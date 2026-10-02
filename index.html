@@ -593,7 +593,7 @@ const AUGS=[
   {id:'gravity',u:'주변 적이 느려지는 정도가 커져요. ★1은 −20%, ★2는 −30%, ★3은 −40%. 범위 150.',t:'g',n:'중력장',tags:['roulette','guard'],d:'내 주변 150 안의 적 이동 속도 −20%'},
   {id:'goldbullet',u:'골드를 쓰는 탄환의 피해 보너스가 커져요. ★1은 +30%, ★2는 +45%, ★3은 +60%.',t:'g',n:'황금 탄환',tags:['house','card'],d:'두 번 공격할 때마다 골드 1을 쓰고 그 공격 피해 +30% (골드가 있을 때만)'},
   {id:'interest',u:'보유 골드에 비례한 공격 속도 보너스가 커져요. 골드 100당 +2% → +3% → +4%, 최대 +40% → +60% → +80%.',t:'p',n:'복리',tags:['house','house'],d:'보유 골드 100당 공격 속도 +2% (최대 +40%). 하우스 2개로 계산'},
-  {id:'luckycoin',u:'강화할 때마다 행운 +2, 골드 획득 +10%가 한 번 더 붙어요.',t:'s',n:'행운의 동전',tags:['house','dice'],d:'행운 +2, 골드 획득 +10%',f:p=>{p.luck+=2;p.goldM+=.1;}},
+  {id:'luckycoin',u:'강화할 때마다 행운 +1, 골드 획득 +10%가 한 번 더 붙어요.',t:'s',n:'행운의 동전',tags:['house','dice'],d:'행운 +1, 골드 획득 +10%',f:p=>{p.luck+=1;p.goldM+=.1;}},
   // poison
   {id:'toxic',u:'독 피해 자체가 세져요. ★1은 기본, ★2는 +50%, ★3은 +100%.',t:'s',n:'독주',tags:['poison'],d:'탄환이 적을 중독시킵니다'},
   {id:'neuro',u:'중독된 적이 느려지는 정도가 커져요. ★1은 이동 속도 −40%, ★2는 −55%, ★3은 −70%.',t:'s',n:'마비 독',tags:['poison'],d:'중독된 적 이동 속도 −40%'},
@@ -646,7 +646,7 @@ function tryFuse(){
   const el=fusable();if(!el.length)return null;
   const sure=el.find(f=>S.augs.find(a=>a.id===f.a).lv>=3&&S.augs.find(a=>a.id===f.b).lv>=3);
   if(sure)return doFuse(sure);
-  if(Math.random()<.1+Math.min(.15,S.p.luck*.01))return doFuse(el[Math.floor(Math.random()*el.length)]);
+  if(Math.random()<.1+LK()*.005)return doFuse(el[Math.floor(Math.random()*el.length)]);
   return null;
 }
 const VIPS=[
@@ -670,19 +670,19 @@ const RMUL={c:1,r:1.4,e:1.8,l:2.4};
 const CARDS=[
   {n:'날카로운 모서리',v:[[1,2.5,1]],t:v=>`공격력 +${v[0]}`,a:(p,v)=>{p.dmg+=v[0];}},
   {n:'날 선 패',v:[[3,6,1]],t:v=>`공격력 +${v[0]}%`,a:(p,v)=>{p.dmg*=1+v[0]/100;}},
-  {n:'빠른 손',v:[[3,6,1]],t:v=>`공격 속도 +${v[0]}%`,a:(p,v)=>{p.rate*=1+v[0]/100;}},
+  {req:()=>rawRate()<RATE_CAP(),n:'빠른 손',v:[[3,6,1]],t:v=>`공격 속도 +${v[0]}%`,a:(p,v)=>{p.rate*=1+v[0]/100;}},
   {n:'두둑한 배짱',v:[[8,16,0]],t:v=>`최대 체력 +${v[0]}`,a:(p,v)=>{p.maxHp+=v[0];p.hp+=v[0];}},
   {n:'칩 조끼',v:[[3,6,0]],t:v=>`방어력 +${v[0]}`,a:(p,v)=>{p.armor+=v[0];}},
-  {n:'가벼운 발',v:[[2,5,1]],t:v=>`이동 속도 +${v[0]}%`,a:(p,v)=>{p.speed*=1+v[0]/100;}},
+  {req:()=>moveSpd()<SPEED_CAP,n:'가벼운 발',v:[[2,5,1]],t:v=>`이동 속도 +${v[0]}%`,a:(p,v)=>{p.speed*=1+v[0]/100;}},
   {n:'긴 팔',v:[[4,8,0]],t:v=>`사거리 +${v[0]}%`,a:(p,v)=>{p.range*=1+v[0]/100;}},
   {n:'자석 주머니',v:[[10,20,0]],t:v=>`경험치·골드 흡수 범위 +${v[0]}%`,a:(p,v)=>{p.magnet*=1+v[0]/100;}},
-  {n:'네잎클로버',v:[[1,1.8,0]],t:v=>`행운 +${v[0]}. 높은 등급과 좋은 수치가 잘 나옵니다`,a:(p,v)=>{p.luck+=v[0];}},
+  {req:()=>S.p.luck<LUCK_CAP,n:'네잎클로버',v:[[.6,1.2,0]],t:v=>`행운 +${v[0]}. 높은 등급과 좋은 수치가 잘 나옵니다`,a:(p,v)=>{p.luck+=v[0];}},
   {cc:1,n:'밑장 빼기',v:[[1.5,3,1]],t:v=>`치명타 확률 +${v[0]}%`,a:(p,v)=>{p.crit+=v[0]/100;}},
   {cm:1,n:'뾰족한 모서리',v:[[8,16,0]],t:v=>`치명타 피해 +${v[0]}%`,a:(p,v)=>{p.critM+=v[0]/100;}},
   {n:'빠른 탄',v:[[6,12,0]],t:v=>`탄속 +${v[0]}%`,a:(p,v)=>{p.bspd*=1+v[0]/100;}},
   {n:'공부벌레',v:[[3,6,1]],t:v=>`경험치 획득 +${v[0]}%`,a:(p,v)=>{p.xpM=(p.xpM||1)+v[0]/100;}},
   {n:'동전 주머니',v:[[4,9,0]],t:v=>`골드 획득 +${v[0]}%`,a:(p,v)=>{p.goldM+=v[0]/100;}},
-  {n:'날렵함',v:[[1.2,2.5,1]],t:v=>`회피 +${v[0]}%`,a:(p,v)=>{p.dodge+=v[0]/100;}},
+  {req:()=>S.p.dodge<DODGE_CAP,n:'날렵함',v:[[1.2,2.5,1]],t:v=>`회피 +${v[0]}%`,a:(p,v)=>{p.dodge+=v[0]/100;}},
   {n:'붕대',v:[[.3,.7,2]],t:v=>`초당 체력 재생 +${v[0]}`,a:(p,v)=>{p.regen+=v[0];}},
   {n:'숨 고르기',v:[[4,8,0]],t:v=>`대시 재사용 −${v[0]}%`,a:(p,v)=>{p.dashMul*=1-v[0]/100;}},
   {n:'피 맛',v:[[.3,.7,2]],t:v=>`흡혈 +${v[0]}%`,a:(p,v)=>{p.lifesteal+=v[0]/100;}},
@@ -701,11 +701,13 @@ const CARDS=[
   {fr:'e',n:'불사의 맹세',v:[[1.5,2.5,1],[1,2,1]],t:v=>`흡혈 +${v[0]}%, 초당 체력 재생 +${v[1]}`,a:(p,v)=>{p.lifesteal+=v[0]/100;p.regen+=v[1];}},
   {fr:'l',n:'분신술',d:'탄환 +1발',f:p=>{p.multi+=1;}},
   {fr:'l',n:'올인',v:[[35,55,0]],t:v=>`공격력 +${v[0]}%, 받는 피해 +50%`,a:(p,v)=>{p.dmg*=1+v[0]/100;p.vuln*=1.5;}},
-  {fr:'l',cc:1,n:'럭키 세븐',v:[[4,6.4,0],[4,6,1]],t:v=>`행운 +${v[0]}, 치명타 확률 +${v[1]}%`,a:(p,v)=>{p.luck+=v[0];p.crit+=v[1]/100;}},
+  {fr:'l',cc:1,n:'럭키 세븐',v:[[2,3.4,0],[4,6,1]],t:v=>`행운 +${v[0]}, 치명타 확률 +${v[1]}%`,a:(p,v)=>{p.luck+=v[0];p.crit+=v[1]/100;}},
   {fr:'l',n:'전설의 패',v:[[12,20,0],[8,12,0]],t:v=>`공격력 +${v[0]}%, 공격 속도 +${v[1]}%`,a:(p,v)=>{p.dmg*=1+v[0]/100;p.rate*=1+v[1]/100;}}
 ];
 // 0~1 굴림. 행운이 높을수록 1 쪽으로 치우침 (행운 5면 평균 0.5 → 0.62, 행운 10이면 0.69)
-function luckU(bonus=0){return Math.pow(Math.random(),1/(1+Math.max(0,S.p.luck+bonus)*.12));}
+// 행운 상한 30. 모든 행운 효과는 0~30 구간에 고르게 퍼져 있고 30을 넘는 행운은 무시됨
+const LUCK_CAP=30,LK=(b=0)=>Math.min(LUCK_CAP,Math.max(0,S.p.luck+b));
+function luckU(bonus=0){return Math.pow(Math.random(),1/(1+LK(bonus)*.06));}
 const GRADE=u=>u>=.9?{n:'최상',col:'#ffd76a'}:u>=.6?{n:'상',col:'#7fc4f2'}:u>=.25?{n:'중',col:'#d8d0bc'}:{n:'하',col:'#9a9284'};
 function rollCard(T,r,bonus){if(!T.v)return {...T,r:T.fr||r,u:null};const k=T.fr?1:RMUL[r],u=luckU(bonus);
   const rng=T.v.map(([lo,hi,dp])=>{const q=Math.pow(10,dp);return [Math.round(lo*k*q)/q,Math.round(hi*k*q)/q,q];});
@@ -1290,7 +1292,7 @@ function onKill(e){
   if(e.boss||e.elite||Math.random()<.18){const v=T.coin*(e.elite||e.boss?1:2.5)*(e.elite?2:1)*(1+.05*(Math.min(15,S.round)-1))*(e.boss&&has('king')?3:1)*(e.boss?1:Math.sqrt(chapM().xp));
     const n=e.boss?8:1;for(let i=0;i<n;i++)S.dr.push({x:e.x+rand(-14,14)*(e.boss?3:1),y:e.y+rand(-14,14)*(e.boss?3:1),v:v/n});}
   if(S.dr.length>700){const a=S.dr.shift(),b=S.dr.find(c=>!c.xp===!a.xp);if(b)b.v+=a.v;}
-  {const lk=1+Math.min(1,S.p.luck*.03);
+  {const lk=1+LK()/LUCK_CAP;
    if(e.boss){if(Math.random()<.3)S.items.push({k:Math.random()<.5?'heal':'mag',x:e.x,y:e.y,life:150});}
    else{if(Math.random()<(e.elite?.0025:.00015)*lk)S.items.push({k:'heal',x:e.x+rand(-10,10),y:e.y+rand(-10,10),life:150});
    else if(Math.random()<(e.elite?.0008:.00003)*lk)S.items.push({k:'mag',x:e.x+rand(-10,10),y:e.y+rand(-10,10),life:150});}
@@ -1739,13 +1741,14 @@ function synTable(){
     return `<div class="tile ${c>=2?'on':''}"><h4>${T.n}<small>${c}개</small></h4>${T.t1?R(1,T.t1):''}${R(2,T.t2)}${R(4,T.t4)}${R(6,T.t6)}<div class="tr ${c>=5?'a':''}"><i>5+</i><span>1개마다 ${T.ex}${c>=5?` (현재 +${c-4})`:''}</span></div></div>`;}).join('');
   return `<div class="tgrid">${tiles}</div>`;
 }
-function rollTier(){const L=S.p.luck,r=Math.min(12,S.round);const w=[['s',Math.max(20,58-r*2)],['g',32+L+r],['p',8+L*1.2+r*.8]];let t=w.reduce((a,b)=>a+b[1],0),x=Math.random()*t;for(const [k,v] of w){if((x-=v)<0)return k;}return 's';}
+function rollTier(){const L=LK(),r=Math.min(12,S.round);const w=[['s',Math.max(20,58-r*2)],['g',32+L*.5+r],['p',8+L*.6+r*.8]];let t=w.reduce((a,b)=>a+b[1],0),x=Math.random()*t;for(const [k,v] of w){if((x-=v)<0)return k;}return 's';}
 // 공격력을 직접 올리지 않는 증강 (생존·경제·이동). 선택지마다 공격 증강이 최소 1개는 나오도록 하는 데 씀
 const DEF_AUGS=new Set(['regenarmor','gravity','luckycoin','frost','piggy','tip','insure','king','highroll','thick','armor','evade','iron','gen','fortress','icecoin','rush','sprint','lucky7','lastcard','vamp','neuro','engine','k_wall','counter','unbreak','thorns','mirror','guardian']);
 const isOff=a=>!a.up&&!DEF_AUGS.has(a.id);
 // 선행 조건: 효과가 다른 무언가를 강화만 하는 증강은 그 대상이 있을 때만 등장 (회전 칩 없는데 회전 칩 강화 등 방지)
 const poisonSrc=()=>canPoison()||['wheel','m_inferno','fog','venomcloud','f_napalm','f_gas','f_plaguebullet'].some(has);
 const AUG_REQ={
+  evade:()=>S.p.dodge<DODGE_CAP,luckydie:()=>!critFull(),
   neuro:poisonSrc,spill:poisonSrc,plague:poisonSrc,contagion:poisonSrc,plaguelord:poisonSrc,
   shieldbash:()=>barrierMax()>0
 };
@@ -1839,7 +1842,6 @@ function openStat(keep){
   $('boost').onclick=()=>{S.gold-=boostC;S.boost=true;openStat();};
   $('takeall').onclick=()=>{S.gold-=allC;cards.forEach(take);S.srr=0;toast('전부 획득');openNext();};
 }
-// 스탯 카드 등급. 행운 효과는 15에서 멈춤 (행운 0: 영웅 4.6% 전설 0.6%, 행운 15+: 영웅 7.5% 전설 1.7%)
 // 영웅·전설 카드 등장 연출: 폭죽 파티클, 배너, 화면 플래시, 효과음
 let AC=null;
 function chime(notes,type){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const t0=AC.currentTime;notes.forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(0,t0+i*.09);g.gain.linearRampToValueAtTime(.12,t0+i*.09+.02);g.gain.exponentialRampToValueAtTime(.001,t0+i*.09+.5);o.connect(g).connect(AC.destination);o.start(t0+i*.09);o.stop(t0+i*.09+.55);});}catch(e){}}
@@ -1854,18 +1856,19 @@ function rarityFx(){
   if(leg){const f=document.createElement('div');f.className='rflash';f.style.background='radial-gradient(circle,rgba(255,230,140,.9),rgba(255,200,60,.35) 60%,transparent)';document.body.appendChild(f);setTimeout(()=>f.remove(),800);}
   chime(leg?[523,659,784,1047,1319]:[440,554,659],leg?'triangle':'sine');
 }
-function rollRarity(bonus=0){const L=Math.min(15,Math.max(0,S.p.luck+bonus));const w=[['c',66],['r',26+1.1*L],['e',4.5+.3*L],['l',.55+.1*L]];let t=w.reduce((a,b)=>a+b[1],0),x=Math.random()*t;for(const [k,v] of w){if((x-=v)<0)return k;}return 'c';}
+// 스탯 카드 등급 (행운 0: 영웅 4.6% 전설 0.6%, 행운 30: 영웅 7.5% 전설 1.7%)
+function rollRarity(bonus=0){const L=LK(bonus);const w=[['c',66],['r',26+.55*L],['e',4.5+.15*L],['l',.55+.05*L]];let t=w.reduce((a,b)=>a+b[1],0),x=Math.random()*t;for(const [k,v] of w){if((x-=v)<0)return k;}return 'c';}
 const cardOk=c=>!(c.cc&&critFull())&&!(c.cm&&critMFull())&&(!c.req||c.req());
 // 직업 선호 카드는 ×1.6, 최근 9장 안에 나온 카드는 ×0.3 (같은 카드 반복 방지)
 function cardOf(r,bonus=0){const pool=CARDS.filter(c=>(c.fr?c.fr===r:true)&&cardOk(c)),fav=CLASSES[S.cls||'knight'].cards,rec=S.recentC||[],w=c=>(fav.includes(c.n)?1.6:1)*(rec.includes(c.n)?.3:1);
   let t=pool.reduce((q,c)=>q+w(c),0),x=Math.random()*t,pick=pool[pool.length-1];for(const c of pool){if((x-=w(c))<0){pick=c;break;}}
   S.recentC=[...rec,pick.n].slice(-9);return rollCard(pick,r,bonus);}
 const SYM=['🍒','🔔','🪙','💎','7️⃣','💀'];
-function spinSym(){const L=S.p.luck;const w={'🍒':22,'🔔':18,'🪙':20,'💎':10+L*.6,'7️⃣':5+L*.5,'💀':Math.max(4,15-L*1.5)};let t=0;for(const s of SYM)t+=w[s];let x=Math.random()*t;for(const s of SYM){if((x-=w[s])<0)return s;}return '🍒';}
+function spinSym(){const L=LK();const w={'🍒':22,'🔔':18,'🪙':20,'💎':10+L*.3,'7️⃣':5+L*.25,'💀':Math.max(4,15-L*.37)};let t=0;for(const s of SYM)t+=w[s];let x=Math.random()*t;for(const s of SYM){if((x-=w[s])<0)return s;}return '🍒';}
 function openCasino(){S.mode='casino';S.log='';S.busy=false;renderCasino();}
 const boxC=()=>price(90*Math.pow(1.3,cb('box'))),healC=()=>price(45),augC=()=>price(450*Math.pow(1.8,cb('aug')));
 function renderCasino(){
-  const p=S.p,g=S.gold,b=S.busy,dbl=Math.min(.62,.45+p.luck*.02);
+  const p=S.p,g=S.gold,b=S.busy,dbl=.45+LK()*.005;
   show(`<h2>카지노 테이블</h2>
   <p class="sub">게임은 멈춰 있습니다. 보유 <span class="gold">${g} 골드</span>, 체력 ${Math.ceil(p.hp)}/${Math.round(p.maxHp)}.</p>
   <div class="log" aria-live="polite">${S.log}</div>
@@ -1887,7 +1890,7 @@ function casinoAct(a){
   if(a==='aug'){if(slotCount()>=MAXA)return;S.gold-=augC();S.cbuys.aug=cb('aug')+1;S.backToCasino=true;openAug(true,'카지노에서 구매');return;}
   if(a==='box'){S.gold-=boxC();S.cbuys.box=cb('box')+1;const c=cardOf(rollRarity(3));const res=c.f(p);S.log=`<span style="color:${RAR[c.r].col};filter:brightness(1.5)">[${RAR[c.r].n}]</span> ${c.n}<br><small>${res||c.d}</small>`;renderCasino();return;}
   if(a==='double'){
-    const bet=S.gold,ch=Math.min(.62,.45+p.luck*.02);S.busy=true;S.log='동전이 돌고 있습니다…';renderCasino();
+    const bet=S.gold,ch=.45+LK()*.005;S.busy=true;S.log='동전이 돌고 있습니다…';renderCasino();
     setTimeout(()=>{if(Math.random()<ch){S.gold+=bet;S.log=`앞면. ${bet} 골드 따서 ${S.gold} 골드`;}else{S.gold=0;S.log=`뒷면. ${bet} 골드 전부 날렸습니다`;}S.busy=false;renderCasino();},800);
     return;
   }
@@ -2278,7 +2281,7 @@ const DEALS=[
   {id:'swap',n:'바꿔치기',d:'무작위 보유 증강 하나를 같은 등급 다른 증강으로 교체',cost:()=>0,ok:()=>S.augs.some(a=>!a.f&&a.t!=='v'&&a.t!=='f'),f:()=>{const c=S.augs.filter(a=>!a.f&&a.t!=='v'&&a.t!=='f');const o=c[Math.floor(Math.random()*c.length)];const pool=AUGS.filter(x=>x.t===o.t&&!has(x.id)&&!x.f&&(!x.cls||x.cls===S.cls)&&augReq(x));if(!pool.length)return '바꿀 증강이 없음';const n=pool[Math.floor(Math.random()*pool.length)];S.augs[S.augs.indexOf(o)]={...n,lv:o.lv};tagCount();return `${o.n} → ${n.n}`;}},
   {id:'smuggle',n:'밀수 증강',d:'골드 등급 이상 증강 하나 (슬롯 필요)',cost:()=>price(380),ok:()=>slotCount()<MAXA,f:()=>{const g=grantAug('g');return g?g.n:'없음';}},
   {id:'debt',n:'도박 빚',d:'지금 골드를 받고, 2분간 받는 피해 +30%',cost:()=>-price(260),f:()=>{S.debtT=120;}},
-  {id:'blind',n:'눈가리개',d:'행운 +3, 사거리 −15%',cost:()=>0,f:()=>{S.p.luck+=3;S.p.range*=.85;}},
+  {id:'blind',n:'눈가리개',d:'행운 +2, 사거리 −15%',cost:()=>0,f:()=>{S.p.luck+=2;S.p.range*=.85;}},
   {id:'sharp',n:'숫돌',d:'공격력 +15%, 이동 속도 −8%',cost:()=>price(120),f:()=>{S.p.dmg*=1.15;S.p.speed*=.92;}}
 ];
 function spawnMerchant(){
@@ -2287,7 +2290,7 @@ function spawnMerchant(){
   const p=S.p,a=Math.random()*TAU,r=rand(240,380);
   const m={k,x:clamp(p.x+Math.cos(a)*r,80,WW-80),y:clamp(p.y+Math.sin(a)*r,80,WH-80),life:32,max:32};
   for(let i=0;i<4;i++)pushOut(m,52);
-  if(k==='chips')m.stock=STACKS.map((_,i)=>i).filter(i=>!(STACKS[i].k==='crit'&&critFull())&&!(STACKS[i].k==='critm'&&critMFull())).sort(()=>Math.random()-.5).slice(0,5);
+  if(k==='chips')m.stock=STACKS.map((_,i)=>i).filter(i=>!(STACKS[i].k==='crit'&&critFull())&&!(STACKS[i].k==='critm'&&critMFull())&&!(STACKS[i].k==='luck'&&S.p.luck>=LUCK_CAP)&&!(STACKS[i].k==='dodge'&&S.p.dodge>=DODGE_CAP)&&!(STACKS[i].k==='rate'&&rawRate()>=RATE_CAP())&&!(STACKS[i].k==='spd'&&moveSpd()>=SPEED_CAP)).sort(()=>Math.random()-.5).slice(0,5);
   if(k==='black')m.deals=DEALS.filter(d=>!d.ok||d.ok()).sort(()=>Math.random()-.5).slice(0,3).map(d=>d.id);
   S.merch=m;toast(`${MERCH[k].icon} ${MERCH[k].n} 등장`);
 }
@@ -2295,7 +2298,7 @@ const HUB_KEYS=['chips','smith','alch','doc','black','vip','casino'];
 function openHub(){
   S.mode='shop';joy=null;
   if(!S.hub){const mk=k=>{const m={k,used:{}};
-      if(k==='chips')m.stock=STACKS.map((_,i)=>i).filter(i=>!(STACKS[i].k==='crit'&&critFull())&&!(STACKS[i].k==='critm'&&critMFull())).sort(()=>Math.random()-.5).slice(0,6);
+      if(k==='chips')m.stock=STACKS.map((_,i)=>i).filter(i=>!(STACKS[i].k==='crit'&&critFull())&&!(STACKS[i].k==='critm'&&critMFull())&&!(STACKS[i].k==='luck'&&S.p.luck>=LUCK_CAP)&&!(STACKS[i].k==='dodge'&&S.p.dodge>=DODGE_CAP)&&!(STACKS[i].k==='rate'&&rawRate()>=RATE_CAP())&&!(STACKS[i].k==='spd'&&moveSpd()>=SPEED_CAP)).sort(()=>Math.random()-.5).slice(0,6);
       if(k==='black')m.deals=DEALS.filter(d=>!d.ok||d.ok()).sort(()=>Math.random()-.5).slice(0,3).map(d=>d.id);return m;};
     S.hub={ms:Object.fromEntries(HUB_KEYS.filter(k=>k!=='casino').map(k=>[k,mk(k)]))};}
   const off=k=>(k==='smith'||k==='alch'||k==='vip')&&MERCH[k].w()<=0;
@@ -2397,7 +2400,7 @@ const STAT_TIP={
   '대시 재사용':'대시를 다시 쓸 수 있을 때까지 걸리는 시간. 대시 중에는 무적입니다.',
   '회전 칩':'내 주변을 돌며 닿는 적에게 피해를 주는 칩 개수. 공격력의 50%가 기본 피해입니다.',
   '흡수 범위':'경험치와 골드를 끌어당기는 거리.',
-  '행운':'스탯 카드·증강의 높은 등급, 범위 안 수치, 증강 품질, 슬롯 결과가 좋게 나올 확률을 올립니다.',
+  '행운':'30이 상한. 0~30 구간에서 고르게 효과가 오릅니다: 스탯 카드 영웅·전설 확률(행운 0: 4.6%·0.6% → 30: 7.5%·1.7%), 스탯 카드 수치, 증강 프리즘 확률, 자동 합체 확률(10→25%), 아이템 드롭(최대 2배), 카지노 승률(45→60%)과 슬롯 결과.',
   '부활 비용':'죽었을 때 이만큼 골드가 있으면 체력 50%로 부활할 수 있습니다. 쓸 때마다 비싸집니다.',
   '골드 획득':'주운 골드에 곱해지는 배율.',
   '고유 능력':'직업마다 처음부터 가진 능력. 증강 없이도 항상 적용됩니다.',
@@ -2441,7 +2444,7 @@ function renderStats(){
     row('대시 재사용',dashCdVal().toFixed(2)+'초'),
     row('회전 칩',orbitN()+'개'),
     row('흡수 범위',Math.round(p.magnet)),
-    row('행운',p.luck),
+    row('행운',Math.min(p.luck,LUCK_CAP)+' <small>/ 30</small>',p.luck>LUCK_CAP?`초과 ${p.luck-LUCK_CAP}은 효과 없음`:''),
     row('부활 비용',reviveCost()+'골드'),
     row('골드 획득','×'+(p.goldM*(has('bankrupt')?.7:1)).toFixed(2))
   ].join('');
