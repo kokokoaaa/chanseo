@@ -844,7 +844,7 @@ return {canvas:sc,draw:sprite,PAL};
 })();
 const CLASSES={
   knight:{n:'기사',role:'근접 탱커',d:'짧은 검기를 휘두르는 튼튼한 전사',passive:'방패 막기: 15% 확률로 받는 피해 무효. 4번째 공격마다 주변 회전 베기 (공격력 50%)',atk:.3,
-    stats:{hp:200,maxHp:200,speed:180,dmg:15,rate:1.9,range:185,bspd:430,armor:15,block:.15},fav:['guard','curse','blitz'],dis:['poison'],
+    stats:{hp:200,maxHp:200,speed:180,dmg:17,rate:1.9,range:210,bspd:430,armor:15,block:.15},fav:['guard','curse','blitz'],dis:['poison'],
     cards:['날 선 패','날카로운 모서리','빠른 손','뾰족한 모서리','두둑한 배짱','방탄 칩'],lvd:'체력 +2, 방어력 +0.3, 공격력 +1%',lv:p=>{p.maxHp+=2;p.hp+=2;p.armor+=.3;p.dmg*=1.01;}},
   mage:{n:'마법사',role:'광역 화력',d:'맞으면 터지는 화염구를 쏘는 마법사',passive:'화염 폭발: 화염구가 맞은 자리에 작은 폭발',atk:.35,
     stats:{hp:115,maxHp:115,speed:185,dmg:12,rate:1.8,range:320,bspd:380},fav:['poison','roulette','dice'],dis:['guard'],
@@ -853,7 +853,7 @@ const CLASSES={
     stats:{hp:130,maxHp:130,speed:200,dmg:8,rate:2.8,range:390,bspd:720,pierce:1,crit:.15},fav:['card','jackpot','dice'],dis:['curse'],
     cards:['빠른 손','긴 팔','관통 탄','밑장 빼기','분신술','럭키 세븐'],lvd:'공격 속도 +0.4%, 공격력 +0.4%, 체력 +1',lv:p=>{p.rate*=1.004;p.dmg*=1.004;p.maxHp+=1;p.hp+=1;}},
   rogue:{n:'도적',role:'회피 암살',d:'단검을 난사하며 치고 빠지는 도적',passive:'그림자: 회피 15%, 대시 재사용 −30%',atk:.2,
-    stats:{hp:120,maxHp:120,speed:225,dmg:7.5,rate:4.2,range:235,bspd:600,dodge:.15,dashMul:.7,crit:.12,critM:2.3},fav:['blitz','poison','curse'],dis:['guard'],
+    stats:{hp:120,maxHp:120,speed:225,dmg:9,rate:4.2,range:260,bspd:600,dodge:.15,dashMul:.7,crit:.12,critM:2.3},fav:['blitz','poison','curse'],dis:['guard'],
     cards:['가벼운 발','날렵함','숨 고르기','피 맛','밑장 빼기','뾰족한 모서리'],lvd:'치명타 +0.2%, 회피 +0.1%, 공격력 +1%, 체력 +1',lv:p=>{p.crit+=.002;p.dodge+=.001;p.dmg*=1.01;p.maxHp+=1;p.hp+=1;}}
 };
 function applyClass(cls){S.cls=cls;Object.assign(S.p,CLASSES[cls].stats);S.p.face=1;}
@@ -936,21 +936,21 @@ const AFFIX={
   gunner:{n:'포격',col:'#ffd76a'}
 };
 // 장별 추가 난이도. 3장부터 일반 몹 체력·피해·스폰량, 정예 확률이 더 오름 (보스 체력은 제외)
-// 4장(마지막)은 수를 줄이고 개체를 크게 강화: 체력 ×5, 피해 ×1.9, 크기 ×1.2, 정예 +30%p. 대신 경험치·골드도 많이 줌
-const CHAP_MUL=[{hp:1,dm:1,sp:1,n:22,el:0,xp:1,sz:1},{hp:1,dm:1,sp:1,n:22,el:0,xp:1.2,sz:1},{hp:1.5,dm:1.3,sp:.85,n:26,el:.06,xp:1.4,sz:1},{hp:5,dm:1.9,sp:1.1,n:12,el:.3,xp:2.2,sz:1.2,cap:110}];
+// 4장(마지막)은 수를 줄이고 개체를 크게 강화: 체력 ×3.5, 피해 ×1.25, 크기 ×1.2, 정예 +30%p. 대신 경험치·골드도 많이 줌
+const CHAP_MUL=[{hp:1,dm:1,sp:1,n:22,el:0,xp:1,sz:1},{hp:1,dm:1,sp:1,n:22,el:0,xp:1.2,sz:1},{hp:1.5,dm:1.3,sp:.85,n:26,el:.06,xp:1.4,sz:1},{hp:3.5,dm:1.25,sp:1.1,n:12,el:.3,xp:2.2,sz:1.2,cap:110}];
 const chapM=()=>CHAP_MUL[Math.min(3,S.chap||0)];
 function spawnAt(type,x,y,noElite,forceElite){
   const T=ET[type],d=S.round,cm=chapM();
   const elite=!T.boss&&!T.flee&&(forceElite||(!noElite&&S.gt>120&&Math.random()<Math.min(.35+cm.el,(S.gt-120)/700+cm.el)));
   const om=Math.pow(1.3,Math.max(0,S.gt-600)/60);
-  const m=(1+.35*(d-1))*om*(elite?4:1)*(T.boss?1:cm.hp),dm=(1+.15*(d-1))*om*(elite?1.5:1)*cm.dm;
+  const m=(T.boss?1+.12*(Math.min(d,50)-1):(1+.35*(d-1))*om)*(elite?4:1)*(T.boss?1:cm.hp),dm=(T.boss?1+.08*(d-1):(1+.15*(d-1))*om)*(elite?1.5:1)*cm.dm;
   S.en.push({type,x,y,elite,r:T.r*(elite?1.45:1)*(T.boss?1:cm.sz),hp:T.hp*m,maxHp:T.hp*m,dmg:T.dmg*dm,spd:T.spd*Math.min(1.75,1+.025*(d-1))*(1+.07*Math.max(0,S.gt-600)/60),cd:rand(.3,1.2),hcd:1,bcd:2.5,hit:0,rot:Math.random()*6,orbCd:0,pt:0,ps:0,pTick:0,alive:true,boss:!!T.boss});
   const e=S.en[S.en.length-1];if(elite&&S.gt>150){const ks=Object.keys(AFFIX);e.aff=ks[Math.floor(Math.random()*ks.length)];if(AFFIX[e.aff].on)AFFIX[e.aff].on(e);}
   return e;
 }
 function ringPos(extra=40){const p=S.p,a=(p.moving&&Math.random()<.6)?Math.atan2(p.lmy,p.lmx)+rand(-1.1,1.1):Math.random()*TAU,r=Math.hypot(W,H)/2+extra;return [clamp(p.x+Math.cos(a)*r,20,WW-20),clamp(p.y+Math.sin(a)*r,20,WH-20)];}
 function spawnBurst(){
-  if(S.en.length>(chapM().cap||190))return;
+  if(S.en.length>(S.bossI>=0?60:(chapM().cap||190)))return;
   let n=Math.min(chapM().n,2+Math.floor(S.round*.7));if(S.bossI>=0)n=Math.ceil(n*.35);
   const side=Math.floor(Math.random()*4);
   const [cx,cy]=ringPos();
@@ -1012,6 +1012,8 @@ const BOSSES=[
 ];
 function spawnBoss(i){
   if(S.ev)endEvent(false);S.evBanner=null;
+  // 기존 몹은 유지하되 너무 많으면 가까운 80마리(정예 포함)만 남김
+  if(S.en.length>80){const p0=S.p,keep=new Set([...S.en].sort((a,b)=>(b.elite-a.elite)||(d2(a,p0)-d2(b,p0))).slice(0,80));S.en=S.en.filter(e=>keep.has(e));}
   S.bossI=i;S.tele=[];S.hz=[];S.bStart=S.bt||0;
   const a=Math.random()*TAU;spawnAt(BOSSES[i].type,clamp(S.p.x+Math.cos(a)*300,60,WW-60),clamp(S.p.y+Math.sin(a)*300,60,WH-60));
   const b=S.en[S.en.length-1];b.bk=0;go(b,'intro');S.boss=b;
@@ -1034,15 +1036,15 @@ function eFan(e,n,spread,spd,dmg,r=6,col){const a=Math.atan2(S.p.y-e.y,S.p.x-e.x
 function stepTo(e,tx,ty,spd,dt){const dx=tx-e.x,dy=ty-e.y,d=Math.hypot(dx,dy)||1,s=Math.min(d,spd*dt);e.x+=dx/d*s;e.y+=dy/d*s;return d;}
 function keepDist(e,o,dt,lo,hi){const {p,d,sp}=o;if(d<lo)stepTo(e,e.x*2-p.x,e.y*2-p.y,sp,dt);else if(d>hi)stepTo(e,p.x,p.y,sp,dt);else{const a=Math.atan2(e.y-p.y,e.x-p.x)+(e.dir||1)*.9*dt*sp/Math.max(d,1);e.x=p.x+Math.cos(a)*d;e.y=p.y+Math.sin(a)*d;}}
 const nearP=r=>{const p=S.p,a=Math.random()*TAU,k=Math.random()*r;return [clamp(p.x+Math.cos(a)*k,30,WW-30),clamp(p.y+Math.sin(a)*k,30,WH-30)];};
-// 광폭화: 기준 시간(BOSS_PAR)을 넘기면 20초마다 단계 상승. 단계당 공격력 +25%, 이동 속도 +10%, 결계 −6%
+// 광폭화: 기준 시간(BOSS_PAR)을 넘기면 20초마다 단계 상승. 단계당 공격력 +15%, 이동 속도 +5%, 결계 −5%
 function bossRage(e){const el=(S.bt||0)-(S.bStart||0),par=BOSS_PAR[S.bossI]||120;return el<par?0:1+Math.floor((el-par)/20);}
 function bossAI(e,dt){
   const p=S.p,T=ET[e.type],dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1,ph2=e.hp<e.maxHp*.5;
-  {const rg=bossRage(e);if(e.baseDmg==null)e.baseDmg=e.dmg;if(rg!==(e.rage||0)){e.rage=rg;e.dmg=e.baseDmg*(1+.25*rg);if(S.arena)S.arena.tr=Math.max(900,S.arena.tr*.95);S.shake=.4;S.flash=.15;
+  {const rg=bossRage(e);if(e.baseDmg==null)e.baseDmg=e.dmg;if(rg!==(e.rage||0)){e.rage=rg;e.dmg=e.baseDmg*(1+.15*rg);if(S.arena)S.arena.tr=Math.max(900,S.arena.tr*.95);S.shake=.4;S.flash=.15;
     S.rings.push({x:e.x,y:e.y,r:e.r,max:e.r+180,life:.6,col:'#ff2020'});toast(rg===1?`시간을 너무 끌었다! ${T.n} 광폭화`:`${T.n} 광폭화 ${rg}단계. 더 강해집니다`);}}
   if(ph2&&!e.ph2){e.ph2=true;if(S.arena)S.arena.tr*=.85;S.shake=.4;toast(`${T.n} 분노! 패턴이 빨라집니다`);S.rings.push({x:e.x,y:e.y,r:e.r,max:e.r+140,life:.5,col:'#ff6060'});}
   if(e.slowT>0)e.slowT-=dt;
-  const sp=e.spd*(e.slowT>0?.6:1)*(ph2?1.2:1)*(1+.1*(e.rage||0));
+  const sp=e.spd*(e.slowT>0?.6:1)*(ph2?1.2:1)*(1+.05*(e.rage||0));
   e.bt+=dt;
   BAI[e.type](e,dt,{p,d,dx,dy,sp,ph2});
   e.x=clamp(e.x,40,WW-40);e.y=clamp(e.y,40,WH-40);
@@ -1274,7 +1276,9 @@ function onPHit(b,t){
   if(tag('card')>=4&&!b.bounced){const n=nearestE(t,240,b.hit);if(n){b.bounced=true;const a=Math.atan2(n.y-b.y,n.x-b.x),sp=Math.hypot(b.vx,b.vy);b.vx=Math.cos(a)*sp;b.vy=Math.sin(a)*sp;b.life=Math.max(b.life,.7);return;}}
   if(b.pierce--<=0)b.life=0;
 }
-function gainXp(v){S.xp+=v*(S.p.xpM||1)*(evOn('moon')?2:1);while(S.xp>=S.next){S.xp-=S.next;S.lvl++;S.next=Math.round(1.2*(4+S.lvl*1.6+S.lvl*S.lvl*.1)*(S.lvl>20?Math.pow(1.15,S.lvl-20):1));S.pendingLv++;const p=S.p;const C=CLASSES[S.cls];if(C&&C.lv)C.lv(p);p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.1);S.wavePend=true;}}
+// 따라잡기: 시간 대비 기대 레벨(6 + 경과초/12)보다 낮으면 1레벨 부족할 때마다 경험치 +15%
+const catchUp=()=>1+Math.max(0,6+(S.gt||0)/12-S.lvl)*.15;
+function gainXp(v){S.xp+=v*(S.p.xpM||1)*(evOn('moon')?2:1)*catchUp();while(S.xp>=S.next){S.xp-=S.next;S.lvl++;S.next=Math.round(1.02*(4+S.lvl*1.6+S.lvl*S.lvl*.1)*(S.lvl>20?Math.pow(1.15,S.lvl-20):1));S.pendingLv++;const p=S.p;const C=CLASSES[S.cls];if(C&&C.lv)C.lv(p);p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.1);S.wavePend=true;}}
 function lvlWave(){const p=S.p,mw=META.sk.wave,R=150*(mw?1.4:1),dm=pDmg()*.6*(mw?1.5:1);
   S.rings.push({x:p.x,y:p.y,r:12,max:R,life:.45,col:'#ffd76a'});S.rings.push({x:p.x,y:p.y,r:6,max:R*.7,life:.35,col:'#fff3c4'});ftext(p.x,p.y-40,'LEVEL UP','#ffd76a',20);
   for(const e of S.en){if(!e.alive)continue;const dx=e.x-p.x,dy=e.y-p.y,d=Math.hypot(dx,dy)||1;if(d<R+e.r){if(!e.boss){const k=(R+30-d);e.x+=dx/d*k;e.y+=dy/d*k;e.slowT=Math.max(e.slowT||0,.6);}dmgE(e,dm,'#ffd76a');}}}
@@ -1397,7 +1401,7 @@ function update(dt){
     p.inv=Math.max(0,p.inv-dt);p.all6=Math.max(0,p.all6-dt);p.dashCd=Math.max(0,p.dashCd-dt);p.blitzT=Math.max(0,p.blitzT-dt);p.shockT=Math.max(0,p.shockT-dt);
     if(p.comboT>0){p.comboT-=dt;if(p.comboT<=0)p.combo=0;}
     p.cd-=dt;
-    if(p.cd<=0){const tg=nearestE(p,p.range);if(tg){playerFire(tg);p.cd=1/pRate();}}
+    if(p.cd<=0){const bo=S.boss&&S.boss.alive&&!S.boss.air&&d2(S.boss,p)<(p.range+S.boss.r)**2?S.boss:null,tg=bo||nearestE(p,p.range);if(tg){playerFire(tg);p.cd=1/pRate();}}
     const n=orbitN();
     if(n){const sp=2.8*(has('spinner')?1.5:1),rad=48*p.orbR,big=tag('roulette')>=6,orr=big?12:7;
       for(let i=0;i<n;i++){const a=S.t*sp+i*TAU/n,ox=p.x+Math.cos(a)*rad,oy=p.y+Math.sin(a)*rad;
@@ -2149,11 +2153,19 @@ function autoMoveVec(){
     if(edge<0)sc-=5000-edge*10;else if(edge<250)sc-=(250-edge)*1.2;
     if(inSolid(tx,ty,p.r+6)||inSolid(p.x+cx*STEP*.5,p.y+cy*STEP*.5,p.r+4)||inSolid(p.x+cx*30,p.y+cy*30,p.r+2))sc-=900;
     let mn=420;
-    for(const e of near){const w=e.boss||e.elite?1.6:1;const d=Math.hypot(e.x-tx,e.y-ty)/w;if(d<mn)mn=d;
+    for(const e of near){const w=e.elite?1.6:e.boss?1.2:1;const d=Math.hypot(e.x-tx,e.y-ty)/w;if(d<mn)mn=d;
       const dot=((e.x-p.x)*cx+(e.y-p.y)*cy)/(Math.hypot(e.x-p.x,e.y-p.y)||1);if(dot>.6)sc-=40*dot*(1-Math.min(1,Math.hypot(e.x-p.x,e.y-p.y)/300));}
     sc+=Math.min(mn,desired)*2.2;
     if(wide.length){let dn=1e9;for(const e of wide){const d=Math.hypot(e.x-tx,e.y-ty);if(d<dn)dn=d;}if(dn>reach)sc-=(dn-reach)*(danger>=3?1.2:2.6);else sc+=25;}
     for(const b of shots){const d=Math.hypot(b.x-tx,b.y-ty);if(d<60)sc-=(60-d)*3;}
+    // 보스전: 보스를 사거리 안 적정 거리(사거리의 70%, 최소 보스 몸통+70)에 두도록 유도
+    if(S.boss&&S.boss.alive){const e=S.boss,want=Math.max(e.r+p.r+70,p.range*.7),db=Math.hypot(e.x-tx,e.y-ty);sc-=Math.abs(db-want)*(db>p.range?3:1.4);}
+    // 보스 예고 공격·장판 회피
+    for(const t of S.tele){if(!t.dmg&&t.k==='c')continue;
+      if(t.k==='c'){const d=Math.hypot(t.x-tx,t.y-ty),m2=Math.hypot(t.x-(p.x+cx*STEP*.5),t.y-(p.y+cy*STEP*.5));if(d<t.r+p.r+10)sc-=900*(1-d/(t.r+p.r+10))+300;if(m2<t.r)sc-=200;}
+      else{const ux=Math.cos(t.a),uy=Math.sin(t.a),px2=tx-t.x,py2=ty-t.y,u=clamp(px2*ux+py2*uy,0,t.len),dd=Math.hypot(px2-ux*u,py2-uy*u);if(dd<t.w/2+p.r+16)sc-=900;}}
+    for(const h of S.hz){const d=Math.hypot(h.x-tx,h.y-ty);if(d<h.r+p.r+6)sc-=500;}
+    if(S.boss&&S.boss.beams&&S.boss.beams.on!==undefined){const e=S.boss,B=e.beams;for(let k=0;k<B.n;k++){const a2=B.a+B.rot*.35+k*TAU/B.n,ux=Math.cos(a2),uy=Math.sin(a2),px2=tx-e.x,py2=ty-e.y,u=clamp(px2*ux+py2*uy,0,B.len),dd=Math.hypot(px2-ux*u,py2-uy*u);if(dd<B.w/2+p.r+24)sc-=700;}}
     if(goal&&danger<2){const gd=Math.hypot(goal.x-tx,goal.y-ty);sc+=Math.max(0,300-gd)*.8;}
     sc+=-Math.hypot(CX-tx,CY-ty)*(A?.05:.02);
     if(p.amA!==undefined){let df=Math.abs(a-p.amA);if(df>Math.PI)df=TAU-df;sc-=df*6;}
