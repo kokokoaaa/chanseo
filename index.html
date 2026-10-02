@@ -713,12 +713,10 @@ const LUCK_CAP=30,LK=(b=0)=>Math.min(LUCK_CAP,Math.max(0,S.p.luck+b));
 function luckU(bonus=0){return Math.random()<LK(bonus)/LUCK_CAP*.35?.5+Math.random()*.5:Math.random();}
 const GRADE=u=>u>=.9?{n:'최상',col:'#ffd76a'}:u>=.6?{n:'상',col:'#7fc4f2'}:u>=.25?{n:'중',col:'#d8d0bc'}:{n:'하',col:'#9a9284'};
 // % 효과 옆에 실제 수치 변화를 괄호로 표시: 플레이어 사본에 효과를 적용해 전후 값을 비교
-// % 효과 옆에 실제로 오르는 양을 괄호로 표시 (예: 공격력 +6% (+0.9)). 플레이어 사본에 효과를 적용해 차이를 계산
+// 공격력 % 효과에만 실제로 오르는 양을 괄호로 표시 (예: 공격력 +6% (+0.9)). 플레이어 사본에 효과를 적용해 차이를 계산
 // %가 곧 실제 수치인 항목(치명타, 회피, 흡혈, 골드·경험치 획득 등)은 같은 숫자 반복이라 표시 안 함
 const sgn=(v,d)=>(v>=0?'+':'−')+Math.abs(v).toFixed(d).replace(/\.0+$/,'');
-const PV=[['공격 속도','rate',(a,b)=>sgn(b-a,2)+'회'],['공격력','dmg',(a,b)=>sgn(b-a,1)],['최대 체력','maxHp',(a,b)=>sgn(b-a,0)],['이동 속도','speed',(a,b)=>sgn(b-a,0)],
-  ['사거리','range',(a,b)=>sgn(b-a,0)],['경험치·골드 흡수 범위','magnet',(a,b)=>sgn(b-a,0)],['흡수 범위','magnet',(a,b)=>sgn(b-a,0)],['탄속','bspd',(a,b)=>sgn(b-a,0)],
-  ['대시 재사용','dashMul',(a,b)=>sgn(dashCdVal()/S.p.dashMul*(b-a),2)+'초']];
+const PV=[['공격력','dmg',(a,b)=>sgn(b-a,1)]];
 function withActual(desc,f){const W=a=>a.map(l=>`<div>${l}</div>`).join('');if(!S||!S.p||!f)return W(desc.split(', '));const c={...S.p};try{f(c);}catch(e){}
   return W(desc.split(', ').map(line=>{if(!line.includes('%'))return line;const m=PV.find(([k])=>line.startsWith(k));if(!m)return line;const [,key,fmt]=m,a=S.p[key]??0,b=c[key]??a;if(a===b)return line;
     return `${line} <small style="opacity:.65">(${fmt(a,b)})</small>`;}));}
