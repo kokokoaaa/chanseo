@@ -852,7 +852,7 @@ const CLASSES={
     stats:{hp:115,maxHp:115,speed:185,dmg:12,rate:1.8,range:320,bspd:380},fav:['poison','roulette','dice'],dis:['guard'],
     cards:['날 선 패','날카로운 모서리','긴 팔','뾰족한 모서리','로열 플러시','분신술'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmg*=1.008;p.maxHp+=1;p.hp+=1;}},
   archer:{n:'궁수',role:'원거리 연사',d:'멀리서 빠르게 화살을 쏘는 사수',passive:'관통 화살: 기본 관통 1, 치명타 +10%',atk:.28,
-    stats:{hp:130,maxHp:130,speed:200,dmg:8,rate:2.8,range:390,bspd:720,pierce:1,crit:.15},fav:['card','jackpot','dice'],dis:['curse'],
+    stats:{hp:130,maxHp:130,speed:200,dmg:8,rate:2.8,range:340,bspd:720,pierce:1,crit:.15},fav:['card','jackpot','dice'],dis:['curse'],
     cards:['빠른 손','긴 팔','관통 탄','밑장 빼기','분신술','럭키 세븐'],lvd:'공격 속도 +0.4%, 공격력 +0.4%, 체력 +1',lv:p=>{p.rate*=1.004;p.dmg*=1.004;p.maxHp+=1;p.hp+=1;}},
   rogue:{n:'도적',role:'회피 암살',d:'단검을 난사하며 치고 빠지는 도적',passive:'그림자: 회피 15%, 대시 재사용 −30%',atk:.2,
     stats:{hp:120,maxHp:120,speed:225,dmg:9,rate:4.2,range:260,bspd:600,dodge:.15,dashMul:.7,crit:.12,critM:2.3},fav:['blitz','poison','curse'],dis:['guard'],
@@ -1292,15 +1292,15 @@ function onKill(e){
   if(e.boss||e.elite||Math.random()<.18){const v=T.coin*(e.elite||e.boss?1:2.5)*(e.elite?2:1)*(1+.05*(Math.min(15,S.round)-1))*(e.boss&&has('king')?3:1)*(e.boss?1:Math.sqrt(chapM().xp));
     const n=e.boss?8:1;for(let i=0;i<n;i++)S.dr.push({x:e.x+rand(-14,14)*(e.boss?3:1),y:e.y+rand(-14,14)*(e.boss?3:1),v:v/n});}
   if(S.dr.length>700){const a=S.dr.shift(),b=S.dr.find(c=>!c.xp===!a.xp);if(b)b.v+=a.v;}
-  {const lk=1+LK()/LUCK_CAP;
-   if(e.boss){if(Math.random()<.3)S.items.push({k:Math.random()<.5?'heal':'mag',x:e.x,y:e.y,life:150});}
-   else{if(Math.random()<(e.elite?.0025:.00015)*lk)S.items.push({k:'heal',x:e.x+rand(-10,10),y:e.y+rand(-10,10),life:150});
-   else if(Math.random()<(e.elite?.0008:.00003)*lk)S.items.push({k:'mag',x:e.x+rand(-10,10),y:e.y+rand(-10,10),life:150});}
+  {const lk=1+LK()/LUCK_CAP*.5;
+   if(e.boss){if(Math.random()<.15)S.items.push({k:Math.random()<.5?'heal':'mag',x:e.x,y:e.y,life:150});}
+   else{if(Math.random()<(e.elite?.0012:.00007)*lk)S.items.push({k:'heal',x:e.x+rand(-10,10),y:e.y+rand(-10,10),life:150});
+   else if(Math.random()<(e.elite?.0004:.000015)*lk)S.items.push({k:'mag',x:e.x+rand(-10,10),y:e.y+rand(-10,10),life:150});}
    if(S.items.length>40)S.items.shift();}
   if(e.boss)bossDown(e);
   if(e.aff==='split')for(let i=0;i<3;i++)spawnAt(e.type==='slime'?'slimelet':'runner',e.x+rand(-12,12),e.y+rand(-12,12),true);
   if(e.aff==='volatile')tele({k:'c',x:e.x,y:e.y,r:90,T:.85,dmg:e.dmg*1.2,col:'#ff7a3a',fx:t=>burst(t.x,t.y,'#ff7a3a',16)});
-  if(e.type==='goblin'){const g=price(30);for(let i=0;i<12;i++)S.dr.push({x:e.x+rand(-40,40),y:e.y+rand(-40,40),v:g/12});if(Math.random()<.2)S.items.push({k:Math.random()<.5?'mag':'heal',x:e.x,y:e.y,life:150});S.flash=.2;toast('보물 고블린 처치!');}
+  if(e.type==='goblin'){const g=price(30);for(let i=0;i<12;i++)S.dr.push({x:e.x+rand(-40,40),y:e.y+rand(-40,40),v:g/12});if(Math.random()<.1)S.items.push({k:Math.random()<.5?'mag':'heal',x:e.x,y:e.y,life:150});S.flash=.2;toast('보물 고블린 처치!');}
   if(e.bombed)return;
   p.pkills++;
   if(has('fever')){p.combo++;p.comboT=has('f_frenzy')?4:2;}
