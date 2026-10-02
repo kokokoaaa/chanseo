@@ -1786,7 +1786,7 @@ function openStat(keep){
   const cost=price(6+S.srr*4),allC=price(60+S.lvl*12),boostC=price(50+S.lvl*6),next=5-(S.picks%5);
   const bossSt=S.bossStat;S.bossStat=false;
   show(`<h2>${bossSt?'보스 보상':'레벨 '+(S.lvl-S.pendingLv)}</h2><p class="sub">스탯 하나 고르기. ${!augReady()?`증강이 모두 최대 강화라 레벨업마다 스탯만 받습니다`:`다음 증강까지 ${next}레벨${slotCount()>=MAXA?' (슬롯이 가득 차서 강화·합체로 나와요)':''}`}${bossSt?'. 강화할 증강이 없어서 고급 스탯 카드로 대신':''}. 보유 <span class="gold">${S.gold} 골드</span></p>
-  <div class="cards">${cards.map((c,i)=>{const R=RAR[c.r];return `<button class="card" data-i="${i}" style="--rc:${R.col}"><span class="rr">${R.n}${c.u!=null?` · <span style="color:${GRADE(c.u).col}">${GRADE(c.u).n}</span>`:''}</span><b>${c.n}</b>${c.d}${c.range?`<small style="display:block;opacity:.6;margin-top:4px">범위: ${c.range}</small>`:''}</button>`;}).join('')}</div>
+  <div class="cards">${cards.map((c,i)=>{const R=RAR[c.r];return `<button class="card" data-i="${i}" style="--rc:${R.col}"><span class="rr">${R.n}${c.u!=null?` · <span style="color:${GRADE(c.u).col}">${GRADE(c.u).n}</span>`:''}</span><b>${c.n}</b>${c.d.split(', ').join('<br>')}</button>`;}).join('')}</div>
   <div class="btnrow">
     <button class="btn" id="reroll" ${S.gold<cost?'disabled':''}>다시 뽑기<small>${cost}골드</small></button>
     <button class="btn" id="boost" ${S.gold<boostC?'disabled':''}>고급 카드로 다시 뽑기<small>${boostC}골드, 높은 등급 확률 크게 증가</small></button>
