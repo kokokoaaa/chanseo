@@ -652,7 +652,7 @@ const VIPS=[
 const RAR={c:{n:'일반',col:'#8f8873'},r:{n:'희귀',col:'#2f74c9'},e:{n:'영웅',col:'#8e45c9'},l:{n:'전설',col:'#c99223'}};
 // 스탯 카드: 대부분의 스탯은 일반~전설 어느 등급으로든 뜸. 등급이 높을수록 수치 범위가 RMUL배로 커짐.
 // v: 일반 기준 [[최소,최대,소수자리], ...]. fr: 등급 고정 카드(특수 효과, 도박). 행운은 등급과 범위 내 굴림을 모두 위로 끌어올림
-const RMUL={c:1,r:1.6,e:2.3,l:3.2};
+const RMUL={c:1,r:1.4,e:1.8,l:2.4};
 const CARDS=[
   {n:'날카로운 모서리',v:[[1,2.5,1]],t:v=>`공격력 +${v[0]}`,a:(p,v)=>{p.dmg+=v[0];}},
   {n:'날 선 패',v:[[3,6,1]],t:v=>`공격력 +${v[0]}%`,a:(p,v)=>{p.dmg*=1+v[0]/100;}},
@@ -922,8 +922,8 @@ const AFFIX={
   gunner:{n:'포격',col:'#ffd76a'}
 };
 // 장별 추가 난이도. 3장부터 일반 몹 체력·피해·스폰량, 정예 확률이 더 오름 (보스 체력은 제외)
-// 4장(마지막)은 수를 줄이고 개체를 크게 강화: 체력 ×3.5, 피해 ×1.6, 크기 ×1.15, 정예 +25%p. 대신 경험치·골드도 많이 줌
-const CHAP_MUL=[{hp:1,dm:1,sp:1,n:22,el:0,xp:1,sz:1},{hp:1,dm:1,sp:1,n:22,el:0,xp:1.3,sz:1},{hp:1.3,dm:1.2,sp:.85,n:26,el:.06,xp:1.6,sz:1},{hp:3.5,dm:1.6,sp:1.15,n:12,el:.25,xp:2.8,sz:1.15,cap:110}];
+// 4장(마지막)은 수를 줄이고 개체를 크게 강화: 체력 ×5, 피해 ×1.9, 크기 ×1.2, 정예 +30%p. 대신 경험치·골드도 많이 줌
+const CHAP_MUL=[{hp:1,dm:1,sp:1,n:22,el:0,xp:1,sz:1},{hp:1,dm:1,sp:1,n:22,el:0,xp:1.2,sz:1},{hp:1.5,dm:1.3,sp:.85,n:26,el:.06,xp:1.4,sz:1},{hp:5,dm:1.9,sp:1.1,n:12,el:.3,xp:2.2,sz:1.2,cap:110}];
 const chapM=()=>CHAP_MUL[Math.min(3,S.chap||0)];
 function spawnAt(type,x,y,noElite,forceElite){
   const T=ET[type],d=S.round,cm=chapM();
@@ -1260,7 +1260,7 @@ function onPHit(b,t){
   if(tag('card')>=4&&!b.bounced){const n=nearestE(t,240,b.hit);if(n){b.bounced=true;const a=Math.atan2(n.y-b.y,n.x-b.x),sp=Math.hypot(b.vx,b.vy);b.vx=Math.cos(a)*sp;b.vy=Math.sin(a)*sp;b.life=Math.max(b.life,.7);return;}}
   if(b.pierce--<=0)b.life=0;
 }
-function gainXp(v){S.xp+=v*(S.p.xpM||1)*(evOn('moon')?2:1);while(S.xp>=S.next){S.xp-=S.next;S.lvl++;S.next=Math.round(1.2*(4+S.lvl*1.6+S.lvl*S.lvl*.1)*(S.lvl>20?Math.pow(1.12,S.lvl-20):1));S.pendingLv++;const p=S.p;const C=CLASSES[S.cls];if(C&&C.lv)C.lv(p);p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.1);S.wavePend=true;}}
+function gainXp(v){S.xp+=v*(S.p.xpM||1)*(evOn('moon')?2:1);while(S.xp>=S.next){S.xp-=S.next;S.lvl++;S.next=Math.round(1.2*(4+S.lvl*1.6+S.lvl*S.lvl*.1)*(S.lvl>20?Math.pow(1.15,S.lvl-20):1));S.pendingLv++;const p=S.p;const C=CLASSES[S.cls];if(C&&C.lv)C.lv(p);p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.1);S.wavePend=true;}}
 function lvlWave(){const p=S.p,mw=META.sk.wave,R=150*(mw?1.4:1),dm=pDmg()*.6*(mw?1.5:1);
   S.rings.push({x:p.x,y:p.y,r:12,max:R,life:.45,col:'#ffd76a'});S.rings.push({x:p.x,y:p.y,r:6,max:R*.7,life:.35,col:'#fff3c4'});ftext(p.x,p.y-40,'LEVEL UP','#ffd76a',20);
   for(const e of S.en){if(!e.alive)continue;const dx=e.x-p.x,dy=e.y-p.y,d=Math.hypot(dx,dy)||1;if(d<R+e.r){if(!e.boss){const k=(R+30-d);e.x+=dx/d*k;e.y+=dy/d*k;e.slowT=Math.max(e.slowT||0,.6);}dmgE(e,dm,'#ffd76a');}}}
@@ -1273,14 +1273,14 @@ function onKill(e){
     const n=e.boss?8:1;for(let i=0;i<n;i++)S.dr.push({x:e.x+rand(-14,14)*(e.boss?3:1),y:e.y+rand(-14,14)*(e.boss?3:1),v:v/n});}
   if(S.dr.length>700){const a=S.dr.shift(),b=S.dr.find(c=>!c.xp===!a.xp);if(b)b.v+=a.v;}
   {const lk=1+Math.min(1,S.p.luck*.03);
-   if(e.boss){if(Math.random()<.6)S.items.push({k:Math.random()<.5?'heal':'mag',x:e.x,y:e.y,life:150});}
-   else{if(Math.random()<(e.elite?.006:.0004)*lk)S.items.push({k:'heal',x:e.x+rand(-10,10),y:e.y+rand(-10,10),life:150});
-   else if(Math.random()<(e.elite?.002:.00008)*lk)S.items.push({k:'mag',x:e.x+rand(-10,10),y:e.y+rand(-10,10),life:150});}
+   if(e.boss){if(Math.random()<.3)S.items.push({k:Math.random()<.5?'heal':'mag',x:e.x,y:e.y,life:150});}
+   else{if(Math.random()<(e.elite?.0025:.00015)*lk)S.items.push({k:'heal',x:e.x+rand(-10,10),y:e.y+rand(-10,10),life:150});
+   else if(Math.random()<(e.elite?.0008:.00003)*lk)S.items.push({k:'mag',x:e.x+rand(-10,10),y:e.y+rand(-10,10),life:150});}
    if(S.items.length>40)S.items.shift();}
   if(e.boss)bossDown(e);
   if(e.aff==='split')for(let i=0;i<3;i++)spawnAt(e.type==='slime'?'slimelet':'runner',e.x+rand(-12,12),e.y+rand(-12,12),true);
   if(e.aff==='volatile')tele({k:'c',x:e.x,y:e.y,r:90,T:.85,dmg:e.dmg*1.2,col:'#ff7a3a',fx:t=>burst(t.x,t.y,'#ff7a3a',16)});
-  if(e.type==='goblin'){const g=price(30);for(let i=0;i<12;i++)S.dr.push({x:e.x+rand(-40,40),y:e.y+rand(-40,40),v:g/12});if(Math.random()<.4)S.items.push({k:Math.random()<.5?'mag':'heal',x:e.x,y:e.y,life:150});S.flash=.2;toast('보물 고블린 처치!');}
+  if(e.type==='goblin'){const g=price(30);for(let i=0;i<12;i++)S.dr.push({x:e.x+rand(-40,40),y:e.y+rand(-40,40),v:g/12});if(Math.random()<.2)S.items.push({k:Math.random()<.5?'mag':'heal',x:e.x,y:e.y,life:150});S.flash=.2;toast('보물 고블린 처치!');}
   if(e.bombed)return;
   p.pkills++;
   if(has('fever')){p.combo++;p.comboT=has('f_frenzy')?4:2;}
