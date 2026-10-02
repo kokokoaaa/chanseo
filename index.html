@@ -942,8 +942,6 @@ const BOSSES=[
 function spawnBoss(i){
   if(S.ev)endEvent(false);S.evBanner=null;
   S.bossI=i;S.tele=[];S.hz=[];
-  for(const e of S.en)if(!e.elite&&!e.boss){e.alive=false;burst(e.x,e.y,'#3a4a3a',3);}
-  S.en=S.en.filter(e=>e.alive);
   const a=Math.random()*TAU;spawnAt(BOSSES[i].type,clamp(S.p.x+Math.cos(a)*300,60,WW-60),clamp(S.p.y+Math.sin(a)*300,60,WH-60));
   const b=S.en[S.en.length-1];b.bk=0;go(b,'intro');S.boss=b;
   S.shake=.5;S.bannerT=3.2;
@@ -1007,7 +1005,7 @@ const BAI={
     case 'blink':if(e.f){e.f=0;burst(e.x,e.y,'#8a3fc0',20);const a=Math.random()*TAU;e.x=clamp(p.x+Math.cos(a)*270,60,WW-60);e.y=clamp(p.y+Math.sin(a)*270,60,WH-60);burst(e.x,e.y,'#c98af0',20);e.n=0;}
       if(e.n<(ph2?3:2)&&e.bt>.45+e.n*.45){e.n++;eFan(e,ph2?7:5,1,260,e.dmg*.5,6,'#e9dcff');}
       if(e.bt>1.6)go(e,'float');break;
-    case 'summon':if(e.f){e.f=0;if(S.en.length<70){const k=ph2?6:4;for(let i=0;i<k;i++){const a=i/k*TAU;spawnAt(i%2?'mage':'ranger',e.x+Math.cos(a)*90,e.y+Math.sin(a)*90,true);}S.rings.push({x:e.x,y:e.y,r:20,max:110,life:.4,col:'#c98af0'});}}
+    case 'summon':if(e.f){e.f=0;if(S.en.length<150){const k=ph2?6:4;for(let i=0;i<k;i++){const a=i/k*TAU;spawnAt(i%2?'mage':'ranger',e.x+Math.cos(a)*90,e.y+Math.sin(a)*90,true);}S.rings.push({x:e.x,y:e.y,r:20,max:110,life:.4,col:'#c98af0'});}}
       keepDist(e,o,dt,240,360);if(e.bt>.9)go(e,'spiral');break;
     }},
   // 슬라임 킹: 점프 내려찍기, 독 웅덩이, 산성 침, 분열
@@ -1024,7 +1022,7 @@ const BAI={
     case 'spit':{const n=ph2?4:3;if(e.f){e.f=0;e.n=0;}
       if(e.n<n&&e.bt>e.n*.5){e.n++;eFan(e,9,1.7,190,e.dmg*.45,7,'#8ee06a');}
       if(e.bt>n*.5+.6)go(e,'crawl');break;}
-    case 'split':if(e.f){e.f=0;if(S.en.length<70){const k=ph2?6:4;for(let i=0;i<k;i++){const a=i/k*TAU;spawnAt('slime',e.x+Math.cos(a)*70,e.y+Math.sin(a)*70,true);}}
+    case 'split':if(e.f){e.f=0;if(S.en.length<150){const k=ph2?6:4;for(let i=0;i<k;i++){const a=i/k*TAU;spawnAt('slime',e.x+Math.cos(a)*70,e.y+Math.sin(a)*70,true);}}
         for(let i=0;i<6;i++){const a=i/6*TAU;S.hz.push({x:e.x+Math.cos(a)*130,y:e.y+Math.sin(a)*130,r:40,life:5,dmg:e.dmg*.55});}S.rings.push({x:e.x,y:e.y,r:20,max:150,life:.4,col:'#8ee06a'});}
       if(e.bt>1)go(e,'crawl');break;
     }},
