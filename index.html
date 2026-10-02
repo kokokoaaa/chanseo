@@ -2218,7 +2218,7 @@ refreshAutoBtns();
 /* ---------- save ---------- */
 const SAVE_KEY='chipdungeon_save_v1';
 const PKEYS=['xpM','block','token','hp','maxHp','speed','dmg','rate','bspd','range','multi','pierce','crit','critM','luck','goldM','vuln','orbR','orbM','dashMul','armor','dodge','lifesteal','regen','magnet','shots','pkills','lastCd'];
-const SKEYS=['gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','keys','vipStock','buys','cbuys','fused'];
+const SKEYS=['gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','keys','vipStock','vipRoll','buys','cbuys','fused'];
 function saveGame(silent){
   if(!S||!S.started||!S.p.alive||S.mode==='over'||S.mode==='dying'||S.mode==='revive')return false;
   const d={v:1,at:Date.now(),p:{},s:{},augs:S.augs.map(a=>[a.id,a.lv,a.q||1]),st:S.st};
@@ -2295,10 +2295,10 @@ const STACKS=[
 // 골드 상점 가격: 현재 스탯이 높을수록 비싸짐 (구매 횟수는 약하게만 반영)
 function statF(k){const p=S.p,B=CLASSES[S.cls||'knight'].stats;return {atk:p.dmg/(B.dmg||10),rate:p.rate/(B.rate||2),hp:p.maxHp/(B.maxHp||140),arm:1+p.armor/40,crit:1+p.crit*6,critm:p.critM/2,dodge:1+p.dodge*8,ls:1+p.lifesteal*50,luck:1+p.luck/8,multi:Math.pow(2.2,p.multi-1)}[k]||1;}
 const stackCost=x=>Math.round(x.b*(x.k==='multi'?2:1.2)*Math.sqrt(econ())*Math.pow(Math.max(1,statF(x.k)),1.6)*Math.pow(1.06,(S.buys[x.k]||0)));
-// VIP는 보스 열쇠로만 구매. 첫 번째 1개, 두 번째 2개 → 한 판 최대 2개. 품목은 판마다 무작위 3개로 고정
+// VIP는 보스 열쇠로만 구매: 보스 1마리 = 열쇠 1개 = VIP 1개. 품목은 보스를 잡을 때마다 미보유 VIP 중 무작위 3개로 새로 뽑힘
 const vipOwned=()=>S.augs.filter(a=>a.t==='v').length;
-const vipCost=()=>[1,2][vipOwned()]??Infinity;
-const vipStock=()=>{if(!S.vipStock||!S.vipStock.length)S.vipStock=[...VIPS].sort(()=>Math.random()-.5).slice(0,3).map(v=>v.id);return S.vipStock.map(id=>VIPS.find(v=>v.id===id)).filter(Boolean);};
+const vipCost=()=>1;
+const vipStock=()=>{if(!S.vipStock||S.vipRoll!==S.chap){S.vipRoll=S.chap;S.vipStock=VIPS.filter(v=>!has(v.id)).sort(()=>Math.random()-.5).slice(0,3).map(v=>v.id);}return S.vipStock.map(id=>VIPS.find(v=>v.id===id)).filter(Boolean);};
 const MERCH={
   casino:{n:'카지노 테이블',icon:'🎲',col:'#145a3f',w:()=>22,d:'더블 오어 낫싱, 상자, 회복'},
   chips:{n:'칩 상인',icon:'🪙',col:'#7a5a12',w:()=>24,d:'능력치를 골드로 삽니다. 매번 파는 품목이 다름'},
@@ -2306,7 +2306,7 @@ const MERCH={
   alch:{n:'연금술사',icon:'⚗️',col:'#5a2a6a',w:()=>fusable().length?16:(S.augs.length>=3?5:0),d:'강제 합체, 증강 분해'},
   doc:{n:'칩 의사',icon:'🩺',col:'#2c6b5a',w:()=>14,d:'회복, 최대 체력, 부활 보험'},
   black:{n:'암상인',icon:'🕶️',col:'#2a1414',w:()=>S.gt>60?11:0,d:'수상한 거래 세 가지'},
-  vip:{n:'VIP 브로커',icon:'💎',col:'#6a1020',w:()=>vipOwned()<2&&vipStock().some(v=>!has(v.id))?6:0,d:'보스 열쇠로 사는 VIP 증강 (한 판 최대 2개)'}
+  vip:{n:'VIP 브로커',icon:'💎',col:'#6a1020',w:()=>(S.keys||0)>0&&vipStock().some(v=>!has(v.id))?6:0,d:'보스 열쇠로 사는 VIP 증강'}
 };
 const DEALS=[
   {id:'blood',n:'피의 거래',d:'최대 체력 −20%, 공격력 +20%',cost:()=>0,f:()=>{const p=S.p;p.maxHp=Math.max(40,Math.round(p.maxHp*.8));p.hp=Math.min(p.hp,p.maxHp);p.dmg*=1.2;}},
@@ -2387,7 +2387,7 @@ function openShop(back,m){
   }
   if(m.k==='vip'){
     const vc=vipCost(),k=S.keys||0;
-    body+=`<p class="sub">보유 🔑 <b>${k}</b>. 보스를 잡을 때마다 열쇠 1개. 첫 VIP는 열쇠 1개, 두 번째는 2개 (한 판 최대 2개). 이번 판 품목은 아래 3개로 고정. 슬롯을 차지하지 않음.</p><div class="uplist">${vipStock().map(v=>{const own=has(v.id),ok=augReq(v);return `<div class="uprow"><b>${v.n}</b><button class="btn" data-v="${v.id}" ${own||!ok||k<vc?'disabled':''}>${own?'보유':!ok?'조건 미충족':vc===Infinity?'구매 한도':'🔑 '+vc}</button><small>${v.d}</small></div>`;}).join('')}</div>`;
+    body+=`<p class="sub">보유 🔑 <b>${k}</b>. 보스를 잡을 때마다 열쇠 1개, 열쇠 1개로 VIP 1개. 품목은 보스를 잡을 때마다 새로 뽑혀요. 슬롯을 차지하지 않음.</p><div class="uplist">${vipStock().map(v=>{const own=has(v.id),ok=augReq(v);return `<div class="uprow"><b>${v.n}</b><button class="btn" data-v="${v.id}" ${own||!ok||k<vc?'disabled':''}>${own?'보유':!ok?'조건 미충족':'🔑 '+vc}</button><small>${v.d}</small></div>`;}).join('')}</div>`;
   }
   show(`<div class="shophead"><h2>${M.icon} ${M.n}</h2><button class="btn" id="upBackTop">${S.hub?'상점으로':'떠나기'}</button></div><p class="sub">${M.d}. 보유 <span class="gold">${g} 골드</span>. 게임은 멈춰 있습니다.</p>${body}<button class="btn primary" id="upBack">${S.hub?'상점으로 돌아가기':'떠나기'}</button>`);
   const re=()=>openShop(back,m);
