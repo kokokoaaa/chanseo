@@ -672,7 +672,7 @@ const CARDS=[
   {n:'붕대',v:[[.3,.7,2]],t:v=>`초당 체력 재생 +${v[0]}`,a:(p,v)=>{p.regen+=v[0];}},
   {n:'숨 고르기',v:[[4,8,0]],t:v=>`대시 재사용 −${v[0]}%`,a:(p,v)=>{p.dashMul*=1-v[0]/100;}},
   {n:'피 맛',v:[[.3,.7,2]],t:v=>`흡혈 +${v[0]}%`,a:(p,v)=>{p.lifesteal+=v[0]/100;}},
-  {n:'회전 윤활유',v:[[10,20,0],[4,8,0]],t:v=>`회전 칩 피해 +${v[0]}%, 회전 반경 +${v[1]}%`,a:(p,v)=>{p.orbM*=1+v[0]/100;p.orbR*=1+v[1]/100;}},
+  {req:()=>orbitN()>0,n:'회전 윤활유',v:[[10,20,0],[4,8,0]],t:v=>`회전 칩 피해 +${v[0]}%, 회전 반경 +${v[1]}%`,a:(p,v)=>{p.orbM*=1+v[0]/100;p.orbR*=1+v[1]/100;}},
   {n:'유리 대포',v:[[7,12,1]],t:v=>`공격력 +${v[0]}%, 최대 체력 −8%`,a:(p,v)=>{p.dmg*=1+v[0]/100;p.maxHp=Math.round(p.maxHp*.92);p.hp=Math.min(p.hp,p.maxHp);}},
   {n:'무거운 갑옷',v:[[7,12,0]],t:v=>`방어력 +${v[0]}, 이동 속도 −4%`,a:(p,v)=>{p.armor+=v[0];p.speed*=.96;}},
   {n:'광기',v:[[6,11,1]],t:v=>`공격 속도 +${v[0]}%, 받는 피해 +8%`,a:(p,v)=>{p.rate*=1+v[0]/100;p.vuln*=1.08;}},
@@ -1725,11 +1725,18 @@ function rollTier(){const L=S.p.luck,r=Math.min(12,S.round);const w=[['s',Math.m
 // 공격력을 직접 올리지 않는 증강 (생존·경제·이동). 선택지마다 공격 증강이 최소 1개는 나오도록 하는 데 씀
 const DEF_AUGS=new Set(['regenarmor','gravity','luckycoin','frost','piggy','tip','insure','king','highroll','thick','armor','evade','iron','gen','fortress','icecoin','rush','sprint','lucky7','lastcard','vamp','neuro','engine','k_wall','counter','unbreak','thorns','mirror','guardian']);
 const isOff=a=>!a.up&&!DEF_AUGS.has(a.id);
+// 선행 조건: 효과가 다른 무언가를 강화만 하는 증강은 그 대상이 있을 때만 등장 (회전 칩 없는데 회전 칩 강화 등 방지)
+const poisonSrc=()=>canPoison()||['wheel','m_inferno','fog','venomcloud','f_napalm','f_gas','f_plaguebullet'].some(has);
+const AUG_REQ={
+  neuro:poisonSrc,spill:poisonSrc,plague:poisonSrc,contagion:poisonSrc,plaguelord:poisonSrc,
+  shieldbash:()=>barrierMax()>0
+};
+const augReq=a=>!AUG_REQ[a.id]||AUG_REQ[a.id]();
 // 태그 중복(가드 2개 등)으로 선호 가중치가 겹쳐 쌓이지 않게: 선호 태그가 하나라도 있으면 ×2.5, 비선호는 ×0.3
 function augW(a){const C=CLASSES[S.cls||'knight'];if(a.cls)return a.cls===S.cls?4:0;const ts=new Set(a.tags);let w=1;if([...ts].some(t=>C.fav.includes(t)))w*=2.5;if([...ts].some(t=>C.dis.includes(t)))w*=.3;return w;}
 function pickW(pool,n){const out=[];pool=[...pool];while(out.length<n&&pool.length){const t=pool.reduce((q,a)=>q+augW(a),0);let x=Math.random()*t,i=0;for(;i<pool.length-1;i++){if((x-=augW(pool[i]))<0)break;}out.push(pool.splice(i,1)[0]);}return out;}
 function augOptions(tier){
-  const avail=AUGS.filter(a=>!has(a.id)&&augW(a)>0&&!(a.id==='luckydie'&&critFull()));
+  const avail=AUGS.filter(a=>!has(a.id)&&augW(a)>0&&augReq(a)&&!(a.id==='luckydie'&&critFull()));
   let out=pickW(avail.filter(a=>a.t===tier),3);
   if(out.length<3)out=out.concat(pickW(avail.filter(a=>a.t!==tier),3-out.length));
   if(out.length&&!out.some(isOff)){const alt=pickW(avail.filter(a=>isOff(a)&&!out.includes(a)&&a.t===tier),1);const o2=alt.length?alt:pickW(avail.filter(a=>isOff(a)&&!out.includes(a)),1);if(o2.length)out[out.length-1]=o2[0];}
@@ -1760,7 +1767,7 @@ function bindPeek(){
 function openAugKeep(opts,free,why,tier){openAug(free,why,opts,tier);}
 const augReady=()=>slotCount()<MAXA||fullOptions().length>0;
 function fullOptions(){
-  const fz=AUGS.filter(a=>!has(a.id)&&(!a.cls||a.cls===S.cls)&&partnerOf(a.id)).sort(()=>Math.random()-.5).slice(0,3).map(a=>({...a,fuseNow:true,q:rollQ()}));
+  const fz=AUGS.filter(a=>!has(a.id)&&(!a.cls||a.cls===S.cls)&&augReq(a)&&partnerOf(a.id)).sort(()=>Math.random()-.5).slice(0,3).map(a=>({...a,fuseNow:true,q:rollQ()}));
   if(fz.length)return fz;
   return S.augs.filter(a=>a.lv<3&&a.t!=='v'&&a.t!=='f'&&!(a.id==='luckydie'&&critFull())).sort(()=>Math.random()-.5).slice(0,3).map(o=>({up:true,ref:o}));
 }
@@ -1814,7 +1821,7 @@ function openStat(keep){
   $('takeall').onclick=()=>{S.gold-=allC;cards.forEach(take);S.srr=0;toast('전부 획득');openNext();};
 }
 function rollRarity(bonus=0){const L=S.p.luck+bonus;const w=[['c',60],['r',26+2*L],['e',10+1.5*L],['l',2+.6*L]];let t=w.reduce((a,b)=>a+b[1],0),x=Math.random()*t;for(const [k,v] of w){if((x-=v)<0)return k;}return 'c';}
-const cardOk=c=>!(c.cc&&critFull())&&!(c.cm&&critMFull());
+const cardOk=c=>!(c.cc&&critFull())&&!(c.cm&&critMFull())&&(!c.req||c.req());
 // 직업 선호 카드는 ×1.6, 최근 9장 안에 나온 카드는 ×0.3 (같은 카드 반복 방지)
 function cardOf(r,bonus=0){const pool=CARDS.filter(c=>(c.fr?c.fr===r:true)&&cardOk(c)),fav=CLASSES[S.cls||'knight'].cards,rec=S.recentC||[],w=c=>(fav.includes(c.n)?1.6:1)*(rec.includes(c.n)?.3:1);
   let t=pool.reduce((q,c)=>q+w(c),0),x=Math.random()*t,pick=pool[pool.length-1];for(const c of pool){if((x-=w(c))<0){pick=c;break;}}
@@ -1838,7 +1845,7 @@ function renderCasino(){
   <button class="btn primary" data-a="next" ${b?'disabled':''}>${S.hub?'상점으로 돌아가기':'테이블 떠나기'}</button>`);
   ov.querySelectorAll('[data-a]').forEach(el=>el.onclick=()=>casinoAct(el.dataset.a));
 }
-function grantAug(min){if(slotCount()>=MAXA){const o=S.augs.filter(a=>a.lv<3&&a.t!=='v'&&a.t!=='f');if(!o.length)return null;const a=o[Math.floor(Math.random()*o.length)];a.lv++;if(a.f)applyQ(a.f,S.p,a.q);tagCount();tryFuse();return {n:a.n+' ★'+a.lv,d:'슬롯이 가득 차서 강화로 대체'};}const order=['s','g','p'];const ok=AUGS.filter(a=>!has(a.id)&&(!a.cls||a.cls===S.cls)&&order.indexOf(a.t)>=order.indexOf(min));if(!ok.length)return null;const a={...ok[Math.floor(Math.random()*ok.length)],q:rollQ()},lv=a.t==='v'||a.t==='f'?1:2;S.augs.push({...a,lv});tagCount();tryFuse();if(a.f)for(let i=0;i<lv;i++)applyQ(a.f,S.p,a.q);tagCount();return a;}
+function grantAug(min){if(slotCount()>=MAXA){const o=S.augs.filter(a=>a.lv<3&&a.t!=='v'&&a.t!=='f');if(!o.length)return null;const a=o[Math.floor(Math.random()*o.length)];a.lv++;if(a.f)applyQ(a.f,S.p,a.q);tagCount();tryFuse();return {n:a.n+' ★'+a.lv,d:'슬롯이 가득 차서 강화로 대체'};}const order=['s','g','p'];const ok=AUGS.filter(a=>!has(a.id)&&(!a.cls||a.cls===S.cls)&&augReq(a)&&order.indexOf(a.t)>=order.indexOf(min));if(!ok.length)return null;const a={...ok[Math.floor(Math.random()*ok.length)],q:rollQ()},lv=a.t==='v'||a.t==='f'?1:2;S.augs.push({...a,lv});tagCount();tryFuse();if(a.f)for(let i=0;i<lv;i++)applyQ(a.f,S.p,a.q);tagCount();return a;}
 function casinoAct(a){
   const p=S.p;
   if(a==='next'){if(S.hub){openHub();return;}openNext();return;}
@@ -2224,7 +2231,7 @@ const MERCH={
 const DEALS=[
   {id:'blood',n:'피의 거래',d:'최대 체력 −20%, 공격력 +20%',cost:()=>0,f:()=>{const p=S.p;p.maxHp=Math.max(40,Math.round(p.maxHp*.8));p.hp=Math.min(p.hp,p.maxHp);p.dmg*=1.2;}},
   {id:'soul',n:'영혼 담보',d:'보유 골드 절반을 내고 즉시 2레벨',cost:()=>Math.max(30,Math.floor(S.gold/2)),f:()=>{S.pendingLv+=2;}},
-  {id:'swap',n:'바꿔치기',d:'무작위 보유 증강 하나를 같은 등급 다른 증강으로 교체',cost:()=>0,ok:()=>S.augs.some(a=>!a.f&&a.t!=='v'&&a.t!=='f'),f:()=>{const c=S.augs.filter(a=>!a.f&&a.t!=='v'&&a.t!=='f');const o=c[Math.floor(Math.random()*c.length)];const pool=AUGS.filter(x=>x.t===o.t&&!has(x.id)&&!x.f&&(!x.cls||x.cls===S.cls));if(!pool.length)return '바꿀 증강이 없음';const n=pool[Math.floor(Math.random()*pool.length)];S.augs[S.augs.indexOf(o)]={...n,lv:o.lv};tagCount();return `${o.n} → ${n.n}`;}},
+  {id:'swap',n:'바꿔치기',d:'무작위 보유 증강 하나를 같은 등급 다른 증강으로 교체',cost:()=>0,ok:()=>S.augs.some(a=>!a.f&&a.t!=='v'&&a.t!=='f'),f:()=>{const c=S.augs.filter(a=>!a.f&&a.t!=='v'&&a.t!=='f');const o=c[Math.floor(Math.random()*c.length)];const pool=AUGS.filter(x=>x.t===o.t&&!has(x.id)&&!x.f&&(!x.cls||x.cls===S.cls)&&augReq(x));if(!pool.length)return '바꿀 증강이 없음';const n=pool[Math.floor(Math.random()*pool.length)];S.augs[S.augs.indexOf(o)]={...n,lv:o.lv};tagCount();return `${o.n} → ${n.n}`;}},
   {id:'smuggle',n:'밀수 증강',d:'골드 등급 이상 증강 하나 (슬롯 필요)',cost:()=>price(380),ok:()=>slotCount()<MAXA,f:()=>{const g=grantAug('g');return g?g.n:'없음';}},
   {id:'debt',n:'도박 빚',d:'지금 골드를 받고, 2분간 받는 피해 +30%',cost:()=>-price(260),f:()=>{S.debtT=120;}},
   {id:'blind',n:'눈가리개',d:'행운 +3, 사거리 −15%',cost:()=>0,f:()=>{S.p.luck+=3;S.p.range*=.85;}},
@@ -2300,7 +2307,7 @@ function openShop(back,m){
   }
   if(m.k==='vip'){
     const vc=vipCost();
-    body+=`<p class="sub">살 때마다 가격 1.8배. 슬롯을 차지하지 않음.</p><div class="uplist">${VIPS.filter(v=>!has(v.id)).sort((a,b)=>a.id<b.id?-1:1).slice(0,4).map(v=>`<div class="uprow"><b>${v.n}</b><button class="btn" data-v="${v.id}" ${g<vc?'disabled':''}>${vc}골드</button><small>${v.d}</small></div>`).join('')||'<p class="sub">전부 보유</p>'}</div>`;
+    body+=`<p class="sub">살 때마다 가격 1.8배. 슬롯을 차지하지 않음.</p><div class="uplist">${VIPS.filter(v=>!has(v.id)&&augReq(v)).sort((a,b)=>a.id<b.id?-1:1).slice(0,4).map(v=>`<div class="uprow"><b>${v.n}</b><button class="btn" data-v="${v.id}" ${g<vc?'disabled':''}>${vc}골드</button><small>${v.d}</small></div>`).join('')||'<p class="sub">전부 보유</p>'}</div>`;
   }
   show(`<div class="shophead"><h2>${M.icon} ${M.n}</h2><button class="btn" id="upBackTop">${S.hub?'상점으로':'떠나기'}</button></div><p class="sub">${M.d}. 보유 <span class="gold">${g} 골드</span>. 게임은 멈춰 있습니다.</p>${body}<button class="btn primary" id="upBack">${S.hub?'상점으로 돌아가기':'떠나기'}</button>`);
   const re=()=>openShop(back,m);
