@@ -154,6 +154,7 @@ h3{font-family:'Do Hyeon',sans-serif;font-weight:400;font-size:19px;margin:18px 
 @media (max-width:600px){.cards{grid-template-columns:1fr}}
 .card{background:var(--ivory);color:var(--ink);border:3px solid var(--rc);border-radius:10px;padding:12px;text-align:left;cursor:pointer;font:inherit;line-height:1.45;font-size:15px}
 .card:hover{transform:translateY(-2px)}
+#dsel .btn small{color:inherit;opacity:.85}
 .card{position:relative}
 @keyframes cPop{0%{transform:scale(.55) rotate(-5deg);opacity:0}60%{transform:scale(1.1) rotate(1deg);opacity:1}100%{transform:scale(1)}}
 @keyframes shine{0%{background-position:160% 0}55%,100%{background-position:-60% 0}}
@@ -707,7 +708,8 @@ const CARDS=[
 // 0~1 굴림. 행운이 높을수록 1 쪽으로 치우침 (행운 5면 평균 0.5 → 0.62, 행운 10이면 0.69)
 // 행운 상한 30. 모든 행운 효과는 0~30 구간에 고르게 퍼져 있고 30을 넘는 행운은 무시됨
 const LUCK_CAP=30,LK=(b=0)=>Math.min(LUCK_CAP,Math.max(0,S.p.luck+b));
-function luckU(bonus=0){return Math.pow(Math.random(),1/(1+LK(bonus)*.06));}
+// 행운은 '높게 나올 확률'만 올림: 행운 30이면 35% 확률로 범위 위쪽 절반에서 굴리고, 나머지는 행운 없는 것과 같음
+function luckU(bonus=0){return Math.random()<LK(bonus)/LUCK_CAP*.35?.5+Math.random()*.5:Math.random();}
 const GRADE=u=>u>=.9?{n:'최상',col:'#ffd76a'}:u>=.6?{n:'상',col:'#7fc4f2'}:u>=.25?{n:'중',col:'#d8d0bc'}:{n:'하',col:'#9a9284'};
 function rollCard(T,r,bonus){if(!T.v)return {...T,r:T.fr||r,u:null};const k=T.fr?1:RMUL[r],u=luckU(bonus);
   const rng=T.v.map(([lo,hi,dp])=>{const q=Math.pow(10,dp);return [Math.round(lo*k*q)/q,Math.round(hi*k*q)/q,q];});
@@ -937,22 +939,27 @@ const AFFIX={
   volatile:{n:'폭발',col:'#ff7a3a'},
   gunner:{n:'포격',col:'#ffd76a'}
 };
+// 난이도 모드. 보통 = 자동 플레이로도 클리어 가능한 기준, 어려움 = 직접 플레이용 (점수 ×1.5)
+const DIFF={normal:{n:'보통',hp:1,bhp:1,dm:1,sp:1,el:0,sc:1,d:'자동 플레이로도 클리어할 수 있는 기준 난이도'},
+  hard:{n:'어려움',hp:1.7,bhp:1.4,dm:1.4,sp:.85,el:.08,sc:1.5,d:'적 체력 ×1.7 (보스 ×1.4), 적 공격력 ×1.4, 더 자주 몰려옴, 정예 +8%p. 점수 ×1.5'}};
+const dfM=()=>DIFF[S.diff]||DIFF.normal;
+let pickDiff=(()=>{try{return localStorage.getItem('chanseo_diff')||'normal';}catch(e){return 'normal';}})();
 // 장별 추가 난이도. 3장부터 일반 몹 체력·피해·스폰량, 정예 확률이 더 오름 (보스 체력은 제외)
 // 4장(마지막)은 수를 줄이고 개체를 크게 강화: 체력 ×3.5, 피해 ×1.25, 크기 ×1.2, 정예 +30%p. 대신 경험치·골드도 많이 줌
 const CHAP_MUL=[{hp:1,dm:1,sp:1,n:22,el:0,xp:1,sz:1},{hp:1,dm:1,sp:1,n:22,el:0,xp:1.2,sz:1},{hp:1.5,dm:1.3,sp:.85,n:26,el:.06,xp:1.4,sz:1},{hp:3.5,dm:1.25,sp:1.1,n:12,el:.3,xp:2.2,sz:1.2,cap:110}];
 const chapM=()=>CHAP_MUL[Math.min(3,S.chap||0)];
 function spawnAt(type,x,y,noElite,forceElite){
   const T=ET[type],d=S.round,cm=chapM();
-  const elite=!T.boss&&!T.flee&&(forceElite||(!noElite&&S.gt>120&&Math.random()<Math.min(.35+cm.el,(S.gt-120)/700+cm.el)));
+  const elite=!T.boss&&!T.flee&&(forceElite||(!noElite&&S.gt>120&&Math.random()<Math.min(.35+cm.el+dfM().el,(S.gt-120)/700+cm.el+dfM().el)));
   const om=Math.pow(1.3,Math.max(0,S.gt-600)/60);
-  const m=(T.boss?1+.12*(Math.min(d,50)-1):(1+.35*(d-1))*om)*(elite?4:1)*(T.boss?1:cm.hp),dm=(T.boss?1+.08*(d-1):(1+.15*(d-1))*om)*(elite?1.5:1)*cm.dm;
+  const m=(T.boss?1+.12*(Math.min(d,50)-1):(1+.35*(d-1))*om)*(elite?4:1)*(T.boss?dfM().bhp:cm.hp*dfM().hp),dm=(T.boss?1+.08*(d-1):(1+.15*(d-1))*om)*(elite?1.5:1)*cm.dm*dfM().dm;
   S.en.push({type,x,y,elite,r:T.r*(elite?1.45:1)*(T.boss?1:cm.sz),hp:T.hp*m,maxHp:T.hp*m,dmg:T.dmg*dm,spd:T.spd*Math.min(1.75,1+.025*(d-1))*(1+.07*Math.max(0,S.gt-600)/60),cd:rand(.3,1.2),hcd:1,bcd:2.5,hit:0,rot:Math.random()*6,orbCd:0,pt:0,ps:0,pTick:0,alive:true,boss:!!T.boss});
   const e=S.en[S.en.length-1];if(elite&&S.gt>150){const ks=Object.keys(AFFIX);e.aff=ks[Math.floor(Math.random()*ks.length)];if(AFFIX[e.aff].on)AFFIX[e.aff].on(e);}
   return e;
 }
 function ringPos(extra=40){const p=S.p,a=(p.moving&&Math.random()<.6)?Math.atan2(p.lmy,p.lmx)+rand(-1.1,1.1):Math.random()*TAU,r=Math.hypot(W,H)/2+extra;return [clamp(p.x+Math.cos(a)*r,20,WW-20),clamp(p.y+Math.sin(a)*r,20,WH-20)];}
 function spawnBurst(){
-  if(S.en.length>(S.bossI>=0?60:(chapM().cap||190)))return;
+  if(S.en.length>(S.bossI>=0?35:(chapM().cap||190)))return;
   let n=Math.min(chapM().n,2+Math.floor(S.round*.7));if(S.bossI>=0)n=Math.ceil(n*.35);
   const side=Math.floor(Math.random()*4);
   const [cx,cy]=ringPos();
@@ -1014,11 +1021,12 @@ const BOSSES=[
 ];
 function spawnBoss(i){
   if(S.ev)endEvent(false);S.evBanner=null;
-  // 기존 몹은 유지하되 너무 많으면 가까운 80마리(정예 포함)만 남김
-  if(S.en.length>80){const p0=S.p,keep=new Set([...S.en].sort((a,b)=>(b.elite-a.elite)||(d2(a,p0)-d2(b,p0))).slice(0,80));S.en=S.en.filter(e=>keep.has(e));}
+  // 기존 몹은 유지하되 너무 많으면 가까운 40마리(정예 포함)만 남김. 보스 등장 시 체력 30% 회복
+  if(S.en.length>40){const p0=S.p,keep=new Set([...S.en].sort((a,b)=>(b.elite-a.elite)||(d2(a,p0)-d2(b,p0))).slice(0,40));S.en=S.en.filter(e=>keep.has(e));}
+  S.p.hp=Math.min(S.p.maxHp,S.p.hp+S.p.maxHp*.3);
   S.bossI=i;S.tele=[];S.hz=[];S.bStart=S.bt||0;
   const a=Math.random()*TAU;spawnAt(BOSSES[i].type,clamp(S.p.x+Math.cos(a)*300,60,WW-60),clamp(S.p.y+Math.sin(a)*300,60,WH-60));
-  const b=S.en[S.en.length-1];b.bk=0;go(b,'intro');S.boss=b;
+  const b=S.en[S.en.length-1];b.dmg*=BOSS_DM[i]||1;b.bk=0;go(b,'intro');S.boss=b;
   // 보스 결계: 전체 맵의 약 1/4 넓이(3000×3000) 사각 구역. 분노(체력 50%) 시 85%로, 광폭화마다 5%씩 좁아짐. r = 한 변의 절반
   {const tr=1500,cx=clamp(S.p.x,tr,WW-tr),cy=clamp(S.p.y,tr,WH-tr);S.arena={x:cx,y:cy,r:tr*1.3,tr};
    const d=Math.hypot(b.x-cx,b.y-cy);if(d>tr*.7){b.x=cx+(b.x-cx)/d*tr*.7;b.y=cy+(b.y-cy)/d*tr*.7;}}
@@ -1028,7 +1036,7 @@ function bossDown(e){
   S.shake=.5;S.st.bosses=(S.st.bosses||0)+1;(S.st.btimes=S.st.btimes||[]).push(Math.round(((S.bt||0)-(S.bStart||0))*10)/10);for(const c of S.dr){if(c.xp)gainXp(c.v);else addGold(c.v);}S.dr=[];S.bossI=-1;S.boss=null;S.arena=null;S.tele=[];S.hz=[];S.pr=S.pr.filter(b=>b.mine);S.chap++;
   const p=S.p;p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.3);
   if(S.chap>=CHAPTERS){S.win=true;S.winT=2.5;p.inv=99;toast('🏆 하우스를 무너뜨렸다!');}
-  else{S.bonusAug++;S.shopPend=true;toast('보스 격파! 보상 후 상점이 열립니다');}
+  else{S.bonusAug++;S.shopPend=true;S.keys=(S.keys||0)+1;toast('보스 격파! 🔑 열쇠 획득. 보상 후 상점이 열립니다');}
 }
 function go(e,st){e.bst=st;e.bt=0;e.f=1;}
 function tele(o){o.t=o.T;S.tele.push(o);}
@@ -1350,7 +1358,7 @@ function update(dt){
   if(S.bossI<0&&!S.win&&S.gt>=(S.chap+1)*CH_LEN){S.gt=(S.chap+1)*CH_LEN;spawnBoss(S.chap);}
   {const bi=biomeIdx();if(S.biome==null)S.biome=bi;if(bi!==S.biome){S.prevBiome=S.biome;S.biome=bi;S.biomeT=3;toast('🌲 '+BIOMES[bi].n+'에 들어섰다');}S.biomeT=Math.max(0,(S.biomeT||0)-dt);}
   // spawn & timers
-  S.spawnT-=dt*(S.win?0:S.bossI>=0?.4:evOn('horde')?2.6:1);updEvent(dt);if(S.spawnT<=0){spawnBurst();S.spawnT=Math.max(.2,1.1-S.round*.07)*chapM().sp*rand(.7,1.3);}
+  S.spawnT-=dt*(S.win?0:S.bossI>=0?.4:evOn('horde')?2.6:1);updEvent(dt);if(S.spawnT<=0){spawnBurst();S.spawnT=Math.max(.2,1.1-S.round*.07)*chapM().sp*dfM().sp*rand(.7,1.3);}
   if(S.merch){S.merch.life-=dt;if(S.merch.life<=0){S.merch=null;}else if(p.alive&&Math.abs(p.x-S.merch.x)<44+p.r&&Math.abs(p.y-S.merch.y)<30+p.r){const m=S.merch;S.merch=null;if(AUTO.pick){toast('자동 모드: 상인 건너뜀');}else{openMerch(m);return;}}}
   if(has('piggy')){S.piggyT-=dt;if(S.piggyT<=0){S.piggyT=30;const it=Math.min(30*L('piggy'),Math.floor(S.gold*.1));if(it>0){S.gold+=it;ftext(p.x,p.y-34,'이자 +'+it,'#d6a94a',15);}}}
   if(has('insure')){S.insureT-=dt;if(S.insureT<=0){S.insureT=30;p.shield=2+L('insure')+(has('f_insure')?3:0);}}
@@ -1478,7 +1486,7 @@ function update(dt){
     else{for(const c of S.dr)c.pull=true;toast(`자석. 경험치·골드 ${S.dr.length}개 회수`);S.rings.push({x:p.x,y:p.y,r:10,max:220,life:.4,col:'#5fa8e8'});}}}
   S.items=S.items.filter(it=>it.life>0);for(const it of S.items)if(!it.nud){pushOut(it,18);it.nud=1;}
   S.waveCd=Math.max(0,(S.waveCd||0)-dt);if(S.wavePend&&S.p.alive&&S.waveCd<=0){S.wavePend=false;S.waveCd=4;lvlWave();}
-  if(S.pendingLv>0||S.bonusAug>0||S.shopPend){if(S.mode==='play'){if(AUTO.pick){autoProcess();if(S.shopPend){S.shopPend=false;toast('자동 모드: 보스 상점 건너뜀');}}else{openNext();return;}}}
+  if(S.pendingLv>0||S.bonusAug>0||S.shopPend){if(S.mode==='play'){if(AUTO.pick){autoProcess();if(S.shopPend){S.shopPend=false;autoShop();}}else{openNext();return;}}}
   fx(dt);
 }
 
@@ -1711,9 +1719,9 @@ function hud(){
   $('hpf').style.width=(p.hp/p.maxHp*100)+'%';
   $('bpf').style.width=Math.min(100,p.barrier/p.maxHp*100)+'%';
   $('hpt').textContent=`${Math.ceil(p.hp)} / ${Math.round(p.maxHp)}${p.barrier>=1?' +'+Math.ceil(p.barrier):''}`;
-  $('round').innerHTML=`${S.bossI>=0?`<span style="color:#ff6060">⏸ ${mm}:${ss} 보스전</span>`:`${mm}:${ss}<span style="color:var(--muted)"> / 12:00</span>`} <span style="color:var(--brass)">${S.bossI===3?'마지막 장':Math.min(4,S.chap+1)+'장'}</span> <span style="color:var(--muted)">${BIOMES[S.biome||0].n}</span> <span style="color:${S.round>12?'#ff6060':S.round>6?'#ffb347':'var(--muted)'}">위협 ${S.round.toFixed(1)}</span>`;
+  $('round').innerHTML=`${S.diff==='hard'?'<span style="color:#ff6060">어려움</span> ':''}${S.bossI>=0?`<span style="color:#ff6060">⏸ ${mm}:${ss} 보스전</span>`:`${mm}:${ss}<span style="color:var(--muted)"> / 12:00</span>`} <span style="color:var(--brass)">${S.bossI===3?'마지막 장':Math.min(4,S.chap+1)+'장'}</span> <span style="color:var(--muted)">${BIOMES[S.biome||0].n}</span> <span style="color:${S.round>12?'#ff6060':S.round>6?'#ffb347':'var(--muted)'}">위협 ${S.round.toFixed(1)}</span>`;
   $('left').textContent=`처치 ${S.st.kills}`;
-  $('gold').textContent=`${S.gold} 골드`;
+  $('gold').textContent=`${S.gold} 골드${S.keys?' · 🔑'+S.keys:''}`;
   $('lv').textContent=!augReady()?`레벨 ${S.lvl}, 증강 모두 최대`:`레벨 ${S.lvl}, 증강까지 ${nx}`;
   $('xpf').style.width=(S.xp/S.next*100)+'%';
   $('syn').innerHTML=Object.keys(TAGS).filter(t=>tag(t)>0).map(t=>{const c=tag(t);return `<span class="pill ${c>=6?'on6':c>=4?'on4':c>=2?'on2':''}">${TAGS[t].n} ${c}${c>=5?' ▲'+(c-4):''}</span>`;}).join('');
@@ -1928,6 +1936,7 @@ function gameOver(win){
   show(`${win?`<h2>🏆 클리어!</h2><p class="sub">12분을 버티고 하우스 딜러를 쓰러뜨렸습니다. 보스전에 ${fmt(Math.floor(S.bt))} 걸렸어요.</p>`:`<h2>쓰러졌습니다</h2><p class="sub">${Math.min(4,S.chap+1)}장에서 ${fmt(sec)} 버텼습니다.${S.bossI>=0?` (${ET[BOSSES[S.bossI].type].n}에게 패배)`:''}</p>`}
   <div class="medal"><span>최종 점수 <b>${score.toLocaleString()}</b></span><span>🏅 메달 <b>+${medals}</b> <small>(보유 ${META.medals})</small></span></div>
   <div class="stats">
+    <span>난이도</span><span>${dfM().n}${dfM().sc>1?` (점수 ×${dfM().sc})`:''}</span>
     <span>생존 시간</span><span>${fmt(sec)}</span>
     <span>실제 플레이 시간</span><span>${fmt(Math.floor(S.gt+(S.bt||0)))} <small>(보스전 ${fmt(Math.floor(S.bt||0))})</small></span>
     <span>잡은 보스</span><span>${S.st.bosses||0} / 4</span>${(S.st.btimes||[]).length?`
@@ -1968,6 +1977,7 @@ function startScreen(){
   ${sv?`<button class="btn primary" id="cont">이어하기 (${CLASSES[sv.s.cls||'knight'].n})<br><small style="color:var(--ink)">${Math.floor(sv.s.gt/60)}분 ${Math.floor(sv.s.gt%60)}초, 레벨 ${sv.s.lvl}, 증강 ${sv.augs.length}개</small></button><h3>새 게임</h3>`:''}
   <h3>캐릭터 선택</h3><div class="clsgrid">${cards}</div>
   <div class="cdet" id="cdet">${clsDetail(pickCls)}</div>
+  <h3>난이도</h3><div class="btnrow" id="dsel">${Object.keys(DIFF).map(k=>`<button class="btn ${k===pickDiff?'primary':''}" data-diff="${k}">${DIFF[k].n}<small>${DIFF[k].d}</small></button>`).join('')}</div>
   ${best?`<p class="sub">내 최고 기록 ${Math.floor(best/60)}분 ${best%60}초</p>`:''}
   <button class="btn primary" id="go">${CLASSES[pickCls].n}(으)로 시작${sv?' (저장 삭제)':''}</button>
   <button class="btn ghost" id="meta">🏅 영구 강화 <small>보유 메달 ${META.medals}개</small></button>
@@ -1989,6 +1999,7 @@ function startScreen(){
   </ul></details>`);
   ov.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{pickCls=b.dataset.cls;try{localStorage.setItem('chipdungeon_cls',pickCls);}catch(e){}
     ov.querySelectorAll('[data-cls]').forEach(x=>x.classList.toggle('on',x===b));$('cdet').innerHTML=clsDetail(pickCls);$('go').firstChild.textContent=`${CLASSES[pickCls].n}(으)로 시작${sv?' (저장 삭제)':''}`;});
+  ov.querySelectorAll('[data-diff]').forEach(b=>b.onclick=()=>{pickDiff=b.dataset.diff;try{localStorage.setItem('chanseo_diff',pickDiff);}catch(e){}ov.querySelectorAll('[data-diff]').forEach(x=>x.classList.toggle('primary',x===b));});
   if(sv)$('cont').onclick=()=>continueGame(sv);
   $('go').onclick=()=>beginRun(pickCls);
   $('meta').onclick=openMeta;
@@ -2020,9 +2031,9 @@ function applyMeta(){const p=S.p;p.dmg*=1+.04*mlv('atk');p.maxHp+=10*mlv('hp');p
   p.xpM=1+.05*mlv('xp');p.goldM+=.08*mlv('gold');S.gold+=30*mlv('sgold');p.luck+=mlv('luck');if(META.sk.token)p.token=true;}
 const goldPts=()=>S.win?Math.floor(S.gold/10):0;
 // 보스 처치 속도 보너스: 보스마다 기준 시간보다 빨리 잡은 1초당 10점. 보스전 중엔 생존 시간이 멈추므로 실제 걸린 시간은 여기서만 반영
-const BOSS_PAR=[90,90,110,140];
+const BOSS_PAR=[90,90,110,140],BOSS_DM=[.55,.75,1,1];
 const bossSpeedPts=()=>(S.st.btimes||[]).reduce((q,t,i)=>q+Math.round(Math.max(0,BOSS_PAR[i]-t)*10),0);
-function runScore(){return Math.round(S.gt*10+S.st.kills*2+S.lvl*30+(S.st.bosses||0)*400)+goldPts()+bossSpeedPts();}
+function runScore(){return Math.round((Math.round(S.gt*10+S.st.kills*2+S.lvl*30+(S.st.bosses||0)*400)+goldPts()+bossSpeedPts())*dfM().sc);}
 function runMedals(sc){return Math.floor(sc/600)+(META.sk.bossMedal?(S.st.bosses||0):0);}
 function openMeta(){
   const now=x=>{const l=mlv(x.k);return l?x.d.replace(/[\d.]+/,m=>+(parseFloat(m)*l).toFixed(1)):'없음';};
@@ -2043,7 +2054,7 @@ function openMeta(){
   ov.querySelectorAll('[data-mk]').forEach(b=>b.onclick=()=>{const x=MSKILL.find(q=>q.k===b.dataset.mk);if(META.medals<x.c||META.sk[x.k])return;META.medals-=x.c;META.sk[x.k]=1;saveMeta();keepY();});
   $('mBack').onclick=startScreen;$('mBack2').onclick=startScreen;
 }
-function beginRun(cls){clearSave();newRun();applyClass(cls);applyMeta();S.bonusAug=1+(META.sk.extraAug?1:0);openNext();}
+function beginRun(cls){clearSave();newRun();S.diff=pickDiff;applyClass(cls);applyMeta();S.bonusAug=1+(META.sk.extraAug?1:0);openNext();}
 
 /* ---------- online ranking ---------- */
 let RDB=null,RMYID=null,BOARD=null,RSTATE='loading',SHEET=false;
@@ -2064,7 +2075,7 @@ const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 }catch(e){loadSheet();}})();
 let HOF_ALL=false;
 function boardHtml(){
-  const head='<h2>🏆 명예의 전당</h2><p class="hsub">종합 점수 = 생존 초×10 + 처치×2 + 레벨×30 + 보스 처치×400 + 클리어 시 남은 골드÷10</p>';
+  const head='<h2>🏆 명예의 전당</h2><p class="hsub">종합 점수 = 생존 초×10 + 처치×2 + 레벨×30 + 보스 처치×400 + 클리어 시 남은 골드÷10 + 보스 빨리 잡기 보너스. 어려움은 ×1.5</p>';
   const note=t=>head+`<p class="sub" style="text-align:center;margin:0">${t}</p>`;
   if(RSTATE==='off')return note('랭킹 서버에 연결하지 못했어요. 인터넷 연결을 확인해주세요.');
   if(RSTATE==='loading')return note('랭킹 불러오는 중…');
@@ -2107,12 +2118,16 @@ async function submitScore(nick,comment,run){
 }
 
 /* ---------- auto mode ---------- */
+// 자동 선택: 등급, 공격 기여, 직업 전용, 합체, 시너지 단계 도달을 함께 고려
 function scoreAug(a){
-  if(a.up)return 1+(3-a.ref.lv);
-  let sc={s:1,g:2,p:3}[a.t]||1;
-  if(a.fuseNow)sc+=20;else if(partnerOf(a.id))sc+=6;
-  for(const t of a.tags)sc+=tag(t)*1.5+(tag(t)%2===1?2:0);
-  return sc+Math.random();
+  if(a.up)return 2+(3-a.ref.lv)+(isOff(a.ref)?2.5:0)+({s:0,g:.5,p:1}[a.ref.t]||0);
+  let sc={s:1,g:2.5,p:4}[a.t]||1;
+  if(a.fuseNow)sc+=20;else if(partnerOf(a.id))sc+=5;
+  if(isOff(a))sc+=4;if(a.cls)sc+=3;
+  const cnt={};for(const t of a.tags)cnt[t]=(cnt[t]||0)+1;
+  for(const t in cnt){const c=tag(t),n=c+cnt[t];sc+=c*1.2;for(const th of [2,4,6])if(c<th&&n>=th)sc+=th;}
+  if(S.p.hp<S.p.maxHp*.4&&!isOff(a))sc+=2;
+  return sc+Math.random()*.8;
 }
 function autoAug(){
   const full=slotCount()>=MAXA,opts=full?fullOptions():augOptions(rollTier());
@@ -2124,11 +2139,22 @@ function autoAug(){
   ftext(S.p.x,S.p.y-40,'증강: '+a.n,'#ffd76a',16);
 }
 const BADCARD=['러시안 룰렛','동전 던지기','주사위 한 번 더','올인'];
+const OFFCARD=['날카로운 모서리','날 선 패','빠른 손','뾰족한 모서리','밑장 빼기','전투 본능','유리 대포','광기','쾌속 장전','사냥꾼의 눈','분신술','전설의 패','관통 탄'];
 function autoStat(){
   const cards=[];let tries=0;while(cards.length<3&&tries<60){tries++;const c=cardOf(rollRarity());if(!cards.some(x=>x.n===c.n))cards.push(c);}
-  const sc=c=>({c:1,r:2,e:3,l:4}[c.r])-(BADCARD.includes(c.n)?5:0)+(c.u!=null?c.u*.8:.4)+Math.random()*.5;
+  const sc=c=>({c:1,r:2,e:3.5,l:5}[c.r])-(BADCARD.includes(c.n)?5:0)+(OFFCARD.includes(c.n)?1.2:0)+(c.u!=null?c.u:.4)+Math.random()*.5;
   const c=cards.reduce((b,x)=>sc(x)>sc(b)?x:b,cards[0]);c.f(S.p);tryFuse();
   ftext(S.p.x,S.p.y-28,c.n,'#5fc9d9',14);
+}
+// 자동 모드 보스 상점: VIP(열쇠) 구매, 증강 강화, 남은 골드로 공격·생존 스탯 구매 (부활 비용은 남김)
+function autoShop(){
+  const vc=vipCost(),vs=vipStock().filter(v=>!has(v.id)&&augReq(v));if(vs.length&&(S.keys||0)>=vc){const v=vs[0];S.keys-=vc;S.augs.push({...v,lv:3});tagCount();}
+  const reserve=()=>reviveCost();let guard=0,bought=0;
+  while(guard++<60){const up=S.augs.filter(a=>a.lv<3&&a.t!=='v'&&a.t!=='f').sort((a,b)=>upCost(a)-upCost(b))[0];
+    if(up&&S.gold-Math.round(upCost(up)*.85)>reserve()){S.gold-=Math.round(upCost(up)*.85);up.lv++;if(up.f)applyQ(up.f,S.p,up.q);tagCount();tryFuse();bought++;continue;}
+    const pool=STACKS.filter(x=>['atk','rate','hp','arm','crit','critm'].includes(x.k)&&!(x.k==='crit'&&critFull())&&!(x.k==='critm'&&critMFull())&&!(x.k==='rate'&&rawRate()>=RATE_CAP()));
+    const x=pool.sort((a,b)=>stackCost(a)-stackCost(b))[0];if(!x||S.gold-stackCost(x)<=reserve())break;S.gold-=stackCost(x);S.buys[x.k]=(S.buys[x.k]||0)+1;x.f(S.p);bought++;}
+  toast(`자동 모드: 상점에서 ${bought}개 구매`);
 }
 function autoProcess(){
   let guard=0;
@@ -2190,7 +2216,7 @@ refreshAutoBtns();
 /* ---------- save ---------- */
 const SAVE_KEY='chipdungeon_save_v1';
 const PKEYS=['xpM','block','token','hp','maxHp','speed','dmg','rate','bspd','range','multi','pierce','crit','critM','luck','goldM','vuln','orbR','orbM','dashMul','armor','dodge','lifesteal','regen','magnet','shots','pkills','lastCd'];
-const SKEYS=['gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','buys','cbuys','fused'];
+const SKEYS=['gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','keys','vipStock','buys','cbuys','fused'];
 function saveGame(silent){
   if(!S||!S.started||!S.p.alive||S.mode==='over'||S.mode==='dying'||S.mode==='revive')return false;
   const d={v:1,at:Date.now(),p:{},s:{},augs:S.augs.map(a=>[a.id,a.lv,a.q||1]),st:S.st};
@@ -2264,8 +2290,13 @@ const STACKS=[
   {k:'luck',n:'행운 +1',b:60,f:p=>{p.luck+=1;}},
   {k:'multi',n:'탄환 +1발',b:700,g:2.6,f:p=>{p.multi+=1;}}
 ];
-const stackCost=x=>Math.round(x.b*(x.k==='multi'?2:1.2)*Math.sqrt(econ())*Math.pow(x.g||1.25,(S.buys[x.k]||0)));
-const vipCost=()=>Math.round(700*Math.sqrt(econ())*Math.pow(1.8,S.augs.filter(a=>a.t==='v').length));
+// 골드 상점 가격: 현재 스탯이 높을수록 비싸짐 (구매 횟수는 약하게만 반영)
+function statF(k){const p=S.p,B=CLASSES[S.cls||'knight'].stats;return {atk:p.dmg/(B.dmg||10),rate:p.rate/(B.rate||2),hp:p.maxHp/(B.maxHp||140),arm:1+p.armor/40,crit:1+p.crit*6,critm:p.critM/2,dodge:1+p.dodge*8,ls:1+p.lifesteal*50,luck:1+p.luck/8,multi:Math.pow(2.2,p.multi-1)}[k]||1;}
+const stackCost=x=>Math.round(x.b*(x.k==='multi'?2:1.2)*Math.sqrt(econ())*Math.pow(Math.max(1,statF(x.k)),1.6)*Math.pow(1.06,(S.buys[x.k]||0)));
+// VIP는 보스 열쇠로만 구매. 첫 번째 1개, 두 번째 2개 → 한 판 최대 2개. 품목은 판마다 무작위 3개로 고정
+const vipOwned=()=>S.augs.filter(a=>a.t==='v').length;
+const vipCost=()=>[1,2][vipOwned()]??Infinity;
+const vipStock=()=>{if(!S.vipStock||!S.vipStock.length)S.vipStock=[...VIPS].sort(()=>Math.random()-.5).slice(0,3).map(v=>v.id);return S.vipStock.map(id=>VIPS.find(v=>v.id===id)).filter(Boolean);};
 const MERCH={
   casino:{n:'카지노 테이블',icon:'🎲',col:'#145a3f',w:()=>22,d:'더블 오어 낫싱, 상자, 회복'},
   chips:{n:'칩 상인',icon:'🪙',col:'#7a5a12',w:()=>24,d:'능력치를 골드로 삽니다. 매번 파는 품목이 다름'},
@@ -2273,7 +2304,7 @@ const MERCH={
   alch:{n:'연금술사',icon:'⚗️',col:'#5a2a6a',w:()=>fusable().length?16:(S.augs.length>=3?5:0),d:'강제 합체, 증강 분해'},
   doc:{n:'칩 의사',icon:'🩺',col:'#2c6b5a',w:()=>14,d:'회복, 최대 체력, 부활 보험'},
   black:{n:'암상인',icon:'🕶️',col:'#2a1414',w:()=>S.gt>60?11:0,d:'수상한 거래 세 가지'},
-  vip:{n:'VIP 브로커',icon:'💎',col:'#6a1020',w:()=>S.gt>150&&VIPS.some(v=>!has(v.id))?6:0,d:'골드 전용 VIP 증강'}
+  vip:{n:'VIP 브로커',icon:'💎',col:'#6a1020',w:()=>vipOwned()<2&&vipStock().some(v=>!has(v.id))?6:0,d:'보스 열쇠로 사는 VIP 증강 (한 판 최대 2개)'}
 };
 const DEALS=[
   {id:'blood',n:'피의 거래',d:'최대 체력 −20%, 공격력 +20%',cost:()=>0,f:()=>{const p=S.p;p.maxHp=Math.max(40,Math.round(p.maxHp*.8));p.hp=Math.min(p.hp,p.maxHp);p.dmg*=1.2;}},
@@ -2320,7 +2351,7 @@ function openShop(back,m){
   S.mode='shop';S.shopBack=back;
   const g=S.gold,M=MERCH[m.k];let body='';
   if(m.k==='chips'){
-    body+=`<h3>오늘의 품목 <small style="color:var(--muted);font-size:13px">살 때마다 가격 상승</small></h3><div class="grid">${m.stock.map(i=>{const x=STACKS[i],c=stackCost(x);return `<button class="btn" data-k="${i}" ${g<c?'disabled':''}>${x.n}<small>${c}골드${S.buys[x.k]?`, ${S.buys[x.k]}회 구매`:''}</small></button>`;}).join('')}</div>`;
+    body+=`<h3>오늘의 품목 <small style="color:var(--muted);font-size:13px">지금 스탯이 높을수록 비쌈</small></h3><div class="grid">${m.stock.map(i=>{const x=STACKS[i],c=stackCost(x);return `<button class="btn" data-k="${i}" ${g<c?'disabled':''}>${x.n}<small>${c}골드${S.buys[x.k]?`, ${S.buys[x.k]}회 구매`:''}</small></button>`;}).join('')}</div>`;
   }
   if(m.k==='smith'){
     const ups=S.augs.map((a,i)=>[a,i]).filter(([a])=>a.lv<3&&a.t!=='v'&&a.t!=='f');const maxed=S.augs.length-ups.length;
@@ -2353,8 +2384,8 @@ function openShop(back,m){
       return `<div class="uprow"><b>${d.n}</b><button class="btn" data-deal="${id}" ${done||!ok||c>g?'disabled':''}>${done?'완료':c>0?c+'골드':c<0?'+'+(-c)+'골드 받기':'무료'}</button><small>${d.d}</small></div>`;}).join('')}</div>`;
   }
   if(m.k==='vip'){
-    const vc=vipCost();
-    body+=`<p class="sub">살 때마다 가격 1.8배. 슬롯을 차지하지 않음.</p><div class="uplist">${VIPS.filter(v=>!has(v.id)&&augReq(v)).sort((a,b)=>a.id<b.id?-1:1).slice(0,4).map(v=>`<div class="uprow"><b>${v.n}</b><button class="btn" data-v="${v.id}" ${g<vc?'disabled':''}>${vc}골드</button><small>${v.d}</small></div>`).join('')||'<p class="sub">전부 보유</p>'}</div>`;
+    const vc=vipCost(),k=S.keys||0;
+    body+=`<p class="sub">보유 🔑 <b>${k}</b>. 보스를 잡을 때마다 열쇠 1개. 첫 VIP는 열쇠 1개, 두 번째는 2개 (한 판 최대 2개). 이번 판 품목은 아래 3개로 고정. 슬롯을 차지하지 않음.</p><div class="uplist">${vipStock().map(v=>{const own=has(v.id),ok=augReq(v);return `<div class="uprow"><b>${v.n}</b><button class="btn" data-v="${v.id}" ${own||!ok||k<vc?'disabled':''}>${own?'보유':!ok?'조건 미충족':vc===Infinity?'구매 한도':'🔑 '+vc}</button><small>${v.d}</small></div>`;}).join('')}</div>`;
   }
   show(`<div class="shophead"><h2>${M.icon} ${M.n}</h2><button class="btn" id="upBackTop">${S.hub?'상점으로':'떠나기'}</button></div><p class="sub">${M.d}. 보유 <span class="gold">${g} 골드</span>. 게임은 멈춰 있습니다.</p>${body}<button class="btn primary" id="upBack">${S.hub?'상점으로 돌아가기':'떠나기'}</button>`);
   const re=()=>openShop(back,m);
@@ -2368,7 +2399,7 @@ function openShop(back,m){
     if(k==='token'){const c=price(320);if(S.gold<c||p.token)return;S.gold-=c;p.token=true;}
     re();});
   ov.querySelectorAll('[data-deal]').forEach(b=>b.onclick=()=>{const d=DEALS.find(x=>x.id===b.dataset.deal),c=d.cost();if(m.used[d.id]||c>S.gold)return;S.gold-=c;m.used[d.id]=1;const r=d.f();toast(d.n+(r?': '+r:''));re();});
-  ov.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{const v=VIPS.find(x=>x.id===b.dataset.v),c=vipCost();if(S.gold<c||has(v.id))return;S.gold-=c;S.augs.push({...v,lv:3});tagCount();toast('VIP '+v.n);re();});
+  ov.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{const v=VIPS.find(x=>x.id===b.dataset.v),c=vipCost();if((S.keys||0)<c||has(v.id))return;S.keys-=c;S.augs.push({...v,lv:3});tagCount();toast('VIP '+v.n);re();});
   $('upBack').onclick=back;$('upBackTop').onclick=back;
 }
 
