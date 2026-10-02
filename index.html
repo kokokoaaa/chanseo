@@ -678,7 +678,7 @@ const CARDS=[
   {req:()=>moveSpd()<SPEED_CAP,n:'가벼운 발',v:[[2,5,1]],t:v=>`이동 속도 +${v[0]}%`,a:(p,v)=>{p.speed*=1+v[0]/100;}},
   {n:'긴 팔',v:[[4,8,0]],t:v=>`사거리 +${v[0]}%`,a:(p,v)=>{p.range*=1+v[0]/100;}},
   {n:'자석 주머니',v:[[10,20,0]],t:v=>`경험치·골드 흡수 범위 +${v[0]}%`,a:(p,v)=>{p.magnet*=1+v[0]/100;}},
-  {req:()=>S.p.luck<LUCK_CAP,n:'네잎클로버',v:[[.6,1.2,0]],t:v=>`행운 +${v[0]}. 높은 등급과 좋은 수치가 잘 나옵니다`,a:(p,v)=>{p.luck+=v[0];}},
+  {req:()=>S.p.luck<LUCK_CAP,n:'네잎클로버',v:[[.8,1.6,1]],t:v=>`행운 +${v[0]}. 높은 등급과 좋은 수치가 잘 나옵니다`,a:(p,v)=>{p.luck=Math.round((p.luck+v[0])*10)/10;}},
   {cc:1,n:'밑장 빼기',v:[[1.5,3,1]],t:v=>`치명타 확률 +${v[0]}%`,a:(p,v)=>{p.crit+=v[0]/100;}},
   {cm:1,n:'뾰족한 모서리',v:[[8,16,0]],t:v=>`치명타 피해 +${v[0]}%`,a:(p,v)=>{p.critM+=v[0]/100;}},
   {n:'빠른 탄',v:[[6,12,0]],t:v=>`탄속 +${v[0]}%`,a:(p,v)=>{p.bspd*=1+v[0]/100;}},
@@ -703,7 +703,7 @@ const CARDS=[
   {fr:'e',n:'불사의 맹세',v:[[1.5,2.5,1],[1,2,1]],t:v=>`흡혈 +${v[0]}%, 초당 체력 재생 +${v[1]}`,a:(p,v)=>{p.lifesteal+=v[0]/100;p.regen+=v[1];}},
   {fr:'l',n:'분신술',d:'탄환 +1발',f:p=>{p.multi+=1;}},
   {fr:'l',n:'올인',v:[[35,55,0]],t:v=>`공격력 +${v[0]}%, 받는 피해 +50%`,a:(p,v)=>{p.dmg*=1+v[0]/100;p.vuln*=1.5;}},
-  {fr:'l',cc:1,n:'럭키 세븐',v:[[2,3.4,0],[4,6,1]],t:v=>`행운 +${v[0]}, 치명타 확률 +${v[1]}%`,a:(p,v)=>{p.luck+=v[0];p.crit+=v[1]/100;}},
+  {fr:'l',cc:1,n:'럭키 세븐',v:[[2,3.4,1],[4,6,1]],t:v=>`행운 +${v[0]}, 치명타 확률 +${v[1]}%`,a:(p,v)=>{p.luck=Math.round((p.luck+v[0])*10)/10;p.crit+=v[1]/100;}},
   {fr:'l',n:'전설의 패',v:[[12,20,0],[8,12,0]],t:v=>`공격력 +${v[0]}%, 공격 속도 +${v[1]}%`,a:(p,v)=>{p.dmg*=1+v[0]/100;p.rate*=1+v[1]/100;}}
 ];
 // 0~1 굴림. 행운이 높을수록 1 쪽으로 치우침 (행운 5면 평균 0.5 → 0.62, 행운 10이면 0.69)
@@ -2547,13 +2547,13 @@ function renderStats(){
     row('대시 재사용',dashCdVal().toFixed(2)+'초'),
     row('회전 칩',orbitN()+'개'),
     row('흡수 범위',Math.round(p.magnet)),
-    row('행운',Math.min(p.luck,LUCK_CAP)+' <small>/ 30</small>',p.luck>LUCK_CAP?`초과 ${p.luck-LUCK_CAP}은 효과 없음`:''),
+    row('행운',(+Math.min(p.luck,LUCK_CAP).toFixed(1))+' <small>/ 30</small>',p.luck>LUCK_CAP?`초과 ${(p.luck-LUCK_CAP).toFixed(1)}은 효과 없음`:''),
     row('부활 비용',reviveCost()+'골드'),
     row('골드 획득','×'+(p.goldM*(has('bankrupt')?.7:1)).toFixed(2))
   ].join('');
   const syn=Object.keys(TAGS).filter(t=>tag(t)>0).map(t=>{const c=tag(t),T=TAGS[t],on=[1,2,4,6].filter(k=>c>=k&&T['t'+k]).map(k=>T['t'+k]);if(c>=5)on.push(`초과 ${c-4}개: ${T.ex} ×${c-4}`);const L=(n,x)=>`<div style="color:${c>=n?'var(--brass)':'var(--muted)'}">${c>=n?'✔':'·'} ${n}개: ${x}</div>`;
     return row(`${T.n} ${c}`,on.length?(c>=5?'초과 +'+(c-4):on.length+'단계'):'-','',`${T.t1?L(1,T.t1):''}${L(2,T.t2)}${L(4,T.t4)}${L(6,T.t6)}<div style="color:${c>=5?'var(--brass)':'var(--muted)'}">${c>=5?'✔':'·'} 5개부터 1개마다: ${T.ex}</div>`);}).join('')||'<p class="sub">아직 없음</p>';
-  stEl.innerHTML=`<div class="panel"><h2>내 스탯</h2><p class="sub">${CLASSES[S.cls].n}. ${CLASSES[S.cls].passive}. ${Math.floor(S.gt/60)}분 ${Math.floor(S.gt%60)}초, 레벨 ${S.lvl}. 열려 있는 동안 게임이 멈춥니다.</p>
+  stEl.innerHTML=`<div class="panel"><div class="shophead"><h2>내 스탯</h2><button class="btn" id="stCloseTop" aria-label="닫기" style="min-width:48px;font-size:20px">✕</button></div><p class="sub">${CLASSES[S.cls].n}. ${CLASSES[S.cls].passive}. ${Math.floor(S.gt/60)}분 ${Math.floor(S.gt%60)}초, 레벨 ${S.lvl}. 열려 있는 동안 게임이 멈춥니다.</p>
   <h3>직업: ${CLASSES[S.cls].n} <small style="color:var(--muted);font-size:13px">${CLASSES[S.cls].role}</small></h3>
   ${row('고유 능력',' ',CLASSES[S.cls].passive)}${row('레벨당 상승',`${S.lvl-1}회 누적`,CLASSES[S.cls].lvd)}
   <div class="sgrid"><div class="sgrp"><h3>공격</h3>${atk}</div><div class="sgrp"><h3>방어</h3>${def}<h3>유틸</h3>${util}</div></div>
@@ -2561,7 +2561,7 @@ function renderStats(){
   <h3 title="일반 증강은 최대 ${MAXA}개. VIP 증강은 슬롯을 차지하지 않습니다. 슬롯이 가득 차면 합체 가능한 증강이나 강화만 나옵니다">증강 슬롯 ${slotCount()}/${MAXA}${S.augs.length>slotCount()?` (+VIP ${S.augs.length-slotCount()})`:''}</h3>${S.augs.map(a=>row(a.n,(a.t==='v'?'VIP':a.t==='f'?'합체':'★'.repeat(a.lv)),'',`<b style="color:${(TIER[a.t]||{}).col||'var(--brass)'};filter:brightness(1.4)">${(TIER[a.t]||{n:''}).n}</b> · ${a.tags.map(t=>TAGS[t].n).join(', ')}<br>${a.d}${a.u&&a.t!=='v'&&a.t!=='f'?`<br><span style="color:var(--muted)">강화하면: ${a.u}</span>`:''}`)).join('')||'<p class="sub">없음</p>'}
   <div class="btnrow"><button class="btn" id="stSave">저장</button><button class="btn" id="stQuit">저장하고 메인으로</button></div>
   <button class="btn primary" id="stClose">닫기</button></div>`;
-  $('stClose').onclick=toggleStats;
+  $('stClose').onclick=toggleStats;$('stCloseTop').onclick=toggleStats;
   {let pop=document.getElementById('stipPop');if(!pop){pop=document.createElement('div');pop.id='stipPop';document.body.appendChild(pop);}
    const place=(x,ev)=>{pop.innerHTML=x.querySelector('.stip').innerHTML;pop.style.display='block';const r=x.getBoundingClientRect(),pw=pop.offsetWidth,ph=pop.offsetHeight;
      let lx=ev&&ev.clientX!=null?ev.clientX+14:r.left,ly=ev&&ev.clientY!=null?ev.clientY+16:r.bottom+4;if(lx+pw>innerWidth-8)lx=innerWidth-pw-8;if(ly+ph>innerHeight-8)ly=r.top-ph-6;pop.style.left=Math.max(8,lx)+'px';pop.style.top=Math.max(8,ly)+'px';};
