@@ -2102,18 +2102,20 @@ function autoProcess(){
 }
 function autoMoveVec(){
   const p=S.p,N=16,STEP=100,M=70;
+  // 이동 가능 영역: 보스전이면 결계, 아니면 맵 전체
+  const A=S.arena,X0=A?A.x-A.r:0,X1=A?A.x+A.r:WW,Y0=A?A.y-A.r:0,Y1=A?A.y+A.r:WH,CX=(X0+X1)/2,CY=(Y0+Y1)/2,inA=o=>o.x>X0+M&&o.x<X1-M&&o.y>Y0+M&&o.y<Y1-M;
   const near=S.en.filter(e=>e.alive&&d2(e,p)<420*420),wide=S.en.filter(e=>e.alive&&!e.phase&&d2(e,p)<1000*1000);
   const desired=clamp(p.range*.68,85,270),reach=p.range*.88;
   const shots=S.pr.filter(b=>!b.mine&&d2(b,p)<260*260);
   let goal=null;
-  {let bd=600*600;for(const i of S.items){const d=d2(i,p);if(d<bd){bd=d;goal=i;}}}
-  if(!goal){let bd=320*320;for(const q of S.dr){const d=d2(q,p);if(d<bd&&d>p.magnet*p.magnet*.4){bd=d;goal=q;}}}
+  {let bd=600*600;for(const i of S.items){const d=d2(i,p);if(d<bd&&inA(i)){bd=d;goal=i;}}}
+  if(!goal){let bd=320*320;for(const q of S.dr){const d=d2(q,p);if(d<bd&&d>p.magnet*p.magnet*.4&&inA(q)){bd=d;goal=q;}}}
   let best=-1e9,ba=0,danger=0;
   for(const e of near){const d=Math.sqrt(d2(e,p));if(d<160)danger+=1;}
   for(let i=0;i<N;i++){
     const a=i*TAU/N,cx=Math.cos(a),cy=Math.sin(a),tx=p.x+cx*STEP,ty=p.y+cy*STEP;
     let sc=0;
-    const edge=Math.min(tx-M,WW-M-tx,ty-M,WH-M-ty);
+    const edge=Math.min(tx-X0-M,X1-M-tx,ty-Y0-M,Y1-M-ty);
     if(edge<0)sc-=5000-edge*10;else if(edge<250)sc-=(250-edge)*1.2;
     if(inSolid(tx,ty,p.r+6)||inSolid(p.x+cx*STEP*.5,p.y+cy*STEP*.5,p.r+4)||inSolid(p.x+cx*30,p.y+cy*30,p.r+2))sc-=900;
     let mn=420;
@@ -2123,11 +2125,11 @@ function autoMoveVec(){
     if(wide.length){let dn=1e9;for(const e of wide){const d=Math.hypot(e.x-tx,e.y-ty);if(d<dn)dn=d;}if(dn>reach)sc-=(dn-reach)*(danger>=3?1.2:2.6);else sc+=25;}
     for(const b of shots){const d=Math.hypot(b.x-tx,b.y-ty);if(d<60)sc-=(60-d)*3;}
     if(goal&&danger<2){const gd=Math.hypot(goal.x-tx,goal.y-ty);sc+=Math.max(0,300-gd)*.8;}
-    sc+=-Math.hypot(WW/2-tx,WH/2-ty)*.02;
+    sc+=-Math.hypot(CX-tx,CY-ty)*(A?.05:.02);
     if(p.amA!==undefined){let df=Math.abs(a-p.amA);if(df>Math.PI)df=TAU-df;sc-=df*6;}
     if(sc>best){best=sc;ba=a;}
   }
-  if(!wide.length&&!goal&&!shots.length){const a=S.t*.35;ba=Math.atan2(Math.sin(a)+(WH/2-p.y)/1500,Math.cos(a)+(WW/2-p.x)/1500);}
+  if(!wide.length&&!goal&&!shots.length){const a=S.t*.35;ba=Math.atan2(Math.sin(a)+(CY-p.y)/(A?600:1500),Math.cos(a)+(CX-p.x)/(A?600:1500));}
   p.amA=ba;
   const vx=Math.cos(ba),vy=Math.sin(ba);
   if(p.dashCd<=0&&S.en.some(e=>e.alive&&d2(e,p)<(e.r+p.r+26)**2)){p.lmx=vx;p.lmy=vy;dash();}
