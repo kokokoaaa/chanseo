@@ -186,6 +186,14 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 .syntab{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:13.5px;line-height:1.5;color:var(--muted);margin-top:8px}
 .syntab b{font-family:'Do Hyeon',sans-serif;font-weight:400;font-size:16px;color:var(--ivory);white-space:nowrap}
 .syntab .a{color:var(--brass)}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:7px;margin-top:8px}
+.tile{background:rgba(0,0,0,.22);border:1px solid rgba(241,231,207,.12);border-radius:8px;padding:8px 10px;font-size:12.5px;line-height:1.45;color:var(--muted)}
+.tile.on{border-color:rgba(214,169,74,.7);background:rgba(214,169,74,.08)}.tile.done{border-color:#ff9ad0;background:rgba(255,154,208,.08)}
+.tile h4{margin:0 0 5px;font-family:'Do Hyeon',sans-serif;font-weight:400;font-size:16px;color:var(--ivory);display:flex;justify-content:space-between;align-items:center;gap:6px}
+.tile h4 small{font-size:12px;color:var(--muted);font-family:inherit}
+.tile .tr{display:flex;gap:6px;align-items:flex-start;margin-top:2px}.tile .tr i{font-style:normal;flex:none;min-width:20px;text-align:center;border-radius:4px;background:rgba(241,231,207,.1);font-size:11px;padding:0 3px}
+.tile .tr.a{color:var(--brass)}.tile .tr.a i{background:var(--brass);color:#1a1410}
+.tile .parts{color:var(--ivory);margin-bottom:3px}.tile .parts .own{color:var(--brass)}
 .stats{display:grid;grid-template-columns:1fr auto;gap:6px 16px;margin:6px 0 4px;font-size:16px}
 .stats span:nth-child(even){font-family:'Do Hyeon',sans-serif;font-size:19px;color:var(--ivory);text-align:right}
 #statBtn{position:absolute;right:12px;top:10px;z-index:2;background:rgba(4,18,12,.65);color:var(--ivory);border:1px solid var(--brass);border-radius:8px;padding:6px 12px;font-family:'Do Hyeon',sans-serif;font-size:16px;cursor:pointer}
@@ -1705,10 +1713,12 @@ function openNext(){
   if(!S.started){startGame();return;}
   resume();
 }
+// 시너지·합체표는 카드형 타일 그리드로 (활성/보유 중인 항목을 앞으로)
 function synTable(){
-  const rows=Object.keys(TAGS).map(k=>{const T=TAGS[k],c=tag(k);const L=(n,s)=>`<span class="${c>=n?'a':''}">${n}: ${s}</span>`;
-    return `<b>${T.n} ${c}</b><span>${T.t1?L(1,T.t1)+'<br>':''}${L(2,T.t2)}<br>${L(4,T.t4)}<br>${L(6,T.t6)}<br><span class="${c>=5?'a':''}">5개부터 1개마다: ${T.ex}${c>=5?` (현재 +${c-4})`:''}</span></span>`;}).join('');
-  return `<div class="syntab">${rows}</div>`;
+  const ks=Object.keys(TAGS).sort((a,b)=>tag(b)-tag(a));
+  const tiles=ks.map(k=>{const T=TAGS[k],c=tag(k),R=(n,t)=>`<div class="tr ${c>=n?'a':''}"><i>${n}</i><span>${t}</span></div>`;
+    return `<div class="tile ${c>=2?'on':''}"><h4>${T.n}<small>${c}개</small></h4>${T.t1?R(1,T.t1):''}${R(2,T.t2)}${R(4,T.t4)}${R(6,T.t6)}<div class="tr ${c>=5?'a':''}"><i>5+</i><span>1개마다 ${T.ex}${c>=5?` (현재 +${c-4})`:''}</span></div></div>`;}).join('');
+  return `<div class="tgrid">${tiles}</div>`;
 }
 function rollTier(){const L=S.p.luck,r=Math.min(12,S.round);const w=[['s',Math.max(20,58-r*2)],['g',32+L+r],['p',8+L*1.2+r*.8]];let t=w.reduce((a,b)=>a+b[1],0),x=Math.random()*t;for(const [k,v] of w){if((x-=v)<0)return k;}return 's';}
 // 공격력을 직접 올리지 않는 증강 (생존·경제·이동). 선택지마다 공격 증강이 최소 1개는 나오도록 하는 데 씀
@@ -1776,7 +1786,10 @@ function openAug(free,why,fixed,fixedTier){
 }
 function fusionTable(){
   const nm=id=>{const a=AUGS.find(x=>x.id===id);const o=has(id)&&S.augs.some(x=>x.id===id);return `<span style="color:${o?'var(--brass)':'inherit'}">${a.n}</span>`;};
-  return `<div class="syntab">${FUSIONS.map(f=>{const done=S.augs.some(a=>a.id===f.id);return `<b style="color:${done?'#ff9ad0':'var(--ivory)'}">${f.n}</b><span>${nm(f.a)} + ${nm(f.b)}<br>${f.d}</span>`;}).join('')}</div>
+  const own=id=>S.augs.some(x=>x.id===id),score=f=>own(f.id)?3:(own(f.a)?1:0)+(own(f.b)?1:0);
+  const nm2=id=>`<span class="${own(id)?'own':''}">${AUGS.find(x=>x.id===id).n}${own(id)?' ✔':''}</span>`;
+  return `<div class="tgrid">${[...FUSIONS].sort((a,b)=>score(b)-score(a)).map(f=>{const done=own(f.id),half=!done&&(own(f.a)||own(f.b));
+    return `<div class="tile ${done?'done':half?'on':''}"><h4>${f.n}<small>${done?'완성':own(f.a)&&own(f.b)?'합체 가능':half?'재료 1/2':''}</small></h4><div class="parts">${nm2(f.a)} + ${nm2(f.b)}</div>${f.d}</div>`;}).join('')}</div>
   <p class="rule">두 재료를 다 가지고 있으면 레벨업이나 증강 선택 때 10% 확률로 자동 합체 (행운으로 상승). 둘 다 ★3이면 확정 합체. 상점에서 골드로 강제 합체도 가능. 합체하면 슬롯 하나가 비고, 재료 효과는 ★3으로 유지됩니다.</p>`;
 }
 function openStat(keep){
