@@ -711,6 +711,14 @@ const LUCK_CAP=30,LK=(b=0)=>Math.min(LUCK_CAP,Math.max(0,S.p.luck+b));
 // 행운은 '높게 나올 확률'만 올림: 행운 30이면 35% 확률로 범위 위쪽 절반에서 굴리고, 나머지는 행운 없는 것과 같음
 function luckU(bonus=0){return Math.random()<LK(bonus)/LUCK_CAP*.35?.5+Math.random()*.5:Math.random();}
 const GRADE=u=>u>=.9?{n:'최상',col:'#ffd76a'}:u>=.6?{n:'상',col:'#7fc4f2'}:u>=.25?{n:'중',col:'#d8d0bc'}:{n:'하',col:'#9a9284'};
+// % 효과 옆에 실제 수치 변화를 괄호로 표시: 플레이어 사본에 효과를 적용해 전후 값을 비교
+const PV=[['공격 속도','rate',v=>v.toFixed(2)+'회'],['공격력','dmg',v=>v.toFixed(1)],['최대 체력','maxHp',v=>Math.round(v)],['이동 속도','speed',v=>Math.round(v)],['사거리','range',v=>Math.round(v)],
+  ['흡수 범위','magnet',v=>Math.round(v)],['탄속','bspd',v=>Math.round(v)],['치명타 확률','crit',v=>Math.round(v*1000)/10+'%'],['치명타 피해','critM',v=>Math.round(v*100)+'%'],['회피','dodge',v=>Math.round(v*1000)/10+'%'],
+  ['흡혈','lifesteal',v=>Math.round(v*1000)/10+'%'],['받는 피해','vuln',v=>'×'+v.toFixed(2)],['대시 재사용','dashMul',v=>(dashCdVal()/S.p.dashMul*v).toFixed(2)+'초'],['회전 칩 피해','orbM',v=>'×'+v.toFixed(2)],
+  ['회전 반경','orbR',v=>'×'+v.toFixed(2)],['골드 획득','goldM',v=>'×'+v.toFixed(2)],['경험치 획득','xpM',v=>'×'+(v||1).toFixed(2)]];
+function withActual(desc,f){if(!S||!S.p||!f)return desc.split(', ').join('<br>');const c={...S.p};try{f(c);}catch(e){}
+  return desc.split(', ').map(line=>{if(!line.includes('%'))return line;const m=PV.find(([k])=>line.startsWith(k));if(!m)return line;const [,key,fmt]=m,a=S.p[key]??(key==='xpM'?1:0),b=c[key]??a;if(a===b)return line;
+    return `${line} <small style="opacity:.65">(${fmt(a)} → ${fmt(b)})</small>`;}).join('<br>');}
 function rollCard(T,r,bonus){if(!T.v)return {...T,r:T.fr||r,u:null};const k=T.fr?1:RMUL[r],u=luckU(bonus);
   const rng=T.v.map(([lo,hi,dp])=>{const q=Math.pow(10,dp);return [Math.round(lo*k*q)/q,Math.round(hi*k*q)/q,q];});
   const v=rng.map(([lo,hi,q])=>Math.round((lo+(hi-lo)*u)*q)/q);
@@ -1838,7 +1846,7 @@ function openStat(keep){
   const cost=price(6+S.srr*4),allC=price(60+S.lvl*12),boostC=price(50+S.lvl*6),next=5-(S.picks%5);
   const bossSt=S.bossStat;S.bossStat=false;
   show(`<h2>${bossSt?'보스 보상':'레벨 '+(S.lvl-S.pendingLv)}</h2><p class="sub">스탯 하나 고르기. ${!augReady()?`증강이 모두 최대 강화라 레벨업마다 스탯만 받습니다`:`다음 증강까지 ${next}레벨${slotCount()>=MAXA?' (슬롯이 가득 차서 강화·합체로 나와요)':''}`}${bossSt?'. 강화할 증강이 없어서 고급 스탯 카드로 대신':''}. 보유 <span class="gold">${S.gold} 골드</span></p>
-  <div class="cards">${cards.map((c,i)=>{const R=RAR[c.r];return `<button class="card rar-${c.r}" data-i="${i}" style="--rc:${R.col}"><span class="rr">${c.r==='l'?'✨ ':''}${R.n}${c.u!=null?` · <span style="color:${GRADE(c.u).col}">${GRADE(c.u).n}</span>`:''}</span><b>${c.n}</b>${c.d.split(', ').join('<br>')}</button>`;}).join('')}</div>
+  <div class="cards">${cards.map((c,i)=>{const R=RAR[c.r];return `<button class="card rar-${c.r}" data-i="${i}" style="--rc:${R.col}"><span class="rr">${c.r==='l'?'✨ ':''}${R.n}${c.u!=null?` · <span style="color:${GRADE(c.u).col}">${GRADE(c.u).n}</span>`:''}</span><b>${c.n}</b>${withActual(c.d,c.f)}</button>`;}).join('')}</div>
   <div class="btnrow">
     <button class="btn" id="reroll" ${S.gold<cost?'disabled':''}>다시 뽑기<small>${cost}골드</small></button>
     <button class="btn" id="boost" ${S.gold<boostC?'disabled':''}>고급 카드로 다시 뽑기<small>${boostC}골드, 높은 등급 확률 크게 증가</small></button>
@@ -2353,7 +2361,7 @@ function openShop(back,m){
   S.mode='shop';S.shopBack=back;
   const g=S.gold,M=MERCH[m.k];let body='';
   if(m.k==='chips'){
-    body+=`<h3>오늘의 품목 <small style="color:var(--muted);font-size:13px">지금 스탯이 높을수록 비쌈</small></h3><div class="grid">${m.stock.map(i=>{const x=STACKS[i],c=stackCost(x);return `<button class="btn" data-k="${i}" ${g<c?'disabled':''}>${x.n}<small>${c}골드${S.buys[x.k]?`, ${S.buys[x.k]}회 구매`:''}</small></button>`;}).join('')}</div>`;
+    body+=`<h3>오늘의 품목 <small style="color:var(--muted);font-size:13px">지금 스탯이 높을수록 비쌈</small></h3><div class="grid">${m.stock.map(i=>{const x=STACKS[i],c=stackCost(x);return `<button class="btn" data-k="${i}" ${g<c?'disabled':''}>${withActual(x.n,x.f)}<small>${c}골드${S.buys[x.k]?`, ${S.buys[x.k]}회 구매`:''}</small></button>`;}).join('')}</div>`;
   }
   if(m.k==='smith'){
     const ups=S.augs.map((a,i)=>[a,i]).filter(([a])=>a.lv<3&&a.t!=='v'&&a.t!=='f');const maxed=S.augs.length-ups.length;
