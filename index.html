@@ -718,7 +718,8 @@ const has=id=>L(id)>0;
 // 값이 ★ 따라 줄어드는 항목(재사용 대기, N번째 공격 등)은 작을수록 좋으므로 q로 나눔. 정수 항목은 반올림
 const Qf=id=>(S.oq&&S.oq[id])||1;
 const lv3=(id,a,b,c)=>{const v=[0,a,b,c][L(id)],q=Qf(id);if(!v||q===1)return v;const down=a>c,r=down?v/q:v*q;return Number.isInteger(a)&&Number.isInteger(b)&&Number.isInteger(c)?Math.max(down?2:1,Math.round(r)):r;};
-function rollQ(){return Math.round((.85+.4*luckU())*100)/100;}
+// 증강 랜덤 배율은 끔: 증강 설명에 적힌 수치가 그대로 적용됨 (랜덤·등급은 레벨업 스탯 카드에만). 다시 켜려면 아래 줄을 .85+.4*luckU()로
+function rollQ(){return 1;}
 const QGRADE=q=>GRADE((q-.85)/.4);
 // 스탯형 증강(f)의 이로운 변화에만 q를 곱함. 곱셈/덧셈 여부는 값을 2배로 한 사본과 비교해서 판별
 const LOWER_BETTER=new Set(['dashMul','vuln']),Q_SKIP=new Set(['hp','multi','pierce']);
@@ -1735,7 +1736,7 @@ function augOptions(tier){
   return out.map(a=>({...a,q:rollQ()}));
 }
 function augHtml(a,i){
-  if(a.up){const o=a.ref;return `<button class="card" data-i="${i}" style="--rc:#c99223"><span class="rr">무료 강화</span><b>${o.n}</b><span class="stars">${'★'.repeat(o.lv)} → ${'★'.repeat(o.lv+1)}</span>${o.q&&o.q!==1?`<span style="color:${QGRADE(o.q).col};font-size:12px">효과 ×${o.q.toFixed(2)} 유지</span>`:''}<span class="tip">${o.d}<br><br><span style="color:var(--brass)">강화하면:</span> ${o.u||''}</span></button>`;}
+  if(a.up){const o=a.ref;return `<button class="card" data-i="${i}" style="--rc:#c99223"><span class="rr">무료 강화</span><b>${o.n}</b><span class="stars">${'★'.repeat(o.lv)} → ${'★'.repeat(o.lv+1)}</span><span class="tip">${o.d}<br><br><span style="color:var(--brass)">강화하면:</span> ${o.u||''}</span></button>`;}
   const T=TIER[a.t],cnt={};for(const t of a.tags)cnt[t]=(cnt[t]||0)+1;
   let lines='';
   const chips=Object.keys(cnt).map(t=>{const cur=tag(t),aft=cur+cnt[t],D=TAGS[t];let up='';
@@ -1746,7 +1747,7 @@ function augHtml(a,i){
     return `<span class="chip ${up?'on':''}">${D.n} ${cur}→${aft}</span>`;}).join('');
   const pf=partnerOf(a.id),pn=pf?AUGS.find(x=>x.id===(pf.a===a.id?pf.b:pf.a)).n:'';
   const fz=pf?`<span class="ta fz">🔗 ${pn}와 합체 → ${pf.n}: ${pf.d}${a.fuseNow?' (고르면 바로 합체)':''}</span>`:'';
-  return `<button class="card aug" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}${pf?' 🔗':''}${a.q?` · <span style="color:${QGRADE(a.q).col}">효과 ×${a.q.toFixed(2)}</span>`:''}</span><b>${a.n}</b><span class="chips">${chips}</span><span class="tip">${a.d}${lines||fz?'<br>':''}${lines}${fz}</span></button>`;
+  return `<button class="card aug" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}${pf?' 🔗':''}</span><b>${a.n}</b><span class="chips">${chips}</span><span class="tip">${a.d}${lines||fz?'<br>':''}${lines}${fz}</span></button>`;
 }
 function bindPeek(){
   ov.querySelectorAll('.card').forEach(c=>{let t=null;
@@ -1770,7 +1771,7 @@ function openAug(free,why,fixed,fixedTier){
   if(!opts.length){const g=price(120);S.gold+=g;toast(`슬롯 가득, 강화할 것도 없음. ${g} 골드 지급`);openNext();return;}
   const cost=price(18);
   show(`<h2>증강 선택</h2><p class="sub">${why}. 슬롯 <b style="color:${full?'#ff9ad0':'var(--ivory)'}">${slotCount()}/${MAXA}</b>. ${full?'슬롯이 가득 차서 <b style="color:#ff9ad0">합체할 수 있는 증강</b> 또는 무료 강화만 나옵니다.':`이번엔 <b style="color:${TIER[tier].col};filter:brightness(1.5)">${TIER[tier].n}</b> 등급.`}</p>
-  <p class="hint">증강마다 효과 배율(×0.85~1.25)이 붙어 수치에 곱해져요. 행운이 높을수록 높은 배율이 잘 나와요. 새 증강은 ★2로 시작해요. PC는 카드에 마우스를 올리면, 모바일은 꾹 누르면 설명이 보여요</p>
+  <p class="hint">새 증강은 ★2로 시작해요. PC는 카드에 마우스를 올리면, 모바일은 꾹 누르면 설명이 보여요</p>
   <div class="cards">${opts.map(augHtml).join('')}</div>
   <button class="btn ghost" id="reroll" ${!free&&S.gold<cost?'disabled':''}>다시 뽑기<small>${free?(free===true?(META.sk.reroll?'무료 2회':'무료 1회'):'무료 '+free+'회'):cost+'골드 (보유 '+S.gold+')'}</small></button>
   <button class="btn ghost" data-stats>내 스탯 보기</button>
@@ -1934,7 +1935,7 @@ function startScreen(){
     <li><b>성장</b>레벨업마다 스탯 카드와 직업별 기본 능력치 상승, 주변 충격파. 적이 떨군 파란 경험치 구슬을 주워야 레벨업. 골드는 가끔만 떨어짐. 5레벨마다 증강 (새 증강은 ★2로 시작). 증강 슬롯 6칸, 정해진 조합은 합체</li>
     <li><b>영구 강화</b>게임이 끝나면 점수에 따라 메달. 메인 화면에서 메달로 영구 능력치와 기술 구매</li>
     <li><b>시너지</b>태그 9종, 같은 태그 2, 4, 6개에서 발동, 5개부터 초과 보너스</li>
-    <li><b>랜덤 수치</b>스탯 카드는 뽑힐 때마다 수치가 범위 안에서 굴려짐 (하·중·상·최상). 증강은 품질 ×0.85~1.25가 붙어 효과에 곱해짐. 행운이 높을수록 좋은 값이 잘 나옴</li>
+    <li><b>랜덤 수치</b>레벨업 스탯 카드는 등급(일반~전설)과 수치가 매번 굴려지고 하·중·상·최상으로 표시됨. 행운이 높을수록 높은 등급과 좋은 수치가 잘 나옴. 증강은 설명에 적힌 수치 그대로</li>
     <li><b>이벤트</b>1분마다 무작위: 대군 습격, 정예 사냥, 보물 고블린, 고대 제단(30초 축복), 붉은 달(위험하지만 보상 2배)</li>
     <li><b>정예 특성</b>2분 30초부터 정예에 신속·거대·분열·폭발·포격 중 하나가 붙음. 멧돼지는 주황 선으로 예고 후 돌진</li>
     <li><b>보스 상점</b>보스 1~3을 잡으면 상점이 열려 골드를 쓸 수 있음 (총 3번). 마지막 보스를 잡으면 남은 골드는 10골드당 1점</li>
@@ -2149,7 +2150,7 @@ function continueGame(d){
   for(const k of PKEYS)if(d.p[k]!==undefined)S.p[k]=d.p[k];
   for(const k of SKEYS)if(d.s[k]!==undefined)S[k]=d.s[k];
   S.st=d.st||S.st;
-  S.augs=d.augs.map(([id,lv,q])=>{const f=FUSIONS.find(x=>x.id===id);if(f)return fusionObj(f);const a=AUGS.find(x=>x.id===id)||VIPS.find(x=>x.id===id);return a?{...a,lv,q:q||1}:null;}).filter(Boolean);
+  S.augs=d.augs.map(([id,lv,q])=>{const f=FUSIONS.find(x=>x.id===id);if(f)return fusionObj(f);const a=AUGS.find(x=>x.id===id)||VIPS.find(x=>x.id===id);return a?{...a,lv,q:1}:null;}).filter(Boolean);
   tagCount();S.round=diffAt(S.gt);
   S.started=true;const p=S.p;p.x=WW/2;p.y=WH/2;p.inv=2;p.alive=true;p.barrier=barrierMax();
   S.mode='play';hide();toast('이어하기');
@@ -2357,7 +2358,7 @@ function renderStats(){
   const p=S.p,raw=rawRate(),rate=pRate(),ar=armorEff(),red_=ar/(ar+100),n=p.multi+(tag('card')>=6?1:0);
   const pct=v=>(v*100).toFixed(v<.1&&v>0?1:0)+'%';
   const tip=k=>STAT_TIP[k.replace(/ \d+$/,'')]||'';
-  const row=(k,v,note)=>{const t=tip(k);return `<div class="sitem"${t?' data-tip="1"':''}><div class="srow"><span>${k}${t?'<span class="qi">ⓘ</span>':''}</span><b>${v}</b></div>${note?`<div class="snote">${note}</div>`:''}${t?`<div class="stip">${t}</div>`:''}</div>`;};
+  const row=(k,v,note,ct)=>{const t=ct||tip(k);return `<div class="sitem"${t?' data-tip="1"':''}><div class="srow"><span>${k}${t?'<span class="qi">ⓘ</span>':''}</span><b>${v}</b></div>${note?`<div class="snote">${note}</div>`:''}${t?`<div class="stip">${t}</div>`:''}</div>`;};
   const dps=pDmg()*rate*n*(1+critC()*(critMul()-1));
   const bonus=[];
   if(tag('house')>=2)bonus.push(`하우스 골드 보너스 +${Math.round(Math.min(.6,Math.floor(S.gold/50)*.04)*100)}%`);
@@ -2393,14 +2394,14 @@ function renderStats(){
     row('부활 비용',reviveCost()+'골드'),
     row('골드 획득','×'+(p.goldM*(has('bankrupt')?.7:1)).toFixed(2))
   ].join('');
-  const syn=Object.keys(TAGS).filter(t=>tag(t)>0).map(t=>{const c=tag(t),T=TAGS[t],on=[1,2,4,6].filter(k=>c>=k&&T['t'+k]).map(k=>T['t'+k]);if(c>=5)on.push(`초과 ${c-4}개: ${T.ex} ×${c-4}`);return row(`${T.n} ${c}`,on.length?(c>=5?'초과 +'+(c-4):on.length+'단계'):'-',on.join(' / '));}).join('')||'<p class="sub">아직 없음</p>';
+  const syn=Object.keys(TAGS).filter(t=>tag(t)>0).map(t=>{const c=tag(t),T=TAGS[t],on=[1,2,4,6].filter(k=>c>=k&&T['t'+k]).map(k=>T['t'+k]);if(c>=5)on.push(`초과 ${c-4}개: ${T.ex} ×${c-4}`);const L=(n,x)=>`<div style="color:${c>=n?'var(--brass)':'var(--muted)'}">${c>=n?'✔':'·'} ${n}개: ${x}</div>`;
+    return row(`${T.n} ${c}`,on.length?(c>=5?'초과 +'+(c-4):on.length+'단계'):'-','',`${T.t1?L(1,T.t1):''}${L(2,T.t2)}${L(4,T.t4)}${L(6,T.t6)}<div style="color:${c>=5?'var(--brass)':'var(--muted)'}">${c>=5?'✔':'·'} 5개부터 1개마다: ${T.ex}</div>`);}).join('')||'<p class="sub">아직 없음</p>';
   stEl.innerHTML=`<div class="panel"><h2>내 스탯</h2><p class="sub">${CLASSES[S.cls].n}. ${CLASSES[S.cls].passive}. ${Math.floor(S.gt/60)}분 ${Math.floor(S.gt%60)}초, 레벨 ${S.lvl}. 열려 있는 동안 게임이 멈춥니다.</p>
   <h3>직업: ${CLASSES[S.cls].n} <small style="color:var(--muted);font-size:13px">${CLASSES[S.cls].role}</small></h3>
-  ${row('고유 능력',' ',CLASSES[S.cls].passive)}${row('레벨당 상승',`${S.lvl-1}회 누적`,CLASSES[S.cls].lvd)}${row('선호 시너지',CLASSES[S.cls].fav.map(t=>TAGS[t].n).join(', '),`증강 선택지에 자주 나옴. 잘 안 나옴: ${CLASSES[S.cls].dis.map(t=>TAGS[t].n).join(', ')||'없음'}`)}${row('전용 증강',AUGS.filter(a=>a.cls===S.cls).length+'종',AUGS.filter(a=>a.cls===S.cls).map(a=>a.n+(has(a.id)?' ✔':'')).join(', '))}
+  ${row('고유 능력',' ',CLASSES[S.cls].passive)}${row('레벨당 상승',`${S.lvl-1}회 누적`,CLASSES[S.cls].lvd)}
   <div class="sgrid"><div class="sgrp"><h3>공격</h3>${atk}</div><div class="sgrp"><h3>방어</h3>${def}<h3>유틸</h3>${util}</div></div>
   <h3>시너지</h3>${syn}
-  <h3>증강 슬롯 ${slotCount()}/${MAXA}${S.augs.length>slotCount()?` (+VIP ${S.augs.length-slotCount()})`:''}</h3><p class="sub">${S.augs.map(a=>a.n+' '+(a.t==='v'?'VIP':a.t==='f'?'(합체)':'★'.repeat(a.lv))+(a.q&&a.q!==1?` <span style="color:${QGRADE(a.q).col}">×${a.q.toFixed(2)}</span>`:'')).join(', ')||'없음'}</p>
-  <p class="rule">상한: 치명타 확률 100%, 치명타 피해 500%, 회피 60%, 공격 속도 초당 ${RATE_CAP()}회, 이동 속도 230. 넘는 수치는 버려지지 않고 변환됩니다. 치명타 확률 1%당 치명타 피해 +0.5% (최대 500%까지), 상한에 닿은 치명타 스탯은 카드·증강·상인에서 더 나오지 않습니다, 회피 1%당 방어력 +2, 공격 속도는 넘은 비율의 절반만큼 공격력이 오릅니다. 이동 속도는 10 넘을 때마다 공격 속도 +3%. 방어력 100이면 받는 피해 절반.</p>
+  <h3 title="일반 증강은 최대 ${MAXA}개. VIP 증강은 슬롯을 차지하지 않습니다. 슬롯이 가득 차면 합체 가능한 증강이나 강화만 나옵니다">증강 슬롯 ${slotCount()}/${MAXA}${S.augs.length>slotCount()?` (+VIP ${S.augs.length-slotCount()})`:''}</h3>${S.augs.map(a=>row(a.n,(a.t==='v'?'VIP':a.t==='f'?'합체':'★'.repeat(a.lv)),'',`<b style="color:${(TIER[a.t]||{}).col||'var(--brass)'};filter:brightness(1.4)">${(TIER[a.t]||{n:''}).n}</b> · ${a.tags.map(t=>TAGS[t].n).join(', ')}<br>${a.d}${a.u&&a.t!=='v'&&a.t!=='f'?`<br><span style="color:var(--muted)">강화하면: ${a.u}</span>`:''}`)).join('')||'<p class="sub">없음</p>'}
   <div class="btnrow"><button class="btn" id="stSave">저장</button><button class="btn" id="stQuit">저장하고 메인으로</button></div>
   <button class="btn primary" id="stClose">닫기</button></div>`;
   $('stClose').onclick=toggleStats;
