@@ -781,14 +781,14 @@ function sprite(cls,a,t,ap,flash){
 return {canvas:sc,draw:sprite,PAL};
 })();
 const CLASSES={
-  knight:{n:'기사',role:'근접 탱커',d:'짧은 검기를 휘두르는 튼튼한 전사',passive:'방패 막기: 15% 확률로 받는 피해 무효. 4번째 공격마다 주변 회전 베기 (공격력 60%)',atk:.3,
+  knight:{n:'기사',role:'근접 탱커',d:'짧은 검기를 휘두르는 튼튼한 전사',passive:'방패 막기: 15% 확률로 받는 피해 무효. 4번째 공격마다 주변 회전 베기 (공격력 50%)',atk:.3,
     stats:{hp:200,maxHp:200,speed:180,dmg:15,rate:1.9,range:185,bspd:430,armor:15,block:.15},fav:['guard','curse','blitz'],dis:['poison'],
     cards:['날 선 패','날카로운 모서리','빠른 손','뾰족한 모서리','두둑한 배짱','방탄 칩'],lvd:'체력 +2, 방어력 +0.3, 공격력 +1%',lv:p=>{p.maxHp+=2;p.hp+=2;p.armor+=.3;p.dmg*=1.01;}},
   mage:{n:'마법사',role:'광역 화력',d:'맞으면 터지는 화염구를 쏘는 마법사',passive:'화염 폭발: 화염구가 맞은 자리에 작은 폭발',atk:.35,
     stats:{hp:115,maxHp:115,speed:185,dmg:12,rate:1.8,range:320,bspd:380},fav:['poison','roulette','dice'],dis:['guard'],
     cards:['날 선 패','날카로운 모서리','긴 팔','뾰족한 모서리','로열 플러시','분신술'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmg*=1.008;p.maxHp+=1;p.hp+=1;}},
   archer:{n:'궁수',role:'원거리 연사',d:'멀리서 빠르게 화살을 쏘는 사수',passive:'관통 화살: 기본 관통 1, 치명타 +10%',atk:.28,
-    stats:{hp:130,maxHp:130,speed:200,dmg:7,rate:2.8,range:390,bspd:720,pierce:1,crit:.15},fav:['card','jackpot','dice'],dis:['curse'],
+    stats:{hp:130,maxHp:130,speed:200,dmg:8,rate:2.8,range:390,bspd:720,pierce:1,crit:.15},fav:['card','jackpot','dice'],dis:['curse'],
     cards:['빠른 손','긴 팔','관통 탄','밑장 빼기','분신술','럭키 세븐'],lvd:'공격 속도 +0.4%, 공격력 +0.4%, 체력 +1',lv:p=>{p.rate*=1.004;p.dmg*=1.004;p.maxHp+=1;p.hp+=1;}},
   rogue:{n:'도적',role:'회피 암살',d:'단검을 난사하며 치고 빠지는 도적',passive:'그림자: 회피 15%, 대시 재사용 −30%',atk:.2,
     stats:{hp:120,maxHp:120,speed:225,dmg:7.5,rate:4.2,range:235,bspd:600,dodge:.15,dashMul:.7,crit:.12,critM:2.3},fav:['blitz','poison','curse'],dis:['guard'],
@@ -941,13 +941,16 @@ const BOSSES=[
 ];
 function spawnBoss(i){
   if(S.ev)endEvent(false);S.evBanner=null;
-  S.bossI=i;S.tele=[];S.hz=[];
+  S.bossI=i;S.tele=[];S.hz=[];S.bStart=S.bt||0;
   const a=Math.random()*TAU;spawnAt(BOSSES[i].type,clamp(S.p.x+Math.cos(a)*300,60,WW-60),clamp(S.p.y+Math.sin(a)*300,60,WH-60));
   const b=S.en[S.en.length-1];b.bk=0;go(b,'intro');S.boss=b;
+  // 보스 결계: 플레이어 위치를 중심으로 원형 벽이 좁혀짐. 분노(체력 50%) 시 한 번 더 좁아짐
+  {const tr=clamp(Math.min(W,H)*.55,300,460),cx=clamp(S.p.x,tr+20,WW-tr-20),cy=clamp(S.p.y,tr+20,WH-tr-20);S.arena={x:cx,y:cy,r:tr*1.8,tr};
+   const d=Math.hypot(b.x-cx,b.y-cy);if(d>tr*.7){b.x=cx+(b.x-cx)/d*tr*.7;b.y=cy+(b.y-cy)/d*tr*.7;}}
   S.shake=.5;S.bannerT=3.2;
 }
 function bossDown(e){
-  S.shake=.5;S.st.bosses=(S.st.bosses||0)+1;for(const c of S.dr){if(c.xp)gainXp(c.v);else addGold(c.v);}S.dr=[];S.bossI=-1;S.boss=null;S.tele=[];S.hz=[];S.pr=S.pr.filter(b=>b.mine);S.chap++;
+  S.shake=.5;S.st.bosses=(S.st.bosses||0)+1;(S.st.btimes=S.st.btimes||[]).push(Math.round(((S.bt||0)-(S.bStart||0))*10)/10);for(const c of S.dr){if(c.xp)gainXp(c.v);else addGold(c.v);}S.dr=[];S.bossI=-1;S.boss=null;S.arena=null;S.tele=[];S.hz=[];S.pr=S.pr.filter(b=>b.mine);S.chap++;
   const p=S.p;p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.3);
   if(S.chap>=CHAPTERS){S.win=true;S.winT=2.5;p.inv=99;toast('🏆 하우스를 무너뜨렸다!');}
   else{S.bonusAug++;S.shopPend=true;toast('보스 격파! 보상 후 상점이 열립니다');}
@@ -962,12 +965,13 @@ function keepDist(e,o,dt,lo,hi){const {p,d,sp}=o;if(d<lo)stepTo(e,e.x*2-p.x,e.y*
 const nearP=r=>{const p=S.p,a=Math.random()*TAU,k=Math.random()*r;return [clamp(p.x+Math.cos(a)*k,30,WW-30),clamp(p.y+Math.sin(a)*k,30,WH-30)];};
 function bossAI(e,dt){
   const p=S.p,T=ET[e.type],dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1,ph2=e.hp<e.maxHp*.5;
-  if(ph2&&!e.ph2){e.ph2=true;S.shake=.4;toast(`${T.n} 분노! 패턴이 빨라집니다`);S.rings.push({x:e.x,y:e.y,r:e.r,max:e.r+140,life:.5,col:'#ff6060'});}
+  if(ph2&&!e.ph2){e.ph2=true;if(S.arena)S.arena.tr*=.8;S.shake=.4;toast(`${T.n} 분노! 패턴이 빨라집니다`);S.rings.push({x:e.x,y:e.y,r:e.r,max:e.r+140,life:.5,col:'#ff6060'});}
   if(e.slowT>0)e.slowT-=dt;
   const sp=e.spd*(e.slowT>0?.6:1)*(ph2?1.2:1);
   e.bt+=dt;
   BAI[e.type](e,dt,{p,d,dx,dy,sp,ph2});
   e.x=clamp(e.x,40,WW-40);e.y=clamp(e.y,40,WH-40);
+  if(S.arena){const A=S.arena,ax=e.x-A.x,ay=e.y-A.y,ad=Math.hypot(ax,ay)||1,m=Math.max(20,A.r-e.r);if(ad>m){e.x=A.x+ax/ad*m;e.y=A.y+ay/ad*m;}}
   if(p.alive&&d<e.r+p.r+3&&e.cd<=0){hurtP(e.dmg,e);e.cd=.9;}
 }
 const BAI={
@@ -1157,7 +1161,7 @@ function playerFire(tg){
   const base=Math.atan2(tg.y-p.y,tg.x-p.x),d=pDmg()*mult*shock;p.aimA=base;p.atkT=CLASSES[S.cls].atk;p.face=Math.cos(base)>=0?1:-1;
   const blife=S.cls==='knight'||S.cls==='rogue'?Math.max(.3,p.range*1.15/p.bspd):1.2;
   if(has('m_meteor')&&p.shots%lv3('m_meteor',10,8,6)===0){explode(tg.x,tg.y,120,pDmg()*6,'#ff5a2a');S.shake=Math.max(S.shake,.18);}
-  if(S.cls==='knight'){const ev=has('k_cleave')?lv3('k_cleave',3,3,2):4;if(p.shots%ev===0){const rad=95*(has('k_cleave')?1.3:1),k=has('k_cleave')?lv3('k_cleave',1.2,1.6,2):.6;p.swingT=.25;S.rings.push({x:p.x,y:p.y,r:20,max:rad,life:.25,col:'#cfe3ff'});for(const e of S.en)if(e.alive&&!e.phase&&d2(e,p)<(rad+e.r)**2)dmgE(e,pDmg()*mult*shock*k,'#cfe3ff');}
+  if(S.cls==='knight'){const ev=has('k_cleave')?lv3('k_cleave',3,3,2):4;if(p.shots%ev===0){const rad=95*(has('k_cleave')?1.3:1),k=has('k_cleave')?lv3('k_cleave',1.2,1.6,2):.5;p.swingT=.25;S.rings.push({x:p.x,y:p.y,r:20,max:rad,life:.25,col:'#cfe3ff'});for(const e of S.en)if(e.alive&&!e.phase&&d2(e,p)<(rad+e.r)**2)dmgE(e,pDmg()*mult*shock*k,'#cfe3ff');}
     if(has('k_smite')&&p.shots%lv3('k_smite',6,5,4)===0){explode(tg.x,tg.y,100,pDmg()*4+armorEff(),'#fff3c4');S.rings.push({x:tg.x,y:tg.y,r:4,max:30,life:.4,col:'#ffffff'});S.shake=Math.max(S.shake,.12);}}
   const x7=has('f_lucky777')&&p.shots%J()===0;
   for(let i=0;i<n;i++){const an=base+(i-(n-1)/2)*.13;pBullet(p.x,p.y,an,d*(big?3:1),{roll,big,x7,life:blife,pierce:p.pierce+(big?3:0),r:big||shock>1||x7?6:(S.cls==='knight'?7:S.cls==='mage'?5:3)});
@@ -1285,6 +1289,7 @@ function update(dt){
       if(p.dashT<=0)dashEnd();
     }else{const sp=Math.min(SPEED_CAP,moveSpd())*(S.buffT.slow>0?.6:1);p.x+=mx*sp*dt;p.y+=my*sp*dt;}
     p.x=clamp(p.x,p.r+10,WW-p.r-10);p.y=clamp(p.y,p.r+10,WH-p.r-10);pushOut(p,p.r);
+    if(S.arena){const A=S.arena;A.r+=(A.tr-A.r)*Math.min(1,dt*1.5);const ax=p.x-A.x,ay=p.y-A.y,ad=Math.hypot(ax,ay)||1,m=A.r-p.r-4;if(ad>m){p.x=A.x+ax/ad*m;p.y=A.y+ay/ad*m;}}
     if(p.regen)p.hp=Math.min(p.maxHp,p.hp+p.regen*dt);
     p.noHitT+=dt;{const bm=barrierMax();if(p.barrier>bm)p.barrier=bm;if(p.noHitT>(has('f_insure')?1.5:3)&&p.barrier<bm)p.barrier=Math.min(bm,p.barrier+bm*.35*dt);}
     if(S.buffT.jack>0)p.inv=Math.max(p.inv,.05);
@@ -1476,6 +1481,8 @@ function draw(){
   ctx.setTransform(DPR*SC,0,0,DPR*SC,rand(-sh,sh)*DPR,rand(-sh,sh)*DPR);
   ctx.translate(-camX,-camY);
   drawWorldBg();
+  if(S.arena){const A=S.arena;ctx.save();ctx.fillStyle='rgba(40,0,0,.62)';ctx.beginPath();ctx.rect(camX-60,camY-60,W+120,H+120);ctx.arc(A.x,A.y,A.r,0,TAU,true);ctx.fill();
+    ctx.strokeStyle=`rgba(255,${S.boss&&S.boss.ph2?60:120},60,${.7+Math.sin(S.t*6)*.2})`;ctx.lineWidth=5;ctx.setLineDash([18,10]);ctx.lineDashOffset=-S.t*40;ctx.beginPath();ctx.arc(A.x,A.y,A.r,0,TAU);ctx.stroke();ctx.restore();}
   for(const z of S.zones){if(z.kind==='hole'){const g=ctx.createRadialGradient(z.x,z.y,4,z.x,z.y,z.r);g.addColorStop(0,'rgba(0,0,0,.95)');g.addColorStop(.6,'rgba(60,20,90,.55)');g.addColorStop(1,'rgba(60,20,90,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(z.x,z.y,z.r,0,TAU);ctx.fill();
       ctx.strokeStyle='rgba(200,140,255,.6)';ctx.lineWidth=2;for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(z.x,z.y,z.r*(.35+i*.2),S.t*4+i,S.t*4+i+2.2);ctx.stroke();}continue;}
     ctx.globalAlpha=Math.min(.55,z.life*.4);ctx.fillStyle=z.kind==='fire'?'#ff7a2a':'#6cc04a';ctx.beginPath();ctx.arc(z.x,z.y,z.r,0,TAU);ctx.fill();}ctx.globalAlpha=1;
@@ -1560,6 +1567,7 @@ function drawMini(){
   mctx.fillStyle='#ff6060';for(const e of S.en){if(e.boss)continue;const z=e.elite?7:4;mctx.fillRect(tx(e.x)-z/2,ty(e.y)-z/2,z,z);}
   for(const it of S.items){mctx.fillStyle=it.k==='heal'?'#7be08f':'#5fa8e8';mctx.beginPath();mctx.arc(cl(tx(it.x)),cl(ty(it.y)),6,0,TAU);mctx.fill();}
   if(S.merch){mctx.fillStyle='#d6a94a';mctx.fillRect(cl(tx(S.merch.x))-11,cl(ty(S.merch.y))-8,22,16);mctx.font='14px sans-serif';mctx.textAlign='center';mctx.textBaseline='middle';mctx.fillText(MERCH[S.merch.k].icon,cl(tx(S.merch.x)),cl(ty(S.merch.y)));}
+  if(S.arena){mctx.strokeStyle='#ff6a4a';mctx.lineWidth=2;mctx.beginPath();mctx.arc(tx(S.arena.x),ty(S.arena.y),S.arena.r*k,0,TAU);mctx.stroke();}
   if(evOn('shrine')){mctx.fillStyle='#9fd3ff';mctx.beginPath();mctx.arc(cl(tx(S.ev.x)),cl(ty(S.ev.y)),9,0,TAU);mctx.fill();}
   for(const e of S.en)if(e.hunt||e.type==='goblin'){mctx.fillStyle=e.hunt?'#ffd76a':'#e8bb4f';mctx.beginPath();mctx.arc(cl(tx(e.x)),cl(ty(e.y)),7,0,TAU);mctx.fill();}
   for(const e of S.en)if(e.boss){mctx.fillStyle='#ffd76a';mctx.beginPath();mctx.arc(cl(tx(e.x)),cl(ty(e.y)),10,0,TAU);mctx.fill();mctx.strokeStyle='#c8323a';mctx.lineWidth=3;mctx.stroke();}
@@ -1778,7 +1786,10 @@ function gameOver(win){
   <div class="medal"><span>최종 점수 <b>${score.toLocaleString()}</b></span><span>🏅 메달 <b>+${medals}</b> <small>(보유 ${META.medals})</small></span></div>
   <div class="stats">
     <span>생존 시간</span><span>${fmt(sec)}</span>
-    <span>잡은 보스</span><span>${S.st.bosses||0} / 4</span>${win?`
+    <span>실제 플레이 시간</span><span>${fmt(Math.floor(S.gt+(S.bt||0)))} <small>(보스전 ${fmt(Math.floor(S.bt||0))})</small></span>
+    <span>잡은 보스</span><span>${S.st.bosses||0} / 4</span>${(S.st.btimes||[]).length?`
+    <span>보스 처치 시간</span><span>${S.st.btimes.map((t,i)=>`${i+1}장 ${Math.round(t)}초`).join(', ')}</span>
+    <span>보스 속도 보너스</span><span>+${bossSpeedPts().toLocaleString()} <small>(기준 ${BOSS_PAR.join('/')}초, 1초 빠를 때마다 10점)</small></span>`:''}${win?`
     <span>남은 골드 → 점수</span><span>${S.gold.toLocaleString()} → +${goldPts().toLocaleString()}</span>`:''}
     <span>레벨</span><span>${S.lvl}</span>
     <span>처치한 몬스터</span><span>${S.st.kills}</span>
@@ -1831,7 +1842,7 @@ function startScreen(){
     <li><b>보스 상점</b>보스 1~3을 잡으면 상점이 열려 골드를 쓸 수 있음 (총 3번). 마지막 보스를 잡으면 남은 골드는 10골드당 1점</li>
     <li><b>자동 모드</b>P 자동 선택, M 자동 이동. 잠수용</li>
     <li><b>배속</b>오른쪽 위 x1 버튼 또는 X 키. 누를 때마다 1배속, 2배속, 3배속</li>
-    <li><b>4장 구성</b>최대 12분. 3분마다 장이 끝나고 보스 등장. 보스전 동안 시간이 멈추고 몬스터가 줄어듦. 빨간 경고 범위를 피하세요. 4번째 보스를 잡으면 클리어</li><li><b>부활</b>죽으면 끝, 골드가 있으면 부활 가능</li>
+    <li><b>4장 구성</b>최대 12분. 3분마다 장이 끝나고 보스 등장. 보스를 빨리 잡을수록 점수 보너스(기준 시간보다 1초 빠를 때마다 10점). 보스전 동안 원형 결계가 생겨 좁은 곳에서 싸워야 하고(분노 시 더 좁아짐), 시간이 멈추고 몬스터가 줄어듦. 빨간 경고 범위를 피하세요. 4번째 보스를 잡으면 클리어</li><li><b>부활</b>죽으면 끝, 골드가 있으면 부활 가능</li>
   </ul></details>`);
   ov.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{pickCls=b.dataset.cls;try{localStorage.setItem('chipdungeon_cls',pickCls);}catch(e){}
     ov.querySelectorAll('[data-cls]').forEach(x=>x.classList.toggle('on',x===b));$('cdet').innerHTML=clsDetail(pickCls);$('go').firstChild.textContent=`${CLASSES[pickCls].n}(으)로 시작${sv?' (저장 삭제)':''}`;});
@@ -1865,7 +1876,10 @@ const mcost=x=>x.c*(mlv(x.k)+1);
 function applyMeta(){const p=S.p;p.dmg*=1+.04*mlv('atk');p.maxHp+=10*mlv('hp');p.hp=p.maxHp;p.armor+=2*mlv('armor');p.speed*=1+.02*mlv('spd');p.crit+=.01*mlv('crit');
   p.xpM=1+.05*mlv('xp');p.goldM+=.08*mlv('gold');S.gold+=30*mlv('sgold');p.luck+=mlv('luck');if(META.sk.token)p.token=true;}
 const goldPts=()=>S.win?Math.floor(S.gold/10):0;
-function runScore(){return Math.round(S.gt*10+S.st.kills*2+S.lvl*30+(S.st.bosses||0)*400)+goldPts();}
+// 보스 처치 속도 보너스: 보스마다 기준 시간보다 빨리 잡은 1초당 10점. 보스전 중엔 생존 시간이 멈추므로 실제 걸린 시간은 여기서만 반영
+const BOSS_PAR=[90,90,110,140];
+const bossSpeedPts=()=>(S.st.btimes||[]).reduce((q,t,i)=>q+Math.round(Math.max(0,BOSS_PAR[i]-t)*10),0);
+function runScore(){return Math.round(S.gt*10+S.st.kills*2+S.lvl*30+(S.st.bosses||0)*400)+goldPts()+bossSpeedPts();}
 function runMedals(sc){return Math.floor(sc/600)+(META.sk.bossMedal?(S.st.bosses||0):0);}
 function openMeta(){
   const now=x=>{const l=mlv(x.k);return l?x.d.replace(/[\d.]+/,m=>+(parseFloat(m)*l).toFixed(1)):'없음';};
