@@ -200,7 +200,7 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 .srow b{font-family:'Do Hyeon',sans-serif;font-weight:400;font-size:18px;color:var(--ivory);white-space:nowrap}
 .snote{font-size:12.5px;color:var(--brass);padding:0 0 4px;text-align:right}
 .sitem[data-tip]{cursor:help}.sitem .stip{display:none;font-size:12.5px;line-height:1.45;color:var(--ivory);background:rgba(0,0,0,.35);border-left:3px solid var(--brass);padding:6px 8px;margin:2px 0 6px;border-radius:4px}
-.sitem[data-tip]:hover .stip,.sitem.open .stip{display:block}.sitem .qi{opacity:.45;font-size:12px;margin-left:4px}
+#stipPop{position:fixed;z-index:200;max-width:280px;pointer-events:none;font-size:13px;line-height:1.5;color:var(--ivory);background:#0b1f18;border:1px solid var(--brass);border-radius:8px;padding:8px 10px;box-shadow:0 6px 18px rgba(0,0,0,.55);display:none}.sitem .qi{opacity:.45;font-size:12px;margin-left:4px}
 .rule{font-size:13px;color:var(--muted);line-height:1.6;margin-top:12px}
 @media (prefers-reduced-motion: reduce){.card:hover{transform:none}}
 </style>
@@ -547,6 +547,31 @@ const AUGS=[
   {id:'guardian',u:'적 탄환을 막아주는 회전 칩이 늘어나요. ★1은 1개, ★2는 2개, ★3은 3개.',t:'g',n:'수호 칩',tags:['guard','roulette'],d:'회전 칩 +1. 회전 칩이 적 탄환을 막음'},
   {id:'engine',u:'처치할 때마다 줄어드는 대시 재사용 시간이 커져요. ★1은 0.12초, ★2는 0.18초, ★3은 0.25초.',t:'p',n:'폭주 기관',tags:['blitz','jackpot'],d:'처치할 때마다 대시 재사용 0.12초 감소'},
   {id:'clone',u:'쏜 탄환이 하나 더 복제될 확률이 올라가요. ★1은 20%, ★2는 30%, ★3은 40%.',t:'g',n:'복제 주사위',tags:['dice','card'],d:'발사한 탄환이 20% 확률로 하나 더 복제됨'},
+  // 빌드 확장: 소환·설치·상태이상·처형·골드 소모·단일 탄 등 새 축
+  {id:'ricochet',u:'적에게 맞은 탄환이 다른 적에게 튕기는 횟수와 거리가 늘어나요. ★1·★2는 1회, ★3은 2회.',t:'s',n:'튕기는 칩',tags:['card'],d:'탄환이 맞은 뒤 근처 적에게 1회 튕겨 나감'},
+  {id:'giant',u:'탄환 크기와 피해가 커져요. 크기 +60% → +90% → +120%, 피해 +15% → +25% → +35%.',t:'g',n:'거인의 탄',tags:['card','guard'],d:'탄환 크기 +60%, 탄환 피해 +15%'},
+  {id:'focus',u:'탄환이 1발일 때 받는 공격력 보너스가 커져요. ★1은 +35%, ★2는 +50%, ★3은 +65%. 2발 이상이면 +10%만 받아요.',t:'s',n:'집중 사격',tags:['card','dice'],d:'탄환이 1발이면 공격력 +35%. 탄환이 많은 빌드엔 약함'},
+  {id:'echo',u:'메아리 탄환의 피해가 커져요. ★1은 원래의 50%, ★2는 70%, ★3은 90%.',t:'p',n:'메아리',tags:['card','blitz'],d:'공격 0.25초 뒤 같은 방향으로 한 번 더 발사 (피해 50%)'},
+  {id:'spiral',u:'4번째 공격마다 사방으로 퍼지는 탄환 수가 늘어나요. ★1은 8발, ★2는 10발, ★3은 12발.',t:'g',n:'소용돌이 패',tags:['card','roulette'],d:'4번째 공격마다 주변 원형으로 탄환 8발 (피해 60%)'},
+  {id:'combo',u:'같은 적을 계속 때릴 때 쌓이는 피해 중첩 최대치가 늘어나요. ★1은 10중첩, ★2는 15중첩, ★3은 20중첩. 중첩당 +4%.',t:'s',n:'연타',tags:['card','jackpot'],d:'같은 적을 연속으로 맞히면 피해 +4%씩 중첩 (최대 +40%). 대상이 바뀌면 초기화'},
+  {id:'second',u:'치명타가 안 터졌을 때 한 번 더 굴릴 확률이 올라가요. ★1은 30%, ★2는 45%, ★3은 60%.',t:'s',n:'두 번째 주사위',tags:['dice'],d:'치명타가 실패하면 30% 확률로 한 번 더 굴림'},
+  {id:'execute',u:'일반 적을 즉시 처치하는 체력 기준이 올라가요. ★1은 12%, ★2는 16%, ★3은 20%. 정예·보스는 그 체력 이하에서 피해 +50%.',t:'g',n:'처형',tags:['curse','dice'],d:'체력 12% 이하 일반 적은 맞으면 즉사. 정예·보스는 그 구간에서 피해 +50%'},
+  {id:'burn',u:'치명타로 붙는 화상의 초당 피해가 커져요. 공격력의 40% → 60% → 80%.',t:'g',n:'점화',tags:['poison','jackpot'],d:'치명타가 적에게 3초 화상 (초당 공격력 40%). 독과 별개로 중첩'},
+  {id:'frost',u:'적중 시 적을 둔화시킬 확률이 올라가요. ★1은 25%, ★2는 35%, ★3은 45%.',t:'s',n:'서리 탄',tags:['guard','dice'],d:'적중 시 25% 확률로 1.5초간 크게 둔화'},
+  {id:'contagion',u:'중독된 적이 죽을 때 터지는 폭발 피해가 커져요. 공격력의 120% → 160% → 200%.',t:'p',n:'감염 폭발',tags:['poison','jackpot'],d:'중독된 적이 죽으면 폭발 (공격력 120%), 맞은 적은 중독'},
+  {id:'venomcloud',u:'6초마다 떨어지는 독구름 개수가 늘어나요. ★1은 1개, ★2는 2개, ★3은 3개.',t:'g',n:'독구름',tags:['poison','roulette'],d:'6초마다 적이 가장 많은 곳에 4초짜리 독구름'},
+  {id:'drone',u:'함께 싸우는 칩 드론 수가 늘어나요. ★1은 1기, ★2는 2기, ★3은 3기.',t:'g',n:'칩 드론',tags:['roulette','card'],d:'주변을 도는 드론이 0.6초마다 가까운 적을 사격 (공격력 60%)'},
+  {id:'nova',u:'10초마다 터지는 노바의 피해가 커져요. 공격력의 5배 → 7배 → 9배, 반경 180.',t:'p',n:'노바',tags:['roulette','jackpot'],d:'10초마다 내 주변에 대폭발 (공격력 5배)'},
+  {id:'thunder',u:'5초마다 떨어지는 낙뢰 수가 늘어나요. ★1은 3발, ★2는 4발, ★3은 5발.',t:'p',n:'천둥',tags:['jackpot','blitz'],d:'5초마다 화면 안 무작위 적 3명에게 낙뢰 (공격력 2.5배)'},
+  {id:'mine',u:'지뢰를 까는 간격이 짧아져요. ★1은 2.5초, ★2는 2초, ★3은 1.5초.',t:'s',n:'지뢰 칩',tags:['blitz','house'],d:'2.5초마다 발밑에 지뢰. 적이 밟으면 폭발 (공격력 180%)'},
+  {id:'adrenaline',u:'대시 후 3초간 오르는 공격력이 커져요. ★1은 +20%, ★2는 +30%, ★3은 +40%. 이동 속도 +20%는 그대로.',t:'s',n:'아드레날린',tags:['blitz'],d:'대시 후 3초간 공격력 +20%, 이동 속도 +20%'},
+  {id:'bloodrage',u:'잃은 체력 1%당 오르는 공격 속도가 커져요. ★1은 0.6%, ★2는 0.8%, ★3은 1%.',t:'p',n:'피의 광란',tags:['curse','blitz'],d:'잃은 체력 1%당 공격 속도 +0.6% (체력 10%면 +54%)'},
+  {id:'shieldbash',u:'보호막이 남아 있는 동안 오르는 공격력이 커져요. ★1은 +20%, ★2는 +30%, ★3은 +40%.',t:'g',n:'보호막 충격',tags:['guard','blitz'],d:'보호막이 남아 있는 동안 공격력 +20%'},
+  {id:'regenarmor',u:'방어력 1당 초당 체력 재생이 커져요. ★1은 0.02, ★2는 0.03, ★3은 0.04.',t:'s',n:'재생 장갑',tags:['guard'],d:'방어력 1당 초당 체력 재생 +0.02 (방어력 100이면 초당 +2)'},
+  {id:'gravity',u:'주변 적이 느려지는 정도가 커져요. ★1은 −20%, ★2는 −30%, ★3은 −40%. 범위 150.',t:'g',n:'중력장',tags:['roulette','guard'],d:'내 주변 150 안의 적 이동 속도 −20%'},
+  {id:'goldbullet',u:'골드를 쓰는 탄환의 피해 보너스가 커져요. ★1은 +30%, ★2는 +45%, ★3은 +60%.',t:'g',n:'황금 탄환',tags:['house','card'],d:'두 번 공격할 때마다 골드 1을 쓰고 그 공격 피해 +30% (골드가 있을 때만)'},
+  {id:'interest',u:'보유 골드에 비례한 공격 속도 보너스가 커져요. 골드 100당 +2% → +3% → +4%, 최대 +40% → +60% → +80%.',t:'p',n:'복리',tags:['house','house'],d:'보유 골드 100당 공격 속도 +2% (최대 +40%). 하우스 2개로 계산'},
+  {id:'luckycoin',u:'강화할 때마다 행운 +2, 골드 획득 +10%가 한 번 더 붙어요.',t:'s',n:'행운의 동전',tags:['house','dice'],d:'행운 +2, 골드 획득 +10%',f:p=>{p.luck+=2;p.goldM+=.1;}},
   // poison
   {id:'toxic',u:'독 피해 자체가 세져요. ★1은 기본, ★2는 +50%, ★3은 +100%.',t:'s',n:'독주',tags:['poison'],d:'탄환이 적을 중독시킵니다'},
   {id:'neuro',u:'중독된 적이 느려지는 정도가 커져요. ★1은 이동 속도 −40%, ★2는 −55%, ★3은 −70%.',t:'s',n:'마비 독',tags:['poison'],d:'중독된 적 이동 속도 −40%'},
@@ -575,7 +600,15 @@ const FUSIONS=[
   {id:'f_storm',a:'chainlt',b:'punch',n:'뇌우',d:'번개가 10명까지 연쇄, 충격파 범위 1.5배'},
   {id:'f_horizon',a:'blackhole',b:'guardian',n:'사건의 지평선',d:'블랙홀 주기 −3초, 크기 1.4배'},
   {id:'f_glacier',a:'icecoin',b:'mirror',n:'빙하',d:'맞으면 주변 적이 1.5초간 완전히 얼어붙음. 반사 확률 +25%'},
-  {id:'f_overdrive',a:'engine',b:'rush',n:'오버드라이브',d:'처치당 대시 재사용 추가 −0.15초, 골드 러시 속도 2배'}
+  {id:'f_overdrive',a:'engine',b:'rush',n:'오버드라이브',d:'처치당 대시 재사용 추가 −0.15초, 골드 러시 속도 2배'},
+  {id:'f_supernova',a:'nova',b:'thunder',n:'초신성',d:'노바 주기 −3초, 노바가 터질 때 낙뢰 6발 동반'},
+  {id:'f_frostfire',a:'frost',b:'burn',n:'냉열',d:'둔화된 적에게 화상 피해 2배. 화상 입은 적은 둔화'},
+  {id:'f_fleet',a:'drone',b:'dealer',n:'드론 함대',d:'드론 +2기, 드론 공격 간격 0.6초 → 0.4초'},
+  {id:'f_minefield',a:'mine',b:'molotov',n:'지뢰밭',d:'지뢰 간격 절반, 지뢰 폭발 자리에 불길'},
+  {id:'f_reaper',a:'execute',b:'combo',n:'사신',d:'처형 기준 +8%p, 처형하면 골드 +1'},
+  {id:'f_compound',a:'interest',b:'goldbullet',n:'복리 탄환',d:'황금 탄환이 골드를 쓰지 않음'},
+  {id:'f_plaguebomb',a:'contagion',b:'venomcloud',n:'역병 폭탄',d:'감염 폭발 자리에 독구름, 폭발 반경 +50%'},
+  {id:'f_juggernaut',a:'shieldbash',b:'regenarmor',n:'저거너트',d:'보호막 최대치 + 방어력 ×1'}
 ];
 function fusionObj(f){const A=AUGS.find(x=>x.id===f.a),B=AUGS.find(x=>x.id===f.b);return {...f,t:'f',tags:[...A.tags,...B.tags],parts:[f.a,f.b],lv:3,u:''};}
 const MAXA=6;
@@ -817,12 +850,16 @@ function pDmg(){const p=S.p;let d=p.dmg;
   if(blessOn('atk'))d*=1.4;
   if(has('k_holy'))d*=1+armorEff()/(500-100*(L('k_holy')-1));
   if(p.rage>0)d*=1+.08*p.rage;
+  if(has('shieldbash')&&p.barrier>0)d*=1+lv3('shieldbash',.2,.3,.4);
+  if(p.adrT>0)d*=1+lv3('adrenaline',.2,.3,.4);
   if(has('edge'))d*=1+Math.floor(S.gold/1000)*.12;
   d*=1+Math.max(0,rawRate()/RATE_CAP()-1)*.5;
   return d;}
 function rawRate(){const p=S.p;let r=p.rate*(1+ex('jackpot')*.03)*(1+Math.max(0,moveSpd()-SPEED_CAP)/10*.03);if(has('a_still')&&!p.moving)r*=1+lv3('a_still',.35,.5,.65);
   if(tag('curse')>=2&&p.hp<p.maxHp*.5)r*=1.6;
   if(p.rage>0)r*=1+.06*p.rage;
+  if(has('bloodrage'))r*=1+(1-p.hp/p.maxHp)*100*lv3('bloodrage',.006,.008,.01);
+  if(has('interest'))r*=1+Math.min(lv3('interest',.4,.6,.8),Math.floor(S.gold/100)*lv3('interest',.02,.03,.04));
   if(p.blitzT>0)r*=2;
   if(has('fever'))r*=1+Math.min(lv3('fever',1.2,1.6,2)+(has('f_frenzy')?1:0),p.combo*lv3('fever',.06,.08,.1));
   if(has('runngun')&&p.moving)r*=1+lv3('runngun',.45,.7,.95);
@@ -832,7 +869,7 @@ function rawRate(){const p=S.p;let r=p.rate*(1+ex('jackpot')*.03)*(1+Math.max(0,
   return r;}
 const RATE_CAP=()=>has('overflow')?16:10,CRIT_CAP=1,CRIT_DMG_CAP=5,DODGE_CAP=.6;
 const SPEED_CAP=230;
-function moveSpd(){const p=S.p;return p.speed*(1+ex('blitz')*.04)*(p.rushT>0?1+lv3('rush',.35,.5,.65)*(has('f_overdrive')?2:1):1);}
+function moveSpd(){const p=S.p;return p.speed*(1+ex('blitz')*.04)*(p.adrT>0?1.2:1)*(p.rushT>0?1+lv3('rush',.35,.5,.65)*(has('f_overdrive')?2:1):1);}
 function pRate(){return Math.min(RATE_CAP(),rawRate());}
 const critRaw=()=>S.p.crit+ex('dice')*.04+(has('a_still')&&!S.p.moving?.1:0);
 const critC=()=>Math.min(CRIT_CAP,critRaw());
@@ -840,7 +877,7 @@ const critMul=()=>Math.min(CRIT_DMG_CAP,S.p.critM+Math.max(0,critRaw()-CRIT_CAP)
 const critFull=()=>critRaw()>=CRIT_CAP,critMFull=()=>critMul()>=CRIT_DMG_CAP;
 const dodgeC=()=>Math.min(DODGE_CAP,S.p.dodge);
 function armorEff(){const p=S.p;let a=(blessOn('guard')?60:0)+p.armor+ex('guard')*8+(tag('guard')>=2?20:0)+Math.max(0,p.dodge-DODGE_CAP)*200;if(has('iron')&&p.hp<p.maxHp*.5)a*=lv3('iron',2,2.5,3);return a;}
-function barrierMax(){const p=S.p;return (has('f_vaultkeeper')?30:0)+(has('goldskin')?Math.min(p.maxHp,S.gold*.02):0)+(tag('guard')>=4?p.maxHp*.2:0)+(has('gen')?40*L('gen')+Math.min(60,Math.floor(S.gold/100)*10):0);}
+function barrierMax(){const p=S.p;return (has('f_juggernaut')?p.armor:0)+(has('f_vaultkeeper')?30:0)+(has('goldskin')?Math.min(p.maxHp,S.gold*.02):0)+(tag('guard')>=4?p.maxHp*.2:0)+(has('gen')?40*L('gen')+Math.min(60,Math.floor(S.gold/100)*10):0);}
 const dashCdVal=()=>2.4*S.p.dashMul*(tag('blitz')>=2?.6:1)*Math.pow(.95,ex('blitz'));
 function orbitN(){return Math.floor(ex('roulette')/2)+(has('f_blade')?3:0)+L('guardian')+(has('orbit')?1+L('orbit'):0)+(has('dealer')?1:0)+(has('spinner')?1:0)+L('wheel')+(has('lastcard')?2:0)+(tag('roulette')>=2?2:0)+(has('vault')?Math.min(4,Math.floor(S.gold/lv3('vault',100,80,60))):0);}
 function addGold(v){v*=S.p.goldM+ex('house')*.12;if(blessOn('gold'))v*=2;if(evOn('moon'))v*=2;if(has('bankrupt')&&!has('f_bankrich'))v*=.7;S.gold+=Math.max(1,Math.round(v));}
@@ -1173,15 +1210,20 @@ function playerFire(tg){
   let shock=1;if(p.shockT>0){shock=2+2*L('shock');p.shockT=0;}
   if(p.revT>0){shock*=lv3('revenge',2,2.5,3);p.revT=0;}
   let n=p.multi+(tag('card')>=6?1:0);if(has('shuffle')&&Math.random()<lv3('shuffle',.2,.35,.5)+(has('f_magician')?.25:0))n*=2;
+  if(has('focus'))shock*=n<=1?1+lv3('focus',.35,.5,.65):1.1;
+  if(has('giant'))shock*=1+lv3('giant',.15,.25,.35);
+  if(has('goldbullet')&&p.shots%2===0&&(S.gold>0||has('f_compound'))){if(!has('f_compound'))S.gold--;shock*=1+lv3('goldbullet',.3,.45,.6);}
   const base=Math.atan2(tg.y-p.y,tg.x-p.x),d=pDmg()*mult*shock;p.aimA=base;p.atkT=CLASSES[S.cls].atk;p.face=Math.cos(base)>=0?1:-1;
   const blife=S.cls==='knight'||S.cls==='rogue'?Math.max(.3,p.range*1.15/p.bspd):1.2;
   if(has('m_meteor')&&p.shots%lv3('m_meteor',10,8,6)===0){explode(tg.x,tg.y,120,pDmg()*6,'#ff5a2a');S.shake=Math.max(S.shake,.18);}
   if(S.cls==='knight'){const ev=has('k_cleave')?lv3('k_cleave',3,3,2):4;if(p.shots%ev===0){const rad=95*(has('k_cleave')?1.3:1),k=has('k_cleave')?lv3('k_cleave',1.2,1.6,2):.5;p.swingT=.25;S.rings.push({x:p.x,y:p.y,r:20,max:rad,life:.25,col:'#cfe3ff'});for(const e of S.en)if(e.alive&&!e.phase&&d2(e,p)<(rad+e.r)**2)dmgE(e,pDmg()*mult*shock*k,'#cfe3ff');}
     if(has('k_smite')&&p.shots%lv3('k_smite',6,5,4)===0){explode(tg.x,tg.y,100,pDmg()*4+armorEff(),'#fff3c4');S.rings.push({x:tg.x,y:tg.y,r:4,max:30,life:.4,col:'#ffffff'});S.shake=Math.max(S.shake,.12);}}
   const x7=has('f_lucky777')&&p.shots%J()===0;
-  for(let i=0;i<n;i++){const an=base+(i-(n-1)/2)*.13;pBullet(p.x,p.y,an,d*(big?3:1),{roll,big,x7,life:blife,pierce:p.pierce+(big?3:0),r:big||shock>1||x7?6:(S.cls==='knight'?7:S.cls==='mage'?5:3)});
+  for(let i=0;i<n;i++){const an=base+(i-(n-1)/2)*.13;pBullet(p.x,p.y,an,d*(big?3:1),{roll,big,x7,life:blife,pierce:p.pierce+(big?3:0),r:(big||shock>1.5||x7?6:(S.cls==='knight'?7:S.cls==='mage'?5:3))*(has('giant')?1+lv3('giant',.6,.9,1.2):1)});
     if(has('clone')&&Math.random()<lv3('clone',.2,.3,.4))pBullet(p.x,p.y,an+rand(-.08,.08),d,{roll,pierce:p.pierce});}
   if(has('blackjack')&&p.shots%21===0){for(let i=0;i<5;i++)pBullet(p.x,p.y,base+(i-2)*.12,pDmg()*8,{pierce:999,r:9,life:1.6,child:true,card:true});ftext(p.x,p.y-30,'21','#ffd76a',20);}
+  if(has('spiral')&&p.shots%4===0){const k=6+2*L('spiral');for(let i=0;i<k;i++)pBullet(p.x,p.y,i*TAU/k+p.shots*.3,d*.6,{child:true});}
+  if(has('echo'))(S.echoQ=S.echoQ||[]).push({t:.25,a:base,d:d*lv3('echo',.5,.7,.9),n});
   if(has('seventh')&&p.shots%J()===0){const k=2+2*L('seventh');for(let i=0;i<k;i++)pBullet(p.x,p.y,base+(i-(k-1)/2)*.25,d*.7);}
 }
 function onPHit(b,t){
@@ -1193,7 +1235,11 @@ function onPHit(b,t){
   if(has('a_snipe'))dmg*=1+Math.min(lv3('a_snipe',1.5,2,2.5),Math.hypot(t.x-S.p.x,t.y-S.p.y)/100*.15);
   if(has('r_assassin')&&(t.elite||t.boss))dmg*=lv3('r_assassin',2,2.5,3);
   if(S.p.shadowT>0&&!col){dmg*=critMul();col='#ffd76a';}
-  if(Math.random()<critC()){dmg*=critMul();col='#ffd76a';}
+  if(has('combo')&&!b.child){if(p.cmbE===t)p.cmbN=Math.min(lv3('combo',10,15,20),(p.cmbN||0)+1);else{p.cmbE=t;p.cmbN=0;}dmg*=1+.04*p.cmbN;}
+  {let cr=Math.random()<critC();if(!cr&&has('second')&&Math.random()<lv3('second',.3,.45,.6))cr=true;
+   if(cr){dmg*=critMul();col='#ffd76a';if(has('burn')){t.burnT=3;t.burnD=Math.max(t.burnD||0,pDmg()*lv3('burn',.4,.6,.8));if(has('f_frostfire'))t.slowT=Math.max(t.slowT||0,1);}}}
+  if(has('frost')&&Math.random()<lv3('frost',.25,.35,.45)&&!t.boss)t.slowT=Math.max(t.slowT||0,1.5);
+  if(has('execute')){const th=lv3('execute',.12,.16,.2)+(has('f_reaper')?.08:0);if(t.hp<=t.maxHp*th||t.hp-dmg<=t.maxHp*th){if(!t.boss&&!t.elite){dmg=Math.max(dmg,t.hp+1);label='처형';col='#c0392b';if(has('f_reaper'))S.gold+=1;}else if(t.hp<=t.maxHp*th)dmg*=1.5;}}
   if(has('triple7')&&!b.child&&Math.random()<lv3('triple7',.07,.1,.14)){dmg*=7;col='#ff4fd8';label='×7 '+Math.round(dmg);}
   if(canPoison()&&!b.dieThrow)poisonE(t);
   dmgE(t,dmg,col,label);
@@ -1201,6 +1247,7 @@ function onPHit(b,t){
   if(b.roll===7)explode(t.x,t.y,85,pDmg()*2.5,'#ff4fd8');
   if(b.roll===6){if(tag('dice')>=2||(b.dieThrow&&has('f_dicestorm')))explode(t.x,t.y,60,pDmg()*.8);if(has('highroll'))S.gold+=L('highroll')*(has('f_heist')?3:1);}
   if(has('split')&&(!b.child||(has('f_cardblast')&&b.gen===1)))for(let i=0;i<1+L('split');i++)pBullet(t.x,t.y,Math.random()*TAU,b.dmg*.4,{child:true,gen:(b.gen||0)+1,hit:new Set([t]),life:.5,r:2,pierce:0});
+  if(has('ricochet')&&(b.rico||0)<lv3('ricochet',1,1,2)){const n=nearestE(t,260,b.hit);if(n){b.rico=(b.rico||0)+1;const a=Math.atan2(n.y-b.y,n.x-b.x),sp=Math.hypot(b.vx,b.vy);b.vx=Math.cos(a)*sp;b.vy=Math.sin(a)*sp;b.life=Math.max(b.life,.7);return;}}
   if(tag('card')>=4&&!b.bounced){const n=nearestE(t,240,b.hit);if(n){b.bounced=true;const a=Math.atan2(n.y-b.y,n.x-b.x),sp=Math.hypot(b.vx,b.vy);b.vx=Math.cos(a)*sp;b.vy=Math.sin(a)*sp;b.life=Math.max(b.life,.7);return;}}
   if(b.pierce--<=0)b.life=0;
 }
@@ -1235,6 +1282,7 @@ function onKill(e){
   if(has('tip')&&Math.random()<lv3('tip',.06,.1,.14)){S.gold+=8;p.hp=Math.min(p.maxHp,p.hp+6);ftext(e.x,e.y-14,'팁','#d6a94a',15);}
   if(has('lotto')&&Math.random()<.015*L('lotto')*(has('f_heist')?3:1)){S.gold+=60;toast('복권 당첨. 60 골드');}
   if(has('lucky7')&&p.pkills%J()===0)p.hp=Math.min(p.maxHp,p.hp+7*L('lucky7'));
+  if(e.ps>0&&has('contagion')){const rr=90*(has('f_plaguebomb')?1.5:1);explode(e.x,e.y,rr,pDmg()*lv3('contagion',1.2,1.6,2),'#8ee06a');for(const o of S.en)if(o.alive&&d2(o,e)<rr*rr)poisonE(o);if(has('f_plaguebomb'))S.zones.push({x:e.x,y:e.y,r:70,life:3,kind:'pool',tick:0});}
   if(e.ps>0){
     if(tag('poison')>=4)for(const o of S.en)if(o.alive&&d2(o,e)<100*100)poisonE(o);
     if(has('spill'))S.zones.push({x:e.x,y:e.y,r:35+15*L('spill'),life:2+L('spill'),kind:'pool',tick:0});
@@ -1244,6 +1292,8 @@ function onKill(e){
   if(tag('curse')>=4&&p.alive){p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.03);for(let i=0;i<6;i++)pBullet(e.x,e.y,i*TAU/6,pDmg()*.5,{child:true,r:4,skull:true});}
   if(tag('jackpot')>=4&&p.pkills%J()===0){S.flash=.25;for(const o of S.en)if(o.alive)dmgE(o,pDmg()*1.5,'#ffd76a');}
 }
+function dronePos(){const p=S.p,n=L('drone')+(has('f_fleet')?2:0),a=-S.t*1.6;return Array.from({length:n},(_,i)=>({x:p.x+Math.cos(a+i*TAU/n)*78,y:p.y+Math.sin(a+i*TAU/n)*78}));}
+function thunderStrike(n){const p=S.p,vis=S.en.filter(e=>e.alive&&!e.phase&&Math.abs(e.x-p.x)<W/2&&Math.abs(e.y-p.y)<H/2);for(let i=0;i<n&&vis.length;i++){const e=vis.splice(Math.floor(Math.random()*vis.length),1)[0];S.bolts.push({x1:e.x+rand(-30,30),y1:e.y-260,x2:e.x,y2:e.y,life:.22});explode(e.x,e.y,45,pDmg()*2.5,'#bff3ff');}}
 function dealerPos(){const p=S.p,a=S.t*1.2;return [0,1].map(i=>({x:p.x+Math.cos(a+i*Math.PI)*62,y:p.y+Math.sin(a+i*Math.PI)*62}));}
 function dash(){
   const p=S.p;if(!p.alive||p.dashCd>0||p.dashT>0)return;
@@ -1260,6 +1310,7 @@ function dashEnd(){
   if(tag('blitz')>=6)p.blitzT=2;
   if(has('after')){const k=6+4*L('after');for(let i=0;i<k;i++)pBullet(p.x,p.y,i*TAU/k,pDmg()*.7,{child:true});}
   if(has('shock'))p.shockT=1.5;
+  if(has('adrenaline'))p.adrT=3;
 }
 
 /* ---------- update ---------- */
@@ -1283,6 +1334,16 @@ function update(dt){
     if(has('guardian')){const n=orbitN(),sp=2.8*(has('spinner')?1.5:1),rad=48*p.orbR;for(let i=0;i<n;i++){const a=S.t*sp+i*TAU/n,ox=p.x+Math.cos(a)*rad,oy=p.y+Math.sin(a)*rad;for(const b of S.pr)if(!b.mine&&b.life>0&&(b.x-ox)**2+(b.y-oy)**2<196)b.life=0;}}
   }S.phoenixCd=Math.max(0,(S.phoenixCd||0)-dt);
   if(has('freeze')){S.freezeT=Math.max(0,(S.freezeT||0)-dt);S.freezeCd=(S.freezeCd??25)-dt;if(S.freezeCd<=0){S.freezeCd=25;S.freezeT=3;toast('시간 정지');}}
+  if(p.alive){
+    p.adrT=Math.max(0,(p.adrT||0)-dt);
+    if(has('regenarmor'))p.hp=Math.min(p.maxHp,p.hp+armorEff()*lv3('regenarmor',.02,.03,.04)*dt);
+    if(S.echoQ&&S.echoQ.length){for(const q of S.echoQ){q.t-=dt;if(q.t<=0)for(let i=0;i<q.n;i++)pBullet(p.x,p.y,q.a+(i-(q.n-1)/2)*.13,q.d,{child:true,r:4});}S.echoQ=S.echoQ.filter(q=>q.t>0);}
+    if(has('drone')){S.drT=(S.drT||0)-dt;if(S.drT<=0){S.drT=has('f_fleet')?.4:.6;for(const q of dronePos()){const e=nearestE(q,p.range*1.1);if(e)pBullet(q.x,q.y,Math.atan2(e.y-q.y,e.x-q.x),pDmg()*.6,{child:true,r:3});}}}
+    if(has('nova')){S.novaT=(S.novaT??10)-dt;if(S.novaT<=0){S.novaT=10-(has('f_supernova')?3:0);explode(p.x,p.y,180,pDmg()*lv3('nova',5,7,9),'#ffd76a');S.shake=Math.max(S.shake,.2);if(has('f_supernova'))thunderStrike(6);}}
+    if(has('thunder')){S.thT=(S.thT??5)-dt;if(S.thT<=0){S.thT=5;thunderStrike(lv3('thunder',3,4,5));}}
+    if(has('mine')){S.mineT=(S.mineT??1)-dt;if(S.mineT<=0){S.mineT=lv3('mine',2.5,2,1.5)*(has('f_minefield')?.5:1);S.zones.push({x:p.x,y:p.y,r:16,life:12,kind:'mine'});}}
+    if(has('venomcloud')){S.vcT=(S.vcT??3)-dt;if(S.vcT<=0){S.vcT=6;for(let k=0;k<L('venomcloud');k++){let best=null,bc=0;for(let i=0;i<12;i++){const e=S.en[Math.floor(Math.random()*S.en.length)];if(!e||!e.alive||d2(e,p)>500*500)continue;let c=0;for(const o of S.en)if(o.alive&&d2(o,e)<90*90)c++;if(c>bc){bc=c;best=e;}}if(best)S.zones.push({x:best.x,y:best.y,r:90,life:4,kind:'pool',tick:0,cloud:true});}}}
+  }
   if(has('dealers')&&p.alive){S.dcd=(S.dcd||0)-dt;if(S.dcd<=0){S.dcd=.35;for(const q of dealerPos()){const e=nearestE(q,p.range);if(e)pBullet(q.x,q.y,Math.atan2(e.y-q.y,e.x-q.x),pDmg()*.75,{child:true});}}}
   for(const k in S.buffT)S.buffT[k]=Math.max(0,S.buffT[k]-dt);
   S.spinCd=Math.max(0,(S.spinCd||0)-dt);
@@ -1326,12 +1387,13 @@ function update(dt){
     if(!e.alive)continue;
     const T=ET[e.type];
     e.hit=Math.max(0,e.hit-dt);e.cd-=dt;e.rot+=dt*(e.boss?.6:1.8);if(e.orbCd>0)e.orbCd-=dt;
+    if(e.burnT>0){e.burnT-=dt;dmgE(e,e.burnD*(has('f_frostfire')&&e.slowT>0?2:1)*dt,null,null,true);if(!e.alive)continue;}
     if(e.pt>0){e.pt-=dt;const dps=S.p.dmg*.35*(1+ex('poison')*.2)*e.ps*(1+.5*Math.max(0,L('toxic')-1)+.5*Math.max(0,L('r_venom')-1))*(has('plague')?2:1)*(tag('poison')>=6?2:1)+(has('plaguelord')?Math.min(e.maxHp*.012,pDmg()*3):0);e.pTick+=dt;dmgE(e,dps*dt,null,null,true);if(e.pTick>.5){e.pTick=0;if(e.alive)ftext(e.x,e.y-e.r-4,Math.round(dps*.5),'#8ee06a',12);}if(e.pt<=0)e.ps=0;if(!e.alive)continue;}
     if(S.freezeT>0)continue;
     if(e.boss){bossAI(e,dt);continue;}
     const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1;
     if(e.slowT>0){e.slowT-=dt;if(e.frozen&&e.slowT>0)continue;}
-    let spd=e.spd*(e.ps>0&&has('neuro')?lv3('neuro',.6,.45,.3):1)*(e.slowT>0?.4:1)*(evOn('moon')?1.2:1),vx=dx/d,vy=dy/d;
+    let spd=e.spd*(e.ps>0&&has('neuro')?lv3('neuro',.6,.45,.3):1)*(e.slowT>0?.4:1)*(has('gravity')&&d<150?1-lv3('gravity',.2,.3,.4):1)*(evOn('moon')?1.2:1),vx=dx/d,vy=dy/d;
     if(T.charge){e.ccd=(e.ccd??rand(1,3))-dt;
       if(e.chT>0){e.chT-=dt;vx=e.cx;vy=e.cy;spd=560*(e.slowT>0?.4:1);}
       else if(e.wind>0){e.wind-=dt;spd=0;if(e.wind<=0)e.chT=.5;}
@@ -1362,6 +1424,7 @@ function update(dt){
   for(const z of S.zones){z.life-=dt;
     if(z.kind==='fire'){for(const e of S.en)if(e.alive&&d2(e,z)<(z.r+e.r)**2){dmgE(e,pDmg()*1.2*(z.m||1)*dt,null,null,true);if(z.nap&&e.alive&&!(e.ps>0))poisonE(e);}}
     else if(z.kind==='hole'){for(const e of S.en){if(!e.alive)continue;const dx=z.x-e.x,dy=z.y-e.y,dd=Math.hypot(dx,dy)||1;if(dd<z.r*1.6){if(!e.boss){e.x+=dx/dd*Math.min(dd,170*dt);e.y+=dy/dd*Math.min(dd,170*dt);}if(dd<z.r)dmgE(e,pDmg()*1.5*dt,null,null,true);}}}
+    else if(z.kind==='mine'){for(const e of S.en)if(e.alive&&!e.phase&&d2(e,z)<(z.r+e.r+6)**2){z.life=0;explode(z.x,z.y,80,pDmg()*1.8,'#ff9a4a');if(has('f_minefield'))S.zones.push({x:z.x,y:z.y,r:40,life:2.5,kind:'fire',m:1});break;}}
     else{z.tick-=dt;if(z.tick<=0){z.tick=.5;for(const e of S.en)if(e.alive&&d2(e,z)<(z.r+e.r)**2)poisonE(e);}}}
   S.zones=S.zones.filter(z=>z.life>0);if(S.zones.length>160)S.zones.splice(0,S.zones.length-160);
   // projectiles
@@ -1464,6 +1527,7 @@ function drawChip(e){
   if(e.elite){ctx.strokeStyle='#ffd76a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,R+5,0,TAU);ctx.stroke();
     ctx.fillStyle='#ffd76a';ctx.beginPath();for(let i=0;i<6;i++){const sa=i*TAU/6+S.t;ctx.moveTo(x+Math.cos(sa)*(R+10),y+Math.sin(sa)*(R+10));ctx.lineTo(x+Math.cos(sa+.18)*(R+4),y+Math.sin(sa+.18)*(R+4));ctx.lineTo(x+Math.cos(sa-.18)*(R+4),y+Math.sin(sa-.18)*(R+4));ctx.closePath();}ctx.fill();}
   if(e.aff||e.hunt||e.type==='goblin'){const A=e.aff&&AFFIX[e.aff],lb=(e.hunt?'🎯 ':'')+(A?A.n:e.type==='goblin'?'💰':'');if(lb){ctx.font='12px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.75)';const ly=y-DS*.62-8;ctx.strokeText(lb,x,ly);ctx.fillStyle=A?A.col:'#ffd76a';ctx.fillText(lb,x,ly);}}
+  if(e.burnT>0){ctx.fillStyle='rgba(255,120,40,.85)';for(let i=0;i<2;i++){const ba=S.t*3+i*3+e.rot;ctx.beginPath();ctx.arc(x+Math.cos(ba)*R*.6,y-R*.9-((S.t*24+i*9)%12),2.2,0,TAU);ctx.fill();}}
   if(e.ps>0){ctx.fillStyle='rgba(142,224,106,.85)';for(let i=0;i<3;i++){const ba=S.t*2+i*2.1+e.rot;ctx.beginPath();ctx.arc(x+Math.cos(ba)*R*.8,y-R*1.1-((S.t*20+i*7)%10),2,0,TAU);ctx.fill();}}
   if(e.hp<e.maxHp&&(e.boss||e.elite||e.type==='tank')){const w=R*2+6,ty=y-DS*.62-4;ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(x-w/2,ty,w,4);ctx.fillStyle='#ff6060';ctx.fillRect(x-w/2,ty,w*Math.max(0,e.hp/e.maxHp),4);}
 }
@@ -1501,6 +1565,7 @@ function draw(){
     ctx.strokeStyle=`rgba(255,${S.boss&&S.boss.ph2?60:120},60,${.7+Math.sin(S.t*6)*.2})`;ctx.lineWidth=5;ctx.setLineDash([18,10]);ctx.lineDashOffset=-S.t*40;ctx.beginPath();ctx.arc(A.x,A.y,A.r,0,TAU);ctx.stroke();ctx.restore();}
   for(const z of S.zones){if(z.kind==='hole'){const g=ctx.createRadialGradient(z.x,z.y,4,z.x,z.y,z.r);g.addColorStop(0,'rgba(0,0,0,.95)');g.addColorStop(.6,'rgba(60,20,90,.55)');g.addColorStop(1,'rgba(60,20,90,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(z.x,z.y,z.r,0,TAU);ctx.fill();
       ctx.strokeStyle='rgba(200,140,255,.6)';ctx.lineWidth=2;for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(z.x,z.y,z.r*(.35+i*.2),S.t*4+i,S.t*4+i+2.2);ctx.stroke();}continue;}
+    if(z.kind==='mine'){ctx.fillStyle='#3a3a44';ctx.beginPath();ctx.arc(z.x,z.y,8,0,TAU);ctx.fill();ctx.fillStyle=Math.floor(S.t*4)%2?'#ff4040':'#7a2020';ctx.beginPath();ctx.arc(z.x,z.y,3,0,TAU);ctx.fill();continue;}
     ctx.globalAlpha=Math.min(.55,z.life*.4);ctx.fillStyle=z.kind==='fire'?'#ff7a2a':'#6cc04a';ctx.beginPath();ctx.arc(z.x,z.y,z.r,0,TAU);ctx.fill();}ctx.globalAlpha=1;
   ctx.strokeStyle='#bff3ff';ctx.lineWidth=2.5;for(const bo of S.bolts){ctx.globalAlpha=bo.life*5;ctx.beginPath();ctx.moveTo(bo.x1,bo.y1);const mx=(bo.x1+bo.x2)/2+rand(-12,12),my=(bo.y1+bo.y2)/2+rand(-12,12);ctx.lineTo(mx,my);ctx.lineTo(bo.x2,bo.y2);ctx.stroke();}ctx.globalAlpha=1;
   if(S.merch){const tb=S.merch,M=MERCH[tb.k],pulse=1+Math.sin(S.t*6)*.04;ctx.save();ctx.translate(tb.x,tb.y);ctx.scale(pulse,pulse);
@@ -1546,6 +1611,7 @@ function draw(){
   ctx.textAlign='center';ctx.textBaseline='middle';
   for(const t of S.tx){ctx.globalAlpha=Math.min(1,t.life*2.5);ctx.font=`${t.size}px "Do Hyeon",sans-serif`;ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.7)';ctx.strokeText(t.s,t.x,t.y);ctx.fillStyle=t.col;ctx.fillText(t.s,t.x,t.y);}
   ctx.globalAlpha=1;
+  if(has('drone')&&S.p.alive)for(const q of dronePos()){ctx.fillStyle='#5fa8e8';ctx.beginPath();ctx.moveTo(q.x,q.y-8);ctx.lineTo(q.x+8,q.y);ctx.lineTo(q.x,q.y+8);ctx.lineTo(q.x-8,q.y);ctx.closePath();ctx.fill();ctx.strokeStyle='#f1e7cf';ctx.lineWidth=1.5;ctx.stroke();}
   if(has('dealers')&&S.p.alive)for(const q of dealerPos()){ctx.fillStyle='#c0392b';ctx.beginPath();ctx.arc(q.x,q.y,9,0,TAU);ctx.fill();ctx.strokeStyle='#f1e7cf';ctx.lineWidth=2;ctx.setLineDash([3,3]);ctx.beginPath();ctx.arc(q.x,q.y,7,0,TAU);ctx.stroke();ctx.setLineDash([]);}
   ctx.setTransform(1,0,0,1,0,0);if(bg)ctx.drawImage(bg,0,0);
   ctx.setTransform(DPR*SC,0,0,DPR*SC,0,0);
@@ -1646,7 +1712,7 @@ function synTable(){
 }
 function rollTier(){const L=S.p.luck,r=Math.min(12,S.round);const w=[['s',Math.max(20,58-r*2)],['g',32+L+r],['p',8+L*1.2+r*.8]];let t=w.reduce((a,b)=>a+b[1],0),x=Math.random()*t;for(const [k,v] of w){if((x-=v)<0)return k;}return 's';}
 // 공격력을 직접 올리지 않는 증강 (생존·경제·이동). 선택지마다 공격 증강이 최소 1개는 나오도록 하는 데 씀
-const DEF_AUGS=new Set(['piggy','tip','insure','king','highroll','thick','armor','evade','iron','gen','fortress','icecoin','rush','sprint','lucky7','lastcard','vamp','neuro','engine','k_wall','counter','unbreak','thorns','mirror','guardian']);
+const DEF_AUGS=new Set(['regenarmor','gravity','luckycoin','frost','piggy','tip','insure','king','highroll','thick','armor','evade','iron','gen','fortress','icecoin','rush','sprint','lucky7','lastcard','vamp','neuro','engine','k_wall','counter','unbreak','thorns','mirror','guardian']);
 const isOff=a=>!a.up&&!DEF_AUGS.has(a.id);
 // 태그 중복(가드 2개 등)으로 선호 가중치가 겹쳐 쌓이지 않게: 선호 태그가 하나라도 있으면 ×2.5, 비선호는 ×0.3
 function augW(a){const C=CLASSES[S.cls||'knight'];if(a.cls)return a.cls===S.cls?4:0;const ts=new Set(a.tags);let w=1;if([...ts].some(t=>C.fav.includes(t)))w*=2.5;if([...ts].some(t=>C.dis.includes(t)))w*=.3;return w;}
@@ -1659,7 +1725,7 @@ function augOptions(tier){
   return out.map(a=>({...a,q:rollQ()}));
 }
 function augHtml(a,i){
-  if(a.up){const o=a.ref;return `<button class="card" data-i="${i}" style="--rc:#c99223"><span class="rr">무료 강화</span><b>${o.n}</b><span class="stars">${'★'.repeat(o.lv)} → ${'★'.repeat(o.lv+1)}</span>${o.q&&o.q!==1?`<span style="color:${QGRADE(o.q).col};font-size:12px">품질 ${QGRADE(o.q).n} ×${o.q.toFixed(2)} 유지</span>`:''}<span class="tip">${o.d}<br><br><span style="color:var(--brass)">강화하면:</span> ${o.u||''}</span></button>`;}
+  if(a.up){const o=a.ref;return `<button class="card" data-i="${i}" style="--rc:#c99223"><span class="rr">무료 강화</span><b>${o.n}</b><span class="stars">${'★'.repeat(o.lv)} → ${'★'.repeat(o.lv+1)}</span>${o.q&&o.q!==1?`<span style="color:${QGRADE(o.q).col};font-size:12px">효과 ×${o.q.toFixed(2)} 유지</span>`:''}<span class="tip">${o.d}<br><br><span style="color:var(--brass)">강화하면:</span> ${o.u||''}</span></button>`;}
   const T=TIER[a.t],cnt={};for(const t of a.tags)cnt[t]=(cnt[t]||0)+1;
   let lines='';
   const chips=Object.keys(cnt).map(t=>{const cur=tag(t),aft=cur+cnt[t],D=TAGS[t];let up='';
@@ -1670,7 +1736,7 @@ function augHtml(a,i){
     return `<span class="chip ${up?'on':''}">${D.n} ${cur}→${aft}</span>`;}).join('');
   const pf=partnerOf(a.id),pn=pf?AUGS.find(x=>x.id===(pf.a===a.id?pf.b:pf.a)).n:'';
   const fz=pf?`<span class="ta fz">🔗 ${pn}와 합체 → ${pf.n}: ${pf.d}${a.fuseNow?' (고르면 바로 합체)':''}</span>`:'';
-  return `<button class="card aug" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}${pf?' 🔗':''}${a.q?` · <span style="color:${QGRADE(a.q).col}">${QGRADE(a.q).n} ×${a.q.toFixed(2)}</span>`:''}</span><b>${a.n}</b><span class="chips">${chips}</span><span class="tip">${a.d}${lines||fz?'<br>':''}${lines}${fz}</span></button>`;
+  return `<button class="card aug" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}${pf?' 🔗':''}${a.q?` · <span style="color:${QGRADE(a.q).col}">효과 ×${a.q.toFixed(2)}</span>`:''}</span><b>${a.n}</b><span class="chips">${chips}</span><span class="tip">${a.d}${lines||fz?'<br>':''}${lines}${fz}</span></button>`;
 }
 function bindPeek(){
   ov.querySelectorAll('.card').forEach(c=>{let t=null;
@@ -1694,7 +1760,7 @@ function openAug(free,why,fixed,fixedTier){
   if(!opts.length){const g=price(120);S.gold+=g;toast(`슬롯 가득, 강화할 것도 없음. ${g} 골드 지급`);openNext();return;}
   const cost=price(18);
   show(`<h2>증강 선택</h2><p class="sub">${why}. 슬롯 <b style="color:${full?'#ff9ad0':'var(--ivory)'}">${slotCount()}/${MAXA}</b>. ${full?'슬롯이 가득 차서 <b style="color:#ff9ad0">합체할 수 있는 증강</b> 또는 무료 강화만 나옵니다.':`이번엔 <b style="color:${TIER[tier].col};filter:brightness(1.5)">${TIER[tier].n}</b> 등급.`}</p>
-  <p class="hint">증강마다 품질(×0.85~1.25)이 붙고 효과 수치에 곱해져요. 행운이 높을수록 좋은 품질이 잘 나와요. 새 증강은 ★2로 시작해요. PC는 카드에 마우스를 올리면, 모바일은 꾹 누르면 설명이 보여요</p>
+  <p class="hint">증강마다 효과 배율(×0.85~1.25)이 붙어 수치에 곱해져요. 행운이 높을수록 높은 배율이 잘 나와요. 새 증강은 ★2로 시작해요. PC는 카드에 마우스를 올리면, 모바일은 꾹 누르면 설명이 보여요</p>
   <div class="cards">${opts.map(augHtml).join('')}</div>
   <button class="btn ghost" id="reroll" ${!free&&S.gold<cost?'disabled':''}>다시 뽑기<small>${free?(free===true?(META.sk.reroll?'무료 2회':'무료 1회'):'무료 '+free+'회'):cost+'골드 (보유 '+S.gold+')'}</small></button>
   <button class="btn ghost" data-stats>내 스탯 보기</button>
@@ -2242,7 +2308,7 @@ function openShop(back,m){
 /* ---------- stats ---------- */
 let statsOpen=false;
 const stEl=$('st');
-function toggleStats(){statsOpen=!statsOpen;joy=null;if(statsOpen){renderStats();stEl.classList.add('on');}else{stEl.classList.remove('on');stEl.innerHTML='';}}
+function toggleStats(){statsOpen=!statsOpen;joy=null;{const pp=document.getElementById('stipPop');if(pp)pp.style.display='none';}if(statsOpen){renderStats();stEl.classList.add('on');}else{stEl.classList.remove('on');stEl.innerHTML='';}}
 $('statBtn').addEventListener('click',()=>{if(S&&S.mode!=='start')toggleStats();});
 // 스탯 설명 (PC는 마우스를 올리면, 모바일은 누르면 표시)
 const STAT_TIP={
@@ -2325,7 +2391,11 @@ function renderStats(){
   <div class="btnrow"><button class="btn" id="stSave">저장</button><button class="btn" id="stQuit">저장하고 메인으로</button></div>
   <button class="btn primary" id="stClose">닫기</button></div>`;
   $('stClose').onclick=toggleStats;
-  stEl.querySelectorAll('.sitem[data-tip]').forEach(x=>x.onclick=()=>x.classList.toggle('open'));
+  {let pop=document.getElementById('stipPop');if(!pop){pop=document.createElement('div');pop.id='stipPop';document.body.appendChild(pop);}
+   const place=(x,ev)=>{pop.innerHTML=x.querySelector('.stip').innerHTML;pop.style.display='block';const r=x.getBoundingClientRect(),pw=pop.offsetWidth,ph=pop.offsetHeight;
+     let lx=ev&&ev.clientX!=null?ev.clientX+14:r.left,ly=ev&&ev.clientY!=null?ev.clientY+16:r.bottom+4;if(lx+pw>innerWidth-8)lx=innerWidth-pw-8;if(ly+ph>innerHeight-8)ly=r.top-ph-6;pop.style.left=Math.max(8,lx)+'px';pop.style.top=Math.max(8,ly)+'px';};
+   stEl.querySelectorAll('.sitem[data-tip]').forEach(x=>{x.onmouseenter=e=>place(x,e);x.onmousemove=e=>place(x,e);x.onmouseleave=()=>{pop.style.display='none';};
+     x.onclick=e=>{if(pop.style.display==='block'&&pop.dataset.k===x.textContent){pop.style.display='none';return;}pop.dataset.k=x.textContent;place(x,e);};});}
   $('stSave').onclick=()=>{saveGame(false);};
   $('stQuit').onclick=()=>{if(saveGame(false)){toggleStats();newRun();startScreen();}};
 }
