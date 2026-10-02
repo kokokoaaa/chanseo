@@ -155,6 +155,7 @@ h3{font-family:'Do Hyeon',sans-serif;font-weight:400;font-size:19px;margin:18px 
 .card{background:var(--ivory);color:var(--ink);border:3px solid var(--rc);border-radius:10px;padding:12px;text-align:left;cursor:pointer;font:inherit;line-height:1.45;font-size:15px}
 .card:hover{transform:translateY(-2px)}
 #dsel .btn{margin:0;min-height:52px;align-self:stretch}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:6px 0 10px}.tabs .btn,.tabs .btn.primary{margin:0!important;padding:8px 4px!important;font-size:14px!important;min-height:48px;line-height:1.25}.tabs .btn small{font-size:11px!important}
 .card{position:relative}
 @keyframes cPop{0%{transform:scale(.55) rotate(-5deg);opacity:0}60%{transform:scale(1.1) rotate(1deg);opacity:1}100%{transform:scale(1)}}
 @keyframes shine{0%{background-position:160% 0}55%,100%{background-position:-60% 0}}
@@ -2355,18 +2356,37 @@ function openMerch(m){
   m.used=m.used||{};
   openShop(()=>resume(),m);
 }
+// 보스 상점: 탭 4개(능력치 / 증강 / VIP / 회복·도박)로 나눠 한 번에 한 묶음만 표시
+function hubBody(m,g){
+  const tab=m.tab||'stat',k=S.keys||0,p=S.p;
+  const ups=S.augs.map((a,i)=>[a,i]).filter(([a])=>a.lv<3&&a.t!=='v'&&a.t!=='f'),fz=fusable(),vs=vipStock();
+  const T=[['stat','📈 능력치',''],['aug','✨ 증강',ups.length+fz.length?ups.length+fz.length:''],['vip','💎 VIP',k?'🔑'+k:''],['etc','🎲 회복·도박','']];
+  let h=`<div class="shophead"><h2>🛒 보스 상점 <span style="font-size:.6em;color:var(--muted)">${S.chap} / 3</span></h2></div>
+  <p class="sub">보유 <span class="gold">${g} 골드</span> · 🔑 ${k} · 체력 ${Math.ceil(p.hp)}/${Math.round(p.maxHp)}</p>
+  <div class="tabs">${T.map(([id,n,b])=>`<button class="btn ${tab===id?'primary':''}" data-tab="${id}">${n}${b?` <small style="display:inline">${b}</small>`:''}</button>`).join('')}</div>
+  ${m.log?`<div class="log" aria-live="polite">${m.log}</div>`:''}`;
+  if(tab==='stat')h+=`<p class="sub">지금 스탯이 높을수록 비싸요.</p><div class="grid">${m.stock.map(i=>{const x=STACKS[i],c=stackCost(x);return `<button class="btn" data-k="${i}" ${g<c?'disabled':''}>${withActual(x.n,x.f)}<small>${c}골드</small></button>`;}).join('')}</div>`;
+  if(tab==='aug'){
+    h+=ups.length?`<p class="sub">증강 강화 · 카드에 마우스를 올리면 강화 효과</p><div class="grid">${ups.map(([a,i])=>{const c=Math.round(upCost(a)*.85);return `<button class="btn" data-u="${i}" title="${(a.u||'').replace(/"/g,'')}" ${g<c?'disabled':''}>${a.n} <span class="stars">${'★'.repeat(a.lv)}${'☆'.repeat(3-a.lv)}</span><small>★${a.lv+1}로 · ${c}골드</small></button>`;}).join('')}</div>`:'<p class="sub">강화할 증강이 없어요.</p>';
+    if(fz.length)h+=`<p class="sub" style="margin-top:12px">강제 합체 · 두 증강을 하나로 (슬롯 1칸 확보)</p><div class="grid">${fz.map(f=>`<button class="btn" data-fz="${f.id}" title="${f.d}" ${g<fuseCost()?'disabled':''}>${f.n}<small>${AUGS.find(x=>x.id===f.a).n} + ${AUGS.find(x=>x.id===f.b).n} · ${Math.round(fuseCost())}골드</small></button>`).join('')}</div>`;}
+  if(tab==='vip')h+=`<p class="sub">열쇠 1개로 VIP 1개. 보스를 잡을 때마다 열쇠 1개, 품목도 새로 바뀌어요.</p><div class="grid">${vs.map(v=>{const own=has(v.id),ok=augReq(v);return `<button class="btn" data-v="${v.id}" ${own||!ok||k<1?'disabled':''}>${v.n}<small>${v.d}</small><small style="color:var(--brass)">${own?'보유':!ok?'조건 미충족':'🔑 1'}</small></button>`;}).join('')}</div>`;
+  if(tab==='etc'){const hc=price(55),dbl=.45+LK()*.005;
+    h+=`<div class="grid">
+      <button class="btn" data-doc="heal" ${g<hc||p.hp>=p.maxHp||m.used.heal?'disabled':''}>❤️ 체력 전부 회복<small>${m.used.heal?'완료':hc+'골드 · 한 번'}</small></button>
+      <button class="btn" data-gb="box" ${g<boxC()?'disabled':''}>🎁 능력치 상자<small>${boxC()}골드 · 무작위 스탯 카드</small></button>
+      <button class="btn" data-gb="double" style="grid-column:1/-1" ${g<1||m.used.double?'disabled':''}>🪙 더블 오어 낫싱<small>${m.used.double?'이번 상점에서 사용함':`보유 골드 전부 · 승률 ${Math.round(dbl*100)}%`}</small></button></div>`;}
+  return h+`<button class="btn ghost" data-stats>내 스탯 보기</button><button class="btn primary" id="upBack">상점 나가기 · 다음 장으로</button>`;
+}
 function openShop(back,m){
   S.mode='shop';S.shopBack=back;
   const g=S.gold,M=MERCH[m.k],H=m.k==='hub';let body='';
-  if(H&&m.log)body+=`<div class="log" aria-live="polite">${m.log}</div>`;
-  if(m.k==='chips'||H){
-    body+=`<h3>${H?'능력치':'오늘의 품목'} <small style="color:var(--muted);font-size:13px">지금 스탯이 높을수록 비쌈</small></h3><div class="grid">${m.stock.map(i=>{const x=STACKS[i],c=stackCost(x);return `<button class="btn" data-k="${i}" ${g<c?'disabled':''}>${withActual(x.n,x.f)}<small>${c}골드${S.buys[x.k]?`, ${S.buys[x.k]}회 구매`:''}</small></button>`;}).join('')}</div>`;
+  if(m.k==='chips'){
+    body+=`<h3>${'오늘의 품목'} <small style="color:var(--muted);font-size:13px">지금 스탯이 높을수록 비쌈</small></h3><div class="grid">${m.stock.map(i=>{const x=STACKS[i],c=stackCost(x);return `<button class="btn" data-k="${i}" ${g<c?'disabled':''}>${withActual(x.n,x.f)}<small>${c}골드${S.buys[x.k]?`, ${S.buys[x.k]}회 구매`:''}</small></button>`;}).join('')}</div>`;
   }
-  if(m.k==='smith'||H){
+  if(m.k==='smith'){
     const ups=S.augs.map((a,i)=>[a,i]).filter(([a])=>a.lv<3&&a.t!=='v'&&a.t!=='f');const maxed=S.augs.length-ups.length;
     body+=`<h3>증강 강화 <small style="color:var(--muted);font-size:13px">${maxed?`최대 강화 ${maxed}개 숨김`:''}</small></h3><div class="uplist">${ups.map(([a,i])=>{const c=Math.round(upCost(a)*.85);return `<div class="uprow"><b>${a.n} <span class="stars">${'★'.repeat(a.lv)}${'☆'.repeat(3-a.lv)}</span></b><button class="btn" data-u="${i}" ${g<c?'disabled':''}>★${a.lv+1}로 ${c}골드</button><small><span style="color:var(--ivory)">지금 효과:</span> ${a.d}<br><span style="color:var(--brass)">강화하면:</span> ${a.u||''}</small></div>`;}).join('')||'<p class="sub">강화할 증강 없음</p>'}</div>`;
   }
-  if(H){const fz=fusable();if(fz.length)body+=`<h3>강제 합체</h3><div class="uplist">${fz.map(f=>`<div class="uprow"><b>${f.n}</b><button class="btn" data-fz="${f.id}" ${g<fuseCost()?'disabled':''}>${fuseCost()}골드</button><small>${AUGS.find(x=>x.id===f.a).n} + ${AUGS.find(x=>x.id===f.b).n} → ${f.d}</small></div>`).join('')}</div>`;}
   if(m.k==='alch'){
     const tagStr=a=>{const c={};for(const t of a.tags)c[t]=(c[t]||0)+1;return Object.keys(c).map(t=>TAGS[t].n+(c[t]>1?' ×'+c[t]:'')).join(', ');};
     const fz=fusable();
@@ -2393,16 +2413,11 @@ function openShop(back,m){
     body+=`<p class="sub">거래는 한 번씩만. 되돌릴 수 없습니다.</p><div class="uplist">${m.deals.map(id=>{const d=DEALS.find(x=>x.id===id),c=d.cost(),done=m.used[id],ok=!d.ok||d.ok();
       return `<div class="uprow"><b>${d.n}</b><button class="btn" data-deal="${id}" ${done||!ok||c>g?'disabled':''}>${done?'완료':c>0?c+'골드':c<0?'+'+(-c)+'골드 받기':'무료'}</button><small>${d.d}</small></div>`;}).join('')}</div>`;
   }
-  if(m.k==='vip'||H){
+  if(m.k==='vip'){
     const vc=vipCost(),k=S.keys||0;
-    body+=`${H?'<h3>💎 VIP 증강</h3>':''}<p class="sub">보유 🔑 <b>${k}</b>. 보스를 잡을 때마다 열쇠 1개, 열쇠 1개로 VIP 1개. 품목은 보스를 잡을 때마다 새로 뽑혀요. 슬롯을 차지하지 않음.</p><div class="uplist">${vipStock().map(v=>{const own=has(v.id),ok=augReq(v);return `<div class="uprow"><b>${v.n}</b><button class="btn" data-v="${v.id}" ${own||!ok||k<vc?'disabled':''}>${own?'보유':!ok?'조건 미충족':'🔑 '+vc}</button><small>${v.d}</small></div>`;}).join('')}</div>`;
+    body+=`<p class="sub">보유 🔑 <b>${k}</b>. 보스를 잡을 때마다 열쇠 1개, 열쇠 1개로 VIP 1개. 품목은 보스를 잡을 때마다 새로 뽑혀요. 슬롯을 차지하지 않음.</p><div class="uplist">${vipStock().map(v=>{const own=has(v.id),ok=augReq(v);return `<div class="uprow"><b>${v.n}</b><button class="btn" data-v="${v.id}" ${own||!ok||k<vc?'disabled':''}>${own?'보유':!ok?'조건 미충족':'🔑 '+vc}</button><small>${v.d}</small></div>`;}).join('')}</div>`;
   }
-  if(H){const p=S.p,hc=price(55),dbl=.45+LK()*.005;
-    body+=`<h3>회복 · 도박</h3><div class="grid">
-      <button class="btn" data-doc="heal" ${g<hc||p.hp>=p.maxHp||m.used.heal?'disabled':''}>체력 전부 회복<small>${m.used.heal?'완료':hc+'골드, 한 번'}</small></button>
-      <button class="btn" data-gb="box" ${g<boxC()?'disabled':''}>능력치 상자<small>${boxC()}골드, 무작위 스탯 카드 (높은 등급 확률↑)</small></button>
-      <button class="btn" data-gb="double" style="grid-column:1/-1" ${g<1||m.used.double?'disabled':''}>더블 오어 낫싱<small>${m.used.double?'이번 상점에서 사용함':`보유 골드 전부, 승률 ${Math.round(dbl*100)}%`}</small></button></div>`;}
-  if(H){show(`<div class="shophead"><h2>🛒 보스 상점 <span style="font-size:.6em;color:var(--muted)">${S.chap} / 3</span></h2></div><p class="sub">보유 <span class="gold">${g} 골드</span> · 🔑 ${S.keys||0}. 게임은 멈춰 있습니다. 마지막 보스를 잡으면 남은 골드는 10골드당 1점.</p>${body}<button class="btn ghost" data-stats>내 스탯 보기</button><button class="btn primary" id="upBack">상점 나가기 · 다음 장으로</button>`);}
+  if(H)show(hubBody(m,g));
   else show(`<div class="shophead"><h2>${M.icon} ${M.n}</h2><button class="btn" id="upBackTop">${S.hub?'상점으로':'떠나기'}</button></div><p class="sub">${M.d}. 보유 <span class="gold">${g} 골드</span>. 게임은 멈춰 있습니다.</p>${body}<button class="btn primary" id="upBack">${S.hub?'상점으로 돌아가기':'떠나기'}</button>`);
   const re=()=>openShop(back,m);
   ov.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const x=STACKS[+b.dataset.k],c=stackCost(x);if(S.gold<c)return;S.gold-=c;S.buys[x.k]=(S.buys[x.k]||0)+1;x.f(S.p);re();});
@@ -2416,6 +2431,7 @@ function openShop(back,m){
     re();});
   ov.querySelectorAll('[data-deal]').forEach(b=>b.onclick=()=>{const d=DEALS.find(x=>x.id===b.dataset.deal),c=d.cost();if(m.used[d.id]||c>S.gold)return;S.gold-=c;m.used[d.id]=1;const r=d.f();toast(d.n+(r?': '+r:''));re();});
   ov.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{const v=VIPS.find(x=>x.id===b.dataset.v),c=vipCost();if((S.keys||0)<c||has(v.id))return;S.keys-=c;S.augs.push({...v,lv:3});tagCount();toast('VIP '+v.n);re();});
+  ov.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{m.tab=b.dataset.tab;re();});
   ov.querySelectorAll('[data-gb]').forEach(b=>b.onclick=()=>{const k=b.dataset.gb,p=S.p;
     if(k==='box'){const c=boxC();if(S.gold<c)return;S.gold-=c;S.cbuys.box=cb('box')+1;const cd=cardOf(rollRarity(3),3);const res=cd.f(p);m.log=`능력치 상자: <span style="color:${RAR[cd.r].col};filter:brightness(1.5)">[${RAR[cd.r].n}]</span> ${cd.n} · ${res||cd.d}`;}
     if(k==='double'){if(m.used.double||S.gold<1)return;m.used.double=1;const bet=S.gold;if(Math.random()<.45+LK()*.005){S.gold+=bet;m.log=`더블 오어 낫싱: 앞면! ${bet} 골드를 따서 ${S.gold} 골드`;}else{S.gold=0;m.log=`더블 오어 낫싱: 뒷면. ${bet} 골드를 전부 잃었습니다`;}}
