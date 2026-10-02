@@ -1820,7 +1820,8 @@ function openStat(keep){
   $('boost').onclick=()=>{S.gold-=boostC;S.boost=true;openStat();};
   $('takeall').onclick=()=>{S.gold-=allC;cards.forEach(take);S.srr=0;toast('전부 획득');openNext();};
 }
-function rollRarity(bonus=0){const L=S.p.luck+bonus;const w=[['c',60],['r',26+2*L],['e',10+1.5*L],['l',2+.6*L]];let t=w.reduce((a,b)=>a+b[1],0),x=Math.random()*t;for(const [k,v] of w){if((x-=v)<0)return k;}return 'c';}
+// 스탯 카드 등급. 행운 효과는 15에서 멈춤 (행운 0: 영웅 7% 전설 1%, 행운 15+: 영웅 12% 전설 4%)
+function rollRarity(bonus=0){const L=Math.min(15,Math.max(0,S.p.luck+bonus));const w=[['c',64],['r',26+1.2*L],['e',7+.6*L],['l',1+.25*L]];let t=w.reduce((a,b)=>a+b[1],0),x=Math.random()*t;for(const [k,v] of w){if((x-=v)<0)return k;}return 'c';}
 const cardOk=c=>!(c.cc&&critFull())&&!(c.cm&&critMFull())&&(!c.req||c.req());
 // 직업 선호 카드는 ×1.6, 최근 9장 안에 나온 카드는 ×0.3 (같은 카드 반복 방지)
 function cardOf(r,bonus=0){const pool=CARDS.filter(c=>(c.fr?c.fr===r:true)&&cardOk(c)),fav=CLASSES[S.cls||'knight'].cards,rec=S.recentC||[],w=c=>(fav.includes(c.n)?1.6:1)*(rec.includes(c.n)?.3:1);
