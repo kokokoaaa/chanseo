@@ -868,11 +868,14 @@ const AFFIX={
   volatile:{n:'폭발',col:'#ff7a3a'},
   gunner:{n:'포격',col:'#ffd76a'}
 };
+// 장별 추가 난이도. 3장부터 일반 몹 체력·피해·스폰량, 정예 확률이 더 오름 (보스 체력은 제외)
+const CHAP_MUL=[{hp:1,dm:1,sp:1,n:22,el:0},{hp:1,dm:1,sp:1,n:22,el:0},{hp:1.3,dm:1.2,sp:.85,n:26,el:.06},{hp:1.6,dm:1.35,sp:.72,n:30,el:.12}];
+const chapM=()=>CHAP_MUL[Math.min(3,S.chap||0)];
 function spawnAt(type,x,y,noElite,forceElite){
-  const T=ET[type],d=S.round;
-  const elite=!T.boss&&!T.flee&&(forceElite||(!noElite&&S.gt>120&&Math.random()<Math.min(.35,(S.gt-120)/700)));
+  const T=ET[type],d=S.round,cm=chapM();
+  const elite=!T.boss&&!T.flee&&(forceElite||(!noElite&&S.gt>120&&Math.random()<Math.min(.35+cm.el,(S.gt-120)/700+cm.el)));
   const om=Math.pow(1.3,Math.max(0,S.gt-600)/60);
-  const m=(1+.35*(d-1))*om*(elite?4:1),dm=(1+.15*(d-1))*om*(elite?1.5:1);
+  const m=(1+.35*(d-1))*om*(elite?4:1)*(T.boss?1:cm.hp),dm=(1+.15*(d-1))*om*(elite?1.5:1)*cm.dm;
   S.en.push({type,x,y,elite,r:T.r*(elite?1.45:1),hp:T.hp*m,maxHp:T.hp*m,dmg:T.dmg*dm,spd:T.spd*Math.min(1.75,1+.025*(d-1))*(1+.07*Math.max(0,S.gt-600)/60),cd:rand(.3,1.2),hcd:1,bcd:2.5,hit:0,rot:Math.random()*6,orbCd:0,pt:0,ps:0,pTick:0,alive:true,boss:!!T.boss});
   const e=S.en[S.en.length-1];if(elite&&S.gt>150){const ks=Object.keys(AFFIX);e.aff=ks[Math.floor(Math.random()*ks.length)];if(AFFIX[e.aff].on)AFFIX[e.aff].on(e);}
   return e;
@@ -880,7 +883,7 @@ function spawnAt(type,x,y,noElite,forceElite){
 function ringPos(extra=40){const p=S.p,a=(p.moving&&Math.random()<.6)?Math.atan2(p.lmy,p.lmx)+rand(-1.1,1.1):Math.random()*TAU,r=Math.hypot(W,H)/2+extra;return [clamp(p.x+Math.cos(a)*r,20,WW-20),clamp(p.y+Math.sin(a)*r,20,WH-20)];}
 function spawnBurst(){
   if(S.en.length>190)return;
-  let n=Math.min(22,2+Math.floor(S.round*.7));if(S.bossI>=0)n=Math.ceil(n*.35);
+  let n=Math.min(chapM().n,2+Math.floor(S.round*.7));if(S.bossI>=0)n=Math.ceil(n*.35);
   const side=Math.floor(Math.random()*4);
   const [cx,cy]=ringPos();
   for(let i=0;i<n;i++)spawnAt(pickType(),cx+rand(-40,40),cy+rand(-40,40));
@@ -1202,14 +1205,14 @@ function onKill(e){
     const n=e.boss?8:1;for(let i=0;i<n;i++)S.dr.push({x:e.x+rand(-14,14)*(e.boss?3:1),y:e.y+rand(-14,14)*(e.boss?3:1),v:v/n});}
   if(S.dr.length>700){const a=S.dr.shift(),b=S.dr.find(c=>!c.xp===!a.xp);if(b)b.v+=a.v;}
   {const lk=1+Math.min(1,S.p.luck*.03);
-   if(e.boss)S.items.push({k:Math.random()<.5?'heal':'mag',x:e.x,y:e.y,life:150});
-   else{if(Math.random()<(e.elite?.012:.0007)*lk)S.items.push({k:'heal',x:e.x+rand(-10,10),y:e.y+rand(-10,10),life:150});
-   else if(Math.random()<(e.elite?.004:.00015)*lk)S.items.push({k:'mag',x:e.x+rand(-10,10),y:e.y+rand(-10,10),life:150});}
+   if(e.boss){if(Math.random()<.6)S.items.push({k:Math.random()<.5?'heal':'mag',x:e.x,y:e.y,life:150});}
+   else{if(Math.random()<(e.elite?.006:.0004)*lk)S.items.push({k:'heal',x:e.x+rand(-10,10),y:e.y+rand(-10,10),life:150});
+   else if(Math.random()<(e.elite?.002:.00008)*lk)S.items.push({k:'mag',x:e.x+rand(-10,10),y:e.y+rand(-10,10),life:150});}
    if(S.items.length>40)S.items.shift();}
   if(e.boss)bossDown(e);
   if(e.aff==='split')for(let i=0;i<3;i++)spawnAt(e.type==='slime'?'slimelet':'runner',e.x+rand(-12,12),e.y+rand(-12,12),true);
   if(e.aff==='volatile')tele({k:'c',x:e.x,y:e.y,r:90,T:.85,dmg:e.dmg*1.2,col:'#ff7a3a',fx:t=>burst(t.x,t.y,'#ff7a3a',16)});
-  if(e.type==='goblin'){const g=price(30);for(let i=0;i<12;i++)S.dr.push({x:e.x+rand(-40,40),y:e.y+rand(-40,40),v:g/12});S.items.push({k:Math.random()<.5?'mag':'heal',x:e.x,y:e.y,life:150});S.flash=.2;toast('보물 고블린 처치!');}
+  if(e.type==='goblin'){const g=price(30);for(let i=0;i<12;i++)S.dr.push({x:e.x+rand(-40,40),y:e.y+rand(-40,40),v:g/12});if(Math.random()<.4)S.items.push({k:Math.random()<.5?'mag':'heal',x:e.x,y:e.y,life:150});S.flash=.2;toast('보물 고블린 처치!');}
   if(e.bombed)return;
   p.pkills++;
   if(has('fever')){p.combo++;p.comboT=has('f_frenzy')?4:2;}
@@ -1255,7 +1258,7 @@ function update(dt){
   if(S.bossI<0&&!S.win&&S.gt>=(S.chap+1)*CH_LEN){S.gt=(S.chap+1)*CH_LEN;spawnBoss(S.chap);}
   {const bi=biomeIdx();if(S.biome==null)S.biome=bi;if(bi!==S.biome){S.prevBiome=S.biome;S.biome=bi;S.biomeT=3;toast('🌲 '+BIOMES[bi].n+'에 들어섰다');}S.biomeT=Math.max(0,(S.biomeT||0)-dt);}
   // spawn & timers
-  S.spawnT-=dt*(S.win?0:S.bossI>=0?.4:evOn('horde')?2.6:1);updEvent(dt);if(S.spawnT<=0){spawnBurst();S.spawnT=Math.max(.2,1.1-S.round*.07)*rand(.7,1.3);}
+  S.spawnT-=dt*(S.win?0:S.bossI>=0?.4:evOn('horde')?2.6:1);updEvent(dt);if(S.spawnT<=0){spawnBurst();S.spawnT=Math.max(.2,1.1-S.round*.07)*chapM().sp*rand(.7,1.3);}
   if(S.merch){S.merch.life-=dt;if(S.merch.life<=0){S.merch=null;}else if(p.alive&&Math.abs(p.x-S.merch.x)<44+p.r&&Math.abs(p.y-S.merch.y)<30+p.r){const m=S.merch;S.merch=null;if(AUTO.pick){toast('자동 모드: 상인 건너뜀');}else{openMerch(m);return;}}}
   if(has('piggy')){S.piggyT-=dt;if(S.piggyT<=0){S.piggyT=30;const it=Math.min(30*L('piggy'),Math.floor(S.gold*.1));if(it>0){S.gold+=it;ftext(p.x,p.y-34,'이자 +'+it,'#d6a94a',15);}}}
   if(has('insure')){S.insureT-=dt;if(S.insureT<=0){S.insureT=30;p.shield=2+L('insure')+(has('f_insure')?3:0);}}
