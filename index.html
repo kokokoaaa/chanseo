@@ -1395,6 +1395,7 @@ function onKill(e){
   if(has('corrode')&&e.ps>0)p.hp=Math.min(p.maxHp,p.hp+1);
   if(has('lottery')&&!e.boss&&Math.random()<.02){const g=price(25);S.gold+=g;explode(e.x,e.y,110,pDmg()*3,'#ffd76a');ftext(e.x,e.y-e.r-18,'복권 당첨! +'+g,'#ffd76a',18);}
   burst(e.x,e.y,T.col,e.boss?40:10);S.st.kills++;
+  {const ck=cosEq('kill');if(ck&&S.pa.length<180)for(let i=0;i<(e.boss?30:5);i++){const a=Math.random()*TAU,v=rand(80,260);S.pa.push({x:e.x,y:e.y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:rand(.35,.65),col:ck.cols[i%ck.cols.length]});}}
   if(e.type==='slime')for(let i=0;i<2;i++)spawnAt('slimelet',e.x+(i?9:-9),e.y+rand(-4,4),true);
   // 드롭: 경험치 ±15%, 골드 ±30% 랜덤. 행운(최대 30)이 골드 드롭 확률(18→20%)과 2배 확률(경험치 0→5%, 골드 5→12%)을 올림
   const lr=LK()/LUCK_CAP,xLucky=!e.boss&&Math.random()<lr*.05,gDrop=e.boss||e.elite||Math.random()<.18+lr*.02,gLucky=gDrop&&!e.boss&&Math.random()<.05+lr*.07;if(xLucky||gLucky)ftext(e.x,e.y-e.r-14,'행운!','#7be08f',14);
@@ -1674,6 +1675,8 @@ function drawChip(e){
   if(e.hp<e.maxHp&&(e.boss||e.elite||e.type==='tank')){const w=R*2+6,ty=y-DS*.62-4;ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(x-w/2,ty,w,4);ctx.fillStyle='#ff6060';ctx.fillRect(x-w/2,ty,w*Math.max(0,e.hp/e.maxHp),4);}
 }
 function drawPlayer(p){
+  {const au=cosEq('aura');if(au){const c=au.col==='rainbow'?rainbowCol():au.col,pu=1+Math.sin(S.t*4)*.08;ctx.save();ctx.globalAlpha=.55;ctx.strokeStyle=c;ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(p.x,p.y+p.r*.8,24*pu,9*pu,0,0,TAU);ctx.stroke();ctx.globalAlpha=.18;ctx.fillStyle=c;ctx.beginPath();ctx.ellipse(p.x,p.y+p.r*.8,24*pu,9*pu,0,0,TAU);ctx.fill();
+    if(au.k==='au_crown'){ctx.globalAlpha=1;ctx.font='16px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('👑',p.x,p.y-p.r-26+Math.sin(S.t*3)*2);}ctx.restore();}}
   const n=orbitN();
   if(n){const sp=2.8*(has('spinner')?1.5:1),rad=ORB_R*p.orbR,big=tag('roulette')>=6,orr=big?12:7,rc=has('redblack')?(red()?'#c8323a':'#1c1c1c'):'#d6a94a';
     for(let i=0;i<n;i++){const a=S.t*sp+i*TAU/n,ox=p.x+Math.cos(a)*rad,oy=p.y+Math.sin(a)*rad;
@@ -1732,8 +1735,9 @@ function draw(){
   if(S.p.alive)drawPlayer(S.p);
   drawBeams();
   const offV=(x,y,m=40)=>x<camX-m||x>camX+W+m||y<camY-m||y>camY+H+m;
+  const trl=cosEq('trail');
   for(const b of S.pr){if(offV(b.x,b.y))continue;
-    if(b.mine){
+    if(b.mine){if(trl&&!b.child){const sp=Math.hypot(b.vx,b.vy)||1,L=22;ctx.strokeStyle=trl.col==='rainbow'?rainbowCol(b.x*.5):trl.col;ctx.globalAlpha=.55;ctx.lineWidth=4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(b.x-b.vx/sp*L,b.y-b.vy/sp*L);ctx.stroke();ctx.globalAlpha=1;ctx.lineCap='butt';}
       if(b.dieThrow){ctx.fillStyle='#f1e7cf';ctx.fillRect(b.x-5,b.y-5,10,10);ctx.fillStyle='#04120c';ctx.font='9px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(b.roll,b.x,b.y+1);continue;}
       if(b.skull){ctx.fillStyle='rgba(200,120,255,.4)';ctx.beginPath();ctx.arc(b.x,b.y,b.r+4,0,TAU);ctx.fill();ctx.fillStyle='#e9dcff';ctx.beginPath();ctx.arc(b.x,b.y,b.r+1,0,TAU);ctx.fill();ctx.fillStyle='#2a1440';ctx.fillRect(b.x-2.5,b.y-1.5,1.8,1.8);ctx.fillRect(b.x+.7,b.y-1.5,1.8,1.8);continue;}
       if(!b.child&&!b.dieThrow&&!b.card&&S.cls){const an=Math.atan2(b.vy,b.vx),gl=b.big||b.x7;ctx.save();ctx.translate(b.x,b.y);ctx.rotate(an);
@@ -2125,32 +2129,15 @@ function startScreen(){
   const sv=loadSave();
   const cards=Object.keys(CLASSES).map(k=>{const C=CLASSES[k];return `<button class="clscard ${k===pickCls?'on':''}" data-cls="${k}">
     <canvas class="pv" data-c="${k}" width="96" height="96"></canvas><b>${C.n}</b><span class="role">${C.role}</span></button>`;}).join('');
-  show(`<h1>찬서 <span style="font-size:.5em;color:var(--ivory)">: 찬붕이의 뱀서</span></h1><p class="sub">카지노 던전에 들어온 모험가. 끝없이 몰려오는 몬스터 사이에서 최대한 오래 버티세요. 오래 버틸수록 숲이 점점 위험해집니다.</p>
+  show(`<h1>찬서 <span style="font-size:.5em;color:var(--ivory)">: 찬붕이의 뱀서</span></h1>
   <div class="hof" id="board">${boardHtml()}</div>
   ${sv?`<button class="btn primary" id="cont">이어하기 (${CLASSES[sv.s.cls||'knight'].n})<br><small style="color:var(--ink)">${Math.floor(sv.s.gt/60)}분 ${Math.floor(sv.s.gt%60)}초, 레벨 ${sv.s.lvl}, 증강 ${sv.augs.length}개</small></button><h3>새 게임</h3>`:''}
   <h3>캐릭터 선택</h3><div class="clsgrid">${cards}</div>
   <div class="cdet" id="cdet">${clsDetail(pickCls)}</div>
   <h3>난이도</h3><div class="btnrow" id="dsel">${DKEYS.map(k=>{const op=diffOpen(k),cl=(META.clears||{})[k];return `<button class="btn ${k===pickDiff?'primary':''}" data-diff="${k}" ${op?'':'disabled'} title="${op?'':DIFF[DKEYS[DKEYS.indexOf(k)-1]].n+' 클리어 시 열림'}">${op?'':'🔒 '}${DIFF[k].n}${cl?' ✔':''}</button>`;}).join('')}</div>
   ${diffOpen(DKEYS[DKEYS.length-1])?'':`<p class="sub" style="margin-top:4px">${DIFF[DKEYS.find(k=>!diffOpen(k))].n} 난이도는 ${DIFF[DKEYS[DKEYS.indexOf(DKEYS.find(k=>!diffOpen(k)))-1]].n} 난이도를 클리어하면 열려요.</p>`}
-  ${best?`<p class="sub">내 최고 기록 ${Math.floor(best/60)}분 ${best%60}초</p>`:''}
   <button class="btn primary" id="go">${CLASSES[pickCls].n}(으)로 시작${sv?' (저장 삭제)':''}</button>
-  <button class="btn ghost" id="meta">🏅 영구 강화 <small>보유 메달 ${META.medals}개</small></button>
-  <details><summary>게임 방법</summary><ul class="how">
-    <li><b>이동</b>WASD, 방향키, 또는 화면을 누른 채 드래그</li>
-    <li><b>대시</b>Space 또는 Shift, 모바일은 오른쪽 아래 버튼. 대시 중엔 무적</li>
-    <li><b>공격</b>사거리 안 가장 가까운 적에게 자동 공격</li>
-    <li><b>스탯</b>Tab 또는 I. 보는 동안 일시정지</li>
-    <li><b>성장</b>레벨업마다 스탯 카드와 직업별 기본 능력치 상승, 주변 충격파. 적이 떨군 파란 경험치 구슬을 주워야 레벨업. 골드는 가끔만 떨어짐. 4레벨마다 증강 (강화 없이 고정 수치). 증강 슬롯 10칸, 같은 태그를 모으면 시너지, 정해진 짝을 모으면 바로 합체</li>
-    <li><b>영구 강화</b>게임이 끝나면 점수에 따라 메달. 메인 화면에서 메달로 영구 능력치와 기술 구매</li>
-    <li><b>시너지</b>태그 9종, 같은 태그 2, 4, 6개에서 발동, 5개부터 초과 보너스</li>
-    <li><b>랜덤 수치</b>레벨업 스탯 카드는 등급(일반~전설)과 수치가 매번 굴려지고 하·중·상·최상으로 표시됨. 행운이 높을수록 높은 등급과 좋은 수치가 잘 나옴. 증강은 설명에 적힌 수치 그대로</li>
-    <li><b>이벤트</b>1분마다 무작위: 대군 습격, 정예 사냥, 보물 고블린, 고대 제단(30초 축복), 붉은 달(위험하지만 보상 2배)</li>
-    <li><b>정예 특성</b>2분 30초부터 정예에 신속·거대·분열·폭발·포격 중 하나가 붙음. 멧돼지는 주황 선으로 예고 후 돌진</li>
-    <li><b>보스 상점</b>보스 1~3을 잡으면 상점이 열려 골드를 쓸 수 있음 (총 3번). 마지막 보스를 잡으면 남은 골드는 10골드당 1점</li>
-    <li><b>자동 모드</b>P 자동 선택, M 자동 이동. 잠수용</li>
-    <li><b>배속</b>오른쪽 위 x1 버튼 또는 X 키. 누를 때마다 1~5배속 순환</li>
-    <li><b>4장 구성</b>최대 10분. 2분 30초마다 장이 끝나고 보스 등장. 기준 시간을 넘기면 보스가 광폭화(20초마다 강해짐). 마지막 4장은 적 수가 줄어드는 대신 훨씬 강한 적이 나옴. 보스를 빨리 잡을수록 점수 보너스(기준 시간보다 1초 빠를 때마다 10점). 보스전 동안 맵의 약 1/4 크기 결계 안에서만 싸워야 하고(분노·광폭화 시 조금씩 좁아짐), 시간이 멈추고 몬스터가 줄어듦. 빨간 경고 범위를 피하세요. 4번째 보스를 잡으면 클리어</li><li><b>부활</b>죽으면 끝, 골드가 있으면 부활 가능</li>
-  </ul></details>`);
+  <button class="btn ghost" id="meta">🏅 영구 강화 <small>보유 메달 ${META.medals}개</small></button>`);
   ov.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{pickCls=b.dataset.cls;try{localStorage.setItem('chipdungeon_cls',pickCls);}catch(e){}
     ov.querySelectorAll('[data-cls]').forEach(x=>x.classList.toggle('on',x===b));$('cdet').innerHTML=clsDetail(pickCls);$('go').firstChild.textContent=`${CLASSES[pickCls].n}(으)로 시작${sv?' (저장 삭제)':''}`;});
   ov.querySelectorAll('[data-diff]').forEach(b=>b.onclick=()=>{pickDiff=b.dataset.diff;try{localStorage.setItem('chanseo_diff',pickDiff);}catch(e){}ov.querySelectorAll('[data-diff]').forEach(x=>x.classList.toggle('primary',x===b));HOF_DIFF=null;refreshBoard();});
@@ -2165,7 +2152,7 @@ function drawPreviews(){
     HERO.draw(k,anim,t,anim==='attack'?cycle/.6:0,false);const x=c.getContext('2d');x.imageSmoothingEnabled=false;x.clearRect(0,0,96,96);x.drawImage(HERO.canvas,0,0,40,40,-12,-24,120,120);});
 }
 /* ---------- meta progression ---------- */
-const META=(()=>{try{const m=JSON.parse(localStorage.getItem('chanseo_meta')||'{}');return {medals:m.medals||0,total:m.total||0,lv:m.lv||{},sk:m.sk||{},clears:m.clears||{},prep:m.prep||{}};}catch(e){return {medals:0,total:0,lv:{},sk:{},clears:{},prep:{}};}})();
+const META=(()=>{try{const m=JSON.parse(localStorage.getItem('chanseo_meta')||'{}');const pc={luck:3,gold:2,xp:3,aug:6,key:5};let rf=0;for(const k in (m.prep||{}))rf+=(m.prep[k]||0)*(pc[k]||0);return {medals:(m.medals||0)+rf,total:m.total||0,lv:m.lv||{},sk:m.sk||{},clears:m.clears||{},cos:m.cos||{own:{},eq:{}}};}catch(e){return {medals:0,total:0,lv:{},sk:{},clears:{},cos:{own:{},eq:{}}};}})();
 function saveMeta(){try{localStorage.setItem('chanseo_meta',JSON.stringify(META));}catch(e){}}
 // 영구 강화: 단계당 효과는 작게, 항목과 단계는 많게 (오래 모으는 성장)
 const MSTAT=[
@@ -2187,16 +2174,25 @@ const MSKILL=[
   {k:'discount',n:'단골 손님',d:'보스 상점 골드 가격 −10%',c:15},
   {k:'key',n:'여분의 열쇠',d:'시작할 때 🔑 1개 (첫 보스 상점에서 VIP 2개 가능)',c:25}
 ];
-// 출전 준비물: 메달로 미리 사두는 1회용 아이템. 판을 시작할 때 종류별로 1개씩 자동 사용 (여러 개 쌓아둘 수 있음). 남는 메달 소모처
-const MPREP=[
-  {k:'luck',n:'행운의 부적',d:'이번 판 행운 +3',c:3,f:()=>{S.p.luck+=3;}},
-  {k:'gold',n:'비상금',d:'이번 판 시작 골드 +200',c:2,f:()=>{S.gold+=200;}},
-  {k:'xp',n:'경험치 물약',d:'이번 판 경험치 획득 +15%',c:3,f:()=>{S.p.xpM=(S.p.xpM||1)+.15;}},
-  {k:'aug',n:'증강 선물',d:'시작할 때 증강을 하나 더 고름',c:6,f:()=>{S.bonusAug++;}},
-  {k:'key',n:'VIP 열쇠',d:'🔑 1개를 들고 시작',c:5,f:()=>{S.keys=(S.keys||0)+1;}}
+// 외형: 메달로 사는 꾸미기. 능력치 영향 없음. 종류별로 하나씩 장착. 목표가 되도록 비싸게
+const COS=[
+  {k:'tr_gold',cat:'trail',n:'황금 궤적',d:'탄환 뒤에 금빛 꼬리',c:150,col:'#ffd76a'},
+  {k:'tr_ice',cat:'trail',n:'서리 궤적',d:'탄환 뒤에 얼음 꼬리',c:250,col:'#9fe8ff'},
+  {k:'tr_fire',cat:'trail',n:'불꽃 궤적',d:'탄환 뒤에 불꽃 꼬리',c:400,col:'#ff7a2a'},
+  {k:'tr_rainbow',cat:'trail',n:'무지개 궤적',d:'탄환 뒤에 무지개 꼬리',c:800,col:'rainbow'},
+  {k:'kl_coin',cat:'kill',n:'동전 폭죽',d:'처치하면 금화가 튐',c:200,cols:['#ffd76a','#e8bb4f','#fff3c4']},
+  {k:'kl_card',cat:'kill',n:'카드 흩날림',d:'처치하면 카드 조각이 흩어짐',c:350,cols:['#f1e7cf','#c8323a','#151515']},
+  {k:'kl_void',cat:'kill',n:'보라 연기',d:'처치하면 보라 연기',c:500,cols:['#b552d6','#7f5cff','#e2c4ff']},
+  {k:'kl_prism',cat:'kill',n:'프리즘 폭발',d:'처치하면 무지개 조각',c:1000,cols:['#ff5ad8','#5fc9d9','#ffd76a','#7be08f','#b552d6']},
+  {k:'au_gold',cat:'aura',n:'금빛 오라',d:'발밑에 금빛 고리',c:300,col:'#ffd76a'},
+  {k:'au_jade',cat:'aura',n:'비취 오라',d:'발밑에 초록 고리',c:500,col:'#7be08f'},
+  {k:'au_blood',cat:'aura',n:'핏빛 오라',d:'발밑에 붉은 고리',c:800,col:'#ff4a4a'},
+  {k:'au_crown',cat:'aura',n:'왕의 광채',d:'무지개 고리와 머리 위 왕관',c:2000,col:'rainbow'}
 ];
-const prepN=k=>(META.prep&&META.prep[k])||0;
-function usePrep(){const used=[];for(const x of MPREP)if(prepN(x.k)>0){META.prep[x.k]--;x.f();used.push(x.n);}if(used.length){saveMeta();setTimeout(()=>toast('준비물 사용: '+used.join(', ')),300);}}
+const COS_CAT={trail:'탄환 궤적',kill:'처치 효과',aura:'오라'};
+const cosOwn=k=>!!(META.cos&&META.cos.own&&META.cos.own[k]);
+const cosEq=cat=>{const k=META.cos&&META.cos.eq&&META.cos.eq[cat];return k?COS.find(x=>x.k===k):null;};
+const rainbowCol=(o=0)=>`hsl(${(S?S.t*120:0)+o}deg,90%,65%)`;
 const mlv=k=>META.lv[k]||0;
 const mcost=x=>x.c*(mlv(x.k)+1);
 const metaSpent=()=>MSTAT.reduce((q,x)=>{const l=mlv(x.k);return q+x.c*l*(l+1)/2;},0)+MSKILL.reduce((q,x)=>q+(META.sk[x.k]?x.c:0),0);
@@ -2222,17 +2218,19 @@ function openMeta(){
   <div class="mbal">보유 메달 <b>🏅 ${META.medals}</b><small>지금까지 ${META.total}개 획득 · 강화는 모든 캐릭터, 모든 판에 적용</small></div>
   <h3>영구 능력치 <small style="color:var(--muted);font-size:13px">단계가 오를수록 가격 상승</small></h3><div class="mgrid">${st}</div>
   <h3>영구 기술 <small style="color:var(--muted);font-size:13px">한 번 사면 계속 적용</small></h3><div class="mgrid">${sk}</div>
-  <h3>출전 준비물 <small style="color:var(--muted);font-size:13px">1회용. 다음 판 시작 때 종류별로 1개씩 자동 사용, 여러 개 쌓아둘 수 있음</small></h3><div class="mgrid">${MPREP.map(x=>`<button class="mtile sk" data-mp="${x.k}" ${META.medals>=x.c?'':'disabled'}><b>${x.n}</b><span class="md">${x.d}</span><span class="mnow">보유 ${prepN(x.k)}개</span><span class="mc">🏅 ${x.c}</span></button>`).join('')}</div>
+  <h3>외형 <small style="color:var(--muted);font-size:13px">능력치 영향 없음 · 눌러서 장착/해제</small></h3>${Object.keys(COS_CAT).map(cat=>`<h3 style="font-size:15px;margin:10px 0 4px;color:var(--muted)">${COS_CAT[cat]}</h3><div class="mgrid">${COS.filter(x=>x.cat===cat).map(x=>{const own=cosOwn(x.k),eq=cosEq(cat)===x;return `<button class="mtile sk ${eq?'max':''}" data-cs="${x.k}" ${own||META.medals>=x.c?'':'disabled'}><b>${x.n}</b><span class="md">${x.d}</span><span class="mc">${eq?'✔ 장착 중':own?'장착하기':'🏅 '+x.c}</span></button>`;}).join('')}</div>`).join('')}
   <button class="btn ghost" id="mReset" ${metaSpent()?'':'disabled'}>↺ 전체 초기화 <small>🏅 ${metaSpent()} 환불</small></button>
   <button class="btn primary" id="mBack2">돌아가기</button>`);
   const keepY=()=>{const y=ov.scrollTop;openMeta();ov.scrollTop=y;};
   ov.querySelectorAll('[data-ms]').forEach(b=>b.onclick=()=>{const x=MSTAT.find(q=>q.k===b.dataset.ms),c=mcost(x);if(META.medals<c||mlv(x.k)>=x.max)return;META.medals-=c;META.lv[x.k]=mlv(x.k)+1;saveMeta();keepY();});
   ov.querySelectorAll('[data-mk]').forEach(b=>b.onclick=()=>{const x=MSKILL.find(q=>q.k===b.dataset.mk);if(META.medals<x.c||META.sk[x.k])return;META.medals-=x.c;META.sk[x.k]=1;saveMeta();keepY();});
-  ov.querySelectorAll('[data-mp]').forEach(b=>b.onclick=()=>{const x=MPREP.find(q=>q.k===b.dataset.mp);if(META.medals<x.c)return;META.medals-=x.c;META.prep=META.prep||{};META.prep[x.k]=prepN(x.k)+1;saveMeta();keepY();});
+  ov.querySelectorAll('[data-cs]').forEach(b=>b.onclick=()=>{const x=COS.find(q=>q.k===b.dataset.cs);META.cos=META.cos||{own:{},eq:{}};
+    if(!cosOwn(x.k)){if(META.medals<x.c)return;META.medals-=x.c;META.cos.own[x.k]=1;META.cos.eq[x.cat]=x.k;}
+    else META.cos.eq[x.cat]=META.cos.eq[x.cat]===x.k?null:x.k;saveMeta();keepY();});
   $('mReset').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.innerHTML='한 번 더 누르면 초기화 <small>🏅 '+metaSpent()+' 환불</small>';return;}META.medals+=metaSpent();META.lv={};META.sk={};saveMeta();keepY();};
   $('mBack').onclick=startScreen;$('mBack2').onclick=startScreen;
 }
-function beginRun(cls){clearSave();newRun();S.diff=pickDiff;applyClass(cls);applyMeta();S.bonusAug=1+(META.sk.extraAug?1:0);usePrep();openNext();}
+function beginRun(cls){clearSave();newRun();S.diff=pickDiff;applyClass(cls);applyMeta();S.bonusAug=1+(META.sk.extraAug?1:0);openNext();}
 
 /* ---------- online ranking ---------- */
 let RDB=null,RMYID=null,BOARD=null,RSTATE='loading',SHEET=false;
