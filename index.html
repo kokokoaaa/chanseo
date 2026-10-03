@@ -2510,7 +2510,9 @@ const STACKS=[
 ];
 // 골드 상점 가격: 현재 스탯이 높을수록 비싸짐 (구매 횟수는 약하게만 반영)
 function statF(k){const p=S.p,B=CLASSES[S.cls||'knight'].stats;return {atk:effDmg(p)/(B.dmg||10),rate:effRate(p)/(B.rate||2),hp:p.maxHp/(B.maxHp||140),arm:1+p.armor/40,crit:1+p.crit*6,critm:p.critM/2,dodge:1+p.dodge*8,ls:1+p.lifesteal*50,luck:1+p.luck/8,multi:Math.pow(2.2,p.multi-1)}[k]||1;}
-const stackCost=x=>Math.round((META.sk.discount?.9:1)*x.b*(x.k==='multi'?2:3)*Math.sqrt(econ())*Math.pow(Math.max(1,statF(x.k)),1.6)*Math.pow(1.15,(S.buys[x.k]||0)));
+const stackCost=x=>Math.round((META.sk.discount?.9:1)*x.b*(x.k==='multi'?2:3)*Math.sqrt(econ())*Math.pow(Math.max(1,statF(x.k)),1.6)*Math.pow(1.25,(S.buys[x.k]||0))*Math.pow(1.04,totBuys()));
+// 지금까지 상점에서 산 스탯 총 횟수. 많이 살수록 모든 스탯이 조금씩 비싸짐 (후반 골드 폭증 대응)
+function totBuys(){let n=0;for(const k in S.buys)n+=S.buys[k];return n;}
 // VIP는 보스 열쇠로만 구매: 보스 1마리 = 열쇠 1개 = VIP 1개. 품목은 보스를 잡을 때마다 미보유 VIP 중 무작위 3개로 새로 뽑힘
 const vipOwned=()=>S.augs.filter(a=>a.t==='v').length;
 const vipCost=()=>1;
