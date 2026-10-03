@@ -37,6 +37,9 @@ canvas{display:block;width:100%;height:100%}
 .aico i{font-style:normal;font-size:17px;line-height:1}
 .aico span{font-size:10px;color:#f1e7cf;line-height:1.1;margin-top:2px;white-space:nowrap;overflow:hidden;max-width:34px}
 .aico.empty{border-style:dashed;border-color:rgba(241,231,207,.22);box-shadow:none;cursor:default}
+.mtile.poor{opacity:.5;cursor:help}
+#cosPrev{position:fixed;z-index:260;display:none;padding:6px;background:#0b1f18;border:1px solid var(--brass);border-radius:10px;box-shadow:0 10px 26px rgba(0,0,0,.6);pointer-events:none}
+#cosPrev canvas{display:block;width:240px;height:140px;image-rendering:pixelated;border-radius:6px}
 #augTip{position:fixed;z-index:250;display:none;max-width:260px;background:rgba(4,18,12,.96);border:1px solid var(--ac,#d6a94a);border-radius:8px;padding:8px 10px;font-family:'Do Hyeon',sans-serif;font-size:14px;color:#f1e7cf;pointer-events:none;line-height:1.35}
 #augTip b{display:block;font-size:16px;font-weight:400;color:var(--ac,#d6a94a)}
 #augTip small{display:block;color:var(--muted);font-size:12px;margin:2px 0 4px}
@@ -2267,7 +2270,33 @@ const bossSpeedPts=()=>(S.st.btimes||[]).reduce((q,t,i)=>q+Math.round(Math.max(0
 function clearScore(){return Math.round((Math.round(effT()*10+S.st.kills*2+S.lvl*30+(S.st.bosses||0)*400)+Math.floor(S.gold/10)+bossSpeedPts())*dfM().sc);}
 function runScore(){return Math.round((Math.round(effT()*10+S.st.kills*2+S.lvl*30+(S.st.bosses||0)*400)+goldPts()+bossSpeedPts())*dfM().sc);}
 function runMedals(sc){return Math.floor(sc/2000)+(META.sk.bossMedal?(S.st.bosses||0):0);}
-function openMeta(){
+// 외형 미리보기: 마우스를 올리면(모바일은 첫 번째 탭) 옆에 작은 애니메이션
+let cosPrevRAF=0;
+function cosPreview(x,anchor){
+  let box=document.getElementById('cosPrev');if(!box){box=document.createElement('div');box.id='cosPrev';document.body.appendChild(box);}
+  cancelAnimationFrame(cosPrevRAF);box.style.display='block';
+  if(x.cat==='hof'){box.innerHTML=`<div class="rrow hc-${x.k}" style="margin:0;min-width:200px"><span class="rn">1</span><span class="rnm"><b><span class="hn hx-${x.k}">${x.k==='hf_crown'?'👑 ':''}찬붕이</span></b></span><span class="rs">99,999</span></div>`;}
+  else{box.innerHTML='<canvas width="240" height="140"></canvas>';const cv=box.firstChild,g=cv.getContext('2d');g.imageSmoothingEnabled=false;const t0=performance.now(),parts=[];let lastK=-1;
+    const col=o=>x.col==='rainbow'?`hsl(${(performance.now()/1000*120+o)%360}deg,90%,65%)`:x.col;
+    const loop=()=>{const T=(performance.now()-t0)/1000;g.fillStyle='#0b3024';g.fillRect(0,0,240,140);
+      const hx=60,hy=82,ex=190,ey=74,cyc=T%1.4,alive=cyc<1.1;
+      if(x.cat==='aura'){const pu=1+Math.sin(T*4)*.08;g.globalAlpha=.6;g.strokeStyle=col(0);g.lineWidth=3;g.beginPath();g.ellipse(hx,hy+4,30*pu,11*pu,0,0,TAU);g.stroke();g.globalAlpha=.2;g.fillStyle=col(0);g.fill();g.globalAlpha=1;}
+      HERO.draw(pickCls||'knight',cyc<.3?'attack':'idle',T,cyc<.3?cyc/.3:0,false);g.save();if(x.cat==='skin'){g.filter=x.f;if(x.a)g.globalAlpha=x.a;}g.translate(hx,hy);g.scale(1.7,1.7);g.drawImage(HERO.canvas,-20,-35);g.restore();g.filter='none';g.globalAlpha=1;
+      if(x.k==='au_crown'){g.font='18px serif';g.textAlign='center';g.fillText('👑',hx,hy-62+Math.sin(T*3)*2);}
+      if(alive){g.fillStyle='#6fae45';g.beginPath();g.arc(ex,ey,12,0,TAU);g.fill();g.fillStyle='#ffeb6b';g.fillRect(ex-5,ey-4,3,3);g.fillRect(ex+2,ey-4,3,3);}
+      const k=Math.floor(T/1.4);if(!alive&&k!==lastK){lastK=k;const cs=x.cat==='kill'?x.cols:['#6fae45','#4a7d2c'];for(let i=0;i<(x.cat==='kill'?18:8);i++){const a=Math.random()*TAU,v=40+Math.random()*90;parts.push({x:ex,y:ey,vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:.6,c:cs[i%cs.length]});}}
+      for(let i=0;i<3;i++){const ph=(cyc-i*.12)/.5;if(ph<0||ph>1||!alive)continue;const bx=hx+20+(ex-hx-30)*ph,by=hy-14+(ey-hy+14)*ph;
+        if(x.cat==='trail'){g.strokeStyle=col(bx);g.globalAlpha=.6;g.lineWidth=4;g.lineCap='round';g.beginPath();g.moveTo(bx,by);g.lineTo(bx-24,by-(ey-hy+14)/(ex-hx-30)*24);g.stroke();g.globalAlpha=1;}
+        g.fillStyle='#fffaf0';g.fillRect(bx-4,by-3,8,6);}
+      for(const q of parts){q.l-=1/60;q.x+=q.vx/60;q.y+=q.vy/60;if(q.l>0){g.globalAlpha=Math.min(1,q.l*2);g.fillStyle=q.c;g.fillRect(q.x-2,q.y-2,4,4);}}g.globalAlpha=1;
+      for(let i=parts.length-1;i>=0;i--)if(parts[i].l<=0)parts.splice(i,1);
+      cosPrevRAF=requestAnimationFrame(loop);};loop();}
+  const r=anchor.getBoundingClientRect(),bw=box.offsetWidth,bh=box.offsetHeight;
+  let left=r.right+8;if(left+bw>innerWidth-8)left=r.left-bw-8;if(left<8)left=Math.max(8,(innerWidth-bw)/2);
+  let top=r.top+r.height/2-bh/2;if(left===Math.max(8,(innerWidth-bw)/2))top=r.top-bh-8;box.style.left=left+'px';box.style.top=Math.max(8,Math.min(innerHeight-bh-8,top))+'px';
+}
+function cosPreviewHide(){cancelAnimationFrame(cosPrevRAF);const b=document.getElementById('cosPrev');if(b)b.style.display='none';}
+function openMeta(){cosPreviewHide();
   const now=x=>{const l=mlv(x.k);return l?x.d.replace(/[\d.]+/,m=>+(parseFloat(m)*l).toFixed(1)):'없음';};
   const st=MSTAT.map(x=>{const l=mlv(x.k),c=mcost(x),mx=l>=x.max,can=!mx&&META.medals>=c;
     return `<button class="mtile ${mx?'max':''}" data-ms="${x.k}" ${can?'':'disabled'}><b>${x.n}</b><span class="md">${x.d} / 단계</span>
@@ -2279,17 +2308,20 @@ function openMeta(){
   <div class="mbal">보유 메달 <b>🏅 ${META.medals}</b><small>지금까지 ${META.total}개 획득 · 강화는 모든 캐릭터, 모든 판에 적용</small></div>
   <h3>영구 능력치 <small style="color:var(--muted);font-size:13px">단계가 오를수록 가격 상승</small></h3><div class="mgrid">${st}</div>
   <h3>영구 기술 <small style="color:var(--muted);font-size:13px">한 번 사면 계속 적용</small></h3><div class="mgrid">${sk}</div>
-  <h3>외형 <small style="color:var(--muted);font-size:13px">능력치 영향 없음 · 눌러서 장착/해제</small></h3>${Object.keys(COS_CAT).map(cat=>`<h3 style="font-size:15px;margin:10px 0 4px;color:var(--muted)">${COS_CAT[cat]}</h3><div class="mgrid">${COS.filter(x=>x.cat===cat).map(x=>{const own=cosOwn(x.k),eq=cosEq(cat)===x;return `<button class="mtile sk ${eq?'max':''}" data-cs="${x.k}" ${own||META.medals>=x.c?'':'disabled'}><b>${x.n}</b><span class="md">${x.d}</span><span class="mc">${eq?'✔ 장착 중':own?'장착하기':'🏅 '+x.c}</span></button>`;}).join('')}</div>`).join('')}
+  <h3>외형 <small style="color:var(--muted);font-size:13px">능력치 영향 없음 · 눌러서 장착/해제</small></h3>${Object.keys(COS_CAT).map(cat=>`<h3 style="font-size:15px;margin:10px 0 4px;color:var(--muted)">${COS_CAT[cat]}</h3><div class="mgrid">${COS.filter(x=>x.cat===cat).map(x=>{const own=cosOwn(x.k),eq=cosEq(cat)===x;return `<button class="mtile sk ${eq?'max':''} ${own||META.medals>=x.c?'':'poor'}" data-cs="${x.k}"><b>${x.n}</b><span class="md">${x.d}</span><span class="mc">${eq?'✔ 장착 중':own?'장착하기':'🏅 '+x.c}</span></button>`;}).join('')}</div>`).join('')}
   <button class="btn ghost" id="mReset" ${metaSpent()?'':'disabled'}>↺ 전체 초기화 <small>🏅 ${metaSpent()} 환불</small></button>
   <button class="btn primary" id="mBack2">돌아가기</button>`);
   const keepY=()=>{const y=ov.scrollTop;openMeta();ov.scrollTop=y;};
   ov.querySelectorAll('[data-ms]').forEach(b=>b.onclick=()=>{const x=MSTAT.find(q=>q.k===b.dataset.ms),c=mcost(x);if(META.medals<c||mlv(x.k)>=x.max)return;META.spent=metaSpent()+c;META.medals-=c;META.lv[x.k]=mlv(x.k)+1;saveMeta();keepY();});
   ov.querySelectorAll('[data-mk]').forEach(b=>b.onclick=()=>{const x=MSKILL.find(q=>q.k===b.dataset.mk);if(META.medals<x.c||META.sk[x.k])return;META.spent=metaSpent()+x.c;META.medals-=x.c;META.sk[x.k]=1;saveMeta();keepY();});
+  ov.querySelectorAll('[data-cs]').forEach(b=>{const x=COS.find(q=>q.k===b.dataset.cs);b.addEventListener('mouseenter',()=>cosPreview(x,b));b.addEventListener('mouseleave',cosPreviewHide);
+    b.addEventListener('touchstart',()=>{if(b.dataset.pv!=='1'){ov.querySelectorAll('[data-cs]').forEach(o=>o.dataset.pv='');b.dataset.pv='1';b.dataset.tap='1';cosPreview(x,b);}},{passive:true});});
   ov.querySelectorAll('[data-cs]').forEach(b=>b.onclick=()=>{const x=COS.find(q=>q.k===b.dataset.cs);META.cos=META.cos||{own:{},eq:{}};
-    if(!cosOwn(x.k)){if(META.medals<x.c)return;META.medals-=x.c;META.cos.own[x.k]=1;META.cos.eq[x.cat]=x.k;}
+    if(b.dataset.tap==='1'&&!cosOwn(x.k)){b.dataset.tap='';return;}
+    if(!cosOwn(x.k)){if(META.medals<x.c)return;cosPreviewHide();META.medals-=x.c;META.cos.own[x.k]=1;META.cos.eq[x.cat]=x.k;}
     else META.cos.eq[x.cat]=META.cos.eq[x.cat]===x.k?null:x.k;saveMeta();keepY();});
   $('mReset').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.innerHTML='한 번 더 누르면 초기화 <small>🏅 '+metaSpent()+' 환불</small>';return;}META.medals+=metaSpent();META.spent=0;META.lv={};META.sk={};saveMeta();keepY();};
-  $('mBack').onclick=startScreen;$('mBack2').onclick=startScreen;
+  $('mBack').onclick=()=>{cosPreviewHide();startScreen();};$('mBack2').onclick=()=>{cosPreviewHide();startScreen();};
 }
 function beginRun(cls){clearSave();newRun();S.diff=pickDiff;applyClass(cls);applyMeta();S.bonusAug=1+(META.sk.extraAug?1:0);openNext();}
 
