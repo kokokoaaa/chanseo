@@ -2249,7 +2249,7 @@ function autoMoveVec(){
     for(const b of shots){const ex=b.vx*.6,ey=b.vy*.6,L2=ex*ex+ey*ey||1,u=clamp(((tx-b.x)*ex+(ty-b.y)*ey)/L2,0,1),d=Math.hypot(b.x+ex*u-tx,b.y+ey*u-ty),R0=(b.r||5)+p.r+22;if(d<R0)sc-=(R0-d)*6;}
     // 보스전: 보스를 사거리 안 적정 거리(사거리의 70%, 최소 보스 몸통+70)에 두도록 유도
     // 사거리 끝 쪽(85%)에서 때리고, 가까이 붙는 쪽을 더 크게 감점. 보스 몸통+120 안쪽은 금지 수준
-    if(bossOn){const e=S.boss,want=Math.max(e.r+p.r+120,p.range*(low?.92:.85)),db=Math.hypot(e.x-tx,e.y-ty);sc-=db<want?(want-db)*2.4:db>p.range*.95?(db-p.range*.95)*3:0;}
+    if(bossOn){const e=S.boss,want=Math.max(e.r+p.r+90,p.range*(low?.88:.74)),db=Math.hypot(e.x-tx,e.y-ty);sc-=db<want?(want-db)*2.4:db>p.range*.95?(db-p.range*.95)*3:0;}
     // 보스 예고 공격·장판 회피
     for(const t of S.tele){if(!t.dmg&&t.k==='c')continue;
       if(t.k==='c'){const d=Math.hypot(t.x-tx,t.y-ty),m2=Math.hypot(t.x-(p.x+cx*STEP*.5),t.y-(p.y+cy*STEP*.5));if(d<t.r+p.r+10)sc-=900*(1-d/(t.r+p.r+10))+300;if(m2<t.r)sc-=200;}
