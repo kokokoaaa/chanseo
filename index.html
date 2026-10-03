@@ -28,7 +28,9 @@ canvas{display:block;width:100%;height:100%}
 .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--chip-red)}
 .bar span{position:relative;display:block;text-align:center;font-size:14px;line-height:17px}
 .gold{color:var(--brass)}
-#botLeft{position:absolute;left:10px;bottom:14px;display:flex;flex-direction:column;gap:6px;max-width:calc(100% - 120px);pointer-events:none}
+#botLeft{position:absolute;left:10px;bottom:14px;display:flex;flex-direction:column;gap:6px;max-width:calc(100% - 120px);pointer-events:none;z-index:6}
+/* 레벨업·상점·스탯 창이 열려 멈춰 있어도 증강 아이콘을 볼 수 있게 위에 띄우고, 창 내용은 아이콘 줄에 가리지 않게 아래 여백 */
+#ov>.panel,#st>.panel{margin-bottom:125px}
 #augBar{display:flex;flex-wrap:wrap;gap:4px;pointer-events:auto}
 #augBar:empty{display:none}
 .aico{width:38px;height:40px;border-radius:7px;border:2px solid var(--ac);background:rgba(4,18,12,.78);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Do Hyeon',sans-serif;cursor:help;box-shadow:0 0 6px color-mix(in srgb,var(--ac) 45%,transparent);user-select:none;-webkit-user-select:none}
