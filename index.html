@@ -610,11 +610,11 @@ const AUGS=[
   {id:'r_assassin',cls:'rogue',u:'정예와 보스에게 주는 피해 배율이 커져요. ★1은 2배, ★2는 2.5배, ★3은 3배.',t:'p',n:'암살',tags:['curse','jackpot'],d:'[도적 전용] 정예와 보스에게 피해 2.5배, 처치하면 체력 2% 회복'},
   // new mechanics
   {id:'chainlt',u:'7번째 적중마다 튀는 번개가 이어지는 적 수가 늘어나요. ★1은 5명, ★2는 7명, ★3은 9명.',t:'g',n:'체인 라이트닝',tags:['card','jackpot'],d:'7번째 적중마다 번개가 주변 적 7명에게 연쇄'},
-  {id:'blackhole',u:'블랙홀이 생기는 주기가 짧아지고 크기도 커져요. 주기는 8초 → 7초 → 6초.',t:'p',n:'블랙홀 칩',tags:['roulette','curse'],d:'9초마다 가까운 적 위치에 블랙홀. 적을 빨아들이며 피해'},
+  {id:'blackhole',u:'블랙홀이 생기는 주기가 짧아지고 크기도 커져요. 주기는 8초 → 7초 → 6초.',t:'p',n:'블랙홀 칩',tags:['roulette','curse'],d:'9초마다 가까운 적 위치에 블랙홀. 적을 빨아들이며 피해. 공속이 오를수록 더 자주'},
   {id:'icecoin',u:'맞았을 때 주변 적이 느려지는 시간이 늘어나요. ★1은 2초, ★2는 2.5초, ★3은 3초.',t:'s',n:'얼음 동전',tags:['house','guard'],d:'맞으면 주변에 냉기 폭발 (공격력 200%, 1초에 한 번), 주변 적이 2.5초간 크게 느려짐'},
   {id:'mirror',u:'적 탄환을 튕겨내는 확률이 올라가요. ★1은 20%, ★2는 30%, ★3은 40%. 튕긴 탄환은 공격력 2배로 적을 맞혀요.',t:'g',n:'거울 패',tags:['card','guard'],d:'적 탄환이 30% 확률로 튕겨 나가 적을 공격 (공격력 2배)'},
   {id:'revenge',u:'맞은 뒤 3초 안의 다음 공격 피해 배율이 커져요. ★1은 2배, ★2는 2.5배, ★3은 3배.',t:'s',n:'복수',tags:['curse','jackpot'],d:'맞으면 3초 안의 다음 공격 피해 2.5배'},
-  {id:'punch',u:'0.8초마다 터지는 충격파의 범위와 피해가 커져요. 범위는 85 → 100 → 115, 피해는 공격력의 120% → 160% → 200%.',t:'s',n:'주사위 충격파',tags:['dice'],d:'0.8초마다 가까운 적에게 충격파 (범위 100, 공격력 160%)'},
+  {id:'punch',u:'0.8초마다 터지는 충격파의 범위와 피해가 커져요. 범위는 85 → 100 → 115, 피해는 공격력의 120% → 160% → 200%.',t:'s',n:'주사위 충격파',tags:['dice'],d:'0.8초마다 가까운 적에게 충격파 (범위 100, 공격력 160%). 공속이 오를수록 더 자주'},
   {id:'rush',u:'골드를 주웠을 때 1초 동안 오르는 이동 속도가 커져요. ★1은 +35%, ★2는 +50%, ★3은 +65%.',t:'g',n:'골드 러시',tags:['house','blitz'],d:'골드를 주우면 1초간 이동 속도 +50%, 공격 속도 +30%'},
   {id:'fog',u:'지나간 자리에 남는 독 웅덩이가 커져요. 반경 28 → 34 → 40.',t:'s',n:'독안개',tags:['poison','blitz'],d:'움직이는 길에 독 웅덩이를 남김 (반경 34)'},
   {id:'guardian',u:'적 탄환을 막아주는 회전 칩이 늘어나요. ★1은 1개, ★2는 2개, ★3은 3개.',t:'g',n:'수호 칩',tags:['guard','roulette'],d:'회전 칩 +2. 회전 칩이 적 탄환을 막음'},
@@ -632,11 +632,11 @@ const AUGS=[
   {id:'burn',u:'치명타로 붙는 화상의 초당 피해가 커져요. 공격력의 40% → 60% → 80%.',t:'g',n:'점화',tags:['poison','jackpot'],d:'치명타가 적에게 3초 화상 (초당 공격력 60%). 독과 별개로 중첩'},
   {id:'frost',u:'적중 시 적을 둔화시킬 확률이 올라가요. ★1은 25%, ★2는 35%, ★3은 45%.',t:'s',n:'서리 탄',tags:['guard','dice'],d:'적중 시 35% 확률로 1.5초간 크게 둔화'},
   {id:'contagion',u:'중독된 적이 죽을 때 터지는 폭발 피해가 커져요. 공격력의 120% → 160% → 200%.',t:'p',n:'감염 폭발',tags:['poison','jackpot'],d:'중독된 적이 죽으면 폭발 (공격력 160%), 맞은 적은 중독'},
-  {id:'venomcloud',u:'6초마다 떨어지는 독구름 개수가 늘어나요. ★1은 1개, ★2는 2개, ★3은 3개.',t:'g',n:'독구름',tags:['poison','roulette'],d:'8초마다 적이 가장 많은 곳에 4초짜리 독구름'},
-  {id:'drone',u:'함께 싸우는 칩 드론 수가 늘어나요. ★1은 1기, ★2는 2기, ★3은 3기.',t:'g',n:'칩 드론',tags:['roulette','card'],d:'주변을 도는 드론 2기가 0.6초마다 가까운 적을 사격 (공격력 60%)'},
-  {id:'nova',u:'10초마다 터지는 노바의 피해가 커져요. 공격력의 5배 → 7배 → 9배, 반경 180.',t:'p',n:'노바',tags:['roulette','jackpot'],d:'10초마다 내 주변에 대폭발 (공격력 7배)'},
-  {id:'thunder',u:'5초마다 떨어지는 낙뢰 수가 늘어나요. ★1은 3발, ★2는 4발, ★3은 5발.',t:'p',n:'천둥',tags:['jackpot','blitz'],d:'6초마다 화면 안 무작위 적 3명에게 낙뢰 (공격력 2.5배)'},
-  {id:'mine',u:'지뢰를 까는 간격이 짧아져요. ★1은 2.5초, ★2는 2초, ★3은 1.5초.',t:'s',n:'지뢰',tags:['blitz','house'],d:'2초마다 발밑에 지뢰. 적이 밟으면 폭발 (공격력 180%)'},
+  {id:'venomcloud',u:'6초마다 떨어지는 독구름 개수가 늘어나요. ★1은 1개, ★2는 2개, ★3은 3개.',t:'g',n:'독구름',tags:['poison','roulette'],d:'8초마다 적이 가장 많은 곳에 4초짜리 독구름. 공속이 오를수록 더 자주'},
+  {id:'drone',u:'함께 싸우는 칩 드론 수가 늘어나요. ★1은 1기, ★2는 2기, ★3은 3기.',t:'g',n:'칩 드론',tags:['roulette','card'],d:'주변을 도는 드론 2기가 0.6초마다 가까운 적을 사격 (공격력 60%). 공속이 오를수록 더 자주'},
+  {id:'nova',u:'10초마다 터지는 노바의 피해가 커져요. 공격력의 5배 → 7배 → 9배, 반경 180.',t:'p',n:'노바',tags:['roulette','jackpot'],d:'10초마다 내 주변에 대폭발 (공격력 9배). 공속이 오를수록 더 자주'},
+  {id:'thunder',u:'5초마다 떨어지는 낙뢰 수가 늘어나요. ★1은 3발, ★2는 4발, ★3은 5발.',t:'p',n:'천둥',tags:['jackpot','blitz'],d:'6초마다 화면 안 무작위 적 3명에게 낙뢰 (공격력 3.5배). 공속이 오를수록 더 자주'},
+  {id:'mine',u:'지뢰를 까는 간격이 짧아져요. ★1은 2.5초, ★2는 2초, ★3은 1.5초.',t:'s',n:'지뢰',tags:['blitz','house'],d:'2초마다 발밑에 지뢰. 적이 밟으면 폭발 (공격력 180%). 공속이 오를수록 더 자주'},
   {id:'adrenaline',u:'대시 후 3초간 오르는 공격력이 커져요. ★1은 +20%, ★2는 +30%, ★3은 +40%. 이동 속도 +20%는 그대로.',t:'s',n:'아드레날린',tags:['blitz'],d:'대시 후 3초간 공격력 +30%, 이동 속도 +20%'},
   {id:'bloodrage',u:'잃은 체력 1%당 오르는 공격 속도가 커져요. ★1은 0.6%, ★2는 0.8%, ★3은 1%.',t:'p',n:'피의 광란',tags:['curse','blitz'],d:'잃은 체력 1%당 공격 속도 +0.8% (체력 10%면 +72%)'},
   {id:'shieldbash',u:'보호막이 남아 있는 동안 오르는 공격력이 커져요. ★1은 +20%, ★2는 +30%, ★3은 +40%.',t:'g',n:'보호막 충격',tags:['guard','blitz'],d:'보호막이 남아 있는 동안 공격력 +30%'},
@@ -656,7 +656,7 @@ const AUGS=[
   {id:'corrode',u:'',t:'g',n:'부식 독',tags:['poison','guard'],d:'중독된 적에게 받는 피해 −35%. 중독된 적을 처치하면 체력 +1'},
   {id:'lottery',u:'',t:'g',n:'복권',tags:['house','jackpot'],d:'처치마다 2% 확률로 당첨: 골드 획득 + 그 자리에 대폭발 (공격력 3배)'},
   {id:'static',u:'',t:'g',n:'정전기',tags:['blitz','dice'],d:'300만큼 움직일 때마다 가까운 적부터 4명에게 번개 연쇄 (공격력 150%)'},
-  {id:'chipshot',u:'',t:'g',n:'칩 사출',tags:['roulette','card'],d:'3초마다 모든 회전 칩이 바깥으로 탄환을 쏨 (공격력 80%, 관통 2)'}
+  {id:'chipshot',u:'',t:'g',n:'칩 사출',tags:['roulette','card'],d:'3초마다 모든 회전 칩이 바깥으로 탄환을 쏨 (공격력 80%, 관통 2). 공속이 오를수록 더 자주'}
 ];
 const FUSIONS=[
   {id:'f_cardblast',a:'split',b:'storm',n:'카드 폭발',d:'분열한 탄환이 한 번 더 분열함'},
@@ -1440,7 +1440,9 @@ function onKill(e){
   if(tag('jackpot')>=4&&p.pkills%J()===0){S.flash=.25;for(const o of S.en)if(o.alive)dmgE(o,pDmg()*1.5,'#ffd76a');}
 }
 function dronePos(){const p=S.p,n=L('drone')+(has('f_fleet')?2:0),a=-S.t*1.6;return Array.from({length:n},(_,i)=>({x:p.x+Math.cos(a+i*TAU/n)*78,y:p.y+Math.sin(a+i*TAU/n)*78}));}
-function thunderStrike(n){const p=S.p,vis=S.en.filter(e=>e.alive&&!e.phase&&Math.abs(e.x-p.x)<W/2&&Math.abs(e.y-p.y)<H/2);for(let i=0;i<n&&vis.length;i++){const e=vis.splice(Math.floor(Math.random()*vis.length),1)[0];S.bolts.push({x1:e.x+rand(-30,30),y1:e.y-260,x2:e.x,y2:e.y,life:.22});explode(e.x,e.y,45,pDmg()*2.5,'#bff3ff');}}
+// N초마다 발동하는 효과의 주기 배율: 공격 속도 보너스가 오를수록 더 자주 (최대 2.5배 빠르게). 후반에 타이머 증강이 뒤처지지 않게
+const tmul=()=>1/Math.min(2.5,1+Math.max(0,S.p.rateP||0)*.6);
+function thunderStrike(n){const p=S.p,vis=S.en.filter(e=>e.alive&&!e.phase&&Math.abs(e.x-p.x)<W/2&&Math.abs(e.y-p.y)<H/2);for(let i=0;i<n&&vis.length;i++){const e=vis.splice(Math.floor(Math.random()*vis.length),1)[0];S.bolts.push({x1:e.x+rand(-30,30),y1:e.y-260,x2:e.x,y2:e.y,life:.22});explode(e.x,e.y,55,pDmg()*3.5,'#bff3ff');}}
 function dealerPos(){const p=S.p,a=S.t*1.2;return [0,1].map(i=>({x:p.x+Math.cos(a+i*Math.PI)*62,y:p.y+Math.sin(a+i*Math.PI)*62}));}
 function dash(){
   const p=S.p;if(!p.alive||p.dashCd>0||p.dashT>0)return;
@@ -1475,10 +1477,10 @@ function update(dt){
   p.lastCd=Math.max(0,p.lastCd-dt);S.debtT=Math.max(0,(S.debtT||0)-dt);p.rushT=Math.max(0,(p.rushT||0)-dt);p.revT=Math.max(0,(p.revT||0)-dt);
   for(const bo of S.bolts)bo.life-=dt;S.bolts=S.bolts.filter(bo=>bo.life>0);
   if(p.alive){
-    if(has('punch')){S.punchT=(S.punchT||0)-dt;if(S.punchT<=0){const rad=(70+15*L('punch'))*(has('f_storm')?1.5:1);if(S.en.some(e=>e.alive&&d2(e,p)<rad*rad)){S.punchT=.8;explode(p.x,p.y,rad,pDmg()*(.8+.4*L('punch')),'#fff3c4');}else S.punchT=.1;}}
-    if(has('blackhole')){S.holeT=(S.holeT??4)-dt;if(S.holeT<=0){S.holeT=lv3('blackhole',10,9,8)-(has('f_horizon')?3:0);const e=nearestE(p,500);if(e)S.zones.push({x:e.x,y:e.y,r:(110+15*L('blackhole'))*(has('f_horizon')?1.4:1),life:2.5,kind:'hole'});}}
+    if(has('punch')){S.punchT=(S.punchT||0)-dt;if(S.punchT<=0){const rad=(70+15*L('punch'))*(has('f_storm')?1.5:1);if(S.en.some(e=>e.alive&&d2(e,p)<rad*rad)){S.punchT=.8*tmul();explode(p.x,p.y,rad,pDmg()*(.8+.4*L('punch')),'#fff3c4');}else S.punchT=.1;}}
+    if(has('blackhole')){S.holeT=(S.holeT??4)-dt;if(S.holeT<=0){S.holeT=(lv3('blackhole',10,9,8)-(has('f_horizon')?3:0))*tmul();const e=nearestE(p,500);if(e)S.zones.push({x:e.x,y:e.y,r:(110+15*L('blackhole'))*(has('f_horizon')?1.4:1),life:2.5,kind:'hole'});}}
     if(has('static')&&p.moving){p.stD=(p.stD||0)+moveSpd()*dt;if(p.stD>=300){p.stD=0;if(nearestE(p,240))lightning(p,4);}}
-    if(has('chipshot')){S.csT=(S.csT??3)-dt;if(S.csT<=0){S.csT=3;const n=orbitN(),sp=2.8*(has('spinner')?1.5:1),rad=ORB_R*p.orbR;for(let i=0;i<n;i++){const an=S.t*sp+i*TAU/n;pBullet(p.x+Math.cos(an)*rad,p.y+Math.sin(an)*rad,an,pDmg()*.8,{child:true,pierce:2});}}}
+    if(has('chipshot')){S.csT=(S.csT??3)-dt;if(S.csT<=0){S.csT=3*tmul();const n=orbitN(),sp=2.8*(has('spinner')?1.5:1),rad=ORB_R*p.orbR;for(let i=0;i<n;i++){const an=S.t*sp+i*TAU/n;pBullet(p.x+Math.cos(an)*rad,p.y+Math.sin(an)*rad,an,pDmg()*.8,{child:true,pierce:2});}}}
     if(has('fog')&&p.moving){S.fogT=(S.fogT||0)-dt;if(S.fogT<=0){S.fogT=.22;S.zones.push({x:p.x,y:p.y,r:(22+6*L('fog'))*(has('f_windwalker')?2:1),life:2,kind:'pool',tick:0});}}
     if(has('guardian')){const n=orbitN(),sp=2.8*(has('spinner')?1.5:1),rad=ORB_R*p.orbR;for(let i=0;i<n;i++){const a=S.t*sp+i*TAU/n,ox=p.x+Math.cos(a)*rad,oy=p.y+Math.sin(a)*rad;for(const b of S.pr)if(!b.mine&&b.life>0&&(b.x-ox)**2+(b.y-oy)**2<196)b.life=0;}}
   }S.phoenixCd=Math.max(0,(S.phoenixCd||0)-dt);
@@ -1487,11 +1489,11 @@ function update(dt){
     p.adrT=Math.max(0,(p.adrT||0)-dt);
     if(has('regenarmor'))p.hp=Math.min(p.maxHp,p.hp+armorEff()*lv3('regenarmor',.02,.03,.04)*dt);
     if(S.echoQ&&S.echoQ.length){for(const q of S.echoQ){q.t-=dt;if(q.t<=0)for(let i=0;i<q.n;i++)pBullet(p.x,p.y,q.a+(i-(q.n-1)/2)*.13,q.d,{child:true,r:4});}S.echoQ=S.echoQ.filter(q=>q.t>0);}
-    if(has('drone')){S.drT=(S.drT||0)-dt;if(S.drT<=0){S.drT=has('f_fleet')?.4:.6;for(const q of dronePos()){const e=nearestE(q,p.range*1.1);if(e)pBullet(q.x,q.y,Math.atan2(e.y-q.y,e.x-q.x),pDmg()*.6,{child:true,r:3});}}}
-    if(has('nova')){S.novaT=(S.novaT??10)-dt;if(S.novaT<=0){S.novaT=10-(has('f_supernova')?3:0);explode(p.x,p.y,180,pDmg()*lv3('nova',5,7,9),'#ffd76a');S.shake=Math.max(S.shake,.2);if(has('f_supernova'))thunderStrike(6);}}
-    if(has('thunder')){S.thT=(S.thT??6)-dt;if(S.thT<=0){S.thT=6;thunderStrike(lv3('thunder',2,3,4));}}
-    if(has('mine')){S.mineT=(S.mineT??1)-dt;if(S.mineT<=0){S.mineT=lv3('mine',2.5,2,1.5)*(has('f_minefield')?.5:1);S.zones.push({x:p.x,y:p.y,r:16,life:12,kind:'mine'});}}
-    if(has('venomcloud')){S.vcT=(S.vcT??3)-dt;if(S.vcT<=0){S.vcT=8;for(let k=0;k<Math.max(1,L('venomcloud')-1);k++){let best=null,bc=0;for(let i=0;i<12;i++){const e=S.en[Math.floor(Math.random()*S.en.length)];if(!e||!e.alive||d2(e,p)>500*500)continue;let c=0;for(const o of S.en)if(o.alive&&d2(o,e)<90*90)c++;if(c>bc){bc=c;best=e;}}if(best)S.zones.push({x:best.x,y:best.y,r:90,life:4,kind:'pool',tick:0,cloud:true});}}}
+    if(has('drone')){S.drT=(S.drT||0)-dt;if(S.drT<=0){S.drT=(has('f_fleet')?.4:.6)*tmul();for(const q of dronePos()){const e=nearestE(q,p.range*1.1);if(e)pBullet(q.x,q.y,Math.atan2(e.y-q.y,e.x-q.x),pDmg()*.6,{child:true,r:3});}}}
+    if(has('nova')){S.novaT=(S.novaT??10)-dt;if(S.novaT<=0){S.novaT=(10-(has('f_supernova')?3:0))*tmul();explode(p.x,p.y,180,pDmg()*lv3('nova',7,9,11),'#ffd76a');S.shake=Math.max(S.shake,.2);if(has('f_supernova'))thunderStrike(6);}}
+    if(has('thunder')){S.thT=(S.thT??6)-dt;if(S.thT<=0){S.thT=6*tmul();thunderStrike(lv3('thunder',2,3,4));}}
+    if(has('mine')){S.mineT=(S.mineT??1)-dt;if(S.mineT<=0){S.mineT=lv3('mine',2.5,2,1.5)*(has('f_minefield')?.5:1)*tmul();S.zones.push({x:p.x,y:p.y,r:16,life:12,kind:'mine'});}}
+    if(has('venomcloud')){S.vcT=(S.vcT??3)-dt;if(S.vcT<=0){S.vcT=8*tmul();for(let k=0;k<Math.max(1,L('venomcloud')-1);k++){let best=null,bc=0;for(let i=0;i<12;i++){const e=S.en[Math.floor(Math.random()*S.en.length)];if(!e||!e.alive||d2(e,p)>500*500)continue;let c=0;for(const o of S.en)if(o.alive&&d2(o,e)<90*90)c++;if(c>bc){bc=c;best=e;}}if(best)S.zones.push({x:best.x,y:best.y,r:90,life:4,kind:'pool',tick:0,cloud:true});}}}
   }
   if(has('dealers')&&p.alive){S.dcd=(S.dcd||0)-dt;if(S.dcd<=0){S.dcd=.5;for(const q of dealerPos()){const e=nearestE(q,p.range);if(e)pBullet(q.x,q.y,Math.atan2(e.y-q.y,e.x-q.x),pDmg()*.5,{child:true});}}}
   for(const k in S.buffT)S.buffT[k]=Math.max(0,S.buffT[k]-dt);
