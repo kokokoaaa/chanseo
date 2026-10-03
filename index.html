@@ -195,6 +195,13 @@ h3{font-family:'Do Hyeon',sans-serif;font-weight:400;font-size:19px;margin:18px 
 @keyframes rf{from{opacity:.55}to{opacity:0}}
 .card.aug{text-align:center;padding:14px 10px;min-height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
 .card.aug b{font-size:22px;margin:0}
+.card.aug.tier-p{border:3px solid transparent;background:linear-gradient(160deg,#fbf3ff,#f1e4ff 55%,#e7f6ff) padding-box,linear-gradient(90deg,#ff5ad8,#b552d6,#5fc9d9,#ffd76a,#ff5ad8) border-box;background-size:100% 100%,300% 100%;animation:prz 2.4s linear infinite;box-shadow:0 0 14px rgba(181,82,214,.7),0 0 30px rgba(95,201,217,.35)}
+@keyframes prz{to{background-position:0 0,300% 0}}
+.card.aug.tier-p b{color:#6a1d8a;text-shadow:0 0 10px rgba(214,140,255,.9)}
+.card.aug.tier-p::after{content:'';position:absolute;inset:0;border-radius:8px;pointer-events:none;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.85) 48%,transparent 66%);background-size:260% 100%;animation:shine 1.6s ease-in-out .2s infinite}
+.card.aug.tier-p::before{content:'✦ ✧ ✦';position:absolute;top:6px;right:8px;font-size:12px;color:#b552d6;letter-spacing:2px;animation:twk 1.2s ease-in-out infinite}
+@keyframes twk{50%{opacity:.25}}
+.card.aug.tier-p.canfuse{animation:prz 2.4s linear infinite,fzp 1.4s ease-in-out infinite}
 .card.aug.canfuse{border-color:#ff4fd8;box-shadow:0 0 0 2px #ff4fd8,0 0 18px rgba(255,79,216,.55);animation:fzp 1.4s ease-in-out infinite}
 @keyframes fzp{50%{box-shadow:0 0 0 2px #ff4fd8,0 0 30px rgba(255,79,216,.9)}}
 .fzbox{display:flex;flex-direction:column;gap:2px;width:100%;margin-top:4px;padding:7px 8px;border-radius:8px;background:linear-gradient(180deg,#3a0f33,#25091f);border:1px solid #ff4fd8;color:#ffe6f8;font-size:13px;line-height:1.35}
@@ -1897,7 +1904,7 @@ function augHtml(a,i){
   const pf=partnerOf(a.id),pn=pf?AUGS.find(x=>x.id===(pf.a===a.id?pf.b:pf.a)).n:'';
   // 짝이 있으면 카드 앞면에 합체 안내를 크게 표시 (마우스를 안 올려도 보임)
   const fz=pf?`<span class="fzbox"><span class="fzh">💥 고르면 바로 합체!</span><span class="fzr">보유 중인 <b>${pn}</b> + <b>${a.n}</b></span><span class="fzr">→ <b class="fzn">${pf.n}</b></span><span class="fzd">${pf.d}</span><span class="fzs">슬롯 1칸 비고, 두 재료 효과도 강해짐</span></span>`:'';
-  return `<button class="card aug ${pf?'canfuse':''}" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}</span><b>${a.n}</b><span class="chips">${chips}</span>${fz}<span class="tip">${a.d}${hpLoss(a.f,a.d,a.t==='v'||a.t==='f'?1:2)}${lines?'<br>':''}${lines}</span></button>`;
+  return `<button class="card aug tier-${a.t} ${pf?'canfuse':''}" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}</span><b>${a.n}</b><span class="chips">${chips}</span>${fz}<span class="tip">${a.d}${hpLoss(a.f,a.d,a.t==='v'||a.t==='f'?1:2)}${lines?'<br>':''}${lines}</span></button>`;
 }
 function bindPeek(){
   ov.querySelectorAll('.card').forEach(c=>{let t=null;
@@ -1920,14 +1927,11 @@ function openAug(free,why,fixed,fixedTier){
   const tier=fixedTier||rollTier(),opts=fixed||(full?fullOptions():augOptions(tier));
   if(!opts.length){const g=price(120);S.gold+=g;toast(`슬롯 가득, 강화할 것도 없음. ${g} 골드 지급`);openNext();return;}
   const cost=price(18);
-  show(`<h2>증강 선택</h2><p class="sub">${why}. 슬롯 <b style="color:${full?'#ff9ad0':'var(--ivory)'}">${slotCount()}/${MAXA}</b>. ${full?'슬롯이 가득 차서 <b style="color:#ff9ad0">합체할 수 있는 증강</b> 또는 무료 강화만 나옵니다.':`이번엔 <b style="color:${TIER[tier].col};filter:brightness(1.5)">${TIER[tier].n}</b> 등급.`}</p>
-  <p class="hint">증강은 강화 없이 그대로 적용돼요. 짝이 맞으면 바로 합체. PC는 카드에 마우스를 올리면, 모바일은 꾹 누르면 설명이 보여요</p>
+  show(`<h2>증강 선택</h2><p class="sub">슬롯 <b style="color:${full?'#ff9ad0':'var(--ivory)'}">${slotCount()}/${MAXA}</b>${full?' · <b style="color:#ff9ad0">합체 짝만</b>':''}</p>
   <div class="cards">${opts.map(augHtml).join('')}</div>
   <button class="btn ghost" id="reroll" ${!free&&S.gold<cost?'disabled':''}>다시 뽑기<small>${free?(free===true?(META.sk.reroll?'무료 2회':'무료 1회'):'무료 '+free+'회'):cost+'골드 (보유 '+S.gold+')'}</small></button>
-  <button class="btn ghost" data-stats>내 스탯 보기</button>
-  <details><summary>합체 조합표</summary>${fusionTable()}</details>
-  <details><summary>시너지 전체 보기</summary>${synTable()}</details>`);
-  bindPeek();
+  <button class="btn ghost" data-stats>내 스탯 보기</button>`);
+  bindPeek();if(opts.some(a=>a.t==='p'))augFx('💎 프리즘 등장!','','#d68cff',true);
   ov.querySelectorAll('.card').forEach(b=>b.onclick=()=>{const a=opts[+b.dataset.i];
     if(a.up){const o=a.ref;o.lv++;if(o.f)applyQ(o.f,S.p,o.q);tagCount();toast(`${o.n} ★${o.lv}`);tryFuse();openNext();return;}
     gainAug(a);
