@@ -41,8 +41,12 @@ canvas{display:block;width:100%;height:100%}
 #augTip b{display:block;font-size:16px;font-weight:400;color:var(--ac,#d6a94a)}
 #augTip small{display:block;color:var(--muted);font-size:12px;margin:2px 0 4px}
 @media (max-width:520px){.aico{width:32px;height:34px}.aico i{font-size:14px}.aico span{font-size:9px;max-width:29px}}
-#syn{display:flex;flex-wrap:wrap;gap:6px;pointer-events:none;font-family:'Do Hyeon',sans-serif;font-size:15px}
+#syn{display:flex;flex-wrap:wrap;gap:6px;pointer-events:auto;font-family:'Do Hyeon',sans-serif;font-size:15px}
 .pill{padding:3px 9px;border-radius:999px;background:rgba(0,0,0,.5);border:1px solid rgba(241,231,207,.25);color:var(--muted)}
+.pill[data-tg]{cursor:help}
+#augTip .tl{display:block;color:var(--muted)}
+#augTip .tl.on{color:#f1e7cf}
+#augTip .tl.on::before{content:'✔ ';color:#7be08f}
 .pill.on2{border-color:var(--brass);color:var(--brass)}
 .pill.on4{border-color:var(--prism);color:#e7b6f5;background:rgba(80,20,100,.45)}
 .pill.on6{border-color:#fff;color:#fff;background:linear-gradient(90deg,rgba(200,50,58,.6),rgba(197,108,224,.6),rgba(95,201,217,.6))}
@@ -265,7 +269,7 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
     <div id="gold" class="gold"></div>
     <div id="lv"></div>
   </div>
-  <div id="botLeft"><div id="augBar"></div><div id="syn"></div></div><div id="augTip"></div>
+  <div id="botLeft"><div id="syn"></div><div id="augBar"></div></div><div id="augTip"></div>
   <button id="dash" aria-label="대시">대시<small>Space</small></button>
   <div id="live"><span></span><span></span><span></span></div>
   <div id="buffs"></div>
@@ -1773,8 +1777,8 @@ function drawMini(){
 }
 // 왼쪽 아래 증강 아이콘 줄: 보유 증강 + 빈 슬롯. PC는 마우스 올리면, 모바일은 누르면 설명
 const TAG_ICO={card:'🃏',dice:'🎲',roulette:'🎡',house:'🏦',curse:'💀',jackpot:'🎰',blitz:'⚡',guard:'🛡',poison:'☠'};
-let augBarKey='';
-function renderAugBar(){const el=$('augBar');const k=!S||S.mode==='start'?'':S.augs.map(a=>a.id).join(',')+'|'+MAXA;if(k===augBarKey)return;augBarKey=k;if(!k){el.innerHTML='';return;}
+let augBarKey='',synKey='';
+function renderAugBar(){const el=$('augBar');const k=!S||S.mode==='start'?'':S.augs.map(a=>a.id).join(',')+'|'+MAXA;if(k===augBarKey)return;augBarKey=k;synKey='';if(!k){el.innerHTML='';return;}
   const own=S.augs.map((a,i)=>{const col=(TIER[a.t]||{}).col||'#d6a94a',ic=a.t==='f'?'💥':a.t==='v'?'👑':(TAG_ICO[a.tags[0]]||'✦');
     return `<div class="aico" data-ai="${i}" style="--ac:${col}"><i>${ic}</i><span>${a.n.replace(/\s/g,'').slice(0,3)}</span></div>`;}).join('');
   el.innerHTML=own+'<div class="aico empty"></div>'.repeat(Math.max(0,MAXA-slotCount()));}
@@ -1783,10 +1787,19 @@ function renderAugBar(){const el=$('augBar');const k=!S||S.mode==='start'?'':S.a
     tip.innerHTML=`<b>${a.n}</b><small>${T.n}${a.tags.length?' · '+[...new Set(a.tags)].map(t=>TAGS[t].n+(a.tags.filter(x=>x===t).length>1?'×2':'')).join(', '):''}</small>${a.d}`;
     tip.style.display='block';const r=t.getBoundingClientRect();tip.style.left=Math.min(innerWidth-tip.offsetWidth-8,Math.max(8,r.left))+'px';tip.style.top=Math.max(8,r.top-tip.offsetHeight-8)+'px';};
   const hideT=()=>{tip.style.display='none';};
+  // 시너지 알약: 단계별 효과, 현재 단계는 ✔ 표시
+  const syn=document.getElementById('syn');
+  const showS=(t)=>{const k=t.dataset.tg,D=TAGS[k];if(!D||!S)return;const c=tag(k);tip.style.setProperty('--ac','#7be08f');
+    const L=[[1,D.t1],[2,D.t2],[4,D.t4],[6,D.t6]].filter(x=>x[1]).map(([n,d])=>`<span class="tl ${c>=n?'on':''}">${n}개: ${d}</span>`).join('')+`<span class="tl ${c>=5?'on':''}">5개부터 1개마다: ${D.ex}${c>=5?' (×'+(c-4)+')':''}</span>`;
+    tip.innerHTML=`<b>${D.n} 시너지 ${c}개</b><small>이 태그가 붙은 증강을 모을수록 강해짐</small>${L}`;
+    tip.style.display='block';const r=t.getBoundingClientRect();tip.style.left=Math.min(innerWidth-tip.offsetWidth-8,Math.max(8,r.left))+'px';tip.style.top=Math.max(8,r.top-tip.offsetHeight-8)+'px';};
+  syn.addEventListener('mouseover',e=>{const t=e.target.closest('.pill[data-tg]');if(t)showS(t);});
+  syn.addEventListener('mouseout',e=>{if(!e.relatedTarget||!syn.contains(e.relatedTarget))tip.style.display='none';});
+  syn.addEventListener('touchstart',e=>{const t=e.target.closest('.pill[data-tg]');if(t){e.preventDefault();e.stopPropagation();if(tip.style.display==='block'&&tip.dataset.k==='s'+t.dataset.tg)tip.style.display='none';else{showS(t);tip.dataset.k='s'+t.dataset.tg;}}},{passive:false});
   bar.addEventListener('mouseover',e=>{const t=e.target.closest('.aico[data-ai]');if(t)show(t);});
   bar.addEventListener('mouseout',e=>{if(!e.relatedTarget||!bar.contains(e.relatedTarget))hideT();});
   bar.addEventListener('touchstart',e=>{const t=e.target.closest('.aico[data-ai]');if(t){e.preventDefault();e.stopPropagation();if(tip.style.display==='block'&&tip.dataset.k===t.dataset.ai)hideT();else{show(t);tip.dataset.k=t.dataset.ai;}}},{passive:false});
-  addEventListener('touchstart',e=>{if(!bar.contains(e.target))hideT();},{passive:true});}
+  addEventListener('touchstart',e=>{if(!bar.contains(e.target)&&!syn.contains(e.target))hideT();},{passive:true});}
 function hud(){
   if(!S)return;const p=S.p;
   const play=S.mode==='play';
@@ -1820,7 +1833,7 @@ function hud(){
   $('lv').textContent=!augReady()?`레벨 ${S.lvl}, 증강 슬롯 가득`:`레벨 ${S.lvl}, 증강까지 ${nx}`;
   $('xpf').style.width=(S.xp/S.next*100)+'%';
   renderAugBar();
-  $('syn').innerHTML=Object.keys(TAGS).filter(t=>tag(t)>0).map(t=>{const c=tag(t);return `<span class="pill ${c>=6?'on6':c>=4?'on4':c>=2?'on2':''}">${TAGS[t].n} ${c}${c>=5?' ▲'+(c-4):''}</span>`;}).join('');
+  {const sk=Object.keys(TAGS).map(t=>tag(t)).join(',');if(sk!==synKey){synKey=sk;$('syn').innerHTML=Object.keys(TAGS).filter(t=>tag(t)>0).map(t=>{const c=tag(t);return `<span class="pill ${c>=6?'on6':c>=4?'on4':c>=2?'on2':''}" data-tg="${t}">${TAGS[t].n} ${c}${c>=5?' ▲'+(c-4):''}</span>`;}).join('');}}
 }
 
 /* ---------- overlays ---------- */
