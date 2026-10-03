@@ -2420,7 +2420,8 @@ function autoStat(){
 // 자동 모드 보스 상점: VIP(열쇠) 구매, 증강 강화, 남은 골드로 공격·생존 스탯 구매 (부활 비용은 남김)
 function autoShop(){
   const vc=vipCost(),vs=vipStock().filter(v=>!has(v.id)&&augReq(v));if(vs.length&&(S.keys||0)>=vc){const v=vs[0];S.keys-=vc;S.augs.push({...v,lv:3});tagCount();}
-  const reserve=()=>reviveCost();let guard=0,bought=0;
+  // 하우스 빌드는 보유 골드가 곧 화력이라 절반은 남겨둠
+  const keep=tag('house')>=2?S.gold*.5:0,reserve=()=>Math.max(reviveCost(),keep);let guard=0,bought=0;
   while(guard++<60){const up=S.augs.filter(a=>AUG_UP&&a.lv<3&&a.t!=='v'&&a.t!=='f').sort((a,b)=>upCost(a)-upCost(b))[0];
     if(up&&S.gold-Math.round(upCost(up)*.85)>reserve()){S.gold-=Math.round(upCost(up)*.85);up.lv++;if(up.f)applyQ(up.f,S.p,up.q);tagCount();tryFuse();bought++;continue;}
     const pool=STACKS.filter(x=>['atk','rate','hp','arm','crit','critm'].includes(x.k)&&!(x.k==='crit'&&critFull())&&!(x.k==='critm'&&critMFull())&&!(x.k==='rate'&&rawRate()>=RATE_CAP()));
