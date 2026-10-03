@@ -22,7 +22,7 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
 html,body{height:100%;margin:0}
 body{background:var(--felt-deep);color:var(--ivory);font-family:'Gowun Dodum',system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
 #wrap{position:relative;width:100%;height:100%}
-canvas{display:block;width:100%;height:100%}
+canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 #hud{position:absolute;left:0;right:0;top:0;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;padding:10px 14px;pointer-events:none;font-family:'Do Hyeon',system-ui,sans-serif;font-size:17px;text-shadow:0 1px 2px #000}
 .bar{position:relative;width:150px;height:18px;background:rgba(0,0,0,.5);border:1px solid rgba(214,169,74,.7);border-radius:3px;overflow:hidden}
 .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--chip-red)}
@@ -320,11 +320,14 @@ const isTouch=matchMedia('(pointer: coarse)').matches;
 
 function resize(){
   DPR=Math.min(window.devicePixelRatio||1,2);
-  const r=cv.getBoundingClientRect();
-  // 도트 1칸이 화면에서 정확히 n픽셀이 되도록 확대율을 맞춤 (짧은 변 기준 약 380칸)
-  const n=Math.max(1,Math.round(DPR*Math.min(r.width,r.height)/380));SC=n/(DPR*PXW);
-  W=r.width/SC;H=r.height/SC;
-  cv.width=Math.round(r.width*DPR);cv.height=Math.round(r.height*DPR);
+  // 도트 크기 고정: 도트 1칸 = 화면 2px(휴대폰·작은 태블릿은 1px, 아주 큰 화면은 3px).
+  // 창 크기를 바꿔도 캐릭터 크기는 그대로, 보이는 맵 범위만 달라짐. 캔버스는 실제 화면 픽셀과 1:1로 맞춰 번짐 없음
+  cv.style.width='100%';cv.style.height='100%';
+  const r=cv.getBoundingClientRect(),cs=Math.min(r.width,r.height),s=isTouch&&cs<600?1:cs<1100?2:3;
+  const n=Math.max(1,Math.round(s*DPR));SC=n/(DPR*PXW);
+  cv.width=Math.floor(r.width*DPR);cv.height=Math.floor(r.height*DPR);
+  cv.style.width=(cv.width/DPR)+'px';cv.style.height=(cv.height/DPR)+'px';
+  W=cv.width/DPR/SC;H=cv.height/DPR/SC;
   buildBg();SPR.clear();
 }
 function buildBg(){
@@ -1309,7 +1312,7 @@ function spawnBurst(){
 const EVENTS={
   horde:{n:'대군 습격',icon:'⚔️',col:'#ff9a4a',d:'15초간 한 종류의 적이 몰려옵니다. 버티면 골드'},
   hunt:{n:'정예 사냥',icon:'🎯',col:'#ffd76a',d:'정예 3마리를 30초 안에 처치하면 고급 스탯 카드'},
-  goblin:{n:'보물 고블린',icon:'💰',col:'#e8bb4f',d:'도망치는 고블린을 18초 안에 잡으면 골드 폭탄'},
+  goblin:{n:'보물 고블린',icon:'💰',col:'#e8bb4f',d:'도망치는 고블린을 30초 안에 잡으면 골드 폭탄'},
   shrine:{n:'고대 제단',icon:'✨',col:'#9fd3ff',d:'제단 위에 2.5초 서 있으면 30초 축복'},
   moon:{n:'붉은 달',icon:'🌕',col:'#ff5050',d:'25초간 적이 빠르고 세지만 경험치·골드 2배'}
 };
@@ -1324,7 +1327,7 @@ const blessOn=k=>S.bless&&S.bless.t>0&&S.bless.k===k;
 function farPos(r){const a=Math.random()*TAU,p=S.p;return [clamp(p.x+Math.cos(a)*r,80,WW-80),clamp(p.y+Math.sin(a)*r,80,WH-80)];}
 function startEvent(){
   const ks=Object.keys(EVENTS).filter(k=>k!==S.lastEv);const k=ks[Math.floor(Math.random()*ks.length)];S.lastEv=k;
-  const E=EVENTS[k],ev={k,t:0,T:{horde:15,hunt:30,goblin:18,shrine:25,moon:25}[k]};S.ev=ev;
+  const E=EVENTS[k],ev={k,t:0,T:{horde:15,hunt:30,goblin:30,shrine:25,moon:25}[k]};S.ev=ev;
   if(k==='horde'){const pool=['grunt','runner','slime','boar','ghost','bomber'].filter(t=>t!=='boar'||S.round>=2.5);ev.type=pool[Math.floor(Math.random()*pool.length)];}
   if(k==='hunt'){for(let i=0;i<3;i++){const [x,y]=ringPos(60);const t=['grunt','tank','boar','ranger'][Math.floor(Math.random()*4)];const e=spawnAt(t,x,y,false,true);e.hunt=true;}}
   if(k==='goblin'){const [x,y]=farPos(260);const e=spawnAt('goblin',x,y,true);e.gold=true;}
@@ -1650,7 +1653,7 @@ const catchUp=()=>1+Math.max(0,6+effT()/12-S.lvl)*.15*(dfM().xp||1);
 function gainXp(v){S.xp+=v*TS*(S.p.xpM||1)*(evOn('moon')?2:1)*catchUp();while(S.xp>=S.next){S.xp-=S.next;S.lvl++;S.next=Math.round(1.15*(4+S.lvl*1.6+S.lvl*S.lvl*.1)*(S.lvl>20?Math.pow(1.15,S.lvl-20):1));S.pendingLv++;const p=S.p;const C=CLASSES[S.cls];if(C&&C.lv)C.lv(p);p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.1);S.wavePend=true;}}
 function lvlWave(){S.p.lvJ=.45;const p=S.p,mw=META.sk.wave,R=150*(mw?1.4:1),dm=pDmg()*.6*(mw?1.5:1);
   S.rings.push({x:p.x,y:p.y,r:12,max:R,life:.45,col:'#ffd76a'});S.rings.push({x:p.x,y:p.y,r:6,max:R*.7,life:.35,col:'#fff3c4'});ftext(p.x,p.y-40,'LEVEL UP','#ffd76a',20);
-  for(const e of S.en){if(!e.alive)continue;const dx=e.x-p.x,dy=e.y-p.y,d=Math.hypot(dx,dy)||1;if(d<R+e.r){if(!e.boss){const k=(R+30-d);e.x+=dx/d*k;e.y+=dy/d*k;e.slowT=Math.max(e.slowT||0,.6);}dmgE(e,dm,'#ffd76a');}}}
+  for(const e of S.en){if(!e.alive)continue;const dx=e.x-p.x,dy=e.y-p.y,d=Math.hypot(dx,dy)||1;if(d<R+e.r){if(!e.boss){const k=Math.min(60,(R-d)*.4+15);e.x+=dx/d*k;e.y+=dy/d*k;e.slowT=Math.max(e.slowT||0,.6);}dmgE(e,dm,'#ffd76a');}}}
 function onKill(e){
   const T=ET[e.type],p=S.p;
   if(has('soul')&&!e.boss&&(p.soulN||0)<500){p.soulN=(p.soulN||0)+1;p.dmgP=(p.dmgP||0)+.001;}
@@ -2443,7 +2446,7 @@ function startScreen(){
 function drawPreviews(){
   ov.querySelectorAll('canvas.pv').forEach(c=>{const k=c.dataset.c,sel=k===pickCls,t=performance.now()/1000;
     const cycle=(t+Object.keys(CLASSES).indexOf(k)*.7)%3,anim=sel?(cycle<.6?'attack':'walk'):'idle';
-    HERO.draw(k,anim,t,anim==='attack'?cycle/.6:0,false);const x=c.getContext('2d');x.imageSmoothingEnabled=false;x.clearRect(0,0,96,96);x.imageSmoothingEnabled=HERO.hires;{const B=HERO.box,k=2;x.drawImage(HERO.canvas,48+B[0]*k,86+B[1]*k,B[2]*k,B[3]*k);}});
+    HERO.draw(k,anim,t,anim==='attack'?cycle/.6:0,false);const x=c.getContext('2d');x.imageSmoothingEnabled=false;const sz=Math.max(40,Math.round(c.clientWidth*(window.devicePixelRatio||1)));if(c.width!==sz){c.width=c.height=sz;}const x2=c.getContext('2d');x2.imageSmoothingEnabled=false;x2.clearRect(0,0,sz,sz);{const k=Math.max(1,Math.floor(sz/40)),o=(sz-40*k)>>1;x2.drawImage(HERO.canvas,o,o+k*2,40*k,40*k);}});
 }
 /* ---------- meta progression ---------- */
 const META=(()=>{try{const m=JSON.parse(localStorage.getItem('chanseo_meta')||'{}');const pc={luck:3,gold:2,xp:3,aug:6,key:5};let rf=0;for(const k in (m.prep||{}))rf+=(m.prep[k]||0)*(pc[k]||0);return {medals:(m.medals||0)+rf,total:m.total||0,lv:m.lv||{},sk:m.sk||{},clears:m.clears||{},cos:m.cos||{own:{},eq:{}},spent:m.spent!=null?m.spent:null};}catch(e){return {medals:0,total:0,lv:{},sk:{},clears:{},cos:{own:{},eq:{}}};}})();
