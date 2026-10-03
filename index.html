@@ -737,7 +737,7 @@ const VIPS=[
 const RAR={c:{n:'일반',col:'#8f8873'},r:{n:'희귀',col:'#2f74c9'},e:{n:'영웅',col:'#8e45c9'},l:{n:'전설',col:'#c99223'}};
 // 스탯 카드: 대부분의 스탯은 일반~전설 어느 등급으로든 뜸. 등급이 높을수록 수치 범위가 RMUL배로 커짐.
 // v: 일반 기준 [[최소,최대,소수자리], ...]. fr: 등급 고정 카드(특수 효과, 도박). 행운은 등급과 범위 내 굴림을 모두 위로 끌어올림
-const RMUL={c:.6,r:.85,e:1.36,l:2};
+const RMUL={c:.6,r:.9,e:1.7,l:3};
 const CARDS=[
   {n:'숫돌',v:[[.5,1.1,1]],t:v=>`공격력 +${v[0]}`,a:(p,v)=>{p.dmg+=v[0];}},
   {n:'힘의 물약',v:[[4,8,1]],t:v=>`공격력 +${v[0]}%`,a:(p,v)=>{p.dmgP=(p.dmgP||0)+v[0]/100;}},
@@ -1976,14 +1976,13 @@ function openStat(keep){
   S.mode='stat';saveGame(true);S.srr=S.srr||0;
   let cards=keep;
   if(!cards){cards=[];let tries=0;const bonus=S.boost?6:0;while(cards.length<3&&tries<60){tries++;const c=cardOf(rollRarity(bonus),bonus);if(!cards.some(x=>x.n===c.n))cards.push(c);}S.boost=false;}
-  const cost=price(15+S.srr*10),allC=Math.round(price(60+S.lvl*12)*Math.pow(1.35,S.takeAll||0)),boostC=price(90+S.lvl*12),next=AUG_EVERY-(S.picks%AUG_EVERY);
+  const cost=price(15+S.srr*10),boostC=price(90+S.lvl*12),next=AUG_EVERY-(S.picks%AUG_EVERY);
   const bossSt=S.bossStat;S.bossStat=false;
-  show(`<h2>${bossSt?'보스 보상':'레벨 '+(S.lvl-S.pendingLv)}</h2><p class="sub">${augReady()?`다음 증강까지 ${next}레벨 · `:''}<span class="gold">${S.gold} 골드</span></p>
+  show(`<h2>${bossSt?'보스 보상':'레벨 '+(S.lvl-S.pendingLv)}</h2>${augReady()?`<p class="sub">다음 증강까지 ${next}레벨</p>`:''}
   <div class="cards">${cards.map((c,i)=>{const R=RAR[c.r];return `<button class="card rar-${c.r}" data-i="${i}" style="--rc:${R.col}"><span class="rr">${c.r==='l'?'✨ ':''}${R.n}${c.u!=null?` · <span style="color:${GRADE(c.u).col}">${GRADE(c.u).n}</span>`:''}</span><b>${c.n}</b>${withActual(c.d,c.u!=null?c.f:null)}</button>`;}).join('')}</div>
   <div class="btnrow">
     <button class="btn" id="reroll" ${S.gold<cost?'disabled':''}>다시 뽑기<small>${cost}골드</small></button>
     <button class="btn" id="boost" ${S.gold<boostC?'disabled':''}>고급 카드로 다시 뽑기<small>${boostC}골드, 높은 등급 확률 크게 증가</small></button>
-    <button class="btn" id="takeall" ${S.gold<allC?'disabled':''}>세 장 전부 갖기<small>${allC}골드</small></button>
   </div>
   <button class="btn ghost" data-stats>내 스탯 보기</button>`);
   rarityFx();
@@ -1991,7 +1990,6 @@ function openStat(keep){
   ov.querySelectorAll('.card').forEach(b=>b.onclick=()=>{take(cards[+b.dataset.i]);S.srr=0;tryFuse();openNext();});
   $('reroll').onclick=()=>{S.gold-=cost;S.srr++;openStat();};
   $('boost').onclick=()=>{S.gold-=boostC;S.boost=true;openStat();};
-  $('takeall').onclick=()=>{S.gold-=allC;S.takeAll=(S.takeAll||0)+1;cards.forEach(take);S.srr=0;toast('전부 획득');openNext();};
 }
 // 영웅·전설 카드 등장 연출: 폭죽 파티클, 배너, 화면 플래시, 효과음
 let AC=null;
