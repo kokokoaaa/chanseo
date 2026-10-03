@@ -1738,6 +1738,11 @@ function drawChip(e){
   if(e.ps>0){ctx.fillStyle='rgba(142,224,106,.85)';for(let i=0;i<3;i++){const ba=S.t*2+i*2.1+e.rot;ctx.beginPath();ctx.arc(x+Math.cos(ba)*R*.8,y-R*1.1-((S.t*20+i*7)%10),2,0,TAU);ctx.fill();}}
   if(e.hp<e.maxHp&&(e.boss||e.elite||e.type==='tank')){const w=R*2+6,ty=y-DS*.62-4;ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(x-w/2,ty,w,4);ctx.fillStyle='#ff6060';ctx.fillRect(x-w/2,ty,w*Math.max(0,e.hp/e.maxHp),4);}
 }
+// 기사 도트: 한 칸이 화면에서 정확히 정수 픽셀이 되게 배율을 반올림하고 위치도 화면 픽셀에 맞춤 (1.5배 같은 배율이면 칸 크기가 들쭉날쭉해져 깨져 보임)
+function heroBlit(img,x,y,pf,snap){const K=1.45;
+  if(snap){const T=ctx.getTransform(),a=T.a,n=Math.max(1,Math.round(a*K));ctx.setTransform(n*pf,0,0,n,Math.round(x*a+T.e),Math.round(y*a+T.f));}
+  else{ctx.translate(x,y);ctx.scale(pf*K,K);}
+  ctx.drawImage(img,...HERO.box);}
 function drawPlayer(p){
   const emitG=q=>{if(S.pa.length<260)S.pa.push(q);};
   {const au=cosEq('aura');if(au)auraFx(ctx,p.x,p.y,au,S.t,emitG);}
@@ -1755,16 +1760,16 @@ function drawPlayer(p){
   const pf=k8?1:(p.face||1);
   HERO.draw(cls,anim,S.t,ap,p.hurtT>.3);
   ctx.save();ctx.imageSmoothingEnabled=HERO.hires;
-  if(p.dashT>0){for(let i=1;i<=3;i++){ctx.globalAlpha=.28/i;ctx.save();ctx.translate(p.x-p.dx*i*16,p.y+R+3-p.dy*i*16);ctx.scale(pf*K,K);ctx.drawImage(HERO.canvas,...HERO.box);ctx.restore();}ctx.globalAlpha=1;}
+  if(p.dashT>0){for(let i=1;i<=3;i++){ctx.globalAlpha=.28/i;ctx.save();heroBlit(HERO.canvas,p.x-p.dx*i*16,p.y+R+3-p.dy*i*16,pf,k8);ctx.restore();}ctx.globalAlpha=1;}
   if(p.blitzT>0||S.buffT.jack>0||p.shadowT>0){ctx.fillStyle=S.buffT.jack>0?'rgba(255,215,106,.3)':p.shadowT>0?'rgba(120,80,160,.35)':'rgba(95,201,217,.3)';ctx.beginPath();ctx.arc(p.x,p.y,R+12,0,TAU);ctx.fill();}
   if(p.inv>0&&Math.floor(S.t*14)%2)ctx.globalAlpha=.2;
   if(p.all6>0||p.shockT>0){ctx.strokeStyle=p.all6>0?'#ffd76a':'#5fc9d9';ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x,p.y,R+14,0,TAU);ctx.stroke();}
   const sk=cosEq('skin');
   if(sk){skinPre(ctx,p.x,p.y,sk,S.t,emitG);
     if(COS_TIER[sk.k]===4){p.gh=p.gh||[];if(!p.ghT||S.t-p.ghT>.05){p.ghT=S.t;p.gh.unshift({x:p.x,y:p.y});p.gh.length=Math.min(p.gh.length,5);}
-      for(let i=1;i<p.gh.length;i+=2){const g=p.gh[i];ctx.save();ctx.globalAlpha=.22-i*.03;ctx.translate(g.x,g.y+R+3);ctx.scale(pf*K,K);ctx.drawImage(skinSprite(sk),...HERO.box);ctx.restore();}}
+      for(let i=1;i<p.gh.length;i+=2){const g=p.gh[i];ctx.save();ctx.globalAlpha=.22-i*.03;heroBlit(skinSprite(sk),g.x,g.y+R+3,pf,k8);ctx.restore();}}
     if(sk.a)ctx.globalAlpha=sk.a;}
-  ctx.translate(p.x,p.y+R+3);ctx.scale(pf*K,K);ctx.drawImage(sk?skinSprite(sk):HERO.canvas,...HERO.box);
+  heroBlit(sk?skinSprite(sk):HERO.canvas,p.x,p.y+R+3,pf,k8);
   ctx.filter='none';ctx.globalAlpha=1;ctx.restore();
   if(sk)skinPost(ctx,p.x,p.y,sk,S.t);
   if(p.barrier>0){ctx.strokeStyle='rgba(127,196,242,.85)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(p.x,p.y,R+9,0,TAU*Math.min(1,p.barrier/(barrierMax()||1)));ctx.stroke();}
@@ -1806,7 +1811,7 @@ function draw(){
    ctx.fillStyle='rgba(0,0,0,.33)';ctx.beginPath();for(const e of vis){ctx.moveTo(e.x+2+e.r,e.y+e.r*.85);ctx.ellipse(e.x+2,e.y+e.r*.85,e.r,e.r*.38,0,0,TAU);}ctx.fill();
    for(const e of vis)drawChip(e);ctx.imageSmoothingEnabled=true;}
   if(S.p.alive)drawPlayer(S.p);
-  else if(S.cls==='knight'&&S.p.deadAt!=null&&HERO.canvas){const p=S.p;HERO.draw('knight','dead',(S.t-p.deadAt)/.16,0,false);{ctx.save();ctx.imageSmoothingEnabled=false;ctx.translate(p.x,p.y+p.r+3);ctx.scale(1.45,1.45);ctx.drawImage(HERO.canvas,...HERO.box);ctx.restore();}}
+  else if(S.cls==='knight'&&S.p.deadAt!=null&&HERO.canvas){const p=S.p;HERO.draw('knight','dead',(S.t-p.deadAt)/.16,0,false);{ctx.save();ctx.imageSmoothingEnabled=false;heroBlit(HERO.canvas,p.x,p.y+p.r+3,1,true);ctx.restore();}}
   drawBeams();
   const offV=(x,y,m=40)=>x<camX-m||x>camX+W+m||y<camY-m||y>camY+H+m;
   const trl=cosEq('trail');
