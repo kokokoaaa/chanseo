@@ -191,6 +191,14 @@ h3{font-family:'Do Hyeon',sans-serif;font-weight:400;font-size:19px;margin:18px 
 @keyframes rf{from{opacity:.55}to{opacity:0}}
 .card.aug{text-align:center;padding:14px 10px;min-height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
 .card.aug b{font-size:22px;margin:0}
+.card.aug.canfuse{border-color:#ff4fd8;box-shadow:0 0 0 2px #ff4fd8,0 0 18px rgba(255,79,216,.55);animation:fzp 1.4s ease-in-out infinite}
+@keyframes fzp{50%{box-shadow:0 0 0 2px #ff4fd8,0 0 30px rgba(255,79,216,.9)}}
+.fzbox{display:flex;flex-direction:column;gap:2px;width:100%;margin-top:4px;padding:7px 8px;border-radius:8px;background:linear-gradient(180deg,#3a0f33,#25091f);border:1px solid #ff4fd8;color:#ffe6f8;font-size:13px;line-height:1.35}
+.fzbox .fzh{font-size:16px;color:#ff8be6;letter-spacing:.5px}
+.card.aug .fzbox b{display:inline;font-size:inherit;margin:0;color:#fff;font-weight:400}
+.card.aug .fzbox .fzn{font-size:17px;color:#ffd76a}
+.fzbox .fzd{color:#f6d8ef}
+.fzbox .fzs{font-size:11px;color:#d9a6cc}
 .chips{display:flex;flex-wrap:wrap;justify-content:center;gap:4px}
 .chip{font-size:12.5px;padding:2px 7px;border-radius:999px;background:rgba(4,18,12,.1);color:#33443c}
 .chip.on{background:#04120c;color:var(--brass)}
@@ -1868,8 +1876,9 @@ function augHtml(a,i){
     if(up)lines+=`<span class="ta">▲ ${D.n} ${up}</span>`;
     return `<span class="chip ${up?'on':''}">${D.n} ${cur}→${aft}</span>`;}).join('');
   const pf=partnerOf(a.id),pn=pf?AUGS.find(x=>x.id===(pf.a===a.id?pf.b:pf.a)).n:'';
-  const fz=pf?`<span class="ta fz">🔗 ${pn}와 합체 → ${pf.n}: ${pf.d}${a.fuseNow?' (고르면 바로 합체)':''}</span>`:'';
-  return `<button class="card aug" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}${pf?' 🔗':''}</span><b>${a.n}</b><span class="chips">${chips}</span><span class="tip">${a.d}${hpLoss(a.f,a.d,a.t==='v'||a.t==='f'?1:2)}${lines||fz?'<br>':''}${lines}${fz}</span></button>`;
+  // 짝이 있으면 카드 앞면에 합체 안내를 크게 표시 (마우스를 안 올려도 보임)
+  const fz=pf?`<span class="fzbox"><span class="fzh">💥 고르면 바로 합체!</span><span class="fzr">보유 중인 <b>${pn}</b> + <b>${a.n}</b></span><span class="fzr">→ <b class="fzn">${pf.n}</b></span><span class="fzd">${pf.d}</span><span class="fzs">슬롯 1칸 비고, 두 재료 효과도 강해짐</span></span>`:'';
+  return `<button class="card aug ${pf?'canfuse':''}" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}</span><b>${a.n}</b><span class="chips">${chips}</span>${fz}<span class="tip">${a.d}${hpLoss(a.f,a.d,a.t==='v'||a.t==='f'?1:2)}${lines?'<br>':''}${lines}</span></button>`;
 }
 function bindPeek(){
   ov.querySelectorAll('.card').forEach(c=>{let t=null;
