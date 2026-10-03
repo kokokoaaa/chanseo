@@ -957,6 +957,9 @@ const DIFF={normal:{n:'일반',col:'#cfe3c4',hp:1,bhp:1,dm:1,sp:1,el:0,sc:1},
   hell:{n:'지옥',col:'#ff5a3a',hp:3.6,bhp:2.4,dm:2.1,sp:.7,el:.2,sc:2.2},
   god:{n:'신',col:'#e9c4ff',hp:5.5,bhp:3.4,dm:2.8,sp:.6,el:.3,sc:3.2}};
 const dfM=()=>DIFF[S.diff]||DIFF.normal;
+// 난이도 해금: 바로 앞 난이도를 클리어해야 다음 난이도가 열림
+const DKEYS=['normal','hard','hell','god'];
+const diffOpen=k=>{const i=DKEYS.indexOf(k);return i<=0||!!(META.clears||{})[DKEYS[i-1]];};
 let pickDiff=(()=>{try{return localStorage.getItem('chanseo_diff')||'normal';}catch(e){return 'normal';}})();
 // 장별 추가 난이도. 3장부터 일반 몹 체력·피해·스폰량, 정예 확률이 더 오름 (보스 체력은 제외)
 // 4장(마지막)은 수를 줄이고 개체를 크게 강화: 체력 ×3.5, 피해 ×1.25, 크기 ×1.2, 정예 +30%p. 대신 경험치·골드도 많이 줌
@@ -1947,10 +1950,11 @@ function slotResolve(r){
 }
 function gameOver(win){
   win=win===true;S.mode='over';joy=null;clearSave();
+  let unlocked='';if(win){META.clears=META.clears||{};const d=S.diff||'normal',first=!META.clears[d];META.clears[d]=(META.clears[d]||0)+1;const nx=DKEYS[DKEYS.indexOf(d)+1];if(first&&nx)unlocked=DIFF[nx].n;}
   const sec=Math.floor(S.gt),score=runScore(),medals=runMedals(score);META.medals+=medals;META.total+=medals;saveMeta();
   if(sec>best){best=sec;try{localStorage.setItem('chipdungeon_best_v5',String(best));}catch(e){}}
   const fmt=x=>`${Math.floor(x/60)}분 ${x%60}초`;
-  show(`${win?`<h2>🏆 클리어!</h2><p class="sub">10분을 버티고 하우스 딜러를 쓰러뜨렸습니다. 보스전에 ${fmt(Math.floor(S.bt))} 걸렸어요.</p>`:`<h2>쓰러졌습니다</h2><p class="sub">${Math.min(4,S.chap+1)}장에서 ${fmt(sec)} 버텼습니다.${S.bossI>=0?` (${ET[BOSSES[S.bossI].type].n}에게 패배)`:''}</p>`}
+  show(`${unlocked?`<div class="medal" style="justify-content:center"><span>🔓 <b>${unlocked}</b> 난이도가 열렸습니다!</span></div>`:''}${win?`<h2>🏆 클리어!</h2><p class="sub">10분을 버티고 하우스 딜러를 쓰러뜨렸습니다. 보스전에 ${fmt(Math.floor(S.bt))} 걸렸어요.</p>`:`<h2>쓰러졌습니다</h2><p class="sub">${Math.min(4,S.chap+1)}장에서 ${fmt(sec)} 버텼습니다.${S.bossI>=0?` (${ET[BOSSES[S.bossI].type].n}에게 패배)`:''}</p>`}
   <div class="medal"><span>최종 점수 <b>${score.toLocaleString()}</b></span><span>🏅 메달 <b>+${medals}</b> <small>(보유 ${META.medals})</small></span></div>
   <div class="stats">
     <span>난이도</span><span>${dfM().n}${dfM().sc>1?` (점수 ×${dfM().sc})`:''}</span>
@@ -1985,6 +1989,7 @@ function clsDetail(k){
   <div class="cmeta"><span>레벨업마다</span><span style="color:#9fe8b0">${C.lvd}</span><span>잘 나오는 시너지</span><span>${C.fav.map(t=>`<span class="tg2">${TAGS[t].n}</span>`).join('')}</span></div>`;
 }
 function startScreen(){
+  if(!diffOpen(pickDiff))pickDiff=[...DKEYS].reverse().find(diffOpen)||'normal';
   if(SHEET)loadSheet();
   const sv=loadSave();
   const cards=Object.keys(CLASSES).map(k=>{const C=CLASSES[k];return `<button class="clscard ${k===pickCls?'on':''}" data-cls="${k}">
@@ -1994,7 +1999,8 @@ function startScreen(){
   ${sv?`<button class="btn primary" id="cont">이어하기 (${CLASSES[sv.s.cls||'knight'].n})<br><small style="color:var(--ink)">${Math.floor(sv.s.gt/60)}분 ${Math.floor(sv.s.gt%60)}초, 레벨 ${sv.s.lvl}, 증강 ${sv.augs.length}개</small></button><h3>새 게임</h3>`:''}
   <h3>캐릭터 선택</h3><div class="clsgrid">${cards}</div>
   <div class="cdet" id="cdet">${clsDetail(pickCls)}</div>
-  <h3>난이도</h3><div class="btnrow" id="dsel">${Object.keys(DIFF).map(k=>`<button class="btn ${k===pickDiff?'primary':''}" data-diff="${k}">${DIFF[k].n}</button>`).join('')}</div>
+  <h3>난이도</h3><div class="btnrow" id="dsel">${DKEYS.map(k=>{const op=diffOpen(k),cl=(META.clears||{})[k];return `<button class="btn ${k===pickDiff?'primary':''}" data-diff="${k}" ${op?'':'disabled'} title="${op?'':DIFF[DKEYS[DKEYS.indexOf(k)-1]].n+' 클리어 시 열림'}">${op?'':'🔒 '}${DIFF[k].n}${cl?' ✔':''}</button>`;}).join('')}</div>
+  ${diffOpen(DKEYS[DKEYS.length-1])?'':`<p class="sub" style="margin-top:4px">${DIFF[DKEYS.find(k=>!diffOpen(k))].n} 난이도는 ${DIFF[DKEYS[DKEYS.indexOf(DKEYS.find(k=>!diffOpen(k)))-1]].n} 난이도를 클리어하면 열려요.</p>`}
   ${best?`<p class="sub">내 최고 기록 ${Math.floor(best/60)}분 ${best%60}초</p>`:''}
   <button class="btn primary" id="go">${CLASSES[pickCls].n}(으)로 시작${sv?' (저장 삭제)':''}</button>
   <button class="btn ghost" id="meta">🏅 영구 강화 <small>보유 메달 ${META.medals}개</small></button>
@@ -2028,7 +2034,7 @@ function drawPreviews(){
     HERO.draw(k,anim,t,anim==='attack'?cycle/.6:0,false);const x=c.getContext('2d');x.imageSmoothingEnabled=false;x.clearRect(0,0,96,96);x.drawImage(HERO.canvas,0,0,40,40,-12,-24,120,120);});
 }
 /* ---------- meta progression ---------- */
-const META=(()=>{try{const m=JSON.parse(localStorage.getItem('chanseo_meta')||'{}');return {medals:m.medals||0,total:m.total||0,lv:m.lv||{},sk:m.sk||{}};}catch(e){return {medals:0,total:0,lv:{},sk:{}};}})();
+const META=(()=>{try{const m=JSON.parse(localStorage.getItem('chanseo_meta')||'{}');return {medals:m.medals||0,total:m.total||0,lv:m.lv||{},sk:m.sk||{},clears:m.clears||{}};}catch(e){return {medals:0,total:0,lv:{},sk:{},clears:{}};}})();
 function saveMeta(){try{localStorage.setItem('chanseo_meta',JSON.stringify(META));}catch(e){}}
 // 영구 강화: 단계당 효과는 작게, 항목과 단계는 많게 (오래 모으는 성장)
 const MSTAT=[
