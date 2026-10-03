@@ -2160,27 +2160,27 @@ function drawPreviews(){
     HERO.draw(k,anim,t,anim==='attack'?cycle/.6:0,false);const x=c.getContext('2d');x.imageSmoothingEnabled=false;x.clearRect(0,0,96,96);x.drawImage(HERO.canvas,0,0,40,40,-12,-24,120,120);});
 }
 /* ---------- meta progression ---------- */
-const META=(()=>{try{const m=JSON.parse(localStorage.getItem('chanseo_meta')||'{}');const pc={luck:3,gold:2,xp:3,aug:6,key:5};let rf=0;for(const k in (m.prep||{}))rf+=(m.prep[k]||0)*(pc[k]||0);return {medals:(m.medals||0)+rf,total:m.total||0,lv:m.lv||{},sk:m.sk||{},clears:m.clears||{},cos:m.cos||{own:{},eq:{}}};}catch(e){return {medals:0,total:0,lv:{},sk:{},clears:{},cos:{own:{},eq:{}}};}})();
+const META=(()=>{try{const m=JSON.parse(localStorage.getItem('chanseo_meta')||'{}');const pc={luck:3,gold:2,xp:3,aug:6,key:5};let rf=0;for(const k in (m.prep||{}))rf+=(m.prep[k]||0)*(pc[k]||0);return {medals:(m.medals||0)+rf,total:m.total||0,lv:m.lv||{},sk:m.sk||{},clears:m.clears||{},cos:m.cos||{own:{},eq:{}},spent:m.spent!=null?m.spent:null};}catch(e){return {medals:0,total:0,lv:{},sk:{},clears:{},cos:{own:{},eq:{}}};}})();
 function saveMeta(){try{localStorage.setItem('chanseo_meta',JSON.stringify(META));}catch(e){}}
 // 영구 강화: 단계당 효과는 작게, 항목과 단계는 많게 (오래 모으는 성장)
 const MSTAT=[
-  {k:'atk',n:'공격력',d:'+2%',max:10,c:2},{k:'rate',n:'공격 속도',d:'+1.5%',max:8,c:3},{k:'hp',n:'최대 체력',d:'+6',max:10,c:2},
-  {k:'armor',n:'방어력',d:'+1',max:10,c:2},{k:'regen',n:'체력 재생',d:'+0.1',max:5,c:3},{k:'ls',n:'흡혈',d:'+0.1%',max:5,c:4},
-  {k:'crit',n:'치명타 확률',d:'+0.5%',max:6,c:3},{k:'critm',n:'치명타 피해',d:'+4%',max:6,c:3},{k:'range',n:'사거리',d:'+2%',max:5,c:2},
-  {k:'spd',n:'이동 속도',d:'+1%',max:5,c:2},{k:'dash',n:'대시 재사용',d:'-2%',max:5,c:3},{k:'magnet',n:'흡수 범위',d:'+8%',max:5,c:1},
-  {k:'xp',n:'경험치 획득',d:'+3%',max:10,c:3},{k:'gold',n:'골드 획득',d:'+5%',max:8,c:2},{k:'sgold',n:'시작 골드',d:'+25',max:6,c:1},
-  {k:'luck',n:'행운',d:'+1',max:5,c:4}
+  {k:'atk',n:'공격력',d:'+2%',max:10,c:6},{k:'rate',n:'공격 속도',d:'+1.5%',max:8,c:9},{k:'hp',n:'최대 체력',d:'+6',max:10,c:6},
+  {k:'armor',n:'방어력',d:'+1',max:10,c:6},{k:'regen',n:'체력 재생',d:'+0.1',max:5,c:9},{k:'ls',n:'흡혈',d:'+0.1%',max:5,c:12},
+  {k:'crit',n:'치명타 확률',d:'+0.5%',max:6,c:9},{k:'critm',n:'치명타 피해',d:'+4%',max:6,c:9},{k:'range',n:'사거리',d:'+2%',max:5,c:6},
+  {k:'spd',n:'이동 속도',d:'+1%',max:5,c:6},{k:'dash',n:'대시 재사용',d:'-2%',max:5,c:9},{k:'magnet',n:'흡수 범위',d:'+8%',max:5,c:3},
+  {k:'xp',n:'경험치 획득',d:'+3%',max:10,c:9},{k:'gold',n:'골드 획득',d:'+5%',max:8,c:6},{k:'sgold',n:'시작 골드',d:'+25',max:6,c:3},
+  {k:'luck',n:'행운',d:'+1',max:5,c:12}
 ];
 const MSKILL=[
-  {k:'extraAug',n:'준비된 모험가',d:'시작할 때 증강을 하나 더 고르고 시작',c:12},
-  {k:'wave',n:'폭발하는 성장',d:'레벨업 충격파 범위 +40%, 피해 +50%',c:8},
-  {k:'token',n:'수호의 부적',d:'매 판 부활 보험 1개를 들고 시작',c:10},
-  {k:'bossMedal',n:'보스 사냥꾼',d:'보스를 잡을 때마다 메달 +1 추가',c:10},
-  {k:'reroll',n:'여분의 주사위',d:'증강 선택 때 무료 다시 뽑기 +1',c:8},
-  {k:'startCard',n:'준비 운동',d:'시작할 때 고급 스탯 카드 한 장',c:10},
-  {k:'bossHeal',n:'전리품 정리',d:'보스를 잡으면 체력 30% 대신 60% 회복',c:12},
-  {k:'discount',n:'단골 손님',d:'보스 상점 골드 가격 −10%',c:15},
-  {k:'key',n:'여분의 열쇠',d:'시작할 때 🔑 1개 (첫 보스 상점에서 VIP 2개 가능)',c:25}
+  {k:'extraAug',n:'준비된 모험가',d:'시작할 때 증강을 하나 더 고르고 시작',c:36},
+  {k:'wave',n:'폭발하는 성장',d:'레벨업 충격파 범위 +40%, 피해 +50%',c:24},
+  {k:'token',n:'수호의 부적',d:'매 판 부활 보험 1개를 들고 시작',c:30},
+  {k:'bossMedal',n:'보스 사냥꾼',d:'보스를 잡을 때마다 메달 +1 추가',c:30},
+  {k:'reroll',n:'여분의 주사위',d:'증강 선택 때 무료 다시 뽑기 +1',c:24},
+  {k:'startCard',n:'준비 운동',d:'시작할 때 고급 스탯 카드 한 장',c:30},
+  {k:'bossHeal',n:'전리품 정리',d:'보스를 잡으면 체력 30% 대신 60% 회복',c:36},
+  {k:'discount',n:'단골 손님',d:'보스 상점 골드 가격 −10%',c:45},
+  {k:'key',n:'여분의 열쇠',d:'시작할 때 🔑 1개 (첫 보스 상점에서 VIP 2개 가능)',c:75}
 ];
 // 외형: 메달로 사는 꾸미기. 능력치 영향 없음. 종류별로 하나씩 장착. 목표가 되도록 비싸게
 const COS=[
@@ -2212,7 +2212,8 @@ const cosEq=cat=>{const k=META.cos&&META.cos.eq&&META.cos.eq[cat];return k?COS.f
 const rainbowCol=(o=0)=>`hsl(${(S?S.t*120:0)+o}deg,90%,65%)`;
 const mlv=k=>META.lv[k]||0;
 const mcost=x=>x.c*(mlv(x.k)+1);
-const metaSpent=()=>MSTAT.reduce((q,x)=>{const l=mlv(x.k);return q+x.c*l*(l+1)/2;},0)+MSKILL.reduce((q,x)=>q+(META.sk[x.k]?x.c:0),0);
+// 영구 강화 가격은 3배로 올림. 환불은 실제로 쓴 메달만 (META.spent). 가격 인상 전 구매분은 예전 가격(1/3)으로 계산
+const metaSpent=()=>META.spent!=null?META.spent:Math.round((MSTAT.reduce((q,x)=>{const l=mlv(x.k);return q+x.c*l*(l+1)/2;},0)+MSKILL.reduce((q,x)=>q+(META.sk[x.k]?x.c:0),0))/3);
 function applyMeta(){const p=S.p;p.dmgP=(p.dmgP||0)+.02*mlv('atk');p.rateP=(p.rateP||0)+.015*mlv('rate');p.maxHp+=6*mlv('hp');p.hp=p.maxHp;p.armor+=mlv('armor');p.regen+=.1*mlv('regen');p.lifesteal+=.001*mlv('ls');
   p.crit+=.005*mlv('crit');p.critM+=.04*mlv('critm');p.range*=1+.02*mlv('range');p.speed*=1+.01*mlv('spd');p.dashMul*=1-.02*mlv('dash');p.magnet*=1+.08*mlv('magnet');
   p.xpM=1+.03*mlv('xp');p.goldM+=.05*mlv('gold');S.gold+=25*mlv('sgold');p.luck+=mlv('luck');if(META.sk.token)p.token=true;if(META.sk.key)S.keys=1;if(META.sk.startCard){S.pendingLv++;S.boost=true;}}
@@ -2239,12 +2240,12 @@ function openMeta(){
   <button class="btn ghost" id="mReset" ${metaSpent()?'':'disabled'}>↺ 전체 초기화 <small>🏅 ${metaSpent()} 환불</small></button>
   <button class="btn primary" id="mBack2">돌아가기</button>`);
   const keepY=()=>{const y=ov.scrollTop;openMeta();ov.scrollTop=y;};
-  ov.querySelectorAll('[data-ms]').forEach(b=>b.onclick=()=>{const x=MSTAT.find(q=>q.k===b.dataset.ms),c=mcost(x);if(META.medals<c||mlv(x.k)>=x.max)return;META.medals-=c;META.lv[x.k]=mlv(x.k)+1;saveMeta();keepY();});
-  ov.querySelectorAll('[data-mk]').forEach(b=>b.onclick=()=>{const x=MSKILL.find(q=>q.k===b.dataset.mk);if(META.medals<x.c||META.sk[x.k])return;META.medals-=x.c;META.sk[x.k]=1;saveMeta();keepY();});
+  ov.querySelectorAll('[data-ms]').forEach(b=>b.onclick=()=>{const x=MSTAT.find(q=>q.k===b.dataset.ms),c=mcost(x);if(META.medals<c||mlv(x.k)>=x.max)return;META.spent=metaSpent()+c;META.medals-=c;META.lv[x.k]=mlv(x.k)+1;saveMeta();keepY();});
+  ov.querySelectorAll('[data-mk]').forEach(b=>b.onclick=()=>{const x=MSKILL.find(q=>q.k===b.dataset.mk);if(META.medals<x.c||META.sk[x.k])return;META.spent=metaSpent()+x.c;META.medals-=x.c;META.sk[x.k]=1;saveMeta();keepY();});
   ov.querySelectorAll('[data-cs]').forEach(b=>b.onclick=()=>{const x=COS.find(q=>q.k===b.dataset.cs);META.cos=META.cos||{own:{},eq:{}};
     if(!cosOwn(x.k)){if(META.medals<x.c)return;META.medals-=x.c;META.cos.own[x.k]=1;META.cos.eq[x.cat]=x.k;}
     else META.cos.eq[x.cat]=META.cos.eq[x.cat]===x.k?null:x.k;saveMeta();keepY();});
-  $('mReset').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.innerHTML='한 번 더 누르면 초기화 <small>🏅 '+metaSpent()+' 환불</small>';return;}META.medals+=metaSpent();META.lv={};META.sk={};saveMeta();keepY();};
+  $('mReset').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.innerHTML='한 번 더 누르면 초기화 <small>🏅 '+metaSpent()+' 환불</small>';return;}META.medals+=metaSpent();META.spent=0;META.lv={};META.sk={};saveMeta();keepY();};
   $('mBack').onclick=startScreen;$('mBack2').onclick=startScreen;
 }
 function beginRun(cls){clearSave();newRun();S.diff=pickDiff;applyClass(cls);applyMeta();S.bonusAug=1+(META.sk.extraAug?1:0);openNext();}
