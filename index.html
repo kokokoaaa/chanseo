@@ -2136,7 +2136,6 @@ function openMeta(){
   <h3>영구 능력치 <small style="color:var(--muted);font-size:13px">단계가 오를수록 가격 상승</small></h3><div class="mgrid">${st}</div>
   <h3>영구 기술 <small style="color:var(--muted);font-size:13px">한 번 사면 계속 적용</small></h3><div class="mgrid">${sk}</div>
   <button class="btn ghost" id="mReset" ${metaSpent()?'':'disabled'}>↺ 전체 초기화 <small>🏅 ${metaSpent()} 환불</small></button>
-  <p class="rule">점수 = 생존 초 × 10 + 처치 × 2 + 레벨 × 30 + 보스 처치 × 400 + (클리어 시) 남은 골드 10당 1점. 점수 2000점마다 메달 1개.</p>
   <button class="btn primary" id="mBack2">돌아가기</button>`);
   const keepY=()=>{const y=ov.scrollTop;openMeta();ov.scrollTop=y;};
   ov.querySelectorAll('[data-ms]').forEach(b=>b.onclick=()=>{const x=MSTAT.find(q=>q.k===b.dataset.ms),c=mcost(x);if(META.medals<c||mlv(x.k)>=x.max)return;META.medals-=c;META.lv[x.k]=mlv(x.k)+1;saveMeta();keepY();});
