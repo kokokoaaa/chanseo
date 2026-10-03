@@ -1932,7 +1932,7 @@ function augHtml(a,i){
   const pf=partnerOf(a.id),pn=pf?AUGS.find(x=>x.id===(pf.a===a.id?pf.b:pf.a)).n:'';
   // 짝이 있으면 카드 앞면에 합체 안내를 크게 표시 (마우스를 안 올려도 보임)
   const fz=pf?`<span class="fzbox"><span class="fzh">💥 합체 → <b class="fzn">${pf.n}</b></span><span class="fzd">${pf.d}</span></span>`:'';
-  return `<button class="card aug tier-${a.t} ${pf?'canfuse':''}" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}</span><b>${a.n}</b><span class="chips">${chips}</span>${fz}<span class="tip">${a.d}${hpLoss(a.f,a.d,a.t==='v'||a.t==='f'?1:2)}${lines?'<br>':''}${lines}</span></button>`;
+  return `<button class="card aug tier-${a.t} ${pf?'canfuse':''}" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}${a.swap?' · <span style="color:#ff9ad0">교체</span>':''}</span><b>${a.n}</b><span class="chips">${chips}</span>${fz}<span class="tip">${a.d}${hpLoss(a.f,a.d,a.t==='v'||a.t==='f'?1:2)}${lines?'<br>':''}${lines}</span></button>`;
 }
 function bindPeek(){
   ov.querySelectorAll('.card').forEach(c=>{let t=null;
@@ -1944,9 +1944,13 @@ function bindPeek(){
 }
 function openAugKeep(opts,free,why,tier){openAug(free,why,opts,tier);}
 const augReady=()=>slotCount()<MAXA||fullOptions().length>0;
+// 슬롯이 가득 차면: 합체 짝(최대 2) + 나머지는 '교체' 후보 (고르면 기존 증강 하나를 버리고 바꿈)
+const swappable=()=>S.augs.map((a,i)=>[a,i]).filter(([a])=>a.t!=='v'&&a.t!=='f'&&!a.f);
 function fullOptions(){
-  const fz=AUGS.filter(a=>!has(a.id)&&(!a.cls||a.cls===S.cls)&&augReq(a)&&partnerOf(a.id)).sort(()=>Math.random()-.5).slice(0,3).map(a=>({...a,fuseNow:true,q:rollQ()}));
-  return fz;
+  const fz=AUGS.filter(a=>!has(a.id)&&(!a.cls||a.cls===S.cls)&&augReq(a)&&partnerOf(a.id)).sort(()=>Math.random()-.5).slice(0,2).map(a=>({...a,fuseNow:true,q:rollQ()}));
+  if(!swappable().length)return fz;
+  const sw=augOptions(rollTier()).filter(a=>!fz.some(f=>f.id===a.id)&&!partnerOf(a.id)).slice(0,3-fz.length).map(a=>({...a,swap:true}));
+  return [...fz,...sw];
   return S.augs.filter(a=>AUG_UP&&a.lv<3&&a.t!=='v'&&a.t!=='f'&&!(a.id==='luckydie'&&critFull())).sort(()=>Math.random()-.5).slice(0,3).map(o=>({up:true,ref:o}));
 }
 function openAug(free,why,fixed,fixedTier){
@@ -1955,16 +1959,24 @@ function openAug(free,why,fixed,fixedTier){
   const tier=fixedTier||rollTier(),opts=fixed||(full?fullOptions():augOptions(tier));
   if(!opts.length){const g=price(120);S.gold+=g;toast(`슬롯 가득, 강화할 것도 없음. ${g} 골드 지급`);openNext();return;}
   const cost=price(18);
-  show(`<h2>증강 선택</h2><p class="sub">슬롯 <b style="color:${full?'#ff9ad0':'var(--ivory)'}">${slotCount()}/${MAXA}</b>${full?' · <b style="color:#ff9ad0">합체 짝만</b>':''}</p>
+  show(`<h2>증강 선택</h2><p class="sub">슬롯 <b style="color:${full?'#ff9ad0':'var(--ivory)'}">${slotCount()}/${MAXA}</b>${full?' · <b style="color:#ff9ad0">가득 참 · 고르면 교체</b>':''}</p>
   <div class="cards">${opts.map(augHtml).join('')}</div>
   <button class="btn ghost" id="reroll" ${!free&&S.gold<cost?'disabled':''}>다시 뽑기<small>${free?(free===true?(META.sk.reroll?'무료 2회':'무료 1회'):'무료 '+free+'회'):cost+'골드 (보유 '+S.gold+')'}</small></button>
   <button class="btn ghost" data-stats>내 스탯 보기</button>`);
   bindPeek();if(opts.some(a=>a.t==='p'))augFx('💎 프리즘 등장!','','#d68cff',true);
   ov.querySelectorAll('.card').forEach(b=>b.onclick=()=>{const a=opts[+b.dataset.i];
     if(a.up){const o=a.ref;o.lv++;if(o.f)applyQ(o.f,S.p,o.q);tagCount();toast(`${o.n} ★${o.lv}`);tryFuse();openNext();return;}
+    if(a.swap&&slotCount()>=MAXA){openSwap(a,opts,free,why);return;}
     gainAug(a);
     openNext();});
   $('reroll').onclick=()=>{if(!free)S.gold-=cost;const left=free===true?(META.sk.reroll?1:0):(typeof free==='number'?free-1:0);openAug(left>0?left:false,why);};
+}
+function openSwap(a,opts,free,why){
+  const list=swappable();
+  show(`<h2>교체할 증강</h2><p class="sub"><b>${a.n}</b> 대신 버릴 증강</p><div class="grid">${list.map(([o,i])=>`<button class="btn" data-sw="${i}">${o.n}<small>${o.d}</small></button>`).join('')}</div>
+  <button class="btn ghost" id="swBack">돌아가기</button>`);
+  ov.querySelectorAll('[data-sw]').forEach(b=>b.onclick=()=>{const o=S.augs[+b.dataset.sw];S.augs.splice(+b.dataset.sw,1);tagCount();toast(`${o.n} → ${a.n}`);gainAug({...a,swap:undefined});openNext();});
+  $('swBack').onclick=()=>openAug(free,why,opts);
 }
 function fusionTable(){
   const nm=id=>{const a=AUGS.find(x=>x.id===id);const o=has(id)&&S.augs.some(x=>x.id===id);return `<span style="color:${o?'var(--brass)':'inherit'}">${a.n}</span>`;};
@@ -2328,8 +2340,8 @@ function scoreAug(a){
   return sc+Math.random()*.8;
 }
 function autoAug(){
-  const full=slotCount()>=MAXA,opts=full?fullOptions():augOptions(rollTier());
-  if(!opts.length){S.gold+=price(120);return;}
+  const full=slotCount()>=MAXA,opts=full?fullOptions().filter(a=>!a.swap):augOptions(rollTier());
+  if(!opts.length){autoStat();return;}
   const a=opts.reduce((b,c)=>scoreAug(c)>scoreAug(b)?c:b,opts[0]);
   if(a.up){const o=a.ref;o.lv++;if(o.f)applyQ(o.f,S.p,o.q);tagCount();ftext(S.p.x,S.p.y-40,o.n+' ★'+o.lv,'#ffd76a',15);tryFuse();return;}
   gainAug(a);
