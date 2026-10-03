@@ -2167,7 +2167,7 @@ const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 let HOF_ALL=false,HOF_DIFF=null;
 function boardHtml(){
   const hd=HOF_DIFF||pickDiff||'normal';
-  const head=`<h2>🏆 명예의 전당</h2><div class="dtabs">${Object.keys(DIFF).map(k=>`<button class="btn ${k===hd?'primary':''}" data-hd="${k}">${DIFF[k].n}</button>`).join('')}</div><p class="hsub">${DIFF[hd].n} 난이도 순위 · 종합 점수 = 생존 초×10 + 처치×2 + 레벨×30 + 보스 처치×400 + 클리어 시 남은 골드÷10 + 보스 빨리 잡기 보너스</p>`;
+  const head=`<h2>🏆 명예의 전당</h2><div class="dtabs">${Object.keys(DIFF).map(k=>`<button class="btn ${k===hd?'primary':''}" data-hd="${k}">${DIFF[k].n}</button>`).join('')}</div><p class="hsub">${DIFF[hd].n} 난이도 순위</p>`;
   const note=t=>head+`<p class="sub" style="text-align:center;margin:0">${t}</p>`;
   if(RSTATE==='off')return note('랭킹 서버에 연결하지 못했어요. 인터넷 연결을 확인해주세요.');
   if(RSTATE==='loading')return note('랭킹 불러오는 중…');
