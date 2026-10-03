@@ -2147,7 +2147,7 @@ function drawPreviews(){
     HERO.draw(k,anim,t,anim==='attack'?cycle/.6:0,false);const x=c.getContext('2d');x.imageSmoothingEnabled=false;x.clearRect(0,0,96,96);x.drawImage(HERO.canvas,0,0,40,40,-12,-24,120,120);});
 }
 /* ---------- meta progression ---------- */
-const META=(()=>{try{const m=JSON.parse(localStorage.getItem('chanseo_meta')||'{}');return {medals:m.medals||0,total:m.total||0,lv:m.lv||{},sk:m.sk||{},clears:m.clears||{}};}catch(e){return {medals:0,total:0,lv:{},sk:{},clears:{}};}})();
+const META=(()=>{try{const m=JSON.parse(localStorage.getItem('chanseo_meta')||'{}');return {medals:m.medals||0,total:m.total||0,lv:m.lv||{},sk:m.sk||{},clears:m.clears||{},prep:m.prep||{}};}catch(e){return {medals:0,total:0,lv:{},sk:{},clears:{},prep:{}};}})();
 function saveMeta(){try{localStorage.setItem('chanseo_meta',JSON.stringify(META));}catch(e){}}
 // 영구 강화: 단계당 효과는 작게, 항목과 단계는 많게 (오래 모으는 성장)
 const MSTAT=[
@@ -2169,6 +2169,16 @@ const MSKILL=[
   {k:'discount',n:'단골 손님',d:'보스 상점 골드 가격 −10%',c:15},
   {k:'key',n:'여분의 열쇠',d:'시작할 때 🔑 1개 (첫 보스 상점에서 VIP 2개 가능)',c:25}
 ];
+// 출전 준비물: 메달로 미리 사두는 1회용 아이템. 판을 시작할 때 종류별로 1개씩 자동 사용 (여러 개 쌓아둘 수 있음). 남는 메달 소모처
+const MPREP=[
+  {k:'luck',n:'행운의 부적',d:'이번 판 행운 +3',c:3,f:()=>{S.p.luck+=3;}},
+  {k:'gold',n:'비상금',d:'이번 판 시작 골드 +200',c:2,f:()=>{S.gold+=200;}},
+  {k:'xp',n:'경험치 물약',d:'이번 판 경험치 획득 +15%',c:3,f:()=>{S.p.xpM=(S.p.xpM||1)+.15;}},
+  {k:'aug',n:'증강 선물',d:'시작할 때 증강을 하나 더 고름',c:6,f:()=>{S.bonusAug++;}},
+  {k:'key',n:'VIP 열쇠',d:'🔑 1개를 들고 시작',c:5,f:()=>{S.keys=(S.keys||0)+1;}}
+];
+const prepN=k=>(META.prep&&META.prep[k])||0;
+function usePrep(){const used=[];for(const x of MPREP)if(prepN(x.k)>0){META.prep[x.k]--;x.f();used.push(x.n);}if(used.length){saveMeta();setTimeout(()=>toast('준비물 사용: '+used.join(', ')),300);}}
 const mlv=k=>META.lv[k]||0;
 const mcost=x=>x.c*(mlv(x.k)+1);
 const metaSpent=()=>MSTAT.reduce((q,x)=>{const l=mlv(x.k);return q+x.c*l*(l+1)/2;},0)+MSKILL.reduce((q,x)=>q+(META.sk[x.k]?x.c:0),0);
@@ -2194,15 +2204,17 @@ function openMeta(){
   <div class="mbal">보유 메달 <b>🏅 ${META.medals}</b><small>지금까지 ${META.total}개 획득 · 강화는 모든 캐릭터, 모든 판에 적용</small></div>
   <h3>영구 능력치 <small style="color:var(--muted);font-size:13px">단계가 오를수록 가격 상승</small></h3><div class="mgrid">${st}</div>
   <h3>영구 기술 <small style="color:var(--muted);font-size:13px">한 번 사면 계속 적용</small></h3><div class="mgrid">${sk}</div>
+  <h3>출전 준비물 <small style="color:var(--muted);font-size:13px">1회용. 다음 판 시작 때 종류별로 1개씩 자동 사용, 여러 개 쌓아둘 수 있음</small></h3><div class="mgrid">${MPREP.map(x=>`<button class="mtile sk" data-mp="${x.k}" ${META.medals>=x.c?'':'disabled'}><b>${x.n}</b><span class="md">${x.d}</span><span class="mnow">보유 ${prepN(x.k)}개</span><span class="mc">🏅 ${x.c}</span></button>`).join('')}</div>
   <button class="btn ghost" id="mReset" ${metaSpent()?'':'disabled'}>↺ 전체 초기화 <small>🏅 ${metaSpent()} 환불</small></button>
   <button class="btn primary" id="mBack2">돌아가기</button>`);
   const keepY=()=>{const y=ov.scrollTop;openMeta();ov.scrollTop=y;};
   ov.querySelectorAll('[data-ms]').forEach(b=>b.onclick=()=>{const x=MSTAT.find(q=>q.k===b.dataset.ms),c=mcost(x);if(META.medals<c||mlv(x.k)>=x.max)return;META.medals-=c;META.lv[x.k]=mlv(x.k)+1;saveMeta();keepY();});
   ov.querySelectorAll('[data-mk]').forEach(b=>b.onclick=()=>{const x=MSKILL.find(q=>q.k===b.dataset.mk);if(META.medals<x.c||META.sk[x.k])return;META.medals-=x.c;META.sk[x.k]=1;saveMeta();keepY();});
+  ov.querySelectorAll('[data-mp]').forEach(b=>b.onclick=()=>{const x=MPREP.find(q=>q.k===b.dataset.mp);if(META.medals<x.c)return;META.medals-=x.c;META.prep=META.prep||{};META.prep[x.k]=prepN(x.k)+1;saveMeta();keepY();});
   $('mReset').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.innerHTML='한 번 더 누르면 초기화 <small>🏅 '+metaSpent()+' 환불</small>';return;}META.medals+=metaSpent();META.lv={};META.sk={};saveMeta();keepY();};
   $('mBack').onclick=startScreen;$('mBack2').onclick=startScreen;
 }
-function beginRun(cls){clearSave();newRun();S.diff=pickDiff;applyClass(cls);applyMeta();S.bonusAug=1+(META.sk.extraAug?1:0);openNext();}
+function beginRun(cls){clearSave();newRun();S.diff=pickDiff;applyClass(cls);applyMeta();S.bonusAug=1+(META.sk.extraAug?1:0);usePrep();openNext();}
 
 /* ---------- online ranking ---------- */
 let RDB=null,RMYID=null,BOARD=null,RSTATE='loading',SHEET=false;
