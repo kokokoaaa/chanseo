@@ -692,7 +692,7 @@ function doFuse(f){
   for(const a of S.augs)if((a.id===f.a||a.id===f.b)&&a.f)for(let k=a.lv;k<3;k++)applyQ(a.f,S.p,a.q);
   S.augs=S.augs.filter(a=>a.id!==f.a&&a.id!==f.b);const o=fusionObj(f);S.augs.push(o);if(f.f)f.f(S.p);tagCount();
   S.flash=.35;const p=S.p;S.rings.push({x:p.x,y:p.y,r:10,max:200,life:.5,col:'#ff4fd8'});S.fused=(S.fused||0)+1;
-  augFx(`💥 합체! ${f.n}`,`${AUGS.find(x=>x.id===f.a).n} + ${AUGS.find(x=>x.id===f.b).n} · 재료 효과도 한 단계 강해짐`,'#ff4fd8',true,.5);return o;
+  augFx(`💥 합체! ${f.n}`,f.d,'#ff4fd8',true,.5);return o;
 }
 function tryFuse(){
   const el=fusable();if(!el.length)return null;
@@ -1903,7 +1903,7 @@ function augHtml(a,i){
     return `<span class="chip ${up?'on':''}">${D.n} ${cur}→${aft}</span>`;}).join('');
   const pf=partnerOf(a.id),pn=pf?AUGS.find(x=>x.id===(pf.a===a.id?pf.b:pf.a)).n:'';
   // 짝이 있으면 카드 앞면에 합체 안내를 크게 표시 (마우스를 안 올려도 보임)
-  const fz=pf?`<span class="fzbox"><span class="fzh">💥 고르면 바로 합체!</span><span class="fzr">보유 중인 <b>${pn}</b> + <b>${a.n}</b></span><span class="fzr">→ <b class="fzn">${pf.n}</b></span><span class="fzd">${pf.d}</span><span class="fzs">슬롯 1칸 비고, 두 재료 효과도 강해짐</span></span>`:'';
+  const fz=pf?`<span class="fzbox"><span class="fzh">💥 합체 → <b class="fzn">${pf.n}</b></span><span class="fzd">${pf.d}</span></span>`:'';
   return `<button class="card aug tier-${a.t} ${pf?'canfuse':''}" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}</span><b>${a.n}</b><span class="chips">${chips}</span>${fz}<span class="tip">${a.d}${hpLoss(a.f,a.d,a.t==='v'||a.t==='f'?1:2)}${lines?'<br>':''}${lines}</span></button>`;
 }
 function bindPeek(){
@@ -1952,7 +1952,7 @@ function openStat(keep){
   if(!cards){cards=[];let tries=0;const bonus=S.boost?6:0;while(cards.length<3&&tries<60){tries++;const c=cardOf(rollRarity(bonus),bonus);if(!cards.some(x=>x.n===c.n))cards.push(c);}S.boost=false;}
   const cost=price(15+S.srr*10),allC=Math.round(price(60+S.lvl*12)*Math.pow(1.35,S.takeAll||0)),boostC=price(90+S.lvl*12),next=AUG_EVERY-(S.picks%AUG_EVERY);
   const bossSt=S.bossStat;S.bossStat=false;
-  show(`<h2>${bossSt?'보스 보상':'레벨 '+(S.lvl-S.pendingLv)}</h2><p class="sub">스탯 하나 고르기. ${!augReady()?`증강 슬롯이 가득 차서 레벨업마다 스탯만 받습니다`:`다음 증강까지 ${next}레벨${slotCount()>=MAXA?' (슬롯이 가득 차서 강화·합체로 나와요)':''}`}${bossSt?'. 강화할 증강이 없어서 고급 스탯 카드로 대신':''}. 보유 <span class="gold">${S.gold} 골드</span></p>
+  show(`<h2>${bossSt?'보스 보상':'레벨 '+(S.lvl-S.pendingLv)}</h2><p class="sub">${augReady()?`다음 증강까지 ${next}레벨 · `:''}<span class="gold">${S.gold} 골드</span></p>
   <div class="cards">${cards.map((c,i)=>{const R=RAR[c.r];return `<button class="card rar-${c.r}" data-i="${i}" style="--rc:${R.col}"><span class="rr">${c.r==='l'?'✨ ':''}${R.n}${c.u!=null?` · <span style="color:${GRADE(c.u).col}">${GRADE(c.u).n}</span>`:''}</span><b>${c.n}</b>${withActual(c.d,c.u!=null?c.f:null)}</button>`;}).join('')}</div>
   <div class="btnrow">
     <button class="btn" id="reroll" ${S.gold<cost?'disabled':''}>다시 뽑기<small>${cost}골드</small></button>
