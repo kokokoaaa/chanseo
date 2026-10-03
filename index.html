@@ -171,6 +171,9 @@ h3{font-family:'Do Hyeon',sans-serif;font-weight:400;font-size:19px;margin:18px 
 @keyframes cf{0%{transform:translate(0,0) rotate(0) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(var(--r)) scale(.6);opacity:0}}
 .rbanner{position:fixed;left:50%;top:14%;z-index:301;pointer-events:none;font-family:'Do Hyeon',sans-serif;font-size:44px;white-space:nowrap;letter-spacing:2px;transform:translate(-50%,0);animation:rb 1.9s ease-out forwards;text-shadow:0 0 12px rgba(0,0,0,.6),0 0 30px currentColor}
 @keyframes rb{0%{transform:translate(-50%,0) scale(.3);opacity:0}18%{transform:translate(-50%,0) scale(1.18);opacity:1}30%{transform:translate(-50%,0) scale(1)}80%{opacity:1}100%{transform:translate(-50%,-30px) scale(1);opacity:0}}
+.abanner{position:fixed;left:50%;top:22%;z-index:301;pointer-events:none;font-family:'Do Hyeon',sans-serif;text-align:center;width:min(92vw,640px);transform:translate(-50%,0);animation:rb 2.2s ease-out forwards;text-shadow:0 0 12px rgba(0,0,0,.7),0 0 26px currentColor}
+.abanner b{display:block;font-size:clamp(28px,7vw,44px);font-weight:400;letter-spacing:1px}
+.abanner small{display:block;margin-top:6px;font-size:clamp(14px,3.6vw,18px);color:#f1e7cf;text-shadow:0 1px 3px #000}
 .rflash{position:fixed;inset:0;z-index:299;pointer-events:none;animation:rf .7s ease-out forwards}
 @keyframes rf{from{opacity:.55}to{opacity:0}}
 .card.aug{text-align:center;padding:14px 10px;min-height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
@@ -502,111 +505,111 @@ const TAGS={
 const TIER={s:{n:'실버',col:'#9aa1ab'},g:{n:'골드',col:'#c99223'},p:{n:'프리즘',col:'#b552d6'},v:{n:'VIP',col:'#c0392b'},f:{n:'합체',col:'#e0418f'}};
 const AUGS=[
   // card
-  {id:'split',u:'적에게 맞은 탄환이 쪼개지면서 나오는 작은 탄환 수가 늘어나요. ★1은 2발, ★2는 3발, ★3은 4발. 적이 몰려 있을수록 효과가 커져요.',t:'s',n:'분열 탄',tags:['card'],d:'탄환이 적에게 맞으면 작은 탄 2발로 갈라집니다'},
-  {id:'quick',u:'강화할 때마다 공격 속도 +12%, 탄속 +20%가 한 번 더 붙어요. ★3이면 기본 대비 공격 속도 약 +40%.',t:'s',n:'속사',tags:['card'],d:'공격 속도 +12%, 탄속 +20%',f:p=>{p.rateP=(p.rateP||0)+.12;p.bspd*=1.2;}},
-  {id:'ghost',u:'강화할 때마다 관통이 1씩 늘어나요. ★3이면 이 증강만으로 탄환 하나가 적 4명까지 뚫고 지나가요.',t:'g',n:'관통 패',tags:['card','curse'],d:'탄환 관통 +1',f:p=>{p.pierce+=1;}},
-  {id:'dealer',u:'탄환이 휘어서 따라가는 거리가 늘어나요. ★1은 170, ★2는 230, ★3은 300 안의 적을 추적해서 빗나가는 탄환이 줄어요.',t:'g',n:'유도 패',tags:['card','roulette'],d:'탄환이 가까운 적을 따라갑니다. 회전 칩 +1'},
-  {id:'storm',u:'강화할 때마다 한 번에 쏘는 탄환이 1발씩 더 늘어나요. 모든 피해 증가 효과와 곱해져서 강화 가치가 큰 편이에요.',t:'p',n:'카드 폭풍',tags:['card','card'],d:'탄환 +1발. 카드 2개로 계산',f:p=>{p.multi+=1;}},
+  {id:'split',u:'적에게 맞은 탄환이 쪼개지면서 나오는 작은 탄환 수가 늘어나요. ★1은 2발, ★2는 3발, ★3은 4발. 적이 몰려 있을수록 효과가 커져요.',t:'s',n:'분열 탄',tags:['card'],d:'탄환이 적에게 맞으면 작은 탄 3발로 갈라집니다'},
+  {id:'quick',u:'강화할 때마다 공격 속도 +12%, 탄속 +20%가 한 번 더 붙어요. ★3이면 기본 대비 공격 속도 약 +40%.',t:'s',n:'속사',tags:['card'],d:'공격 속도 +24%, 탄속 +44%',f:p=>{p.rateP=(p.rateP||0)+.12;p.bspd*=1.2;}},
+  {id:'ghost',u:'강화할 때마다 관통이 1씩 늘어나요. ★3이면 이 증강만으로 탄환 하나가 적 4명까지 뚫고 지나가요.',t:'g',n:'관통 패',tags:['card','curse'],d:'탄환 관통 +2',f:p=>{p.pierce+=1;}},
+  {id:'dealer',u:'탄환이 휘어서 따라가는 거리가 늘어나요. ★1은 170, ★2는 230, ★3은 300 안의 적을 추적해서 빗나가는 탄환이 줄어요.',t:'g',n:'유도 패',tags:['card','roulette'],d:'탄환이 230 안의 가까운 적을 따라갑니다. 회전 칩 +1'},
+  {id:'storm',u:'강화할 때마다 한 번에 쏘는 탄환이 1발씩 더 늘어나요. 모든 피해 증가 효과와 곱해져서 강화 가치가 큰 편이에요.',t:'p',n:'카드 폭풍',tags:['card','card'],d:'탄환 +2발. 카드 2개로 계산',f:p=>{p.multi+=1;}},
   // dice
-  {id:'luckydie',u:'강화할 때마다 치명타 확률이 7%씩 더 올라가요. 치명타가 100%를 넘으면 넘은 만큼 치명타 피해로 바뀌어요.',t:'s',n:'행운의 주사위',tags:['dice'],d:'치명타 확률 +7%',f:p=>{p.crit+=.07;}},
-  {id:'highroll',u:'주사위 눈금 6으로 적을 맞힐 때 받는 골드가 늘어나요. ★1은 1, ★2는 2, ★3은 3골드. 탄환이 많을수록 골드가 잘 쌓여요.',t:'g',n:'하이 롤러',tags:['dice','house'],d:'눈금 6 탄환이 적중하면 골드 +1'},
-  {id:'loaded',u:'나쁜 눈금이 나왔을 때 다시 굴리는 범위가 넓어져요. ★1은 1~2만 다시 굴리고, ★2는 1~3, ★3은 1~3이 나오면 두 번까지 다시 굴려요. 평균 피해가 확 올라가요.',t:'p',n:'조작된 주사위',tags:['dice','dice'],d:'눈금 1~2가 나오면 다시 굴립니다. 주사위 2개로 계산'},
-  {id:'triple7',u:'적을 맞힐 때 7배 피해가 터질 확률이 올라가요. ★1은 7%, ★2는 10%, ★3은 14%. 분열 탄 같은 파생 탄환에는 적용되지 않아요.',t:'p',n:'777',tags:['dice','jackpot'],d:'적중마다 7% 확률로 7배 피해'},
+  {id:'luckydie',u:'강화할 때마다 치명타 확률이 7%씩 더 올라가요. 치명타가 100%를 넘으면 넘은 만큼 치명타 피해로 바뀌어요.',t:'s',n:'행운의 주사위',tags:['dice'],d:'치명타 확률 +14%',f:p=>{p.crit+=.07;}},
+  {id:'highroll',u:'주사위 눈금 6으로 적을 맞힐 때 받는 골드가 늘어나요. ★1은 1, ★2는 2, ★3은 3골드. 탄환이 많을수록 골드가 잘 쌓여요.',t:'g',n:'하이 롤러',tags:['dice','house'],d:'눈금 6 탄환이 적중하면 골드 +2'},
+  {id:'loaded',u:'나쁜 눈금이 나왔을 때 다시 굴리는 범위가 넓어져요. ★1은 1~2만 다시 굴리고, ★2는 1~3, ★3은 1~3이 나오면 두 번까지 다시 굴려요. 평균 피해가 확 올라가요.',t:'p',n:'조작된 주사위',tags:['dice','dice'],d:'눈금 1~3이 나오면 다시 굴립니다. 주사위 2개로 계산'},
+  {id:'triple7',u:'적을 맞힐 때 7배 피해가 터질 확률이 올라가요. ★1은 7%, ★2는 10%, ★3은 14%. 분열 탄 같은 파생 탄환에는 적용되지 않아요.',t:'p',n:'777',tags:['dice','jackpot'],d:'적중마다 10% 확률로 7배 피해'},
   // roulette
-  {id:'orbit',u:'내 주변을 도는 회전 칩 개수가 늘어나요. ★1은 2개, ★2는 3개, ★3은 4개. 가까이 붙는 적을 계속 갈아요.',t:'s',n:'회전 칩',tags:['roulette'],d:'주변을 도는 칩 2개가 닿는 적에게 피해'},
-  {id:'wheel',u:'적을 중독시키는 회전 칩 개수가 늘어나요. ★1은 1개, ★2는 2개, ★3은 3개.',t:'s',n:'독 바른 칩',tags:['roulette','poison'],d:'회전 칩 +1. 회전 칩이 적을 중독시킵니다'},
-  {id:'spinner',u:'강화할 때마다 회전 반경 +40%, 회전 칩 피해 +60%가 한 번 더 붙어요. 반경이 넓어지면 더 멀리 있는 적까지 닿아요.',t:'g',n:'큰 원 회전',tags:['roulette'],d:'회전 칩 +1, 반경 +40%, 회전 칩 피해 +60%',f:p=>{p.orbR*=1.4;p.orbM*=1.6;}},
-  {id:'vault',u:'골드를 얼마나 모아야 회전 칩이 하나 생기는지가 줄어요. ★1은 100골드당, ★2는 80골드당, ★3은 60골드당 1개 (최대 4개).',t:'p',n:'금고 칩',tags:['roulette','house'],d:'보유 골드 100당 회전 칩 +1 (최대 +4)'},
+  {id:'orbit',u:'내 주변을 도는 회전 칩 개수가 늘어나요. ★1은 2개, ★2는 3개, ★3은 4개. 가까이 붙는 적을 계속 갈아요.',t:'s',n:'회전 칩',tags:['roulette'],d:'주변을 도는 칩 3개가 닿는 적에게 피해'},
+  {id:'wheel',u:'적을 중독시키는 회전 칩 개수가 늘어나요. ★1은 1개, ★2는 2개, ★3은 3개.',t:'s',n:'독 바른 칩',tags:['roulette','poison'],d:'회전 칩 +2. 회전 칩이 적을 중독시킵니다'},
+  {id:'spinner',u:'강화할 때마다 회전 반경 +40%, 회전 칩 피해 +60%가 한 번 더 붙어요. 반경이 넓어지면 더 멀리 있는 적까지 닿아요.',t:'g',n:'큰 원 회전',tags:['roulette'],d:'회전 칩 +1, 반경 +96%, 회전 칩 피해 +156%',f:p=>{p.orbR*=1.4;p.orbM*=1.6;}},
+  {id:'vault',u:'골드를 얼마나 모아야 회전 칩이 하나 생기는지가 줄어요. ★1은 100골드당, ★2는 80골드당, ★3은 60골드당 1개 (최대 4개).',t:'p',n:'금고 칩',tags:['roulette','house'],d:'보유 골드 80당 회전 칩 +1 (최대 +4)'},
   // house
-  {id:'piggy',u:'강화할 때마다 골드 획득 +40%가 한 번 더 붙고, 30초마다 받는 이자의 최대치가 30 → 60 → 90골드로 늘어나요.',t:'s',n:'저금통',tags:['house'],d:'골드 획득 +40%. 30초마다 보유 골드 10% 이자 (최대 30)',f:p=>{p.goldM+=.4;}},
-  {id:'tip',u:'적을 잡을 때 골드 8과 체력 6을 받는 확률이 올라가요. ★1은 6%, ★2는 10%, ★3은 14%.',t:'s',n:'팁 박스',tags:['house'],d:'처치 시 6% 확률로 골드 +8, 체력 +6'},
-  {id:'insure',u:'30초마다 충전되는 피해 무효 횟수가 늘어나요. ★1은 3번, ★2는 4번, ★3은 5번까지 공격을 그냥 막아줘요.',t:'s',n:'보험',tags:['house'],d:'30초마다 피해 무효 3회 충전'},
-  {id:'king',u:'강화할 때마다 골드 획득 +60%가 한 번 더 붙어요. 보스 골드 3배는 그대로예요.',t:'p',n:'카지노 왕',tags:['house','house'],d:'골드 획득 +60%, 보스 처치 골드 3배. 하우스 2개로 계산',f:p=>{p.goldM+=.6;}},
+  {id:'piggy',u:'강화할 때마다 골드 획득 +40%가 한 번 더 붙고, 30초마다 받는 이자의 최대치가 30 → 60 → 90골드로 늘어나요.',t:'s',n:'저금통',tags:['house'],d:'골드 획득 +80%. 30초마다 보유 골드 10% 이자 (최대 60)',f:p=>{p.goldM+=.4;}},
+  {id:'tip',u:'적을 잡을 때 골드 8과 체력 6을 받는 확률이 올라가요. ★1은 6%, ★2는 10%, ★3은 14%.',t:'s',n:'팁 박스',tags:['house'],d:'처치 시 10% 확률로 골드 +8, 체력 +6'},
+  {id:'insure',u:'30초마다 충전되는 피해 무효 횟수가 늘어나요. ★1은 3번, ★2는 4번, ★3은 5번까지 공격을 그냥 막아줘요.',t:'s',n:'보험',tags:['house'],d:'30초마다 피해 무효 4회 충전'},
+  {id:'king',u:'강화할 때마다 골드 획득 +60%가 한 번 더 붙어요. 보스 골드 3배는 그대로예요.',t:'p',n:'카지노 왕',tags:['house','house'],d:'골드 획득 +120%, 보스 처치 골드 3배. 하우스 2개로 계산',f:p=>{p.goldM+=.6;}},
   // curse
-  {id:'blood',u:'강화할 때마다 최대 체력 −20%와 공격력 +20%가 한 번 더 적용돼요. 체력은 더 줄지만 화력은 크게 올라가요.',t:'s',n:'피의 계약',tags:['curse'],d:'최대 체력 −20%, 공격력 +20%',f:p=>{p.maxHp=Math.round(p.maxHp*.8);p.hp=Math.min(p.hp,p.maxHp);p.dmgP=(p.dmgP||0)+.2;}},
-  {id:'thorns',u:'나를 근접 공격한 적에게 돌려주는 피해가 커져요. ★1은 받은 피해의 250%, ★2는 500%, ★3은 750%.',t:'s',n:'가시 칩',tags:['curse'],d:'근접 공격한 적에게 받은 피해의 250% 반사'},
-  {id:'vamp',u:'강화할 때마다 흡혈 +2.5%가 한 번 더 붙어요. 내가 입힌 피해의 일정 비율만큼 체력이 차요.',t:'g',n:'흡혈귀',tags:['curse','poison'],d:'흡혈 +2.5% (입힌 피해만큼 체력 회복)',f:p=>{p.lifesteal+=.025;}},
-  {id:'deathwish',u:'체력이 낮을수록 오르는 공격력의 최대치가 커져요. 체력이 거의 없을 때 ★1은 +100%, ★2는 +150%, ★3은 +200%.',t:'p',n:'죽음의 소원',tags:['curse','curse'],d:'잃은 체력에 비례해 공격력 최대 +100%. 저주 2개로 계산'},
-  {id:'lastcard',u:'죽을 피해를 체력 1로 버티는 효과의 재사용 대기 시간이 줄어요. ★1은 60초, ★2는 45초, ★3은 30초.',t:'p',n:'최후의 패',tags:['curse','roulette'],d:'60초에 한 번, 치명상을 체력 1로 버티고 2초 무적. 회전 칩 +2'},
+  {id:'blood',u:'강화할 때마다 최대 체력 −20%와 공격력 +20%가 한 번 더 적용돼요. 체력은 더 줄지만 화력은 크게 올라가요.',t:'s',n:'피의 계약',tags:['curse'],d:'최대 체력 −36%, 공격력 +40%',f:p=>{p.maxHp=Math.round(p.maxHp*.8);p.hp=Math.min(p.hp,p.maxHp);p.dmgP=(p.dmgP||0)+.2;}},
+  {id:'thorns',u:'나를 근접 공격한 적에게 돌려주는 피해가 커져요. ★1은 받은 피해의 250%, ★2는 500%, ★3은 750%.',t:'s',n:'가시 칩',tags:['curse'],d:'근접 공격한 적에게 받은 피해의 500% 반사'},
+  {id:'vamp',u:'강화할 때마다 흡혈 +2.5%가 한 번 더 붙어요. 내가 입힌 피해의 일정 비율만큼 체력이 차요.',t:'g',n:'흡혈귀',tags:['curse','poison'],d:'흡혈 +5% (입힌 피해만큼 체력 회복)',f:p=>{p.lifesteal+=.025;}},
+  {id:'deathwish',u:'체력이 낮을수록 오르는 공격력의 최대치가 커져요. 체력이 거의 없을 때 ★1은 +100%, ★2는 +150%, ★3은 +200%.',t:'p',n:'죽음의 소원',tags:['curse','curse'],d:'잃은 체력에 비례해 공격력 최대 +150%. 저주 2개로 계산'},
+  {id:'lastcard',u:'죽을 피해를 체력 1로 버티는 효과의 재사용 대기 시간이 줄어요. ★1은 60초, ★2는 45초, ★3은 30초.',t:'p',n:'최후의 패',tags:['curse','roulette'],d:'45초에 한 번, 치명상을 체력 1로 버티고 2초 무적. 회전 칩 +2'},
   // jackpot
-  {id:'seventh',u:'7번째 공격마다 부채꼴로 추가 발사하는 탄환 수가 늘어나요. ★1은 4발, ★2는 6발, ★3은 8발.',t:'s',n:'일곱 번째 패',tags:['jackpot'],d:'7번째 공격마다 탄환 4발을 부채꼴로 추가'},
-  {id:'lucky7',u:'7번째 처치마다 회복하는 체력이 늘어나요. ★1은 7, ★2는 14, ★3은 21.',t:'s',n:'일곱 번째 회복',tags:['jackpot'],d:'7번째 처치마다 체력 +7'},
-  {id:'boom',u:'처치한 적이 터지는 폭발의 범위와 피해가 커져요. 범위는 70 → 85 → 100, 피해는 공격력의 60% → 80% → 100%. 폭발로 죽은 적도 또 터져요.',t:'g',n:'폭발 칩',tags:['jackpot','dice'],d:'처치한 적이 폭발합니다. 연쇄 가능'},
-  {id:'fever',u:'연속 처치로 쌓이는 공격 속도가 커져요. 처치당 6% → 8% → 10%씩 쌓이고, 최대치도 +120% → +160% → +200%로 올라가요.',t:'p',n:'피버 타임',tags:['jackpot','blitz'],d:'2초 안에 이어지는 처치마다 공격 속도 +6% 중첩 (최대 +120%)'},
+  {id:'seventh',u:'7번째 공격마다 부채꼴로 추가 발사하는 탄환 수가 늘어나요. ★1은 4발, ★2는 6발, ★3은 8발.',t:'s',n:'일곱 번째 패',tags:['jackpot'],d:'7번째 공격마다 탄환 6발을 부채꼴로 추가'},
+  {id:'lucky7',u:'7번째 처치마다 회복하는 체력이 늘어나요. ★1은 7, ★2는 14, ★3은 21.',t:'s',n:'일곱 번째 회복',tags:['jackpot'],d:'7번째 처치마다 체력 +14'},
+  {id:'boom',u:'처치한 적이 터지는 폭발의 범위와 피해가 커져요. 범위는 70 → 85 → 100, 피해는 공격력의 60% → 80% → 100%. 폭발로 죽은 적도 또 터져요.',t:'g',n:'폭발 칩',tags:['jackpot','dice'],d:'처치한 적이 폭발 (범위 85, 공격력 80%). 연쇄 가능'},
+  {id:'fever',u:'연속 처치로 쌓이는 공격 속도가 커져요. 처치당 6% → 8% → 10%씩 쌓이고, 최대치도 +120% → +160% → +200%로 올라가요.',t:'p',n:'피버 타임',tags:['jackpot','blitz'],d:'2초 안에 이어지는 처치마다 공격 속도 +8% 중첩 (최대 +160%)'},
   // blitz
-  {id:'sprint',u:'강화할 때마다 이동 속도 +10%, 대시 재사용 −15%가 한 번 더 적용돼요.',t:'s',n:'스프린트',tags:['blitz'],d:'이동 속도 +10%, 대시 재사용 −15%',f:p=>{p.speed*=1.1;p.dashMul*=.85;}},
-  {id:'dicethrow',u:'대시할 때 주변 적에게 던지는 주사위 수가 늘어나요. ★1은 3개, ★2는 5개, ★3은 7개. 눈금이 높을수록 아파요.',t:'s',n:'주사위 투척',tags:['blitz','dice'],d:'대시할 때 주변 적 3명에게 주사위를 던집니다'},
-  {id:'after',u:'대시가 끝나는 순간 원형으로 퍼지는 탄환이 늘어나요. ★1은 10발, ★2는 14발, ★3은 18발.',t:'g',n:'잔상',tags:['blitz','card'],d:'대시 끝에 탄환 10발을 원형으로 발사'},
-  {id:'shock',u:'대시 직후 첫 공격의 피해 배율이 커져요. ★1은 4배, ★2는 6배, ★3은 8배.',t:'g',n:'충격파',tags:['blitz','jackpot'],d:'대시 후 첫 공격 피해 4배'},
-  {id:'runngun',u:'움직이는 동안 오르는 공격 속도가 커져요. ★1은 +45%, ★2는 +70%, ★3은 +95%.',t:'p',n:'런 앤 건',tags:['blitz','blitz'],d:'움직이는 동안 공격 속도 +45%. 블리츠 2개로 계산'},
+  {id:'sprint',u:'강화할 때마다 이동 속도 +10%, 대시 재사용 −15%가 한 번 더 적용돼요.',t:'s',n:'스프린트',tags:['blitz'],d:'이동 속도 +21%, 대시 재사용 −28%',f:p=>{p.speed*=1.1;p.dashMul*=.85;}},
+  {id:'dicethrow',u:'대시할 때 주변 적에게 던지는 주사위 수가 늘어나요. ★1은 3개, ★2는 5개, ★3은 7개. 눈금이 높을수록 아파요.',t:'s',n:'주사위 투척',tags:['blitz','dice'],d:'대시할 때 주변 적 5명에게 주사위를 던집니다'},
+  {id:'after',u:'대시가 끝나는 순간 원형으로 퍼지는 탄환이 늘어나요. ★1은 10발, ★2는 14발, ★3은 18발.',t:'g',n:'잔상',tags:['blitz','card'],d:'대시 끝에 탄환 14발을 원형으로 발사'},
+  {id:'shock',u:'대시 직후 첫 공격의 피해 배율이 커져요. ★1은 4배, ★2는 6배, ★3은 8배.',t:'g',n:'충격파',tags:['blitz','jackpot'],d:'대시 후 첫 공격 피해 6배'},
+  {id:'runngun',u:'움직이는 동안 오르는 공격 속도가 커져요. ★1은 +45%, ★2는 +70%, ★3은 +95%.',t:'p',n:'런 앤 건',tags:['blitz','blitz'],d:'움직이는 동안 공격 속도 +70%. 블리츠 2개로 계산'},
   // guard
-  {id:'armor',u:'강화할 때마다 방어력 +15가 한 번 더 붙어요. 방어력 100이면 받는 피해가 절반이에요.',t:'s',n:'판금 갑옷',tags:['guard'],d:'방어력 +15',f:p=>{p.armor+=15;}},
-  {id:'evade',u:'강화할 때마다 회피 +10%가 한 번 더 붙어요. 회피는 60%가 최대고, 넘는 만큼은 방어력으로 바뀌어요.',t:'s',n:'회피 기동',tags:['guard','blitz'],d:'회피 +10%',f:p=>{p.dodge+=.1;}},
-  {id:'thick',u:'강화할 때마다 최대 체력 +30, 초당 체력 재생 +1.2가 한 번 더 붙어요.',t:'s',n:'강인한 육체',tags:['guard','house'],d:'최대 체력 +30, 초당 체력 재생 +1.2',f:p=>{p.maxHp+=30;p.hp+=30;p.regen+=1.2;}},
-  {id:'iron',u:'체력이 절반 이하일 때 방어력에 곱해지는 배율이 커져요. ★1은 2배, ★2는 2.5배, ★3은 3배.',t:'g',n:'철의 의지',tags:['guard','curse'],d:'체력 50% 이하일 때 방어력 2배'},
-  {id:'gen',u:'기본 보호막 양이 늘어나요. ★1은 40, ★2는 80, ★3은 120. 골드 보너스(100당 +10, 최대 +60)는 그대로 더해져요.',t:'g',n:'보호막 발생기',tags:['guard','house'],d:'보호막 +40, 골드 100당 +10 (최대 +60). 3초간 안 맞으면 재충전'},
-  {id:'counter',u:'회피에 성공했을 때 사방으로 쏘는 반격 탄환이 늘어나요. ★1은 6발, ★2는 9발, ★3은 12발. 강화할 때마다 회피 +8%도 한 번 더 붙어요.',t:'g',n:'반격',tags:['guard','card'],d:'회피 +8%. 회피에 성공하면 탄환 6발로 반격',f:p=>{p.dodge+=.08;}},
-  {id:'fortress',u:'강화할 때마다 방어력 +25, 최대 체력 +40, 이동 속도 −10%가 한 번 더 적용돼요. 단단해지는 대신 느려져요.',t:'p',n:'요새',tags:['guard','guard'],d:'방어력 +25, 최대 체력 +40, 이동 속도 −10%. 가드 2개로 계산',f:p=>{p.armor+=25;p.maxHp+=40;p.hp+=40;p.speed*=.9;}},
-  {id:'unbreak',u:'피해를 무효로 하고 폭발하는 주기가 짧아져요. ★1은 7번째, ★2는 6번째, ★3은 5번째 피격마다.',t:'p',n:'불굴',tags:['guard','jackpot'],d:'7번째 피격마다 피해를 무효로 하고 주변 폭발'},
+  {id:'armor',u:'강화할 때마다 방어력 +15가 한 번 더 붙어요. 방어력 100이면 받는 피해가 절반이에요.',t:'s',n:'판금 갑옷',tags:['guard'],d:'방어력 +30',f:p=>{p.armor+=15;}},
+  {id:'evade',u:'강화할 때마다 회피 +10%가 한 번 더 붙어요. 회피는 60%가 최대고, 넘는 만큼은 방어력으로 바뀌어요.',t:'s',n:'회피 기동',tags:['guard','blitz'],d:'회피 +20%',f:p=>{p.dodge+=.1;}},
+  {id:'thick',u:'강화할 때마다 최대 체력 +30, 초당 체력 재생 +1.2가 한 번 더 붙어요.',t:'s',n:'강인한 육체',tags:['guard','house'],d:'최대 체력 +60, 초당 체력 재생 +2.4',f:p=>{p.maxHp+=30;p.hp+=30;p.regen+=1.2;}},
+  {id:'iron',u:'체력이 절반 이하일 때 방어력에 곱해지는 배율이 커져요. ★1은 2배, ★2는 2.5배, ★3은 3배.',t:'g',n:'철의 의지',tags:['guard','curse'],d:'체력 50% 이하일 때 방어력 2.5배'},
+  {id:'gen',u:'기본 보호막 양이 늘어나요. ★1은 40, ★2는 80, ★3은 120. 골드 보너스(100당 +10, 최대 +60)는 그대로 더해져요.',t:'g',n:'보호막 발생기',tags:['guard','house'],d:'보호막 +80, 골드 100당 +10 (최대 +60). 3초간 안 맞으면 재충전'},
+  {id:'counter',u:'회피에 성공했을 때 사방으로 쏘는 반격 탄환이 늘어나요. ★1은 6발, ★2는 9발, ★3은 12발. 강화할 때마다 회피 +8%도 한 번 더 붙어요.',t:'g',n:'반격',tags:['guard','card'],d:'회피 +16%. 회피에 성공하면 탄환 9발로 반격',f:p=>{p.dodge+=.08;}},
+  {id:'fortress',u:'강화할 때마다 방어력 +25, 최대 체력 +40, 이동 속도 −10%가 한 번 더 적용돼요. 단단해지는 대신 느려져요.',t:'p',n:'요새',tags:['guard','guard'],d:'방어력 +50, 최대 체력 +80, 이동 속도 −19%. 가드 2개로 계산',f:p=>{p.armor+=25;p.maxHp+=40;p.hp+=40;p.speed*=.9;}},
+  {id:'unbreak',u:'피해를 무효로 하고 폭발하는 주기가 짧아져요. ★1은 7번째, ★2는 6번째, ★3은 5번째 피격마다.',t:'p',n:'불굴',tags:['guard','jackpot'],d:'6번째 피격마다 피해를 무효로 하고 주변 폭발'},
   // class exclusive
-  {id:'k_charge',cls:'knight',u:'대시로 부딪힌 적에게 주는 피해가 커져요. ★1은 공격력 2배, ★2는 3배, ★3은 4배. 보스가 아니면 뒤로 밀려나요.',t:'g',n:'방패 돌진',tags:['guard','blitz'],d:'[기사 전용] 대시로 부딪힌 적에게 큰 피해와 밀쳐내기'},
-  {id:'k_holy',cls:'knight',u:'방어력이 공격력으로 바뀌는 효율이 좋아져요. ★1은 방어력 5당 공격력 1%, ★2는 4당, ★3은 3당. 방어력을 쌓을수록 세져요.',t:'s',n:'수호 기사',tags:['guard'],d:'[기사 전용] 방어력 5당 공격력 +1%, 상한 없음'},
-  {id:'k_cleave',cls:'knight',u:'회전 베기가 더 자주, 더 세게 나가요. ★1은 3번째 공격마다 120%, ★2는 3번째마다 160%, ★3은 2번째마다 200%. 반경도 30% 넓어져요.',t:'s',n:'회오리 베기',tags:['blitz','card'],d:'[기사 전용] 회전 베기가 3번째 공격마다, 공격력 120%로 강화'},
-  {id:'k_berserk',cls:'knight',u:'맞을 때 쌓이는 분노 중첩의 최대치가 늘어나요. ★1은 5중첩, ★2는 7중첩, ★3은 9중첩. 중첩당 공격력 +8%, 공격 속도 +6%.',t:'g',n:'광전사',tags:['curse','jackpot'],d:'[기사 전용] 피격·막기 시 5초간 분노 1중첩 (공격력 +8%, 공격 속도 +6%, 최대 5중첩)'},
-  {id:'k_smite',cls:'knight',u:'심판의 빛기둥이 떨어지는 주기가 짧아져요. ★1은 6번째, ★2는 5번째, ★3은 4번째 공격마다. 피해는 공격력 4배 + 방어력 ×1.',t:'p',n:'심판',tags:['guard','jackpot'],d:'[기사 전용] 6번째 공격마다 대상에 빛기둥. 공격력 4배 + 방어력만큼 범위 피해'},
-  {id:'k_wall',cls:'knight',u:'막기 확률에 더해지는 값이 커져요. ★1은 +15%, ★2는 +20%, ★3은 +25%. 막을 때마다 주변에 충격파가 터져요.',t:'p',n:'철벽',tags:['guard','guard'],d:'[기사 전용] 막기 확률 +15%, 막을 때마다 주변 충격파. 가드 2개로 계산'},
-  {id:'m_inferno',cls:'mage',u:'화염구가 터지는 범위가 넓어져요. ★1은 +60%, ★2는 +90%, ★3은 +120%. 폭발에 휩쓸린 적은 중독돼요.',t:'g',n:'화염 확산',tags:['poison','dice'],d:'[마법사 전용] 화염 폭발 범위 +60%, 폭발이 적을 중독시킴'},
-  {id:'m_meteor',cls:'mage',u:'운석이 떨어지는 주기가 짧아져요. ★1은 10번째, ★2는 8번째, ★3은 6번째 공격마다 공격력 6배 대폭발.',t:'p',n:'운석 낙하',tags:['dice','jackpot'],d:'[마법사 전용] 10번째 공격마다 대상 위치에 운석. 공격력 6배 대폭발'},
-  {id:'m_ring',cls:'mage',u:'내 주변을 태우는 불꽃 장막의 피해가 커져요. 초당 공격력의 60% → 90% → 120%.',t:'s',n:'불꽃 장막',tags:['roulette'],d:'[마법사 전용] 주변 적에게 초당 공격력 60% 화염 피해'},
-  {id:'a_multi',cls:'archer',u:'강화할 때마다 화살이 1발씩 더 늘어나요.',t:'g',n:'부채꼴 사격',tags:['card'],d:'[궁수 전용] 화살 +1발',f:p=>{p.multi+=1;}},
-  {id:'a_snipe',cls:'archer',u:'멀리 있는 적을 맞힐 때 받는 추가 피해의 최대치가 커져요. 거리 100당 +15%씩 오르고, 최대치가 ★1은 +150%, ★2는 +200%, ★3은 +250%.',t:'s',n:'저격수',tags:['card','jackpot'],d:'[궁수 전용] 먼 적일수록 피해 증가 (거리 100당 +15%)'},
-  {id:'a_still',cls:'archer',u:'멈춰 있을 때 오르는 공격 속도가 커져요. ★1은 +35%, ★2는 +50%, ★3은 +65%. 치명타 +10%는 그대로예요.',t:'s',n:'정조준',tags:['dice'],d:'[궁수 전용] 멈춰 있으면 공격 속도 +35%, 치명타 +10%'},
-  {id:'r_shadow',cls:'rogue',u:'대시 후 모든 공격이 치명타가 되는 시간이 늘어나요. ★1은 1.5초, ★2는 2초, ★3은 2.5초.',t:'g',n:'그림자 걸음',tags:['blitz','curse'],d:'[도적 전용] 대시 후 1.5초간 모든 공격이 치명타'},
-  {id:'r_venom',cls:'rogue',u:'단검 독의 피해가 세져요. ★1은 기본, ★2는 +50%, ★3은 +100%.',t:'s',n:'독 바른 단검',tags:['poison'],d:'[도적 전용] 단검이 적을 중독시킴'},
-  {id:'r_assassin',cls:'rogue',u:'정예와 보스에게 주는 피해 배율이 커져요. ★1은 2배, ★2는 2.5배, ★3은 3배.',t:'p',n:'암살',tags:['curse','jackpot'],d:'[도적 전용] 정예와 보스에게 피해 2배, 처치하면 체력 2% 회복'},
+  {id:'k_charge',cls:'knight',u:'대시로 부딪힌 적에게 주는 피해가 커져요. ★1은 공격력 2배, ★2는 3배, ★3은 4배. 보스가 아니면 뒤로 밀려나요.',t:'g',n:'방패 돌진',tags:['guard','blitz'],d:'[기사 전용] 대시로 부딪힌 적에게 공격력 3배 피해와 밀쳐내기'},
+  {id:'k_holy',cls:'knight',u:'방어력이 공격력으로 바뀌는 효율이 좋아져요. ★1은 방어력 5당 공격력 1%, ★2는 4당, ★3은 3당. 방어력을 쌓을수록 세져요.',t:'s',n:'수호 기사',tags:['guard'],d:'[기사 전용] 방어력 4당 공격력 +1%, 상한 없음'},
+  {id:'k_cleave',cls:'knight',u:'회전 베기가 더 자주, 더 세게 나가요. ★1은 3번째 공격마다 120%, ★2는 3번째마다 160%, ★3은 2번째마다 200%. 반경도 30% 넓어져요.',t:'s',n:'회오리 베기',tags:['blitz','card'],d:'[기사 전용] 회전 베기가 3번째 공격마다, 공격력 160%로 강화'},
+  {id:'k_berserk',cls:'knight',u:'맞을 때 쌓이는 분노 중첩의 최대치가 늘어나요. ★1은 5중첩, ★2는 7중첩, ★3은 9중첩. 중첩당 공격력 +8%, 공격 속도 +6%.',t:'g',n:'광전사',tags:['curse','jackpot'],d:'[기사 전용] 피격·막기 시 5초간 분노 1중첩 (공격력 +8%, 공격 속도 +6%, 최대 7중첩)'},
+  {id:'k_smite',cls:'knight',u:'심판의 빛기둥이 떨어지는 주기가 짧아져요. ★1은 6번째, ★2는 5번째, ★3은 4번째 공격마다. 피해는 공격력 4배 + 방어력 ×1.',t:'p',n:'심판',tags:['guard','jackpot'],d:'[기사 전용] 5번째 공격마다 대상에 빛기둥. 공격력 4배 + 방어력만큼 범위 피해'},
+  {id:'k_wall',cls:'knight',u:'막기 확률에 더해지는 값이 커져요. ★1은 +15%, ★2는 +20%, ★3은 +25%. 막을 때마다 주변에 충격파가 터져요.',t:'p',n:'철벽',tags:['guard','guard'],d:'[기사 전용] 막기 확률 +20%, 막을 때마다 주변 충격파. 가드 2개로 계산'},
+  {id:'m_inferno',cls:'mage',u:'화염구가 터지는 범위가 넓어져요. ★1은 +60%, ★2는 +90%, ★3은 +120%. 폭발에 휩쓸린 적은 중독돼요.',t:'g',n:'화염 확산',tags:['poison','dice'],d:'[마법사 전용] 화염 폭발 범위 +90%, 폭발이 적을 중독시킴'},
+  {id:'m_meteor',cls:'mage',u:'운석이 떨어지는 주기가 짧아져요. ★1은 10번째, ★2는 8번째, ★3은 6번째 공격마다 공격력 6배 대폭발.',t:'p',n:'운석 낙하',tags:['dice','jackpot'],d:'[마법사 전용] 8번째 공격마다 대상 위치에 운석. 공격력 6배 대폭발'},
+  {id:'m_ring',cls:'mage',u:'내 주변을 태우는 불꽃 장막의 피해가 커져요. 초당 공격력의 60% → 90% → 120%.',t:'s',n:'불꽃 장막',tags:['roulette'],d:'[마법사 전용] 주변 적에게 초당 공격력 90% 화염 피해'},
+  {id:'a_multi',cls:'archer',u:'강화할 때마다 화살이 1발씩 더 늘어나요.',t:'g',n:'부채꼴 사격',tags:['card'],d:'[궁수 전용] 화살 +2발',f:p=>{p.multi+=1;}},
+  {id:'a_snipe',cls:'archer',u:'멀리 있는 적을 맞힐 때 받는 추가 피해의 최대치가 커져요. 거리 100당 +15%씩 오르고, 최대치가 ★1은 +150%, ★2는 +200%, ★3은 +250%.',t:'s',n:'저격수',tags:['card','jackpot'],d:'[궁수 전용] 먼 적일수록 피해 증가 (거리 100당 +15%, 최대 +200%)'},
+  {id:'a_still',cls:'archer',u:'멈춰 있을 때 오르는 공격 속도가 커져요. ★1은 +35%, ★2는 +50%, ★3은 +65%. 치명타 +10%는 그대로예요.',t:'s',n:'정조준',tags:['dice'],d:'[궁수 전용] 멈춰 있으면 공격 속도 +50%, 치명타 +10%'},
+  {id:'r_shadow',cls:'rogue',u:'대시 후 모든 공격이 치명타가 되는 시간이 늘어나요. ★1은 1.5초, ★2는 2초, ★3은 2.5초.',t:'g',n:'그림자 걸음',tags:['blitz','curse'],d:'[도적 전용] 대시 후 2초간 모든 공격이 치명타'},
+  {id:'r_venom',cls:'rogue',u:'단검 독의 피해가 세져요. ★1은 기본, ★2는 +50%, ★3은 +100%.',t:'s',n:'독 바른 단검',tags:['poison'],d:'[도적 전용] 단검이 적을 중독시킴 (독 피해 +50%)'},
+  {id:'r_assassin',cls:'rogue',u:'정예와 보스에게 주는 피해 배율이 커져요. ★1은 2배, ★2는 2.5배, ★3은 3배.',t:'p',n:'암살',tags:['curse','jackpot'],d:'[도적 전용] 정예와 보스에게 피해 2.5배, 처치하면 체력 2% 회복'},
   // new mechanics
-  {id:'chainlt',u:'7번째 적중마다 튀는 번개가 이어지는 적 수가 늘어나요. ★1은 5명, ★2는 7명, ★3은 9명.',t:'g',n:'체인 라이트닝',tags:['card','jackpot'],d:'7번째 적중마다 번개가 주변 적 5명에게 연쇄'},
-  {id:'blackhole',u:'블랙홀이 생기는 주기가 짧아지고 크기도 커져요. 주기는 8초 → 7초 → 6초.',t:'p',n:'블랙홀 칩',tags:['roulette','curse'],d:'8초마다 가까운 적 위치에 블랙홀. 적을 빨아들이며 피해'},
-  {id:'icecoin',u:'맞았을 때 주변 적이 느려지는 시간이 늘어나요. ★1은 2초, ★2는 2.5초, ★3은 3초.',t:'s',n:'얼음 동전',tags:['house','guard'],d:'맞으면 주변 적이 2초간 크게 느려짐'},
-  {id:'mirror',u:'적 탄환을 튕겨내는 확률이 올라가요. ★1은 20%, ★2는 30%, ★3은 40%. 튕긴 탄환은 공격력 2배로 적을 맞혀요.',t:'g',n:'거울 패',tags:['card','guard'],d:'적 탄환이 20% 확률로 튕겨 나가 적을 공격'},
-  {id:'revenge',u:'맞은 뒤 3초 안의 다음 공격 피해 배율이 커져요. ★1은 2배, ★2는 2.5배, ★3은 3배.',t:'s',n:'복수',tags:['curse','jackpot'],d:'맞으면 3초 안의 다음 공격 피해 2배'},
-  {id:'punch',u:'0.8초마다 터지는 충격파의 범위와 피해가 커져요. 범위는 85 → 100 → 115, 피해는 공격력의 120% → 160% → 200%.',t:'s',n:'주사위 충격파',tags:['dice'],d:'0.8초마다 가까운 적에게 충격파'},
-  {id:'rush',u:'골드를 주웠을 때 1초 동안 오르는 이동 속도가 커져요. ★1은 +35%, ★2는 +50%, ★3은 +65%.',t:'g',n:'골드 러시',tags:['house','blitz'],d:'골드를 주우면 1초간 이동 속도 +35%'},
-  {id:'fog',u:'지나간 자리에 남는 독 웅덩이가 커져요. 반경 28 → 34 → 40.',t:'s',n:'독안개',tags:['poison','blitz'],d:'움직이는 길에 독 웅덩이를 남김'},
-  {id:'guardian',u:'적 탄환을 막아주는 회전 칩이 늘어나요. ★1은 1개, ★2는 2개, ★3은 3개.',t:'g',n:'수호 칩',tags:['guard','roulette'],d:'회전 칩 +1. 회전 칩이 적 탄환을 막음'},
-  {id:'engine',u:'처치할 때마다 줄어드는 대시 재사용 시간이 커져요. ★1은 0.12초, ★2는 0.18초, ★3은 0.25초.',t:'p',n:'폭주 기관',tags:['blitz','jackpot'],d:'처치할 때마다 대시 재사용 0.12초 감소'},
-  {id:'clone',u:'쏜 탄환이 하나 더 복제될 확률이 올라가요. ★1은 20%, ★2는 30%, ★3은 40%.',t:'g',n:'복제 주사위',tags:['dice','card'],d:'발사한 탄환이 20% 확률로 하나 더 복제됨'},
+  {id:'chainlt',u:'7번째 적중마다 튀는 번개가 이어지는 적 수가 늘어나요. ★1은 5명, ★2는 7명, ★3은 9명.',t:'g',n:'체인 라이트닝',tags:['card','jackpot'],d:'7번째 적중마다 번개가 주변 적 7명에게 연쇄'},
+  {id:'blackhole',u:'블랙홀이 생기는 주기가 짧아지고 크기도 커져요. 주기는 8초 → 7초 → 6초.',t:'p',n:'블랙홀 칩',tags:['roulette','curse'],d:'7초마다 가까운 적 위치에 블랙홀. 적을 빨아들이며 피해'},
+  {id:'icecoin',u:'맞았을 때 주변 적이 느려지는 시간이 늘어나요. ★1은 2초, ★2는 2.5초, ★3은 3초.',t:'s',n:'얼음 동전',tags:['house','guard'],d:'맞으면 주변 적이 2.5초간 크게 느려짐'},
+  {id:'mirror',u:'적 탄환을 튕겨내는 확률이 올라가요. ★1은 20%, ★2는 30%, ★3은 40%. 튕긴 탄환은 공격력 2배로 적을 맞혀요.',t:'g',n:'거울 패',tags:['card','guard'],d:'적 탄환이 30% 확률로 튕겨 나가 적을 공격 (공격력 2배)'},
+  {id:'revenge',u:'맞은 뒤 3초 안의 다음 공격 피해 배율이 커져요. ★1은 2배, ★2는 2.5배, ★3은 3배.',t:'s',n:'복수',tags:['curse','jackpot'],d:'맞으면 3초 안의 다음 공격 피해 2.5배'},
+  {id:'punch',u:'0.8초마다 터지는 충격파의 범위와 피해가 커져요. 범위는 85 → 100 → 115, 피해는 공격력의 120% → 160% → 200%.',t:'s',n:'주사위 충격파',tags:['dice'],d:'0.8초마다 가까운 적에게 충격파 (범위 100, 공격력 160%)'},
+  {id:'rush',u:'골드를 주웠을 때 1초 동안 오르는 이동 속도가 커져요. ★1은 +35%, ★2는 +50%, ★3은 +65%.',t:'g',n:'골드 러시',tags:['house','blitz'],d:'골드를 주우면 1초간 이동 속도 +50%'},
+  {id:'fog',u:'지나간 자리에 남는 독 웅덩이가 커져요. 반경 28 → 34 → 40.',t:'s',n:'독안개',tags:['poison','blitz'],d:'움직이는 길에 독 웅덩이를 남김 (반경 34)'},
+  {id:'guardian',u:'적 탄환을 막아주는 회전 칩이 늘어나요. ★1은 1개, ★2는 2개, ★3은 3개.',t:'g',n:'수호 칩',tags:['guard','roulette'],d:'회전 칩 +2. 회전 칩이 적 탄환을 막음'},
+  {id:'engine',u:'처치할 때마다 줄어드는 대시 재사용 시간이 커져요. ★1은 0.12초, ★2는 0.18초, ★3은 0.25초.',t:'p',n:'폭주 기관',tags:['blitz','jackpot'],d:'처치할 때마다 대시 재사용 0.18초 감소'},
+  {id:'clone',u:'쏜 탄환이 하나 더 복제될 확률이 올라가요. ★1은 20%, ★2는 30%, ★3은 40%.',t:'g',n:'복제 주사위',tags:['dice','card'],d:'발사한 탄환이 30% 확률로 하나 더 복제됨'},
   // 빌드 확장: 소환·설치·상태이상·처형·골드 소모·단일 탄 등 새 축
   {id:'ricochet',u:'적에게 맞은 탄환이 다른 적에게 튕기는 횟수와 거리가 늘어나요. ★1·★2는 1회, ★3은 2회.',t:'s',n:'도탄',tags:['card'],d:'탄환이 맞은 뒤 근처 적에게 1회 튕겨 나감'},
-  {id:'giant',u:'탄환 크기와 피해가 커져요. 크기 +60% → +90% → +120%, 피해 +15% → +25% → +35%.',t:'g',n:'거인의 탄',tags:['card','guard'],d:'탄환 크기 +60%, 탄환 피해 +15%'},
-  {id:'focus',u:'탄환이 1발일 때 받는 공격력 보너스가 커져요. ★1은 +35%, ★2는 +50%, ★3은 +65%. 2발 이상이면 +10%만 받아요.',t:'s',n:'집중 사격',tags:['card','dice'],d:'탄환이 1발이면 공격력 +35%. 탄환이 많은 빌드엔 약함'},
-  {id:'echo',u:'메아리 탄환의 피해가 커져요. ★1은 원래의 50%, ★2는 70%, ★3은 90%.',t:'p',n:'메아리',tags:['card','blitz'],d:'공격 0.25초 뒤 같은 방향으로 한 번 더 발사 (피해 50%)'},
-  {id:'spiral',u:'4번째 공격마다 사방으로 퍼지는 탄환 수가 늘어나요. ★1은 8발, ★2는 10발, ★3은 12발.',t:'g',n:'소용돌이 패',tags:['card','roulette'],d:'4번째 공격마다 주변 원형으로 탄환 8발 (피해 60%)'},
-  {id:'combo',u:'같은 적을 계속 때릴 때 쌓이는 피해 중첩 최대치가 늘어나요. ★1은 10중첩, ★2는 15중첩, ★3은 20중첩. 중첩당 +4%.',t:'s',n:'연타',tags:['card','jackpot'],d:'같은 적을 연속으로 맞히면 피해 +4%씩 중첩 (최대 +40%). 대상이 바뀌면 초기화'},
-  {id:'second',u:'치명타가 안 터졌을 때 한 번 더 굴릴 확률이 올라가요. ★1은 30%, ★2는 45%, ★3은 60%.',t:'s',n:'두 번째 주사위',tags:['dice'],d:'치명타가 실패하면 30% 확률로 한 번 더 굴림'},
-  {id:'execute',u:'일반 적을 즉시 처치하는 체력 기준이 올라가요. ★1은 12%, ★2는 16%, ★3은 20%. 정예·보스는 그 체력 이하에서 피해 +50%.',t:'g',n:'처형',tags:['curse','dice'],d:'체력 12% 이하 일반 적은 맞으면 즉사. 정예·보스는 그 구간에서 피해 +50%'},
-  {id:'burn',u:'치명타로 붙는 화상의 초당 피해가 커져요. 공격력의 40% → 60% → 80%.',t:'g',n:'점화',tags:['poison','jackpot'],d:'치명타가 적에게 3초 화상 (초당 공격력 40%). 독과 별개로 중첩'},
-  {id:'frost',u:'적중 시 적을 둔화시킬 확률이 올라가요. ★1은 25%, ★2는 35%, ★3은 45%.',t:'s',n:'서리 탄',tags:['guard','dice'],d:'적중 시 25% 확률로 1.5초간 크게 둔화'},
-  {id:'contagion',u:'중독된 적이 죽을 때 터지는 폭발 피해가 커져요. 공격력의 120% → 160% → 200%.',t:'p',n:'감염 폭발',tags:['poison','jackpot'],d:'중독된 적이 죽으면 폭발 (공격력 120%), 맞은 적은 중독'},
-  {id:'venomcloud',u:'6초마다 떨어지는 독구름 개수가 늘어나요. ★1은 1개, ★2는 2개, ★3은 3개.',t:'g',n:'독구름',tags:['poison','roulette'],d:'6초마다 적이 가장 많은 곳에 4초짜리 독구름'},
-  {id:'drone',u:'함께 싸우는 칩 드론 수가 늘어나요. ★1은 1기, ★2는 2기, ★3은 3기.',t:'g',n:'칩 드론',tags:['roulette','card'],d:'주변을 도는 드론이 0.6초마다 가까운 적을 사격 (공격력 60%)'},
-  {id:'nova',u:'10초마다 터지는 노바의 피해가 커져요. 공격력의 5배 → 7배 → 9배, 반경 180.',t:'p',n:'노바',tags:['roulette','jackpot'],d:'10초마다 내 주변에 대폭발 (공격력 5배)'},
-  {id:'thunder',u:'5초마다 떨어지는 낙뢰 수가 늘어나요. ★1은 3발, ★2는 4발, ★3은 5발.',t:'p',n:'천둥',tags:['jackpot','blitz'],d:'5초마다 화면 안 무작위 적 3명에게 낙뢰 (공격력 2.5배)'},
-  {id:'mine',u:'지뢰를 까는 간격이 짧아져요. ★1은 2.5초, ★2는 2초, ★3은 1.5초.',t:'s',n:'지뢰',tags:['blitz','house'],d:'2.5초마다 발밑에 지뢰. 적이 밟으면 폭발 (공격력 180%)'},
-  {id:'adrenaline',u:'대시 후 3초간 오르는 공격력이 커져요. ★1은 +20%, ★2는 +30%, ★3은 +40%. 이동 속도 +20%는 그대로.',t:'s',n:'아드레날린',tags:['blitz'],d:'대시 후 3초간 공격력 +20%, 이동 속도 +20%'},
-  {id:'bloodrage',u:'잃은 체력 1%당 오르는 공격 속도가 커져요. ★1은 0.6%, ★2는 0.8%, ★3은 1%.',t:'p',n:'피의 광란',tags:['curse','blitz'],d:'잃은 체력 1%당 공격 속도 +0.6% (체력 10%면 +54%)'},
-  {id:'shieldbash',u:'보호막이 남아 있는 동안 오르는 공격력이 커져요. ★1은 +20%, ★2는 +30%, ★3은 +40%.',t:'g',n:'보호막 충격',tags:['guard','blitz'],d:'보호막이 남아 있는 동안 공격력 +20%'},
-  {id:'regenarmor',u:'방어력 1당 초당 체력 재생이 커져요. ★1은 0.02, ★2는 0.03, ★3은 0.04.',t:'s',n:'재생 장갑',tags:['guard'],d:'방어력 1당 초당 체력 재생 +0.02 (방어력 100이면 초당 +2)'},
-  {id:'gravity',u:'주변 적이 느려지는 정도가 커져요. ★1은 −20%, ★2는 −30%, ★3은 −40%. 범위 150.',t:'g',n:'중력장',tags:['roulette','guard'],d:'내 주변 150 안의 적 이동 속도 −20%'},
-  {id:'goldbullet',u:'골드를 쓰는 탄환의 피해 보너스가 커져요. ★1은 +30%, ★2는 +45%, ★3은 +60%.',t:'g',n:'황금 탄환',tags:['house','card'],d:'두 번 공격할 때마다 골드 1을 쓰고 그 공격 피해 +30% (골드가 있을 때만)'},
-  {id:'interest',u:'보유 골드에 비례한 공격 속도 보너스가 커져요. 골드 100당 +2% → +3% → +4%, 최대 +40% → +60% → +80%.',t:'p',n:'복리',tags:['house','house'],d:'보유 골드 100당 공격 속도 +2% (최대 +40%). 하우스 2개로 계산'},
-  {id:'luckycoin',u:'강화할 때마다 행운 +1, 골드 획득 +10%가 한 번 더 붙어요.',t:'s',n:'행운의 동전',tags:['house','dice'],d:'행운 +1, 골드 획득 +10%',f:p=>{p.luck+=1;p.goldM+=.1;}},
+  {id:'giant',u:'탄환 크기와 피해가 커져요. 크기 +60% → +90% → +120%, 피해 +15% → +25% → +35%.',t:'g',n:'거인의 탄',tags:['card','guard'],d:'탄환 크기 +90%, 탄환 피해 +25%'},
+  {id:'focus',u:'탄환이 1발일 때 받는 공격력 보너스가 커져요. ★1은 +35%, ★2는 +50%, ★3은 +65%. 2발 이상이면 +10%만 받아요.',t:'s',n:'집중 사격',tags:['card','dice'],d:'탄환이 1발이면 공격력 +50%. 탄환이 많은 빌드엔 약함'},
+  {id:'echo',u:'메아리 탄환의 피해가 커져요. ★1은 원래의 50%, ★2는 70%, ★3은 90%.',t:'p',n:'메아리',tags:['card','blitz'],d:'공격 0.25초 뒤 같은 방향으로 한 번 더 발사 (피해 70%)'},
+  {id:'spiral',u:'4번째 공격마다 사방으로 퍼지는 탄환 수가 늘어나요. ★1은 8발, ★2는 10발, ★3은 12발.',t:'g',n:'소용돌이 패',tags:['card','roulette'],d:'4번째 공격마다 주변 원형으로 탄환 10발 (피해 60%)'},
+  {id:'combo',u:'같은 적을 계속 때릴 때 쌓이는 피해 중첩 최대치가 늘어나요. ★1은 10중첩, ★2는 15중첩, ★3은 20중첩. 중첩당 +4%.',t:'s',n:'연타',tags:['card','jackpot'],d:'같은 적을 연속으로 맞히면 피해 +4%씩 중첩 (최대 +60%). 대상이 바뀌면 초기화'},
+  {id:'second',u:'치명타가 안 터졌을 때 한 번 더 굴릴 확률이 올라가요. ★1은 30%, ★2는 45%, ★3은 60%.',t:'s',n:'두 번째 주사위',tags:['dice'],d:'치명타가 실패하면 45% 확률로 한 번 더 굴림'},
+  {id:'execute',u:'일반 적을 즉시 처치하는 체력 기준이 올라가요. ★1은 12%, ★2는 16%, ★3은 20%. 정예·보스는 그 체력 이하에서 피해 +50%.',t:'g',n:'처형',tags:['curse','dice'],d:'체력 16% 이하 일반 적은 맞으면 즉사. 정예·보스는 그 구간에서 피해 +50%'},
+  {id:'burn',u:'치명타로 붙는 화상의 초당 피해가 커져요. 공격력의 40% → 60% → 80%.',t:'g',n:'점화',tags:['poison','jackpot'],d:'치명타가 적에게 3초 화상 (초당 공격력 60%). 독과 별개로 중첩'},
+  {id:'frost',u:'적중 시 적을 둔화시킬 확률이 올라가요. ★1은 25%, ★2는 35%, ★3은 45%.',t:'s',n:'서리 탄',tags:['guard','dice'],d:'적중 시 35% 확률로 1.5초간 크게 둔화'},
+  {id:'contagion',u:'중독된 적이 죽을 때 터지는 폭발 피해가 커져요. 공격력의 120% → 160% → 200%.',t:'p',n:'감염 폭발',tags:['poison','jackpot'],d:'중독된 적이 죽으면 폭발 (공격력 160%), 맞은 적은 중독'},
+  {id:'venomcloud',u:'6초마다 떨어지는 독구름 개수가 늘어나요. ★1은 1개, ★2는 2개, ★3은 3개.',t:'g',n:'독구름',tags:['poison','roulette'],d:'6초마다 적이 많은 곳에 4초짜리 독구름 2개'},
+  {id:'drone',u:'함께 싸우는 칩 드론 수가 늘어나요. ★1은 1기, ★2는 2기, ★3은 3기.',t:'g',n:'칩 드론',tags:['roulette','card'],d:'주변을 도는 드론 2기가 0.6초마다 가까운 적을 사격 (공격력 60%)'},
+  {id:'nova',u:'10초마다 터지는 노바의 피해가 커져요. 공격력의 5배 → 7배 → 9배, 반경 180.',t:'p',n:'노바',tags:['roulette','jackpot'],d:'10초마다 내 주변에 대폭발 (공격력 7배)'},
+  {id:'thunder',u:'5초마다 떨어지는 낙뢰 수가 늘어나요. ★1은 3발, ★2는 4발, ★3은 5발.',t:'p',n:'천둥',tags:['jackpot','blitz'],d:'5초마다 화면 안 무작위 적 4명에게 낙뢰 (공격력 2.5배)'},
+  {id:'mine',u:'지뢰를 까는 간격이 짧아져요. ★1은 2.5초, ★2는 2초, ★3은 1.5초.',t:'s',n:'지뢰',tags:['blitz','house'],d:'2초마다 발밑에 지뢰. 적이 밟으면 폭발 (공격력 180%)'},
+  {id:'adrenaline',u:'대시 후 3초간 오르는 공격력이 커져요. ★1은 +20%, ★2는 +30%, ★3은 +40%. 이동 속도 +20%는 그대로.',t:'s',n:'아드레날린',tags:['blitz'],d:'대시 후 3초간 공격력 +30%, 이동 속도 +20%'},
+  {id:'bloodrage',u:'잃은 체력 1%당 오르는 공격 속도가 커져요. ★1은 0.6%, ★2는 0.8%, ★3은 1%.',t:'p',n:'피의 광란',tags:['curse','blitz'],d:'잃은 체력 1%당 공격 속도 +0.8% (체력 10%면 +72%)'},
+  {id:'shieldbash',u:'보호막이 남아 있는 동안 오르는 공격력이 커져요. ★1은 +20%, ★2는 +30%, ★3은 +40%.',t:'g',n:'보호막 충격',tags:['guard','blitz'],d:'보호막이 남아 있는 동안 공격력 +30%'},
+  {id:'regenarmor',u:'방어력 1당 초당 체력 재생이 커져요. ★1은 0.02, ★2는 0.03, ★3은 0.04.',t:'s',n:'재생 장갑',tags:['guard'],d:'방어력 1당 초당 체력 재생 +0.03 (방어력 100이면 초당 +3)'},
+  {id:'gravity',u:'주변 적이 느려지는 정도가 커져요. ★1은 −20%, ★2는 −30%, ★3은 −40%. 범위 150.',t:'g',n:'중력장',tags:['roulette','guard'],d:'내 주변 150 안의 적 이동 속도 −30%'},
+  {id:'goldbullet',u:'골드를 쓰는 탄환의 피해 보너스가 커져요. ★1은 +30%, ★2는 +45%, ★3은 +60%.',t:'g',n:'황금 탄환',tags:['house','card'],d:'두 번 공격할 때마다 골드 1을 쓰고 그 공격 피해 +45% (골드가 있을 때만)'},
+  {id:'interest',u:'보유 골드에 비례한 공격 속도 보너스가 커져요. 골드 100당 +2% → +3% → +4%, 최대 +40% → +60% → +80%.',t:'p',n:'복리',tags:['house','house'],d:'보유 골드 100당 공격 속도 +3% (최대 +60%). 하우스 2개로 계산'},
+  {id:'luckycoin',u:'강화할 때마다 행운 +1, 골드 획득 +10%가 한 번 더 붙어요.',t:'s',n:'행운의 동전',tags:['house','dice'],d:'행운 +2, 골드 획득 +20%',f:p=>{p.luck+=1;p.goldM+=.1;}},
   // poison
-  {id:'toxic',u:'독 피해 자체가 세져요. ★1은 기본, ★2는 +50%, ★3은 +100%.',t:'s',n:'독 묻은 탄',tags:['poison'],d:'탄환이 적을 중독시킵니다'},
-  {id:'neuro',u:'중독된 적이 느려지는 정도가 커져요. ★1은 이동 속도 −40%, ★2는 −55%, ★3은 −70%.',t:'s',n:'마비 독',tags:['poison'],d:'중독된 적 이동 속도 −40%'},
-  {id:'spill',u:'중독된 적이 죽으면서 남기는 독 웅덩이가 커지고 오래가요. 반경 50 → 65 → 80, 지속 3초 → 4초 → 5초.',t:'g',n:'독 웅덩이',tags:['poison','dice'],d:'중독된 적이 죽으면 3초간 독 웅덩이'},
-  {id:'molotov',u:'대시 경로에 남는 불길의 피해가 세져요. ★1은 기본, ★2는 2배, ★3은 3배.',t:'g',n:'화염병',tags:['poison','blitz'],d:'대시 경로에 2.5초간 불길'},
-  {id:'plague',u:'1초마다 중독이 번지는 적 수가 늘어나요. ★1은 1명, ★2는 2명, ★3은 3명.',t:'p',n:'역병',tags:['poison','poison'],d:'중독이 1초마다 가까운 적에게 번집니다. 독 2개로 계산'}
+  {id:'toxic',u:'독 피해 자체가 세져요. ★1은 기본, ★2는 +50%, ★3은 +100%.',t:'s',n:'독 묻은 탄',tags:['poison'],d:'탄환이 적을 중독시킵니다 (독 피해 +50%)'},
+  {id:'neuro',u:'중독된 적이 느려지는 정도가 커져요. ★1은 이동 속도 −40%, ★2는 −55%, ★3은 −70%.',t:'s',n:'마비 독',tags:['poison'],d:'중독된 적 이동 속도 −55%'},
+  {id:'spill',u:'중독된 적이 죽으면서 남기는 독 웅덩이가 커지고 오래가요. 반경 50 → 65 → 80, 지속 3초 → 4초 → 5초.',t:'g',n:'독 웅덩이',tags:['poison','dice'],d:'중독된 적이 죽으면 4초간 독 웅덩이 (반경 65)'},
+  {id:'molotov',u:'대시 경로에 남는 불길의 피해가 세져요. ★1은 기본, ★2는 2배, ★3은 3배.',t:'g',n:'화염병',tags:['poison','blitz'],d:'대시 경로에 2.5초간 불길 (피해 2배)'},
+  {id:'plague',u:'1초마다 중독이 번지는 적 수가 늘어나요. ★1은 1명, ★2는 2명, ★3은 3명.',t:'p',n:'역병',tags:['poison','poison'],d:'중독이 1초마다 가까운 적 2명에게 번집니다. 독 2개로 계산'}
 ];
 const FUSIONS=[
   {id:'f_cardblast',a:'split',b:'storm',n:'카드 폭발',d:'분열한 탄환이 한 번 더 분열함'},
@@ -640,17 +643,20 @@ const FUSIONS=[
   {id:'f_juggernaut',a:'shieldbash',b:'regenarmor',n:'저거너트',d:'보호막 최대치 + 방어력 ×1'}
 ];
 function fusionObj(f){const A=AUGS.find(x=>x.id===f.a),B=AUGS.find(x=>x.id===f.b);return {...f,t:'f',tags:[...A.tags,...B.tags],parts:[f.a,f.b],lv:3,u:''};}
-const MAXA=6;
+// 증강은 강화 없이 고정 수치. 대신 슬롯 10개를 채우며 조합·시너지·합체로 빌드를 만듦
+const MAXA=10,AUG_UP=false,AUG_EVERY=4;
 const slotCount=()=>S.augs.filter(a=>a.t!=='v').length;
 function fusable(){return FUSIONS.filter(f=>S.augs.some(a=>a.id===f.a)&&S.augs.some(a=>a.id===f.b));}
 function partnerOf(id){for(const f of FUSIONS){if(f.a===id&&S.augs.some(a=>a.id===f.b))return f;if(f.b===id&&S.augs.some(a=>a.id===f.a))return f;}return null;}
 function doFuse(f){
+  for(const a of S.augs)if((a.id===f.a||a.id===f.b)&&a.f)for(let k=a.lv;k<3;k++)applyQ(a.f,S.p,a.q);
   S.augs=S.augs.filter(a=>a.id!==f.a&&a.id!==f.b);const o=fusionObj(f);S.augs.push(o);if(f.f)f.f(S.p);tagCount();
   S.flash=.35;const p=S.p;S.rings.push({x:p.x,y:p.y,r:10,max:200,life:.5,col:'#ff4fd8'});S.fused=(S.fused||0)+1;
-  toast(`합체! ${AUGS.find(x=>x.id===f.a).n} + ${AUGS.find(x=>x.id===f.b).n} → ${f.n}`);return o;
+  augFx(`💥 합체! ${f.n}`,`${AUGS.find(x=>x.id===f.a).n} + ${AUGS.find(x=>x.id===f.b).n} · 재료 효과도 한 단계 강해짐`,'#ff4fd8',true,.5);return o;
 }
 function tryFuse(){
   const el=fusable();if(!el.length)return null;
+  return doFuse(el[0]);
   const sure=el.find(f=>S.augs.find(a=>a.id===f.a).lv>=3&&S.augs.find(a=>a.id===f.b).lv>=3);
   if(sure)return doFuse(sure);
   if(Math.random()<.1+LK()*.005)return doFuse(el[Math.floor(Math.random()*el.length)]);
@@ -673,7 +679,7 @@ const VIPS=[
 const RAR={c:{n:'일반',col:'#8f8873'},r:{n:'희귀',col:'#2f74c9'},e:{n:'영웅',col:'#8e45c9'},l:{n:'전설',col:'#c99223'}};
 // 스탯 카드: 대부분의 스탯은 일반~전설 어느 등급으로든 뜸. 등급이 높을수록 수치 범위가 RMUL배로 커짐.
 // v: 일반 기준 [[최소,최대,소수자리], ...]. fr: 등급 고정 카드(특수 효과, 도박). 행운은 등급과 범위 내 굴림을 모두 위로 끌어올림
-const RMUL={c:.75,r:1.05,e:1.7,l:2.5};
+const RMUL={c:.6,r:.85,e:1.36,l:2};
 const CARDS=[
   {n:'숫돌',v:[[.5,1.1,1]],t:v=>`공격력 +${v[0]}`,a:(p,v)=>{p.dmg+=v[0];}},
   {n:'힘의 물약',v:[[4,8,1]],t:v=>`공격력 +${v[0]}%`,a:(p,v)=>{p.dmgP=(p.dmgP||0)+v[0]/100;}},
@@ -1749,7 +1755,7 @@ function hud(){
   if(p.rage>0)bf.push(`<span style="color:#ff6a4a">분노 ${p.rage}</span>`);
   $('buffs').innerHTML=play?bf.join(''):'';
   dashBtn.classList.toggle('cd',p.dashCd>0);
-  const mm=Math.floor(S.gt/60),ss=String(Math.floor(S.gt%60)).padStart(2,'0'),nx=5-(S.picks+S.pendingLv)%5;
+  const mm=Math.floor(S.gt/60),ss=String(Math.floor(S.gt%60)).padStart(2,'0'),nx=AUG_EVERY-(S.picks+S.pendingLv)%AUG_EVERY;
   const key=[S.bossI,S.chap,Math.ceil(p.barrier),Math.ceil(p.hp),Math.round(p.maxHp),S.round,S.gold,S.lvl,Math.floor(S.xp),mm,ss,S.biome,slotCount(),S.round.toFixed(1),S.st.kills,S.augs.length,S.mode==='start',S.st.bosses].join('|');
   if(key===hudCache)return;hudCache=key;
   $('hud').style.visibility=S.mode==='start'?'hidden':'visible';
@@ -1759,7 +1765,7 @@ function hud(){
   $('round').innerHTML=`${S.diff&&S.diff!=='normal'?`<span style="color:${dfM().col}">${dfM().n}</span> `:''}${S.bossI>=0?`<span style="color:#ff6060">⏸ ${mm}:${ss} 보스전</span>`:`${mm}:${ss}<span style="color:var(--muted)"> / 10:00</span>`} <span style="color:var(--brass)">${S.bossI===3?'마지막 장':Math.min(4,S.chap+1)+'장'}</span> <span style="color:var(--muted)">${BIOMES[S.biome||0].n}</span> <span style="color:${S.round>12?'#ff6060':S.round>6?'#ffb347':'var(--muted)'}">위협 ${S.round.toFixed(1)}</span>`;
   $('left').innerHTML=`처치 ${S.st.kills} <span style="color:var(--brass)">· 클리어 시 ${clearScore().toLocaleString()}점</span>`;
   $('gold').textContent=`${S.gold} 골드${S.keys?' · 🔑'+S.keys:''}`;
-  $('lv').textContent=!augReady()?`레벨 ${S.lvl}, 증강 모두 최대`:`레벨 ${S.lvl}, 증강까지 ${nx}`;
+  $('lv').textContent=!augReady()?`레벨 ${S.lvl}, 증강 슬롯 가득`:`레벨 ${S.lvl}, 증강까지 ${nx}`;
   $('xpf').style.width=(S.xp/S.next*100)+'%';
   $('syn').innerHTML=Object.keys(TAGS).filter(t=>tag(t)>0).map(t=>{const c=tag(t);return `<span class="pill ${c>=6?'on6':c>=4?'on4':c>=2?'on2':''}">${TAGS[t].n} ${c}${c>=5?' ▲'+(c-4):''}</span>`;}).join('');
 }
@@ -1771,7 +1777,7 @@ ov.addEventListener('mousedown',e=>{if(e.target.closest('button'))e.preventDefau
 function hide(){ov.classList.remove('on');ov.innerHTML='';}
 function openNext(){
   joy=null;
-  if(S.pendingLv>0){S.pendingLv--;S.picks++;if(S.picks%5===0&&augReady())openAug(true,`레벨 ${S.lvl-S.pendingLv} 달성. 5레벨마다 증강`);else openStat();return;}
+  if(S.pendingLv>0){S.pendingLv--;S.picks++;if(S.picks%AUG_EVERY===0&&augReady())openAug(true,`레벨 ${S.lvl-S.pendingLv} 달성. ${AUG_EVERY}레벨마다 증강`);else openStat();return;}
   if(AUTO.pick&&!S.started&&S.bonusAug>0){S.bonusAug=0;autoAug();startGame();return;}
   if(S.bonusAug>0){S.bonusAug--;if(augReady())openAug(true,'보스 보상');else{S.boost=true;S.bossStat=true;openStat();}return;}
   if(S.backToCasino){S.backToCasino=false;S.mode='casino';renderCasino();return;}
@@ -1834,8 +1840,8 @@ function openAugKeep(opts,free,why,tier){openAug(free,why,opts,tier);}
 const augReady=()=>slotCount()<MAXA||fullOptions().length>0;
 function fullOptions(){
   const fz=AUGS.filter(a=>!has(a.id)&&(!a.cls||a.cls===S.cls)&&augReq(a)&&partnerOf(a.id)).sort(()=>Math.random()-.5).slice(0,3).map(a=>({...a,fuseNow:true,q:rollQ()}));
-  if(fz.length)return fz;
-  return S.augs.filter(a=>a.lv<3&&a.t!=='v'&&a.t!=='f'&&!(a.id==='luckydie'&&critFull())).sort(()=>Math.random()-.5).slice(0,3).map(o=>({up:true,ref:o}));
+  return fz;
+  return S.augs.filter(a=>AUG_UP&&a.lv<3&&a.t!=='v'&&a.t!=='f'&&!(a.id==='luckydie'&&critFull())).sort(()=>Math.random()-.5).slice(0,3).map(o=>({up:true,ref:o}));
 }
 function openAug(free,why,fixed,fixedTier){
   S.mode='aug';why=why||S.augWhy||'증강';S.augWhy=why;
@@ -1844,7 +1850,7 @@ function openAug(free,why,fixed,fixedTier){
   if(!opts.length){const g=price(120);S.gold+=g;toast(`슬롯 가득, 강화할 것도 없음. ${g} 골드 지급`);openNext();return;}
   const cost=price(18);
   show(`<h2>증강 선택</h2><p class="sub">${why}. 슬롯 <b style="color:${full?'#ff9ad0':'var(--ivory)'}">${slotCount()}/${MAXA}</b>. ${full?'슬롯이 가득 차서 <b style="color:#ff9ad0">합체할 수 있는 증강</b> 또는 무료 강화만 나옵니다.':`이번엔 <b style="color:${TIER[tier].col};filter:brightness(1.5)">${TIER[tier].n}</b> 등급.`}</p>
-  <p class="hint">새 증강은 ★2로 시작해요. PC는 카드에 마우스를 올리면, 모바일은 꾹 누르면 설명이 보여요</p>
+  <p class="hint">증강은 강화 없이 그대로 적용돼요. 짝이 맞으면 바로 합체. PC는 카드에 마우스를 올리면, 모바일은 꾹 누르면 설명이 보여요</p>
   <div class="cards">${opts.map(augHtml).join('')}</div>
   <button class="btn ghost" id="reroll" ${!free&&S.gold<cost?'disabled':''}>다시 뽑기<small>${free?(free===true?(META.sk.reroll?'무료 2회':'무료 1회'):'무료 '+free+'회'):cost+'골드 (보유 '+S.gold+')'}</small></button>
   <button class="btn ghost" data-stats>내 스탯 보기</button>
@@ -1853,8 +1859,7 @@ function openAug(free,why,fixed,fixedTier){
   bindPeek();
   ov.querySelectorAll('.card').forEach(b=>b.onclick=()=>{const a=opts[+b.dataset.i];
     if(a.up){const o=a.ref;o.lv++;if(o.f)applyQ(o.f,S.p,o.q);tagCount();toast(`${o.n} ★${o.lv}`);tryFuse();openNext();return;}
-    {const lv=a.t==='v'||a.t==='f'?1:2;S.augs.push({...a,lv,fuseNow:undefined});if(a.f)for(let i=0;i<lv;i++)applyQ(a.f,S.p,a.q);}tagCount();
-    if(a.fuseNow){const f=partnerOf(a.id);if(f)doFuse(f);}else tryFuse();
+    gainAug(a);
     openNext();});
   $('reroll').onclick=()=>{if(!free)S.gold-=cost;const left=free===true?(META.sk.reroll?1:0):(typeof free==='number'?free-1:0);openAug(left>0?left:false,why);};
 }
@@ -1864,15 +1869,15 @@ function fusionTable(){
   const nm2=id=>`<span class="${own(id)?'own':''}">${AUGS.find(x=>x.id===id).n}${own(id)?' ✔':''}</span>`;
   return `<div class="tgrid">${[...FUSIONS].sort((a,b)=>score(b)-score(a)).map(f=>{const done=own(f.id),half=!done&&(own(f.a)||own(f.b));
     return `<div class="tile ${done?'done':half?'on':''}"><h4>${f.n}<small>${done?'완성':own(f.a)&&own(f.b)?'합체 가능':half?'재료 1/2':''}</small></h4><div class="parts">${nm2(f.a)} + ${nm2(f.b)}</div>${f.d}</div>`;}).join('')}</div>
-  <p class="rule">두 재료를 다 가지고 있으면 레벨업이나 증강 선택 때 10% 확률로 자동 합체 (행운으로 상승). 둘 다 ★3이면 확정 합체. 상점에서 골드로 강제 합체도 가능. 합체하면 슬롯 하나가 비고, 재료 효과는 ★3으로 유지됩니다.</p>`;
+  <p class="rule">두 재료를 모두 가지면 바로 합체합니다. 합체하면 슬롯 하나가 비고, 두 재료의 효과는 그대로 남으면서 한 단계 더 강해집니다.</p>`;
 }
 function openStat(keep){
   S.mode='stat';saveGame(true);S.srr=S.srr||0;
   let cards=keep;
   if(!cards){cards=[];let tries=0;const bonus=S.boost?6:0;while(cards.length<3&&tries<60){tries++;const c=cardOf(rollRarity(bonus),bonus);if(!cards.some(x=>x.n===c.n))cards.push(c);}S.boost=false;}
-  const cost=price(15+S.srr*10),allC=Math.round(price(150+S.lvl*30)*Math.pow(1.25,S.takeAll||0)),boostC=price(90+S.lvl*12),next=5-(S.picks%5);
+  const cost=price(15+S.srr*10),allC=Math.round(price(150+S.lvl*30)*Math.pow(1.25,S.takeAll||0)),boostC=price(90+S.lvl*12),next=AUG_EVERY-(S.picks%AUG_EVERY);
   const bossSt=S.bossStat;S.bossStat=false;
-  show(`<h2>${bossSt?'보스 보상':'레벨 '+(S.lvl-S.pendingLv)}</h2><p class="sub">스탯 하나 고르기. ${!augReady()?`증강이 모두 최대 강화라 레벨업마다 스탯만 받습니다`:`다음 증강까지 ${next}레벨${slotCount()>=MAXA?' (슬롯이 가득 차서 강화·합체로 나와요)':''}`}${bossSt?'. 강화할 증강이 없어서 고급 스탯 카드로 대신':''}. 보유 <span class="gold">${S.gold} 골드</span></p>
+  show(`<h2>${bossSt?'보스 보상':'레벨 '+(S.lvl-S.pendingLv)}</h2><p class="sub">스탯 하나 고르기. ${!augReady()?`증강 슬롯이 가득 차서 레벨업마다 스탯만 받습니다`:`다음 증강까지 ${next}레벨${slotCount()>=MAXA?' (슬롯이 가득 차서 강화·합체로 나와요)':''}`}${bossSt?'. 강화할 증강이 없어서 고급 스탯 카드로 대신':''}. 보유 <span class="gold">${S.gold} 골드</span></p>
   <div class="cards">${cards.map((c,i)=>{const R=RAR[c.r];return `<button class="card rar-${c.r}" data-i="${i}" style="--rc:${R.col}"><span class="rr">${c.r==='l'?'✨ ':''}${R.n}${c.u!=null?` · <span style="color:${GRADE(c.u).col}">${GRADE(c.u).n}</span>`:''}</span><b>${c.n}</b>${withActual(c.d,c.u!=null?c.f:null)}</button>`;}).join('')}</div>
   <div class="btnrow">
     <button class="btn" id="reroll" ${S.gold<cost?'disabled':''}>다시 뽑기<small>${cost}골드</small></button>
@@ -1890,6 +1895,26 @@ function openStat(keep){
 // 영웅·전설 카드 등장 연출: 폭죽 파티클, 배너, 화면 플래시, 효과음
 let AC=null;
 function chime(notes,type){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const t0=AC.currentTime;notes.forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(0,t0+i*.09);g.gain.linearRampToValueAtTime(.12,t0+i*.09+.02);g.gain.exponentialRampToValueAtTime(.001,t0+i*.09+.5);o.connect(g).connect(AC.destination);o.start(t0+i*.09);o.stop(t0+i*.09+.55);});}catch(e){}}
+// 증강 획득: 고정 수치(내부 ★2)로 추가 → 시너지 단계 돌파 확인 → 합체 짝이 있으면 바로 합체. 단계마다 연출
+function gainAug(a){
+  const before={...S.tagc};
+  {const lv=a.t==='v'||a.t==='f'?1:2;S.augs.push({...a,lv,fuseNow:undefined});if(a.f)for(let i=0;i<lv;i++)applyQ(a.f,S.p,a.q);}tagCount();
+  const T=TIER[a.t]||TIER.s;augFx(`✨ ${a.n}`,a.d,T.col,a.t==='p'||a.t==='v');
+  const p=S.p;S.rings.push({x:p.x,y:p.y,r:10,max:260,life:.6,col:T.col});S.flash=Math.max(S.flash,.25);
+  const ups=[];for(const t in S.tagc){const c0=before[t]||0,c1=S.tagc[t];for(const n of [6,4,2])if(c0<n&&c1>=n){ups.push([t,n]);break;}}
+  ups.forEach(([t,n],i)=>augFx(`⚡ 시너지 ${TAGS[t].n} ${n}단계`,TAGS[t]['t'+n],'#7be08f',n>=6,.55*(i+1)));
+  tryFuse();
+}
+function augFx(title,sub,col,big,delay=0){
+  setTimeout(()=>{
+    const bn=document.createElement('div');bn.className='abanner';bn.style.color=col;bn.innerHTML=`<b>${title}</b>${sub?`<small>${sub}</small>`:''}`;document.body.appendChild(bn);setTimeout(()=>bn.remove(),2300);
+    const fl=document.createElement('div');fl.className='rflash';fl.style.background=`radial-gradient(circle at 50% 40%,${col}55,transparent 65%)`;document.body.appendChild(fl);setTimeout(()=>fl.remove(),800);
+    const cx=innerWidth/2,cy=innerHeight*.32,N=big?40:22;
+    for(let i=0;i<N;i++){const d=document.createElement('i'),an=Math.random()*Math.PI*2,v=120+Math.random()*(big?240:150),sz=4+Math.random()*6;
+      d.className='cf';d.style.cssText=`left:${cx}px;top:${cy}px;width:${sz}px;height:${sz*(.6+Math.random())}px;background:${i%3?col:'#fff3c4'};--dx:${Math.cos(an)*v}px;--dy:${Math.sin(an)*v+50}px;--r:${Math.random()*720-360}deg;--t:${1.1+Math.random()*.5}s`;
+      document.body.appendChild(d);setTimeout(()=>d.remove(),1900);}
+    chime(big?[523,659,784,1047,1319]:[587,740,880],'triangle');},delay*1000);
+}
 function rarityFx(){
   const els=[...ov.querySelectorAll('.card.rar-e,.card.rar-l')];if(!els.length)return;
   const leg=els.some(e=>e.classList.contains('rar-l'));
@@ -1927,7 +1952,7 @@ function renderCasino(){
   <button class="btn primary" data-a="next" ${b?'disabled':''}>${S.hub?'상점으로 돌아가기':'테이블 떠나기'}</button>`);
   ov.querySelectorAll('[data-a]').forEach(el=>el.onclick=()=>casinoAct(el.dataset.a));
 }
-function grantAug(min){if(slotCount()>=MAXA){const o=S.augs.filter(a=>a.lv<3&&a.t!=='v'&&a.t!=='f');if(!o.length)return null;const a=o[Math.floor(Math.random()*o.length)];a.lv++;if(a.f)applyQ(a.f,S.p,a.q);tagCount();tryFuse();return {n:a.n+' ★'+a.lv,d:'슬롯이 가득 차서 강화로 대체'};}const order=['s','g','p'];const ok=AUGS.filter(a=>!has(a.id)&&(!a.cls||a.cls===S.cls)&&augReq(a)&&order.indexOf(a.t)>=order.indexOf(min));if(!ok.length)return null;const a={...ok[Math.floor(Math.random()*ok.length)],q:rollQ()},lv=a.t==='v'||a.t==='f'?1:2;S.augs.push({...a,lv});tagCount();tryFuse();if(a.f)for(let i=0;i<lv;i++)applyQ(a.f,S.p,a.q);tagCount();return a;}
+function grantAug(min){if(slotCount()>=MAXA){const o=S.augs.filter(a=>AUG_UP&&a.lv<3&&a.t!=='v'&&a.t!=='f');if(!o.length)return null;const a=o[Math.floor(Math.random()*o.length)];a.lv++;if(a.f)applyQ(a.f,S.p,a.q);tagCount();tryFuse();return {n:a.n+' ★'+a.lv,d:'슬롯이 가득 차서 강화로 대체'};}const order=['s','g','p'];const ok=AUGS.filter(a=>!has(a.id)&&(!a.cls||a.cls===S.cls)&&augReq(a)&&order.indexOf(a.t)>=order.indexOf(min));if(!ok.length)return null;const a={...ok[Math.floor(Math.random()*ok.length)],q:rollQ()},lv=a.t==='v'||a.t==='f'?1:2;S.augs.push({...a,lv});tagCount();tryFuse();if(a.f)for(let i=0;i<lv;i++)applyQ(a.f,S.p,a.q);tagCount();return a;}
 function casinoAct(a){
   const p=S.p;
   if(a==='next'){if(S.hub){openHub();return;}openNext();return;}
@@ -2026,7 +2051,7 @@ function startScreen(){
     <li><b>대시</b>Space 또는 Shift, 모바일은 오른쪽 아래 버튼. 대시 중엔 무적</li>
     <li><b>공격</b>사거리 안 가장 가까운 적에게 자동 공격</li>
     <li><b>스탯</b>Tab 또는 I. 보는 동안 일시정지</li>
-    <li><b>성장</b>레벨업마다 스탯 카드와 직업별 기본 능력치 상승, 주변 충격파. 적이 떨군 파란 경험치 구슬을 주워야 레벨업. 골드는 가끔만 떨어짐. 5레벨마다 증강 (새 증강은 ★2로 시작). 증강 슬롯 6칸, 정해진 조합은 합체</li>
+    <li><b>성장</b>레벨업마다 스탯 카드와 직업별 기본 능력치 상승, 주변 충격파. 적이 떨군 파란 경험치 구슬을 주워야 레벨업. 골드는 가끔만 떨어짐. 4레벨마다 증강 (강화 없이 고정 수치). 증강 슬롯 10칸, 같은 태그를 모으면 시너지, 정해진 짝을 모으면 바로 합체</li>
     <li><b>영구 강화</b>게임이 끝나면 점수에 따라 메달. 메인 화면에서 메달로 영구 능력치와 기술 구매</li>
     <li><b>시너지</b>태그 9종, 같은 태그 2, 4, 6개에서 발동, 5개부터 초과 보너스</li>
     <li><b>랜덤 수치</b>레벨업 스탯 카드는 등급(일반~전설)과 수치가 매번 굴려지고 하·중·상·최상으로 표시됨. 행운이 높을수록 높은 등급과 좋은 수치가 잘 나옴. 증강은 설명에 적힌 수치 그대로</li>
@@ -2191,9 +2216,7 @@ function autoAug(){
   if(!opts.length){S.gold+=price(120);return;}
   const a=opts.reduce((b,c)=>scoreAug(c)>scoreAug(b)?c:b,opts[0]);
   if(a.up){const o=a.ref;o.lv++;if(o.f)applyQ(o.f,S.p,o.q);tagCount();ftext(S.p.x,S.p.y-40,o.n+' ★'+o.lv,'#ffd76a',15);tryFuse();return;}
-  {const lv=a.t==='v'||a.t==='f'?1:2;S.augs.push({...a,lv,fuseNow:undefined});if(a.f)for(let i=0;i<lv;i++)applyQ(a.f,S.p,a.q);}tagCount();
-  if(a.fuseNow){const f=partnerOf(a.id);if(f)doFuse(f);}else tryFuse();
-  ftext(S.p.x,S.p.y-40,'증강: '+a.n,'#ffd76a',16);
+  gainAug(a);
 }
 const BADCARD=['러시안 룰렛','동전 던지기','도박꾼의 주사위','올인'];
 const OFFCARD=['숫돌','힘의 물약','날랜 손놀림','치명상','급소 노리기','전투 본능','유리 대포','광기','쾌속 장전','사냥꾼의 눈','다연발','관통 탄'];
@@ -2207,7 +2230,7 @@ function autoStat(){
 function autoShop(){
   const vc=vipCost(),vs=vipStock().filter(v=>!has(v.id)&&augReq(v));if(vs.length&&(S.keys||0)>=vc){const v=vs[0];S.keys-=vc;S.augs.push({...v,lv:3});tagCount();}
   const reserve=()=>reviveCost();let guard=0,bought=0;
-  while(guard++<60){const up=S.augs.filter(a=>a.lv<3&&a.t!=='v'&&a.t!=='f').sort((a,b)=>upCost(a)-upCost(b))[0];
+  while(guard++<60){const up=S.augs.filter(a=>AUG_UP&&a.lv<3&&a.t!=='v'&&a.t!=='f').sort((a,b)=>upCost(a)-upCost(b))[0];
     if(up&&S.gold-Math.round(upCost(up)*.85)>reserve()){S.gold-=Math.round(upCost(up)*.85);up.lv++;if(up.f)applyQ(up.f,S.p,up.q);tagCount();tryFuse();bought++;continue;}
     const pool=STACKS.filter(x=>['atk','rate','hp','arm','crit','critm'].includes(x.k)&&!(x.k==='crit'&&critFull())&&!(x.k==='critm'&&critMFull())&&!(x.k==='rate'&&rawRate()>=RATE_CAP()));
     const x=pool.sort((a,b)=>stackCost(a)-stackCost(b))[0];if(!x||S.gold-stackCost(x)<=reserve())break;S.gold-=stackCost(x);S.buys[x.k]=(S.buys[x.k]||0)+1;x.f(S.p);bought++;}
@@ -2216,7 +2239,7 @@ function autoShop(){
 function autoProcess(){
   let guard=0;
   while((S.pendingLv>0||S.bonusAug>0)&&guard++<20){
-    if(S.pendingLv>0){S.pendingLv--;S.picks++;if(S.picks%5===0&&augReady())autoAug();else autoStat();}
+    if(S.pendingLv>0){S.pendingLv--;S.picks++;if(S.picks%AUG_EVERY===0&&augReady())autoAug();else autoStat();}
     else{S.bonusAug--;if(augReady())autoAug();else autoStat();}
   }
 }
@@ -2394,7 +2417,7 @@ const vipCost=()=>1;
 const vipStock=()=>{if(!S.vipStock||S.vipRoll!==S.chap){S.vipRoll=S.chap;S.vipStock=VIPS.filter(v=>!has(v.id)).sort(()=>Math.random()-.5).slice(0,3).map(v=>v.id);}return S.vipStock.map(id=>VIPS.find(v=>v.id===id)).filter(Boolean);};
 const MERCH={
   chips:{n:'칩 상인',icon:'🪙',col:'#7a5a12',w:()=>24,d:'능력치를 골드로 삽니다. 매번 파는 품목이 다름'},
-  smith:{n:'강화 장인',icon:'🔨',col:'#4a4f5a',w:()=>S.augs.some(a=>a.lv<3&&a.t!=='v'&&a.t!=='f')?20:0,d:'증강 ★ 강화'},
+  smith:{n:'강화 장인',icon:'🔨',col:'#4a4f5a',w:()=>S.augs.some(a=>AUG_UP&&a.lv<3&&a.t!=='v'&&a.t!=='f')?20:0,d:'증강 ★ 강화'},
   alch:{n:'연금술사',icon:'⚗️',col:'#5a2a6a',w:()=>fusable().length?16:(S.augs.length>=3?5:0),d:'강제 합체, 증강 분해'},
   hub:{n:'보스 상점',icon:'🛒',col:'#3a2a10',w:()=>0,d:''},
   vip:{n:'VIP 브로커',icon:'💎',col:'#6a1020',w:()=>(S.keys||0)>0&&vipStock().some(v=>!has(v.id))?6:0,d:'보스 열쇠로 사는 VIP 증강'}
@@ -2432,7 +2455,7 @@ function openMerch(m){
 // 보스 상점: 탭 4개(능력치 / 증강 / VIP / 회복·도박)로 나눠 한 번에 한 묶음만 표시
 function hubBody(m,g){
   const tab=m.tab||'stat',k=S.keys||0,p=S.p;
-  const ups=S.augs.map((a,i)=>[a,i]).filter(([a])=>a.lv<3&&a.t!=='v'&&a.t!=='f'),fz=fusable(),vs=vipStock();
+  const ups=S.augs.map((a,i)=>[a,i]).filter(([a])=>AUG_UP&&a.lv<3&&a.t!=='v'&&a.t!=='f'),fz=fusable(),vs=vipStock();
   const T=[['stat','📈 능력치',''],['aug','✨ 증강',ups.length+fz.length?ups.length+fz.length:''],['vip','💎 VIP',k?'🔑'+k:''],['etc','🎲 회복·도박','']];
   let h=`<div class="shophead"><h2>🛒 보스 상점 <span style="font-size:.6em;color:var(--muted)">${S.chap} / 3</span></h2></div>
   <p class="sub">보유 <span class="gold">${g} 골드</span> · 🔑 ${k} · 체력 ${Math.ceil(p.hp)}/${Math.round(p.maxHp)}</p>
@@ -2459,7 +2482,7 @@ function openShop(back,m){
     body+=`<h3>${'오늘의 품목'} <small style="color:var(--muted);font-size:13px">지금 스탯이 높을수록 비쌈</small></h3><div class="grid">${m.stock.map(i=>{const x=STACKS[i],c=stackCost(x);return `<button class="btn" data-k="${i}" ${g<c?'disabled':''}>${withActual(x.n,x.f)}<small>${c}골드${S.buys[x.k]?`, ${S.buys[x.k]}회 구매`:''}</small></button>`;}).join('')}</div>`;
   }
   if(m.k==='smith'){
-    const ups=S.augs.map((a,i)=>[a,i]).filter(([a])=>a.lv<3&&a.t!=='v'&&a.t!=='f');const maxed=S.augs.length-ups.length;
+    const ups=S.augs.map((a,i)=>[a,i]).filter(([a])=>AUG_UP&&a.lv<3&&a.t!=='v'&&a.t!=='f');const maxed=S.augs.length-ups.length;
     body+=`<h3>증강 강화 <small style="color:var(--muted);font-size:13px">${maxed?`최대 강화 ${maxed}개 숨김`:''}</small></h3><div class="uplist">${ups.map(([a,i])=>{const c=Math.round(upCost(a)*.85);return `<div class="uprow"><b>${a.n} <span class="stars">${'★'.repeat(a.lv)}${'☆'.repeat(3-a.lv)}</span></b><button class="btn" data-u="${i}" ${g<c?'disabled':''}>★${a.lv+1}로 ${c}골드</button><small><span style="color:var(--ivory)">지금 효과:</span> ${a.d}<br><span style="color:var(--brass)">강화하면:</span> ${a.u||''}</small></div>`;}).join('')||'<p class="sub">강화할 증강 없음</p>'}</div>`;
   }
   if(m.k==='alch'){
@@ -2474,7 +2497,7 @@ function openShop(back,m){
     }
     const dis=S.augs.map((a,i)=>[a,i]).filter(([a])=>a.t!=='v'&&a.t!=='f'&&!a.f);
     body+=`<h3>증강 분해</h3><p class="sub" style="margin:0 0 8px">증강 하나를 없애고 골드를 받아요. 슬롯이 한 칸 비어서 새 증강을 받을 수 있게 돼요. 대신 그 증강의 효과와 시너지 태그도 같이 사라져요. 능력치를 직접 올려주는 스탯형 증강은 분해할 수 없어요.</p>
-    <div class="uplist">${dis.map(([a,i])=>`<div class="uprow"><b>${a.n} <span class="stars">${'★'.repeat(a.lv)}</span></b><button class="btn" data-dis="${i}">분해 +${price(40*a.lv)}골드</button><small><span style="color:var(--ivory)">효과:</span> ${a.d}<br><span style="color:var(--muted)">태그: ${tagStr(a)} (분해하면 이 태그 수가 줄어요)</span></small></div>`).join('')||'<p class="sub">분해할 수 있는 증강 없음</p>'}</div>`;
+    <div class="uplist">${dis.map(([a,i])=>`<div class="uprow"><b>${a.n} </b><button class="btn" data-dis="${i}">분해 +${price(40*a.lv)}골드</button><small><span style="color:var(--ivory)">효과:</span> ${a.d}<br><span style="color:var(--muted)">태그: ${tagStr(a)} (분해하면 이 태그 수가 줄어요)</span></small></div>`).join('')||'<p class="sub">분해할 수 있는 증강 없음</p>'}</div>`;
   }
   if(m.k==='doc'){
     const p=S.p,hc=price(55),mc=price(70*Math.pow(1.35,S.buys.doc||0)),tc=price(320);
@@ -2598,7 +2621,7 @@ function renderStats(){
   ${row('고유 능력',' ',CLASSES[S.cls].passive)}${row('레벨당 상승',`${S.lvl-1}회 누적`,CLASSES[S.cls].lvd)}
   <div class="sgrid"><div class="sgrp"><h3>공격</h3>${atk}</div><div class="sgrp"><h3>방어</h3>${def}<h3>유틸</h3>${util}</div></div>
   <h3>시너지</h3>${syn}
-  <h3 title="일반 증강은 최대 ${MAXA}개. VIP 증강은 슬롯을 차지하지 않습니다. 슬롯이 가득 차면 합체 가능한 증강이나 강화만 나옵니다">증강 슬롯 ${slotCount()}/${MAXA}${S.augs.length>slotCount()?` (+VIP ${S.augs.length-slotCount()})`:''}</h3>${S.augs.map(a=>row(a.n,(a.t==='v'?'VIP':a.t==='f'?'합체':'★'.repeat(a.lv)),'',`<b style="color:${(TIER[a.t]||{}).col||'var(--brass)'};filter:brightness(1.4)">${(TIER[a.t]||{n:''}).n}</b> · ${a.tags.map(t=>TAGS[t].n).join(', ')}<br>${a.d}${a.u&&a.t!=='v'&&a.t!=='f'?`<br><span style="color:var(--muted)">강화하면: ${a.u}</span>`:''}`)).join('')||'<p class="sub">없음</p>'}
+  <h3 title="일반 증강은 최대 ${MAXA}개. VIP 증강은 슬롯을 차지하지 않습니다. 슬롯이 가득 차면 합체 짝이 되는 증강만 나옵니다">증강 슬롯 ${slotCount()}/${MAXA}${S.augs.length>slotCount()?` (+VIP ${S.augs.length-slotCount()})`:''}</h3>${S.augs.map(a=>row(a.n,(a.t==='v'?'VIP':a.t==='f'?'합체':''),'',`<b style="color:${(TIER[a.t]||{}).col||'var(--brass)'};filter:brightness(1.4)">${(TIER[a.t]||{n:''}).n}</b> · ${a.tags.map(t=>TAGS[t].n).join(', ')}<br>${a.d}${a.u&&a.t!=='v'&&a.t!=='f'?`<br><span style="color:var(--muted)">강화하면: ${a.u}</span>`:''}`)).join('')||'<p class="sub">없음</p>'}
   <div class="btnrow"><button class="btn" id="stSave">저장</button><button class="btn" id="stQuit">저장하고 메인으로</button></div>
   <button class="btn primary" id="stClose">닫기</button></div>`;
   $('stClose').onclick=toggleStats;$('stCloseTop').onclick=toggleStats;
