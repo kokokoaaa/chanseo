@@ -28,7 +28,18 @@ canvas{display:block;width:100%;height:100%}
 .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--chip-red)}
 .bar span{position:relative;display:block;text-align:center;font-size:14px;line-height:17px}
 .gold{color:var(--brass)}
-#syn{position:absolute;left:10px;bottom:14px;display:flex;flex-wrap:wrap;gap:6px;max-width:calc(100% - 120px);pointer-events:none;font-family:'Do Hyeon',sans-serif;font-size:15px}
+#botLeft{position:absolute;left:10px;bottom:14px;display:flex;flex-direction:column;gap:6px;max-width:calc(100% - 120px);pointer-events:none}
+#augBar{display:flex;flex-wrap:wrap;gap:4px;pointer-events:auto}
+#augBar:empty{display:none}
+.aico{width:38px;height:40px;border-radius:7px;border:2px solid var(--ac);background:rgba(4,18,12,.78);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Do Hyeon',sans-serif;cursor:help;box-shadow:0 0 6px color-mix(in srgb,var(--ac) 45%,transparent);user-select:none;-webkit-user-select:none}
+.aico i{font-style:normal;font-size:17px;line-height:1}
+.aico span{font-size:10px;color:#f1e7cf;line-height:1.1;margin-top:2px;white-space:nowrap;overflow:hidden;max-width:34px}
+.aico.empty{border-style:dashed;border-color:rgba(241,231,207,.22);box-shadow:none;cursor:default}
+#augTip{position:fixed;z-index:250;display:none;max-width:260px;background:rgba(4,18,12,.96);border:1px solid var(--ac,#d6a94a);border-radius:8px;padding:8px 10px;font-family:'Do Hyeon',sans-serif;font-size:14px;color:#f1e7cf;pointer-events:none;line-height:1.35}
+#augTip b{display:block;font-size:16px;font-weight:400;color:var(--ac,#d6a94a)}
+#augTip small{display:block;color:var(--muted);font-size:12px;margin:2px 0 4px}
+@media (max-width:520px){.aico{width:32px;height:34px}.aico i{font-size:14px}.aico span{font-size:9px;max-width:29px}}
+#syn{display:flex;flex-wrap:wrap;gap:6px;pointer-events:none;font-family:'Do Hyeon',sans-serif;font-size:15px}
 .pill{padding:3px 9px;border-radius:999px;background:rgba(0,0,0,.5);border:1px solid rgba(241,231,207,.25);color:var(--muted)}
 .pill.on2{border-color:var(--brass);color:var(--brass)}
 .pill.on4{border-color:var(--prism);color:#e7b6f5;background:rgba(80,20,100,.45)}
@@ -244,7 +255,7 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
     <div id="gold" class="gold"></div>
     <div id="lv"></div>
   </div>
-  <div id="syn"></div>
+  <div id="botLeft"><div id="augBar"></div><div id="syn"></div></div><div id="augTip"></div>
   <button id="dash" aria-label="대시">대시<small>Space</small></button>
   <div id="live"><span></span><span></span><span></span></div>
   <div id="buffs"></div>
@@ -1748,6 +1759,22 @@ function drawMini(){
   for(const e of S.en)if(e.boss){mctx.fillStyle='#ffd76a';mctx.beginPath();mctx.arc(cl(tx(e.x)),cl(ty(e.y)),10,0,TAU);mctx.fill();mctx.strokeStyle='#c8323a';mctx.lineWidth=3;mctx.stroke();}
   mctx.fillStyle='#ffffff';mctx.beginPath();mctx.arc(M/2,M/2,7,0,TAU);mctx.fill();
 }
+// 왼쪽 아래 증강 아이콘 줄: 보유 증강 + 빈 슬롯. PC는 마우스 올리면, 모바일은 누르면 설명
+const TAG_ICO={card:'🃏',dice:'🎲',roulette:'🎡',house:'🏦',curse:'💀',jackpot:'🎰',blitz:'⚡',guard:'🛡',poison:'☠'};
+let augBarKey='';
+function renderAugBar(){const el=$('augBar');const k=!S||S.mode==='start'?'':S.augs.map(a=>a.id).join(',')+'|'+MAXA;if(k===augBarKey)return;augBarKey=k;if(!k){el.innerHTML='';return;}
+  const own=S.augs.map((a,i)=>{const col=(TIER[a.t]||{}).col||'#d6a94a',ic=a.t==='f'?'💥':a.t==='v'?'👑':(TAG_ICO[a.tags[0]]||'✦');
+    return `<div class="aico" data-ai="${i}" style="--ac:${col}"><i>${ic}</i><span>${a.n.replace(/\s/g,'').slice(0,3)}</span></div>`;}).join('');
+  el.innerHTML=own+'<div class="aico empty"></div>'.repeat(Math.max(0,MAXA-slotCount()));}
+{const bar=document.getElementById('augBar'),tip=document.getElementById('augTip');
+  const show=(t)=>{const a=S&&S.augs[+t.dataset.ai];if(!a)return;const T=TIER[a.t]||{n:'',col:'#d6a94a'};tip.style.setProperty('--ac',T.col);
+    tip.innerHTML=`<b>${a.n}</b><small>${T.n}${a.tags.length?' · '+[...new Set(a.tags)].map(t=>TAGS[t].n+(a.tags.filter(x=>x===t).length>1?'×2':'')).join(', '):''}</small>${a.d}`;
+    tip.style.display='block';const r=t.getBoundingClientRect();tip.style.left=Math.min(innerWidth-tip.offsetWidth-8,Math.max(8,r.left))+'px';tip.style.top=Math.max(8,r.top-tip.offsetHeight-8)+'px';};
+  const hideT=()=>{tip.style.display='none';};
+  bar.addEventListener('mouseover',e=>{const t=e.target.closest('.aico[data-ai]');if(t)show(t);});
+  bar.addEventListener('mouseout',e=>{if(!e.relatedTarget||!bar.contains(e.relatedTarget))hideT();});
+  bar.addEventListener('touchstart',e=>{const t=e.target.closest('.aico[data-ai]');if(t){e.preventDefault();e.stopPropagation();if(tip.style.display==='block'&&tip.dataset.k===t.dataset.ai)hideT();else{show(t);tip.dataset.k=t.dataset.ai;}}},{passive:false});
+  addEventListener('touchstart',e=>{if(!bar.contains(e.target))hideT();},{passive:true});}
 function hud(){
   if(!S)return;const p=S.p;
   const play=S.mode==='play';
@@ -1780,6 +1807,7 @@ function hud(){
   $('gold').textContent=`${S.gold} 골드${S.keys?' · 🔑'+S.keys:''}`;
   $('lv').textContent=!augReady()?`레벨 ${S.lvl}, 증강 슬롯 가득`:`레벨 ${S.lvl}, 증강까지 ${nx}`;
   $('xpf').style.width=(S.xp/S.next*100)+'%';
+  renderAugBar();
   $('syn').innerHTML=Object.keys(TAGS).filter(t=>tag(t)>0).map(t=>{const c=tag(t);return `<span class="pill ${c>=6?'on6':c>=4?'on4':c>=2?'on2':''}">${TAGS[t].n} ${c}${c>=5?' ▲'+(c-4):''}</span>`;}).join('');
 }
 
