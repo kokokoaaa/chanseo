@@ -533,8 +533,8 @@ const AUGS=[
   {id:'lastcard',u:'죽을 피해를 체력 1로 버티는 효과의 재사용 대기 시간이 줄어요. ★1은 60초, ★2는 45초, ★3은 30초.',t:'p',n:'최후의 패',tags:['curse','roulette'],d:'45초에 한 번, 치명상을 체력 1로 버티고 2초 무적. 회전 칩 +2'},
   // jackpot
   {id:'seventh',u:'7번째 공격마다 부채꼴로 추가 발사하는 탄환 수가 늘어나요. ★1은 4발, ★2는 6발, ★3은 8발.',t:'s',n:'일곱 번째 패',tags:['jackpot'],d:'7번째 공격마다 탄환 6발을 부채꼴로 추가'},
-  {id:'lucky7',u:'7번째 처치마다 회복하는 체력이 늘어나요. ★1은 7, ★2는 14, ★3은 21.',t:'s',n:'일곱 번째 회복',tags:['jackpot'],d:'7번째 처치마다 체력 +14'},
-  {id:'boom',u:'처치한 적이 터지는 폭발의 범위와 피해가 커져요. 범위는 70 → 85 → 100, 피해는 공격력의 60% → 80% → 100%. 폭발로 죽은 적도 또 터져요.',t:'g',n:'폭발 칩',tags:['jackpot','dice'],d:'처치한 적이 폭발 (범위 85, 공격력 80%). 연쇄 가능'},
+  {id:'lucky7',u:'7번째 처치마다 회복하는 체력이 늘어나요. ★1은 7, ★2는 14, ★3은 21.',t:'s',n:'일곱 번째 회복',tags:['jackpot'],d:'7번째 처치마다 체력 +14, 그 자리에 폭발 (공격력 150%)'},
+  {id:'boom',u:'처치한 적이 터지는 폭발의 범위와 피해가 커져요. 범위는 70 → 85 → 100, 피해는 공격력의 60% → 80% → 100%. 폭발로 죽은 적도 또 터져요.',t:'g',n:'폭발 칩',tags:['jackpot','dice'],d:'처치한 적이 폭발 (범위 70, 공격력 55%). 연쇄 가능'},
   {id:'fever',u:'연속 처치로 쌓이는 공격 속도가 커져요. 처치당 6% → 8% → 10%씩 쌓이고, 최대치도 +120% → +160% → +200%로 올라가요.',t:'p',n:'피버 타임',tags:['jackpot','blitz'],d:'2초 안에 이어지는 처치마다 공격 속도 +8% 중첩 (최대 +160%)'},
   // blitz
   {id:'sprint',u:'강화할 때마다 이동 속도 +10%, 대시 재사용 −15%가 한 번 더 적용돼요.',t:'s',n:'스프린트',tags:['blitz'],d:'이동 속도 +21%, 대시 재사용 −28%',f:p=>{p.speed*=1.1;p.dashMul*=.85;}},
@@ -569,12 +569,12 @@ const AUGS=[
   {id:'r_assassin',cls:'rogue',u:'정예와 보스에게 주는 피해 배율이 커져요. ★1은 2배, ★2는 2.5배, ★3은 3배.',t:'p',n:'암살',tags:['curse','jackpot'],d:'[도적 전용] 정예와 보스에게 피해 2.5배, 처치하면 체력 2% 회복'},
   // new mechanics
   {id:'chainlt',u:'7번째 적중마다 튀는 번개가 이어지는 적 수가 늘어나요. ★1은 5명, ★2는 7명, ★3은 9명.',t:'g',n:'체인 라이트닝',tags:['card','jackpot'],d:'7번째 적중마다 번개가 주변 적 7명에게 연쇄'},
-  {id:'blackhole',u:'블랙홀이 생기는 주기가 짧아지고 크기도 커져요. 주기는 8초 → 7초 → 6초.',t:'p',n:'블랙홀 칩',tags:['roulette','curse'],d:'7초마다 가까운 적 위치에 블랙홀. 적을 빨아들이며 피해'},
-  {id:'icecoin',u:'맞았을 때 주변 적이 느려지는 시간이 늘어나요. ★1은 2초, ★2는 2.5초, ★3은 3초.',t:'s',n:'얼음 동전',tags:['house','guard'],d:'맞으면 주변 적이 2.5초간 크게 느려짐'},
+  {id:'blackhole',u:'블랙홀이 생기는 주기가 짧아지고 크기도 커져요. 주기는 8초 → 7초 → 6초.',t:'p',n:'블랙홀 칩',tags:['roulette','curse'],d:'9초마다 가까운 적 위치에 블랙홀. 적을 빨아들이며 피해'},
+  {id:'icecoin',u:'맞았을 때 주변 적이 느려지는 시간이 늘어나요. ★1은 2초, ★2는 2.5초, ★3은 3초.',t:'s',n:'얼음 동전',tags:['house','guard'],d:'맞으면 주변에 냉기 폭발 (공격력 200%, 1초에 한 번), 주변 적이 2.5초간 크게 느려짐'},
   {id:'mirror',u:'적 탄환을 튕겨내는 확률이 올라가요. ★1은 20%, ★2는 30%, ★3은 40%. 튕긴 탄환은 공격력 2배로 적을 맞혀요.',t:'g',n:'거울 패',tags:['card','guard'],d:'적 탄환이 30% 확률로 튕겨 나가 적을 공격 (공격력 2배)'},
   {id:'revenge',u:'맞은 뒤 3초 안의 다음 공격 피해 배율이 커져요. ★1은 2배, ★2는 2.5배, ★3은 3배.',t:'s',n:'복수',tags:['curse','jackpot'],d:'맞으면 3초 안의 다음 공격 피해 2.5배'},
   {id:'punch',u:'0.8초마다 터지는 충격파의 범위와 피해가 커져요. 범위는 85 → 100 → 115, 피해는 공격력의 120% → 160% → 200%.',t:'s',n:'주사위 충격파',tags:['dice'],d:'0.8초마다 가까운 적에게 충격파 (범위 100, 공격력 160%)'},
-  {id:'rush',u:'골드를 주웠을 때 1초 동안 오르는 이동 속도가 커져요. ★1은 +35%, ★2는 +50%, ★3은 +65%.',t:'g',n:'골드 러시',tags:['house','blitz'],d:'골드를 주우면 1초간 이동 속도 +50%'},
+  {id:'rush',u:'골드를 주웠을 때 1초 동안 오르는 이동 속도가 커져요. ★1은 +35%, ★2는 +50%, ★3은 +65%.',t:'g',n:'골드 러시',tags:['house','blitz'],d:'골드를 주우면 1초간 이동 속도 +50%, 공격 속도 +30%'},
   {id:'fog',u:'지나간 자리에 남는 독 웅덩이가 커져요. 반경 28 → 34 → 40.',t:'s',n:'독안개',tags:['poison','blitz'],d:'움직이는 길에 독 웅덩이를 남김 (반경 34)'},
   {id:'guardian',u:'적 탄환을 막아주는 회전 칩이 늘어나요. ★1은 1개, ★2는 2개, ★3은 3개.',t:'g',n:'수호 칩',tags:['guard','roulette'],d:'회전 칩 +2. 회전 칩이 적 탄환을 막음'},
   {id:'engine',u:'처치할 때마다 줄어드는 대시 재사용 시간이 커져요. ★1은 0.12초, ★2는 0.18초, ★3은 0.25초.',t:'p',n:'폭주 기관',tags:['blitz','jackpot'],d:'처치할 때마다 대시 재사용 0.18초 감소'},
@@ -585,13 +585,13 @@ const AUGS=[
   {id:'focus',u:'탄환이 1발일 때 받는 공격력 보너스가 커져요. ★1은 +35%, ★2는 +50%, ★3은 +65%. 2발 이상이면 +10%만 받아요.',t:'s',n:'집중 사격',tags:['card','dice'],d:'탄환이 1발이면 공격력 +50%. 탄환이 많은 빌드엔 약함'},
   {id:'echo',u:'메아리 탄환의 피해가 커져요. ★1은 원래의 50%, ★2는 70%, ★3은 90%.',t:'p',n:'메아리',tags:['card','blitz'],d:'공격 0.25초 뒤 같은 방향으로 한 번 더 발사 (피해 70%)'},
   {id:'spiral',u:'4번째 공격마다 사방으로 퍼지는 탄환 수가 늘어나요. ★1은 8발, ★2는 10발, ★3은 12발.',t:'g',n:'소용돌이 패',tags:['card','roulette'],d:'4번째 공격마다 주변 원형으로 탄환 10발 (피해 60%)'},
-  {id:'combo',u:'같은 적을 계속 때릴 때 쌓이는 피해 중첩 최대치가 늘어나요. ★1은 10중첩, ★2는 15중첩, ★3은 20중첩. 중첩당 +4%.',t:'s',n:'연타',tags:['card','jackpot'],d:'같은 적을 연속으로 맞히면 피해 +4%씩 중첩 (최대 +60%). 대상이 바뀌면 초기화'},
+  {id:'combo',u:'같은 적을 계속 때릴 때 쌓이는 피해 중첩 최대치가 늘어나요. ★1은 10중첩, ★2는 15중첩, ★3은 20중첩. 중첩당 +4%.',t:'s',n:'연타',tags:['card','jackpot'],d:'같은 적을 연속으로 맞히면 피해 +6%씩 중첩 (최대 +90%). 대상이 바뀌면 초기화'},
   {id:'second',u:'치명타가 안 터졌을 때 한 번 더 굴릴 확률이 올라가요. ★1은 30%, ★2는 45%, ★3은 60%.',t:'s',n:'두 번째 주사위',tags:['dice'],d:'치명타가 실패하면 45% 확률로 한 번 더 굴림'},
   {id:'execute',u:'일반 적을 즉시 처치하는 체력 기준이 올라가요. ★1은 12%, ★2는 16%, ★3은 20%. 정예·보스는 그 체력 이하에서 피해 +50%.',t:'g',n:'처형',tags:['curse','dice'],d:'체력 16% 이하 일반 적은 맞으면 즉사. 정예·보스는 그 구간에서 피해 +50%'},
   {id:'burn',u:'치명타로 붙는 화상의 초당 피해가 커져요. 공격력의 40% → 60% → 80%.',t:'g',n:'점화',tags:['poison','jackpot'],d:'치명타가 적에게 3초 화상 (초당 공격력 60%). 독과 별개로 중첩'},
   {id:'frost',u:'적중 시 적을 둔화시킬 확률이 올라가요. ★1은 25%, ★2는 35%, ★3은 45%.',t:'s',n:'서리 탄',tags:['guard','dice'],d:'적중 시 35% 확률로 1.5초간 크게 둔화'},
   {id:'contagion',u:'중독된 적이 죽을 때 터지는 폭발 피해가 커져요. 공격력의 120% → 160% → 200%.',t:'p',n:'감염 폭발',tags:['poison','jackpot'],d:'중독된 적이 죽으면 폭발 (공격력 160%), 맞은 적은 중독'},
-  {id:'venomcloud',u:'6초마다 떨어지는 독구름 개수가 늘어나요. ★1은 1개, ★2는 2개, ★3은 3개.',t:'g',n:'독구름',tags:['poison','roulette'],d:'6초마다 적이 많은 곳에 4초짜리 독구름 2개'},
+  {id:'venomcloud',u:'6초마다 떨어지는 독구름 개수가 늘어나요. ★1은 1개, ★2는 2개, ★3은 3개.',t:'g',n:'독구름',tags:['poison','roulette'],d:'6초마다 적이 가장 많은 곳에 4초짜리 독구름'},
   {id:'drone',u:'함께 싸우는 칩 드론 수가 늘어나요. ★1은 1기, ★2는 2기, ★3은 3기.',t:'g',n:'칩 드론',tags:['roulette','card'],d:'주변을 도는 드론 2기가 0.6초마다 가까운 적을 사격 (공격력 60%)'},
   {id:'nova',u:'10초마다 터지는 노바의 피해가 커져요. 공격력의 5배 → 7배 → 9배, 반경 180.',t:'p',n:'노바',tags:['roulette','jackpot'],d:'10초마다 내 주변에 대폭발 (공격력 7배)'},
   {id:'thunder',u:'5초마다 떨어지는 낙뢰 수가 늘어나요. ★1은 3발, ★2는 4발, ★3은 5발.',t:'p',n:'천둥',tags:['jackpot','blitz'],d:'5초마다 화면 안 무작위 적 4명에게 낙뢰 (공격력 2.5배)'},
@@ -896,7 +896,7 @@ const cb=k=>S.cbuys[k]||0;
 const J=()=>has('chain')?5:tag('jackpot')>=6?5:7;
 const red=()=>has('redblack')&&Math.floor(S.t/3)%2===0;
 // 공격력·공격 속도 %는 합연산: 모든 % 보너스를 더한 뒤 한 번만 곱함 (dmgP, rateP)
-const effDmg=p=>p.dmg*Math.max(.2,1+(p.dmgP||0)),effRate=p=>p.rate*Math.max(.2,1+(p.rateP||0));
+const effDmg=p=>p.dmg*Math.max(.2,1+(p.dmgP||0)),effRate=p=>p.rate*Math.max(.2,1+(p.rateP||0)+(p.rushT>0&&S&&has('rush')?.3:0));
 function pDmg(){const p=S.p;let d=effDmg(p);
   if(tag('house')>=2)d*=1+Math.min(.6,Math.floor(S.gold/50)*.04);
   if(has('bankrupt')&&(S.gold===0||has('f_bankrich')))d*=lv3('bankrupt',2,2.5,3);
@@ -1250,6 +1250,7 @@ function hurtP(amt,src){
     if(p.barrier<=0&&tag('guard')>=6){explode(p.x,p.y,110,pDmg()*2,'#9fd3ff');toast('보호막 폭발');}
     if(amt<=0){ftext(p.x,p.y-24,'-'+Math.round(ab),'#9fd3ff',14);p.inv=.25;return;}
   }
+  if(has('icecoin')&&!(p.iceCd>S.t)){p.iceCd=S.t+1;explode(p.x,p.y,150,pDmg()*2,'#bfe8ff');}
   if(has('icecoin')){const fr=has('f_glacier');for(const e of S.en)if(e.alive&&!e.boss&&d2(e,p)<150*150){e.slowT=fr?1.5:lv3('icecoin',2,2.5,3);e.frozen=fr;}}
   if(has('revenge'))p.revT=3;
   addRage();
@@ -1315,7 +1316,7 @@ function onPHit(b,t){
   if(has('a_snipe'))dmg*=1+Math.min(lv3('a_snipe',1.5,2,2.5),Math.hypot(t.x-S.p.x,t.y-S.p.y)/100*.15);
   if(has('r_assassin')&&(t.elite||t.boss))dmg*=lv3('r_assassin',2,2.5,3);
   if(S.p.shadowT>0&&!col){dmg*=critMul();col='#ffd76a';}
-  if(has('combo')&&!b.child){if(p.cmbE===t)p.cmbN=Math.min(lv3('combo',10,15,20),(p.cmbN||0)+1);else{p.cmbE=t;p.cmbN=0;}dmg*=1+.04*p.cmbN;}
+  if(has('combo')&&!b.child){if(p.cmbE===t)p.cmbN=Math.min(lv3('combo',10,15,20),(p.cmbN||0)+1);else{p.cmbE=t;p.cmbN=0;}dmg*=1+.06*p.cmbN;}
   {let cr=Math.random()<critC();if(!cr&&has('second')&&Math.random()<lv3('second',.3,.45,.6))cr=true;
    if(cr){dmg*=critMul();col='#ffd76a';if(has('burn')){t.burnT=3;t.burnD=Math.max(t.burnD||0,pDmg()*lv3('burn',.4,.6,.8));if(has('f_frostfire'))t.slowT=Math.max(t.slowT||0,1);}}}
   if(has('frost')&&Math.random()<lv3('frost',.25,.35,.45)&&!t.boss)t.slowT=Math.max(t.slowT||0,1.5);
@@ -1370,13 +1371,13 @@ function onKill(e){
   if(tag('house')>=6)S.gold+=1;
   if(has('tip')&&Math.random()<lv3('tip',.06,.1,.14)){S.gold+=8;p.hp=Math.min(p.maxHp,p.hp+6);ftext(e.x,e.y-14,'팁','#d6a94a',15);}
   if(has('lotto')&&Math.random()<.015*L('lotto')*(has('f_heist')?3:1)){S.gold+=60;toast('복권 당첨. 60 골드');}
-  if(has('lucky7')&&p.pkills%J()===0)p.hp=Math.min(p.maxHp,p.hp+7*L('lucky7'));
+  if(has('lucky7')&&p.pkills%J()===0){p.hp=Math.min(p.maxHp,p.hp+7*L('lucky7'));explode(e.x,e.y,90,pDmg()*1.5,'#7be08f');}
   if(e.ps>0&&has('contagion')){const rr=90*(has('f_plaguebomb')?1.5:1);explode(e.x,e.y,rr,pDmg()*lv3('contagion',1.2,1.6,2),'#8ee06a');for(const o of S.en)if(o.alive&&d2(o,e)<rr*rr)poisonE(o);if(has('f_plaguebomb'))S.zones.push({x:e.x,y:e.y,r:70,life:3,kind:'pool',tick:0});}
   if(e.ps>0){
     if(tag('poison')>=4)for(const o of S.en)if(o.alive&&d2(o,e)<100*100)poisonE(o);
     if(has('spill'))S.zones.push({x:e.x,y:e.y,r:35+15*L('spill'),life:2+L('spill'),kind:'pool',tick:0});
   }
-  if(has('boom')){const br=55+15*L('boom');explode(e.x,e.y,br,pDmg()*(.4+.2*L('boom')));if(has('f_gas')){S.zones.push({x:e.x,y:e.y,r:60,life:3,kind:'pool',tick:0});for(const o of S.en)if(o.alive&&d2(o,e)<br*br)poisonE(o);}}
+  if(has('boom')){const br=50+10*L('boom');explode(e.x,e.y,br,pDmg()*(.25+.15*L('boom')));if(has('f_gas')){S.zones.push({x:e.x,y:e.y,r:60,life:3,kind:'pool',tick:0});for(const o of S.en)if(o.alive&&d2(o,e)<br*br)poisonE(o);}}
   if(tag('card')>=2)for(let i=0;i<2;i++){const o=nearestE(e);const a=o?Math.atan2(o.y-e.y,o.x-e.x)+(i?.25:-.25):Math.random()*TAU;pBullet(e.x,e.y,a,pDmg()*.6,{child:true});}
   if(tag('curse')>=4&&p.alive){p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.03);for(let i=0;i<6;i++)pBullet(e.x,e.y,i*TAU/6,pDmg()*.5,{child:true,r:4,skull:true});}
   if(tag('jackpot')>=4&&p.pkills%J()===0){S.flash=.25;for(const o of S.en)if(o.alive)dmgE(o,pDmg()*1.5,'#ffd76a');}
@@ -1418,7 +1419,7 @@ function update(dt){
   for(const bo of S.bolts)bo.life-=dt;S.bolts=S.bolts.filter(bo=>bo.life>0);
   if(p.alive){
     if(has('punch')){S.punchT=(S.punchT||0)-dt;if(S.punchT<=0){const rad=(70+15*L('punch'))*(has('f_storm')?1.5:1);if(S.en.some(e=>e.alive&&d2(e,p)<rad*rad)){S.punchT=.8;explode(p.x,p.y,rad,pDmg()*(.8+.4*L('punch')),'#fff3c4');}else S.punchT=.1;}}
-    if(has('blackhole')){S.holeT=(S.holeT??4)-dt;if(S.holeT<=0){S.holeT=lv3('blackhole',8,7,6)-(has('f_horizon')?3:0);const e=nearestE(p,500);if(e)S.zones.push({x:e.x,y:e.y,r:(110+15*L('blackhole'))*(has('f_horizon')?1.4:1),life:2.5,kind:'hole'});}}
+    if(has('blackhole')){S.holeT=(S.holeT??4)-dt;if(S.holeT<=0){S.holeT=lv3('blackhole',10,9,8)-(has('f_horizon')?3:0);const e=nearestE(p,500);if(e)S.zones.push({x:e.x,y:e.y,r:(110+15*L('blackhole'))*(has('f_horizon')?1.4:1),life:2.5,kind:'hole'});}}
     if(has('static')&&p.moving){p.stD=(p.stD||0)+moveSpd()*dt;if(p.stD>=300){p.stD=0;if(nearestE(p,240))lightning(p,4);}}
     if(has('chipshot')){S.csT=(S.csT??3)-dt;if(S.csT<=0){S.csT=3;const n=orbitN(),sp=2.8*(has('spinner')?1.5:1),rad=48*p.orbR;for(let i=0;i<n;i++){const an=S.t*sp+i*TAU/n;pBullet(p.x+Math.cos(an)*rad,p.y+Math.sin(an)*rad,an,pDmg()*.8,{child:true,pierce:2});}}}
     if(has('fog')&&p.moving){S.fogT=(S.fogT||0)-dt;if(S.fogT<=0){S.fogT=.22;S.zones.push({x:p.x,y:p.y,r:(22+6*L('fog'))*(has('f_windwalker')?2:1),life:2,kind:'pool',tick:0});}}
@@ -1433,7 +1434,7 @@ function update(dt){
     if(has('nova')){S.novaT=(S.novaT??10)-dt;if(S.novaT<=0){S.novaT=10-(has('f_supernova')?3:0);explode(p.x,p.y,180,pDmg()*lv3('nova',5,7,9),'#ffd76a');S.shake=Math.max(S.shake,.2);if(has('f_supernova'))thunderStrike(6);}}
     if(has('thunder')){S.thT=(S.thT??5)-dt;if(S.thT<=0){S.thT=5;thunderStrike(lv3('thunder',3,4,5));}}
     if(has('mine')){S.mineT=(S.mineT??1)-dt;if(S.mineT<=0){S.mineT=lv3('mine',2.5,2,1.5)*(has('f_minefield')?.5:1);S.zones.push({x:p.x,y:p.y,r:16,life:12,kind:'mine'});}}
-    if(has('venomcloud')){S.vcT=(S.vcT??3)-dt;if(S.vcT<=0){S.vcT=6;for(let k=0;k<L('venomcloud');k++){let best=null,bc=0;for(let i=0;i<12;i++){const e=S.en[Math.floor(Math.random()*S.en.length)];if(!e||!e.alive||d2(e,p)>500*500)continue;let c=0;for(const o of S.en)if(o.alive&&d2(o,e)<90*90)c++;if(c>bc){bc=c;best=e;}}if(best)S.zones.push({x:best.x,y:best.y,r:90,life:4,kind:'pool',tick:0,cloud:true});}}}
+    if(has('venomcloud')){S.vcT=(S.vcT??3)-dt;if(S.vcT<=0){S.vcT=6;for(let k=0;k<Math.max(1,L('venomcloud')-1);k++){let best=null,bc=0;for(let i=0;i<12;i++){const e=S.en[Math.floor(Math.random()*S.en.length)];if(!e||!e.alive||d2(e,p)>500*500)continue;let c=0;for(const o of S.en)if(o.alive&&d2(o,e)<90*90)c++;if(c>bc){bc=c;best=e;}}if(best)S.zones.push({x:best.x,y:best.y,r:90,life:4,kind:'pool',tick:0,cloud:true});}}}
   }
   if(has('dealers')&&p.alive){S.dcd=(S.dcd||0)-dt;if(S.dcd<=0){S.dcd=.5;for(const q of dealerPos()){const e=nearestE(q,p.range);if(e)pBullet(q.x,q.y,Math.atan2(e.y-q.y,e.x-q.x),pDmg()*.5,{child:true});}}}
   for(const k in S.buffT)S.buffT[k]=Math.max(0,S.buffT[k]-dt);
@@ -1470,7 +1471,7 @@ function update(dt){
     if(n){const sp=2.8*(has('spinner')?1.5:1),rad=48*p.orbR,big=tag('roulette')>=6,orr=big?12:7;
       for(let i=0;i<n;i++){const a=S.t*sp+i*TAU/n,ox=p.x+Math.cos(a)*rad,oy=p.y+Math.sin(a)*rad;
         for(const e of S.en){if(!e.alive||e.orbCd>0)continue;
-          if((e.x-ox)**2+(e.y-oy)**2<(e.r+orr)**2){e.orbCd=.3;if(has('wheel'))poisonE(e);dmgE(e,pDmg()*.5*p.orbM*(big?2:1)*(has('f_blade')?2:1)*(1+ex('roulette')*.2),null,null,true);
+          if((e.x-ox)**2+(e.y-oy)**2<(e.r+orr)**2){e.orbCd=.3;if(has('wheel'))poisonE(e);dmgE(e,pDmg()*.8*p.orbM*(big?2:1)*(has('f_blade')?2:1)*(1+ex('roulette')*.2),null,null,true);
             if(tag('roulette')>=4&&Math.random()<.25&&e.alive)pBullet(ox,oy,Math.atan2(e.y-oy,e.x-ox),pDmg()*.7,{child:true});}}}}
   }
   // enemies
@@ -1480,7 +1481,7 @@ function update(dt){
     const T=ET[e.type];
     e.hit=Math.max(0,e.hit-dt);e.cd-=dt;e.rot+=dt*(e.boss?.6:1.8);if(e.orbCd>0)e.orbCd-=dt;
     if(e.burnT>0){e.burnT-=dt;dmgE(e,e.burnD*(has('f_frostfire')&&e.slowT>0?2:1)*dt,null,null,true);if(!e.alive)continue;}
-    if(e.pt>0){e.pt-=dt;const dps=effDmg(S.p)*.35*(1+ex('poison')*.2)*e.ps*(1+.5*Math.max(0,L('toxic')-1)+.5*Math.max(0,L('r_venom')-1))*(has('plague')?2:1)*(tag('poison')>=6?2:1)+(has('plaguelord')?Math.min(e.maxHp*.006,pDmg()*1.5):0);e.pTick+=dt;dmgE(e,dps*dt,null,null,true);if(e.pTick>.5){e.pTick=0;if(e.alive)ftext(e.x,e.y-e.r-4,Math.round(dps*.5),'#8ee06a',12);}if(e.pt<=0)e.ps=0;if(!e.alive)continue;}
+    if(e.pt>0){e.pt-=dt;const dps=effDmg(S.p)*.35*(1+ex('poison')*.2)*e.ps*(1+.5*Math.max(0,L('toxic')-1)+.5*Math.max(0,L('r_venom')-1))*(has('plague')?1.4:1)*(tag('poison')>=6?2:1)+(has('plaguelord')?Math.min(e.maxHp*.006,pDmg()*1.5):0);e.pTick+=dt;dmgE(e,dps*dt,null,null,true);if(e.pTick>.5){e.pTick=0;if(e.alive)ftext(e.x,e.y-e.r-4,Math.round(dps*.5),'#8ee06a',12);}if(e.pt<=0)e.ps=0;if(!e.alive)continue;}
     if(S.freezeT>0)continue;
     if(e.boss){bossAI(e,dt);continue;}
     const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1;
