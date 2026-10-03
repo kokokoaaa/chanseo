@@ -717,10 +717,12 @@ const LUCK_CAP=30,LK=(b=0)=>Math.min(LUCK_CAP,Math.max(0,S.p.luck+b));
 function luckU(bonus=0){return Math.random()<LK(bonus)/LUCK_CAP*.35?.5+Math.random()*.5:Math.random();}
 const GRADE=u=>u>=.9?{n:'최상',col:'#ffd76a'}:u>=.6?{n:'상',col:'#7fc4f2'}:u>=.25?{n:'중',col:'#d8d0bc'}:{n:'하',col:'#9a9284'};
 // % 효과 옆에 실제 수치 변화를 괄호로 표시: 플레이어 사본에 효과를 적용해 전후 값을 비교
-// 공격력 % 효과에만 실제로 오르는 양을 괄호로 표시 (예: 공격력 +6% (+0.9)). 플레이어 사본에 효과를 적용해 차이를 계산
+// 공격력·최대 체력 % 효과에만 실제로 바뀌는 양을 괄호로 표시 (예: 공격력 +6% (+0.9)). 플레이어 사본에 효과를 적용해 차이를 계산
 // %가 곧 실제 수치인 항목(치명타, 회피, 흡혈, 골드·경험치 획득 등)은 같은 숫자 반복이라 표시 안 함
 const sgn=(v,d)=>(v>=0?'+':'−')+Math.abs(v).toFixed(d).replace(/\.0+$/,'');
-const PV=[['공격력','dmg',(a,b)=>sgn(b-a,1)]];
+const PV=[['공격력','dmg',(a,b)=>sgn(b-a,1)],['최대 체력','maxHp',(a,b)=>sgn(b-a,0)]];
+// 증강의 최대 체력 % 감소도 실제로 깎이는 양을 괄호로 (n번 적용 기준)
+function hpLoss(f,d,n=1){if(!f||!S||!S.p||!/최대 체력 [−-][\d.]+%/.test(d||''))return '';const c={...S.p};try{for(let k=0;k<n;k++)f(c);}catch(e){return '';}const x=Math.round(c.maxHp-S.p.maxHp);return x?` <small style="opacity:.65">(최대 체력 ${sgn(x,0)})</small>`:'';}
 function withActual(desc,f){const W=a=>a.map(l=>`<div>${l}</div>`).join('');if(!S||!S.p||!f)return W(desc.split(', '));const c={...S.p};try{f(c);}catch(e){}
   return W(desc.split(', ').map(line=>{if(!line.includes('%'))return line;const m=PV.find(([k])=>line.startsWith(k));if(!m)return line;const [,key,fmt]=m,g=o=>key==='dmg'?effDmg(o):o[key],a=g(S.p)??0,b=g(c)??a;if(a===b)return line;
     return `${line} <small style="opacity:.65">(${fmt(a,b)})</small>`;}));}
@@ -1805,7 +1807,7 @@ function augOptions(tier){
   return out.map(a=>({...a,q:rollQ()}));
 }
 function augHtml(a,i){
-  if(a.up){const o=a.ref;return `<button class="card" data-i="${i}" style="--rc:#c99223"><span class="rr">무료 강화</span><b>${o.n}</b><span class="stars">${'★'.repeat(o.lv)} → ${'★'.repeat(o.lv+1)}</span><span class="tip">${o.d}<br><br><span style="color:var(--brass)">강화하면:</span> ${o.u||''}</span></button>`;}
+  if(a.up){const o=a.ref;return `<button class="card" data-i="${i}" style="--rc:#c99223"><span class="rr">무료 강화</span><b>${o.n}</b><span class="stars">${'★'.repeat(o.lv)} → ${'★'.repeat(o.lv+1)}</span><span class="tip">${o.d}<br><br><span style="color:var(--brass)">강화하면:</span> ${o.u||''}${hpLoss(o.f,o.d)}</span></button>`;}
   const T=TIER[a.t],cnt={};for(const t of a.tags)cnt[t]=(cnt[t]||0)+1;
   let lines='';
   const chips=Object.keys(cnt).map(t=>{const cur=tag(t),aft=cur+cnt[t],D=TAGS[t];let up='';
@@ -1816,7 +1818,7 @@ function augHtml(a,i){
     return `<span class="chip ${up?'on':''}">${D.n} ${cur}→${aft}</span>`;}).join('');
   const pf=partnerOf(a.id),pn=pf?AUGS.find(x=>x.id===(pf.a===a.id?pf.b:pf.a)).n:'';
   const fz=pf?`<span class="ta fz">🔗 ${pn}와 합체 → ${pf.n}: ${pf.d}${a.fuseNow?' (고르면 바로 합체)':''}</span>`:'';
-  return `<button class="card aug" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}${pf?' 🔗':''}</span><b>${a.n}</b><span class="chips">${chips}</span><span class="tip">${a.d}${lines||fz?'<br>':''}${lines}${fz}</span></button>`;
+  return `<button class="card aug" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}${pf?' 🔗':''}</span><b>${a.n}</b><span class="chips">${chips}</span><span class="tip">${a.d}${hpLoss(a.f,a.d,a.t==='v'||a.t==='f'?1:2)}${lines||fz?'<br>':''}${lines}${fz}</span></button>`;
 }
 function bindPeek(){
   ov.querySelectorAll('.card').forEach(c=>{let t=null;
