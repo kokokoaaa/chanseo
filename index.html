@@ -211,6 +211,8 @@ h3{font-family:'Do Hyeon',sans-serif;font-weight:400;font-size:19px;margin:18px 
 .card .tip .fz{color:#ff9ad0}
 @media (hover:hover){.card:hover .tip{display:block}}
 .card.peek .tip{display:block}
+/* 설명이 펼쳐진 카드는 다음 카드보다 위에 그려지게 (다음 카드에 가려지던 문제) */
+.card.peek,.card:hover{z-index:30}
 .hint{font-size:12.5px;color:var(--muted);margin:-6px 0 10px}
 .card .rr{font-size:13px;font-weight:700;color:var(--rc);filter:brightness(.75)}
 .card b{display:block;font-family:'Do Hyeon',sans-serif;font-size:21px;font-weight:400;margin:2px 0 6px}
