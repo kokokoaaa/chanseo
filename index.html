@@ -609,7 +609,13 @@ const AUGS=[
   {id:'neuro',u:'중독된 적이 느려지는 정도가 커져요. ★1은 이동 속도 −40%, ★2는 −55%, ★3은 −70%.',t:'s',n:'마비 독',tags:['poison'],d:'중독된 적 이동 속도 −55%'},
   {id:'spill',u:'중독된 적이 죽으면서 남기는 독 웅덩이가 커지고 오래가요. 반경 50 → 65 → 80, 지속 3초 → 4초 → 5초.',t:'g',n:'독 웅덩이',tags:['poison','dice'],d:'중독된 적이 죽으면 4초간 독 웅덩이 (반경 65)'},
   {id:'molotov',u:'대시 경로에 남는 불길의 피해가 세져요. ★1은 기본, ★2는 2배, ★3은 3배.',t:'g',n:'화염병',tags:['poison','blitz'],d:'대시 경로에 2.5초간 불길 (피해 2배)'},
-  {id:'plague',u:'1초마다 중독이 번지는 적 수가 늘어나요. ★1은 1명, ★2는 2명, ★3은 3명.',t:'p',n:'역병',tags:['poison','poison'],d:'중독이 1초마다 가까운 적 2명에게 번집니다. 독 2개로 계산'}
+  {id:'plague',u:'1초마다 중독이 번지는 적 수가 늘어나요. ★1은 1명, ★2는 2명, ★3은 3명.',t:'p',n:'역병',tags:['poison','poison'],d:'중독이 1초마다 가까운 적 2명에게 번집니다. 독 2개로 계산'},
+  // 추가 증강
+  {id:'soul',u:'',t:'p',n:'영혼 수확',tags:['curse','jackpot'],d:'일반 적을 처치할 때마다 공격력 +0.1% 영구 중첩 (최대 +50%)'},
+  {id:'corrode',u:'',t:'g',n:'부식 독',tags:['poison','guard'],d:'중독된 적에게 받는 피해 −35%. 중독된 적을 처치하면 체력 +1'},
+  {id:'lottery',u:'',t:'g',n:'복권',tags:['house','jackpot'],d:'처치마다 2% 확률로 당첨: 골드 획득 + 그 자리에 대폭발 (공격력 3배)'},
+  {id:'static',u:'',t:'g',n:'정전기',tags:['blitz','dice'],d:'300만큼 움직일 때마다 가까운 적부터 4명에게 번개 연쇄 (공격력 150%)'},
+  {id:'chipshot',u:'',t:'g',n:'칩 사출',tags:['roulette','card'],d:'3초마다 모든 회전 칩이 바깥으로 탄환을 쏨 (공격력 80%, 관통 2)'}
 ];
 const FUSIONS=[
   {id:'f_cardblast',a:'split',b:'storm',n:'카드 폭발',d:'분열한 탄환이 한 번 더 분열함'},
@@ -1223,6 +1229,7 @@ function lightning(from,n){
 function nearestE(from,maxD=1e9,excl){let b=null,bd=maxD*maxD;for(const v of S.en){if(!v.alive||v.phase||(excl&&excl.has(v)))continue;const d=d2(v,from);if(d<bd){bd=d;b=v;}}return b;}
 function hurtP(amt,src){
   const p=S.p;if(!p.alive||p.inv>0||p.dashT>0)return;
+  if(src&&src.ps>0&&has('corrode'))amt*=.65;
   if(p.shield>0){p.shield--;if(has('f_vaultkeeper'))S.gold+=5;ftext(p.x,p.y-24,'보험','#7be08f',14);p.inv=.25;return;}
   if(Math.random()<dodgeC()){ftext(p.x,p.y-24,'회피','#5fc9d9',15);p.inv=has('f_shadow')?.5:.15;if(has('counter')){const k=(3+3*L('counter'))*(has('f_shadow')?2:1);for(let i=0;i<k;i++)pBullet(p.x,p.y,i*TAU/k,pDmg()*.8,{child:true});}return;}
   if(p.block&&Math.random()<p.block+(has('k_wall')?lv3('k_wall',.15,.2,.25):0)){ftext(p.x,p.y-26,'막기','#cfe3ff',16);p.inv=.2;addRage();if(has('k_wall'))explode(p.x,p.y,75,pDmg()*1.5,'#9fd3ff');return;}
@@ -1334,6 +1341,9 @@ function lvlWave(){const p=S.p,mw=META.sk.wave,R=150*(mw?1.4:1),dm=pDmg()*.6*(mw
   for(const e of S.en){if(!e.alive)continue;const dx=e.x-p.x,dy=e.y-p.y,d=Math.hypot(dx,dy)||1;if(d<R+e.r){if(!e.boss){const k=(R+30-d);e.x+=dx/d*k;e.y+=dy/d*k;e.slowT=Math.max(e.slowT||0,.6);}dmgE(e,dm,'#ffd76a');}}}
 function onKill(e){
   const T=ET[e.type],p=S.p;
+  if(has('soul')&&!e.boss&&(p.soulN||0)<500){p.soulN=(p.soulN||0)+1;p.dmgP=(p.dmgP||0)+.001;}
+  if(has('corrode')&&e.ps>0)p.hp=Math.min(p.maxHp,p.hp+1);
+  if(has('lottery')&&!e.boss&&Math.random()<.02){const g=price(25);S.gold+=g;explode(e.x,e.y,110,pDmg()*3,'#ffd76a');ftext(e.x,e.y-e.r-18,'복권 당첨! +'+g,'#ffd76a',18);}
   burst(e.x,e.y,T.col,e.boss?40:10);S.st.kills++;
   if(e.type==='slime')for(let i=0;i<2;i++)spawnAt('slimelet',e.x+(i?9:-9),e.y+rand(-4,4),true);
   // 드롭: 경험치 ±15%, 골드 ±30% 랜덤. 행운(최대 30)이 골드 드롭 확률(18→20%)과 2배 확률(경험치 0→5%, 골드 5→12%)을 올림
@@ -1409,6 +1419,8 @@ function update(dt){
   if(p.alive){
     if(has('punch')){S.punchT=(S.punchT||0)-dt;if(S.punchT<=0){const rad=(70+15*L('punch'))*(has('f_storm')?1.5:1);if(S.en.some(e=>e.alive&&d2(e,p)<rad*rad)){S.punchT=.8;explode(p.x,p.y,rad,pDmg()*(.8+.4*L('punch')),'#fff3c4');}else S.punchT=.1;}}
     if(has('blackhole')){S.holeT=(S.holeT??4)-dt;if(S.holeT<=0){S.holeT=lv3('blackhole',8,7,6)-(has('f_horizon')?3:0);const e=nearestE(p,500);if(e)S.zones.push({x:e.x,y:e.y,r:(110+15*L('blackhole'))*(has('f_horizon')?1.4:1),life:2.5,kind:'hole'});}}
+    if(has('static')&&p.moving){p.stD=(p.stD||0)+moveSpd()*dt;if(p.stD>=300){p.stD=0;if(nearestE(p,240))lightning(p,4);}}
+    if(has('chipshot')){S.csT=(S.csT??3)-dt;if(S.csT<=0){S.csT=3;const n=orbitN(),sp=2.8*(has('spinner')?1.5:1),rad=48*p.orbR;for(let i=0;i<n;i++){const an=S.t*sp+i*TAU/n;pBullet(p.x+Math.cos(an)*rad,p.y+Math.sin(an)*rad,an,pDmg()*.8,{child:true,pierce:2});}}}
     if(has('fog')&&p.moving){S.fogT=(S.fogT||0)-dt;if(S.fogT<=0){S.fogT=.22;S.zones.push({x:p.x,y:p.y,r:(22+6*L('fog'))*(has('f_windwalker')?2:1),life:2,kind:'pool',tick:0});}}
     if(has('guardian')){const n=orbitN(),sp=2.8*(has('spinner')?1.5:1),rad=48*p.orbR;for(let i=0;i<n;i++){const a=S.t*sp+i*TAU/n,ox=p.x+Math.cos(a)*rad,oy=p.y+Math.sin(a)*rad;for(const b of S.pr)if(!b.mine&&b.life>0&&(b.x-ox)**2+(b.y-oy)**2<196)b.life=0;}}
   }S.phoenixCd=Math.max(0,(S.phoenixCd||0)-dt);
@@ -1801,7 +1813,7 @@ const poisonSrc=()=>canPoison()||['wheel','m_inferno','fog','venomcloud','f_napa
 const AUG_REQ={
   evade:()=>S.p.dodge<DODGE_CAP,luckydie:()=>!critFull(),
   neuro:poisonSrc,spill:poisonSrc,plague:poisonSrc,contagion:poisonSrc,plaguelord:poisonSrc,
-  shieldbash:()=>barrierMax()>0
+  shieldbash:()=>barrierMax()>0,chipshot:()=>orbitN()>0,corrode:poisonSrc
 };
 const augReq=a=>!AUG_REQ[a.id]||AUG_REQ[a.id]();
 // 태그 중복(가드 2개 등)으로 선호 가중치가 겹쳐 쌓이지 않게: 선호 태그가 하나라도 있으면 ×2.5, 비선호는 ×0.3
@@ -2333,7 +2345,7 @@ refreshAutoBtns();
 
 /* ---------- save ---------- */
 const SAVE_KEY='chipdungeon_save_v1';
-const PKEYS=['dmgP','rateP','xpM','block','token','hp','maxHp','speed','dmg','rate','bspd','range','multi','pierce','crit','critM','luck','goldM','vuln','orbR','orbM','dashMul','armor','dodge','lifesteal','regen','magnet','shots','pkills','lastCd'];
+const PKEYS=['dmgP','rateP','xpM','block','token','hp','maxHp','speed','dmg','rate','bspd','range','multi','pierce','crit','critM','luck','goldM','vuln','orbR','orbM','dashMul','armor','dodge','lifesteal','regen','magnet','shots','pkills','lastCd','soulN'];
 const SKEYS=['gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','takeAll','keys','vipStock','vipRoll','buys','cbuys','fused'];
 function saveGame(silent){
   if(!S||!S.started||!S.p.alive||S.mode==='over'||S.mode==='dying'||S.mode==='revive')return false;
