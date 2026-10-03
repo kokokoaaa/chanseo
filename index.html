@@ -402,116 +402,104 @@ const ART=(()=>{
   };
   return {P,L,B,C,outline,R};
 })();
-// 몬스터 도트 (발끝이 캔버스 맨 아래-2줄). f=0/1 두 프레임
-const MDEF=(()=>{const {P,L,B,C,R}=ART;
-const eye=(g,x,y,c,p)=>{P(g,c,x,y,2,2);P(g,p||'#1a1010',x+1,y+1,1,1);};
+// 몬스터 도트: 캐릭터와 같은 SD 비율(큰 머리, 작은 몸), 점 눈, 3단 명암. 발끝이 캔버스 맨 아래-2줄. f=0/1 두 프레임
+const MDEF=(()=>{const {P,L,B,C,R}=ART;const T3=r=>r.length>4?[r[1],r[2],r[3]]:r.slice(-3);
+const K='#1a1010',W='#fffaf0';
+const dot=(g,x,y,c,h)=>P(g,c||K,x,y,1,h||2);
 const M={
-grunt:{sz:26,draw(g,f){
-  C(g,R.boar,9,19+(f?0:1),3,5-(f?0:1));C(g,R.boar,14,19+(f?1:0),3,5-(f?1:0));P(g,'#24140c',8,24,4,1);P(g,'#24140c',14,24,4,1);
-  C(g,R.gob,5,14,2,5);
-  B(g,R.boar,12.5,17.5,5,4);P(g,'#2a1810',8,19,10,1);P(g,R.gold[3],12,19,2,1);
-  L(g,R.wood[1],19,18,22,8+f);L(g,R.wood[2],20,18,23,8+f);B(g,R.wood,22.5,7.5+f,2.6);P(g,'#c8c8c8',21,6+f,1,1);
-  C(g,R.gob,18,14,2,5);
-  B(g,R.gob,12.5,10,6.2,5.2);
-  for(let i=0;i<5;i++){P(g,R.gob[i<2?3:2],6-i,8+(i>>1),1,2);P(g,R.gob[i<2?3:2],19+i,8+(i>>1),1,2);}P(g,'#d08878',5,9,1,1);P(g,'#d08878',20,9,1,1);
-  P(g,R.gob[0],9,8,3,1);P(g,R.gob[0],14,8,3,1);eye(g,9,9,'#ffe86a','#c01818');eye(g,14,9,'#ffe86a','#c01818');
-  P(g,'#2a1810',10,13,6,1);P(g,'#fffaf0',11,13,1,1);P(g,'#fffaf0',14,13,1,1);P(g,R.gob[4],9,6,2,1);}},
-runner:{sz:24,draw(g,f){
-  const wy=f?-3:2;for(let i=0;i<7;i++){const h=3+(i%3===0?1:0);P(g,R.bat[i<3?2:1],5-i+3,11+Math.round(wy*(i/6))-(i>>2),1,h);P(g,R.bat[1],18+i-3,11+Math.round(wy*(i/6))-(i>>2),1,h);}
-  for(let i=0;i<3;i++){P(g,R.bat[0],1+i*2,12+wy+(i%2),1,2);P(g,R.bat[0],18+i*2,12+wy+(i%2),1,2);}
-  B(g,R.bat,12,13,5,5);P(g,R.bat[2],8,7,2,3);P(g,R.bat[2],14,7,2,3);P(g,R.bat[3],8,7,1,1);P(g,R.bat[3],14,7,1,1);
-  P(g,'#ff4040',9,12,2,1);P(g,'#ff4040',13,12,2,1);P(g,'#ffd0d0',9,12,1,1);P(g,'#ffd0d0',13,12,1,1);P(g,'#fff',10,16,1,2);P(g,'#fff',13,16,1,2);
-  P(g,R.bat[0],10,19+(f?0:1),1,2);P(g,R.bat[0],13,19+(f?0:1),1,2);}},
-tank:{sz:40,draw(g,f){
-  C(g,R.stone,12,30,6,8-(f?0:1));C(g,R.stone,22,30,6,8-(f?1:0));P(g,R.stone[0],11,37,8,1);P(g,R.stone[0],21,37,8,1);
-  B(g,R.stone,5.5,22+(f?1:0),4.5,6);B(g,R.stone,34.5,22+(f?0:1),4.5,6);B(g,R.stone,5,29+(f?1:0),3.5,3);B(g,R.stone,35,29+(f?0:1),3.5,3);
-  B(g,R.stone,20,20,13,12);
-  B(g,R.moss,15,10,7,3.2);B(g,R.moss,24,9.5,6,3);P(g,R.moss[1],10,12,2,3);P(g,R.moss[1],28,11,1,3);
-  L(g,R.stone[0],13,24,17,29);L(g,R.stone[0],26,14,29,18);L(g,R.stone[0],22,26,25,27);
-  P(g,'#0e1a22',13,17,5,3);P(g,'#0e1a22',22,17,5,3);P(g,'#5fe8ff',14,18,3,1);P(g,'#5fe8ff',23,18,3,1);P(g,'#c8fbff',15,18,1,1);P(g,'#c8fbff',24,18,1,1);}},
-ranger:{sz:28,draw(g,f){
-  C(g,R.bone,11,19,1,6-(f?1:0));C(g,R.bone,15,19,1,6-(f?0:1));P(g,R.bone[2],10,24,3,1);P(g,R.bone[2],14,24,3,1);
-  P(g,R.bone[3],12,13,2,7);for(let i=0;i<3;i++){P(g,R.bone[3-(i>1)],9,14+i*2,8,1);}P(g,R.bone[1],10,19,6,1);
-  C(g,R.bone,7,13,1,6);C(g,R.bone,18,13,1,5);P(g,R.bone[3],18,18,2,1);
-  B(g,R.bone,13,8,5,4.6);P(g,R.bone[2],10,11,6,2);P(g,'#140e0a',10,7,2,2);P(g,'#140e0a',14,7,2,2);P(g,'#ff5a3a',11,8,1,1);P(g,'#ff5a3a',15,8,1,1);P(g,'#140e0a',13,10,1,1);
-  for(let i=0;i<4;i++)P(g,'#140e0a',10+i*2,12,1,1);
-  for(let i=0;i<15;i++){const x=22+Math.round(Math.sin(i/14*Math.PI)*3);P(g,R.wood[i%4===0?3:2],x,6+i,1,1);P(g,R.wood[1],x+1,6+i,1,1);}L(g,'#e8e0d0',22,6,22,20);}},
-mage:{sz:30,draw(g,f){
-  P(g,'#24140c',10,27,4,1);P(g,'#24140c',16,27,4,1);
-  for(let y=0;y<12;y++){const w=4+Math.floor(y/3);for(let x=-w;x<=w;x++){const t=(x+w)/(2*w);P(g,R.robe[Math.min(4,Math.max(0,Math.round((1-t)*3.2+(y<2?1:0))))],15+x,16+y,1,1);}}
-  P(g,R.gold[2],14,16,2,11);P(g,R.gold[3],14,16,1,11);P(g,R.gold[2],10,22,10,1);
-  C(g,R.gob,7,18,2,4);C(g,R.gob,21,18,2,4);
-  B(g,R.gob,15,12,5,4);for(let i=0;i<3;i++){P(g,R.gob[3],9-i,11+(i>>1),1,2);P(g,R.gob[2],21+i,11+(i>>1),1,2);}
-  P(g,'#ffe86a',12,12,2,1);P(g,'#ffe86a',16,12,2,1);P(g,'#2a1810',13,15,4,1);
-  for(let y=0;y<9;y++){const w=Math.floor(y*0.75)+1;for(let x=-w;x<=w;x++)P(g,R.robe[x<0?3:x<1?2:1],16+x-Math.floor((8-y)/3),1+y,1,1);}
-  P(g,R.robe[1],8,9,16,2);P(g,R.robe[3],8,9,7,1);P(g,R.gold[3],14,5,2,2);
-  L(g,R.wood[2],24,10,24,27);L(g,R.wood[1],25,11,25,27);B(g,['#6a2aa0','#9a4ae0','#c98af0','#f0d0ff'],24.5,7+f*0,3);P(g,'#fff',23,5,1,1);
-  if(f){P(g,'#f0d0ff',20,4,1,1);P(g,'#f0d0ff',28,6,1,1);}}},
+grunt:{sz:26,draw(g,f){const gb=T3(R.gob);
+  C(g,[R.boar[1],R.boar[2]],10,21+(f?0:1),2,4-(f?0:1));C(g,[R.boar[1],R.boar[2]],14,21+(f?1:0),2,4-(f?1:0));P(g,'#24140c',9,24,3,1);P(g,'#24140c',14,24,3,1);
+  B(g,T3(R.boar),12.5,19,4.2,2.6);P(g,R.gold[2],12,20,1,1);P(g,gb[1],7,18,2,3);P(g,gb[1],17,18,2,3);
+  L(g,R.wood[2],19,20,21,12-f);B(g,T3(R.wood),21.5,11-f,2.2);
+  B(g,gb,12.5,11,7,5.8);
+  for(let i=0;i<4;i++){P(g,gb[i<2?2:1],5-i,9+(i>>1),1,2);P(g,gb[i<2?2:1],20+i,9+(i>>1),1,2);}
+  P(g,gb[0],8,9,2,1);P(g,gb[0],15,9,2,1);dot(g,9,10,'#ffe86a',1);dot(g,9,11);dot(g,15,10,'#ffe86a',1);dot(g,15,11);
+  P(g,K,11,14,3,1);P(g,W,12,14,1,1);}},
+runner:{sz:22,draw(g,f){const b=T3(R.bat);
+  const up=!f;for(let i=0;i<5;i++){const yy=up?9-i+(i>>1):11+(i>>1);P(g,b[i<2?1:0],6-i,yy,1,up?3:3);P(g,b[i<2?1:0],15+i,yy,1,3);}
+  B(g,b,11,12,5,4.5);P(g,b[1],7,7,2,2);P(g,b[1],13,7,2,2);
+  P(g,'#ff4040',9,12,1,1);P(g,'#ff4040',12,12,1,1);P(g,W,10,15,1,1);P(g,W,12,15,1,1);
+  P(g,b[0],9,17+(f?0:1),1,2);P(g,b[0],12,17+(f?0:1),1,2);}},
+tank:{sz:40,draw(g,f){const st=T3(R.stone);
+  C(g,st,13,32,5,6-(f?0:1));C(g,st,22,32,5,6-(f?1:0));P(g,R.stone[0],12,37,7,1);P(g,R.stone[0],21,37,7,1);
+  B(g,st,6,26+(f?1:0),4,4.5);B(g,st,34,26+(f?0:1),4,4.5);
+  B(g,st,20,21,13,12);B(g,T3(R.moss),15,11,7,3);B(g,T3(R.moss),25,10.5,6,2.8);
+  L(g,R.stone[1],12,25,15,29);L(g,R.stone[1],27,15,29,18);
+  P(g,'#0e1a22',14,20,3,2);P(g,'#0e1a22',23,20,3,2);P(g,'#5fe8ff',15,20,1,1);P(g,'#5fe8ff',24,20,1,1);}},
+ranger:{sz:28,draw(g,f){const bo=T3(R.bone);
+  P(g,bo[1],11,21,1,5-(f?1:0));P(g,bo[1],14,21,1,5-(f?0:1));P(g,bo[2],10,25,2,1);P(g,bo[2],14,25,2,1);
+  P(g,bo[2],12,16,2,5);P(g,bo[1],10,17,6,1);P(g,bo[1],10,19,6,1);P(g,bo[2],8,16,1,4);P(g,bo[2],17,16,1,3);
+  B(g,bo,13,10,6.5,6);P(g,K,10,9,2,2);P(g,K,14,9,2,2);P(g,'#ff5a3a',10,9,1,1);P(g,'#ff5a3a',15,9,1,1);P(g,K,12,12,2,1);
+  for(let i=0;i<3;i++)P(g,K,11+i*2,14,1,1);
+  for(let i=0;i<11;i++){const x=20+Math.round(Math.sin(i/10*Math.PI)*2);P(g,R.wood[2],x,9+i,1,1);P(g,R.wood[1],x+1,9+i,1,1);}L(g,'#e8e0d0',20,9,20,19);}},
+mage:{sz:30,draw(g,f){const gb=T3(R.gob),rb=T3(R.robe);
+  P(g,'#24140c',12,28,3,1);P(g,'#24140c',16,28,3,1);
+  for(let y=0;y<8;y++){const w=3+(y>>1);for(let x=-w;x<w;x++)P(g,rb[x<-w+2?2:x<w-2?1:0],15+x,20+y,1,1);}P(g,R.gold[2],14,20,2,8);
+  P(g,gb[1],10,21,2,3);P(g,gb[1],19,21,2,3);
+  B(g,gb,15,15,6,4.8);for(let i=0;i<3;i++){P(g,gb[2],8-i,13+(i>>1),1,2);P(g,gb[1],22+i,13+(i>>1),1,2);}
+  dot(g,12,15,'#ffe86a',1);dot(g,17,15,'#ffe86a',1);P(g,K,13,18,4,1);
+  for(let y=0;y<10;y++){const w=(y>>1)+1;for(let x=-w;x<w;x++)P(g,rb[x<-1?2:x<1?1:0],16+x+Math.floor((9-y)/4),1+y,1,1);}
+  P(g,rb[0],8,11,15,2);P(g,rb[2],8,11,7,1);P(g,R.gold[3],15,8,2,1);
+  L(g,R.wood[2],24,12,24,28);L(g,R.wood[1],25,13,25,28);B(g,['#9a4ae0','#c98af0','#f0d0ff'],24.5,9,2.6);if(f){P(g,'#f0d0ff',21,6,1,1);P(g,'#f0d0ff',27,7,1,1);}}},
 support:{sz:26,draw(g,f){
-  C(g,R.cream,9,13,8,10);P(g,R.cream[0],9,22,8,1);P(g,R.cream[1],8,23,3,1);P(g,R.cream[1],15,23,3,1);
-  P(g,'#1a1010',10,15,1,2);P(g,'#1a1010',14,15,1,2);P(g,'#e88a8a',9,17,1,1);P(g,'#e88a8a',15,17,1,1);P(g,'#1a1010',11,18,3,1);
-  B(g,R.cap,13,9,10,6,(x,y)=>y>12);P(g,R.cap[1],3,12,21,1);
-  for(const [x,y,w] of [[8,6,3],[15,5,2],[18,9,2],[11,10,2],[5,9,2]]){P(g,'#fff8f0',x,y,w,w);P(g,'#d8c8c0',x+w-1,y+w-1,1,1);}
-  P(g,'#7be08f',12,f?0:1,3,1);P(g,'#7be08f',13,f?-1:0,1,3);P(g,'#c8ffd0',13,f?0:1,1,1);}},
+  C(g,T3(R.cream),10,14,6,9);P(g,R.cream[1],9,23,3,1);P(g,R.cream[1],14,23,3,1);
+  dot(g,11,16);dot(g,14,16);
+  B(g,T3(R.cap),13,10,10,6.5,(x,y)=>y>13);
+  for(const [x,y,w] of [[8,6,2],[15,5,2],[18,9,2],[11,10,1],[5,10,1]])P(g,'#fff8f0',x,y,w,w);
+  P(g,'#7be08f',12,f?0:1,3,1);P(g,'#7be08f',13,f?-1:0,1,3);}},
 bomber:{sz:26,draw(g,f){
-  B(g,R.bomb,13,16,8.5,7.5);P(g,R.bomb[0],6,23,14,1);
-  P(g,'#1a1010',8,14,3,3);P(g,'#1a1010',15,14,3,3);P(g,'#fff',8,14,1,1);P(g,'#fff',15,14,1,1);
-  L(g,'#1a1010',10,20,11,19);L(g,'#1a1010',11,19,12,20);L(g,'#1a1010',12,20,13,19);L(g,'#1a1010',13,19,14,20);
-  P(g,R.stone[1],12,7,3,2);L(g,'#4a3a2a',13,6,15,3);L(g,'#4a3a2a',15,3,17,2);
-  if(f){P(g,'#ffe86a',17,0,2,2);P(g,'#ff9a2a',19,1,1,1);P(g,'#ff9a2a',16,0,1,1);}else{P(g,'#ff9a2a',17,1,2,2);P(g,'#ffe86a',17,1,1,1);}
-  P(g,'#9fd3ff',20,11,1,2);}},
+  B(g,T3(R.bomb),13,16,8.5,7.5);dot(g,10,15);dot(g,16,15);P(g,K,12,19,3,1);
+  P(g,R.stone[2],12,7,3,2);L(g,'#4a3a2a',13,6,15,3);L(g,'#4a3a2a',15,3,17,2);
+  if(f){P(g,'#ffe86a',17,0,2,2);P(g,'#ff9a2a',19,1,1,1);}else{P(g,'#ff9a2a',17,1,2,2);P(g,'#ffe86a',17,1,1,1);}}},
 slime:{sz:28,draw(g,f){
-  const ry=f?6:7,rx=f?11:10,cy=25-ry;B(g,R.slime,14,cy,rx,ry,(x,y)=>y>25);
-  P(g,R.slime[4],9,cy-ry+3,3,1);P(g,R.slime[4],8,cy-ry+4,1,2);
-  P(g,'#0e2a10',10,cy-1,2,3);P(g,'#0e2a10',16,cy-1,2,3);P(g,'#fff',10,cy-1,1,1);P(g,'#fff',16,cy-1,1,1);P(g,R.slime[0],13,cy+3,3,1);}},
-ghost:{sz:26,draw(g,f){
-  B(g,R.ghost,13,10,7,7);for(let y=10;y<20;y++)for(let x=6;x<=20;x++){const t=(x-6)/14;P(g,R.ghost[Math.round((1-t)*2.4+.4)],x,y,1,1);}
-  for(let i=0;i<5;i++){const x=6+i*3+(f?1:0);P(g,R.ghost[1+(i%2)],x,20,2,2+(i%2));}
-  B(g,R.ghost,4,13+(f?1:0),2,2);B(g,R.ghost,22,12+(f?0:1),2,2);
-  P(g,'#1a2a4a',9,8,2,4);P(g,'#1a2a4a',15,8,2,4);P(g,'#5a7ac8',9,8,1,1);P(g,'#5a7ac8',15,8,1,1);B(g,['#1a2a4a'],13,15,1.5,2);}},
-boar:{sz:32,draw(g,f){
-  for(let i=0;i<4;i++){const lx=8+i*5,lf=(i+f)%2;C(g,R.boar,lx,22+lf,2,5-lf);P(g,'#1e120a',lx,26,3,1);}
-  B(g,R.boar,15,18,11,6.5);for(let i=0;i<6;i++)P(g,R.boar[0],8+i*2,11+(i%2),1,3);
-  B(g,R.boar,25,18,5,5);P(g,'#c48a70',28,18,3,3);P(g,'#5a3020',29,19,1,1);P(g,'#5a3020',30,19,1,1);
-  P(g,'#fffaf0',27,22,1,2);P(g,'#fffaf0',30,21,1,2);P(g,'#ff3a2a',25,15,2,1);P(g,R.boar[0],22,12,2,3);P(g,R.boar[0],3,15,2,1);}},
+  const ry=f?6:7,rx=f?11:10,cy=25-ry;B(g,T3(R.slime),14,cy,rx,ry,(x,y)=>y>25);
+  P(g,R.slime[4],9,cy-ry+3,2,1);P(g,R.slime[4],8,cy-ry+4,1,1);dot(g,11,cy);dot(g,16,cy);}},
+ghost:{sz:26,draw(g,f){const gh=T3(R.ghost);
+  B(g,gh,13,10,7,7);for(let y=10;y<19;y++)for(let x=6;x<=20;x++)P(g,gh[x<9?2:x<17?1:0],x,y,1,1);
+  for(let i=0;i<5;i++){const x=6+i*3+(f?1:0);P(g,gh[1],x,19,2,2+(i%2));}
+  dot(g,10,10);dot(g,15,10);P(g,K,12,14,2,1);}},
+boar:{sz:32,draw(g,f){const bo=T3(R.boar);
+  for(let i=0;i<4;i++){const lx=8+i*5,lf=(i+f)%2;C(g,[bo[0],bo[1]],lx,22+lf,2,5-lf);P(g,'#1e120a',lx,26,3,1);}
+  B(g,bo,15,18,11,6.5);for(let i=0;i<5;i++)P(g,bo[0],9+i*2,12+(i%2),1,2);
+  B(g,bo,25,18,5,5);P(g,'#c48a70',28,18,3,3);P(g,'#5a3020',29,19,1,1);
+  P(g,W,27,22,1,2);P(g,W,30,21,1,2);dot(g,25,16,K,1);P(g,bo[0],22,13,2,2);}},
 };
-M.slimelet={sz:18,draw(g,f){const ry=f?4:5,rx=f?7:6,cy=15-ry;B(g,R.slime,9,cy,rx,ry,(x,y)=>y>15);P(g,R.slime[4],6,cy-ry+2,2,1);P(g,'#0e2a10',7,cy-1,1,2);P(g,'#0e2a10',11,cy-1,1,2);}};
+M.slimelet={sz:18,draw(g,f){const ry=f?4:5,rx=f?7:6,cy=15-ry;B(g,T3(R.slime),9,cy,rx,ry,(x,y)=>y>15);P(g,R.slime[4],6,cy-ry+2,1,1);dot(g,7,cy);dot(g,11,cy);}};
 M.goblin={sz:28,draw(g,f){g.save();g.translate(1,2);M.grunt.draw(g,f);g.restore();
-  B(g,R.gold,5,20,4.5,4.2);P(g,R.wood[1],3,15,4,2);P(g,'#fff8c0',4,19,1,1);
-  P(g,R.gold[2],9,4,9,2);P(g,R.gold[3],9,2,1,2);P(g,R.gold[3],13,1,1,3);P(g,R.gold[3],17,2,1,2);P(g,'#c8323a',13,4,1,1);}};
-// 보스 (72칸)
-M.boss={sz:72,draw(g,f){
-  C(g,R.boar,24,52+(f?0:1),8,16-(f?0:1));C(g,R.boar,40,52+(f?1:0),8,16-(f?1:0));P(g,'#1e120a',22,68,12,2);P(g,'#1e120a',38,68,12,2);
-  B(g,R.gob,36,44,19,15);P(g,R.boar[2],18,48,36,9);P(g,R.boar[1],18,55,36,2);P(g,'#2a1810',18,48,36,2);P(g,R.gold[2],32,49,7,5);P(g,R.gold[3],33,50,2,2);
-  B(g,R.gob,12,42+(f?1:0),6,8);B(g,R.gob,60,42+(f?0:1),6,8);B(g,R.gob,11,53+(f?1:0),5,4);B(g,R.gob,61,53+(f?0:1),5,4);
-  L(g,R.wood[2],62,52,68,20+f*2);L(g,R.wood[1],63,52,69,20+f*2);L(g,R.wood[2],61,52,67,20+f*2);B(g,R.wood,67,16+f*2,5);P(g,'#c8c8c8',65,13+f*2,1,1);P(g,'#c8c8c8',70,17+f*2,1,1);
-  B(g,R.gob,36,22,14,12);
-  P(g,R.gob[0],26,18,8,2);P(g,R.gob[0],38,18,8,2);P(g,'#fff6c8',27,20,6,4);P(g,'#fff6c8',39,20,6,4);P(g,'#e02a1a',30,21,3,3);P(g,'#e02a1a',42,21,3,3);
-  P(g,'#2a1408',28,28,16,4);P(g,'#fff8e0',29,27,2,3);P(g,'#fff8e0',41,27,2,3);P(g,'#fff8e0',33,31,2,1);P(g,'#fff8e0',38,31,2,1);
-  for(let i=0;i<5;i++){P(g,R.gold[2],24+i*6,6-(i%2?0:3),4,8+(i%2?0:3));}P(g,R.gold[1],24,12,28,3);P(g,R.gold[3],24,11,28,1);P(g,'#c8323a',35,7,3,3);P(g,'#5fa8e8',27,12,2,2);P(g,'#5fa8e8',45,12,2,2);}};
-M.boss2={sz:72,draw(g,f){
-  P(g,'#24140c',26,68,8,2);P(g,'#24140c',38,68,8,2);
-  for(let y=0;y<34;y++){const w=10+Math.floor(y/3);for(let x=-w;x<=w;x++){const t=(x+w)/(2*w);P(g,R.robe[Math.min(4,Math.max(0,Math.round((1-t)*3.4+(y<3?1:0))))],36+x,34+y,1,1);}}
-  P(g,R.gold[2],34,34,4,34);P(g,R.gold[3],34,34,1,34);P(g,R.gold[2],24,46,24,2);
-  B(g,R.robe,20,42,5,8);B(g,R.robe,52,42,5,8);B(g,R.gob,19,51,3,3);B(g,R.gob,53,51,3,3);
-  B(g,R.gob,36,28,10,8);for(let i=0;i<6;i++){P(g,R.gob[3],24-i,26+(i>>1),1,3);P(g,R.gob[2],47+i,26+(i>>1),1,3);}
-  P(g,'#ffe86a',30,27,4,3);P(g,'#ffe86a',39,27,4,3);P(g,'#c01818',32,28,1,1);P(g,'#c01818',41,28,1,1);P(g,'#2a1810',32,33,8,1);P(g,'#fffaf0',33,33,1,1);P(g,'#fffaf0',38,33,1,1);
-  for(let y=0;y<20;y++){const w=Math.floor(y*0.8)+1;for(let x=-w;x<=w;x++)P(g,R.robe[x<-2?3:x<2?2:1],36+x+Math.floor((19-y)/4),1+y,1,1);}
-  P(g,R.robe[1],18,20,36,3);P(g,R.robe[3],18,20,16,1);P(g,R.gold[3],37,10,3,3);P(g,R.gold[2],22,19,28,1);
-  L(g,R.wood[2],62,24,62,68);L(g,R.wood[1],63,24,63,68);B(g,['#6a2aa0','#9a4ae0','#c98af0','#f0d0ff'],62.5,19,5);P(g,'#fff',60,16,2,2);
-  if(f){P(g,'#f0d0ff',55,12,1,1);P(g,'#f0d0ff',69,15,1,1);P(g,'#f0d0ff',58,27,1,1);}}};
+  B(g,T3(R.gold),5,21,4.5,4);P(g,R.wood[1],3,16,4,2);P(g,'#fff8c0',4,20,1,1);
+  P(g,R.gold[2],9,6,9,2);P(g,R.gold[3],9,4,1,2);P(g,R.gold[3],13,3,1,3);P(g,R.gold[3],17,4,1,2);P(g,'#c8323a',13,6,1,1);}};
+// 보스 (72칸): 머리 크게, 몸 작게
+const crown=(g,x,y,w)=>{for(let i=0;i<5;i++)P(g,R.gold[2],x+i*Math.floor((w-4)/4),y-(i%2?3:6),4,(i%2?3:6)+1);P(g,R.gold[1],x,y,w,4);P(g,R.gold[3],x,y,w,1);P(g,'#c8323a',x+(w>>1)-1,y-4,3,3);};
+M.boss={sz:72,draw(g,f){const gb=T3(R.gob);
+  C(g,[R.boar[1],R.boar[2]],27,58+(f?0:1),7,11-(f?0:1));C(g,[R.boar[1],R.boar[2]],38,58+(f?1:0),7,11-(f?1:0));P(g,'#1e120a',25,69,10,1);P(g,'#1e120a',37,69,10,1);
+  B(g,gb,36,51,14,9);P(g,R.boar[2],23,52,26,6);P(g,'#2a1810',23,52,26,1);P(g,R.gold[2],34,53,5,4);
+  B(g,gb,18,50+(f?1:0),5,6);B(g,gb,54,50+(f?0:1),5,6);
+  L(g,R.wood[2],57,54,63,26+f*2);L(g,R.wood[1],58,54,64,26+f*2);B(g,T3(R.wood),63,22+f*2,5);
+  B(g,gb,36,28,19,16);
+  P(g,gb[0],25,24,7,2);P(g,gb[0],40,24,7,2);P(g,K,27,27,3,4);P(g,K,42,27,3,4);P(g,'#e02a1a',28,28,1,1);P(g,'#e02a1a',43,28,1,1);
+  P(g,K,30,36,12,3);P(g,W,31,35,2,2);P(g,W,39,35,2,2);
+  crown(g,24,12,24);}};
+M.boss2={sz:72,draw(g,f){const gb=T3(R.gob),rb=T3(R.robe);
+  P(g,'#24140c',28,69,7,1);P(g,'#24140c',37,69,7,1);
+  for(let y=0;y<22;y++){const w=8+(y>>2);for(let x=-w;x<w;x++)P(g,rb[x<-w+4?2:x<w-4?1:0],36+x,47+y,1,1);}P(g,R.gold[2],35,47,3,22);
+  B(g,rb,22,52,4,6);B(g,rb,50,52,4,6);B(g,gb,22,59,3,2.5);B(g,gb,50,59,3,2.5);
+  B(g,gb,36,35,15,12);for(let i=0;i<7;i++){P(g,gb[2],20-i,31+(i>>1),1,3);P(g,gb[1],52+i,31+(i>>1),1,3);}
+  P(g,'#ffe86a',29,33,3,3);P(g,'#ffe86a',41,33,3,3);P(g,K,30,34,1,2);P(g,K,42,34,1,2);P(g,K,32,41,8,1);
+  for(let y=0;y<20;y++){const w=Math.floor(y*0.8)+1;for(let x=-w;x<w;x++)P(g,rb[x<-2?2:x<2?1:0],36+x+Math.floor((19-y)/4),2+y,1,1);}
+  P(g,rb[0],18,22,36,3);P(g,rb[2],18,22,16,1);P(g,R.gold[3],38,12,3,3);
+  L(g,R.wood[2],62,30,62,68);L(g,R.wood[1],63,30,63,68);B(g,['#9a4ae0','#c98af0','#f0d0ff'],62.5,25,5);if(f){P(g,'#f0d0ff',55,18,1,1);P(g,'#f0d0ff',69,21,1,1);}}};
 M.boss3={sz:72,draw(g,f){
-  const ry=f?20:22,rx=f?32:30,cy=68-ry;B(g,R.slime,36,cy,rx,ry,(x,y)=>y>68);
-  P(g,R.slime[4],18,cy-ry+7,10,3);P(g,R.slime[4],15,cy-ry+11,3,5);
-  P(g,'#0e2a10',24,cy-4,6,9);P(g,'#0e2a10',42,cy-4,6,9);P(g,'#fff',24,cy-4,3,3);P(g,'#fff',42,cy-4,3,3);P(g,R.slime[0],31,cy+9,10,3);
-  const ct=cy-ry-2;for(let i=0;i<5;i++)P(g,R.gold[2],23+i*6,ct-(i%2?5:9),4,(i%2?5:9)+1);P(g,R.gold[1],23,ct,28,4);P(g,R.gold[3],23,ct,28,1);P(g,'#c8323a',35,ct-6,3,3);P(g,'#5fa8e8',26,ct+1,2,2);P(g,'#5fa8e8',44,ct+1,2,2);}};
-M.boss4={sz:72,draw(g,f){
-  C(g,R.suit,27,50,7,17-f);C(g,R.suit,38,50,7,16+f);P(g,'#060608',25,67-f,10,2);P(g,'#060608',37,66+f,10,2);
-  B(g,R.suit,36,40,15,13);P(g,'#f1e7cf',32,28,8,22);P(g,'#c8323a',30,28,12,4);P(g,'#c8323a',34,32,4,2);for(const y of [36,41,46])P(g,'#1a1a22',35,y,2,2);P(g,R.gold[2],22,40,6,2);
-  B(g,R.suit,19,40+(f?1:0),5,9);B(g,R.suit,53,40+(f?0:1),5,9);P(g,'#fff',15,49,8,4);P(g,'#fff',49,49,8,4);
-  B(g,R.skin,36,20,9,9);P(g,'#c8323a',29,18,4,3);P(g,'#c8323a',39,18,4,3);P(g,'#ffd0c0',30,18,1,1);P(g,'#ffd0c0',40,18,1,1);P(g,'#2a1408',29,25,14,2);for(let i=0;i<4;i++)P(g,'#fff',30+i*3,25,2,1);
-  P(g,R.suit[1],20,10,32,3);C(g,R.suit,26,0,20,11);P(g,'#c8323a',26,7,20,2);
-  for(let k=0;k<2;k++){const cx=56+k*6,cy=40+f*2-k*3;P(g,'#fffaf0',cx,cy,8,11);P(g,'#c8c0b0',cx+7,cy,1,11);P(g,k?'#1a1a22':'#c8323a',cx+2,cy+3,3,4);P(g,k?'#1a1a22':'#c8323a',cx+1,cy+1,1,1);}}};
+  const ry=f?20:22,rx=f?32:30,cy=68-ry;B(g,T3(R.slime),36,cy,rx,ry,(x,y)=>y>68);
+  P(g,R.slime[4],18,cy-ry+7,6,2);P(g,R.slime[4],15,cy-ry+10,2,4);
+  P(g,K,26,cy-2,3,6);P(g,K,43,cy-2,3,6);P(g,R.slime[0],33,cy+8,6,2);
+  crown(g,24,cy-ry-1,24);}};
+M.boss4={sz:72,draw(g,f){const su=T3(R.suit);
+  C(g,su,29,56,6,13-f);C(g,su,37,56,6,12+f);P(g,'#060608',27,69-f,9,1);P(g,'#060608',36,68+f,9,1);
+  B(g,su,36,49,12,9);P(g,'#f1e7cf',33,41,6,14);P(g,'#c8323a',31,41,10,3);
+  B(g,su,23,49+(f?1:0),4,6);B(g,su,49,49+(f?0:1),4,6);P(g,'#fff',20,54,6,3);P(g,'#fff',46,54,6,3);
+  B(g,T3(R.skin),36,27,14,13);P(g,K,29,26,3,4);P(g,K,41,26,3,4);P(g,'#c8323a',30,27,1,1);P(g,'#c8323a',42,27,1,1);P(g,K,30,34,12,2);for(let i=0;i<4;i++)P(g,W,31+i*3,34,2,1);
+  P(g,su[0],20,14,32,3);C(g,su,26,2,20,13);P(g,'#c8323a',26,10,20,2);
+  for(let k=0;k<2;k++){const cx=55+k*5,cy=46+f*2-k*3;P(g,'#fffaf0',cx,cy,7,10);P(g,'#c8c0b0',cx+6,cy,1,10);P(g,k?'#1a1a22':'#c8323a',cx+2,cy+3,3,4);}}};
 return M;})();
 // 배경 도트: 나무(72×96), 소품(작게), 바닥 타일(64×64). 캐릭터와 같은 도트 배율로 그림
 const BART=(()=>{const {P,L,B,C,R}=ART;let sd=1;const rnd=()=>{sd=(sd*16807)%2147483647;return sd/2147483647;};
@@ -993,7 +981,7 @@ function guard(hx,hy,dx,dy,w,c1,c2){const gx=-dy,gy=dx;for(let i=-w;i<=w;i++){cp
 function cape(x0,y0,h,w0,grow,hi,mid,lo,f){for(let i=0;i<h;i++){const e=Math.floor(i*grow),L=x0-e,Rr=x0+w0+e;for(let x=L;x<=Rr;x++){let c=x<=L+1?hi:x>=Rr-2?lo:mid;if(i===h-1&&((x+f)%3===0))continue;cp(c,x,y0+i+(i>h-3&&(x+f)%5===0?1:0));}}}
 const CH={
 knight:{
- head:['...ssssss...','..sWWsssSx..','.sWWssssSSx.','.sWsssssSSx.','sWsssssssSSx','sGggggggggGx','skkkkkkkkkKx','skkEekkEekKx','skkeekkeekKx','skkeekkeekKx','skQkkMMkkQKx','.SkkkkkkkKx.','..xKKKKKKx..'],
+ head:['...ssssss...','..sWWsssSx..','.sWWssssSSx.','.sWsssssSSx.','sWsssssssSSx','sGggggggggGx','skkkkkkkkkKx','skkkkkkkkkKx','skkekkkkekKx','skkekkkkekKx','skkkkkkkkKKx','.SkkkkkkkKx.','..xKKKKKKx..'],
  plume:[['.qqR.','qRRRr','.Rrr.'],['..qR.','qqRRr','.Rrr.']],
  torso:['ssBhBBSx','ssBggBSx','SsBhBBSx','.LLgGLL.','.BhBBbb.','.bB..Bb.'],
  leg:['sS','sx','Sx','lL','lL','LLL'],
@@ -1015,7 +1003,7 @@ knight:{
 mage:{
  hat:['............um..','...........uPm..','..........uPPm..','.........uPPpm..','........uPPPpm..','.......uPPPPpm..','......GgggggGGn.','.....uPPPPPPppm.','uuuuPPPPPPPPPpppm','.mmppppppppppppm.'],
  star:[['.g.','ggg','.g.'],['...','.g.','...']],
- head:['..77777777..','.7777777777.','777k77k7k777','7kkkkkkkkkK7','7kkEekkEekK7','7kkeekkeekK7','7kkeekkeekK7','7kQkkMMkkQK7','77kkkkkkkK77','7.xKKKKKKx.7','7..........7'],
+ head:['..77777777..','.7777777777.','777k77k7k777','7kkkkkkkkkK7','7kkkkkkkkkK7','7kkekkkkekK7','7kkekkkkekK7','7kkkkkkkkKK7','77kkkkkkkK77','7.xKKKKKKx.7','7..........7'],
  robe:['.uPgGPp.','uPPgGPpm','uPPgGPpm','GgggggGn','uPPgGPpm','uPPgGPpm','uPPgGPppm'.slice(0,8),'uPPgGPpm','uPPgGPpm','.GgggGGn.'.slice(0,8)],
  sleeveL:['.uP','uPp','uPp','.kK'],sleeveR:['Pp.','Ppm','Ppm','kK.'],
  draw(st){const U=st.U,A=st.atk;
@@ -1034,7 +1022,7 @@ mage:{
   cg(this.hat,11,3+U);cg(this.star[st.pf],18,7+U);
  }},
 archer:{
- head:['....aNNa....','..aNFFNNa...','.aNFFNNNNNa.','aNFNNNNNNNaA','aNF5565555aA','a5kkkkkkkk5A','akkEekkEekKA','akkeekkeekKA','akkeekkeekKA','akQkkMMkkQKA','aNkkkkkkkKNA','.aNKKKKKKNa.','..aNNNNNNa..'],
+ head:['....aNNa....','..aNFFNNa...','.aNFFNNNNNa.','aNFNNNNNNNaA','aNF5565555aA','a5kkkkkkkk5A','akkkkkkkkkKA','akkekkkkekKA','akkekkkkekKA','akkkkkkkkKKA','aNkkkkkkkKNA','.aNKKKKKKNa.','..aNNNNNNa..'],
  leaf:[['.F','FN','N.'],['F.','NF','.N']],
  quiver:['.q.q','qEqE','.56L'],
  torso:['FNNNLLNa','FNNLLNNa','FNLLNNNa','.zzgzzz.','FNNNNNaa','.NNa.Na.'],
@@ -1057,7 +1045,7 @@ archer:{
  },
  swoosh:[null,null,[[35,25],[37,25],[39,25]]]},
 rogue:{
- head:['....3223....','..31222223..','.3122222223.','312222222223','312444444423','31kkkkkkkk23','3kkEekkEekK3','3kkeekkeekK3','3iiiiiiiiiI3','3iiiiiiiiII3','.3IiiiiiIII.','..3IIIIII3..'],
+ head:['....3223....','..31222223..','.3122222223.','312222222223','312444444423','31kkkkkkkk23','3kkekkkkekK3','3kkekkkkekK3','3iiiiiiiiiI3','3iiiiiiiiII3','.3IiiiiiIII.','..3IIIIII3..'],
  tail:[['iI...','.iII.','...iI'],['iI...','.iIi.','..iII']],
  torso:['12IiiI23','16222223','12622p23','.44g444.','12222223','.122.23.'],
  leg:['21','21','12','34','44','444'],
