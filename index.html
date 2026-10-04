@@ -1563,7 +1563,7 @@ const CLASSES={
   paladin:{lock:true,n:'성기사',role:'신성 근접',d:'빛의 오라로 주변을 태우며 버티는 성전사',passive:'신성 오라: 주변 110 안의 적에게 초당 공격력 50% 빛 피해. 5번째 공격마다 체력 3% 회복',atk:.32,
     stats:{hp:210,maxHp:210,speed:178,dmg:17,rate:1.85,range:200,bspd:430,armor:12,block:.08},fav:['holy','guard','fire'],dis:['curse'],
     cards:['힘의 물약','숫돌','튼튼한 체력','가죽 갑옷','붕대','철벽 자세'],lvd:'체력 +2, 공격력 +0.8%, 방어력 +0.2',lv:p=>{p.maxHp+=2;p.hp+=2;p.dmgP=(p.dmgP||0)+.008;p.armor+=.2;}},
-  necro:{lock:true,n:'사령술사',role:'해골 소환',d:'쓰러진 적을 해골 병사로 일으키는 술사',passive:'해골 소환: 처치 시 25% 확률, 그리고 3초마다 해골 병사 소환 (최대 4기, 12초, 공격력 60%로 근접 공격)',atk:.35,
+  necro:{lock:true,n:'사령술사',role:'해골 소환',d:'쓰러진 적을 해골 병사로 일으키는 술사',passive:'해골 소환: 처치 시 25% 확률, 그리고 3초마다 해골 병사 소환 (최대 4기, 12초, 공격력 60%로 근접 공격). 해골은 주변 근접 적을 끌어당기는 방패 역할 (체력 = 내 최대 체력 50%, 받는 피해 절반)',atk:.35,
     stats:{hp:155,maxHp:155,speed:185,dmg:15,rate:2.1,range:300,bspd:500,armor:7},fav:['undead','summon','curse'],dis:['holy'],
     cards:['힘의 물약','숫돌','조준경','튼튼한 체력','전투 본능','흡혈 송곳니'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
   gunner:{lock:true,n:'총잡이',role:'연사 저격',d:'리볼버를 연사하고 재장전하는 총잡이',passive:'6발 탄창: 6발 쏘면 짧게 재장전. 마지막 탄은 반드시 치명타 + 관통 2',atk:.18,
@@ -2023,9 +2023,11 @@ function ricoShot(t,dm,n){const o=nearestE(t,220,new Set([t]));if(o)pBullet(t.x,
 const skelMax=()=>(S.cls==='necro'?4:0)+(tag('undead')>=1?1:0)+(tag('undead')>=4?2:0)+(has('raise')?2:0)+(has('n_legion')?lv3('n_legion',1,2,3):0)+(has('n_lich')?2:0)+(has('f_bonelord')?2:0);
 const skelC=()=>(S.cls==='necro'?.25:tag('undead')>=1?.08:0)+(tag('undead')>=4?.1:0)+(has('raise')?lv3('raise',.06,.08,.1):0)+(has('n_legion')?.1:0);
 const skelD=()=>pDmg()*.6*(1+(S.p.skD||0))*(1+.05*mlv('m_undead'))*sumM()*undM()*(tag('undead')>=6?2:1)*(has('f_bonelord')?1+.03*(S.skel?S.skel.length:0):1);
+// 해골이 맞음: 받는 피해 절반 + 내 방어력 적용, 체력 0이면 사라짐 (사라질 때 효과 발동)
+function skHit(k,dmg){k.hp-=dmg*.5*100/(100+armorEff());k.hit=.12;if(k.hp<=0){k.hp=0;k.life=0;}}
 function raiseSkel(x,y){const sk=S.skel||(S.skel=[]),mx=skelMax();if(mx<=0)return;const lf=12+(has('deathnova')?4:0)+(S.p.skL||0);
-  if(sk.length>=mx){let o=sk[0];for(const k of sk)if(k.life<o.life)o=k;o.life=lf;return;}
-  const a=Math.random()*TAU;sk.push({x,y,life:lf,cd:.3,ox:Math.cos(a)*40,oy:Math.sin(a)*28,f:1,sw:0});S.rings.push({x,y:y+6,r:3,max:16,life:.3,col:'#8cff9a'});}
+  if(sk.length>=mx){let o=sk[0];for(const k of sk)if(k.life<o.life)o=k;o.life=lf;o.mhp=o.hp=S.p.maxHp*.5;return;}
+  const a=Math.random()*TAU;sk.push({x,y,hp:S.p.maxHp*.5,mhp:S.p.maxHp*.5,life:lf,cd:.3,ox:Math.cos(a)*40,oy:Math.sin(a)*28,f:1,sw:0});S.rings.push({x,y:y+6,r:3,max:16,life:.3,col:'#8cff9a'});}
 function soulShot(x,y,n){for(let i=0;i<n;i++){const e=nearestE({x,y},320);if(!e)return;pBullet(x,y,Math.atan2(e.y-y,e.x-x)+(i?rand(-.5,.5):0),pDmg()*1.2*undM()*(has('n_lich')?1.5:1),{child:true,r:4,ghost:true,life:1,pierce:0});}}
 const thM=()=>homeM('thunder')*(1+(S.p.thD||0))*(tag('thunder')>=4?1.5:1)*(has('stormlord')?2:1)*(1+ex('thunder')*.15);
 const fireM=()=>homeM('fire')*(1+(S.p.fiD||0))*(tag('fire')>=6?2:1)*(has('f_willo')?1.3:1)*(has('kindle')?1+lv3('kindle',.3,.4,.5):1)*(has('inferno')?1.5:1)*(1+ex('fire')*.15);
@@ -2447,7 +2449,9 @@ function update(dt){
     if(e.pt>0){e.pt-=dt;const dps=effDmg(S.p)*.35*(1+ex('poison')*.2)*homeM('poison')*(1+(S.p.psD||0))*e.ps*(1+.5*Math.max(0,L('toxic')-1)+.5*Math.max(0,L('r_venom')-1))*(has('plague')?1.2:1)*(tag('poison')>=6?2:1)+(has('plaguelord')?Math.min(e.maxHp*.006,pDmg()*(has('f_blackdeath')?3:1.5)):0);e.pTick+=dt;S.dsrc='poison';dmgE(e,dps*dt,null,null,true);S.dsrc=null;if(e.pTick>.5){e.pTick=0;if(e.alive)ftext(e.x,e.y-e.r-4,Math.round(dps*.5),'#8ee06a',12);}if(e.pt<=0)e.ps=0;if(!e.alive)continue;}
     if(S.freezeT>0)continue;
     if(e.boss){bossAI(e,dt);continue;}
-    const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1;
+    // 해골 병사 어그로: 반경 90 안의 근접 잡몹은 해골을 노림 (원거리·돌진·자폭·보스 제외), 한 번 붙으면 160까지 따라감
+    let sk=null;if(S.skel&&S.skel.length&&!T.range&&!T.flee&&!T.bomb&&!T.charge){if(e.tk&&e.tk.life>0&&d2(e.tk,e)<160*160)sk=e.tk;else{e.tk=null;for(const k of S.skel)if(k.life>0&&d2(k,e)<90*90){sk=k;e.tk=k;break;}}}
+    const tg_=sk||p,dx=tg_.x-e.x,dy=tg_.y-e.y,d=Math.hypot(dx,dy)||1;
     if(e.slowT>0){e.slowT-=dt;if(e.frozen&&e.slowT>0)continue;}else e.frozen=false;
     let spd=e.spd*(e.ps>0&&has('neuro')?lv3('neuro',.6,.45,.3):1)*(e.slowT>0?.4:1)*(has('gravity')&&d<150?1-lv3('gravity',.2,.3,.4):1)*(evOn('moon')?1.2:1),vx=dx/d,vy=dy/d;
     if(T.charge){e.ccd=(e.ccd??rand(1,3))-dt;
@@ -2464,6 +2468,7 @@ function update(dt){
     if(!p.alive)continue;
     if(T.bomb&&d<e.r+p.r+4){e.alive=false;e.bombed=true;S.rings.push({x:e.x,y:e.y,r:6,max:55,life:.3,col:'#f0c419'});burst(e.x,e.y,'#f0c419',16);if(d<55+p.r)hurtP(e.dmg,null);onKill(e);continue;}
     if(T.range&&e.type!=='support'&&d<T.range&&e.cd<=0&&S.ebN<EB_CAP){S.ebN++;const a=Math.atan2(dy,dx);S.pr.push({x:e.x,y:e.y,vx:Math.cos(a)*300,vy:Math.sin(a)*300,mine:false,dmg:e.dmg,aoe:T.aoe||0,life:1.4,r:T.aoe?5:4});e.cd=rand(1.2,1.9);}
+    else if(sk){if(d<e.r+11&&e.cd<=0){skHit(sk,e.dmg);e.cd=.9;}}
     else if(!T.range&&!T.flee&&d<e.r+p.r+3&&e.cd<=0){hurtP(e.dmg,e);e.cd=.9;}
     if(e.type==='ghost'){e.phT=(e.phT??rand(0,4))-dt;if(e.phT<0)e.phT+=4;e.phase=e.phT<1.1;}
   }
@@ -2719,6 +2724,7 @@ function draw(){
     if(P.rlT>0){ctx.fillStyle='#ffd76a';ctx.fillRect(P.x-w/2,P.y+P.r+15,w*(1-P.rlT/(P.rlM||1)),2);}}
   if(S.cls==='paladin'&&S.p.alive){const ar=110*(1+(S.p.auraM||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1);ctx.fillStyle=`rgba(255,230,140,${.07+Math.sin(S.t*3)*.02})`;ctx.beginPath();ctx.arc(S.p.x,S.p.y,ar,0,TAU);ctx.fill();ctx.strokeStyle='rgba(255,230,140,.28)';ctx.lineWidth=2;ctx.stroke();}
   for(const e of S.en){if(!(e.mkT>S.t)||!e.alive||offV(e.x,e.y))continue;const r=e.r+6,a=S.t*3;ctx.strokeStyle='rgba(255,80,100,.85)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(e.x,e.y,r,0,TAU);ctx.stroke();for(let i=0;i<4;i++){const q=a+i*1.571;ctx.beginPath();ctx.moveTo(e.x+Math.cos(q)*(r-4),e.y+Math.sin(q)*(r-4));ctx.lineTo(e.x+Math.cos(q)*(r+4),e.y+Math.sin(q)*(r+4));ctx.stroke();}}
+  if(S.skel&&S.p.alive)for(const k of S.skel){if(k.mhp&&k.hp<k.mhp&&!offV(k.x,k.y)){const w=14,fr=Math.max(0,k.hp/k.mhp);ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(k.x-w/2-1,k.y-20,w+2,4);ctx.fillStyle=fr>.5?'#8cff9a':fr>.25?'#ffd76a':'#ff6a6a';ctx.fillRect(k.x-w/2,k.y-19,w*fr,2);}}
   if(S.skel&&S.p.alive)for(const k of S.skel){if(offV(k.x,k.y))continue;const X=Math.round(k.x),Y=Math.round(k.y),f=k.f,bob=k.mv?Math.floor(S.t*10)%2:0,al=k.life<2?.5+.5*Math.sin(S.t*20):1;ctx.globalAlpha=al;
     ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(X-6,Y+9,12,3);const P=(c,x,y,w,h)=>{ctx.fillStyle=c;ctx.fillRect(X+(f>0?x:-x-w),Y+y,w,h);};
     P('#2a2630',-5,-13,10,9);P('#e8e4d8',-4,-12,8,7);P('#c8c2b2',-4,-6,8,1);P('#14101a',-2,-10,2,2);P('#14101a',1,-10,2,2);P('#8cff9a',-2,-10,1,1);P('#8cff9a',1,-10,1,1);
