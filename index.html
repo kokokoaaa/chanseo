@@ -1368,9 +1368,30 @@ CH.gunner={
   cg(this.head,14,12+U);if(st.hurt)hurtEyes(16+U);
   cg(this.hat,12,7+U);
  }};
-// 사령술사: 마법사 몸에 검은 로브·초록 불꽃 팔레트, 해골 지팡이
-CH.necro={draw(st){const sw={u:'#4a4658',P:'#2e2a3a',p:'#1e1b28',m:'#110f18',g:'#8cff9a',G:'#3fbf5a',n:'#1f6a30',8:'#d8ffd0',9:'#6aff8a',0:'#1fa040',7:'#d8d4e4',k:'#e8dccc',K:'#bfae9c'},old={};
-  for(const kk in sw){old[kk]=CP[kk];CP[kk]=sw[kk];}try{CH.mage.draw.call(CH.mage,st);}finally{for(const kk in old)CP[kk]=old[kk];}}};
+// 사령술사: 깊은 후드 + 후드 속 창백한 얼굴과 초록 눈빛, 너덜너덜한 검보라 로브(뼈 장식·해골 브로치), 해골 뼈 지팡이
+CH.necro={
+ hood:['.....mmmm.....','...mmPPPPmm...','..mPPPPPPPPm..','.mPPpppppPPPm.','.mPpvvvvvvpPm.','mPPpvkkkkvpPPm','mPPvkFkkFkvPPm','mPPvkkkkkkvPPm','mPPpvkKKkvpPPm','.mPPvvKKvvPPm.','.mPPPvvvvPPPm.','..mPPPPPPPPm..'],
+ robe:['..mPPPPPPm..','.mPPgPPgPPm.','.mPPPEEPPPm.','mPPPPEEPPPPm','mPPPppppPPPm','mPPgpppppgPm','mPPPpgggpPPm','mPPPpppppPPm','mPPPPPPPPPPm','mPPpPPPPpPPm','mPpPPPPPPpPm','mmPmPPmPPmPm','.m.mPm.mPm.m'],
+ skull:['.EEE.','EvEvE','EEEEE','.EvE.','.E.E.'],
+ draw(st){const U=st.U,A=st.atk,sw={P:'#2b2438',p:'#1c1726',m:'#0e0b14',v:'#050308',k:'#d9d3c4',K:'#a69d8c',F:'#7dff8a',g:'#e8e2d0',E:'#f4f1e6',7:'#cfc6ae',8:'#d8ffd0',9:'#6aff8a',0:'#1fa040'},old={};
+  for(const kk in sw){old[kk]=CP[kk];CP[kk]=sw[kk];}
+  try{
+   cg(['zl'],17,35+Math.min(0,st.lL));cg(['lz'],21,35+Math.min(0,st.rL));
+   cg(this.robe,14,22+U);
+   // 왼손: 뼈 손
+   cg(['mP','Pp','kK'],12,24+U+st.ay);
+   // 지팡이: 공격하면 들어 올림, 해골 주위 초록빛
+   const up=A>=0?-3:0,sx=27,top=6+U+up,fl=Math.floor((st.t||0)*8)%3;
+   for(let y=top+5;y<=35+up;y++)cp(y%4?'7':'K',sx,y);
+   cg(['.9.','9F9','.9.'][0]?(fl===0?['.9.9.','9...9','.....']:fl===1?['..9..','.9.9.','9...9']:['9...9','.9.9.','..9..']):[],sx-2,top-3);
+   cg(this.skull,sx-2,top);
+   if(A>=0)cg(['.8.','8F8','.8.'],sx-1,top+1);
+   // 오른손: 지팡이 쥔 손
+   cg(['Pm','pP','Kk'],sx-1,24+U+up);
+   cg(this.hood,13,10+U);
+   if(st.hurt)hurtEyes(15+U);
+  }finally{for(const kk in old)CP[kk]=old[kk];}
+ }};
 function hurtEyes(y){g.fillStyle=CP.k;g.fillRect(17,y,6,3);cg(['e.','.e','e.'],17,y);cg(['.e','e.','.e'],21,y);}
 function drawChar(cls,a,t,ap,flash){
   const C=CH[cls];g.clearRect(0,0,40,40);g.save();
