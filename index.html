@@ -1505,7 +1505,7 @@ const CLASSES={
 };
 function applyClass(cls){S.cls=cls;Object.assign(S.p,CLASSES[cls].stats);S.p.face=1;}
 const ex=t=>Math.max(0,tag(t)-4);
-const TS=1.2,effT=()=>(S.gt||0)*TS;
+const CHILD_CAP=180,TS=1.2,effT=()=>(S.gt||0)*TS;
 const econ=()=>1+effT()/90+Math.pow(effT()/240,2);
 const price=v=>Math.round(v*econ());
 const cb=k=>S.cbuys[k]||0;
@@ -1996,7 +1996,7 @@ function dmgE(e,amt,col,label,quiet){
   if(e.hp<=0){e.alive=false;onKill(e);}
 }
 function poisonE(e,st=1){const cap=(tag('poison')>=6?10:1)+(has('f_plaguebullet')?3:0)+(has('virulence')?3:0);e.ps=Math.min(cap,Math.max(e.ps,0)+(e.ps>=cap?0:st));if(e.ps<1)e.ps=1;e.pt=3;}
-function pBullet(x,y,ang,dmg,o={}){const p=S.p;S.pr.push(Object.assign({x,y,vx:Math.cos(ang)*p.bspd,vy:Math.sin(ang)*p.bspd,mine:true,dmg,life:1.2,pierce:p.pierce,hit:new Set(),r:3,roll:0},o));}
+function pBullet(x,y,ang,dmg,o={}){const p=S.p;if(o.child&&(S.chN2||0)>=CHILD_CAP)return;if(o.child)S.chN2=(S.chN2||0)+1;S.pr.push(Object.assign({x,y,vx:Math.cos(ang)*p.bspd,vy:Math.sin(ang)*p.bspd,mine:true,dmg,life:1.2,pierce:p.pierce,hit:new Set(),r:3,roll:0},o));}
 function explode(x,y,rad,dmg,col='#ffb347'){if(has('catalyst'))rad*=1+lv3('catalyst',.15,.2,.25);
   S.rings.push({x,y,r:6,max:rad,life:.3,col});burst(x,y,col,12);
   for(const e of S.en)if(e.alive&&(e.x-x)**2+(e.y-y)**2<(rad+e.r)**2)dmgE(e,dmg,col);
@@ -2388,7 +2388,7 @@ function update(dt){
       hurtP(b.dmg,null);b.life=0;
     }
   }
-  {const mx=W/2+140,my=H/2+140;S.pr=S.pr.filter(b=>b.life>0&&Math.abs(b.x-p.x)<mx&&Math.abs(b.y-p.y)<my);}
+  {const mx=W/2+140,my=H/2+140;S.pr=S.pr.filter(b=>b.life>0&&Math.abs(b.x-p.x)<mx&&Math.abs(b.y-p.y)<my);let n=0;for(const b of S.pr)if(b.mine&&b.child)n++;S.chN2=n;}
   // coins
   for(const c of S.dr){const dx=p.x-c.x,dy=p.y-c.y,d=Math.hypot(dx,dy)||1;const sp=c.pull?Math.max(700,d*3):d<p.magnet*(c.xp?1.35:1)?620:0;c.x+=dx/d*sp*dt;c.y+=dy/d*sp*dt;if(d<p.r+8){c.taken=true;if(c.xp)gainXp(c.v);else{if(has('rush'))p.rushT=1;addGold(c.v);if(tag('house')>=2&&Math.random()<.25)explode(p.x,p.y,70,pDmg()*.8,'#ffd76a');}}}
   S.dr=S.dr.filter(c=>!c.taken);
