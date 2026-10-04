@@ -2241,6 +2241,7 @@ function openAug(free,why,fixed,fixedTier){
   show(`<h2>증강 선택</h2><p class="sub">슬롯 <b style="color:${full?'#ff9ad0':'var(--ivory)'}">${slotCount()}/${MAXA}</b>${full?' · <b style="color:#ff9ad0">가득 참 · 고르면 교체</b>':''}</p>
   <div class="cards">${opts.map(augHtml).join('')}</div>
   <button class="btn ghost" id="reroll" ${!free&&S.gold<cost?'disabled':''}>다시 뽑기<small>${free?(free===true?(META.sk.reroll?'무료 2회':'무료 1회'):'무료 '+free+'회'):cost+'골드 (보유 '+S.gold+')'}</small></button>
+  <button class="btn ghost" id="augSkip">포기<small>${price(40)}골드 받고 넘기기</small></button>
   <button class="btn ghost" data-stats>내 스탯 보기</button>`);
   bindPeek();if(opts.some(a=>a.t==='p'))augFx('💎 프리즘 등장!','','#d68cff',true);
   ov.querySelectorAll('.card').forEach(b=>b.onclick=()=>{const a=opts[+b.dataset.i];
@@ -2248,6 +2249,7 @@ function openAug(free,why,fixed,fixedTier){
     if(a.swap&&slotCount()>=MAXA){openSwap(a,opts,free,why);return;}
     gainAug(a);
     openNext();});
+  $('augSkip').onclick=()=>{const g=price(40);S.gold+=g;toast(`증강 포기 · ${g} 골드`);openNext();};
   $('reroll').onclick=()=>{if(!free)S.gold-=cost;const left=free===true?(META.sk.reroll?1:0):(typeof free==='number'?free-1:0);openAug(left>0?left:false,why);};
 }
 function openSwap(a,opts,free,why){
