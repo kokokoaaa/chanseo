@@ -1835,7 +1835,7 @@ function updBoss(dt){
   const p=S.p;
   if(S.freezeT>0)return;
   for(const t of S.tele){t.t-=dt;if(t.t>0)continue;
-    if(t.dmg&&p.alive&&t.k==='c'&&d2(t,p)<(t.r+p.r*.5)**2)hurtP(t.dmg,null);
+    if(t.dmg&&p.alive&&t.k==='c'&&d2(t,p)<(t.r+p.r*.5)**2){if(t.vol){if(!(p.inv>0)){hurtP(Math.min(t.dmg,p.maxHp*.3),null);p.inv=Math.max(p.inv,.3);}}else hurtP(t.dmg,null);}
     if(t.k==='c')S.rings.push({x:t.x,y:t.y,r:t.r*.6,max:t.r,life:.25,col:t.col||'#ff6060'});
     if(t.fx)t.fx(t);}
   S.tele=S.tele.filter(t=>t.t>0);
@@ -1985,6 +1985,8 @@ function hurtP(amt,src){
   // 보스전: 보스 공격은 방어력 일부를 무시 (일반 20%, 어려움 30%, 지옥 40%, 신 45%), 광폭화 단계마다 12%씩 더 무시
   // 잡몹의 근접 공격에는 적용하지 않음 (보스 몸·탄·장판만)
   {const bR=bossOn()&&(!src||src===S.boss)?(S.boss.rage||0):-1,ar=armorEff()*(bR<0?1:Math.max(0,1-(dfM().pen||.2)-.12*bR));amt*=100/(100+ar);}
+  // 한 방 즉사 방지: 보스 몸통 공격을 뺀 모든 공격은 한 번에 최대 체력의 35%까지만
+  if(src!==S.boss||!src)amt=Math.min(amt,p.maxHp*.35);
   p.noHitT=0;
   // 가드 6: 맞을 때마다 방어 전 피해의 30% × (1 + 방어력/100) 반사, 보호막이 있으면 2배. 보스전에서는 보스에게
   if(tag('guard')>=6){const t=src&&src.alive?src:bossOn()&&!S.boss.air&&!S.boss.phase?S.boss:nearestE(p,150);if(t)dmgE(t,raw*.3*(p.barrier>0?2:1)*(1+armorEff()/100),'#9fd3ff');}
@@ -2184,7 +2186,7 @@ function onKill(e){
    if(S.items.length>40)S.items.shift();}
   if(e.boss)bossDown(e);
   if(e.aff==='split')for(let i=0;i<3;i++)spawnAt(e.type==='slime'?'slimelet':'runner',e.x+rand(-12,12),e.y+rand(-12,12),true);
-  if(e.aff==='volatile')tele({k:'c',x:e.x,y:e.y,r:90,T:.85,dmg:e.dmg*1.2,col:'#ff7a3a',fx:t=>burst(t.x,t.y,'#ff7a3a',16)});
+  if(e.aff==='volatile')tele({k:'c',vol:1,x:e.x,y:e.y,r:90,T:.85,dmg:e.dmg*1.2,col:'#ff7a3a',fx:t=>burst(t.x,t.y,'#ff7a3a',16)});
   if(e.type==='goblin'){const g=price(30);for(let i=0;i<12;i++)S.dr.push({x:e.x+rand(-40,40),y:e.y+rand(-40,40),v:g/12});if(Math.random()<.1)S.items.push({k:Math.random()<.5?'mag':'heal',x:e.x,y:e.y,life:150});S.flash=.2;toast('보물 고블린 처치!');}
   if(e.bombed)return;
   p.pkills++;
