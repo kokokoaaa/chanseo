@@ -1707,8 +1707,9 @@ const BOSSES=[
 const BOSS_HPM=[1,1.8,2.2,1];
 function spawnBoss(i){
   if(S.ev)endEvent(false);S.evBanner=null;
-  // 기존 몹은 유지하되 너무 많으면 가까운 40마리(정예 포함)만 남김. 보스 등장 시 체력 30% 회복
-  const kN=(dfM().bc||35)+5;if(S.en.length>kN){const p0=S.p,keep=new Set([...S.en].sort((a,b)=>(b.elite-a.elite)||(d2(a,p0)-d2(b,p0))).slice(0,kN));S.en=S.en.filter(e=>keep.has(e));}
+  // 기존 몹은 유지하되 너무 많으면 화면 밖 먼 몹만 정리 (화면에 보이는 몹은 절대 지우지 않음). 보스 등장 시 체력 30% 회복
+  const kN=(dfM().bc||35)+5;if(S.en.length>kN){const p0=S.p,vis=e=>Math.abs(e.x-p0.x)<W/2+60&&Math.abs(e.y-p0.y)<H/2+60;
+    const far=S.en.filter(e=>!vis(e)&&!e.elite).sort((a,b)=>d2(b,p0)-d2(a,p0)),drop=new Set(far.slice(0,Math.max(0,S.en.length-kN)));S.en=S.en.filter(e=>!drop.has(e));}
   S.p.hp=Math.min(S.p.maxHp,S.p.hp+S.p.maxHp*.3);
   S.bossI=i;S.tele=[];S.hz=[];S.bStart=S.bt||0;
   const a=Math.random()*TAU;spawnAt(BOSSES[i].type,clamp(S.p.x+Math.cos(a)*300,60,WW-60),clamp(S.p.y+Math.sin(a)*300,60,WH-60));
