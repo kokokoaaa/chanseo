@@ -853,7 +853,7 @@ const AUGS=[
   {id:'stormfury',u:'번개 확률이 올라요. ★1은 25%, ★2는 35%, ★3은 45%.',t:'g',n:'폭풍의 분노',tags:['fury','thunder'],d:'광란 10 이상일 때 처치하면 35% 확률로 번개 연쇄 2'},
   {id:'stigma',u:'',t:'s',n:'성흔',tags:['holy','mark'],d:'표식된 적이 죽으면 체력 1% 회복, 표식된 적에게 빛 피해 +20%'},
   {id:'doublehead',u:'앞면 확률이 올라요. ★1은 +5%, ★2는 +8%, ★3은 +10%.',t:'s',n:'양면 앞면',tags:['coin','dice'],d:'동전 앞면 확률 +8%'},
-  {id:'tailwind',u:'뒷면 보호막이 커져요. ★1은 +3, ★2는 +4, ★3은 +5.',t:'s',n:'뒷면 보험',tags:['coin','guard'],d:'동전 뒷면이 나오면 보호막 +4'},
+  {id:'coinguard',u:'뒷면 보호막이 커져요. ★1은 +3, ★2는 +4, ★3은 +5.',t:'s',n:'뒷면 보험',tags:['coin','guard'],d:'동전 뒷면이 나오면 보호막 +4'},
   {id:'coinshower',u:'동전 피해가 커져요. ★1은 50%, ★2는 70%, ★3은 90%.',t:'g',n:'동전 비',tags:['coin','jackpot'],d:'앞면마다 15% 확률로 동전 3개 추가 발사 (공격력 70%)'},
   {id:'allin',u:'',t:'p',n:'올인',tags:['coin','coin'],d:'앞면 피해 +1배, 뒷면 피해 0.5배 → 0.25배. 동전 2개로 계산'},
   {id:'gb_lucky',cls:'gambler',u:'강화할 때마다 행운 +4가 한 번 더 붙어요.',t:'s',n:'행운의 동전',tags:['coin','dice'],d:'[도박사 전용] 행운 +8',f:p=>{p.luck+=4;}},
@@ -874,7 +874,7 @@ const AUGS=[
   {id:'d_bear',cls:'druid',u:'곰 변신 공격력이 커져요. ★1은 +40%, ★2는 +60%, ★3은 +80%.',t:'g',n:'곰 변신',tags:['nature','guard'],d:'[드루이드 전용] 10초마다 4초간 곰 변신: 받는 피해 −40%, 공격력 +60%'},
   {id:'d_wrath',cls:'druid',u:'',t:'p',n:'자연의 분노',tags:['nature','poison'],d:'[드루이드 전용] 덩굴 지대가 3번째 → 2번째 공격마다, 덩굴 피해 +30%'},
   {id:'bloodlust',u:'처치 회복이 커져요. ★1은 +1, ★2는 +1.5, ★3은 +2.',t:'s',n:'피의 갈증',tags:['fury','curse'],d:'광란 지속 +2초, 처치 시 체력 +1.5'},
-  {id:'warcry',u:'함성 광란이 늘어나요. ★1은 +3, ★2는 +5, ★3은 +7.',t:'g',n:'전쟁 함성',tags:['fury'],d:'8초마다 함성: 주변 150 적 1.5초 둔화, 광란 +5'},
+  {id:'battlecry',u:'함성 광란이 늘어나요. ★1은 +3, ★2는 +5, ★3은 +7.',t:'g',n:'전쟁 함성',tags:['fury'],d:'8초마다 함성: 주변 150 적 1.5초 둔화, 광란 +5'},
   {id:'rampage',u:'강화할 때마다 이동 속도 +5%가 한 번 더 붙어요.',t:'s',n:'폭주',tags:['fury','blitz'],d:'이동 속도 +10%, 광란 중첩당 이동 속도 +1%',f:p=>{p.speed*=1.05;}},
   {id:'bladestorm',u:'',t:'p',n:'칼날 폭풍',tags:['fury','fury'],d:'광란 10 이상이면 1초마다 회전 베기 (범위 110, 공격력 100%). 분노 2개로 계산'},
   {id:'b_cleave',cls:'berserk',u:'회전 베기 피해가 커져요. ★1은 80%, ★2는 100%, ★3은 120%.',t:'s',n:'대회전',tags:['fury'],d:'[광전사 전용] 3번째 공격마다 회전 베기 (범위 100, 공격력 100%)'},
@@ -889,7 +889,7 @@ const AUGS=[
   {id:'e_avatar',cls:'elem',u:'',t:'p',n:'원소 화신',tags:['elem','frost'],d:'[정령사 전용] 모든 기본 공격이 화상·둔화·연쇄를 모두 가짐'},
   {id:'fanfire',u:'부채꼴 탄 피해가 커져요. ★1은 60%, ★2는 80%, ★3은 100%.',t:'g',n:'패닝',tags:['rapid'],d:'8번째 공격마다 부채꼴로 5발 (공격력 80%)'},
   {id:'quickdraw',u:'강화할 때마다 공격 속도 +6%가 한 번 더 붙어요.',t:'s',n:'빠른 손',tags:['rapid','blitz'],d:'공격 속도 +12%',f:p=>{p.rateP=(p.rateP||0)+.06;}},
-  {id:'ricochet',u:'튕긴 탄 피해가 커져요. ★1은 50%, ★2는 60%, ★3은 70%.',t:'s',n:'도탄',tags:['rapid','sniper'],d:'기본 탄환이 처음 맞힌 뒤 가까운 적에게 한 번 튕김 (공격력 60%)'},
+  {id:'ricoshot',u:'튕긴 탄 피해가 커져요. ★1은 50%, ★2는 60%, ★3은 70%.',t:'s',n:'도탄',tags:['rapid','sniper'],d:'기본 탄환이 처음 맞힌 뒤 가까운 적에게 한 번 튕김 (공격력 60%)'},
   {id:'deadeye',u:'',t:'p',n:'명사수',tags:['rapid','rapid'],d:'치명타 확률 +10%, 치명타 피해 +50%. 속사 2개로 계산',f:p=>{p.crit+=.05;p.critM+=.25;}},
   {id:'g_extmag',cls:'gunner',u:'탄창이 더 커져요. ★1은 +2발, ★2는 +3발, ★3은 +4발.',t:'s',n:'확장 탄창',tags:['rapid'],d:'[총잡이 전용] 탄창 +3발'},
   {id:'g_hollow',cls:'gunner',u:'마지막 탄 피해가 커져요. ★1은 2.5배, ★2는 3배, ★3은 3.5배.',t:'g',n:'할로우 포인트',tags:['rapid','sniper'],d:'[총잡이 전용] 마지막 탄 피해 3배, 맞으면 폭발 (범위 70)'},
@@ -983,16 +983,16 @@ const FUSIONS=[
   {id:'f_bonelord',a:'raise',b:'bonewall',n:'뼈의 군주',d:'해골 최대 수 +2, 해골 1기당 공격력 +3%'},
   {id:'f_wraith',a:'soulburst',b:'deathnova',n:'망령 폭풍',d:'원혼이 2갈래로 날아가고 원혼·해골 폭발 범위 +50%'},
   {id:'f_gunkata',a:'fanfire',b:'quickdraw',n:'건 카타',d:'패닝이 8번째 → 4번째 공격마다, 부채꼴 7발'},
-  {id:'f_trickshot',a:'ricochet',b:'deadeye',n:'곡예 사격',d:'도탄이 3번 튕기고, 튕긴 탄은 반드시 치명타'},
+  {id:'f_trickshot',a:'ricoshot',b:'deadeye',n:'곡예 사격',d:'도탄이 3번 튕기고, 튕긴 탄은 반드시 치명타'},
   {id:'f_plasma',a:'steam',b:'conduct',n:'플라스마',d:'증기 폭발이 주변 3명에게 번개를 연쇄시킴'},
   {id:'f_tempest',a:'stormcall',b:'elembody',n:'대폭풍',d:'원소 폭풍이 2초마다, 5명에게 떨어짐'},
-  {id:'f_warlord',a:'warcry',b:'bloodlust',n:'전쟁군주',d:'함성이 4초마다, 함성 때 체력 5% 회복'},
+  {id:'f_warlord',a:'battlecry',b:'bloodlust',n:'전쟁군주',d:'함성이 4초마다, 함성 때 체력 5% 회복'},
   {id:'f_cyclone',a:'bladestorm',b:'rampage',n:'사이클론',d:'칼날 폭풍이 0.5초마다, 범위 +30%'},
   {id:'f_overgrow',a:'thornseed',b:'spore',n:'무성한 숲',d:'가시 씨앗이 3초마다, 3명에게'},
   {id:'f_ancient',a:'worldtree',b:'barkskin',n:'고대 수호자',d:'덩굴 지대 안에 서 있으면 초당 체력 2% 회복'},
   {id:'f_alkahest',a:'catalyst',b:'philosopher',n:'만능 용매',d:'물약이 항상 세 가지 효과를 모두 냄'},
   {id:'f_panacea',a:'elixir',b:'transmute',n:'만병통치약',d:'물약을 던질 때 체력 +2 → +5, 보호막 +5'},
-  {id:'f_twoface',a:'doublehead',b:'tailwind',n:'투페이스',d:'뒷면이 나와도 피해가 줄지 않음'},
+  {id:'f_twoface',a:'doublehead',b:'coinguard',n:'투페이스',d:'뒷면이 나와도 피해가 줄지 않음'},
   {id:'f_goldrush',a:'coinshower',b:'allin',n:'골드 러시',d:'동전 비 확률 15% → 40%'},
   {id:'f_execution',a:'markburst',b:'deathsent',n:'처형장',d:'표식 폭발 범위 +50%, 폭발에 맞은 적도 표식'},
   {id:'f_predator',a:'huntmark',b:'tracker',n:'포식자',d:'추적자 상한 +20% → +40%, 표식 증폭 +10%'},
@@ -1917,7 +1917,7 @@ function elemFx(t,k,dm){const ov=has('e_overflow');
   if(k===2||k===3)elemChain(t,2+(ov?1:0),dm*.6);}
 function elemDrop(e){explode(e.x,e.y,70,pDmg()*2*elM(),'#c8a0ff');for(const o of S.en)if(o.alive&&d2(o,e)<70*70){burnE(o,pDmg()*.25*elM(),3);if(!o.boss)o.slowT=Math.max(o.slowT||0,1);}}
 const magN=()=>6+(S.p.magB||0)+(has('g_extmag')?lv3('g_extmag',2,3,4):0);
-function ricoShot(t,dm,n){const o=nearestE(t,220,new Set([t]));if(o)pBullet(t.x,t.y,Math.atan2(o.y-t.y,o.x-t.x),dm,{child:true,r:3,rico:n,hit:new Set([t]),sure:has('f_trickshot'),life:.6,pierce:0});}
+function ricoShot(t,dm,n){const o=nearestE(t,220,new Set([t]));if(o)pBullet(t.x,t.y,Math.atan2(o.y-t.y,o.x-t.x),dm,{child:true,r:3,rc:n,hit:new Set([t]),sure:has('f_trickshot'),life:.6,pierce:0});}
 const skelMax=()=>(S.cls==='necro'?4:0)+(tag('undead')>=4?2:0)+(has('raise')?2:0)+(has('n_legion')?lv3('n_legion',1,2,3):0)+(has('n_lich')?2:0)+(has('f_bonelord')?2:0);
 const skelC=()=>(S.cls==='necro'?.25:0)+(tag('undead')>=4?.1:0)+(has('raise')?lv3('raise',.06,.08,.1):0)+(has('n_legion')?.1:0);
 const skelD=()=>pDmg()*.6*(1+(S.p.skD||0))*sumM()*undM()*(tag('undead')>=6?2:1)*(has('f_bonelord')?1+.03*(S.skel?S.skel.length:0):1);
@@ -2018,7 +2018,7 @@ function playerFire(tg){
   let coin=0;if(coinOn()){const hd=p.cfF||Math.random()<headP();p.cfF=false;coin=hd?1:-1;
     if(hd){p.cfS=(p.cfS||0)+1;shock*=((tag('coin')>=6?3:2)+(has('allin')?1:0))*(1+(p.hdD||0));if(has('gb_streak'))shock*=1+Math.min(10,p.cfS-1)*lv3('gb_streak',.1,.15,.2);
       if(tag('coin')>=2&&p.cfS%3===0)S.coinB=1;if(has('gb_jackpot')&&p.cfS%5===0)S.coinJ=1;if(has('coinshower')&&Math.random()<(has('f_goldrush')?.4:.15))S.coinS=1;}
-    else{p.cfS=0;shock*=has('f_twoface')?1:has('allin')?.25:.5;if(tag('coin')>=4)p.cfF=true;if(has('tailwind')){p.barrier=Math.min(Math.max(barrierMax(),20),(p.barrier||0)+lv3('tailwind',3,4,5));}}}
+    else{p.cfS=0;shock*=has('f_twoface')?1:has('allin')?.25:.5;if(tag('coin')>=4)p.cfF=true;if(has('coinguard')){p.barrier=Math.min(Math.max(barrierMax(),20),(p.barrier||0)+lv3('coinguard',3,4,5));}}}
   if(tag('rapid')>=4){p.rpS=Math.min(20,(p.rpS||0)+1);p.rpT=1.5;}
   let n=p.multi+(tag('card')>=6?2:0)+(has('bulletstorm')?3:0)+(has('g_twin')?1:0);if(has('bulletstorm'))shock*=.85;if(has('shuffle')&&Math.random()<lv3('shuffle',.2,.35,.5)+(has('f_magician')?.25:0))n*=2;
   if(has('focus'))shock*=n<=1?1+lv3('focus',.35,.5,.65):1.1;
@@ -2083,8 +2083,8 @@ function onPHit(b,t){
   if(tag('nature')>=4&&t.vnT>S.t)dmg*=1.2;
   if(b.mk)markE(t);
   if(b.el!=null){elemFx(t,b.el,b.dmg);if(b.orb&&tag('elem')>=6)explode(t.x,t.y,90,pDmg()*2*elM(),'#c8a0ff');}
-  if(has('ricochet')&&!b.child&&!b.ric){b.ric=1;ricoShot(t,b.dmg*lv3('ricochet',.5,.6,.7)*rpM(),has('f_trickshot')?2:0);}
-  if(b.rico>0){const n=b.rico;b.rico=0;ricoShot(t,b.dmg,n-1);}
+  if(has('ricoshot')&&!b.child&&!b.ric){b.ric=1;ricoShot(t,b.dmg*lv3('ricoshot',.5,.6,.7)*rpM(),has('f_trickshot')?2:0);}
+  if(b.rc>0){const n=b.rc;b.rc=0;ricoShot(t,b.dmg,n-1);}
   if(b.hollow&&!b.hb){b.hb=1;explode(t.x,t.y,70,pDmg()*1.5,'#ffd76a');}
   if(b.ghost&&has('soulburst'))explode(t.x,t.y,70*(has('f_wraith')?1.5:1),pDmg()*lv3('soulburst',.6,.8,1)*undM(),'#8cff9a');
   if(t.slowT>0&&tag('frost')>=4)dmg*=1.3*(1+ex('frost')*.06);
@@ -2258,7 +2258,7 @@ function update(dt){
     if(has('thornseed')){S.tsT=(S.tsT??5)-dt;if(S.tsT<=0){S.tsT=has('f_overgrow')?3:5;const c=S.en.filter(e=>e.alive&&!e.phase&&d2(e,p)<300*300);for(let i=0;i<(has('f_overgrow')?3:2)&&c.length;i++){const e=c.splice(Math.floor(Math.random()*c.length),1)[0];vineAt(e.x,e.y,lv3('thornseed',.6,.8,1));}}}
     if(has('d_bear')){if(p.bearT>0)p.bearT-=dt;S.brT=(S.brT??10)-dt;if(S.brT<=0){S.brT=10;p.bearT=4;ftext(p.x,p.y-34,'곰 변신!','#c98a52',16);S.rings.push({x:p.x,y:p.y,r:10,max:70,life:.35,col:'#c98a52'});}}
     if(p.fy>0){p.fyT-=dt;if(p.fyT<=0){p.fy--;p.fyT=.3;}}
-    if(has('warcry')){S.wcT=(S.wcT??8)-dt;if(S.wcT<=0){S.wcT=has('f_warlord')?4:8;S.rings.push({x:p.x,y:p.y,r:10,max:150,life:.4,col:'#ff6a4a'});ftext(p.x,p.y-34,'함성!','#ff6a4a',16);for(const e of S.en)if(e.alive&&!e.boss&&d2(e,p)<150*150)e.slowT=Math.max(e.slowT||0,1.5);addFury(lv3('warcry',3,5,7));if(has('f_warlord'))p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.05*healM());}}
+    if(has('battlecry')){S.wcT=(S.wcT??8)-dt;if(S.wcT<=0){S.wcT=has('f_warlord')?4:8;S.rings.push({x:p.x,y:p.y,r:10,max:150,life:.4,col:'#ff6a4a'});ftext(p.x,p.y-34,'함성!','#ff6a4a',16);for(const e of S.en)if(e.alive&&!e.boss&&d2(e,p)<150*150)e.slowT=Math.max(e.slowT||0,1.5);addFury(lv3('battlecry',3,5,7));if(has('f_warlord'))p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.05*healM());}}
     if(has('bladestorm')&&p.fy>=10){S.bsT=(S.bsT??1)-dt;if(S.bsT<=0){S.bsT=has('f_cyclone')?.5:1;spinHit(110*(has('f_cyclone')?1.3:1),pDmg(),'#ffb08a');}}
     if(has('stormcall')){S.scT=(S.scT??4)-dt;if(S.scT<=0){S.scT=has('f_tempest')?2:4;const c=S.en.filter(e=>e.alive&&!e.phase&&d2(e,p)<320*320);for(let i=0;i<(has('f_tempest')?5:3)&&c.length;i++){const e=c.splice(Math.floor(Math.random()*c.length),1)[0];S.bolts.push({x1:e.x,y1:e.y-220,x2:e.x,y2:e.y,life:.18});elemDrop(e);}}}
     if(p.rpT>0){p.rpT-=dt;if(p.rpT<=0)p.rpS=0;}if(p.rlT>0)p.rlT-=dt;
