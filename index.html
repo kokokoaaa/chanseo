@@ -1270,16 +1270,16 @@ const CLASSES={
     stats:{hp:200,maxHp:200,speed:180,dmg:17,rate:1.9,range:210,bspd:430,armor:15,block:.15},fav:['guard','frost','blitz'],dis:['poison'],
     cards:['힘의 물약','숫돌','날랜 손놀림','치명상','튼튼한 체력','무거운 갑옷'],lvd:'체력 +2, 방어력 +0.3, 공격력 +1%',lv:p=>{p.maxHp+=2;p.hp+=2;p.armor+=.3;p.dmgP=(p.dmgP||0)+.01;}},
   mage:{n:'마법사',role:'광역 화력',d:'맞으면 터지는 화염구를 쏘는 마법사',passive:'화염 폭발: 화염구가 맞은 자리에 작은 폭발',atk:.35,
-    stats:{hp:150,maxHp:150,speed:185,dmg:16,rate:2.1,range:320,bspd:540,armor:5},fav:['fire','thunder','summon'],dis:['guard'],
+    stats:{hp:165,maxHp:165,speed:185,dmg:16,rate:2.1,range:320,bspd:540,armor:8},fav:['fire','thunder','summon'],dis:['guard'],
     cards:['힘의 물약','숫돌','조준경','치명상','전투 본능','다연발'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
   archer:{n:'궁수',role:'원거리 연사',d:'멀리서 빠르게 화살을 쏘는 사수',passive:'관통 화살: 기본 관통 1, 치명타 +10%',atk:.28,
     stats:{hp:145,maxHp:145,speed:200,dmg:9,rate:2.8,range:340,bspd:720,pierce:1,crit:.15},fav:['sniper','card','jackpot'],dis:['curse'],
     cards:['날랜 손놀림','조준경','관통 탄','급소 노리기','다연발','럭키 세븐'],lvd:'공격 속도 +0.4%, 공격력 +0.4%, 체력 +1',lv:p=>{p.rateP=(p.rateP||0)+.004;p.dmgP=(p.dmgP||0)+.004;p.maxHp+=1;p.hp+=1;}},
   rogue:{n:'도적',role:'회피 암살',d:'단검을 난사하며 치고 빠지는 도적',passive:'그림자: 회피 15%, 대시 재사용 −30%',atk:.2,
-    stats:{hp:120,maxHp:120,speed:225,dmg:9,rate:3.9,range:260,bspd:600,dodge:.15,dashMul:.7,crit:.12,critM:2.3},fav:['blitz','poison','curse'],dis:['guard'],
+    stats:{hp:140,maxHp:140,speed:225,dmg:10,rate:3.9,range:260,bspd:600,dodge:.15,dashMul:.7,crit:.12,critM:2.3},fav:['blitz','poison','curse'],dis:['guard'],
     cards:['가벼운 장화','날렵한 몸놀림','순발력','흡혈 송곳니','급소 노리기','치명상'],lvd:'치명타 +0.2%, 회피 +0.1%, 공격력 +1%, 체력 +1',lv:p=>{p.crit+=.002;p.dodge+=.001;p.dmgP=(p.dmgP||0)+.01;p.maxHp+=1;p.hp+=1;}},
   paladin:{lock:true,n:'성기사',role:'신성 근접',d:'빛의 오라로 주변을 태우며 버티는 성전사',passive:'신성 오라: 주변 110 안의 적에게 초당 공격력 35% 빛 피해. 5번째 공격마다 체력 3% 회복',atk:.32,
-    stats:{hp:210,maxHp:210,speed:178,dmg:15,rate:1.7,range:200,bspd:430,armor:12,block:.08},fav:['holy','guard','fire'],dis:['curse'],
+    stats:{hp:210,maxHp:210,speed:178,dmg:16,rate:1.75,range:200,bspd:430,armor:12,block:.08},fav:['holy','guard','fire'],dis:['curse'],
     cards:['힘의 물약','숫돌','튼튼한 체력','가죽 갑옷','붕대','철벽 자세'],lvd:'체력 +2, 공격력 +0.8%, 방어력 +0.2',lv:p=>{p.maxHp+=2;p.hp+=2;p.dmgP=(p.dmgP||0)+.008;p.armor+=.2;}}
 };
 function applyClass(cls){S.cls=cls;Object.assign(S.p,CLASSES[cls].stats);S.p.face=1;}
