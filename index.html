@@ -1017,11 +1017,11 @@ const FUSIONS=[
   // 갈래 합체: 같은 증강이 여러 짝과 합체할 수 있음. 한쪽으로 합체하면 그 재료는 다른 합체에 못 씀 → 어느 짝으로 갈지 고르는 재미
   {id:'f_bulwark',a:'armor',b:'fortress',n:'난공불락',d:'방어력 +40, 요새 충격파 범위 1.5배',f:p=>{p.armor+=40;}},
   {id:'f_bloodmoon',a:'blood',b:'deathwish',n:'핏빛 달',d:'체력 50% 이하면 공격력 +25% 추가'},
-  {id:'f_ghoststep',a:'evade',b:'sprint',n:'유령 걸음',d:'회피 +10%, 대시 후 2초간 회피 +30%',f:p=>{p.dodge+=.1;}},
-  {id:'f_vampknight',a:'vamp',b:'thick',n:'혈기사',d:'체력 50% 이하일 때 흡혈 2배'},
+  {id:'f_ghoststep',a:'evade',b:'insure',n:'완벽한 회피',d:'회피 +10%, 보험이 공격을 막으면 2초간 회피 +30%',f:p=>{p.dodge+=.1;}},
+  {id:'f_vampknight',a:'vamp',b:'bloodrage',n:'혈기사',d:'체력 50% 이하일 때 흡혈 2배'},
   {id:'f_jackdie',a:'luckydie',b:'highbet',n:'대박 주사위',d:'주사위 대박 확률 2배, 대박 피해 3배 → 4배'},
   {id:'f_rapidfire',a:'quick',b:'trigger',n:'연속 사격',d:'속사 가속이 10번째 → 5번째 공격마다'},
-  {id:'f_deadluck',a:'deadeye',b:'luckydie',n:'저격 대박',d:'치명타 확률 +8%, 치명타 피해 +30%',f:p=>{p.crit+=.08;p.critM+=.3;}},
+  {id:'f_deadluck',a:'deadeye',b:'quickdraw',n:'명사수의 손',d:'치명타 확률 +8%, 치명타 피해 +30%',f:p=>{p.crit+=.08;p.critM+=.3;}},
   {id:'f_colossus',a:'heart',b:'fortress',n:'거신',d:'최대 체력 +25%, 체력이 가득 차 있으면 받는 피해 −40% → −60%',f:p=>{const v=Math.round(p.maxHp*.25);p.maxHp+=v;p.hp+=v;}},
   {id:'f_hydra',a:'troll',b:'thick',n:'재생 괴물',d:'체력 재생 3배가 조건 없이 항상 적용'},
   {id:'f_bloodsport',a:'vamp',b:'madblade',n:'혈투',d:'광기의 칼날이 켜져 있는 동안 흡혈 +5%'},
@@ -1029,8 +1029,8 @@ const FUSIONS=[
   {id:'f_gunrun',a:'quickdraw',b:'sprint',n:'질주 사격',d:'대시가 끝날 때 탄환 3발 → 6발'},
   {id:'f_goldclover',a:'luckycoin',b:'clover',n:'황금 클로버',d:'행운 +3, 행운 폭발 확률 4% → 10%',f:p=>{p.luck=Math.min(LUCK_CAP,p.luck+3);}},
   {id:'f_goldmag',a:'magnet2',b:'piggy',n:'황금 자석',d:'골드 획득 +30%, 경험치 회복 2배',f:p=>{p.goldM+=.3;}},
-  {id:'f_elemfire',a:'elembody',b:'burn',n:'원소 점화',d:'화상·둔화된 적 추가 피해 2배'},
-  {id:'f_bigmag',a:'trigger',b:'seventh',n:'확장 탄창',d:'방아쇠 추가 탄환 2발 → 4발'},
+  {id:'f_elemfire',a:'elembody',b:'steam',n:'원소 점화',d:'화상·둔화된 적 추가 피해 2배'},
+  {id:'f_bigmag',a:'trigger',b:'echo',n:'확장 탄창',d:'방아쇠 추가 탄환 2발 → 4발'},
   {id:'f_racer',a:'boots',b:'runngun',n:'폭주족',d:'움직이는 동안 받는 피해 감소 2배'},
   {id:'f_counterarmor',a:'counter',b:'armor',n:'반격 갑주',d:'판금 갑옷 반격이 0.5초 → 0.2초마다, 반격 탄환 +50%'},
   {id:'f_beheader',a:'execute',b:'madblade',n:'참수',d:'처형 기준 +5%p, 광기의 칼날 공격력 보너스 2배'},
@@ -1038,7 +1038,7 @@ const FUSIONS=[
   {id:'f_fireworks',a:'boom',b:'lucky7',n:'연쇄 폭죽',d:'처치 폭발 범위 +40%, 피해 +40%'},
   {id:'f_mirrorshield',a:'mirror',b:'guardian',n:'거울 방패',d:'탄환 반사 확률 +20%'},
   {id:'f_frostmail',a:'icecoin',b:'armor',n:'서리 갑옷',d:'맞을 때 냉기 폭발 피해 2배'},
-  {id:'f_bloodrush',a:'blood',b:'vamp',n:'피의 갈증',d:'처치할 때마다 체력 +1, 체력 50% 이하면 +3'}
+  {id:'f_bloodrush',a:'blood',b:'bloodrage',n:'피의 갈증',d:'처치할 때마다 체력 +1, 체력 50% 이하면 +3'}
 ];
 // VIP 합체: VIP 증강 + 일반 증강. 둘 다 가져도 바로 합쳐지지 않고, 레벨업·증강 때마다 낮은 확률(12%, 행운 30이면 30%)로 합체
 const VFUSIONS=[
@@ -1715,7 +1715,7 @@ const CRIT_DMG_CAP_F=()=>has('sharpshot')?8:5;
 const critMul=()=>(has('sharpshot')?1:0)+(has('f_luckstar')?LK()*.02:0)+Math.min(CRIT_DMG_CAP_F(),S.p.critM+ex('dice')*.15+Math.max(0,critRaw()-CRIT_CAP)*.5);
 const critFull=()=>critRaw()>=CRIT_CAP,critMFull=()=>critMul()>=CRIT_DMG_CAP_F();
 const stackCapped=x=>(x.k==='crit'&&critFull())||(x.k==='critm'&&critMFull())||(x.k==='luck'&&S.p.luck>=LUCK_CAP)||(x.k==='dodge'&&S.p.dodge>=DODGE_CAP)||(x.k==='rate'&&rawRate()>=RATE_CAP());
-const dodgeC=()=>Math.min(DODGE_CAP,S.p.dodge+(has('f_ghoststep')&&S.p.spT>0?.3:0));
+const dodgeC=()=>Math.min(DODGE_CAP,S.p.dodge+(has('f_ghoststep')&&S.p.ghT>0?.3:0));
 function armorEff(){const p=S.p;let a=(blessOn('guard')?60:0)+(has('bank')?Math.min(50,Math.floor(S.gold/300)*2):0)+p.armor+ex('guard')*8+Math.max(0,p.dodge-DODGE_CAP)*200+(has('bonewall')&&S.skel?S.skel.length*lv3('bonewall',3,4,5):0);if(has('iron'))a*=lv3('iron',1.35,1.5,1.65);if(has('ironclad'))a*=2;if(has('bastion')&&nearTurret())a+=lv3('bastion',20,30,40)*(has('f_citadel')?2:1);return a;}
 function barrierMax(){const p=S.p;return (tag('holy')>=4?p.maxHp*.15:0)+(has('blessing')?30:0)+(has('vampirelord')?p.maxHp*.3:0)+(has('f_juggernaut')?p.armor:0)+(has('f_vaultkeeper')?30:0)+(has('goldskin')?Math.min(p.maxHp*.5,S.gold*.01):0)+(tag('guard')>=4?p.maxHp*.2:0)+(has('gen')?40*L('gen')+Math.min(60,Math.floor(S.gold/100)*10):0);}
 const dashCdVal=()=>2.4*S.p.dashMul*(has('quicksilver')?.5:1)*(tag('blitz')>=2?.6:1)*Math.pow(.95,ex('blitz'));
@@ -2122,7 +2122,7 @@ function hurtP(amt,src){
   if(has('nightveil')&&S.clones&&S.clones.length)amt*=1-Math.min(.2,S.clones.length*lv3('nightveil',.03,.04,.05));
   if(p.bearT>0)amt*=.6;
   if(has('b_unstop')&&p.fy>0)amt*=1-Math.min(.3,.015*p.fy);
-  if(p.shield>0){p.shield--;if(has('f_vaultkeeper'))S.gold+=5;ftext(p.x,p.y-24,'보험','#7be08f',14);p.inv=.25;return;}
+  if(p.shield>0){p.shield--;if(has('f_ghoststep'))p.ghT=2;if(has('f_vaultkeeper'))S.gold+=5;ftext(p.x,p.y-24,'보험','#7be08f',14);p.inv=.25;return;}
   if(Math.random()<dodgeC()){ftext(p.x,p.y-24,'회피','#5fc9d9',15);if(has('evade'))p.evT=2;p.inv=has('f_shadow')?.5:.15;if(has('counter')){const k=Math.round((3+3*L('counter'))*(has('f_shadow')?2:1)*(has('f_counterarmor')?1.5:1));for(let i=0;i<k;i++)pBullet(p.x,p.y,i*TAU/k,pDmg()*.8,{child:true});}return;}
   if(p.block&&Math.random()<p.block+(has('k_wall')?lv3('k_wall',.15,.2,.25):0)+(has('p_divine')?.2:0)){ftext(p.x,p.y-26,'막기','#cfe3ff',16);p.inv=.2;addRage();if(has('k_wall'))explode(p.x,p.y,75,pDmg()*1.5,'#9fd3ff');if(has('p_divine'))exS('holy',p.x,p.y,90,pDmg()*1.5*holyM(),'#fff3a0');return;}
   p.hits++;
@@ -2422,7 +2422,7 @@ function update(dt){
   if(tag('house')>=6){S.intT=(S.intT??30)-dt;if(S.intT<=0){S.intT=30;const it=Math.min(150,Math.floor(S.gold*.1));if(it>0){S.gold+=it;ftext(p.x,p.y-48,'이자 +'+it,'#ffd76a',16);}}}
   if(has('piggy')){S.piggyT-=dt;if(S.piggyT<=0){S.piggyT=30;const it=Math.min(30*L('piggy'),Math.floor(S.gold*.1));if(it>0){S.gold+=it;ftext(p.x,p.y-34,'이자 +'+it,'#d6a94a',15);}}}
   if(has('insure')){S.insureT-=dt;if(S.insureT<=0){S.insureT=30;p.shield=2+L('insure')+(has('f_insure')?3:0);}}
-  p.lastCd=Math.max(0,p.lastCd-dt);S.debtT=Math.max(0,(S.debtT||0)-dt);p.rushT=Math.max(0,(p.rushT||0)-dt);p.qkT=Math.max(0,(p.qkT||0)-dt);p.deT=Math.max(0,(p.deT||0)-dt);p.evT=Math.max(0,(p.evT||0)-dt);p.spT=Math.max(0,(p.spT||0)-dt);p.amCd=Math.max(0,(p.amCd||0)-dt);
+  p.lastCd=Math.max(0,p.lastCd-dt);S.debtT=Math.max(0,(S.debtT||0)-dt);p.rushT=Math.max(0,(p.rushT||0)-dt);p.qkT=Math.max(0,(p.qkT||0)-dt);p.deT=Math.max(0,(p.deT||0)-dt);p.evT=Math.max(0,(p.evT||0)-dt);p.spT=Math.max(0,(p.spT||0)-dt);p.ghT=Math.max(0,(p.ghT||0)-dt);p.amCd=Math.max(0,(p.amCd||0)-dt);
   if(has('fortress')&&p.alive&&!p.moving){p.ftT=(p.ftT||0)+dt;if(p.ftT>=1){p.ftT=0;const fr=has('f_bulwark')?165:110;explode(p.x,p.y,fr,pDmg()*lv3('fortress',1,1.5,2),'#9fd3ff');for(const e of S.en){if(!e.alive||e.boss||d2(e,p)>fr*fr)continue;const a=Math.atan2(e.y-p.y,e.x-p.x);e.x+=Math.cos(a)*30;e.y+=Math.sin(a)*30;}}}else p.ftT=0;p.lvJ=Math.max(0,(p.lvJ||0)-dt);p.curT=Math.max(0,(p.curT||0)-dt);p.g2cd=Math.max(0,(p.g2cd||0)-dt);p.h2cd=Math.max(0,(p.h2cd||0)-dt);p.dwT=Math.max(0,(p.dwT||0)-dt);p.mbT=Math.max(0,(p.mbT||0)-dt);p.wcT=Math.max(0,(p.wcT||0)-dt);p.phT=Math.max(0,(p.phT||0)-dt);p.cascT=Math.max(0,(p.cascT||0)-dt);p.revT=Math.max(0,(p.revT||0)-dt);
   for(const bo of S.bolts)bo.life-=dt;S.bolts=S.bolts.filter(bo=>bo.life>0);S.chN=0;
   if(S.flasks&&S.flasks.length){for(const f of S.flasks){f.t+=dt/.65;if(f.t>=1&&!f.done){f.done=1;f.x=f.x1;f.y=f.y1;potionHit(f);}}S.flasks=S.flasks.filter(f=>!f.done);}
