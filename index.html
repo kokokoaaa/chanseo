@@ -1065,6 +1065,7 @@ const RAR={c:{n:'일반',col:'#8f8873'},r:{n:'희귀',col:'#2f74c9'},e:{n:'영�
 // v: 일반 기준 [[최소,최대,소수자리], ...]. fr: 등급 고정 카드(특수 효과, 도박). 행운은 등급과 범위 내 굴림을 모두 위로 끌어올림
 const RMUL={c:.6,r:.9,e:1.7,l:3};
 const CARDS=[
+  {req:()=>(S.p.cdR||0)<.4&&(gravOn()||waveOn()||shadowOn()||has('thornseed')||tag('nature')>=1||has('stormcall')||has('battlecry')||S.cls==='necro'||tag('undead')>=4||has('d_bear')),g:'주기형 효과',n:'시계 태엽',v:[[4,8,0]],t:v=>`중력장·덩굴·충격파·원소 폭풍·전쟁 함성·분신·해골 소환·곰 변신 쿨타임 −${v[0]}% (최대 40%)`,a:(p,v)=>{p.cdR=Math.min(.4,(p.cdR||0)+v[0]/100);}},
   {req:()=>tag('summon')>0||has('turret')||has('wisp')||has('dealers'),n:'정비 키트',g:'소환물·포탑',v:[[8,15,0]],t:v=>`드론·포탑·도깨비불·딜러 칩·해골 피해 +${v[0]}%`,a:(p,v)=>{p.sumD=(p.sumD||0)+v[0]/100;}},
   {req:()=>has('turret'),n:'포탑 개조',g:'포탑',v:[[.5,1,1]],t:v=>`포탑 지속 +${v[0]}초`,a:(p,v)=>{p.tuL=(p.tuL||0)+v[0];}},
   {req:()=>canPoison(),n:'독샘',g:'독',v:[[8,15,0]],t:v=>`중독 피해 +${v[0]}%`,a:(p,v)=>{p.psD=(p.psD||0)+v[0]/100;}},
@@ -1914,6 +1915,7 @@ function clsRows(row){const p=S.p,c=S.cls,r=[];
   if(skelMax()>0)r.push(row('해골 병사',`${(S.skel||[]).length} / ${skelMax()}기, 피해 +${Math.round((p.skD||0)*100)}%, 지속 ${12+(p.skL||0)+(has('deathnova')?4:0)}초`));
   if(c==='gunner')r.push(row('탄창',`${magN()}발, 재장전 ${Math.round(2.4/pRate()*(has('g_twin')?.5:1)*(p.rlM||1)*100)/100}초`));
   if(c==='elem'||tag('elem')>=1||has('elemcoin'))r.push(row('원소 효과 피해','+'+Math.round((elM()-1)*100)+'%'));
+  if(p.cdR)r.push(row('주기형 효과 쿨타임','−'+Math.round(p.cdR*100)+'% <small>/ 40%</small>'));
   if(furyOn())r.push(row('광란',`${p.fy||0} / ${furyCap()}, 지속 ${4+(p.fyD||0)+(has('bloodlust')?2:0)+(has('b_frenzy')?2:0)}초`));
   if(c==='druid'||has('thornseed')||tag('nature')>=1||has('gravebloom')||has('gravvine'))r.push(row('덩굴 지대',`범위 +${Math.round((p.vnR||0)*100)}%, 피해 +${Math.round((p.vnD||0)*100)}%`));
   if(c==='alch'||tag('alchemy')>=1)r.push(row('물약',`범위 +${Math.round((p.ptR||0)*100)}%, 피해 +${Math.round((potM()-1)*100)}%`));
@@ -2805,7 +2807,7 @@ const augReq=a=>!AUG_REQ[a.id]||AUG_REQ[a.id]();
 // 이미 가진 증강의 합체 짝은 행운에 비례해 더 잘 나옴 (행운 0: ×1.3, 행운 30: ×3)
 const fuseW=a=>partnerOf(a.id)?1.3+1.7*LK()/LUCK_CAP:1;
 // 루트 보너스: 이미 모은 시너지와 같은 계열 증강·능력치 카드가 더 잘 나옴. 시너지 6개면 최대 ×1.6, 행운이 높을수록 더 커짐 (행운 30이면 ×2.2)
-const CARD_TAG={'정비 키트':['summon'],'포탑 개조':['summon'],'독샘':['poison'],'연료':['fire'],'축전지':['thunder'],'서리 결정':['frost'],'성수':['holy'],'그림자 정수':['shadow'],'중력자':['grav'],'표적 지정':['mark'],'진동판':['wave'],'뼈 가루':['undead','summon'],'영혼 사슬':['undead'],'원소 결정':['elem'],'정령 공명':['elem'],'피의 북':['fury'],'끝없는 분노':['fury'],'씨앗 주머니':['nature'],'가시 독':['nature'],'큰 병':['alchemy'],'농축액':['alchemy'],'타짜의 손':['coin'],'판돈':['coin'],'튼튼한 체력':['guard','holy'],'가죽 갑옷':['guard'],'무거운 갑옷':['guard'],'철벽 자세':['guard'],'거인의 심장':['guard'],'불사의 맹세':['guard','curse'],'붕대':['guard','holy'],
+const CARD_TAG={'시계 태엽':['grav','nature','wave','shadow','undead','elem','fury'],'정비 키트':['summon'],'포탑 개조':['summon'],'독샘':['poison'],'연료':['fire'],'축전지':['thunder'],'서리 결정':['frost'],'성수':['holy'],'그림자 정수':['shadow'],'중력자':['grav'],'표적 지정':['mark'],'진동판':['wave'],'뼈 가루':['undead','summon'],'영혼 사슬':['undead'],'원소 결정':['elem'],'정령 공명':['elem'],'피의 북':['fury'],'끝없는 분노':['fury'],'씨앗 주머니':['nature'],'가시 독':['nature'],'큰 병':['alchemy'],'농축액':['alchemy'],'타짜의 손':['coin'],'판돈':['coin'],'튼튼한 체력':['guard','holy'],'가죽 갑옷':['guard'],'무거운 갑옷':['guard'],'철벽 자세':['guard'],'거인의 심장':['guard'],'불사의 맹세':['guard','curse'],'붕대':['guard','holy'],
   '조준경':['sniper','card'],'가속 탄':['sniper','card'],'관통 탄':['sniper','card'],'다연발':['card'],'사냥꾼의 눈':['sniper','dice'],'쾌속 장전':['card','thunder','summon'],
   '급소 노리기':['dice'],'치명상':['dice'],'도박꾼의 주사위':['dice'],'네잎클로버':['dice','house'],'럭키 세븐':['jackpot','dice'],'전투 본능':['jackpot','fire','frost'],
   '가벼운 장화':['blitz'],'날렵한 몸놀림':['blitz','guard'],'순발력':['blitz'],'질주 본능':['blitz'],'날랜 손놀림':['blitz','card','summon'],
