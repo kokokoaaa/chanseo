@@ -224,7 +224,7 @@ h3{font-family:'Do Hyeon',sans-serif;font-weight:400;font-size:19px;margin:18px 
 .card.aug .apv b{display:inline;font-size:inherit;margin:0;font-weight:700}
 .card.aug .fzbox b{display:inline;font-size:inherit;margin:0;color:#fff;font-weight:400}
 .card.aug .fzbox .fzn{font-size:17px;color:#ffd76a}
-.fzbox .fzd{color:#f6d8ef}
+.fzbox .fzd{color:#f6d8ef;text-align:left}
 .fzbox .fzs{font-size:11px;color:#d9a6cc}
 .chips{display:flex;flex-wrap:wrap;justify-content:center;gap:4px}
 .chip{font-size:12.5px;padding:2px 7px;border-radius:999px;background:rgba(4,18,12,.1);color:#33443c}
@@ -2989,10 +2989,10 @@ function augHtml(a,i){
     if(!up&&aft>=5)up=`초과 +${aft-Math.max(4,cur)}: ${D.ex}`;
     if(up)lines+=`<span class="ta">▲ ${D.n} ${up}</span>`;
     return `<span class="chip ${up?'on':''}">${D.n} ${cur}→${aft}</span>`;}).join('');
-  const pf=partnerOf(a.id),pn=pf?AUGS.find(x=>x.id===(pf.a===a.id?pf.b:pf.a)).n:'';
+  const pf=partnerOf(a.id),po=pf?augDef(pf.a===a.id?pf.b:pf.a):null,pn=po?po.n:'';
   // 짝이 있으면 카드 앞면에 합체 안내를 크게 표시 (마우스를 안 올려도 보임)
   // 합체 안내: 어떤 보유 증강과 합쳐지는지 + 합체로 붙는 추가 효과
-  const fz=pf?`<span class="fzbox"><span class="fzh">💥 보유한 <b>${pn}</b> + 이 증강 → <b class="fzn">${pf.n}</b></span><span class="fzd">합체 추가 효과: ${pf.d}</span></span>`:'';
+  const fz=pf?`<span class="fzbox"><span class="fzh">💥 보유한 <b>${pn}</b> + 이 증강 → <b class="fzn">${pf.n}</b></span><span class="fzd">• <b>${a.n}</b>: ${a.d}</span><span class="fzd">• <b>${pn}</b> (보유): ${po.d}</span><span class="fzd" style="color:#ffd76a">• 합체 추가: ${pf.d}</span></span>`:'';
   return `<button class="card aug tier-${a.t} ${pf?'canfuse':''}" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}${a.swap?' · <span style="color:#ff9ad0">교체</span>':''}</span><b>${a.n}</b><span class="chips">${chips}</span>${augPreview(a)}${fz}<span class="tip">${a.d}${hpLoss(a.f,a.d,a.t==='v'||a.t==='f'?1:2)}${lines?'<br>':''}${lines}</span></button>`;
 }
 function bindPeek(){
