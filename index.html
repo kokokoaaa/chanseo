@@ -1038,7 +1038,69 @@ const FUSIONS=[
   {id:'f_fireworks',a:'boom',b:'lucky7',n:'연쇄 폭죽',d:'처치 폭발 범위 +40%, 피해 +40%'},
   {id:'f_mirrorshield',a:'mirror',b:'guardian',n:'거울 방패',d:'탄환 반사 확률 +20%'},
   {id:'f_frostmail',a:'icecoin',b:'armor',n:'서리 갑옷',d:'맞을 때 냉기 폭발 피해 2배'},
-  {id:'f_bloodrush',a:'blood',b:'bloodrage',n:'피의 갈증',d:'처치할 때마다 체력 +1, 체력 50% 이하면 +3'}
+  {id:'f_bloodrush',a:'blood',b:'bloodrage',n:'피의 갈증',d:'처치할 때마다 체력 +1, 체력 50% 이하면 +3'},
+  // 갈래 합체 2: 모든 합체 재료가 짝을 2개 이상 갖도록 연결. 같은 시너지끼리, 두 재료의 ★ 수치 +30%(pb) + 공통 시너지 보너스
+  {id:'f_x00',a:'smite2',b:'halo',n:'광휘',pb:1.3,d:'천벌 수치 +30%, 빛 피해 +25%',f:p=>{p.hoD=(p.hoD||0)+.25;}},
+  {id:'f_x01',a:'halo',b:'p_aura',n:'성광 오라',pb:1.3,d:'확장 오라 수치 +30%, 빛 피해 +25%',f:p=>{p.hoD=(p.hoD||0)+.25;}},
+  {id:'f_x02',a:'p_aura',b:'p_hammer',n:'성전사',pb:1.3,d:'확장 오라 수치 +30%, 심판의 망치 수치 +30%, 빛 피해 +25%',f:p=>{p.hoD=(p.hoD||0)+.25;}},
+  {id:'f_x03',a:'rapid',b:'quick',n:'연사 폭주',pb:1.3,d:'연사 숙련 수치 +30%, 속사 수치 +30%, 공격력 +8%',f:p=>{p.dmgP=(p.dmgP||0)+.08;}},
+  {id:'f_x04',a:'doppel',b:'shadowstep',n:'그림자 분신술',pb:1.3,d:'분신 피해 +25%',f:p=>{p.shD=(p.shD||0)+.25;}},
+  {id:'f_x05',a:'eventh',b:'crushpull',n:'사건 붕괴',pb:1.3,d:'중력장 범위 +20%',f:p=>{p.gvR=(p.gvR||0)+.2;}},
+  {id:'f_x06',a:'masswell',b:'singularity',n:'중성자별',pb:1.3,d:'질량 수치 +30%, 특이점 수치 +30%, 중력장 범위 +20%',f:p=>{p.gvR=(p.gvR||0)+.2;}},
+  {id:'f_x07',a:'frostnova',b:'stunner',n:'혹한',pb:1.3,d:'서리 폭발 수치 +30%, 기절 주사위 수치 +30%, 둔화된 적에게 피해 +12%',f:p=>{p.slD=(p.slD||0)+.12;}},
+  {id:'f_x08',a:'markburst',b:'huntmark',n:'사냥꾼의 낙인',pb:1.3,d:'표식 폭발 수치 +30%, 표식 추가 피해 +10%',f:p=>{p.mkD=(p.mkD||0)+.1;}},
+  {id:'f_x09',a:'deathsent',b:'tracker',n:'집행자',pb:1.3,d:'추적자 수치 +30%, 표식 추가 피해 +10%',f:p=>{p.mkD=(p.mkD||0)+.1;}},
+  {id:'f_x10',a:'aftershock',b:'sonicboom',n:'음속 여진',pb:1.3,d:'여진 수치 +30%, 충격파 피해 +25%',f:p=>{p.wvD=(p.wvD||0)+.25;}},
+  {id:'f_x11',a:'quake',b:'sonicboom',n:'대지진',pb:1.3,d:'지진 수치 +30%, 충격파 피해 +25%',f:p=>{p.wvD=(p.wvD||0)+.25;}},
+  {id:'f_x12',a:'worldtree',b:'thornseed',n:'생명의 숲',pb:1.3,d:'가시 씨앗 수치 +30%, 덩굴 지대 피해 +25%',f:p=>{p.vnD=(p.vnD||0)+.25;}},
+  {id:'f_x13',a:'d_bramble',b:'barkskin',n:'가시 갑피',pb:1.3,d:'가시 장벽 수치 +30%, 덩굴 지대 피해 +25%',f:p=>{p.vnD=(p.vnD||0)+.25;}},
+  {id:'f_x14',a:'battlecry',b:'b_cleave',n:'전장의 포효',pb:1.3,d:'전쟁 함성 수치 +30%, 대회전 수치 +30%, 광란 최대 중첩 +3',f:p=>{p.fyC=(p.fyC||0)+3;}},
+  {id:'f_x15',a:'stormcall',b:'e_trinity',n:'원소 삼중주',pb:1.3,d:'삼위일체 수치 +30%, 원소 효과 피해 +25%',f:p=>{p.elD=(p.elD||0)+.25;}},
+  {id:'f_x16',a:'conduct',b:'singularity',n:'뇌격 특이점',pb:1.3,d:'전도 수치 +30%, 특이점 수치 +30%, 번개·연쇄 피해 +25%',f:p=>{p.thD=(p.thD||0)+.25;}},
+  {id:'f_x17',a:'kindle',b:'al_chain',n:'불씨 연쇄',pb:1.3,d:'불씨 수치 +30%, 연쇄 반응 수치 +30%, 화상 피해 +25%',f:p=>{p.fiD=(p.fiD||0)+.25;}},
+  {id:'f_x18',a:'philosopher',b:'transmute',n:'황금 연성',pb:1.3,d:'연성 수치 +30%, 물약 피해 +25%',f:p=>{p.ptD=(p.ptD||0)+.25;}},
+  {id:'f_x19',a:'elixir',b:'philosopher',n:'생명의 비약',pb:1.3,d:'물약 피해 +25%',f:p=>{p.ptD=(p.ptD||0)+.25;}},
+  {id:'f_x20',a:'orbit',b:'nova',n:'회전 노바',pb:1.3,d:'노바 수치 +30%, 회전 칩 피해 +25%',f:p=>{p.orbM*=1.25;}},
+  {id:'f_x21',a:'spinner',b:'blackhole',n:'은하 회전',pb:1.3,d:'블랙홀 칩 수치 +30%, 회전 칩 피해 +25%',f:p=>{p.orbM*=1.25;}},
+  {id:'f_x22',a:'drone',b:'orbit',n:'위성 궤도',pb:1.3,d:'회전 칩 피해 +25%',f:p=>{p.orbM*=1.25;}},
+  {id:'f_x23',a:'deathwish',b:'soul',n:'죽음의 계약',pb:1.3,d:'죽음의 소원 수치 +30%, 흡혈 +2%',f:p=>{p.lifesteal+=.02;}},
+  {id:'f_x24',a:'bloodlust',b:'rampage',n:'피의 질주',pb:1.3,d:'피의 갈증 수치 +30%, 광란 최대 중첩 +3',f:p=>{p.fyC=(p.fyC||0)+3;}},
+  {id:'f_x25',a:'soulburst',b:'bonefire',n:'원혼 화로',pb:1.3,d:'원혼 폭발 수치 +30%, 해골 병사 피해 +25%',f:p=>{p.skD=(p.skD||0)+.25;}},
+  {id:'f_x26',a:'wisp',b:'turret',n:'불꽃 포대',pb:1.3,d:'도깨비불 수치 +30%, 마법 포탑 수치 +30%, 소환물 피해 +25%',f:p=>{p.sumD=(p.sumD||0)+.25;}},
+  {id:'f_x27',a:'seventh',b:'lucky7',n:'세븐 세븐',pb:1.3,d:'공격 속도 +8%',f:p=>{p.rateP=(p.rateP||0)+.08;}},
+  {id:'f_x28',a:'fever',b:'gb_streak',n:'열광의 연승',pb:1.3,d:'피버 타임 수치 +30%, 연승 수치 +30%, 공격 속도 +8%',f:p=>{p.rateP=(p.rateP||0)+.08;}},
+  {id:'f_x29',a:'allin',b:'doublehead',n:'양면 올인',pb:1.3,d:'양면 앞면 수치 +30%, 앞면 공격 피해 +15%',f:p=>{p.hdD=(p.hdD||0)+.15;}},
+  {id:'f_x30',a:'coinguard',b:'allin',n:'안전한 올인',pb:1.3,d:'뒷면 보험 수치 +30%, 앞면 공격 피해 +15%',f:p=>{p.hdD=(p.hdD||0)+.15;}},
+  {id:'f_x31',a:'interest',b:'magnet2',n:'이자 자석',pb:1.3,d:'복리 수치 +30%, 자석 부적 수치 +30%, 골드 획득 +20%',f:p=>{p.goldM+=.2;}},
+  {id:'f_x32',a:'rush',b:'magnet2',n:'골드 사냥꾼',pb:1.3,d:'골드 러시 수치 +30%, 자석 부적 수치 +30%, 골드 획득 +20%',f:p=>{p.goldM+=.2;}},
+  {id:'f_x33',a:'n_bone',b:'deathnova',n:'죽음의 창',pb:1.3,d:'뼈창 수치 +30%, 해골 병사 피해 +25%',f:p=>{p.skD=(p.skD||0)+.25;}},
+  {id:'f_x34',a:'raise',b:'deathnova',n:'망자 소환',pb:1.3,d:'시체 일으키기 수치 +30%, 해골 병사 피해 +25%',f:p=>{p.skD=(p.skD||0)+.25;}},
+  {id:'f_x35',a:'bonewall',b:'shieldbash',n:'뼈 방패',pb:1.3,d:'뼈 갑옷 수치 +30%, 보호막 충격 수치 +30%, 방어력 +15',f:p=>{p.armor+=15;}},
+  {id:'f_x36',a:'contagion',b:'toxic',n:'감염 탄환',pb:1.3,d:'감염 폭발 수치 +30%, 독 피해 +25%',f:p=>{p.psD=(p.psD||0)+.25;}},
+  {id:'f_x37',a:'venomcloud',b:'plague',n:'역병 구름',pb:1.3,d:'독 피해 +25%',f:p=>{p.psD=(p.psD||0)+.25;}},
+  {id:'f_x38',a:'neuro',b:'spill',n:'마비 늪',pb:1.3,d:'마비 독 수치 +30%, 독 피해 +25%',f:p=>{p.psD=(p.psD||0)+.25;}},
+  {id:'f_x39',a:'fog',b:'venomcloud',n:'독무',pb:1.3,d:'독 피해 +25%',f:p=>{p.psD=(p.psD||0)+.25;}},
+  {id:'f_x40',a:'ricoshot',b:'g_hollow',n:'도탄 할로우',pb:1.3,d:'튕김 사격 수치 +30%, 할로우 포인트 수치 +30%, 공격 속도 +10%',f:p=>{p.rateP=(p.rateP||0)+.1;}},
+  {id:'f_x41',a:'artillery',b:'overwatch',n:'포격 관측',pb:1.3,d:'감시탑 수치 +30%, 공격력 +8%',f:p=>{p.dmgP=(p.dmgP||0)+.08;}},
+  {id:'f_x42',a:'turret2',b:'turret',n:'포탑 공장',pb:1.3,d:'포탑 증설 수치 +30%, 마법 포탑 수치 +30%, 소환물 피해 +25%',f:p=>{p.sumD=(p.sumD||0)+.25;}},
+  {id:'f_x43',a:'tesla',b:'thunder',n:'뇌신의 토템',pb:1.3,d:'번개 토템 수치 +30%, 천둥 수치 +30%, 번개·연쇄 피해 +25%',f:p=>{p.thD=(p.thD||0)+.25;}},
+  {id:'f_x44',a:'resonance',b:'static',n:'공명 전류',pb:1.3,d:'번개·연쇄 피해 +25%',f:p=>{p.thD=(p.thD||0)+.25;}},
+  {id:'f_x45',a:'engine',b:'tailwind',n:'터보 엔진',pb:1.3,d:'폭주 기관 수치 +30%, 뒷바람 수치 +30%, 이동 속도 +8%',f:p=>{p.speed*=1.08;}},
+  {id:'f_x46',a:'umbra',b:'nightveil',n:'그림자 칼춤',pb:1.3,d:'밤의 장막 수치 +30%, 분신 피해 +25%',f:p=>{p.shD=(p.shD||0)+.25;}},
+  {id:'f_x47',a:'loaded',b:'punch',n:'조작 충격파',pb:1.3,d:'치명타 확률 +5%',f:p=>{p.crit+=.05;}},
+  {id:'f_x48',a:'luckycoin',b:'highbet',n:'행운의 판돈',pb:1.3,d:'치명타 확률 +5%',f:p=>{p.crit+=.05;}},
+  {id:'f_x49',a:'highroll',b:'luckycoin',n:'황금 주사위',pb:1.3,d:'치명타 확률 +5%',f:p=>{p.crit+=.05;}},
+  {id:'f_x50',a:'fortune',b:'triple7',n:'여신의 777',pb:1.3,d:'행운의 여신 수치 +30%, 777 수치 +30%, 치명타 확률 +5%',f:p=>{p.crit+=.05;}},
+  {id:'f_x51',a:'overload',b:'dicethrow',n:'번개 주사위',pb:1.3,d:'과부하 수치 +30%, 치명타 확률 +5%',f:p=>{p.crit+=.05;}},
+  {id:'f_x52',a:'marksman',b:'rifling',n:'정밀 사격',pb:1.3,d:'명중 표식 수치 +30%, 공격력 +8%',f:p=>{p.dmgP=(p.dmgP||0)+.08;}},
+  {id:'f_x53',a:'shieldbash',b:'thorns',n:'가시 방패',pb:1.3,d:'보호막 충격 수치 +30%, 방어력 +15',f:p=>{p.armor+=15;}},
+  {id:'f_x54',a:'regenarmor',b:'thick',n:'강철 재생',pb:1.3,d:'재생 장갑 수치 +30%, 방어력 +15',f:p=>{p.armor+=15;}},
+  {id:'f_x55',a:'bastion',b:'boltturret',n:'철벽 포대',pb:1.3,d:'보루 수치 +30%, 관통 포탑탄 수치 +30%, 소환물 피해 +25%',f:p=>{p.sumD=(p.sumD||0)+.25;}},
+  {id:'f_x56',a:'split',b:'echo',n:'분열 메아리',pb:1.3,d:'메아리 수치 +30%, 공격력 +8%',f:p=>{p.dmgP=(p.dmgP||0)+.08;}},
+  {id:'f_x57',a:'storm',b:'combo',n:'카드 난타',pb:1.3,d:'연타 수치 +30%, 공격력 +8%',f:p=>{p.dmgP=(p.dmgP||0)+.08;}},
+  {id:'f_x58',a:'bigshot',b:'icebolt',n:'빙결 대포',pb:1.3,d:'대포알 수치 +30%, 얼음 화살 수치 +30%, 공격력 +8%',f:p=>{p.dmgP=(p.dmgP||0)+.08;}},
+  {id:'f_x59',a:'after',b:'velocity',n:'잔상 가속',pb:1.3,d:'질풍탄 수치 +30%, 공격력 +8%',f:p=>{p.dmgP=(p.dmgP||0)+.08;}},
+  {id:'f_x60',a:'goldbullet',b:'quick',n:'황금 연사',pb:1.3,d:'황금 탄환 수치 +30%, 속사 수치 +30%, 공격력 +8%',f:p=>{p.dmgP=(p.dmgP||0)+.08;}}
 ];
 // VIP 합체: VIP 증강 + 일반 증강. 둘 다 가져도 바로 합쳐지지 않고, 레벨업·증강 때마다 낮은 확률(12%, 행운 30이면 30%)로 합체
 const VFUSIONS=[
@@ -1252,7 +1314,7 @@ function applyQ(f,p,q){if(!q||q===1){f(p);return;}
     if(k==='maxHp')p[k]=Math.round(p[k]);}
   for(const k of ['multi','pierce'])if(A2[k]!==A[k])p[k]+=A2[k]-A[k];
   if(p.maxHp>mh)p.hp+=p.maxHp-mh;p.hp=Math.min(p.hp,p.maxHp);}
-function tagCount(){const c={},o={},oq={};for(const a of S.augs){for(const t of a.tags)c[t]=(c[t]||0)+1;o[a.id]=a.lv;oq[a.id]=a.q||1;if(a.parts)for(const q of a.parts)o[q]=3;}{const hm=homeTag();if(hm&&c[hm]>0)c[hm]++;}S.tagc=c;S.own=o;S.oq=oq;
+function tagCount(){const c={},o={},oq={};for(const a of S.augs){for(const t of a.tags)c[t]=(c[t]||0)+1;o[a.id]=a.lv;oq[a.id]=a.q||1;if(a.parts)for(const q of a.parts){o[q]=3;if(a.pb)oq[q]=a.pb;}}{const hm=homeTag();if(hm&&c[hm]>0)c[hm]++;}S.tagc=c;S.own=o;S.oq=oq;
   // 가드 2: 최대 체력 +40 (조건이 바뀌면 더하거나 뺌)
   if(S.p){const sw=tag('sniper')>=2?1.2:1,sh=S.p.snR||1;if(sw!==sh){S.p.range*=sw/sh;S.p.snR=sw;}}
   if(S.p){const want=0,have=S.p.g2hp||0;if(want!==have){S.p.maxHp+=want-have;S.p.hp=Math.max(1,Math.min(S.p.maxHp,S.p.hp+(want-have)));S.p.g2hp=want;}}}
