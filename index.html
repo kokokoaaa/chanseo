@@ -658,6 +658,8 @@ const TAGS={
   sniper:  {n:'원거리',t2:'사거리 +20%',t4:'먼 적일수록 피해 증가 (거리 100당 +10%, 최대 +60%)',t6:'탄환이 적을 뚫을 때마다 피해 +30% 누적 (최대 +150%)',ex:'원거리 피해 +5%'},
   thunder: {n:'번개',  t2:'10번째 공격마다 연쇄 번개 (적 4명)',t4:'번개 연쇄 대상 +3, 번개 피해 +50%',t6:'번개 맞은 일반 적 0.8초 기절',ex:'번개 피해 +15%'},
   fire:    {n:'화염',  t2:'적중 시 화상 (3초, 초당 공격력 20%)',t4:'화상 입은 적이 죽으면 불길 폭발 (범위 70, 공격력 120%)',t6:'화상 피해 2배, 화상이 1초마다 주변 적에게 번짐',ex:'화상 피해 +15%'},
+  shadow:  {n:'그림자',t2:'대시할 때와 6초마다 그림자 분신 소환 (4초, 0.5초마다 공격력 40% 사격, 최대 3기)',t4:'분신이 사라질 때 그림자 폭발 (범위 80, 공격력 150%)',t6:'분신 탄환 30%는 반드시 치명타, 분신 최대 +2',ex:'분신 피해 +15%'},
+  grav:    {n:'중력',  t2:'8초마다 적이 가장 많은 곳에 중력장 (2초, 범위 100, 끌어당김)',t4:'중력장에 끌린 적은 받는 피해 +20%',t6:'중력장이 사라질 때 붕괴 폭발 (범위 130, 공격력 300%)',ex:'중력장 범위 +10%'},
   mark:    {n:'표식',  t2:'5번째 공격마다 대상에 표식 (5초): 표식된 적은 받는 피해 +20%',t4:'표식된 적이 죽으면 가까운 적 2명에게 표식이 옮겨감',t6:'표식된 적에게 치명타 확률 +25%',ex:'표식 피해 증폭 +5%'},
   wave:    {n:'파동',  t2:'4초마다 주변에 충격파 (범위 130, 공격력 100%, 밀쳐냄)',t4:'충격파 범위 +30%, 맞은 적 1.5초 둔화',t6:'충격파가 한 번 더 퍼지고 피해 2배',ex:'충격파 피해 +15%'},
   coin:    {n:'동전',  t2:'공격마다 동전 던지기 (앞면 피해 2배, 뒷면 0.5배). 앞면 3연속마다 동전 폭발 (범위 90, 공격력 300%)',t4:'뒷면이 나오면 다음 공격은 반드시 앞면',t6:'앞면 피해 2배 → 3배',ex:'앞면 확률 +3%'},
@@ -821,6 +823,18 @@ const AUGS=[
   {id:'n_legion',cls:'necro',u:'해골 최대 수가 늘어나요. ★1은 +1, ★2는 +2, ★3은 +3.',t:'s',n:'해골 군단',tags:['undead','summon'],d:'[사령술사 전용] 해골 최대 수 +2, 해골 소환 확률 +10%'},
   {id:'n_bone',cls:'necro',u:'뼈창 피해가 커져요. ★1은 200%, ★2는 250%, ★3은 300%.',t:'g',n:'뼈창',tags:['undead'],d:'[사령술사 전용] 5번째 공격마다 관통하는 뼈창 (공격력 250%, 관통 4)'},
   {id:'n_lich',cls:'necro',u:'',t:'p',n:'리치',tags:['undead','curse'],d:'[사령술사 전용] 원혼 확률 +20%, 원혼 피해 +50%, 해골 최대 수 +2'},
+  {id:'umbra',u:'',t:'g',n:'그림자 칼날',tags:['shadow','blitz'],d:'분신이 3발씩 부채꼴로 사격'},
+  {id:'nightveil',u:'분신당 피해 감소가 커져요. ★1은 3%, ★2는 4%, ★3은 5%.',t:'s',n:'밤의 장막',tags:['shadow','guard'],d:'분신 1기당 받는 피해 −4% (최대 −20%)'},
+  {id:'shadowstep',u:'강화할 때마다 대시 재사용 −10%가 한 번 더 붙어요.',t:'s',n:'그림자 걸음',tags:['shadow','blitz'],d:'대시 재사용 −20%. 대시할 때 분신 소환 (그림자 시너지 없이도)',f:p=>{p.dashMul*=.9;}},
+  {id:'doppel',u:'',t:'p',n:'도플갱어',tags:['shadow','shadow'],d:'분신이 내 기본 공격을 따라 쏨 (공격력 50%), 분신 지속 +2초. 그림자 2개로 계산'},
+  {id:'shadowmark',u:'',t:'s',n:'그림자 사냥',tags:['shadow','mark'],d:'분신 탄환이 맞힌 적에게 표식'},
+  {id:'masswell',u:'중력장이 더 커져요. ★1은 +15%, ★2는 +20%, ★3은 +30%.',t:'s',n:'질량',tags:['grav','guard'],d:'중력장 지속 +1초, 범위 +20%'},
+  {id:'singularity',u:'번개 피해가 커져요. ★1은 50%, ★2는 60%, ★3은 80%.',t:'g',n:'특이점',tags:['grav','thunder'],d:'중력장 중심에서 0.5초마다 번개 연쇄 2 (공격력 60%)'},
+  {id:'eventh',u:'',t:'p',n:'사건의 지평선',tags:['grav','grav'],d:'중력장이 8초 → 4초마다 생김. 중력 2개로 계산'},
+  {id:'crushpull',u:'',t:'s',n:'압착',tags:['grav','frost'],d:'중력장 안의 적 둔화, 중력장 피해 2배'},
+  {id:'gravvine',u:'',t:'s',n:'뿌리 감옥',tags:['grav','nature'],d:'중력장이 생길 때 그 자리에 덩굴 지대 (초당 공격력 80%)'},
+  {id:'venommark',u:'',t:'s',n:'독 표식',tags:['mark','poison'],d:'표식된 적이 중독 3중첩'},
+  {id:'frostwave',u:'',t:'s',n:'서리 파동',tags:['wave','frost'],d:'충격파에 맞은 적 2초 둔화, 충격파 피해 +30%'},
   {id:'huntmark',u:'',t:'s',n:'사냥 표식',tags:['mark','sniper'],d:'표식이 정예·보스에게 붙으면 피해 증폭 2배'},
   {id:'brand',u:'낙인 화상이 세져요. ★1은 30%, ★2는 40%, ★3은 50%.',t:'s',n:'낙인',tags:['mark','fire'],d:'표식을 남길 때 5초 화상 (초당 공격력 40%)'},
   {id:'markburst',u:'표식 폭발 피해가 커져요. ★1은 150%, ★2는 200%, ★3은 250%.',t:'g',n:'표식 폭발',tags:['mark'],d:'표식된 적이 죽으면 폭발 (범위 80, 공격력 200%)'},
@@ -983,7 +997,11 @@ const FUSIONS=[
   {id:'f_execution',a:'markburst',b:'deathsent',n:'처형장',d:'표식 폭발 범위 +50%, 폭발에 맞은 적도 표식'},
   {id:'f_predator',a:'huntmark',b:'tracker',n:'포식자',d:'추적자 상한 +20% → +40%, 표식 증폭 +10%'},
   {id:'f_epicenter',a:'quake',b:'aftershock',n:'진앙',d:'충격파 주기 추가 −1초, 충격파가 화상·둔화를 모두 걸음'},
-  {id:'f_thunderclap',a:'resonance',b:'sonicboom',n:'천둥소리',d:'공명 번개가 연쇄 3, 맞은 적 수 제한 없음'}
+  {id:'f_thunderclap',a:'resonance',b:'sonicboom',n:'천둥소리',d:'공명 번개가 연쇄 3, 맞은 적 수 제한 없음'},
+  {id:'f_shadowarmy',a:'umbra',b:'doppel',n:'그림자 군대',d:'분신 최대 +3'},
+  {id:'f_eclipse',a:'nightveil',b:'shadowstep',n:'일식',d:'대시할 때 분신 2기 소환'},
+  {id:'f_bigcrunch',a:'masswell',b:'eventh',n:'빅 크런치',d:'중력장 붕괴 폭발이 항상 일어나고 피해 2배'},
+  {id:'f_magnetar',a:'singularity',b:'crushpull',n:'마그네타',d:'특이점 번개가 0.25초마다'}
 ];
 // VIP 합체: VIP 증강 + 일반 증강. 둘 다 가져도 바로 합쳐지지 않고, 레벨업·증강 때마다 낮은 확률(12%, 행운 30이면 30%)로 합체
 const VFUSIONS=[
@@ -1018,6 +1036,8 @@ function tryFuse(){
   return null;
 }
 const VIPS=[
+  {id:'nightlord',t:'v',n:'밤의 군주',tags:['shadow','shadow'],d:'분신 지속 2배, 분신 공격 속도 2배. 그림자 2개로 계산'},
+  {id:'blackstar',t:'v',n:'검은 별',tags:['grav','grav'],d:'중력장이 2개씩 생기고, 사라질 때 항상 붕괴 폭발. 중력 2개로 계산'},
   {id:'judge',t:'v',n:'심판자',tags:['mark','mark'],d:'모든 공격이 표식을 남기고, 표식 피해 증폭 +20%. 표식 2개로 계산'},
   {id:'tectonic',t:'v',n:'지각 변동',tags:['wave','guard'],d:'충격파 주기 −2초, 충격파에 맞은 적 1명당 보호막 +2'},
   {id:'blackjack',t:'v',n:'블랙잭',tags:['card','jackpot'],d:'21번째 공격마다 모든 적을 뚫는 카드 파도 3장 (공격력 5배)'},
@@ -1844,8 +1864,16 @@ const elM=()=>(1+ex('elem')*.12)*(1+(S.p.elD||0));
 const natM=()=>1+ex('nature')*.15;
 const coinOn=()=>S.cls==='gambler'||tag('coin')>=2;
 const headP=()=>Math.min((S.p.hdP||0)>0?.8:.75,.5+(S.p.hdP||0)+LK()*.004+ex('coin')*.03+(has('doublehead')?lv3('doublehead',.05,.08,.1):0));
+const shadowOn=()=>tag('shadow')>=2||has('shadowstep')||has('doppel')||has('nightlord');
+const shM=()=>1+ex('shadow')*.15;
+const shMax=()=>3+(tag('shadow')>=6?2:0)+(has('f_shadowarmy')?3:0);
+function spawnClone(){if(!shadowOn())return;const p=S.p,c=S.clones||(S.clones=[]);if(c.length>=shMax())c.shift();
+  c.push({x:p.x+rand(-24,24),y:p.y+rand(-18,18),life:(4+(has('doppel')?2:0))*(has('nightlord')?2:1),cd:.15});S.rings.push({x:p.x,y:p.y,r:4,max:26,life:.25,col:'#9a6aff'});}
+const gravOn=()=>tag('grav')>=2||has('eventh')||has('blackstar');
+function gravAt(){const p=S.p;let best=null,bn=0;for(const e of S.en){if(!e.alive||e.phase||d2(e,p)>380*380)continue;let n=0;for(const o of S.en)if(o.alive&&d2(o,e)<110*110)n++;if(n>bn){bn=n;best=e;}}
+  if(!best)return;const r=100*(1+ex('grav')*.1)*(has('masswell')?1+lv3('masswell',.15,.2,.3):1);S.zones.push({x:best.x,y:best.y,r,life:2+(has('masswell')?1:0),kind:'hole',grav:true});if(has('gravvine'))vineAt(best.x,best.y,.8);}
 const markAmp=e=>(.2+ex('mark')*.05+(has('judge')?.2:0)+(has('f_predator')?.1:0))*(has('huntmark')&&(e.elite||e.boss)?2:1);
-function markE(e){if(!e||!e.alive)return;e.mkT=S.t+5+(has('deathsent')?3:0);if(has('brand'))burnE(e,pDmg()*lv3('brand',.3,.4,.5),5);}
+function markE(e){if(!e||!e.alive)return;e.mkT=S.t+5+(has('deathsent')?3:0);if(has('venommark'))poisonE(e,3);if(has('brand'))burnE(e,pDmg()*lv3('brand',.3,.4,.5),5);}
 const waveOn=()=>tag('wave')>=2||has('quake')||has('tectonic');
 const wvM=()=>1+ex('wave')*.15;
 function doWave(){const p=S.p,R=130*(tag('wave')>=4?1.3:1)*(has('aftershock')?1.2:1)*(has('sonicboom')?2:1),dm=pDmg()*(tag('wave')>=6?2:1)*wvM();let hitN=0,rz=0;
@@ -1853,7 +1881,7 @@ function doWave(){const p=S.p,R=130*(tag('wave')>=4?1.3:1)*(has('aftershock')?1.
   for(const e of S.en){if(!e.alive||e.phase)continue;const dx=e.x-p.x,dy=e.y-p.y,d=Math.hypot(dx,dy)||1;if(d>R+e.r)continue;hitN++;
     if(!e.boss){const k=Math.min(40,(R-d)*.25+10);e.x+=dx/d*k;e.y+=dy/d*k;if(tag('wave')>=4)e.slowT=Math.max(e.slowT||0,1.5);}
     if(has('f_epicenter')){burnE(e,pDmg()*.3,3);if(!e.boss)e.slowT=Math.max(e.slowT||0,1.5);}
-    dmgE(e,dm*(has('sonicboom')&&(e.elite||e.boss)?1.5:1),'#cfe3ff');
+    if(has('frostwave')&&!e.boss)e.slowT=Math.max(e.slowT||0,2);dmgE(e,dm*(has('sonicboom')&&(e.elite||e.boss)?1.5:1)*(has('frostwave')?1.3:1),'#cfe3ff');
     if(has('resonance')&&e.alive&&(has('f_thunderclap')||rz<5)){rz++;elemChain(e,has('f_thunderclap')?3:1,pDmg()*.6);}}
   if(has('tectonic')&&hitN)p.barrier=Math.min(Math.max(barrierMax(),20),(p.barrier||0)+2*hitN);}
 function clsRows(row){const p=S.p,c=S.cls;
@@ -1914,6 +1942,7 @@ function hurtP(amt,src){
   const p=S.p;if(!p.alive||p.inv>0||p.dashT>0)return;
   if(src&&src.ps>0&&has('corrode'))amt*=.65;
   if(has('barkskin')&&inVine(p))amt*=.8;
+  if(has('nightveil')&&S.clones&&S.clones.length)amt*=1-Math.min(.2,S.clones.length*lv3('nightveil',.03,.04,.05));
   if(p.bearT>0)amt*=.6;
   if(has('b_unstop')&&p.fy>0)amt*=1-Math.min(.3,.015*p.fy);
   if(p.shield>0){p.shield--;if(has('f_vaultkeeper'))S.gold+=5;ftext(p.x,p.y-24,'보험','#7be08f',14);p.inv=.25;return;}
@@ -1957,6 +1986,7 @@ function addRage(){const p=S.p;if(!has('k_berserk'))return;p.rage=Math.min(lv3('
 function dmgE(e,amt,col,label,quiet){
   if(!e.alive)return;
   if(tag('alchemy')>=4&&e.potT>S.t)amt*=1.15;
+  if(tag('grav')>=4&&e.gvT>S.t)amt*=1.2;
   if(e.mkT>S.t)amt*=1+markAmp(e)+(has('stigma')?.2*(tag('holy')>0?1:0):0);
   e.hp-=amt;e.hit=.06;S.st.dmg+=amt;
   {let ls=S.p.lifesteal+ex('curse')*.01+(has('vampirelord')?.08:0);if(tag('curse')>=6)ls*=2;if(ls&&S.p.alive){const P=S.p,nh=P.hp+amt*ls*healM();if(nh>P.maxHp&&has('vampirelord'))P.barrier=Math.min(barrierMax(),(P.barrier||0)+nh-P.maxHp);P.hp=Math.min(P.maxHp,nh);}}
@@ -2018,6 +2048,7 @@ function playerFire(tg){
   if(has('smite2')&&p.shots%6===0){explode(tg.x,tg.y,80,pDmg()*lv3('smite2',2,2.5,3)*holyM(),'#fff3c4');S.rings.push({x:tg.x,y:tg.y,r:4,max:30,life:.4,col:'#ffffff'});}
   {const pe=S.cls==='alch'?4:tag('alchemy')>=2?6:0;if(pe&&p.shots%Math.max(2,pe-(has('philosopher')?2:0))===0){const n=has('al_grand')?3:1;for(let i=0;i<n;i++)throwPotion(tg.x+(i?rand(-50,50):0),tg.y+(i?rand(-50,50):0),1);}}
   if(S.cls==='druid'&&p.shots%(has('d_wrath')?2:3)===0)vineAt(tg.x,tg.y,.7);
+  if(has('doppel')&&S.clones)for(const c of S.clones)pBullet(c.x,c.y,Math.atan2(tg.y-c.y,tg.x-c.x),d*.5*shM(),{child:true,r:3,shd:true,mk:has('shadowmark')});
   if(has('judge'))markE(tg);else if(tag('mark')>=2&&p.shots%(has('deathsent')?3:5)===0)markE(tg);
   if(S.coinB){S.coinB=0;explode(tg.x,tg.y,90,pDmg()*3,'#ffd76a');ftext(p.x,p.y-34,'앞면 ×3!','#ffd76a',16);}
   if(S.coinJ){S.coinJ=0;ftext(p.x,p.y-48,'대박!','#ff4fd8',22);S.shake=Math.max(S.shake,.2);for(const e of S.en)if(e.alive&&!e.phase&&Math.abs(e.x-p.x)<W/2&&Math.abs(e.y-p.y)<H/2)dmgE(e,pDmg()*5,'#ff4fd8');}
@@ -2050,6 +2081,7 @@ function onPHit(b,t){
   if(tag('holy')>=6&&(t.elite||t.boss))dmg*=1.4;
   if(tag('elem')>=4&&elCnt(t)>=2)dmg*=1.25;
   if(tag('nature')>=4&&t.vnT>S.t)dmg*=1.2;
+  if(b.mk)markE(t);
   if(b.el!=null){elemFx(t,b.el,b.dmg);if(b.orb&&tag('elem')>=6)explode(t.x,t.y,90,pDmg()*2*elM(),'#c8a0ff');}
   if(has('ricochet')&&!b.child&&!b.ric){b.ric=1;ricoShot(t,b.dmg*lv3('ricochet',.5,.6,.7)*rpM(),has('f_trickshot')?2:0);}
   if(b.rico>0){const n=b.rico;b.rico=0;ricoShot(t,b.dmg,n-1);}
@@ -2163,7 +2195,7 @@ function dealerPos(){const p=S.p,a=S.t*1.2;return [0,1].map(i=>({x:p.x+Math.cos(
 function dash(){
   const p=S.p;if(!p.alive||p.dashCd>0||p.dashT>0)return;
   let dx=p.lmx,dy=p.lmy;const l=Math.hypot(dx,dy)||1;dx/=l;dy/=l;
-  p.dx=dx;p.dy=dy;p.dashT=.14;p.chargeHit=new Set();if(has('phantom'))p.phT=3;
+  p.dx=dx;p.dy=dy;p.dashT=.14;p.chargeHit=new Set();if(has('phantom'))p.phT=3;if(shadowOn()){spawnClone();if(has('f_eclipse'))spawnClone();}
   if(has('vaultbomb'))explode(p.x,p.y,140,S.gold*.05+pDmg()*1.5,'#ffd76a');
   if(has('warcry')){p.wcT=2;for(const e of S.en)if(e.alive&&!e.boss&&d2(e,p)<160*160)e.slowT=Math.max(e.slowT||0,lv3('warcry',.8,1.2,1.6));S.rings.push({x:p.x,y:p.y,r:10,max:160,life:.3,col:'#ffe08a'});}
   const cd=dashCdVal();p.dashCd=cd;p.dashMax=cd;
@@ -2216,6 +2248,10 @@ function update(dt){
     if(S.turrets&&S.turrets.length){const rg=p.range*(has('overwatch')?1+lv3('overwatch',.4,.5,.6):1);for(const u of S.turrets){u.life-=dt;u.cd-=dt;if(u.cd<=0){u.cd=(has('f_sentry')?.2:.4)*sumR()*tmul();const e=nearestE(u,rg);if(e){const an=Math.atan2(e.y-u.y,e.x-u.x),bs=S.p.bspd*(has('overwatch')?1.5:1);pBullet(u.x,u.y,an,pDmg()*.5*sumM()*(has('boltturret')?1+lv3('boltturret',.3,.4,.5):1),{child:true,r:3,pierce:has('boltturret')?2:0,vx:Math.cos(an)*bs,vy:Math.sin(an)*bs});}}
       if(u.life<=0&&has('selfdestruct'))explode(u.x,u.y,130,pDmg()*4*sumM(),'#ffb347');}S.turrets=S.turrets.filter(u=>u.life>0);}
     if(has('wisp')){S.wiT=(S.wiT??1)-dt;if(S.wiT<=0){S.wiT=(has('f_willo')?.5:1)*sumR();const w=wispPos(),e=nearestE(w,p.range);if(e)pBullet(w.x,w.y,Math.atan2(e.y-w.y,e.x-w.x),pDmg()*lv3('wisp',.6,.8,1)*sumM(),{child:true,r:4,burn:true});}}
+    if(tag('shadow')>=2||has('nightlord')){S.shT=(S.shT??6)-dt;if(S.shT<=0){S.shT=6;spawnClone();}}
+    if(S.clones&&S.clones.length){for(const c of S.clones){c.life-=dt;c.cd-=dt;if(c.cd<=0){c.cd=.5*sumR()*(has('nightlord')?.5:1);const e=nearestE(c,p.range);if(e){const a=Math.atan2(e.y-c.y,e.x-c.x),n=has('umbra')?3:1;for(let i=0;i<n;i++)pBullet(c.x,c.y,a+(i-(n-1)/2)*.15,pDmg()*.4*shM(),{child:true,r:3,shd:true,mk:has('shadowmark'),sure:tag('shadow')>=6&&Math.random()<.3});}}
+      if(c.life<=0&&tag('shadow')>=4)explode(c.x,c.y,80,pDmg()*1.5*shM(),'#9a6aff');}S.clones=S.clones.filter(c=>c.life>0);}
+    if(gravOn()){S.gvT=(S.gvT??8)-dt;if(S.gvT<=0){S.gvT=has('eventh')?4:8;gravAt();if(has('blackstar'))gravAt();}}
     if(has('tracker')){let n=0;for(const e of S.en)if(e.alive&&e.mkT>S.t)n++;S.mkN=n;}
     if(waveOn()){S.wvT=(S.wvT??4)-dt;if(S.wvT<=0){S.wvT=Math.max(1,4-(has('quake')?lv3('quake',.5,1,1.5):0)-(has('f_epicenter')?1:0)-(has('tectonic')?2:0));doWave();if(tag('wave')>=6)S.wv2=.3;}
       if(S.wv2>0){S.wv2-=dt;if(S.wv2<=0)doWave();}}
@@ -2329,10 +2365,12 @@ function update(dt){
   if(has('plague')){S.plagueT-=dt;if(S.plagueT<=0){S.plagueT=has('f_blackdeath')?.7:1.5;for(const e of S.en.filter(e=>e.ps>0)){const c=S.en.filter(o=>o.ps<=0&&d2(o,e)<90*90).sort((a,b)=>d2(a,e)-d2(b,e)).slice(0,Math.max(1,L('plague')-1));for(const o of c)poisonE(o);}}}
   // zones
   for(const z of S.zones){z.life-=dt;
+    if(z.grav){if(has('singularity')){z.sgT=(z.sgT??0)-dt;if(z.sgT<=0){z.sgT=has('f_magnetar')?.25:.5;const e=nearestE(z,z.r);if(e){S.bolts.push({x1:z.x,y1:z.y,x2:e.x,y2:e.y,life:.15});elemChain(e,2,pDmg()*lv3('singularity',.5,.6,.8));}}}
+      if(z.life<=0&&!z.bo&&(tag('grav')>=6||has('f_bigcrunch')||has('blackstar'))){z.bo=1;explode(z.x,z.y,130,pDmg()*3*(has('f_bigcrunch')?2:1),'#9a6aff');S.shake=Math.max(S.shake,.12);}}
     if(z.kind==='vine'){for(const e of S.en)if(e.alive&&!e.phase&&d2(e,z)<(z.r+e.r)**2){e.vnT=S.t+.2;if(!e.boss)e.slowT=Math.max(e.slowT||0,.3);dmgE(e,pDmg()*z.m*dt,null,null,true);if(has('spore')&&e.alive&&!(e.ps>0))poisonE(e);}
       if(z.life<=0&&tag('nature')>=6&&!z.bo){z.bo=1;explode(z.x,z.y,80,pDmg()*1.5*natM(),'#8ee06a');}}
     else if(z.kind==='fire'){for(const e of S.en)if(e.alive&&d2(e,z)<(z.r+e.r)**2){dmgE(e,pDmg()*1.2*(z.m||1)*dt,null,null,true);if(z.nap&&e.alive&&!(e.ps>0))poisonE(e);}}
-    else if(z.kind==='hole'){for(const e of S.en){if(!e.alive)continue;const dx=z.x-e.x,dy=z.y-e.y,dd=Math.hypot(dx,dy)||1;if(dd<z.r*1.6){if(!e.boss){e.x+=dx/dd*Math.min(dd,170*dt);e.y+=dy/dd*Math.min(dd,170*dt);}if(dd<z.r)dmgE(e,pDmg()*dt,null,null,true);}}}
+    else if(z.kind==='hole'){for(const e of S.en){if(!e.alive)continue;const dx=z.x-e.x,dy=z.y-e.y,dd=Math.hypot(dx,dy)||1;if(dd<z.r*1.6){if(!e.boss){e.x+=dx/dd*Math.min(dd,170*dt);e.y+=dy/dd*Math.min(dd,170*dt);}if(dd<z.r)dmgE(e,pDmg()*dt*(z.grav&&has('crushpull')?2:1),null,null,true);if(z.grav&&dd<z.r*1.3){e.gvT=S.t+.4;if(has('crushpull')&&!e.boss)e.slowT=Math.max(e.slowT||0,.4);}}}}
     else if(z.kind==='mine'){for(const e of S.en)if(e.alive&&!e.phase&&d2(e,z)<(z.r+e.r+6)**2){z.life=0;explode(z.x,z.y,80,pDmg()*1.8*sumM()*(has('f_overclock')?2:1),'#ff9a4a');if(has('f_minefield'))S.zones.push({x:z.x,y:z.y,r:40,life:2.5,kind:'fire',m:1});break;}}
     else{z.tick-=dt;if(z.tick<=0){z.tick=.5;for(const e of S.en)if(e.alive&&d2(e,z)<(z.r+e.r)**2)poisonE(e);}}}
   S.zones=S.zones.filter(z=>z.life>0);if(S.zones.length>70)S.zones.splice(0,S.zones.length-70);
@@ -2462,6 +2500,7 @@ function drawPlayer(p){
   const pf=k8?1:(p.face||1);
   HERO.draw(cls,anim,S.t,ap,p.hurtT>.3);
   ctx.save();ctx.imageSmoothingEnabled=HERO.hires;
+  if(S.clones)for(const c of S.clones){ctx.save();ctx.globalAlpha=.5*Math.min(1,c.life);ctx.fillStyle='rgba(90,50,150,.35)';ctx.beginPath();ctx.ellipse(c.x,c.y+R,R*.9,R*.35,0,0,TAU);ctx.fill();ctx.filter='brightness(0.3) sepia(1) hue-rotate(220deg) saturate(2)';heroBlit(HERO.canvas,c.x,c.y+R+3,pf,k8);ctx.restore();}
   if(p.dashT>0){for(let i=1;i<=3;i++){ctx.globalAlpha=.28/i;ctx.save();heroBlit(HERO.canvas,p.x-p.dx*i*16,p.y+R+3-p.dy*i*16,pf,k8);ctx.restore();}ctx.globalAlpha=1;}
   if(p.blitzT>0||S.buffT.jack>0||p.shadowT>0){ctx.fillStyle=S.buffT.jack>0?'rgba(255,215,106,.3)':p.shadowT>0?'rgba(120,80,160,.35)':'rgba(95,201,217,.3)';ctx.beginPath();ctx.arc(p.x,p.y,R+12,0,TAU);ctx.fill();}
   if(p.inv>0&&Math.floor(S.t*14)%2)ctx.globalAlpha=.2;
@@ -2537,6 +2576,7 @@ function draw(){
         else if(S.cls==='archer'){ctx.strokeStyle='#8a5a32';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-12,0);ctx.lineTo(4,0);ctx.stroke();ctx.fillStyle=gl?'#ffd76a':'#c9ced6';ctx.beginPath();ctx.moveTo(8,0);ctx.lineTo(3,-3);ctx.lineTo(3,3);ctx.closePath();ctx.fill();ctx.fillStyle='#b9332d';ctx.fillRect(-13,-3,4,2);ctx.fillRect(-13,1,4,2);}
         else{ctx.rotate(S.t*22);ctx.fillStyle=gl?'#ffd76a':'#d8dee6';ctx.fillRect(-1,-6,2,8);ctx.fillStyle='#5a4a3a';ctx.fillRect(-2,2,4,2);ctx.fillRect(-1,4,2,3);}
         ctx.restore();continue;}
+      if(b.shd){ctx.fillStyle='rgba(154,106,255,.35)';ctx.beginPath();ctx.arc(b.x,b.y,b.r+3,0,TAU);ctx.fill();ctx.fillStyle='#d8c8ff';ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,TAU);ctx.fill();continue;}
       if(b.gcoin){ctx.fillStyle='rgba(255,215,106,.35)';ctx.beginPath();ctx.arc(b.x,b.y,b.r+4,0,TAU);ctx.fill();ctx.fillStyle='#ffd76a';ctx.beginPath();ctx.ellipse(b.x,b.y,Math.abs(Math.cos(S.t*18))*b.r+1,b.r,0,0,TAU);ctx.fill();continue;}
       if(b.orb){const c=['#ff5a2a','#3fa0d8','#e8c020'],a=S.t*12;ctx.fillStyle='rgba(200,160,255,.35)';ctx.beginPath();ctx.arc(b.x,b.y,b.r+5,0,TAU);ctx.fill();for(let i=0;i<3;i++){ctx.fillStyle=c[i];ctx.beginPath();ctx.arc(b.x+Math.cos(a+i*2.09)*3,b.y+Math.sin(a+i*2.09)*3,b.r*.6,0,TAU);ctx.fill();}continue;}
       if(b.ghost){ctx.fillStyle='rgba(140,255,154,.3)';ctx.beginPath();ctx.arc(b.x,b.y,b.r+5,0,TAU);ctx.fill();ctx.fillStyle='#d8ffe0';ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,TAU);ctx.fill();ctx.fillStyle='#1d5a2c';ctx.fillRect(b.x-2,b.y-1.5,1.5,1.5);ctx.fillRect(b.x+.5,b.y-1.5,1.5,1.5);continue;}
@@ -2613,7 +2653,7 @@ function drawMini(){
   mctx.fillStyle='#ffffff';mctx.beginPath();mctx.arc(M/2,M/2,7,0,TAU);mctx.fill();
 }
 // 왼쪽 아래 증강 아이콘 줄: 보유 증강 + 빈 슬롯. PC는 마우스 올리면, 모바일은 누르면 설명
-const TAG_ICO={card:'🃏',dice:'🎲',roulette:'🎡',house:'🏦',curse:'💀',jackpot:'🎰',blitz:'💨',guard:'🛡',poison:'☠',holy:'✝',frost:'❄',summon:'🤖',sniper:'🎯',thunder:'⚡',fire:'🔥',undead:'🦴',rapid:'🔫',elem:'🌀',fury:'💢',nature:'🌿',alchemy:'⚗',coin:'🪙',mark:'📍',wave:'🌊'};
+const TAG_ICO={card:'🃏',dice:'🎲',roulette:'🎡',house:'🏦',curse:'💀',jackpot:'🎰',blitz:'💨',guard:'🛡',poison:'☠',holy:'✝',frost:'❄',summon:'🤖',sniper:'🎯',thunder:'⚡',fire:'🔥',undead:'🦴',rapid:'🔫',elem:'🌀',fury:'💢',nature:'🌿',alchemy:'⚗',coin:'🪙',mark:'📍',wave:'🌊',shadow:'👤',grav:'🕳'};
 let augBarKey='',synKey='';
 function renderAugBar(){const el=$('augBar');const k=!S||S.mode==='start'?'':S.augs.map(a=>a.id).join(',')+'|'+MAXA;if(k===augBarKey)return;augBarKey=k;synKey='';if(!k){el.innerHTML='';return;}
   const cell=(a,i)=>{const col=(TIER[a.t]||{}).col||'#d6a94a',ic=a.vf?'💥':a.t==='f'?'💥':a.t==='v'?'👑':(TAG_ICO[a.tags[0]]||'✦');
