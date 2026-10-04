@@ -2331,7 +2331,15 @@ const augReq=a=>!AUG_REQ[a.id]||AUG_REQ[a.id]();
 // 태그 중복(가드 2개 등)으로 선호 가중치가 겹쳐 쌓이지 않게: 선호 태그가 하나라도 있으면 ×2.5, 비선호는 ×0.3
 // 이미 가진 증강의 합체 짝은 행운에 비례해 더 잘 나옴 (행운 0: ×1.3, 행운 30: ×3)
 const fuseW=a=>partnerOf(a.id)?1.3+1.7*LK()/LUCK_CAP:1;
-function augW(a){const C=CLASSES[S.cls||'knight'];if(a.cls)return a.cls===S.cls?4*fuseW(a):0;const ts=new Set(a.tags);let w=1;if([...ts].some(t=>C.fav.includes(t)))w*=2.5;if([...ts].some(t=>C.dis.includes(t)))w*=.3;return w*fuseW(a);}
+// 루트 보너스: 이미 모은 시너지와 같은 계열 증강·능력치 카드가 더 잘 나옴. 시너지 6개면 최대 ×1.6, 행운이 높을수록 더 커짐 (행운 30이면 ×2.2)
+const CARD_TAG={'튼튼한 체력':['guard'],'가죽 갑옷':['guard'],'무거운 갑옷':['guard'],'철벽 자세':['guard'],'거인의 심장':['guard'],'불사의 맹세':['guard','curse'],'붕대':['guard'],
+  '조준경':['sniper','card'],'가속 탄':['sniper','card'],'관통 탄':['sniper','card'],'다연발':['card'],'사냥꾼의 눈':['sniper','dice'],'쾌속 장전':['card','thunder','summon'],
+  '급소 노리기':['dice'],'치명상':['dice'],'도박꾼의 주사위':['dice'],'네잎클로버':['dice','house'],'럭키 세븐':['jackpot','dice'],'전투 본능':['jackpot','fire','frost'],
+  '가벼운 장화':['blitz'],'날렵한 몸놀림':['blitz','guard'],'순발력':['blitz'],'질주 본능':['blitz'],'날랜 손놀림':['blitz','card','summon'],
+  '흡혈 송곳니':['curse'],'광기':['curse'],'유리 대포':['curse','fire'],'황금 주머니':['house'],'자석':['house'],'올인':['house','jackpot'],'회전 칩 연마':['roulette'],
+  '숫돌':['poison','fire','frost','thunder','summon'],'힘의 물약':['poison','fire','frost','thunder','summon'],'배움의 서':[]};
+function routeW(tags){let m=0;for(const t of tags)m=Math.max(m,Math.min(6,tag(t)));return 1+.6*(1+LK()/30)*m/6;}
+function augW(a){const C=CLASSES[S.cls||'knight'];if(a.cls)return a.cls===S.cls?4*fuseW(a):0;const ts=new Set(a.tags);let w=routeW([...ts]);if([...ts].some(t=>C.fav.includes(t)))w*=2.5;if([...ts].some(t=>C.dis.includes(t)))w*=.3;return w*fuseW(a);}
 function pickW(pool,n){const out=[];pool=[...pool];while(out.length<n&&pool.length){const t=pool.reduce((q,a)=>q+augW(a),0);let x=Math.random()*t,i=0;for(;i<pool.length-1;i++){if((x-=augW(pool[i]))<0)break;}out.push(pool.splice(i,1)[0]);}return out;}
 function augOptions(tier){
   const avail=AUGS.filter(a=>!has(a.id)&&augW(a)>0&&augReq(a)&&!(a.id==='luckydie'&&critFull()));
@@ -2466,7 +2474,7 @@ function rarityFx(){
 function rollRarity(bonus=0){const L=LK(bonus);const w=[['c',66],['r',26+.55*L],['e',4.5+.15*L],['l',.55+.05*L]];let t=w.reduce((a,b)=>a+b[1],0),x=Math.random()*t;for(const [k,v] of w){if((x-=v)<0)return k;}return 'c';}
 const cardOk=c=>!(c.cc&&critFull())&&!(c.cm&&critMFull())&&(!c.req||c.req());
 // 직업 선호 카드는 ×1.6, 최근 9장 안에 나온 카드는 ×0.3 (같은 카드 반복 방지)
-function cardOf(r,bonus=0){const pool=CARDS.filter(c=>(c.fr?c.fr===r:true)&&cardOk(c)),fav=CLASSES[S.cls||'knight'].cards,rec=S.recentC||[],w=c=>(fav.includes(c.n)?1.6:1)*(rec.includes(c.n)?.3:1);
+function cardOf(r,bonus=0){const pool=CARDS.filter(c=>(c.fr?c.fr===r:true)&&cardOk(c)),fav=CLASSES[S.cls||'knight'].cards,rec=S.recentC||[],w=c=>(fav.includes(c.n)?1.6:1)*(rec.includes(c.n)?.3:1)*routeW(CARD_TAG[c.n]||[]);
   let t=pool.reduce((q,c)=>q+w(c),0),x=Math.random()*t,pick=pool[pool.length-1];for(const c of pool){if((x-=w(c))<0){pick=c;break;}}
   S.recentC=[...rec,pick.n].slice(-9);return rollCard(pick,r,bonus);}
 const SYM=['🍒','🔔','🪙','💎','7️⃣','💀'];
