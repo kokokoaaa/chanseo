@@ -1067,20 +1067,20 @@ const RMUL={c:.6,r:.9,e:1.7,l:3};
 const CARDS=[
   {cls:'paladin',n:'성유',v:[[5,10,0]],t:v=>`신성 오라 범위 +${v[0]}%`,a:(p,v)=>{p.auraM=(p.auraM||0)+v[0]/100;}},
   {cls:'paladin',n:'성가',v:[[8,15,0]],t:v=>`신성 오라 피해 +${v[0]}%`,a:(p,v)=>{p.auraD=(p.auraD||0)+v[0]/100;}},
-  {cls:'necro',n:'뼈 가루',v:[[8,15,0]],t:v=>`해골 병사 피해 +${v[0]}%`,a:(p,v)=>{p.skD=(p.skD||0)+v[0]/100;}},
-  {cls:'necro',n:'영혼 사슬',v:[[.5,1,1]],t:v=>`해골 병사 지속 +${v[0]}초`,a:(p,v)=>{p.skL=(p.skL||0)+v[0];}},
+  {src:()=>skelMax()>0,cls:'necro',n:'뼈 가루',v:[[8,15,0]],t:v=>`해골 병사 피해 +${v[0]}%`,a:(p,v)=>{p.skD=(p.skD||0)+v[0]/100;}},
+  {src:()=>skelMax()>0,cls:'necro',n:'영혼 사슬',v:[[.5,1,1]],t:v=>`해골 병사 지속 +${v[0]}초`,a:(p,v)=>{p.skL=(p.skL||0)+v[0];}},
   {cls:'gunner',req:()=>(S.p.magB||0)<6,n:'탄띠',v:[[1,1,0]],t:v=>`탄창 +${v[0]}발 (최대 +6)`,a:(p,v)=>{p.magB=(p.magB||0)+v[0];}},
   {cls:'gunner',req:()=>(S.p.rlM||1)>.4,n:'빠른 장전',v:[[5,10,0]],t:v=>`재장전 시간 −${v[0]}%`,a:(p,v)=>{p.rlM=(p.rlM||1)*(1-v[0]/100);}},
-  {cls:'elem',n:'원소 결정',v:[[8,15,0]],t:v=>`원소 효과 피해 +${v[0]}%`,a:(p,v)=>{p.elD=(p.elD||0)+v[0]/100;}},
-  {cls:'elem',n:'정령 공명',v:[[2,4,1],[3,6,0]],t:v=>`공격 속도 +${v[0]}%, 원소 효과 피해 +${v[1]}%`,a:(p,v)=>{p.rateP=(p.rateP||0)+v[0]/100;p.elD=(p.elD||0)+v[1]/100;}},
-  {cls:'berserk',n:'피의 북',v:[[2,3,0]],t:v=>`광란 최대 +${v[0]}`,a:(p,v)=>{p.fyC=(p.fyC||0)+v[0];}},
-  {cls:'berserk',n:'끝없는 분노',v:[[.3,.6,1]],t:v=>`광란 지속 +${v[0]}초`,a:(p,v)=>{p.fyD=(p.fyD||0)+v[0];}},
-  {cls:'druid',n:'씨앗 주머니',v:[[6,12,0]],t:v=>`덩굴 지대 범위 +${v[0]}%`,a:(p,v)=>{p.vnR=(p.vnR||0)+v[0]/100;}},
-  {cls:'druid',n:'가시 독',v:[[8,15,0]],t:v=>`덩굴 지대 피해 +${v[0]}%`,a:(p,v)=>{p.vnD=(p.vnD||0)+v[0]/100;}},
-  {cls:'alch',n:'큰 병',v:[[6,12,0]],t:v=>`물약 범위 +${v[0]}%`,a:(p,v)=>{p.ptR=(p.ptR||0)+v[0]/100;}},
-  {cls:'alch',n:'농축액',v:[[8,15,0]],t:v=>`물약 피해 +${v[0]}%`,a:(p,v)=>{p.ptD=(p.ptD||0)+v[0]/100;}},
-  {cls:'gambler',req:()=>headP()<.8,n:'타짜의 손',v:[[1,2,1]],t:v=>`동전 앞면 확률 +${v[0]}% (최대 80%)`,a:(p,v)=>{p.hdP=(p.hdP||0)+v[0]/100;}},
-  {cls:'gambler',n:'판돈',v:[[5,10,0]],t:v=>`앞면 피해 +${v[0]}%`,a:(p,v)=>{p.hdD=(p.hdD||0)+v[0]/100;}},
+  {src:()=>tag('elem')>=2||has('elemcoin'),cls:'elem',n:'원소 결정',v:[[8,15,0]],t:v=>`원소 효과 피해 +${v[0]}%`,a:(p,v)=>{p.elD=(p.elD||0)+v[0]/100;}},
+  {src:()=>tag('elem')>=2||has('elemcoin'),cls:'elem',n:'정령 공명',v:[[2,4,1],[3,6,0]],t:v=>`공격 속도 +${v[0]}%, 원소 효과 피해 +${v[1]}%`,a:(p,v)=>{p.rateP=(p.rateP||0)+v[0]/100;p.elD=(p.elD||0)+v[1]/100;}},
+  {src:()=>furyOn(),cls:'berserk',n:'피의 북',v:[[2,3,0]],t:v=>`광란 최대 +${v[0]}`,a:(p,v)=>{p.fyC=(p.fyC||0)+v[0];}},
+  {src:()=>furyOn(),cls:'berserk',n:'끝없는 분노',v:[[.3,.6,1]],t:v=>`광란 지속 +${v[0]}초`,a:(p,v)=>{p.fyD=(p.fyD||0)+v[0];}},
+  {src:()=>has('thornseed')||has('gravebloom')||has('gravvine'),cls:'druid',n:'씨앗 주머니',v:[[6,12,0]],t:v=>`덩굴 지대 범위 +${v[0]}%`,a:(p,v)=>{p.vnR=(p.vnR||0)+v[0]/100;}},
+  {src:()=>has('thornseed')||has('gravebloom')||has('gravvine'),cls:'druid',n:'가시 독',v:[[8,15,0]],t:v=>`덩굴 지대 피해 +${v[0]}%`,a:(p,v)=>{p.vnD=(p.vnD||0)+v[0]/100;}},
+  {src:()=>tag('alchemy')>=2,cls:'alch',n:'큰 병',v:[[6,12,0]],t:v=>`물약 범위 +${v[0]}%`,a:(p,v)=>{p.ptR=(p.ptR||0)+v[0]/100;}},
+  {src:()=>tag('alchemy')>=2,cls:'alch',n:'농축액',v:[[8,15,0]],t:v=>`물약 피해 +${v[0]}%`,a:(p,v)=>{p.ptD=(p.ptD||0)+v[0]/100;}},
+  {src:()=>coinOn(),cls:'gambler',req:()=>headP()<.8,n:'타짜의 손',v:[[1,2,1]],t:v=>`동전 앞면 확률 +${v[0]}% (최대 80%)`,a:(p,v)=>{p.hdP=(p.hdP||0)+v[0]/100;}},
+  {src:()=>coinOn(),cls:'gambler',n:'판돈',v:[[5,10,0]],t:v=>`앞면 피해 +${v[0]}%`,a:(p,v)=>{p.hdD=(p.hdD||0)+v[0]/100;}},
   {n:'숫돌',v:[[.5,1.1,1]],t:v=>`공격력 +${v[0]}`,a:(p,v)=>{p.dmg+=v[0];}},
   {n:'힘의 물약',v:[[4,8,1]],t:v=>`공격력 +${v[0]}%`,a:(p,v)=>{p.dmgP=(p.dmgP||0)+v[0]/100;}},
   {req:()=>rawRate()<RATE_CAP(),n:'날랜 손놀림',v:[[4,8,1]],t:v=>`공격 속도 +${v[0]}%`,a:(p,v)=>{p.rateP=(p.rateP||0)+v[0]/100;}},
@@ -1884,16 +1884,16 @@ function doWave(){const p=S.p,R=130*(tag('wave')>=4?1.3:1)*(has('aftershock')?1.
     if(has('frostwave')&&!e.boss)e.slowT=Math.max(e.slowT||0,2);dmgE(e,dm*(has('sonicboom')&&(e.elite||e.boss)?1.5:1)*(has('frostwave')?1.3:1),'#cfe3ff');
     if(has('resonance')&&e.alive&&(has('f_thunderclap')||rz<5)){rz++;elemChain(e,has('f_thunderclap')?3:1,pDmg()*.6);}}
   if(has('tectonic')&&hitN)p.barrier=Math.min(Math.max(barrierMax(),20),(p.barrier||0)+2*hitN);}
-function clsRows(row){const p=S.p,c=S.cls;
-  if(c==='paladin')return [row('신성 오라',`범위 ${Math.round(110*(1+(p.auraM||0)))}, 피해 +${Math.round((p.auraD||0)*100)}%`)];
-  if(c==='necro')return [row('해골 병사',`${(S.skel||[]).length} / ${skelMax()}기, 피해 +${Math.round((p.skD||0)*100)}%, 지속 ${12+(p.skL||0)+(has('deathnova')?4:0)}초`)];
-  if(c==='gunner')return [row('탄창',`${magN()}발, 재장전 ${Math.round(2.4/pRate()*(has('g_twin')?.5:1)*(p.rlM||1)*100)/100}초`)];
-  if(c==='elem')return [row('원소 효과 피해','+'+Math.round((elM()-1)*100)+'%')];
-  if(c==='berserk')return [row('광란',`${p.fy||0} / ${furyCap()}, 지속 ${4+(p.fyD||0)+(has('bloodlust')?2:0)+(has('b_frenzy')?2:0)}초`)];
-  if(c==='druid')return [row('덩굴 지대',`범위 +${Math.round((p.vnR||0)*100)}%, 피해 +${Math.round((p.vnD||0)*100)}%`)];
-  if(c==='alch')return [row('물약',`범위 +${Math.round((p.ptR||0)*100)}%, 피해 +${Math.round((potM()-1)*100)}%`)];
-  if(c==='gambler')return [row('동전 앞면',Math.round(headP()*100)+'%',`앞면 피해 +${Math.round((p.hdD||0)*100)}%, 연속 ${p.cfS||0}회`)];
-  return [];}
+function clsRows(row){const p=S.p,c=S.cls,r=[];
+  if(c==='paladin')r.push(row('신성 오라',`범위 ${Math.round(110*(1+(p.auraM||0)))}, 피해 +${Math.round((p.auraD||0)*100)}%`));
+  if(skelMax()>0)r.push(row('해골 병사',`${(S.skel||[]).length} / ${skelMax()}기, 피해 +${Math.round((p.skD||0)*100)}%, 지속 ${12+(p.skL||0)+(has('deathnova')?4:0)}초`));
+  if(c==='gunner')r.push(row('탄창',`${magN()}발, 재장전 ${Math.round(2.4/pRate()*(has('g_twin')?.5:1)*(p.rlM||1)*100)/100}초`));
+  if(c==='elem'||tag('elem')>=2||has('elemcoin'))r.push(row('원소 효과 피해','+'+Math.round((elM()-1)*100)+'%'));
+  if(furyOn())r.push(row('광란',`${p.fy||0} / ${furyCap()}, 지속 ${4+(p.fyD||0)+(has('bloodlust')?2:0)+(has('b_frenzy')?2:0)}초`));
+  if(c==='druid'||has('thornseed')||has('gravebloom')||has('gravvine'))r.push(row('덩굴 지대',`범위 +${Math.round((p.vnR||0)*100)}%, 피해 +${Math.round((p.vnD||0)*100)}%`));
+  if(c==='alch'||tag('alchemy')>=2)r.push(row('물약',`범위 +${Math.round((p.ptR||0)*100)}%, 피해 +${Math.round((potM()-1)*100)}%`));
+  if(coinOn())r.push(row('동전 앞면',Math.round(headP()*100)+'%',`앞면 피해 +${Math.round((p.hdD||0)*100)}%, 연속 ${p.cfS||0}회`));
+  return r;}
 const potM=()=>(1+ex('alchemy')*.15)*(1+(S.p.ptD||0))*(has('frostflask')?1.2:1)*(has('philosopher')?1.5:1);
 const POTC=['#8ee06a','#ff8a3a','#9fe8ff'];
 function throwPotion(tx,ty,m){const p=S.p;(S.flasks=S.flasks||[]).push({x0:p.x,y0:p.y-10,x1:tx,y1:ty,t:0,k:Math.floor(Math.random()*3),m});
@@ -2764,7 +2764,7 @@ const augReq=a=>!AUG_REQ[a.id]||AUG_REQ[a.id]();
 // 이미 가진 증강의 합체 짝은 행운에 비례해 더 잘 나옴 (행운 0: ×1.3, 행운 30: ×3)
 const fuseW=a=>partnerOf(a.id)?1.3+1.7*LK()/LUCK_CAP:1;
 // 루트 보너스: 이미 모은 시너지와 같은 계열 증강·능력치 카드가 더 잘 나옴. 시너지 6개면 최대 ×1.6, 행운이 높을수록 더 커짐 (행운 30이면 ×2.2)
-const CARD_TAG={'튼튼한 체력':['guard','holy'],'가죽 갑옷':['guard'],'무거운 갑옷':['guard'],'철벽 자세':['guard'],'거인의 심장':['guard'],'불사의 맹세':['guard','curse'],'붕대':['guard','holy'],
+const CARD_TAG={'뼈 가루':['undead','summon'],'영혼 사슬':['undead'],'원소 결정':['elem'],'정령 공명':['elem'],'피의 북':['fury'],'끝없는 분노':['fury'],'씨앗 주머니':['nature'],'가시 독':['nature'],'큰 병':['alchemy'],'농축액':['alchemy'],'타짜의 손':['coin'],'판돈':['coin'],'튼튼한 체력':['guard','holy'],'가죽 갑옷':['guard'],'무거운 갑옷':['guard'],'철벽 자세':['guard'],'거인의 심장':['guard'],'불사의 맹세':['guard','curse'],'붕대':['guard','holy'],
   '조준경':['sniper','card'],'가속 탄':['sniper','card'],'관통 탄':['sniper','card'],'다연발':['card'],'사냥꾼의 눈':['sniper','dice'],'쾌속 장전':['card','thunder','summon'],
   '급소 노리기':['dice'],'치명상':['dice'],'도박꾼의 주사위':['dice'],'네잎클로버':['dice','house'],'럭키 세븐':['jackpot','dice'],'전투 본능':['jackpot','fire','frost'],
   '가벼운 장화':['blitz'],'날렵한 몸놀림':['blitz','guard'],'순발력':['blitz'],'질주 본능':['blitz'],'날랜 손놀림':['blitz','card','summon'],
@@ -2906,7 +2906,7 @@ function rarityFx(){
 function rollRarity(bonus=0){const L=LK(bonus);const w=[['c',66],['r',26+.55*L],['e',4.5+.15*L],['l',.55+.05*L]];let t=w.reduce((a,b)=>a+b[1],0),x=Math.random()*t;for(const [k,v] of w){if((x-=v)<0)return k;}return 'c';}
 const cardOk=c=>!(c.cc&&critFull())&&!(c.cm&&critMFull())&&(!c.req||c.req());
 // 직업 선호 카드는 ×1.6, 최근 9장 안에 나온 카드는 ×0.3 (같은 카드 반복 방지)
-function cardOf(r,bonus=0){const pool=CARDS.filter(c=>(c.fr?c.fr===r:true)&&(!c.cls||c.cls===S.cls)&&cardOk(c)),fav=CLASSES[S.cls||'knight'].cards,rec=S.recentC||[],w=c=>(fav.includes(c.n)||c.cls?1.6:1)*(rec.includes(c.n)?.3:1)*routeW(CARD_TAG[c.n]||[]);
+function cardOf(r,bonus=0){const pool=CARDS.filter(c=>(c.fr?c.fr===r:true)&&(!c.cls||c.cls===S.cls||(c.src&&c.src()))&&cardOk(c)),fav=CLASSES[S.cls||'knight'].cards,rec=S.recentC||[],w=c=>(fav.includes(c.n)||c.cls?1.6:1)*(rec.includes(c.n)?.3:1)*routeW(CARD_TAG[c.n]||[]);
   let t=pool.reduce((q,c)=>q+w(c),0),x=Math.random()*t,pick=pool[pool.length-1];for(const c of pool){if((x-=w(c))<0){pick=c;break;}}
   S.recentC=[...rec,pick.n].slice(-9);return rollCard(pick,r,bonus);}
 const SYM=['🍒','🔔','🪙','💎','7️⃣','💀'];
