@@ -1811,8 +1811,8 @@ const CLASSES={
   rogue:{n:'도적',role:'회피 암살',d:'단검을 난사하며 치고 빠지는 도적',passive:'그림자: 회피 15%, 대시 재사용 −30%',atk:.2,
     stats:{hp:140,maxHp:140,speed:225,dmg:11,rate:3.9,range:260,bspd:600,dodge:.15,dashMul:.7,crit:.12,critM:2.3},fav:['blitz','poison','curse'],dis:['guard'],
     cards:['가벼운 장화','날렵한 몸놀림','순발력','흡혈 송곳니','급소 노리기','치명상'],lvd:'치명타 +0.2%, 회피 +0.1%, 공격력 +1%, 체력 +1',lv:p=>{p.crit+=.002;p.dodge+=.001;p.dmgP=(p.dmgP||0)+.01;p.maxHp+=1;p.hp+=1;}},
-  paladin:{lock:true,n:'성기사',role:'신성 근접',d:'빛의 오라로 주변을 태우며 버티는 성전사',passive:'신성 오라: 주변 110 안의 적에게 초당 공격력 70% 빛 피해. 5번째 공격마다 체력 3% 회복',atk:.32,
-    stats:{hp:210,maxHp:210,speed:178,dmg:18,rate:1.85,range:200,bspd:430,armor:12,block:.08},fav:['holy','guard','fire'],dis:['curse'],
+  paladin:{lock:true,n:'성기사',role:'신성 근접',d:'빛의 오라로 주변을 태우며 버티는 성전사',passive:'신성 오라: 주변 110 안의 적에게 초당 공격력 100% 빛 피해. 5번째 공격마다 체력 3% 회복',atk:.32,
+    stats:{hp:210,maxHp:210,speed:178,dmg:20,rate:1.85,range:200,bspd:430,armor:12,block:.08},fav:['holy','guard','fire'],dis:['curse'],
     cards:['힘의 물약','숫돌','튼튼한 체력','가죽 갑옷','붕대','철벽 자세'],lvd:'체력 +2, 공격력 +0.8%, 방어력 +0.2',lv:p=>{p.maxHp+=2;p.hp+=2;p.dmgP=(p.dmgP||0)+.008;p.armor+=.2;}},
   necro:{lock:true,n:'사령술사',role:'해골 소환',d:'쓰러진 적을 해골 병사로 일으키는 술사',passive:'해골 소환: 처치 시 25% 확률, 그리고 2.5초마다 해골 병사 소환 (최대 5기, 12초, 공격력 100%로 근접 공격). 해골은 주변 근접 적을 끌어당기는 방패 역할 (체력 = 내 최대 체력 50%, 받는 피해 절반)',atk:.35,
     stats:{hp:155,maxHp:155,speed:185,dmg:16,rate:2.1,range:300,bspd:500,armor:7},fav:['undead','summon','curse'],dis:['holy'],
@@ -2691,7 +2691,7 @@ function update(dt){
       S.skel=S.skel.filter(k=>k.life>0);}
     if(has('frostnova')){S.fnT=(S.fnT??5)-dt;if(S.fnT<=0){S.fnT=(has('f_permafrost')?3:5)*tmul();S.rings.push({x:p.x,y:p.y,r:10,max:140,life:.35,col:'#9fe8ff'});for(const e of S.en)if(e.alive&&d2(e,p)<140*140){dmgE(e,pDmg()*lv3('frostnova',1.2,1.5,1.8),'#9fe8ff');if(!e.boss)e.slowT=Math.max(e.slowT||0,2);}}}
     if(has('tesla')){S.teT=(S.teT??3)-dt;if(S.teT<=0){S.teT=(has('f_tesla2')?1.5:3)*tmul();const e=nearestE(p,200);if(e){S.bolts.push({x1:p.x,y1:p.y,x2:e.x,y2:e.y,life:.18});dmgE(e,pDmg()*1.5*thM(),'#9fe8ff');lightning(e,lv3('tesla',2,3,4)-1);}}}
-    if(S.cls==='paladin'||has('halo')){S.auT=(S.auT??.5)-dt;if(S.auT<=0){S.auT=.5;const ar=110*(1+(p.auraM||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1),ad=S.cls==='paladin'?pDmg()*.35*(1+(p.auraD||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1)*holyM():0,hd=has('halo')?pDmg()*.3*holyM():0;
+    if(S.cls==='paladin'||has('halo')){S.auT=(S.auT??.5)-dt;if(S.auT<=0){S.auT=.5;const ar=110*(1+(p.auraM||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1),ad=S.cls==='paladin'?pDmg()*.5*(1+(p.auraD||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1)*holyM():0,hd=has('halo')?pDmg()*.3*holyM():0;
       for(const e of S.en){if(!e.alive)continue;const dd=d2(e,p);let v=0;if(ad&&dd<ar*ar)v+=ad;if(hd&&dd<(has('f_seraph')?210:140)**2)v+=hd;if(v){S.dsrc='holy';dmgE(e,v,null,null,true);S.dsrc=null;}}}}
     if(has('inferno')){S.inT=(S.inT??1)-dt;if(S.inT<=0){S.inT=1;for(const e of S.en)if(e.alive&&d2(e,p)<120*120)burnE(e,pDmg()*.2,2);}}
     if(has('nova')){S.novaT=(S.novaT??10)-dt;if(S.novaT<=0){S.novaT=(10-(has('f_supernova')?3:0))*tmul();explode(p.x,p.y,180,pDmg()*lv3('nova',7,9,11),'#ffd76a');S.shake=Math.max(S.shake,.2);if(has('f_supernova'))thunderStrike(6);}}
