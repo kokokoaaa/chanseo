@@ -643,11 +643,11 @@ const TAGS={
   card:    {n:'카드',  t2:'처치 시 탄환 2발 분열',t4:'탄환이 다른 적에게 1회 튕김',t6:'기본 탄환 +2발',ex:'공격력 +8%'},
   dice:    {n:'주사위',t1:'발사마다 1~6 눈금, 피해 배율 (평균 1배)',t2:'6이 나오면 폭발',t4:'같은 눈 3연속 시 3초간 전부 6',t6:'눈금 최소 3',ex:'치명타 확률 +4%, 치명타 피해 +15%'},
   roulette:{n:'룰렛',  t2:'회전 칩 +2',t4:'회전 칩 적중 시 25% 확률로 탄환 발사',t6:'회전 칩 크기, 피해 2배',ex:'회전 칩 피해 +20%, 2개마다 회전 칩 +1'},
-  house:   {n:'하우스',t2:'보유 골드 50당 공격력 +4% (최대 +120%)',t4:'받는 피해 40%를 골드로 대신 지불',t6:'처치마다 골드 +1, 골드 50당 공격 속도 +3%',ex:'골드 획득 +12%'},
-  curse:   {n:'저주',  t2:'체력 50% 이하에서 공격 속도 +60%',t4:'처치 시 체력 3% 회복, 해골 탄 6발',t6:'체력 30% 이하에서 받는 피해 −50%',ex:'흡혈 +1%, 공격력 +5%'},
+  house:   {n:'하우스',t2:'보유 골드 50당 공격력 +4% (최대 +120%)',t4:'보유 골드 100당 받는 피해 −2% (최대 −30%)',t6:'처치마다 골드 +1, 골드 50당 공격 속도 +3%',ex:'골드 획득 +12%'},
+  curse:   {n:'저주',  t2:'처치하면 2초간 공격 속도 +35%',t4:'처치 시 체력 3% 회복, 해골 탄 6발',t6:'흡혈 2배, 공격력 +20%',ex:'흡혈 +1%, 공격력 +5%'},
   jackpot: {n:'잭팟',  t2:'7번째 공격마다 강화탄 (3배, 관통)',t4:'7번째 처치마다 적 전체 폭발',t6:'잭팟의 모든 7이 5로 줄어듦',ex:'공격 속도 +3%'},
-  blitz:   {n:'블리츠',t2:'대시 재사용 −40%',t4:'대시 끝 지점에 폭발',t6:'대시 후 2초간 공격 속도 2배',ex:'이동 속도 +4%, 대시 재사용 −5%'},
-  guard:   {n:'가드',  t2:'방어력 +20',t4:'최대 체력 20%만큼 보호막 (3초간 안 맞으면 재충전). 방어력 4당 공격력 +1% (최대 +60%)',t6:'보호막이 있는 동안 받는 피해 50% 반사, 보호막이 깨지면 폭발',ex:'방어력 +8, 공격력 +5%'},
+  blitz:   {n:'블리츠',t2:'대시 재사용 −40%, 이동 속도 +10%',t4:'대시 끝 지점에 폭발',t6:'대시 후 2초간 공격 속도 2배',ex:'이동 속도 +4%, 대시 재사용 −5%'},
+  guard:   {n:'가드',  t2:'방어력 +20, 최대 체력 +40',t4:'최대 체력 20%만큼 보호막 (3초간 안 맞으면 재충전). 방어력 4당 공격력 +1% (최대 +60%)',t6:'보호막이 있는 동안 받는 피해 50% 반사, 보호막이 깨지면 폭발',ex:'방어력 +8, 공격력 +5%'},
   poison:  {n:'독',    t2:'적중 시 중독 (3초, 초당 공격력 35%)',t4:'중독된 적이 죽으면 주변에 독 전염',t6:'중독 10중첩, 독 피해 2배',ex:'독 피해 +20%'}
 };
 const TIER={s:{n:'실버',col:'#9aa1ab'},g:{n:'골드',col:'#c99223'},p:{n:'프리즘',col:'#b552d6'},v:{n:'VIP',col:'#c0392b'},f:{n:'합체',col:'#e0418f'}};
@@ -677,7 +677,7 @@ const AUGS=[
   {id:'blood',u:'강화할 때마다 최대 체력 −20%와 공격력 +20%가 한 번 더 적용돼요. 체력은 더 줄지만 화력은 크게 올라가요.',t:'s',n:'피의 계약',tags:['curse'],d:'최대 체력 −36%, 공격력 +40%',f:p=>{p.maxHp=Math.round(p.maxHp*.8);p.hp=Math.min(p.hp,p.maxHp);p.dmgP=(p.dmgP||0)+.2;}},
   {id:'thorns',u:'나를 근접 공격한 적에게 돌려주는 피해가 커져요. ★1은 받은 피해의 250%, ★2는 500%, ★3은 750%.',t:'s',n:'가시 칩',tags:['curse'],d:'근접 공격한 적에게 받은 피해의 500% 반사'},
   {id:'vamp',u:'강화할 때마다 흡혈 +2.5%가 한 번 더 붙어요. 내가 입힌 피해의 일정 비율만큼 체력이 차요.',t:'g',n:'흡혈귀',tags:['curse','poison'],d:'흡혈 +5% (입힌 피해만큼 체력 회복)',f:p=>{p.lifesteal+=.025;}},
-  {id:'deathwish',u:'체력이 낮을수록 오르는 공격력의 최대치가 커져요. 체력이 거의 없을 때 ★1은 +100%, ★2는 +150%, ★3은 +200%.',t:'p',n:'죽음의 소원',tags:['curse','curse'],d:'잃은 체력에 비례해 공격력 최대 +150%. 저주 2개로 계산'},
+  {id:'deathwish',u:'최대 중첩이 늘어나요. ★1은 6중첩, ★2는 8중첩, ★3은 10중첩.',t:'p',n:'죽음의 소원',tags:['curse','curse'],d:'처치할 때마다 3초간 공격력 +12% 중첩 (최대 8중첩, 처치하면 시간 갱신). 저주 2개로 계산'},
   {id:'lastcard',u:'죽을 피해를 체력 1로 버티는 효과의 재사용 대기 시간이 줄어요. ★1은 60초, ★2는 45초, ★3은 30초.',t:'p',n:'최후의 패',tags:['curse','roulette'],d:'45초에 한 번, 치명상을 체력 1로 버티고 2초 무적. 회전 칩 +2'},
   // jackpot
   {id:'seventh',u:'7번째 공격마다 부채꼴로 추가 발사하는 탄환 수가 늘어나요. ★1은 4발, ★2는 6발, ★3은 8발.',t:'s',n:'일곱 번째 패',tags:['jackpot'],d:'7번째 공격마다 탄환 6발을 부채꼴로 추가'},
@@ -694,7 +694,7 @@ const AUGS=[
   {id:'armor',u:'강화할 때마다 방어력 +15가 한 번 더 붙어요. 방어력 100이면 받는 피해가 절반이에요.',t:'s',n:'판금 갑옷',tags:['guard'],d:'방어력 +30',f:p=>{p.armor+=15;}},
   {id:'evade',u:'강화할 때마다 회피 +10%가 한 번 더 붙어요. 회피는 60%가 최대고, 넘는 만큼은 방어력으로 바뀌어요.',t:'s',n:'회피 기동',tags:['guard','blitz'],d:'회피 +20%',f:p=>{p.dodge+=.1;}},
   {id:'thick',u:'강화할 때마다 최대 체력 +30, 초당 체력 재생 +1.2가 한 번 더 붙어요.',t:'s',n:'강인한 육체',tags:['guard','house'],d:'최대 체력 +60, 초당 체력 재생 +2.4',f:p=>{p.maxHp+=30;p.hp+=30;p.regen+=1.2;}},
-  {id:'iron',u:'체력이 절반 이하일 때 방어력에 곱해지는 배율이 커져요. ★1은 2배, ★2는 2.5배, ★3은 3배.',t:'g',n:'철의 의지',tags:['guard','curse'],d:'체력 50% 이하일 때 방어력 2.5배'},
+  {id:'iron',u:'방어력 배율이 커져요. ★1은 1.35배, ★2는 1.5배, ★3은 1.65배.',t:'g',n:'철의 의지',tags:['guard','curse'],d:'방어력 1.5배'},
   {id:'gen',u:'기본 보호막 양이 늘어나요. ★1은 40, ★2는 80, ★3은 120. 골드 보너스(100당 +10, 최대 +60)는 그대로 더해져요.',t:'g',n:'보호막 발생기',tags:['guard','house'],d:'보호막 +80, 골드 100당 +10 (최대 +60). 3초간 안 맞으면 재충전'},
   {id:'counter',u:'회피에 성공했을 때 사방으로 쏘는 반격 탄환이 늘어나요. ★1은 6발, ★2는 9발, ★3은 12발. 강화할 때마다 회피 +8%도 한 번 더 붙어요.',t:'g',n:'반격',tags:['guard','card'],d:'회피 +16%. 회피에 성공하면 탄환 9발로 반격',f:p=>{p.dodge+=.08;}},
   {id:'fortress',u:'강화할 때마다 방어력 +25, 최대 체력 +40, 이동 속도 −10%가 한 번 더 적용돼요. 단단해지는 대신 느려져요.',t:'p',n:'요새',tags:['guard','guard'],d:'방어력 +50, 최대 체력 +80, 이동 속도 −19%. 가드 2개로 계산',f:p=>{p.armor+=25;p.maxHp+=40;p.hp+=40;p.speed*=.9;}},
@@ -745,11 +745,11 @@ const AUGS=[
   {id:'thunder',u:'5초마다 떨어지는 낙뢰 수가 늘어나요. ★1은 3발, ★2는 4발, ★3은 5발.',t:'p',n:'천둥',tags:['jackpot','blitz'],d:'6초마다 화면 안 무작위 적 3명에게 낙뢰 (공격력 3.5배). 공속이 오를수록 더 자주'},
   {id:'mine',u:'지뢰를 까는 간격이 짧아져요. ★1은 2.5초, ★2는 2초, ★3은 1.5초.',t:'s',n:'지뢰',tags:['blitz','house'],d:'2초마다 발밑에 지뢰. 적이 밟으면 폭발 (공격력 180%). 공속이 오를수록 더 자주'},
   {id:'adrenaline',u:'대시 후 3초간 오르는 공격력이 커져요. ★1은 +20%, ★2는 +30%, ★3은 +40%. 이동 속도 +20%는 그대로.',t:'s',n:'아드레날린',tags:['blitz'],d:'대시 후 3초간 공격력 +30%, 이동 속도 +20%'},
-  {id:'bloodrage',u:'잃은 체력 1%당 오르는 공격 속도가 커져요. ★1은 0.6%, ★2는 0.8%, ★3은 1%.',t:'p',n:'피의 광란',tags:['curse','blitz'],d:'잃은 체력 1%당 공격 속도 +0.8% (체력 10%면 +72%)'},
+  {id:'bloodrage',u:'공격 속도가 더 올라요. ★1은 +30%, ★2는 +40%, ★3은 +50%.',t:'p',n:'피의 광란',tags:['curse','blitz'],d:'공격 속도 +40%. 적중할 때마다 체력 0.3 회복'},
   {id:'shieldbash',u:'보호막이 남아 있는 동안 오르는 공격력이 커져요. ★1은 +20%, ★2는 +30%, ★3은 +40%.',t:'g',n:'보호막 충격',tags:['guard','blitz'],d:'보호막이 남아 있는 동안 공격력 +30%'},
   {id:'regenarmor',u:'방어력 1당 초당 체력 재생이 커져요. ★1은 0.02, ★2는 0.03, ★3은 0.04.',t:'s',n:'재생 장갑',tags:['guard'],d:'방어력 1당 초당 체력 재생 +0.03 (방어력 100이면 초당 +3)'},
   {id:'gravity',u:'주변 적이 느려지는 정도가 커져요. ★1은 −20%, ★2는 −30%, ★3은 −40%. 범위 150.',t:'g',n:'중력장',tags:['roulette','guard'],d:'내 주변 150 안의 적 이동 속도 −30%'},
-  {id:'goldbullet',u:'골드를 쓰는 탄환의 피해 보너스가 커져요. ★1은 +30%, ★2는 +45%, ★3은 +60%.',t:'g',n:'황금 탄환',tags:['house','card'],d:'두 번 공격할 때마다 골드 1을 쓰고 그 공격 피해 +45% (골드가 있을 때만)'},
+  {id:'goldbullet',u:'보너스 상한이 커져요. ★1은 최대 +30%, ★2는 +45%, ★3은 +60%.',t:'g',n:'황금 탄환',tags:['house','card'],d:'보유 골드 100당 탄환 피해 +3% (최대 +45%). 골드는 쓰지 않음'},
   {id:'interest',u:'보유 골드에 비례한 공격 속도 보너스가 커져요. 골드 100당 +2% → +3% → +4%, 최대 +40% → +60% → +80%.',t:'p',n:'복리',tags:['house','house'],d:'보유 골드 100당 공격 속도 +3% (최대 +60%). 하우스 2개로 계산'},
   {id:'luckycoin',u:'강화할 때마다 행운 +1, 골드 획득 +10%가 한 번 더 붙어요.',t:'s',n:'행운의 동전',tags:['house','dice'],d:'행운 +2, 골드 획득 +20%',f:p=>{p.luck+=1;p.goldM+=.1;}},
   // poison
@@ -772,8 +772,16 @@ const AUGS=[
   {id:'bigwheel',u:'',t:'p',n:'대형 룰렛',tags:['roulette','roulette'],d:'회전 칩 +3, 회전 칩 피해 +50%. 룰렛 2개로 계산',f:p=>{p.orbM*=1.225;}},
   {id:'sawblade',u:'',t:'g',n:'톱날 칩',tags:['roulette','curse'],d:'회전 칩에 맞은 적이 3초간 출혈 (초당 공격력 40%)'},
   {id:'bank',u:'',t:'g',n:'은행 금고',tags:['house','guard'],d:'보유 골드 300당 방어력 +2 (최대 +50)'},
-  {id:'goldbomb',u:'',t:'p',n:'돈다발 폭탄',tags:['house','house'],d:'8초마다 보유 골드 1%를 써서 주변 대폭발 (쓴 골드 ×3 + 공격력 3배). 하우스 2개로 계산. 공속이 오를수록 더 자주'},
-  {id:'madblade',u:'',t:'g',n:'광기의 칼날',tags:['curse','blitz'],d:'잃은 체력 1%당 공격력 +0.8%'},
+  {id:'goldbomb',u:'',t:'p',n:'돈다발 폭탄',tags:['house','house'],d:'8초마다 주변 대폭발 (공격력 3배 + 보유 골드 2%만큼 추가 피해). 골드는 쓰지 않음. 하우스 2개로 계산. 공속이 오를수록 더 자주'},
+  {id:'madblade',u:'처치 후 공격력 보너스가 커져요. ★1은 +25%, ★2는 +35%, ★3은 +45%.',t:'g',n:'광기의 칼날',tags:['curse','blitz'],d:'처치하면 3초간 공격력 +35% (처치하면 시간 갱신)'},
+  {id:'crossfire',u:'반대쪽 탄환이 나갈 확률이 커져요. ★1은 25%, ★2는 35%, ★3은 45%.',t:'s',n:'십자포화',tags:['card','blitz'],d:'공격할 때 35% 확률로 반대 방향에도 탄환 1발'},
+  {id:'bigshot',u:'대포알 피해가 커져요. ★1은 2.5배, ★2는 3배, ★3은 3.5배.',t:'g',n:'대포알',tags:['card','guard'],d:'5번째 공격마다 거대한 탄환 (공격력 3배, 관통 5)'},
+  {id:'overcharge',u:'과충전 피해 배율이 커져요. ★1은 1.8배, ★2는 2.2배, ★3은 2.6배.',t:'p',n:'과충전',tags:['jackpot','card'],d:'10번째 공격마다 다음 3번 공격 피해 2.2배'},
+  {id:'stunner',u:'기절 시간이 늘어나요. ★1은 0.6초, ★2는 0.9초, ★3은 1.2초.',t:'s',n:'기절 주사위',tags:['dice','guard'],d:'치명타를 맞은 일반 적이 0.9초간 거의 멈춤'},
+  {id:'goldrain',u:'7번째 처치 보너스가 커져요. ★1은 +5, ★2는 +7, ★3은 처치마다 +2에 7번째 +9.',t:'g',n:'황금비',tags:['house','jackpot'],d:'처치마다 골드 +1, 7번째 처치마다 골드 +7'},
+  {id:'warcry',u:'둔화 시간이 늘어나요. ★1은 0.8초, ★2는 1.2초, ★3은 1.6초.',t:'g',n:'함성',tags:['blitz','guard'],d:'대시하면 주변 160 안의 적이 1.2초간 크게 느려지고, 2초간 받는 피해 −30%'},
+  {id:'miasma',u:'독기 범위가 넓어져요. ★1은 110, ★2는 130, ★3은 150.',t:'s',n:'독기',tags:['poison','curse'],d:'2초마다 주변 130 안의 적을 중독'},
+  {id:'magnet2',u:'강화할 때마다 흡수 범위 ×1.3, 골드 획득 +7%가 한 번 더 붙어요.',t:'s',n:'자석 칩',tags:['house','roulette'],d:'흡수 범위 +70%, 골드 획득 +14%',f:p=>{p.magnet*=1.3;p.goldM+=.07;}},
   {id:'deathmark',u:'',t:'p',n:'죽음의 표식',tags:['curse','jackpot'],d:'체력 30% 이하 적(보스 포함)에게 피해 2배'},
   {id:'cascade',u:'',t:'g',n:'연쇄 당첨',tags:['jackpot','blitz'],d:'7번째 처치마다 4초간 공격 속도 +35%'},
   {id:'gold7',u:'',t:'p',n:'골든 세븐',tags:['jackpot','jackpot'],d:'7번째 공격마다 황금탄 1발 (공격력 5배, 관통 7). 잭팟 2개로 계산'},
@@ -792,7 +800,7 @@ const FUSIONS=[
   {id:'f_dicestorm',a:'dicethrow',b:'after',n:'주사위 폭풍',d:'대시할 때 주사위 8개를 사방으로. 6이 나오면 폭발'},
   {id:'f_spikearmor',a:'thorns',b:'armor',n:'가시 갑옷',d:'방어력 +25. 반사 피해에 방어력 ×3 추가',f:p=>{p.armor+=25;}},
   {id:'f_lucky777',a:'triple7',b:'seventh',n:'럭키 777',d:'7번째 공격은 항상 7배 피해'},
-  {id:'f_feast',a:'vamp',b:'blood',n:'피의 축제',d:'흡혈 +3%. 체력 50% 이하에서 흡혈 2배',f:p=>{p.lifesteal+=.03;}},
+  {id:'f_feast',a:'vamp',b:'blood',n:'피의 축제',d:'흡혈 +6%. 처치 시 체력 +2',f:p=>{p.lifesteal+=.06;}},
   {id:'f_insure',a:'insure',b:'gen',n:'종합 보험',d:'보호막 재충전 대기 3초 → 1.5초, 보험 횟수 +3'},
   {id:'f_frenzy',a:'fever',b:'runngun',n:'광란',d:'피버 최대치 +100%, 피버 유지 시간 2배'},
   {id:'f_shadow',a:'evade',b:'counter',n:'그림자 춤',d:'회피 +15%. 반격 탄환 2배, 회피하면 0.5초 무적',f:p=>{p.dodge+=.15;}},
@@ -811,7 +819,7 @@ const FUSIONS=[
   {id:'f_fleet',a:'drone',b:'dealer',n:'드론 함대',d:'드론 +2기, 드론 공격 간격 0.6초 → 0.4초'},
   {id:'f_minefield',a:'mine',b:'molotov',n:'지뢰밭',d:'지뢰 간격 절반, 지뢰 폭발 자리에 불길'},
   {id:'f_reaper',a:'execute',b:'combo',n:'사신',d:'처형 기준 +8%p, 처형하면 골드 +1'},
-  {id:'f_compound',a:'interest',b:'goldbullet',n:'복리 탄환',d:'황금 탄환이 골드를 쓰지 않음'},
+  {id:'f_compound',a:'interest',b:'goldbullet',n:'복리 탄환',d:'황금 탄환 보너스 상한 2배'},
   {id:'f_plaguebomb',a:'contagion',b:'venomcloud',n:'역병 폭탄',d:'감염 폭발 자리에 독구름, 폭발 반경 +50%'},
   {id:'f_juggernaut',a:'shieldbash',b:'regenarmor',n:'저거너트',d:'보호막 최대치 + 방어력 ×1'}
 ];
@@ -849,7 +857,7 @@ function tryFuse(){
 const VIPS=[
   {id:'blackjack',t:'v',n:'블랙잭',tags:['card','jackpot'],d:'21번째 공격마다 모든 적을 뚫는 카드 파도 3장 (공격력 5배)'},
   {id:'edge',t:'v',n:'진짜 하우스 엣지',tags:['house','house'],d:'보유 골드 1000당 공격력 +6% (최대 +60%). 하우스 2개로 계산'},
-  {id:'vaultbomb',t:'v',n:'금고 폭파',tags:['house','blitz'],d:'대시할 때 보유 골드 3%를 태워 폭발. 태운 골드 ×2 + 공격력 1.5배 피해'},
+  {id:'vaultbomb',t:'v',n:'금고 폭파',tags:['house','blitz'],d:'대시할 때 폭발 (공격력 1.5배 + 보유 골드 5%만큼 추가 피해). 골드는 쓰지 않음'},
   {id:'dealers',t:'v',n:'딜러 둘',tags:['roulette','card'],d:'따라다니는 딜러 칩 2개가 0.5초마다 사격 (공격력 50%)'},
   {id:'fate',t:'v',n:'운명의 주사위',tags:['dice','dice'],d:'주사위에 7이 생깁니다. 7이 나온 탄환은 맞은 자리에서 폭발 (공격력 1.8배). 주사위 2개로 계산'},
   {id:'goldskin',t:'v',n:'황금 피부',tags:['guard','house'],d:'보호막 최대치에 보유 골드의 1% 추가 (최대 체력의 50%까지)'},
@@ -955,7 +963,9 @@ function applyQ(f,p,q){if(!q||q===1){f(p);return;}
     if(k==='maxHp')p[k]=Math.round(p[k]);}
   for(const k of ['multi','pierce'])if(A2[k]!==A[k])p[k]+=A2[k]-A[k];
   if(p.maxHp>mh)p.hp+=p.maxHp-mh;p.hp=Math.min(p.hp,p.maxHp);}
-function tagCount(){const c={},o={},oq={};for(const a of S.augs){for(const t of a.tags)c[t]=(c[t]||0)+1;o[a.id]=a.lv;oq[a.id]=a.q||1;if(a.parts)for(const q of a.parts)o[q]=3;}S.tagc=c;S.own=o;S.oq=oq;}
+function tagCount(){const c={},o={},oq={};for(const a of S.augs){for(const t of a.tags)c[t]=(c[t]||0)+1;o[a.id]=a.lv;oq[a.id]=a.q||1;if(a.parts)for(const q of a.parts)o[q]=3;}S.tagc=c;S.own=o;S.oq=oq;
+  // 가드 2: 최대 체력 +40 (조건이 바뀌면 더하거나 뺌)
+  if(S.p){const want=tag('guard')>=2?40:0,have=S.p.g2hp||0;if(want!==have){S.p.maxHp+=want-have;S.p.hp=Math.max(1,Math.min(S.p.maxHp,S.p.hp+(want-have)));S.p.g2hp=want;}}}
 const HERO=(()=>{
 const sc=document.createElement('canvas');sc.width=40;sc.height=40;const g=sc.getContext('2d',{willReadFrequently:true});
 function px(c,col,x,y,w=1,h=1){c.fillStyle=col;c.fillRect(x|0,y|0,w,h);}
@@ -1200,7 +1210,9 @@ const effDmg=p=>p.dmg*Math.max(.2,1+(p.dmgP||0)),effRate=p=>p.rate*Math.max(.2,1
 function pDmg(){const p=S.p;let d=effDmg(p);
   if(tag('house')>=2)d*=1+Math.min(1.2,S.gold/1250);
   if(has('bankrupt')&&(S.gold===0||has('f_bankrich')))d*=lv3('bankrupt',2,2.5,3);
-  if(has('deathwish'))d*=1+(1-p.hp/p.maxHp)*lv3('deathwish',1,1.5,2);
+  if(p.dwT>0)d*=1+.12*(p.dwS||0);
+  if(p.mbT>0)d*=1+lv3('madblade',.25,.35,.45);
+  if(tag('curse')>=6)d*=1.2;
   if(red())d*=lv3('redblack',1.35,1.5,1.65);
   d*=1+ex('card')*.08+ex('guard')*.05+ex('curse')*.05;
   if(tag('guard')>=4)d*=1+Math.min(.6,armorEff()/400);
@@ -1214,9 +1226,9 @@ function pDmg(){const p=S.p;let d=effDmg(p);
   d*=1+Math.max(0,rawRate()/RATE_CAP()-1)*.5;
   return d;}
 function rawRate(){const p=S.p;let r=effRate(p)*(1+ex('jackpot')*.03)*(1+Math.max(0,moveSpd()-SPEED_CAP)/10*.03);if(has('a_still')&&!p.moving)r*=1+lv3('a_still',.35,.5,.65);
-  if(tag('curse')>=2&&p.hp<p.maxHp*.5)r*=1.6;
+  if(tag('curse')>=2&&p.curT>0)r*=1.35;
   if(p.rage>0)r*=1+.06*p.rage;
-  if(has('bloodrage'))r*=1+(1-p.hp/p.maxHp)*100*lv3('bloodrage',.006,.008,.01);
+  if(has('bloodrage'))r*=1+lv3('bloodrage',.3,.4,.5);
   if(has('interest'))r*=1+Math.min(lv3('interest',.4,.6,.8),Math.floor(S.gold/100)*lv3('interest',.02,.03,.04));
   if(p.blitzT>0)r*=2;
   if(has('fever'))r*=1+Math.min(lv3('fever',1.2,1.6,2)+(has('f_frenzy')?1:0),p.combo*lv3('fever',.06,.08,.1));
@@ -1227,7 +1239,7 @@ function rawRate(){const p=S.p;let r=effRate(p)*(1+ex('jackpot')*.03)*(1+Math.ma
   return r;}
 const RATE_CAP=()=>has('overflow')?13:10,CRIT_CAP=1,CRIT_DMG_CAP=5,DODGE_CAP=.6;
 const SPEED_CAP=230;
-function moveSpd(){const p=S.p;return p.speed*(1+ex('blitz')*.04)*(p.adrT>0?1.2:1)*(p.rushT>0?1+lv3('rush',.35,.5,.65)*(has('f_overdrive')?2:1):1);}
+function moveSpd(){const p=S.p;return p.speed*(1+ex('blitz')*.04+(tag('blitz')>=2?.1:0))*(p.adrT>0?1.2:1)*(p.rushT>0?1+lv3('rush',.35,.5,.65)*(has('f_overdrive')?2:1):1);}
 function pRate(){return Math.min(RATE_CAP(),rawRate());}
 const critRaw=()=>S.p.crit+ex('dice')*.04+(has('a_still')&&!S.p.moving?.1:0);
 const critC=()=>Math.min(CRIT_CAP,critRaw());
@@ -1235,7 +1247,7 @@ const critMul=()=>Math.min(CRIT_DMG_CAP,S.p.critM+ex('dice')*.15+Math.max(0,crit
 const critFull=()=>critRaw()>=CRIT_CAP,critMFull=()=>critMul()>=CRIT_DMG_CAP;
 const stackCapped=x=>(x.k==='crit'&&critFull())||(x.k==='critm'&&critMFull())||(x.k==='luck'&&S.p.luck>=LUCK_CAP)||(x.k==='dodge'&&S.p.dodge>=DODGE_CAP)||(x.k==='rate'&&rawRate()>=RATE_CAP());
 const dodgeC=()=>Math.min(DODGE_CAP,S.p.dodge);
-function armorEff(){const p=S.p;let a=(blessOn('guard')?60:0)+(has('bank')?Math.min(50,Math.floor(S.gold/300)*2):0)+p.armor+ex('guard')*8+(tag('guard')>=2?20:0)+Math.max(0,p.dodge-DODGE_CAP)*200;if(has('iron')&&p.hp<p.maxHp*.5)a*=lv3('iron',2,2.5,3);return a;}
+function armorEff(){const p=S.p;let a=(blessOn('guard')?60:0)+(has('bank')?Math.min(50,Math.floor(S.gold/300)*2):0)+p.armor+ex('guard')*8+(tag('guard')>=2?20:0)+Math.max(0,p.dodge-DODGE_CAP)*200;if(has('iron'))a*=lv3('iron',1.35,1.5,1.65);return a;}
 function barrierMax(){const p=S.p;return (has('f_juggernaut')?p.armor:0)+(has('f_vaultkeeper')?30:0)+(has('goldskin')?Math.min(p.maxHp*.5,S.gold*.01):0)+(tag('guard')>=4?p.maxHp*.2:0)+(has('gen')?40*L('gen')+Math.min(60,Math.floor(S.gold/100)*10):0);}
 const dashCdVal=()=>2.4*S.p.dashMul*(tag('blitz')>=2?.6:1)*Math.pow(.95,ex('blitz'));
 // 회전 칩 기본 반경. 몸에 붙은 적이 아니라 다가오는 적을 먼저 갈도록 근접 범위 밖으로 넓힘 (48 → 82)
@@ -1545,9 +1557,9 @@ function hurtP(amt,src){
   if(S.buffT.vuln>0)amt*=1.5;
   if(S.debtT>0)amt*=1.3;
   if(evOn('moon'))amt*=1.2;
-  if(tag('curse')>=6&&p.hp<p.maxHp*.3)amt*=.5;
+  if(p.wcT>0)amt*=.7;
   amt*=100/(100+armorEff());
-  if(tag('house')>=4&&S.gold>0){const pay=Math.min(S.gold,Math.ceil(amt*.4));S.gold-=pay;amt-=pay;}
+  if(tag('house')>=4)amt*=1-Math.min(.3,Math.floor(S.gold/100)*.02);
   p.noHitT=0;
   if(p.barrier>0){
     if(tag('guard')>=6){const t=src&&src.alive?src:nearestE(p,150);if(t)dmgE(t,amt*.5,'#9fd3ff');}
@@ -1573,7 +1585,7 @@ function addRage(){const p=S.p;if(!has('k_berserk'))return;p.rage=Math.min(lv3('
 function dmgE(e,amt,col,label,quiet){
   if(!e.alive)return;
   e.hp-=amt;e.hit=.06;S.st.dmg+=amt;
-  {let ls=S.p.lifesteal+ex('curse')*.01;if(has('f_feast')&&S.p.hp<S.p.maxHp*.5)ls*=2;if(ls&&S.p.alive)S.p.hp=Math.min(S.p.maxHp,S.p.hp+amt*ls);}
+  {let ls=S.p.lifesteal+ex('curse')*.01;if(tag('curse')>=6)ls*=2;if(ls&&S.p.alive)S.p.hp=Math.min(S.p.maxHp,S.p.hp+amt*ls);}
   // quiet=2: 회전 칩처럼 자주 맞는 피해는 작은 하늘색 숫자로
   if(quiet===2)ftext(e.x+rand(-8,8),e.y-e.r-4,Math.round(amt),'#9fe8ff',12);
   else if(!quiet)ftext(e.x+rand(-6,6),e.y-e.r-6,label||Math.round(amt),col||'#f1e7cf',col?19:13);
@@ -1600,7 +1612,8 @@ function playerFire(tg){
   let n=p.multi+(tag('card')>=6?2:0);if(has('shuffle')&&Math.random()<lv3('shuffle',.2,.35,.5)+(has('f_magician')?.25:0))n*=2;
   if(has('focus'))shock*=n<=1?1+lv3('focus',.35,.5,.65):1.1;
   if(has('giant'))shock*=1+lv3('giant',.15,.25,.35);
-  if(has('goldbullet')&&p.shots%2===0&&(S.gold>0||has('f_compound'))){if(!has('f_compound'))S.gold--;shock*=1+lv3('goldbullet',.3,.45,.6);}
+  if(p.ocN>0){shock*=lv3('overcharge',1.8,2.2,2.6);p.ocN--;}
+  if(has('goldbullet'))shock*=1+Math.min(lv3('goldbullet',.3,.45,.6)*(has('f_compound')?2:1),Math.floor(S.gold/100)*.03);
   const base=Math.atan2(tg.y-p.y,tg.x-p.x),d=pDmg()*mult*shock;p.aimA=base;p.atkT=CLASSES[S.cls].atk;p.face=Math.cos(base)>=0?1:-1;
   const blife=S.cls==='knight'||S.cls==='rogue'?Math.max(.3,p.range*1.15/p.bspd):1.2;
   if(has('m_meteor')&&p.shots%lv3('m_meteor',10,8,6)===0){explode(tg.x,tg.y,120,pDmg()*6,'#ff5a2a');S.shake=Math.max(S.shake,.18);}
@@ -1616,6 +1629,9 @@ function playerFire(tg){
   if(has('spiral')&&p.shots%4===0){const k=6+2*L('spiral');for(let i=0;i<k;i++)pBullet(p.x,p.y,i*TAU/k+p.shots*.3,d*.6,{child:true});}
   if(has('echo'))(S.echoQ=S.echoQ||[]).push({t:.25,a:base,d:d*lv3('echo',.5,.7,.9),n});
   if(has('seventh')&&p.shots%J()===0){const k=2+2*L('seventh');for(let i=0;i<k;i++)pBullet(p.x,p.y,base+(i-(k-1)/2)*.25,d*.7);}
+  if(has('crossfire')&&Math.random()<lv3('crossfire',.25,.35,.45))pBullet(p.x,p.y,base+Math.PI,d,{child:true});
+  if(has('bigshot')&&p.shots%5===0)pBullet(p.x,p.y,base,d*lv3('bigshot',2.5,3,3.5),{pierce:5,r:9,big:true,child:true,life:blife*1.3});
+  if(has('overcharge')){if(p.shots%10===0)p.ocN=3;}
 }
 function onPHit(b,t){
   const p=S.p;b.hit.add(t);
@@ -1627,13 +1643,13 @@ function onPHit(b,t){
   if(has('r_assassin')&&(t.elite||t.boss))dmg*=lv3('r_assassin',2,2.5,3);
   if(S.p.shadowT>0&&!col){dmg*=critMul();col='#ffd76a';}
   if(has('deck'))dmg*=1+.06*p.multi;
-  if(has('madblade'))dmg*=1+.8*Math.max(0,1-p.hp/p.maxHp);
   if(has('deathmark')&&t.hp<t.maxHp*.3)dmg*=2;
   if(has('slipstream'))dmg*=1+.6*Math.max(0,moveSpd()/(CLASSES[S.cls].stats.speed||195)-1);
   if(has('titan'))dmg*=1+p.maxHp/1000;
   if(has('combo')&&!b.child){if(p.cmbE===t)p.cmbN=Math.min(lv3('combo',10,15,20),(p.cmbN||0)+1);else{p.cmbE=t;p.cmbN=0;}dmg*=1+.06*p.cmbN;}
   {let cr=Math.random()<critC();if(!cr&&has('second')&&Math.random()<lv3('second',.3,.45,.6))cr=true;
-   if(cr){dmg*=critMul();col='#ffd76a';if(has('reroll2')&&!b.child)pBullet(p.x,p.y,Math.atan2(t.y-p.y,t.x-p.x),b.dmg*.7,{child:true});if(has('toxicburst')&&t.ps>0){explode(t.x,t.y,80,pDmg()*1.5,'#8ee06a');for(const o of S.en)if(o.alive&&d2(o,t)<80*80)poisonE(o);}if(has('burn')){t.burnT=3;t.burnD=Math.max(t.burnD||0,pDmg()*lv3('burn',.4,.6,.8));if(has('f_frostfire'))t.slowT=Math.max(t.slowT||0,1);}}}
+   if(has('bloodrage')&&p.alive)p.hp=Math.min(p.maxHp,p.hp+.3);
+   if(cr){dmg*=critMul();col='#ffd76a';if(has('stunner')&&!t.boss)t.slowT=Math.max(t.slowT||0,lv3('stunner',.6,.9,1.2));if(has('reroll2')&&!b.child)pBullet(p.x,p.y,Math.atan2(t.y-p.y,t.x-p.x),b.dmg*.7,{child:true});if(has('toxicburst')&&t.ps>0){explode(t.x,t.y,80,pDmg()*1.5,'#8ee06a');for(const o of S.en)if(o.alive&&d2(o,t)<80*80)poisonE(o);}if(has('burn')){t.burnT=3;t.burnD=Math.max(t.burnD||0,pDmg()*lv3('burn',.4,.6,.8));if(has('f_frostfire'))t.slowT=Math.max(t.slowT||0,1);}}}
   if(has('frost')&&Math.random()<lv3('frost',.25,.35,.45)&&!t.boss)t.slowT=Math.max(t.slowT||0,1.5);
   if(has('execute')){const th=lv3('execute',.12,.16,.2)+(has('f_reaper')?.08:0);if(t.hp<=t.maxHp*th||t.hp-dmg<=t.maxHp*th){if(!t.boss&&!t.elite){dmg=Math.max(dmg,t.hp+1);label='처형';col='#c0392b';if(has('f_reaper'))S.gold+=1;}else if(t.hp<=t.maxHp*th)dmg*=1.5;}}
   if(has('triple7')&&!b.child&&Math.random()<lv3('triple7',.07,.1,.14)){dmg*=7;col='#ff4fd8';label='×7 '+Math.round(dmg);}
@@ -1660,6 +1676,11 @@ function onKill(e){
   const T=ET[e.type],p=S.p;
   if(has('soul')&&!e.boss&&(p.soulN||0)<500){p.soulN=(p.soulN||0)+1;p.dmgP=(p.dmgP||0)+.001;}
   if(has('corrode')&&e.ps>0)p.hp=Math.min(p.maxHp,p.hp+1);
+  if(tag('curse')>=2)p.curT=2;
+  if(has('deathwish')){p.dwS=Math.min(lv3('deathwish',6,8,10),(p.dwT>0?p.dwS||0:0)+1);p.dwT=3;}
+  if(has('madblade'))p.mbT=3;
+  if(has('f_feast'))p.hp=Math.min(p.maxHp,p.hp+2);
+  if(has('goldrain')){addGold(lv3('goldrain',1,1,2));if(S.st.kills%7===6)addGold(lv3('goldrain',5,7,9));}
   if(has('lottery')&&!e.boss&&Math.random()<.02){const g=price(25);S.gold+=g;explode(e.x,e.y,110,pDmg()*3,'#ffd76a');ftext(e.x,e.y-e.r-18,'복권 당첨! +'+g,'#ffd76a',18);}
   burst(e.x,e.y,T.col,e.boss?40:10);S.st.kills++;
   {const ck=cosEq('kill');if(ck&&S.pa.length<200)killFx(e.x,e.y,ck,q=>{if(S.pa.length<260)S.pa.push(q);},r=>{if(S.rings.length<60)S.rings.push(r);},e.boss||e.elite);}
@@ -1709,7 +1730,8 @@ function dash(){
   const p=S.p;if(!p.alive||p.dashCd>0||p.dashT>0)return;
   let dx=p.lmx,dy=p.lmy;const l=Math.hypot(dx,dy)||1;dx/=l;dy/=l;
   p.dx=dx;p.dy=dy;p.dashT=.14;p.chargeHit=new Set();if(has('phantom'))p.phT=3;
-  if(has('vaultbomb')&&S.gold>0){const g=Math.max(1,Math.floor(S.gold*.03));S.gold-=g;explode(p.x,p.y,140,g*2+pDmg()*1.5,'#ffd76a');ftext(p.x,p.y-30,'-'+g+'G','#d6a94a',15);}
+  if(has('vaultbomb'))explode(p.x,p.y,140,S.gold*.05+pDmg()*1.5,'#ffd76a');
+  if(has('warcry')){p.wcT=2;for(const e of S.en)if(e.alive&&!e.boss&&d2(e,p)<160*160)e.slowT=Math.max(e.slowT||0,lv3('warcry',.8,1.2,1.6));S.rings.push({x:p.x,y:p.y,r:10,max:160,life:.3,col:'#ffe08a'});}
   const cd=dashCdVal();p.dashCd=cd;p.dashMax=cd;
   if(has('f_dicestorm')){for(let i=0;i<8;i++){const roll=rollDie();pBullet(p.x,p.y,i*TAU/8,pDmg()*roll*.6,{roll,dieThrow:true,r:5,pierce:2,life:.9});}}
   else if(has('dicethrow')){const ex=new Set();for(let i=0;i<1+2*L('dicethrow');i++){const e=nearestE(p,320,ex);if(!e)break;ex.add(e);const roll=rollDie();pBullet(p.x,p.y,Math.atan2(e.y-p.y,e.x-p.x),pDmg()*roll*.6,{roll,dieThrow:true,r:5,pierce:0,life:.8});}}
@@ -1735,7 +1757,7 @@ function update(dt){
   if(S.merch){S.merch.life-=dt;if(S.merch.life<=0){S.merch=null;}else if(p.alive&&Math.abs(p.x-S.merch.x)<44+p.r&&Math.abs(p.y-S.merch.y)<30+p.r){const m=S.merch;S.merch=null;if(AUTO.pick){toast('자동 모드: 상인 건너뜀');}else{openMerch(m);return;}}}
   if(has('piggy')){S.piggyT-=dt;if(S.piggyT<=0){S.piggyT=30;const it=Math.min(30*L('piggy'),Math.floor(S.gold*.1));if(it>0){S.gold+=it;ftext(p.x,p.y-34,'이자 +'+it,'#d6a94a',15);}}}
   if(has('insure')){S.insureT-=dt;if(S.insureT<=0){S.insureT=30;p.shield=2+L('insure')+(has('f_insure')?3:0);}}
-  p.lastCd=Math.max(0,p.lastCd-dt);S.debtT=Math.max(0,(S.debtT||0)-dt);p.rushT=Math.max(0,(p.rushT||0)-dt);p.lvJ=Math.max(0,(p.lvJ||0)-dt);p.phT=Math.max(0,(p.phT||0)-dt);p.cascT=Math.max(0,(p.cascT||0)-dt);p.revT=Math.max(0,(p.revT||0)-dt);
+  p.lastCd=Math.max(0,p.lastCd-dt);S.debtT=Math.max(0,(S.debtT||0)-dt);p.rushT=Math.max(0,(p.rushT||0)-dt);p.lvJ=Math.max(0,(p.lvJ||0)-dt);p.curT=Math.max(0,(p.curT||0)-dt);p.dwT=Math.max(0,(p.dwT||0)-dt);p.mbT=Math.max(0,(p.mbT||0)-dt);p.wcT=Math.max(0,(p.wcT||0)-dt);p.phT=Math.max(0,(p.phT||0)-dt);p.cascT=Math.max(0,(p.cascT||0)-dt);p.revT=Math.max(0,(p.revT||0)-dt);
   for(const bo of S.bolts)bo.life-=dt;S.bolts=S.bolts.filter(bo=>bo.life>0);
   if(p.alive){
     if(has('punch')){S.punchT=(S.punchT||0)-dt;if(S.punchT<=0){const rad=(70+15*L('punch'))*(has('f_storm')?1.5:1);if(S.en.some(e=>e.alive&&d2(e,p)<rad*rad)){S.punchT=.8*tmul();explode(p.x,p.y,rad,pDmg()*(.8+.4*L('punch')),'#fff3c4');}else S.punchT=.1;}}
@@ -1752,7 +1774,8 @@ function update(dt){
     if(S.echoQ&&S.echoQ.length){for(const q of S.echoQ){q.t-=dt;if(q.t<=0)for(let i=0;i<q.n;i++)pBullet(p.x,p.y,q.a+(i-(q.n-1)/2)*.13,q.d,{child:true,r:4});}S.echoQ=S.echoQ.filter(q=>q.t>0);}
     if(has('drone')){S.drT=(S.drT||0)-dt;if(S.drT<=0){S.drT=(has('f_fleet')?.4:.6)*tmul();for(const q of dronePos()){const e=nearestE(q,p.range*1.1);if(e)pBullet(q.x,q.y,Math.atan2(e.y-q.y,e.x-q.x),pDmg()*.6,{child:true,r:3});}}}
     if(has('nova')){S.novaT=(S.novaT??10)-dt;if(S.novaT<=0){S.novaT=(10-(has('f_supernova')?3:0))*tmul();explode(p.x,p.y,180,pDmg()*lv3('nova',7,9,11),'#ffd76a');S.shake=Math.max(S.shake,.2);if(has('f_supernova'))thunderStrike(6);}}
-    if(has('goldbomb')){S.gbT=(S.gbT??8)-dt;if(S.gbT<=0){S.gbT=8*tmul();const g=Math.floor(S.gold*.01);if(g>0&&S.en.some(e=>e.alive&&d2(e,p)<200*200)){S.gold-=g;explode(p.x,p.y,200,g*3+pDmg()*3,'#ffd76a');ftext(p.x,p.y-34,'-'+g+'G','#d6a94a',15);S.shake=Math.max(S.shake,.15);}}}
+    if(has('goldbomb')){S.gbT=(S.gbT??8)-dt;if(S.gbT<=0){S.gbT=8*tmul();if(S.en.some(e=>e.alive&&d2(e,p)<200*200)){explode(p.x,p.y,200,S.gold*.02+pDmg()*3,'#ffd76a');S.shake=Math.max(S.shake,.15);}}}
+    if(has('miasma')){S.miT=(S.miT??2)-dt;if(S.miT<=0){S.miT=2;for(const e of S.en)if(e.alive&&d2(e,p)<lv3('miasma',110,130,150)**2)poisonE(e);}}
     if(has('spikearmor')){S.spT=(S.spT||0)-dt;if(S.spT<=0){S.spT=.5;const dm=armorEff()*.3;if(dm>0)for(const e of S.en)if(e.alive&&d2(e,p)<(90+e.r)**2)dmgE(e,dm,null,null,true);}}
     if(has('thunder')){S.thT=(S.thT??6)-dt;if(S.thT<=0){S.thT=6*tmul();thunderStrike(lv3('thunder',2,3,4));}}
     if(has('mine')){S.mineT=(S.mineT??1)-dt;if(S.mineT<=0){S.mineT=lv3('mine',2.5,2,1.5)*(has('f_minefield')?.5:1)*tmul();S.zones.push({x:p.x,y:p.y,r:16,life:12,kind:'mine'});}}
@@ -3085,7 +3108,7 @@ function renderStats(){
   const bonus=[];
   if(tag('house')>=2)bonus.push(`하우스 골드 보너스 +${Math.round(Math.min(.6,Math.floor(S.gold/50)*.04)*100)}%`);
   if(has('bankrupt')&&S.gold===0)bonus.push('빚쟁이 ×2');
-  if(has('deathwish'))bonus.push(`죽음의 소원 +${Math.round((1-p.hp/p.maxHp)*100)}%`);
+  if(p.dwT>0)bonus.push(`죽음의 소원 +${Math.round(12*(p.dwS||0))}%`);
   if(raw>RATE_CAP())bonus.push(`공속 초과 ×${(1+(raw/RATE_CAP()-1)*.5).toFixed(2)}`);
   const atk=[
     row('공격력',pDmg().toFixed(1),`기본 ${p.dmg.toFixed(1)} × (1 + 보너스 합계 ${Math.round((p.dmgP||0)*100)}%)`+(bonus.length?`, ${bonus.join(', ')}`:'')),
@@ -3099,7 +3122,7 @@ function renderStats(){
   ].join('');
   const def=[
     row('최대 체력',Math.round(p.maxHp)),
-    row('방어력',Math.round(ar),`받는 피해 −${pct(red_)}`+(p.dodge>DODGE_CAP?`, 회피 초과분 +${Math.round((p.dodge-DODGE_CAP)*200)} 포함`:'')+(has('iron')&&p.hp<p.maxHp*.5?', 철의 의지 ×2 적용 중':'')),
+    row('방어력',Math.round(ar),`받는 피해 −${pct(red_)}`+(p.dodge>DODGE_CAP?`, 회피 초과분 +${Math.round((p.dodge-DODGE_CAP)*200)} 포함`:'')+(has('iron')?', 철의 의지 적용':'')),
     row('회피',pct(dodgeC())+' <small>/ 60%</small>',p.dodge>DODGE_CAP?`초과 ${Math.round((p.dodge-DODGE_CAP)*100)}% → 방어력 +${Math.round((p.dodge-DODGE_CAP)*200)}`:''),
     ...(p.block?[row('막기',pct(p.block+(has('k_wall')?lv3('k_wall',.15,.2,.25):0)),'막으면 피해 무효')]:[]),
     row('보호막',Math.round(barrierMax())),
