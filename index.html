@@ -658,6 +658,7 @@ const TAGS={
   sniper:  {n:'원거리',t2:'사거리 +20%',t4:'먼 적일수록 피해 증가 (거리 100당 +10%, 최대 +60%)',t6:'탄환이 적을 뚫을 때마다 피해 +30% 누적 (최대 +150%)',ex:'원거리 피해 +5%'},
   thunder: {n:'번개',  t2:'10번째 공격마다 연쇄 번개 (적 4명)',t4:'번개 연쇄 대상 +3, 번개 피해 +50%',t6:'번개 맞은 일반 적 0.8초 기절',ex:'번개 피해 +15%'},
   fire:    {n:'화염',  t2:'적중 시 화상 (3초, 초당 공격력 20%)',t4:'화상 입은 적이 죽으면 불길 폭발 (범위 70, 공격력 120%)',t6:'화상 피해 2배, 화상이 1초마다 주변 적에게 번짐',ex:'화상 피해 +15%'},
+  undead:  {n:'망자',  t2:'처치 시 15% 확률로 원혼이 날아가 가까운 적에게 공격력 120% 피해',t4:'처치 시 10% 확률로 해골 병사 소환, 해골 최대 수 +2',t6:'해골 병사 피해 2배, 해골이 적을 처치하면 체력 1% 회복',ex:'원혼·해골 피해 +12%'},
   guard:   {n:'가드',  t2:'맞으면 주변 적을 밀쳐내고 1초간 둔화 (1초에 한 번)',t4:'최대 체력 20%만큼 보호막 (3초간 안 맞으면 재충전). 방어력 4당 공격력 +1% (최대 +60%)',t6:'보호막이 있는 동안 받는 피해 50% 반사, 보호막이 깨지면 폭발',ex:'방어력 +8, 공격력 +5%'},
   poison:  {n:'독',    t2:'적중 시 중독 (3초, 초당 공격력 35%)',t4:'중독된 적이 죽으면 주변에 독 전염',t6:'중독 10중첩, 독 피해 2배',ex:'독 피해 +20%'}
 };
@@ -805,6 +806,13 @@ const AUGS=[
   {id:'halo',u:'',t:'p',n:'후광',tags:['holy','holy'],d:'주변 140 안의 적에게 초당 공격력 60% 빛 피해. 신성 2개로 계산'},
   {id:'p_aura',cls:'paladin',u:'오라가 더 강해져요. ★1은 +30%, ★2는 +50%, ★3은 +70%.',t:'s',n:'확장 오라',tags:['holy'],d:'[성기사 전용] 신성 오라 범위·피해 +50%'},
   {id:'p_hammer',cls:'paladin',u:'망치 피해가 커져요. ★1은 180%, ★2는 220%, ★3은 260%.',t:'g',n:'심판의 망치',tags:['holy','card'],d:'[성기사 전용] 4번째 공격마다 관통하는 망치 투척 (공격력 220%, 관통 5)'},
+  {id:'raise',u:'해골 소환 확률이 올라요. ★1은 6%, ★2는 8%, ★3은 10%.',t:'s',n:'시체 일으키기',tags:['undead','summon'],d:'처치 시 8% 확률로 해골 병사 소환 (12초, 공격력 50%로 근접 공격). 해골 최대 수 +2'},
+  {id:'bonewall',u:'해골 1기당 방어력이 올라요. ★1은 +3, ★2는 +4, ★3은 +5.',t:'s',n:'뼈 갑옷',tags:['undead','guard'],d:'해골 병사 1기당 방어력 +4'},
+  {id:'soulburst',u:'원혼 폭발 피해가 커져요. ★1은 60%, ★2는 80%, ★3은 100%.',t:'g',n:'원혼 폭발',tags:['undead','curse'],d:'처치 시 원혼 확률 +10%. 원혼이 맞으면 폭발 (범위 70, 공격력 80%)'},
+  {id:'deathnova',u:'',t:'p',n:'망자의 파동',tags:['undead','undead'],d:'해골 병사가 사라질 때 폭발 (범위 90, 공격력 200%). 해골 지속 +4초. 망자 2개로 계산'},
+  {id:'n_legion',cls:'necro',u:'해골 최대 수가 늘어나요. ★1은 +1, ★2는 +2, ★3은 +3.',t:'s',n:'해골 군단',tags:['undead','summon'],d:'[사령술사 전용] 해골 최대 수 +2, 해골 소환 확률 +10%'},
+  {id:'n_bone',cls:'necro',u:'뼈창 피해가 커져요. ★1은 200%, ★2는 250%, ★3은 300%.',t:'g',n:'뼈창',tags:['undead'],d:'[사령술사 전용] 5번째 공격마다 관통하는 뼈창 (공격력 250%, 관통 4)'},
+  {id:'n_lich',cls:'necro',u:'',t:'p',n:'리치',tags:['undead','curse'],d:'[사령술사 전용] 원혼 확률 +20%, 원혼 피해 +50%, 해골 최대 수 +2'},
   {id:'p_divine',cls:'paladin',u:'',t:'p',n:'신의 가호',tags:['holy','guard'],d:'[성기사 전용] 막기 확률 +20%. 막을 때마다 빛 폭발 (범위 90, 공격력 150%)'},
   {id:'frostnova',u:'냉기 폭발 피해가 커져요. ★1은 120%, ★2는 150%, ★3은 180%.',t:'g',n:'서리 폭발',tags:['frost'],d:'5초마다 주변 140 안의 적에게 공격력 150% 피해, 2초간 둔화'},
   {id:'icebolt',u:'얼음탄 피해가 커져요. ★1은 120%, ★2는 150%, ★3은 180%.',t:'s',n:'얼음 화살',tags:['frost','card'],d:'4번째 공격마다 얼음탄 (공격력 150%, 관통 3, 맞은 적 둔화)'},
@@ -890,7 +898,9 @@ const FUSIONS=[
   {id:'f_storm3',a:'chainlt',b:'static',n:'번개 폭풍',d:'모든 번개 연쇄 +2, 정전기 300 → 180마다'},
   {id:'f_ember',a:'molotov',b:'fireball',n:'불바다',d:'화염구가 터진 자리에 3초간 불길 (초당 공격력 60%)'},
   {id:'f_citadel',a:'bastion',b:'turret2',n:'요새화',d:'포탑 지속 시간 2배, 보루 효과 2배'},
-  {id:'f_sentry',a:'overwatch',b:'boltturret',n:'자동 포대',d:'포탑 사격 0.4초 → 0.2초마다'}
+  {id:'f_sentry',a:'overwatch',b:'boltturret',n:'자동 포대',d:'포탑 사격 0.4초 → 0.2초마다'},
+  {id:'f_bonelord',a:'raise',b:'bonewall',n:'뼈의 군주',d:'해골 최대 수 +2, 해골 1기당 공격력 +3%'},
+  {id:'f_wraith',a:'soulburst',b:'deathnova',n:'망령 폭풍',d:'원혼이 2갈래로 날아가고 원혼·해골 폭발 범위 +50%'}
 ];
 // VIP 합체: VIP 증강 + 일반 증강. 둘 다 가져도 바로 합쳐지지 않고, 레벨업·증강 때마다 낮은 확률(12%, 행운 30이면 30%)로 합체
 const VFUSIONS=[
@@ -1158,6 +1168,9 @@ rogue:{
 CH.paladin={swoosh:CH.knight.swoosh,draw(st){const sw={B:'#f6f1e2',h:'#ffffff',b:'#cfc4a2',d:'#9a8e6a',q:'#fff0a0',R:'#f0c840',r:'#b08a24',c:'#ffe680'},old={};
   for(const k in sw){old[k]=CP[k];CP[k]=sw[k];}try{CH.knight.draw.call(CH.knight,st);}finally{for(const k in old)CP[k]=old[k];}
   const U=st.U;g.fillStyle='#ffe680';for(const [x,y] of [[16,2],[17,1],[18,1],[19,1],[20,1],[21,1],[22,1],[23,2]])g.fillRect(x,y+U,1,1);g.fillStyle='#fff8d0';g.fillRect(18,1+U,2,1);}};
+// 사령술사: 마법사 몸에 검은 로브·초록 불꽃 팔레트, 해골 지팡이
+CH.necro={draw(st){const sw={u:'#4a4658',P:'#2e2a3a',p:'#1e1b28',m:'#110f18',g:'#8cff9a',G:'#3fbf5a',n:'#1f6a30',8:'#d8ffd0',9:'#6aff8a',0:'#1fa040',7:'#d8d4e4',k:'#e8dccc',K:'#bfae9c'},old={};
+  for(const kk in sw){old[kk]=CP[kk];CP[kk]=sw[kk];}try{CH.mage.draw.call(CH.mage,st);}finally{for(const kk in old)CP[kk]=old[kk];}}};
 function hurtEyes(y){g.fillStyle=CP.k;g.fillRect(17,y,6,3);cg(['e.','.e','e.'],17,y);cg(['.e','e.','.e'],21,y);}
 function drawChar(cls,a,t,ap,flash){
   const C=CH[cls];g.clearRect(0,0,40,40);g.save();
@@ -1280,7 +1293,10 @@ const CLASSES={
     cards:['가벼운 장화','날렵한 몸놀림','순발력','흡혈 송곳니','급소 노리기','치명상'],lvd:'치명타 +0.2%, 회피 +0.1%, 공격력 +1%, 체력 +1',lv:p=>{p.crit+=.002;p.dodge+=.001;p.dmgP=(p.dmgP||0)+.01;p.maxHp+=1;p.hp+=1;}},
   paladin:{lock:true,n:'성기사',role:'신성 근접',d:'빛의 오라로 주변을 태우며 버티는 성전사',passive:'신성 오라: 주변 110 안의 적에게 초당 공격력 35% 빛 피해. 5번째 공격마다 체력 3% 회복',atk:.32,
     stats:{hp:210,maxHp:210,speed:178,dmg:16,rate:1.75,range:200,bspd:430,armor:12,block:.08},fav:['holy','guard','fire'],dis:['curse'],
-    cards:['힘의 물약','숫돌','튼튼한 체력','가죽 갑옷','붕대','철벽 자세'],lvd:'체력 +2, 공격력 +0.8%, 방어력 +0.2',lv:p=>{p.maxHp+=2;p.hp+=2;p.dmgP=(p.dmgP||0)+.008;p.armor+=.2;}}
+    cards:['힘의 물약','숫돌','튼튼한 체력','가죽 갑옷','붕대','철벽 자세'],lvd:'체력 +2, 공격력 +0.8%, 방어력 +0.2',lv:p=>{p.maxHp+=2;p.hp+=2;p.dmgP=(p.dmgP||0)+.008;p.armor+=.2;}},
+  necro:{lock:true,n:'사령술사',role:'해골 소환',d:'쓰러진 적을 해골 병사로 일으키는 술사',passive:'해골 소환: 처치 시 25% 확률로 해골 병사 소환 (최대 4기, 12초, 공격력 50%로 근접 공격)',atk:.35,
+    stats:{hp:150,maxHp:150,speed:185,dmg:13,rate:2.0,range:300,bspd:500,armor:6},fav:['undead','summon','curse'],dis:['holy'],
+    cards:['힘의 물약','숫돌','조준경','튼튼한 체력','전투 본능','흡혈 송곳니'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}}
 };
 function applyClass(cls){S.cls=cls;Object.assign(S.p,CLASSES[cls].stats);S.p.face=1;}
 const ex=t=>Math.max(0,tag(t)-4);
@@ -1338,7 +1354,7 @@ const critMul=()=>(has('sharpshot')?1:0)+(has('f_luckstar')?LK()*.02:0)+Math.min
 const critFull=()=>critRaw()>=CRIT_CAP,critMFull=()=>critMul()>=CRIT_DMG_CAP_F();
 const stackCapped=x=>(x.k==='crit'&&critFull())||(x.k==='critm'&&critMFull())||(x.k==='luck'&&S.p.luck>=LUCK_CAP)||(x.k==='dodge'&&S.p.dodge>=DODGE_CAP)||(x.k==='rate'&&rawRate()>=RATE_CAP());
 const dodgeC=()=>Math.min(DODGE_CAP,S.p.dodge);
-function armorEff(){const p=S.p;let a=(blessOn('guard')?60:0)+(has('bank')?Math.min(50,Math.floor(S.gold/300)*2):0)+p.armor+ex('guard')*8+Math.max(0,p.dodge-DODGE_CAP)*200;if(has('iron'))a*=lv3('iron',1.35,1.5,1.65);if(has('ironclad'))a*=2;if(has('bastion')&&nearTurret())a+=lv3('bastion',20,30,40)*(has('f_citadel')?2:1);return a;}
+function armorEff(){const p=S.p;let a=(blessOn('guard')?60:0)+(has('bank')?Math.min(50,Math.floor(S.gold/300)*2):0)+p.armor+ex('guard')*8+Math.max(0,p.dodge-DODGE_CAP)*200+(has('bonewall')&&S.skel?S.skel.length*lv3('bonewall',3,4,5):0);if(has('iron'))a*=lv3('iron',1.35,1.5,1.65);if(has('ironclad'))a*=2;if(has('bastion')&&nearTurret())a+=lv3('bastion',20,30,40)*(has('f_citadel')?2:1);return a;}
 function barrierMax(){const p=S.p;return (tag('holy')>=4?p.maxHp*.15:0)+(has('blessing')?30:0)+(has('vampirelord')?p.maxHp*.3:0)+(has('f_juggernaut')?p.armor:0)+(has('f_vaultkeeper')?30:0)+(has('goldskin')?Math.min(p.maxHp*.5,S.gold*.01):0)+(tag('guard')>=4?p.maxHp*.2:0)+(has('gen')?40*L('gen')+Math.min(60,Math.floor(S.gold/100)*10):0);}
 const dashCdVal=()=>2.4*S.p.dashMul*(has('quicksilver')?.5:1)*(tag('blitz')>=2?.6:1)*Math.pow(.95,ex('blitz'));
 // 회전 칩 기본 반경. 몸에 붙은 적이 아니라 다가오는 적을 먼저 갈도록 근접 범위 밖으로 넓힘 (48 → 82)
@@ -1632,6 +1648,14 @@ function drawBossUI(){
 /* ---------- combat ---------- */
 // 번개·화상·소환·냉기 공용 배율
 const holyM=()=>1+ex('holy')*.1;
+const undM=()=>1+ex('undead')*.12;
+const skelMax=()=>(S.cls==='necro'?4:0)+(tag('undead')>=4?2:0)+(has('raise')?2:0)+(has('n_legion')?lv3('n_legion',1,2,3):0)+(has('n_lich')?2:0)+(has('f_bonelord')?2:0);
+const skelC=()=>(S.cls==='necro'?.25:0)+(tag('undead')>=4?.1:0)+(has('raise')?lv3('raise',.06,.08,.1):0)+(has('n_legion')?.1:0);
+const skelD=()=>pDmg()*.5*sumM()*undM()*(tag('undead')>=6?2:1)*(has('f_bonelord')?1+.03*(S.skel?S.skel.length:0):1);
+function raiseSkel(x,y){const sk=S.skel||(S.skel=[]),mx=skelMax();if(mx<=0)return;const lf=12+(has('deathnova')?4:0);
+  if(sk.length>=mx){let o=sk[0];for(const k of sk)if(k.life<o.life)o=k;o.life=lf;return;}
+  const a=Math.random()*TAU;sk.push({x,y,life:lf,cd:.3,ox:Math.cos(a)*40,oy:Math.sin(a)*28,f:1,sw:0});S.rings.push({x,y:y+6,r:3,max:16,life:.3,col:'#8cff9a'});}
+function soulShot(x,y,n){for(let i=0;i<n;i++){const e=nearestE({x,y},320);if(!e)return;pBullet(x,y,Math.atan2(e.y-y,e.x-x)+(i?rand(-.5,.5):0),pDmg()*1.2*undM()*(has('n_lich')?1.5:1),{child:true,r:4,ghost:true,life:1,pierce:0});}}
 const thM=()=>(tag('thunder')>=4?1.5:1)*(has('stormlord')?2:1)*(1+ex('thunder')*.15);
 const fireM=()=>(tag('fire')>=6?2:1)*(has('f_willo')?1.3:1)*(has('kindle')?1+lv3('kindle',.3,.4,.5):1)*(has('inferno')?1.5:1)*(1+ex('fire')*.15);
 const sumM=()=>(tag('summon')>=4?2:1)*(1+ex('summon')*.15),sumR=()=>tag('summon')>=6?.5:1;
@@ -1739,6 +1763,7 @@ function playerFire(tg){
   if(has('overcharge')){if(p.shots%10===0)p.ocN=3;}
   if(S.cls==='paladin'&&p.shots%5===0&&p.alive)p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.03*healM());
   if(has('smite2')&&p.shots%6===0){explode(tg.x,tg.y,80,pDmg()*lv3('smite2',2,2.5,3)*holyM(),'#fff3c4');S.rings.push({x:tg.x,y:tg.y,r:4,max:30,life:.4,col:'#ffffff'});}
+  if(has('n_bone')&&p.shots%5===0)pBullet(p.x,p.y,base,pDmg()*lv3('n_bone',2,2.5,3)*undM(),{pierce:4,r:7,child:true,life:1.1,bone:true});
   if(has('p_hammer')&&p.shots%4===0)pBullet(p.x,p.y,base,pDmg()*lv3('p_hammer',1.8,2.2,2.6)*holyM(),{pierce:5,r:9,big:true,child:true,life:1});
   if(tag('thunder')>=2&&p.shots%10===0)lightning(tg,4);
   if(has('icebolt')&&p.shots%(has('f_permafrost')?2:4)===0)pBullet(p.x,p.y,base,d*lv3('icebolt',1.2,1.5,1.8),{pierce:3,r:5,ice:true,child:true,col:'#9fe8ff'});
@@ -1758,6 +1783,7 @@ function onPHit(b,t){
   if(has('slipstream'))dmg*=1+.6*Math.max(0,moveSpd()/(CLASSES[S.cls].stats.speed||195)-1);
   if(has('titan'))dmg*=1+p.maxHp/1000;
   if(tag('holy')>=6&&(t.elite||t.boss))dmg*=1.4;
+  if(b.ghost&&has('soulburst'))explode(t.x,t.y,70*(has('f_wraith')?1.5:1),pDmg()*lv3('soulburst',.6,.8,1)*undM(),'#8cff9a');
   if(t.slowT>0&&tag('frost')>=4)dmg*=1.3*(1+ex('frost')*.06);
   if(tag('sniper')>=4){const ds=Math.hypot(t.x-p.x,t.y-p.y);dmg*=1+Math.min(.6,ds/100*.1);}
   if(tag('sniper')>=6)dmg*=1+Math.min(1.5,.3*(b.hit.size-1));
@@ -1798,6 +1824,8 @@ function onKill(e){
   if(has('corrode')&&e.ps>0)p.hp=Math.min(p.maxHp,p.hp+1);
   if(tag('curse')>=2)p.curT=2;
   if(tag('holy')>=6&&p.alive)p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.01);
+  if(!e.boss&&p.alive){const c=skelC();if(c>0&&Math.random()<c)raiseSkel(e.x,e.y);
+    const gc=(tag('undead')>=2?.15:0)+(has('soulburst')?.1:0)+(has('n_lich')?.2:0);if(gc>0&&Math.random()<gc)soulShot(e.x,e.y,has('f_wraith')?2:1);}
   if(has('deathwish')){p.dwS=Math.min(lv3('deathwish',6,8,10),(p.dwT>0?p.dwS||0:0)+1);p.dwT=3;}
   if(has('madblade'))p.mbT=3;
   if(has('f_feast'))p.hp=Math.min(p.maxHp,p.hp+2);
@@ -1908,6 +1936,13 @@ function update(dt){
     if(S.turrets&&S.turrets.length){const rg=p.range*(has('overwatch')?1+lv3('overwatch',.4,.5,.6):1);for(const u of S.turrets){u.life-=dt;u.cd-=dt;if(u.cd<=0){u.cd=(has('f_sentry')?.2:.4)*sumR()*tmul();const e=nearestE(u,rg);if(e){const an=Math.atan2(e.y-u.y,e.x-u.x),bs=S.p.bspd*(has('overwatch')?1.5:1);pBullet(u.x,u.y,an,pDmg()*.5*sumM()*(has('boltturret')?1+lv3('boltturret',.3,.4,.5):1),{child:true,r:3,pierce:has('boltturret')?2:0,vx:Math.cos(an)*bs,vy:Math.sin(an)*bs});}}
       if(u.life<=0&&has('selfdestruct'))explode(u.x,u.y,130,pDmg()*4*sumM(),'#ffb347');}S.turrets=S.turrets.filter(u=>u.life>0);}
     if(has('wisp')){S.wiT=(S.wiT??1)-dt;if(S.wiT<=0){S.wiT=(has('f_willo')?.5:1)*sumR();const w=wispPos(),e=nearestE(w,p.range);if(e)pBullet(w.x,w.y,Math.atan2(e.y-w.y,e.x-w.x),pDmg()*lv3('wisp',.6,.8,1)*sumM(),{child:true,r:4,burn:true});}}
+    if(S.skel&&S.skel.length){const sd=skelD(),fr=420*420;for(const k of S.skel){k.life-=dt;k.cd-=dt;k.sw=Math.max(0,k.sw-dt);let e=k.tg&&k.tg.alive&&!k.tg.phase&&d2(k.tg,p)<fr?k.tg:null;
+      if(!e){e=nearestE(k,260);if(e&&d2(e,p)>fr)e=null;k.tg=e;}
+      const tx=e?e.x:p.x+k.ox,ty=e?e.y:p.y+k.oy,dx=tx-k.x,dy=ty-k.y,dd=Math.hypot(dx,dy)||1,rr=e?e.r+9:4;
+      if(dd>rr){const sp=Math.min(dd-rr,(e?175:240)*dt);k.x+=dx/dd*sp;k.y+=dy/dd*sp;k.f=dx>=0?1:-1;k.mv=1;}else k.mv=0;
+      if(e&&dd<=rr+4&&k.cd<=0){k.cd=.7*sumR();k.sw=.18;dmgE(e,sd,null,null,2);if(!e.alive&&tag('undead')>=6&&p.alive)p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.01*healM());}
+      if(k.life<=0&&has('deathnova'))explode(k.x,k.y,90*(has('f_wraith')?1.5:1),pDmg()*2*undM(),'#8cff9a');}
+      S.skel=S.skel.filter(k=>k.life>0);}
     if(has('frostnova')){S.fnT=(S.fnT??5)-dt;if(S.fnT<=0){S.fnT=(has('f_permafrost')?3:5)*tmul();S.rings.push({x:p.x,y:p.y,r:10,max:140,life:.35,col:'#9fe8ff'});for(const e of S.en)if(e.alive&&d2(e,p)<140*140){dmgE(e,pDmg()*lv3('frostnova',1.2,1.5,1.8),'#9fe8ff');if(!e.boss)e.slowT=Math.max(e.slowT||0,2);}}}
     if(has('tesla')){S.teT=(S.teT??3)-dt;if(S.teT<=0){S.teT=(has('f_tesla2')?1.5:3)*tmul();const e=nearestE(p,200);if(e){S.bolts.push({x1:p.x,y1:p.y,x2:e.x,y2:e.y,life:.18});dmgE(e,pDmg()*1.5*thM(),'#9fe8ff');lightning(e,lv3('tesla',2,3,4)-1);}}}
     if(S.cls==='paladin'||has('halo')){S.auT=(S.auT??.5)-dt;if(S.auT<=0){S.auT=.5;const ar=110*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1),ad=S.cls==='paladin'?pDmg()*.175*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1)*holyM():0,hd=has('halo')?pDmg()*.3*holyM():0;
@@ -2199,9 +2234,12 @@ function draw(){
       if(!b.child&&!b.dieThrow&&!b.card&&S.cls){const an=Math.atan2(b.vy,b.vx),gl=b.big||b.x7;ctx.save();ctx.translate(b.x,b.y);ctx.rotate(an);
         if(S.cls==='knight'||S.cls==='paladin'){const r=(b.r+4)*(gl?1.4:1);ctx.strokeStyle=gl?'rgba(255,215,106,.6)':'rgba(160,210,255,.45)';ctx.lineWidth=6;ctx.beginPath();ctx.arc(-r*.6,0,r,-1.15,1.15);ctx.stroke();ctx.strokeStyle='#f4f9ff';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(-r*.6,0,r,-1,1);ctx.stroke();}
         else if(S.cls==='mage'){const r=b.r*(gl?1.5:1);ctx.fillStyle='rgba(255,90,30,.35)';ctx.beginPath();ctx.ellipse(-r*.8,0,r*2,r*1.1,0,0,TAU);ctx.fill();ctx.fillStyle='#e0451f';ctx.beginPath();ctx.arc(0,0,r+1,0,TAU);ctx.fill();ctx.fillStyle='#ff9a2a';ctx.beginPath();ctx.arc(.5,0,r*.7,0,TAU);ctx.fill();ctx.fillStyle='#ffe27a';ctx.beginPath();ctx.arc(1,0,r*.35,0,TAU);ctx.fill();}
+        else if(S.cls==='necro'){const r=b.r*(gl?1.5:1)+1;ctx.fillStyle='rgba(120,255,150,.3)';ctx.beginPath();ctx.ellipse(-r*.9,0,r*2.2,r*1.1,0,0,TAU);ctx.fill();ctx.fillStyle='#2f9a4a';ctx.beginPath();ctx.arc(0,0,r+1,0,TAU);ctx.fill();ctx.fillStyle='#b8ffc4';ctx.beginPath();ctx.arc(.5,0,r*.6,0,TAU);ctx.fill();}
         else if(S.cls==='archer'){ctx.strokeStyle='#8a5a32';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-12,0);ctx.lineTo(4,0);ctx.stroke();ctx.fillStyle=gl?'#ffd76a':'#c9ced6';ctx.beginPath();ctx.moveTo(8,0);ctx.lineTo(3,-3);ctx.lineTo(3,3);ctx.closePath();ctx.fill();ctx.fillStyle='#b9332d';ctx.fillRect(-13,-3,4,2);ctx.fillRect(-13,1,4,2);}
         else{ctx.rotate(S.t*22);ctx.fillStyle=gl?'#ffd76a':'#d8dee6';ctx.fillRect(-1,-6,2,8);ctx.fillStyle='#5a4a3a';ctx.fillRect(-2,2,4,2);ctx.fillRect(-1,4,2,3);}
         ctx.restore();continue;}
+      if(b.ghost){ctx.fillStyle='rgba(140,255,154,.3)';ctx.beginPath();ctx.arc(b.x,b.y,b.r+5,0,TAU);ctx.fill();ctx.fillStyle='#d8ffe0';ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,TAU);ctx.fill();ctx.fillStyle='#1d5a2c';ctx.fillRect(b.x-2,b.y-1.5,1.5,1.5);ctx.fillRect(b.x+.5,b.y-1.5,1.5,1.5);continue;}
+      if(b.bone){ctx.save();ctx.translate(b.x,b.y);ctx.rotate(Math.atan2(b.vy,b.vx));ctx.fillStyle='rgba(140,255,154,.3)';ctx.fillRect(-14,-4,26,8);ctx.fillStyle='#e8e4d8';ctx.fillRect(-12,-1.5,20,3);ctx.beginPath();ctx.moveTo(14,0);ctx.lineTo(7,-4);ctx.lineTo(7,4);ctx.closePath();ctx.fill();ctx.restore();continue;}
       if(b.child&&!b.card&&!b.big){ctx.fillStyle='rgba(214,169,74,.35)';ctx.beginPath();ctx.arc(b.x,b.y,b.r+2,0,TAU);ctx.fill();ctx.fillStyle='#f1e7cf';ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,TAU);ctx.fill();continue;}
       {const w=b.r*2.8,h=b.r*2;ctx.save();ctx.translate(b.x,b.y);ctx.rotate(Math.atan2(b.vy,b.vx));
        ctx.fillStyle=b.big||b.card?'rgba(255,215,106,.45)':'rgba(214,169,74,.3)';ctx.fillRect(-w/2-2.5,-h/2-2.5,w+5,h+5);
@@ -2215,6 +2253,12 @@ function draw(){
   ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.7)';let lastF=0;for(const t of S.tx){if(offV(t.x,t.y))continue;ctx.globalAlpha=Math.min(1,t.life*2.5);if(t.size!==lastF){lastF=t.size;ctx.font=`${t.size}px "Do Hyeon",sans-serif`;}ctx.strokeText(t.s,t.x,t.y);ctx.fillStyle=t.col;ctx.fillText(t.s,t.x,t.y);}
   ctx.globalAlpha=1;
   if(S.cls==='paladin'&&S.p.alive){const ar=110*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1);ctx.fillStyle=`rgba(255,230,140,${.07+Math.sin(S.t*3)*.02})`;ctx.beginPath();ctx.arc(S.p.x,S.p.y,ar,0,TAU);ctx.fill();ctx.strokeStyle='rgba(255,230,140,.28)';ctx.lineWidth=2;ctx.stroke();}
+  if(S.skel&&S.p.alive)for(const k of S.skel){if(offV(k.x,k.y))continue;const X=Math.round(k.x),Y=Math.round(k.y),f=k.f,bob=k.mv?Math.floor(S.t*10)%2:0,al=k.life<2?.5+.5*Math.sin(S.t*20):1;ctx.globalAlpha=al;
+    ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(X-6,Y+9,12,3);const P=(c,x,y,w,h)=>{ctx.fillStyle=c;ctx.fillRect(X+(f>0?x:-x-w),Y+y,w,h);};
+    P('#2a2630',-5,-13,10,9);P('#e8e4d8',-4,-12,8,7);P('#c8c2b2',-4,-6,8,1);P('#14101a',-2,-10,2,2);P('#14101a',1,-10,2,2);P('#8cff9a',-2,-10,1,1);P('#8cff9a',1,-10,1,1);
+    P('#e8e4d8',-1,-5,2,9);P('#d8d2c2',-3,-3,6,1);P('#d8d2c2',-3,-1,6,1);P('#e8e4d8',-3,4-bob,2,5+bob);P('#e8e4d8',1,4-(1-bob),2,5+(1-bob));
+    if(k.sw>0){P('#e8e4d8',2,-4,4,2);P('#cfd6e0',5,-8,2,8);ctx.strokeStyle='rgba(200,255,210,.6)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(X+f*6,Y-2,10,f>0?-1.2:Math.PI-1.2,f>0?1.2:Math.PI+1.2);ctx.stroke();}
+    else{P('#e8e4d8',2,-3,2,3);P('#9aa2ad',3,-10,1,8);P('#5a4a3a',2,-3,3,1);}ctx.globalAlpha=1;}
   if(S.turrets&&S.p.alive&&has('bastion'))for(const u of S.turrets){ctx.strokeStyle='rgba(159,211,255,.25)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(u.x,u.y,120,0,TAU);ctx.stroke();}
   if(S.turrets&&S.p.alive)for(const u of S.turrets){ctx.fillStyle='#5a5f6a';ctx.fillRect(u.x-7,u.y-7,14,14);ctx.fillStyle='#5fa8e8';ctx.fillRect(u.x-3,u.y-11,6,8);}
   if(has('wisp')&&S.p.alive){const w=wispPos();ctx.fillStyle='rgba(255,140,60,.35)';ctx.beginPath();ctx.arc(w.x,w.y,9,0,TAU);ctx.fill();ctx.fillStyle='#ffb347';ctx.beginPath();ctx.arc(w.x,w.y,5,0,TAU);ctx.fill();ctx.fillStyle='#fff3c4';ctx.beginPath();ctx.arc(w.x,w.y-1,2,0,TAU);ctx.fill();}
@@ -2263,7 +2307,7 @@ function drawMini(){
   mctx.fillStyle='#ffffff';mctx.beginPath();mctx.arc(M/2,M/2,7,0,TAU);mctx.fill();
 }
 // 왼쪽 아래 증강 아이콘 줄: 보유 증강 + 빈 슬롯. PC는 마우스 올리면, 모바일은 누르면 설명
-const TAG_ICO={card:'🃏',dice:'🎲',roulette:'🎡',house:'🏦',curse:'💀',jackpot:'🎰',blitz:'💨',guard:'🛡',poison:'☠',holy:'✝',frost:'❄',summon:'🤖',sniper:'🎯',thunder:'⚡',fire:'🔥'};
+const TAG_ICO={card:'🃏',dice:'🎲',roulette:'🎡',house:'🏦',curse:'💀',jackpot:'🎰',blitz:'💨',guard:'🛡',poison:'☠',holy:'✝',frost:'❄',summon:'🤖',sniper:'🎯',thunder:'⚡',fire:'🔥',undead:'🦴'};
 let augBarKey='',synKey='';
 function renderAugBar(){const el=$('augBar');const k=!S||S.mode==='start'?'':S.augs.map(a=>a.id).join(',')+'|'+MAXA;if(k===augBarKey)return;augBarKey=k;synKey='';if(!k){el.innerHTML='';return;}
   const cell=(a,i)=>{const col=(TIER[a.t]||{}).col||'#d6a94a',ic=a.vf?'💥':a.t==='f'?'💥':a.t==='v'?'👑':(TAG_ICO[a.tags[0]]||'✦');
@@ -2358,7 +2402,8 @@ const AUG_REQ={
   clover:()=>S.p.luck<LUCK_CAP-1,fortune:()=>!critFull(),trigger:()=>rawRate()<RATE_CAP(),
   evade:()=>S.p.dodge<DODGE_CAP,luckydie:()=>!critFull(),
   neuro:poisonSrc,spill:poisonSrc,plague:poisonSrc,contagion:poisonSrc,plaguelord:poisonSrc,
-  shieldbash:()=>barrierMax()>0,chipshot:()=>orbitN()>0,corrode:poisonSrc,sawblade:()=>orbitN()>0,virulence:poisonSrc,toxicburst:poisonSrc,highbet:()=>!critMFull()
+  shieldbash:()=>barrierMax()>0,chipshot:()=>orbitN()>0,corrode:poisonSrc,sawblade:()=>orbitN()>0,virulence:poisonSrc,toxicburst:poisonSrc,highbet:()=>!critMFull(),
+  bonewall:()=>skelMax()>0||S.cls==='necro'
 };
 const augReq=a=>!AUG_REQ[a.id]||AUG_REQ[a.id]();
 // 태그 중복(가드 2개 등)으로 선호 가중치가 겹쳐 쌓이지 않게: 선호 태그가 하나라도 있으면 ×2.5, 비선호는 ×0.3
