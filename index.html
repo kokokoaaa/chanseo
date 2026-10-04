@@ -1298,10 +1298,25 @@ rogue:{
  },
  swoosh:[[[19,14],[20,15],[22,17],[24,19]],[[21,14],[20,15],[18,17],[16,19]],[[13,32],[16,33],[19,33],[22,33],[25,32]]]}
 };
-// 성기사: 기사 몸에 흰색·금색 팔레트, 금빛 망토와 후광
-CH.paladin={swoosh:CH.knight.swoosh,draw(st){const sw={B:'#f6f1e2',h:'#ffffff',b:'#cfc4a2',d:'#9a8e6a',q:'#fff0a0',R:'#f0c840',r:'#b08a24',c:'#ffe680'},old={};
-  for(const k in sw){old[k]=CP[k];CP[k]=sw[k];}try{CH.knight.draw.call(CH.knight,st);}finally{for(const k in old)CP[k]=old[k];}
-  const U=st.U;g.fillStyle='#ffe680';for(const [x,y] of [[16,2],[17,1],[18,1],[19,1],[20,1],[21,1],[22,1],[23,2]])g.fillRect(x,y+U,1,1);g.fillStyle='#fff8d0';g.fillRect(18,1+U,2,1);}};
+// 성기사: 날개 달린 금빛 투구(빛나는 눈 틈), 흰 바탕 금 십자 망토의 판금 갑옷, 십자 탑 방패, 전투 망치, 후광
+CH.paladin={swoosh:CH.knight.swoosh,
+ helm:['...gggg...','..gWWWWg..','.gWWWWWWg.','.gWWWWWWg.','gWWvvvvWWg','gWWv88vWWg','gWWWWWWWWg','.gWWgWWWg.','..gWWWWg..'],
+ torso:['ssS.WWWW.Sss','sSSsWWgWWsSS','sSSsWgggWsSS','.SSsWWgWWsS.','..SsWWgWWsS.','..gggggggg..','..sWWWWWWs..','..sWW..WWs..'],
+ shield:['GgggggG','gWWgWWg','gWWgWWg','ggggggg','gWWgWWg','gWWgWWg','gWWgWWg','.gWgWg.','..ggg..'],
+ draw(st){const U=st.U,A=st.atk,sw={W:'#f4f1e8',s:'#d7dce6',S:'#9aa3b4',X:'#5a6478',g:'#f0c840',G:'#b08a24',8:'#fff3a0',v:'#20141c',L:'#8a5530',l:'#5a3420'},old={};
+  for(const kk in sw){old[kk]=CP[kk];CP[kk]=sw[kk];}
+  try{
+   cg(['sS','sS','SX','XX'],16,30+st.lL);cg(['Ss','Ss','XS','XX'],22,30+st.rL);
+   cg(this.torso,14,22+U);
+   // 망치: 공격 때 들어 올렸다 내려침
+   const up=A>=0?-4:0;for(let y=15+U+up;y<=30+U;y++)cp(y%3?'L':'l',28,y);cg(['SSSSS','sXXXs','SSSSS'],26,12+U+up);
+   cg(['ss','sS'],26,24+U+st.ay);
+   cg(this.shield,8,20+U+st.ay);
+   cg(this.helm,15,12+U);cg(['g.','gg','.g'],13,13+U);cg(['.g','gg','g.'],25,13+U);
+   // 후광
+   g.fillStyle=CP['8'];for(const [x,y] of [[16,9],[17,8],[18,8],[19,8],[20,8],[21,8],[22,8],[23,9]])g.fillRect(x,y+U,1,1);
+  }finally{for(const kk in old)CP[kk]=old[kk];}
+ }};
 // 도박사: 실크햇, 보라 조끼, 손에 금화
 CH.gambler={
  hat:['.....zzzzzz.....','.....zzzzzz.....','.....zzzzzz.....','.....iiiiii.....','...zzzzzzzzzz...'],
@@ -1330,10 +1345,25 @@ CH.alch={
   cg(this.head,14,12+U);if(st.hurt)hurtEyes(16+U);
   cg(this.hair,13,9+U);
  }};
-// 드루이드: 마법사 몸에 초록·갈색 로브, 사슴뿔 관
-CH.druid={draw(st){const sw={u:'#9ad85a',P:'#4a8a3a',p:'#2f6a24',m:'#1f4a1a',g:'#c98a52',G:'#8a5530',n:'#5a3420',7:'#8a5530',8:'#e8ffd0',9:'#9ad85a',0:'#4a9a3a'},old={};
+// 드루이드: 사슴뿔 짐승 해골 가면, 나뭇잎 망토와 모피 어깨, 덩굴 감긴 나무 지팡이(빛나는 씨앗)
+CH.druid={
+ antler:['Y.............Y','YY...........YY','.Y.Y.......Y.Y.','.YYY.......YYY.','...Y.......Y...','...YY.....YY...'],
+ head:['..aNNNNNNa..','.aNFNFNFNNa.','aNFNEEEEFNNa','aNNEEEEEENNa','aNEvvEEvvENa','aNEvFEEFvENa','aNEEEEEEEENa','aNNEEvvEENNa','.aNNEEEENNa.','..aNNkkNNa..'],
+ body:['.YYYYYYYYYY.','YYlYYYYYYlYY','aNFNLLLLNFNa','aNNFLLLLFNNa','.aNNFLLFNNa.','.aaNNLLNNaa.','..LLgLLgLL..','..LLLLLLLL..','.LLlLLLLlLL.','.LlLLLLLLlL.','LLlLlLLlLlLL','.l.l.ll.l.l.'],
+ draw(st){const U=st.U,A=st.atk,sw={N:'#5aa83a',F:'#9ad85a',a:'#2f6a24',E:'#efe8d6',v:'#1a120c',Y:'#8a6a44',L:'#6a4a2a',l:'#4a3020',g:'#c9b25a',9:'#b8ff7a',8:'#f0ffd0'},old={};
   for(const kk in sw){old[kk]=CP[kk];CP[kk]=sw[kk];}
-  try{CH.mage.draw.call(Object.assign({},CH.mage,{hat:['.................','...Y.........Y...','...YY.......YY...','....Y.Y...Y.Y....','....YYY...YYY....','......Y...Y......','.....FNNNNNF.....','....FNFNNFNNF....'],star:[['.F.','FNF','.F.'],['...','.F.','...']]}),st);}finally{for(const kk in old)CP[kk]=old[kk];}}};
+  try{
+   cg(['kK'],17,36);cg(['Kk'],21,36);
+   cg(this.body,14,23+U);
+   cg(['Yk','.k'],12,26+U+st.ay);
+   // 구부러진 나무 지팡이, 덩굴이 감기고 끝에 빛나는 씨앗
+   const up=A>=0?-3:0,x=28,top=9+U+up,fl=Math.floor((st.t||0)*6)%2;
+   for(let y=top+3;y<=35+up;y++){const dx=y%7<3?0:y%7<5?1:0;cp(y%5?'L':'l',x+dx,y);if(y%4===0)cp('F',x+dx-1,y);}
+   cg(['.LL.','L..L','L.9.','.L..'],x-2,top-1);if(A>=0||fl)cg(['.8.','898','.8.'],x-2,top);
+   cg(['kY','k.'],x-1,25+U+up);
+   cg(this.head,14,11+U);cg(this.antler,13,5+U);
+  }finally{for(const kk in old)CP[kk]=old[kk];}
+ }};
 // 광전사: 뿔 투구, 수염, 맨몸에 가죽끈, 큰 도끼
 CH.berserk={
  horns:['W..............W','WW............WW','.WW..........WW.','..W..........W..'],
@@ -1350,10 +1380,23 @@ CH.berserk={
   cg(this.head,14,12+U);if(st.hurt)hurtEyes(15+U);
   cg(this.horns,12,9+U);
  }};
-// 정령사: 마법사 몸에 청록 로브·청록 머리, 모자 대신 머리칼과 떠 있는 보석
-CH.elem={draw(st){const sw={u:'#8fe0ec',P:'#2f9ab8',p:'#1f6a8a',m:'#123e52',7:'#7fe0e8',8:'#ffffff',9:'#9fe8ff',0:'#3fa0d8'},old={};
+// 정령사: 지팡이 없이 양손에 원소 불꽃(불·얼음), 긴 청록 머리와 보석 머리띠, 물결치는 치마형 로브
+CH.elem={
+ head:['...777777...','..77777777..','.7777777777.','.7ggggcggg7.','77kkkkkkkk77','77kekkkkek77','77kekkkkek77','77kkkkkkkK77','77.kkkkkKK77','7..kKKKKK..7','7....kk....7','77........77'],
+ body:['..uuWWWWuu..','.uPPWWWWPPu.','.uPPPccPPPu.','..uPPPPPPu..','..gggggggg..','..uPPWWPPu..','.uPPWWWWPPu.','.uPPPWWPPPu.','uPPPPWWPPPPu','uPpPPPPPPpPu','upPpPPPPpPpu','.p.p.pp.p.p.'],
+ draw(st){const U=st.U,A=st.atk,sw={7:'#7fe0e8',u:'#8fe0ec',P:'#2f9ab8',p:'#1f6a8a',W:'#f4f8ff',c:'#9fe6ff',g:'#f0c840',h:'#3fa0d8',9:'#ff9a2a',8:'#ffe680',0:'#e0451f'},old={};
   for(const kk in sw){old[kk]=CP[kk];CP[kk]=sw[kk];}
-  try{CH.mage.draw.call(Object.assign({},CH.mage,{hat:['.................','.................','.................','.................','......77777......','....777777777....','...77777777777...','...7777777777....'],star:[['.c.','cEc','.c.'],['...','.c.','...']]}),st);}finally{for(const kk in old)CP[kk]=old[kk];}}};
+  try{
+   cg(['kK'],17,36);cg(['Kk'],21,36);
+   cg(this.body,14,23+U);
+   // 양팔을 벌리고 손 위에 원소 불꽃 (왼손 불, 오른손 얼음), 공격하면 커짐
+   const fl=Math.floor((st.t||0)*10)%2,big=A>=0;
+   cg(['uk','.k'],12,25+U+st.ay);cg(['ku','k.'],26,25-st.ay+U);
+   cg(big?['.9.','989','898','.0.']:fl?['.9.','989','.0.']:['.8.','.9.','909'],11,(big?19:21)+U+st.ay);
+   cg(big?['.c.','cEc','EcE','.h.']:fl?['.c.','cEc','.h.']:['.E.','.c.','chc'],26,(big?19:21)+U-st.ay);
+   cg(this.head,14,11+U);if(st.hurt)hurtEyes(16+U);
+  }finally{for(const kk in old)CP[kk]=old[kk];}
+ }};
 // 총잡이: 챙 넓은 모자, 빨간 판초, 리볼버
 CH.gunner={
  hat:['....LLLLLL......','...LYYYYYYL.....','...LYYYYYYL.....','...LzzzzzzL.....','LLYYYYYYYYYYYYLL'],
