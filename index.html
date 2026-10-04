@@ -2960,7 +2960,8 @@ const tagLocked=a=>{const L=lockedTags();return !!(a.tags&&a.tags.some(t=>L.has(
 const augReq=a=>!tagLocked(a)&&(!AUG_REQ[a.id]||AUG_REQ[a.id]());
 // 태그 중복(가드 2개 등)으로 선호 가중치가 겹쳐 쌓이지 않게: 선호 태그가 하나라도 있으면 ×2.5, 비선호는 ×0.3
 // 이미 가진 증강의 합체 짝은 행운에 비례해 더 잘 나옴 (행운 0: ×1.3, 행운 30: ×3)
-const fuseW=a=>partnerOf(a.id)?1.3+1.7*LK()/LUCK_CAP:1;
+// 합체 짝은 뜨면 무조건 상위호환이라 등장 확률을 낮춤 (기본 ×0.55, 행운 최대치면 ×0.9)
+const fuseW=a=>partnerOf(a.id)?.55+.35*LK()/LUCK_CAP:1;
 // 루트 보너스: 이미 모은 시너지와 같은 계열 증강·능력치 카드가 더 잘 나옴. 시너지 6개면 최대 ×1.6, 행운이 높을수록 더 커짐 (행운 30이면 ×2.2)
 const CARD_TAG={'시계 태엽':['grav','nature','wave','shadow','undead','elem','fury'],'정비 키트':['summon'],'포탑 개조':['summon'],'독샘':['poison'],'연료':['fire'],'축전지':['thunder'],'서리 결정':['frost'],'성수':['holy'],'그림자 정수':['shadow'],'중력자':['grav'],'표적 지정':['mark'],'진동판':['wave'],'뼈 가루':['undead','summon'],'영혼 사슬':['undead'],'원소 결정':['elem'],'정령 공명':['elem'],'피의 북':['fury'],'끝없는 분노':['fury'],'씨앗 주머니':['nature'],'가시 독':['nature'],'큰 병':['alchemy'],'농축액':['alchemy'],'타짜의 손':['coin'],'판돈':['coin'],'튼튼한 체력':['guard','holy'],'가죽 갑옷':['guard'],'무거운 갑옷':['guard'],'철벽 자세':['guard'],'거인의 심장':['guard'],'불사의 맹세':['guard','curse'],'붕대':['guard','holy'],
   '조준경':['sniper','card'],'가속 탄':['sniper','card'],'관통 탄':['sniper','card'],'다연발':['card'],'사냥꾼의 눈':['sniper','dice'],'쾌속 장전':['card','thunder','summon'],
@@ -2992,7 +2993,7 @@ function augHtml(a,i){
   const pf=partnerOf(a.id),po=pf?augDef(pf.a===a.id?pf.b:pf.a):null,pn=po?po.n:'';
   // 짝이 있으면 카드 앞면에 합체 안내를 크게 표시 (마우스를 안 올려도 보임)
   // 합체 안내: 어떤 보유 증강과 합쳐지는지 + 합체로 붙는 추가 효과
-  const fz=pf?`<span class="fzbox"><span class="fzh">💥 합체 시 → <b class="fzn">${pf.n}</b></span><span class="fzd" style="opacity:.8">${pf.n} 효과 (아래 전부 적용)</span><span class="fzd">• ${a.d}</span><span class="fzd">• ${po.d}</span><span class="fzd" style="color:#ffd76a">• ${pf.d} <small>(새 효과)</small></span></span>`:'';
+  const fz=pf?`<span class="fzbox"><span class="fzh">💥 합체 시 → <b class="fzn">${pf.n}</b></span><span class="fzd">${[a.d,po.d,pf.d].map(x=>x.replace(/[.\s]+$/,'')).join('. ')}</span></span>`:'';
   return `<button class="card aug tier-${a.t} ${pf?'canfuse':''}" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}${a.swap?' · <span style="color:#ff9ad0">교체</span>':''}</span><b>${a.n}</b><span class="chips">${chips}</span>${augPreview(a)}${fz}<span class="tip">${a.d}${hpLoss(a.f,a.d,a.t==='v'||a.t==='f'?1:2)}${lines?'<br>':''}${lines}</span></button>`;
 }
 function bindPeek(){
