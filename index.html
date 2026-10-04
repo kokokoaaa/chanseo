@@ -1812,7 +1812,7 @@ const CLASSES={
   paladin:{lock:true,n:'성기사',role:'신성 근접',d:'빛의 오라로 주변을 태우며 버티는 성전사',passive:'신성 오라: 주변 110 안의 적에게 초당 공격력 50% 빛 피해. 5번째 공격마다 체력 3% 회복',atk:.32,
     stats:{hp:210,maxHp:210,speed:178,dmg:17,rate:1.85,range:200,bspd:430,armor:12,block:.08},fav:['holy','guard','fire'],dis:['curse'],
     cards:['힘의 물약','숫돌','튼튼한 체력','가죽 갑옷','붕대','철벽 자세'],lvd:'체력 +2, 공격력 +0.8%, 방어력 +0.2',lv:p=>{p.maxHp+=2;p.hp+=2;p.dmgP=(p.dmgP||0)+.008;p.armor+=.2;}},
-  necro:{lock:true,n:'사령술사',role:'해골 소환',d:'쓰러진 적을 해골 병사로 일으키는 술사',passive:'해골 소환: 처치 시 25% 확률, 그리고 3초마다 해골 병사 소환 (최대 4기, 12초, 공격력 60%로 근접 공격). 해골은 주변 근접 적을 끌어당기는 방패 역할 (체력 = 내 최대 체력 50%, 받는 피해 절반)',atk:.35,
+  necro:{lock:true,n:'사령술사',role:'해골 소환',d:'쓰러진 적을 해골 병사로 일으키는 술사',passive:'해골 소환: 처치 시 25% 확률, 그리고 2.5초마다 해골 병사 소환 (최대 5기, 12초, 공격력 100%로 근접 공격). 해골은 주변 근접 적을 끌어당기는 방패 역할 (체력 = 내 최대 체력 50%, 받는 피해 절반)',atk:.35,
     stats:{hp:155,maxHp:155,speed:185,dmg:16,rate:2.1,range:300,bspd:500,armor:7},fav:['undead','summon','curse'],dis:['holy'],
     cards:['힘의 물약','숫돌','조준경','튼튼한 체력','전투 본능','흡혈 송곳니'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
   gunner:{lock:true,n:'총잡이',role:'연사 저격',d:'리볼버를 연사하고 재장전하는 총잡이',passive:'6발 탄창: 6발 쏘면 짧게 재장전. 마지막 탄은 반드시 치명타 + 관통 2',atk:.18,
@@ -2307,9 +2307,9 @@ function elemFx(t,k,dm){const ov=has('e_overflow');
 function elemDrop(e){explode(e.x,e.y,70,pDmg()*2*elM(),'#c8a0ff');for(const o of S.en)if(o.alive&&d2(o,e)<70*70){burnE(o,pDmg()*.25*elM(),3);if(!o.boss)o.slowT=Math.max(o.slowT||0,1);}}
 const magN=()=>6+(S.p.magB||0)+(has('g_extmag')?lv3('g_extmag',2,3,4):0);
 function ricoShot(t,dm,n){const o=nearestE(t,220,new Set([t]));if(o)pBullet(t.x,t.y,Math.atan2(o.y-t.y,o.x-t.x),dm,{child:true,r:3,rc:n,hit:new Set([t]),sure:has('f_trickshot'),life:.6,pierce:0});}
-const skelMax=()=>(S.cls==='necro'?4:0)+(tag('undead')>=1?1:0)+(tag('undead')>=4?2:0)+(has('raise')?2:0)+(has('n_legion')?lv3('n_legion',1,2,3):0)+(has('n_lich')?2:0)+(has('f_bonelord')?2:0);
+const skelMax=()=>(S.cls==='necro'?5:0)+(tag('undead')>=1?1:0)+(tag('undead')>=4?2:0)+(has('raise')?2:0)+(has('n_legion')?lv3('n_legion',1,2,3):0)+(has('n_lich')?2:0)+(has('f_bonelord')?2:0);
 const skelC=()=>(has('f_deathlord')?.1:0)+(S.cls==='necro'?.25:tag('undead')>=1?.08:0)+(tag('undead')>=4?.1:0)+(has('raise')?lv3('raise',.06,.08,.1):0)+(has('n_legion')?.1:0);
-const skelD=()=>pDmg()*(S.cls==='necro'?.8:.6)*(1+(S.p.skD||0))*(1+.05*mlv('m_undead'))*sumM()*undM()*(tag('undead')>=6?2:1)*(has('f_bonelord')?1+.03*(S.skel?S.skel.length:0):1);
+const skelD=()=>pDmg()*(S.cls==='necro'?1:.6)*(1+(S.p.skD||0))*(1+.05*mlv('m_undead'))*sumM()*undM()*(tag('undead')>=6?2:1)*(has('f_bonelord')?1+.03*(S.skel?S.skel.length:0):1);
 // 해골이 맞음: 받는 피해 절반 + 내 방어력 적용, 체력 0이면 사라짐 (사라질 때 효과 발동)
 function skHit(k,dmg){k.hp-=dmg*.5*100/(100+armorEff());k.hit=.12;if(k.hp<=0){k.hp=0;k.life=0;}}
 function raiseSkel(x,y){const sk=S.skel||(S.skel=[]),mx=skelMax();if(mx<=0)return;const lf=12+(has('deathnova')?4:0)+(S.p.skL||0);
@@ -2677,7 +2677,7 @@ function update(dt){
     if(has('archangel')){S.agT=(S.agT??4)-dt;if(S.agT<=0){S.agT=has('f_seraph')?4:8;const c=S.en.filter(e=>e.alive&&!e.phase&&d2(e,p)<320*320);for(let i=0;i<4&&c.length;i++){const e=c.splice(Math.floor(Math.random()*c.length),1)[0];S.bolts.push({x1:e.x,y1:e.y-220,x2:e.x,y2:e.y,life:.18});exS('holy',e.x,e.y,80,pDmg()*2.5*holyM(),'#fff3a0');}}}
     if(has('stormcall')){S.scT=(S.scT??4)-dt;if(S.scT<=0){S.scT=Math.max(1,(has('f_tempest')?2:4)-(has('f_genesis')?1:0))*cdM();const c=S.en.filter(e=>e.alive&&!e.phase&&d2(e,p)<320*320);for(let i=0;i<(has('f_tempest')?5:3)+(has('f_genesis')?3:0)&&c.length;i++){const e=c.splice(Math.floor(Math.random()*c.length),1)[0];S.bolts.push({x1:e.x,y1:e.y-220,x2:e.x,y2:e.y,life:.18});elemDrop(e);}}}
     if(p.rpT>0){p.rpT-=dt;if(p.rpT<=0)p.rpS=0;}if(p.rlT>0)p.rlT-=dt;
-    if(S.cls==='necro'||tag('undead')>=4){S.skT=(S.skT??3)-dt;if(S.skT<=0){S.skT=(S.cls==='necro'?3:5)*cdM();if((S.skel||[]).length<skelMax())raiseSkel(p.x+rand(-40,40),p.y+rand(-40,40));}}
+    if(S.cls==='necro'||tag('undead')>=4){S.skT=(S.skT??3)-dt;if(S.skT<=0){S.skT=(S.cls==='necro'?2.5:5)*cdM();if((S.skel||[]).length<skelMax())raiseSkel(p.x+rand(-40,40),p.y+rand(-40,40));}}
     if(S.skel&&S.skel.length){const sd=skelD(),fr=420*420;for(const k of S.skel){k.life-=dt;k.cd-=dt;k.sw=Math.max(0,k.sw-dt);let e=k.tg&&k.tg.alive&&!k.tg.phase&&d2(k.tg,p)<fr?k.tg:null;
       if(!e){e=sumTarget(k,260);if(e&&d2(e,p)>fr)e=null;k.tg=e;}if(e&&!e.boss&&k.tg===e&&bossOn()&&!S.boss.air&&!S.boss.phase&&d2(S.boss,k)<260*260){e=S.boss;k.tg=e;}
       const tx=e?e.x:p.x+k.ox,ty=e?e.y:p.y+k.oy,dx=tx-k.x,dy=ty-k.y,dd=Math.hypot(dx,dy)||1,rr=e?e.r+9:4;
