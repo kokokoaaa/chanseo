@@ -1919,7 +1919,7 @@ function throwPotion(tx,ty,m){const p=S.p;(S.flasks=S.flasks||[]).push({x0:p.x,y
   if(has('elixir')&&p.alive){p.hp=Math.min(p.maxHp,p.hp+(has('f_panacea')?5:2)*healM());if(has('f_panacea'))p.barrier=Math.min(barrierMax(),(p.barrier||0)+5);}}
 function potionHit(f){const r=70*(1+(S.p.ptR||0))*(tag('alchemy')>=4?1.3:1),dm=pDmg()*f.m*potM(),ks=has('f_alkahest')?[0,1,2]:tag('alchemy')>=6?[f.k,(f.k+1+Math.floor(Math.random()*2))%3]:[f.k];
   for(const o of S.en)if(o.alive&&d2(o,f)<(r+o.r)**2){o.potT=S.t+3;if(ks.includes(0))poisonE(o,2);if((ks.includes(2)||has('frostflask'))&&!o.boss)o.slowT=Math.max(o.slowT||0,2);}
-  for(const k of ks)explode(f.x,f.y,r,dm*[.6,1.5,.8][k],POTC[k]);}
+  for(const k of ks){explode(f.x,f.y,r,dm*[.6,1.5,.8][k],POTC[k]);S.rings.push({x:f.x,y:f.y,r:r*.3,max:r*1.1,life:.45,col:POTC[k]});burst(f.x,f.y,POTC[k],18);}}
 function vineAt(x,y,m){let n=0;for(const z of S.zones)if(z.kind==='vine')n++;if(n>=14)return;const br=has('d_bramble')?1+lv3('d_bramble',.3,.5,.7):1;
   S.zones.push({x,y,r:60*br*(1+(S.p.vnR||0))*(has('worldtree')?1.3:1),life:3+(tag('nature')>=2?1:0),kind:'vine',m:m*br*(1+(S.p.vnD||0))*natM()*(has('d_wrath')?1.3:1)});}
 const inVine=o=>S.zones.some(z=>z.kind==='vine'&&d2(o,z)<z.r*z.r);
@@ -2257,7 +2257,7 @@ function update(dt){
   if(has('insure')){S.insureT-=dt;if(S.insureT<=0){S.insureT=30;p.shield=2+L('insure')+(has('f_insure')?3:0);}}
   p.lastCd=Math.max(0,p.lastCd-dt);S.debtT=Math.max(0,(S.debtT||0)-dt);p.rushT=Math.max(0,(p.rushT||0)-dt);p.lvJ=Math.max(0,(p.lvJ||0)-dt);p.curT=Math.max(0,(p.curT||0)-dt);p.g2cd=Math.max(0,(p.g2cd||0)-dt);p.h2cd=Math.max(0,(p.h2cd||0)-dt);p.dwT=Math.max(0,(p.dwT||0)-dt);p.mbT=Math.max(0,(p.mbT||0)-dt);p.wcT=Math.max(0,(p.wcT||0)-dt);p.phT=Math.max(0,(p.phT||0)-dt);p.cascT=Math.max(0,(p.cascT||0)-dt);p.revT=Math.max(0,(p.revT||0)-dt);
   for(const bo of S.bolts)bo.life-=dt;S.bolts=S.bolts.filter(bo=>bo.life>0);S.chN=0;
-  if(S.flasks&&S.flasks.length){for(const f of S.flasks){f.t+=dt/.4;if(f.t>=1&&!f.done){f.done=1;f.x=f.x1;f.y=f.y1;potionHit(f);}}S.flasks=S.flasks.filter(f=>!f.done);}
+  if(S.flasks&&S.flasks.length){for(const f of S.flasks){f.t+=dt/.65;if(f.t>=1&&!f.done){f.done=1;f.x=f.x1;f.y=f.y1;potionHit(f);}}S.flasks=S.flasks.filter(f=>!f.done);}
   if(p.alive){
     if(has('punch')){S.punchT=(S.punchT||0)-dt;if(S.punchT<=0){const rad=(70+15*L('punch'))*(has('f_storm')?1.5:1);if(S.en.some(e=>e.alive&&d2(e,p)<rad*rad)){S.punchT=.8*tmul();explode(p.x,p.y,rad,pDmg()*(.8+.4*L('punch')),'#fff3c4');}else S.punchT=.1;}}
     if(has('blackhole')){S.holeT=(S.holeT??4)-dt;if(S.holeT<=0){S.holeT=(lv3('blackhole',10,9,8)-(has('f_horizon')?3:0))*tmul();const e=nearestE(p,500);if(e)S.zones.push({x:e.x,y:e.y,r:(110+15*L('blackhole'))*(has('f_horizon')?1.4:1),life:2.5,kind:'hole'});}}
@@ -2561,7 +2561,14 @@ function draw(){
     if(z.kind==='vine'){ctx.globalAlpha=Math.min(.4,z.life*.4);ctx.fillStyle='#4a9a3a';ctx.beginPath();ctx.arc(z.x,z.y,z.r,0,TAU);ctx.fill();ctx.globalAlpha=Math.min(1,z.life*1.5);ctx.strokeStyle='#2f6a24';ctx.lineWidth=2;for(let i=0;i<6;i++){const a=i*1.047+z.x*.01,rr=z.r*.65;ctx.beginPath();ctx.moveTo(z.x,z.y);ctx.quadraticCurveTo(z.x+Math.cos(a+.6)*rr*.6,z.y+Math.sin(a+.6)*rr*.6,z.x+Math.cos(a)*rr,z.y+Math.sin(a)*rr);ctx.stroke();ctx.fillStyle='#9ad85a';ctx.fillRect(z.x+Math.cos(a)*rr-1.5,z.y+Math.sin(a)*rr-1.5,3,3);}ctx.globalAlpha=1;continue;}
     if(z.kind==='mine'){ctx.fillStyle='#3a3a44';ctx.beginPath();ctx.arc(z.x,z.y,8,0,TAU);ctx.fill();ctx.fillStyle=Math.floor(S.t*4)%2?'#ff4040':'#7a2020';ctx.beginPath();ctx.arc(z.x,z.y,3,0,TAU);ctx.fill();continue;}
     ctx.globalAlpha=Math.min(.55,z.life*.4);ctx.fillStyle=z.kind==='fire'?'#ff7a2a':'#6cc04a';ctx.beginPath();ctx.arc(z.x,z.y,z.r,0,TAU);ctx.fill();}ctx.globalAlpha=1;
-  if(S.flasks)for(const f of S.flasks){const t=Math.min(1,f.t),x=f.x0+(f.x1-f.x0)*t,y=f.y0+(f.y1-f.y0)*t-Math.sin(t*Math.PI)*60;ctx.save();ctx.translate(x,y);ctx.rotate(t*12);ctx.fillStyle='#e8f0f4';ctx.fillRect(-1.5,-7,3,3);ctx.fillStyle=POTC[f.k];ctx.beginPath();ctx.arc(0,0,4.5,0,TAU);ctx.fill();ctx.fillStyle='rgba(255,255,255,.7)';ctx.fillRect(-2,-2,1.5,1.5);ctx.restore();}
+  // 물약: 떨어질 자리에 색 원(예고)과 그림자, 날아가는 병은 크게 + 테두리 + 빛
+  if(S.flasks)for(const f of S.flasks){const t=Math.min(1,f.t),x=f.x0+(f.x1-f.x0)*t,y=f.y0+(f.y1-f.y0)*t-Math.sin(t*Math.PI)*70,c=POTC[f.k],R=70*(1+(S.p.ptR||0))*(tag('alchemy')>=4?1.3:1);
+    ctx.globalAlpha=.12+.18*t;ctx.fillStyle=c;ctx.beginPath();ctx.arc(f.x1,f.y1,R*(.35+.65*t),0,TAU);ctx.fill();ctx.globalAlpha=.55;ctx.strokeStyle=c;ctx.lineWidth=2;ctx.setLineDash([6,5]);ctx.beginPath();ctx.arc(f.x1,f.y1,R,0,TAU);ctx.stroke();ctx.setLineDash([]);
+    const sx=f.x0+(f.x1-f.x0)*t,sy=f.y0+(f.y1-f.y0)*t;ctx.globalAlpha=.3;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(sx,sy+4,7,3,0,0,TAU);ctx.fill();ctx.globalAlpha=1;
+    ctx.save();ctx.translate(x,y);ctx.rotate(t*12);ctx.fillStyle=c+'55';ctx.beginPath();ctx.arc(0,0,13,0,TAU);ctx.fill();
+    ctx.fillStyle='#1a1420';ctx.beginPath();ctx.arc(0,1,8.5,0,TAU);ctx.fill();ctx.fillRect(-3.5,-11,7,6);
+    ctx.fillStyle='#e8f0f4';ctx.fillRect(-2.5,-10,5,5);ctx.fillStyle='#a0703a';ctx.fillRect(-2.5,-12,5,2);
+    ctx.fillStyle=c;ctx.beginPath();ctx.arc(0,1,7,0,TAU);ctx.fill();ctx.fillStyle='rgba(255,255,255,.75)';ctx.fillRect(-4,-3,2.5,2.5);ctx.restore();}
   ctx.strokeStyle='#bff3ff';ctx.lineWidth=2.5;for(const bo of S.bolts){ctx.globalAlpha=bo.life*5;ctx.beginPath();ctx.moveTo(bo.x1,bo.y1);const mx=(bo.x1+bo.x2)/2+rand(-12,12),my=(bo.y1+bo.y2)/2+rand(-12,12);ctx.lineTo(mx,my);ctx.lineTo(bo.x2,bo.y2);ctx.stroke();}ctx.globalAlpha=1;
   if(S.merch){const tb=S.merch,M=MERCH[tb.k],pulse=1+Math.sin(S.t*6)*.04;ctx.save();ctx.translate(tb.x,tb.y);ctx.scale(pulse,pulse);
     ctx.fillStyle='rgba(0,0,0,.35)';rr(ctx,-42,-24,88,58,12);ctx.fill();
