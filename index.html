@@ -2947,7 +2947,8 @@ function augHtml(a,i){
     return `<span class="chip ${up?'on':''}">${D.n} ${cur}→${aft}</span>`;}).join('');
   const pf=partnerOf(a.id),pn=pf?AUGS.find(x=>x.id===(pf.a===a.id?pf.b:pf.a)).n:'';
   // 짝이 있으면 카드 앞면에 합체 안내를 크게 표시 (마우스를 안 올려도 보임)
-  const fz=pf?`<span class="fzbox"><span class="fzh">💥 합체 → <b class="fzn">${pf.n}</b></span><span class="fzd">${pf.d}</span></span>`:'';
+  // 합체 안내: 어떤 보유 증강과 합쳐지는지, 두 효과가 ★3으로 유지되는지, 추가 효과, 이 증강 자체 효과, 슬롯 변화
+  const fz=pf?`<span class="fzbox"><span class="fzh">💥 보유한 <b>${pn}</b> + 이 증강 → <b class="fzn">${pf.n}</b></span><span class="fzd">두 증강 효과 모두 ★3으로 유지 + 추가: ${pf.d}</span><span class="fzd" style="opacity:.75">이 증강: ${a.d}</span><span class="fzd" style="opacity:.6">두 칸이 한 칸으로 합쳐져 슬롯은 늘지 않음</span></span>`:'';
   return `<button class="card aug tier-${a.t} ${pf?'canfuse':''}" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}${a.swap?' · <span style="color:#ff9ad0">교체</span>':''}</span><b>${a.n}</b><span class="chips">${chips}</span>${fz}<span class="tip">${a.d}${hpLoss(a.f,a.d,a.t==='v'||a.t==='f'?1:2)}${lines?'<br>':''}${lines}</span></button>`;
 }
 function bindPeek(){
