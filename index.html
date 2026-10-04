@@ -1298,23 +1298,24 @@ rogue:{
  },
  swoosh:[[[19,14],[20,15],[22,17],[24,19]],[[21,14],[20,15],[18,17],[16,19]],[[13,32],[16,33],[19,33],[22,33],[25,32]]]}
 };
-// 성기사: 날개 달린 금빛 투구(빛나는 눈 틈), 흰 바탕 금 십자 망토의 판금 갑옷, 십자 탑 방패, 전투 망치, 후광
+// 성기사: 기사와 같은 비율. 금테 두른 은빛 통투구(T자 눈틈에 빛), 흰 망토, 금 십자 흰 겉옷, 십자 방패, 금빛 철퇴, 후광
 CH.paladin={swoosh:CH.knight.swoosh,
- helm:['...gggg...','..gWWWWg..','.gWWWWWWg.','.gWWWWWWg.','gWWvvvvWWg','gWWv88vWWg','gWWWWWWWWg','.gWWgWWWg.','..gWWWWg..'],
- torso:['ssS.WWWW.Sss','sSSsWWgWWsSS','sSSsWgggWsSS','.SSsWWgWWsS.','..SsWWgWWsS.','..gggggggg..','..sWWWWWWs..','..sWW..WWs..'],
- shield:['GgggggG','gWWgWWg','gWWgWWg','ggggggg','gWWgWWg','gWWgWWg','gWWgWWg','.gWgWg.','..ggg..'],
- draw(st){const U=st.U,A=st.atk,sw={W:'#f4f1e8',s:'#d7dce6',S:'#9aa3b4',X:'#5a6478',g:'#f0c840',G:'#b08a24',8:'#fff3a0',v:'#20141c',L:'#8a5530',l:'#5a3420'},old={};
+ head:['...gggggg...','..gWWsssSG..','.gWWsssssSG.','.gWsssssSSG.','gWssgggssSSG','gWsvvvvvvSSG','gWs8vvvv8SSG','gWsssvvsssSG','gWsssvvssSSG','gWssssssSSSG','.gSsssssSSG.','..gSSSSSSG..','...GGGGGG...'],
+ torso:['ssWWgWSx','sSWgggSx','SsWWgWSx','.GggggG.','.sWWWWS.','.sS..Sx.'],
+ leg:['sS','sx','Sx','SS','xX','xXX'],
+ shield:['GgggggG','gWWgWWG','ggggggG','gWWgWWG','.gWgWG.','..ggG..'],
+ draw(st){const U=st.U,A=st.atk,sw={W:'#fbf8ef',s:'#dfe4ec',S:'#a7b0c0',x:'#6a7488',X:'#3e4556',g:'#f3cf4e',G:'#b88c22',8:'#fff6b0',v:'#1c1424',L:'#8a5530',l:'#5a3420'},old={};
   for(const kk in sw){old[kk]=CP[kk];CP[kk]=sw[kk];}
   try{
-   cg(['sS','sS','SX','XX'],16,30+st.lL);cg(['Ss','Ss','XS','XX'],22,30+st.rL);
-   cg(this.torso,14,22+U);
-   // 망치: 공격 때 들어 올렸다 내려침
-   const up=A>=0?-4:0;for(let y=15+U+up;y<=30+U;y++)cp(y%3?'L':'l',28,y);cg(['SSSSS','sXXXs','SSSSS'],26,12+U+up);
-   cg(['ss','sS'],26,24+U+st.ay);
-   cg(this.shield,8,20+U+st.ay);
-   cg(this.helm,15,12+U);cg(['g.','gg','.g'],13,13+U);cg(['.g','gg','g.'],25,13+U);
-   // 후광
-   g.fillStyle=CP['8'];for(const [x,y] of [[16,9],[17,8],[18,8],[19,8],[20,8],[21,8],[22,8],[23,9]])g.fillRect(x,y+U,1,1);
+   cape(16,23+U,9,7,.25,'W','s','S',st.cf);
+   cg(this.leg,17,29+st.lL);cg(['Ss','xs','xS','SS','Xx','XXx'],21,29+st.rL);
+   cg(this.torso,16,23+U);
+   cg(this.shield,9,22+U+st.ay);cg(['sS','Sx','kK'],14,24+U+st.ay);
+   const up=A>=0?-5:0,hx=25;cg(['Sx','sS','Kk'],24,24+U+(A>=0?-2:-st.ay));
+   for(let y=17+U+up;y<=27+U+(A>=0?-2:0);y++)cp(y%3?'L':'l',hx+1,y);
+   cg(['.gG.','gGGG','GgGG','.GG.'],hx,13+U+up);
+   cg(this.head,14,10+U);cg(['.W','WW','Ws'],12,12+U);cg(['W.','WW','sW'],26,12+U);
+   g.fillStyle=CP['8'];for(const [x,y] of [[16,7],[17,6],[18,6],[19,6],[20,6],[21,6],[22,6],[23,7]])g.fillRect(x,y+U,1,1);
   }finally{for(const kk in old)CP[kk]=old[kk];}
  }};
 // 도박사: 실크햇, 보라 조끼, 손에 금화
@@ -1331,54 +1332,58 @@ CH.gambler={
   cg(this.head,14,12+U);if(st.hurt)hurtEyes(16+U);
   cg(this.hat,12,7+U);
  }};
-// 연금술사: 고글 쓴 머리, 갈색 앞치마, 손에 플라스크
+// 연금술사: 이마에 올린 황동 고글, 부스스한 머리, 흰 실험 가운에 가죽 앞치마, 색색 약병 허리띠, 손에 끓는 플라스크
 CH.alch={
- hair:['....YYYYYY....','..YYLYYYYLYY..','.YLLYYYYYYLLY.'],
- head:['.YYYYYYYYYY.','YLccYYYYccLY','lkcEckkcEcKl','lkkccxxcckKl','lkkkkkkkkKKl','lkkekkkkekKl','lkkkkkkkkKKl','.lkkkkkkKKl.','..lKKKKKKl..','...WWWWWW...','....WsWW....'],
- torso:['WWLLLLWs','WLYYYYLs','WLYgGYLs','.zLYYLz.','.zzzzzz.','.zz.zz.'],
- draw(st){const U=st.U,A=st.atk;
-  cg(['6L','6L','5L','zl','ll','lll'],17,29+st.lL);cg(['L6','L6','L5','lz','ll','lll'],21,29+st.rL);
-  cg(this.torso,16,23+U);
-  cg(['WW','Ws','Ws','kK'],14,23+U+st.ay);
-  const up=A>=0?-3:0;cg(['sW.','WWs','.Ws','.kK'],24,23+U+up);
-  cg(['.E.','.E.','FNF','NFN','.N.'],25,22+U+up);
-  cg(this.head,14,12+U);if(st.hurt)hurtEyes(16+U);
-  cg(this.hair,13,9+U);
- }};
-// 드루이드: 사슴뿔 짐승 해골 가면, 나뭇잎 망토와 모피 어깨, 덩굴 감긴 나무 지팡이(빛나는 씨앗)
-CH.druid={
- antler:['Y.............Y','YY...........YY','.Y.Y.......Y.Y.','.YYY.......YYY.','...Y.......Y...','...YY.....YY...'],
- head:['..aNNNNNNa..','.aNFNFNFNNa.','aNFNEEEEFNNa','aNNEEEEEENNa','aNEvvEEvvENa','aNEvFEEFvENa','aNEEEEEEEENa','aNNEEvvEENNa','.aNNEEEENNa.','..aNNkkNNa..'],
- body:['.YYYYYYYYYY.','YYlYYYYYYlYY','aNFNLLLLNFNa','aNNFLLLLFNNa','.aNNFLLFNNa.','.aaNNLLNNaa.','..LLgLLgLL..','..LLLLLLLL..','.LLlLLLLlLL.','.LlLLLLLLlL.','LLlLlLLlLlLL','.l.l.ll.l.l.'],
- draw(st){const U=st.U,A=st.atk,sw={N:'#5aa83a',F:'#9ad85a',a:'#2f6a24',E:'#efe8d6',v:'#1a120c',Y:'#8a6a44',L:'#6a4a2a',l:'#4a3020',g:'#c9b25a',9:'#b8ff7a',8:'#f0ffd0'},old={};
+ head:['...LLLLLL...','..LYYYYYYL..','.LYYLYYLYYL.','LYYYYYYYYYYL','XccXXXXXXccX','XcEXkkkkXcEX','LkkkkkkkkkKL','Lkkekkkkekkl','Lkkekkkkekkl','.kkkkkkkkKK.','.LkkkkkkKKl.','..lKKKKKKl..'],
+ torso:['WWsLLsWS','WsLYYLsS','WsLYYLsS','.9gFcg0.','WsLLLLsS','Ws.LL.sS'],
+ draw(st){const U=st.U,A=st.atk,sw={L:'#6a4a2e',Y:'#9a6a3e',l:'#4a3020',X:'#8a6a2a',c:'#ffb347',W:'#f6f8fb',s:'#cfd6e0',S:'#9aa6b8',F:'#8ee06a',N:'#4aa83a',9:'#ff9a3a',0:'#e0451f'},old={};
   for(const kk in sw){old[kk]=CP[kk];CP[kk]=sw[kk];}
   try{
-   cg(['kK'],17,36);cg(['Kk'],21,36);
-   cg(this.body,14,23+U);
-   cg(['Yk','.k'],12,26+U+st.ay);
-   // 구부러진 나무 지팡이, 덩굴이 감기고 끝에 빛나는 씨앗
-   const up=A>=0?-3:0,x=28,top=9+U+up,fl=Math.floor((st.t||0)*6)%2;
-   for(let y=top+3;y<=35+up;y++){const dx=y%7<3?0:y%7<5?1:0;cp(y%5?'L':'l',x+dx,y);if(y%4===0)cp('F',x+dx-1,y);}
-   cg(['.LL.','L..L','L.9.','.L..'],x-2,top-1);if(A>=0||fl)cg(['.8.','898','.8.'],x-2,top);
-   cg(['kY','k.'],x-1,25+U+up);
-   cg(this.head,14,11+U);cg(this.antler,13,5+U);
+   cg(['zl','zl','zl','ll','ll','lll'],17,29+st.lL);cg(['lz','lz','lz','ll','ll','lll'],21,29+st.rL);
+   cg(this.torso,16,23+U);
+   cg(['Ws','Ws','sS','kK'],14,23+U+st.ay);
+   const up=A>=0?-3:0,fl=Math.floor((st.t||0)*6)%2;cg(['sW','sW','kK'],24,23+U+up);
+   cg(['.E.','.E.','FNF','NFN','.N.'],25,21+U+up);if(fl||A>=0)cg(['F.F','.F.'],25,18+U+up);
+   cg(this.head,14,10+U);if(st.hurt)hurtEyes(16+U);
   }finally{for(const kk in old)CP[kk]=old[kk];}
  }};
-// 광전사: 뿔 투구, 수염, 맨몸에 가죽끈, 큰 도끼
+// 드루이드: 나뭇잎 두건에 작은 사슴뿔, 잎 망토, 갈색 튜닉, 덩굴 감긴 나무 지팡이(빛나는 씨앗)
+CH.druid={
+ head:['...aNNNNa...','..aNFFNNNa..','.aNFFNNNNNa.','aNFNNFNNNNNa','aNFNNNNNNNNa','aNkkkkkkkkNa','akkekkkkekKa','akkekkkkekKa','akkkkkkkkkKa','aNkkkkkkkKNa','.aNKKKKKKNa.','..aNNNNNNa..'],
+ torso:['FNNLLNNa','FNLLLLNa','aNLLLLNa','.zzgzzz.','.LLLLLl.','.LL.Ll.'],
+ draw(st){const U=st.U,A=st.atk,sw={N:'#5aa83a',F:'#9ad85a',a:'#2f6a24',L:'#8a5a30',l:'#5a3820',Y:'#a07a4a',9:'#c8ff7a',8:'#f0ffd0'},old={};
+  for(const kk in sw){old[kk]=CP[kk];CP[kk]=sw[kk];}
+  try{
+   cape(16,23+U,9,7,.25,'F','N','a',st.cf);
+   cg(['6L','6L','5L','zl','ll','lll'],17,29+st.lL);cg(['L6','L6','L5','lz','ll','lll'],21,29+st.rL);
+   cg(this.torso,16,23+U);
+   cg(['FN','Na','Na','kK'],14,23+U+st.ay);
+   const up=A>=0?-3:0,fl=Math.floor((st.t||0)*5)%2,x=27;
+   for(let y=13+U+up;y<=33+U;y++){cp(y%4?'L':'l',x,y);if(y%5===1)cp('F',x-1,y);}
+   cg(['.LL.','L..L','L.9.','.L..'],x-2,10+U+up);if(fl||A>=0)cg(['.8.','8.8','.8.'],x-1,10+U+up);
+   cg(['Na.','aNa','.kK'],24,24+U+up);
+   cg(this.head,14,10+U);cg(['Y.Y','YYY','.Y.'],14,7+U);cg(['Y.Y','YYY','.Y.'],23,7+U);
+   if(st.hurt)hurtEyes(16+U);
+  }finally{for(const kk in old)CP[kk]=old[kk];}
+ }};
+// 광전사: 쇠 뿔투구, 덥수룩한 주황 수염, 모피 어깨에 가죽끈 맨몸, 양날 대도끼
 CH.berserk={
- horns:['W..............W','WW............WW','.WW..........WW.','..W..........W..'],
- head:['.XssssssssX.','XsSSSSSSSSSX','lkkkkkkkkkKl','lkkekkkkekKl','lkkekkkkekKl','lkkkkkkkkKKl','lYYkkkkkYYKl','.lYYYYYYYYl.','..lYYYYYYl..','...kkkkKK...','....kkKK....'],
- torso:['kkLkkkKk','kKkLkkKK','kkkkLkKK','.zzgzzz.','.RRRRRr.','.RRr.Rr.'],
- draw(st){const U=st.U,A=st.atk;
-  cg(['6L','6L','5L','zl','ll','lll'],17,29+st.lL);cg(['L6','L6','L5','lz','ll','lll'],21,29+st.rL);
-  cg(this.torso,16,23+U);
-  cg(['kK','kK','kK','kK'],14,23+U+st.ay);
-  const up=A>=0?-3:0,sw=A===0;
-  if(sw){for(let x=24;x<=32;x++)cp(x%3?'L':'l',x,26+U);cg(['.sSS.','sSSSs','sSSSs','.sSS.'],31,24+U);}
-  else{for(let y=13+U+up;y<=30+U+up;y++)cp(y%3?'L':'l',27,y);cg(['.sss.','sSSSs','sSSSs','.sss.'],25,12+U+up);}
-  cg(['kK.','kKK','.kK','.kK'],24,23+U+(sw?0:up));
-  cg(this.head,14,12+U);if(st.hurt)hurtEyes(15+U);
-  cg(this.horns,12,9+U);
+ head:['...xSSSSx...','..xsSSSSSx..','.xsSSSSSSSx.','xsSSSSSSSSSx','xGGGGGGGGGGx','xkkkkkkkkkKx','xkkekkkkekKx','xkkekkkkekKx','xkkkkkkkkKKx','xYYkkkkkYYKx','.xYYYYYYYYx.','..xYYYYYYx..','...xYYYYx...'],
+ torso:['YYkkkkYY','LkLkkKKL','.kkLkKK.','.zzgzzz.','.RRRRRr.','.RRr.Rr.'],
+ leg:['RR','Rr','rr','LY','YY','YYY'],
+ draw(st){const U=st.U,A=st.atk,sw={S:'#8e96a6',s:'#c3c9d4',x:'#4a5060',G:'#b07a3a',Y:'#d0782a',L:'#7a4a24',R:'#5a3a24',r:'#3a2416',E:'#efe6cf',W:'#ffffff'},old={};
+  for(const kk in sw){old[kk]=CP[kk];CP[kk]=sw[kk];}
+  try{
+   cg(this.leg,17,29+st.lL);cg(['RR','rR','rr','YL','YY','YYY'],21,29+st.rL);
+   cg(this.torso,16,23+U);
+   cg(['YY','kK','kK','kK'],14,23+U+st.ay);
+   // 대도끼: 평소엔 어깨에 메고, 공격하면 머리 위로 치켜듦
+   const up=A>=0?-4:0,hx=26;cg(['kK','kK'],24,25+U+(A>=0?-2:-st.ay));
+   for(let y=14+U+up;y<=30+U;y++)cp(y%3?'L':'R',hx+1,y);
+   cg(['.EE','EsS','EsS','EsS','.EE'],hx-2,14+U+up);cg(['EE.','SsE','SsE','SsE','EE.'],hx+2,14+U+up);
+   cg(this.head,14,10+U);cg(['E..','EE.','.EE'],11,8+U);cg(['..E','.EE','EE.'],26,8+U);
+   if(st.hurt)hurtEyes(16+U);
+  }finally{for(const kk in old)CP[kk]=old[kk];}
  }};
 // 정령사: 지팡이 없이 양손에 원소 불꽃(불·얼음), 긴 청록 머리와 보석 머리띠, 물결치는 치마형 로브
 CH.elem={
@@ -1397,19 +1402,23 @@ CH.elem={
    cg(this.head,14,11+U);if(st.hurt)hurtEyes(16+U);
   }finally{for(const kk in old)CP[kk]=old[kk];}
  }};
-// 총잡이: 챙 넓은 모자, 빨간 판초, 리볼버
+// 총잡이: 챙 넓은 카우보이 모자, 빨간 반다나, 갈색 더스터 코트와 조끼, 청바지·부츠, 리볼버
 CH.gunner={
- hat:['....LLLLLL......','...LYYYYYYL.....','...LYYYYYYL.....','...LzzzzzzL.....','LLYYYYYYYYYYYYLL'],
- head:['.lzzzzzzzzl.','lzkkkkkkkkzl','lkkkkkkkkkKl','lkkekkkkekKl','lkkekkkkekKl','lkkkkkkkkKKl','lkkkkkkkkKKl','.lkkkkkkKKl.','..lKKKKKKl..','...RRRRRR...','....RqRR....'],
- torso:['qRRRRRRr','RqRRRRrr','RRqRRRrr','.zzgzzz.','.LLLLLl.','.LLl.Ll.'],
- draw(st){const U=st.U,A=st.atk;
-  cg(['6L','6L','5L','zl','ll','lll'],17,29+st.lL);cg(['L6','L6','L5','lz','ll','lll'],21,29+st.rL);
-  cg(this.torso,16,23+U);
-  cg(['qR','Rr','Rr','kK'],14,23+U+st.ay);
-  const up=A>=0?-2:0;cg(['Ra.','RRa','.Ra','.kK'],24,23+U+up);
-  cg(['XXXXXX','.Xll..','..l...'],25,25+U+up);if(A===0)cg(['8.','98','8.'],31,24+U+up);
-  cg(this.head,14,12+U);if(st.hurt)hurtEyes(16+U);
-  cg(this.hat,12,7+U);
+ hat:['.....LLLLLL.....','....LYYYYYYl....','....LYYYYYYl....','....lqqqqqql....','.LLYYYYYYYYYYll.','..llllllllllll..'],
+ head:['.zzzzzzzzzz.','zzkkkkkkkkzz','zkkkkkkkkkKz','zkkekkkkekKz','zkkekkkkekKz','zkkkkkkkkKKz','zkkkkkkkkKKz','.zkkkkkkKKz.','..zKKKKKKz..','..RqRRRRrR..','...RRRRrr...'],
+ torso:['LYqRRrYl','LYRWWrYl','LYRRRrYl','.zzgzzz.','LYLLLLYl','LY.LL.Yl'],
+ leg:['Bb','Bb','bd','ll','ll','lll'],
+ draw(st){const U=st.U,A=st.atk,sw={L:'#8a5a32',Y:'#b07a46',l:'#5a3820',z:'#3a2414',B:'#4a6ab0',b:'#2f4a86',d:'#1f305e',X:'#3e4452',s:'#c8ced8'},old={};
+  for(const kk in sw){old[kk]=CP[kk];CP[kk]=sw[kk];}
+  try{
+   cg(this.leg,17,29+st.lL);cg(['bB','bB','db','ll','ll','lll'],21,29+st.rL);
+   cg(this.torso,16,23+U);
+   cg(['LY','LY','Yl','kK'],14,23+U+st.ay);
+   const up=A>=0?-2:0;cg(['YL','YL','kK'],24,23+U+up);
+   cg(['XXXXX','.Xs..','.l...'],25,25+U+up);if(A===0)cg(['8.','98','8.'],30,24+U+up);
+   cg(this.head,14,12+U);if(st.hurt)hurtEyes(16+U);
+   cg(this.hat,12,7+U);
+  }finally{for(const kk in old)CP[kk]=old[kk];}
  }};
 // 사령술사: 깊은 후드 + 후드 속 창백한 얼굴과 초록 눈빛, 너덜너덜한 검보라 로브(뼈 장식·해골 브로치), 해골 뼈 지팡이
 CH.necro={
