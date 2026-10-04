@@ -1897,6 +1897,8 @@ function gravAt(){const p=S.p;let best=null,bn=0;for(const e of S.en){if(!e.aliv
   if(!best)return;const r=100*(1+ex('grav')*.1)*(1+(S.p.gvR||0))*(has('masswell')?1+lv3('masswell',.15,.2,.3):1);S.zones.push({x:best.x,y:best.y,r,life:2+(has('masswell')?1:0),kind:'hole',grav:true});if(has('gravvine'))vineAt(best.x,best.y,.8);}
 const markAmp=e=>(.2+(tag('mark')>=2?.1:0)+(S.p.mkD||0)+ex('mark')*.05+(has('judge')?.2:0)+(has('f_predator')?.1:0))*(has('huntmark')&&(e.elite||e.boss)?2:1);
 function markE(e){if(!e||!e.alive)return;e.mkT=S.t+5+(tag('mark')>=2?2:0)+(has('deathsent')?3:0);if(has('venommark'))poisonE(e,3);if(has('brand'))burnE(e,pDmg()*lv3('brand',.3,.4,.5),5);}
+// 주기형 효과(중력장·덩굴·충격파·원소 폭풍·함성·분신·해골·곰 변신) 쿨타임 감소. 최대 40%
+const cdM=()=>1-Math.min(.4,S.p.cdR||0);
 const waveOn=()=>tag('wave')>=1||has('quake')||has('tectonic');
 const wvM=()=>(1+ex('wave')*.15)*(1+(S.p.wvD||0));
 function doWave(){const p=S.p,R=130*(tag('wave')>=4?1.3:1)*(has('aftershock')?1.2:1)*(has('sonicboom')?2:1),dm=pDmg()*(tag('wave')>=6?2:1)*wvM();let hitN=0,rz=0;
@@ -2280,21 +2282,21 @@ function update(dt){
     if(S.turrets&&S.turrets.length){const rg=p.range*(has('overwatch')?1+lv3('overwatch',.4,.5,.6):1);for(const u of S.turrets){u.life-=dt;u.cd-=dt;if(u.cd<=0){u.cd=(has('f_sentry')?.2:.4)*sumR()*tmul();const e=sumTarget(u,rg);if(e){const an=Math.atan2(e.y-u.y,e.x-u.x),bs=S.p.bspd*(has('overwatch')?1.5:1);pBullet(u.x,u.y,an,pDmg()*.5*sumM()*(has('boltturret')?1+lv3('boltturret',.3,.4,.5):1),{child:true,r:3,pierce:has('boltturret')?2:0,vx:Math.cos(an)*bs,vy:Math.sin(an)*bs});}}
       if(u.life<=0&&has('selfdestruct'))explode(u.x,u.y,130,pDmg()*4*sumM(),'#ffb347');}S.turrets=S.turrets.filter(u=>u.life>0);}
     if(has('wisp')){S.wiT=(S.wiT??1)-dt;if(S.wiT<=0){S.wiT=(has('f_willo')?.5:1)*sumR();const w=wispPos(),e=sumTarget(w,p.range);if(e)pBullet(w.x,w.y,Math.atan2(e.y-w.y,e.x-w.x),pDmg()*lv3('wisp',.6,.8,1)*sumM(),{child:true,r:4,burn:true});}}
-    if(shadowOn()){S.shT=(S.shT??6)-dt;if(S.shT<=0){S.shT=6;spawnClone();}}
+    if(shadowOn()){S.shT=(S.shT??6)-dt;if(S.shT<=0){S.shT=6*cdM();spawnClone();}}
     if(S.clones&&S.clones.length){for(const c of S.clones){c.life-=dt;c.cd-=dt;if(c.cd<=0){c.cd=.5*sumR()*(has('nightlord')?.5:1);const e=sumTarget(c,p.range);if(e){const a=Math.atan2(e.y-c.y,e.x-c.x),n=has('umbra')?3:1;for(let i=0;i<n;i++)pBullet(c.x,c.y,a+(i-(n-1)/2)*.15,pDmg()*.4*shM(),{child:true,r:3,shd:true,mk:has('shadowmark'),sure:tag('shadow')>=6&&Math.random()<.3});}}
       if(c.life<=0&&tag('shadow')>=4)explode(c.x,c.y,80,pDmg()*1.5*shM(),'#9a6aff');}S.clones=S.clones.filter(c=>c.life>0);}
-    if(gravOn()){S.gvT=(S.gvT??8)-dt;if(S.gvT<=0){S.gvT=has('eventh')?4:tag('grav')>=2?8:10;gravAt();if(has('blackstar'))gravAt();}}
+    if(gravOn()){S.gvT=(S.gvT??8)-dt;if(S.gvT<=0){S.gvT=(has('eventh')?4:tag('grav')>=2?8:10)*cdM();gravAt();if(has('blackstar'))gravAt();}}
     if(has('tracker')){let n=0;for(const e of S.en)if(e.alive&&e.mkT>S.t)n++;S.mkN=n;}
-    if(waveOn()){S.wvT=(S.wvT??4)-dt;if(S.wvT<=0){S.wvT=Math.max(1,(tag('wave')>=2?4:5)-(has('quake')?lv3('quake',.5,1,1.5):0)-(has('f_epicenter')?1:0)-(has('tectonic')?2:0));doWave();if(tag('wave')>=6)S.wv2=.3;}
+    if(waveOn()){S.wvT=(S.wvT??4)-dt;if(S.wvT<=0){S.wvT=Math.max(1,(tag('wave')>=2?4:5)-(has('quake')?lv3('quake',.5,1,1.5):0)-(has('f_epicenter')?1:0)-(has('tectonic')?2:0))*cdM();doWave();if(tag('wave')>=6)S.wv2=.3;}
       if(S.wv2>0){S.wv2-=dt;if(S.wv2<=0)doWave();}}
-    if(has('thornseed')||tag('nature')>=1){const ts=has('thornseed');S.tsT=(S.tsT??5)-dt;if(S.tsT<=0){S.tsT=ts?(has('f_overgrow')?3:5):6;const c=S.en.filter(e=>e.alive&&!e.phase&&d2(e,p)<300*300);for(let i=0;i<(ts?(has('f_overgrow')?3:2):1)&&c.length;i++){const e=c.splice(Math.floor(Math.random()*c.length),1)[0];vineAt(e.x,e.y,ts?lv3('thornseed',.6,.8,1):.6);}}}
-    if(has('d_bear')){if(p.bearT>0)p.bearT-=dt;S.brT=(S.brT??10)-dt;if(S.brT<=0){S.brT=10;p.bearT=4;ftext(p.x,p.y-34,'곰 변신!','#c98a52',16);S.rings.push({x:p.x,y:p.y,r:10,max:70,life:.35,col:'#c98a52'});}}
+    if(has('thornseed')||tag('nature')>=1){const ts=has('thornseed');S.tsT=(S.tsT??5)-dt;if(S.tsT<=0){S.tsT=(ts?(has('f_overgrow')?3:5):6)*cdM();const c=S.en.filter(e=>e.alive&&!e.phase&&d2(e,p)<300*300);for(let i=0;i<(ts?(has('f_overgrow')?3:2):1)&&c.length;i++){const e=c.splice(Math.floor(Math.random()*c.length),1)[0];vineAt(e.x,e.y,ts?lv3('thornseed',.6,.8,1):.6);}}}
+    if(has('d_bear')){if(p.bearT>0)p.bearT-=dt;S.brT=(S.brT??10)-dt;if(S.brT<=0){S.brT=10*cdM();p.bearT=4;ftext(p.x,p.y-34,'곰 변신!','#c98a52',16);S.rings.push({x:p.x,y:p.y,r:10,max:70,life:.35,col:'#c98a52'});}}
     if(p.fy>0){p.fyT-=dt;if(p.fyT<=0){p.fy--;p.fyT=.3;}}
-    if(has('battlecry')){S.wcT=(S.wcT??8)-dt;if(S.wcT<=0){S.wcT=has('f_warlord')?4:8;S.rings.push({x:p.x,y:p.y,r:10,max:150,life:.4,col:'#ff6a4a'});ftext(p.x,p.y-34,'함성!','#ff6a4a',16);for(const e of S.en)if(e.alive&&!e.boss&&d2(e,p)<150*150)e.slowT=Math.max(e.slowT||0,1.5);addFury(lv3('battlecry',3,5,7));if(has('f_warlord'))p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.05*healM());}}
+    if(has('battlecry')){S.wcT=(S.wcT??8)-dt;if(S.wcT<=0){S.wcT=(has('f_warlord')?4:8)*cdM();S.rings.push({x:p.x,y:p.y,r:10,max:150,life:.4,col:'#ff6a4a'});ftext(p.x,p.y-34,'함성!','#ff6a4a',16);for(const e of S.en)if(e.alive&&!e.boss&&d2(e,p)<150*150)e.slowT=Math.max(e.slowT||0,1.5);addFury(lv3('battlecry',3,5,7));if(has('f_warlord'))p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.05*healM());}}
     if(has('bladestorm')&&p.fy>=10){S.bsT=(S.bsT??1)-dt;if(S.bsT<=0){S.bsT=has('f_cyclone')?.5:1;spinHit(110*(has('f_cyclone')?1.3:1),pDmg(),'#ffb08a');}}
-    if(has('stormcall')){S.scT=(S.scT??4)-dt;if(S.scT<=0){S.scT=has('f_tempest')?2:4;const c=S.en.filter(e=>e.alive&&!e.phase&&d2(e,p)<320*320);for(let i=0;i<(has('f_tempest')?5:3)&&c.length;i++){const e=c.splice(Math.floor(Math.random()*c.length),1)[0];S.bolts.push({x1:e.x,y1:e.y-220,x2:e.x,y2:e.y,life:.18});elemDrop(e);}}}
+    if(has('stormcall')){S.scT=(S.scT??4)-dt;if(S.scT<=0){S.scT=(has('f_tempest')?2:4)*cdM();const c=S.en.filter(e=>e.alive&&!e.phase&&d2(e,p)<320*320);for(let i=0;i<(has('f_tempest')?5:3)&&c.length;i++){const e=c.splice(Math.floor(Math.random()*c.length),1)[0];S.bolts.push({x1:e.x,y1:e.y-220,x2:e.x,y2:e.y,life:.18});elemDrop(e);}}}
     if(p.rpT>0){p.rpT-=dt;if(p.rpT<=0)p.rpS=0;}if(p.rlT>0)p.rlT-=dt;
-    if(S.cls==='necro'||tag('undead')>=4){S.skT=(S.skT??3)-dt;if(S.skT<=0){S.skT=S.cls==='necro'?3:5;if((S.skel||[]).length<skelMax())raiseSkel(p.x+rand(-40,40),p.y+rand(-40,40));}}
+    if(S.cls==='necro'||tag('undead')>=4){S.skT=(S.skT??3)-dt;if(S.skT<=0){S.skT=(S.cls==='necro'?3:5)*cdM();if((S.skel||[]).length<skelMax())raiseSkel(p.x+rand(-40,40),p.y+rand(-40,40));}}
     if(S.skel&&S.skel.length){const sd=skelD(),fr=420*420;for(const k of S.skel){k.life-=dt;k.cd-=dt;k.sw=Math.max(0,k.sw-dt);let e=k.tg&&k.tg.alive&&!k.tg.phase&&d2(k.tg,p)<fr?k.tg:null;
       if(!e){e=sumTarget(k,260);if(e&&d2(e,p)>fr)e=null;k.tg=e;}if(e&&!e.boss&&k.tg===e&&bossOn()&&!S.boss.air&&!S.boss.phase&&d2(S.boss,k)<260*260){e=S.boss;k.tg=e;}
       const tx=e?e.x:p.x+k.ox,ty=e?e.y:p.y+k.oy,dx=tx-k.x,dy=ty-k.y,dd=Math.hypot(dx,dy)||1,rr=e?e.r+9:4;
