@@ -647,6 +647,11 @@ const TAGS={
   curse:   {n:'저주',  t2:'처치하면 2초간 공격 속도 +35%',t4:'처치 시 체력 3% 회복, 해골 탄 6발',t6:'처치한 적이 저주 폭발 (그 적 최대 체력 25% 범위 피해), 흡혈 2배',ex:'흡혈 +1%, 공격력 +5%'},
   jackpot: {n:'잭팟',  t2:'7번째 공격마다 강화탄 (3배, 관통)',t4:'7번째 처치마다 적 전체 폭발',t6:'잭팟의 모든 7이 5로 줄어듦',ex:'공격 속도 +3%'},
   blitz:   {n:'블리츠',t2:'대시 재사용 −40%, 대시가 지나간 적에게 공격력 100% 피해',t4:'대시 끝 지점에 폭발',t6:'대시 후 2초간 공격 속도 2배',ex:'이동 속도 +4%, 대시 재사용 −5%'},
+  frost:   {n:'냉기',  t2:'적중 시 20% 확률로 적 1.5초 둔화',t4:'둔화된 적이 받는 피해 +30%',t6:'둔화된 적이 죽으면 얼음 파편 8발 (공격력 60%)',ex:'둔화된 적 피해 +6%'},
+  summon:  {n:'소환',  t2:'칩 드론 1기 지급',t4:'소환물 피해 2배',t6:'소환물 공격 속도 2배',ex:'소환물 피해 +15%'},
+  sniper:  {n:'원거리',t2:'사거리 +20%',t4:'먼 적일수록 피해 증가 (거리 100당 +10%, 최대 +60%)',t6:'탄환이 적을 뚫을 때마다 피해 +30% 누적',ex:'원거리 피해 +5%'},
+  thunder: {n:'번개',  t2:'10번째 공격마다 연쇄 번개 (적 4명)',t4:'번개 연쇄 대상 +3, 번개 피해 +50%',t6:'번개 맞은 일반 적 0.8초 기절',ex:'번개 피해 +15%'},
+  fire:    {n:'화염',  t2:'적중 시 화상 (3초, 초당 공격력 20%)',t4:'화상 입은 적이 죽으면 불길 폭발 (범위 70, 공격력 120%)',t6:'화상 피해 2배, 화상이 1초마다 주변 적에게 번짐',ex:'화상 피해 +15%'},
   guard:   {n:'가드',  t2:'맞으면 주변 적을 밀쳐내고 1초간 둔화 (1초에 한 번)',t4:'최대 체력 20%만큼 보호막 (3초간 안 맞으면 재충전). 방어력 4당 공격력 +1% (최대 +60%)',t6:'보호막이 있는 동안 받는 피해 50% 반사, 보호막이 깨지면 폭발',ex:'방어력 +8, 공격력 +5%'},
   poison:  {n:'독',    t2:'적중 시 중독 (3초, 초당 공격력 35%)',t4:'중독된 적이 죽으면 주변에 독 전염',t6:'중독 10중첩, 독 피해 2배',ex:'독 피해 +20%'}
 };
@@ -706,19 +711,19 @@ const AUGS=[
   {id:'k_berserk',cls:'knight',u:'맞을 때 쌓이는 분노 중첩의 최대치가 늘어나요. ★1은 5중첩, ★2는 7중첩, ★3은 9중첩. 중첩당 공격력 +8%, 공격 속도 +6%.',t:'g',n:'광전사',tags:['curse','jackpot'],d:'[기사 전용] 피격·막기 시 5초간 분노 1중첩 (공격력 +8%, 공격 속도 +6%, 최대 7중첩)'},
   {id:'k_smite',cls:'knight',u:'심판의 빛기둥이 떨어지는 주기가 짧아져요. ★1은 6번째, ★2는 5번째, ★3은 4번째 공격마다. 피해는 공격력 4배 + 방어력 ×1.',t:'p',n:'심판',tags:['guard','jackpot'],d:'[기사 전용] 5번째 공격마다 대상에 빛기둥. 공격력 3배 + 방어력만큼 범위 피해'},
   {id:'k_wall',cls:'knight',u:'막기 확률에 더해지는 값이 커져요. ★1은 +15%, ★2는 +20%, ★3은 +25%. 막을 때마다 주변에 충격파가 터져요.',t:'p',n:'철벽',tags:['guard','guard'],d:'[기사 전용] 막기 확률 +20%, 막을 때마다 주변 충격파. 가드 2개로 계산'},
-  {id:'m_inferno',cls:'mage',u:'화염구가 터지는 범위가 넓어져요. ★1은 +60%, ★2는 +90%, ★3은 +120%. 폭발에 휩쓸린 적은 중독돼요.',t:'g',n:'화염 확산',tags:['poison','dice'],d:'[마법사 전용] 화염 폭발 범위 +90%, 폭발이 적을 중독시킴'},
-  {id:'m_meteor',cls:'mage',u:'운석이 떨어지는 주기가 짧아져요. ★1은 10번째, ★2는 8번째, ★3은 6번째 공격마다 공격력 6배 대폭발.',t:'p',n:'운석 낙하',tags:['dice','jackpot'],d:'[마법사 전용] 8번째 공격마다 대상 위치에 운석. 공격력 6배 대폭발'},
-  {id:'m_ring',cls:'mage',u:'내 주변을 태우는 불꽃 장막의 피해가 커져요. 초당 공격력의 60% → 90% → 120%.',t:'s',n:'불꽃 장막',tags:['roulette'],d:'[마법사 전용] 주변 110 안의 적에게 초당 공격력 150% 화염 피해'},
+  {id:'m_inferno',cls:'mage',u:'화염구가 터지는 범위가 넓어져요. ★1은 +60%, ★2는 +90%, ★3은 +120%. 폭발에 휩쓸린 적은 중독돼요.',t:'g',n:'화염 확산',tags:['fire','poison'],d:'[마법사 전용] 화염 폭발 범위 +90%, 폭발이 적을 중독시킴'},
+  {id:'m_meteor',cls:'mage',u:'운석이 떨어지는 주기가 짧아져요. ★1은 10번째, ★2는 8번째, ★3은 6번째 공격마다 공격력 6배 대폭발.',t:'p',n:'운석 낙하',tags:['fire','jackpot'],d:'[마법사 전용] 8번째 공격마다 대상 위치에 운석. 공격력 6배 대폭발'},
+  {id:'m_ring',cls:'mage',u:'내 주변을 태우는 불꽃 장막의 피해가 커져요. 초당 공격력의 60% → 90% → 120%.',t:'s',n:'불꽃 장막',tags:['fire'],d:'[마법사 전용] 주변 110 안의 적에게 초당 공격력 150% 화염 피해'},
   {id:'a_multi',cls:'archer',u:'강화할 때마다 화살이 1발씩 더 늘어나요.',t:'g',n:'부채꼴 사격',tags:['card'],d:'[궁수 전용] 화살 +2발',f:p=>{p.multi+=1;}},
-  {id:'a_snipe',cls:'archer',u:'멀리 있는 적을 맞힐 때 받는 추가 피해의 최대치가 커져요. 거리 100당 +15%씩 오르고, 최대치가 ★1은 +150%, ★2는 +200%, ★3은 +250%.',t:'s',n:'저격수',tags:['card','jackpot'],d:'[궁수 전용] 먼 적일수록 피해 증가 (거리 100당 +15%, 최대 +200%)'},
-  {id:'a_still',cls:'archer',u:'멈춰 있을 때 오르는 공격 속도가 커져요. ★1은 +35%, ★2는 +50%, ★3은 +65%. 치명타 +10%는 그대로예요.',t:'s',n:'정조준',tags:['dice'],d:'[궁수 전용] 멈춰 있으면 공격 속도 +50%, 치명타 +10%'},
+  {id:'a_snipe',cls:'archer',u:'멀리 있는 적을 맞힐 때 받는 추가 피해의 최대치가 커져요. 거리 100당 +15%씩 오르고, 최대치가 ★1은 +150%, ★2는 +200%, ★3은 +250%.',t:'s',n:'저격수',tags:['sniper'],d:'[궁수 전용] 먼 적일수록 피해 증가 (거리 100당 +15%, 최대 +200%)'},
+  {id:'a_still',cls:'archer',u:'멈춰 있을 때 오르는 공격 속도가 커져요. ★1은 +35%, ★2는 +50%, ★3은 +65%. 치명타 +10%는 그대로예요.',t:'s',n:'정조준',tags:['sniper','dice'],d:'[궁수 전용] 멈춰 있으면 공격 속도 +50%, 치명타 +10%'},
   {id:'r_shadow',cls:'rogue',u:'대시 후 모든 공격이 치명타가 되는 시간이 늘어나요. ★1은 1.5초, ★2는 2초, ★3은 2.5초.',t:'g',n:'그림자 걸음',tags:['blitz','curse'],d:'[도적 전용] 대시 후 2초간 모든 공격이 치명타'},
   {id:'r_venom',cls:'rogue',u:'단검 독의 피해가 세져요. ★1은 기본, ★2는 +50%, ★3은 +100%.',t:'s',n:'독 바른 단검',tags:['poison'],d:'[도적 전용] 단검이 적을 중독시킴 (독 피해 +50%)'},
   {id:'r_assassin',cls:'rogue',u:'정예와 보스에게 주는 피해 배율이 커져요. ★1은 2배, ★2는 2.5배, ★3은 3배.',t:'p',n:'암살',tags:['curse','jackpot'],d:'[도적 전용] 정예와 보스에게 피해 2.5배, 처치하면 체력 2% 회복'},
   // new mechanics
-  {id:'chainlt',u:'7번째 적중마다 튀는 번개가 이어지는 적 수가 늘어나요. ★1은 5명, ★2는 7명, ★3은 9명.',t:'g',n:'체인 라이트닝',tags:['card','jackpot'],d:'7번째 적중마다 번개가 주변 적 7명에게 연쇄'},
-  {id:'blackhole',u:'블랙홀이 생기는 주기가 짧아지고 크기도 커져요. 주기는 8초 → 7초 → 6초.',t:'p',n:'블랙홀 칩',tags:['roulette'],d:'9초마다 가까운 적 위치에 블랙홀. 적을 빨아들이며 피해. 공속이 오를수록 더 자주'},
-  {id:'icecoin',u:'맞았을 때 주변 적이 느려지는 시간이 늘어나요. ★1은 2초, ★2는 2.5초, ★3은 3초.',t:'s',n:'얼음 동전',tags:['guard'],d:'맞으면 주변에 냉기 폭발 (공격력 200%, 1초에 한 번), 주변 적이 2.5초간 크게 느려짐'},
+  {id:'chainlt',u:'7번째 적중마다 튀는 번개가 이어지는 적 수가 늘어나요. ★1은 5명, ★2는 7명, ★3은 9명.',t:'g',n:'체인 라이트닝',tags:['thunder'],d:'7번째 적중마다 번개가 주변 적 7명에게 연쇄'},
+  {id:'blackhole',u:'블랙홀이 생기는 주기가 짧아지고 크기도 커져요. 주기는 8초 → 7초 → 6초.',t:'p',n:'블랙홀 칩',tags:['roulette','summon'],d:'9초마다 가까운 적 위치에 블랙홀. 적을 빨아들이며 피해. 공속이 오를수록 더 자주'},
+  {id:'icecoin',u:'맞았을 때 주변 적이 느려지는 시간이 늘어나요. ★1은 2초, ★2는 2.5초, ★3은 3초.',t:'s',n:'얼음 동전',tags:['frost','guard'],d:'맞으면 주변에 냉기 폭발 (공격력 200%, 1초에 한 번), 주변 적이 2.5초간 크게 느려짐'},
   {id:'mirror',u:'적 탄환을 튕겨내는 확률이 올라가요. ★1은 20%, ★2는 30%, ★3은 40%. 튕긴 탄환은 공격력 2배로 적을 맞혀요.',t:'g',n:'거울 패',tags:['card','guard'],d:'적 탄환이 30% 확률로 튕겨 나가 적을 공격 (공격력 2배)'},
   {id:'revenge',u:'맞은 뒤 3초 안의 다음 공격 피해 배율이 커져요. ★1은 2배, ★2는 2.5배, ★3은 3배.',t:'s',n:'복수',tags:['curse'],d:'맞으면 3초 안의 다음 공격 피해 2.5배'},
   {id:'punch',u:'0.8초마다 터지는 충격파의 범위와 피해가 커져요. 범위는 85 → 100 → 115, 피해는 공격력의 120% → 160% → 200%.',t:'s',n:'주사위 충격파',tags:['dice'],d:'0.8초마다 가까운 적에게 충격파 (범위 100, 공격력 160%). 공속이 오를수록 더 자주'},
@@ -730,25 +735,25 @@ const AUGS=[
   // 빌드 확장: 소환·설치·상태이상·처형·골드 소모·단일 탄 등 새 축
   {id:'ricochet',u:'적에게 맞은 탄환이 다른 적에게 튕기는 횟수와 거리가 늘어나요. ★1·★2는 1회, ★3은 2회.',t:'s',n:'도탄',tags:['card'],d:'탄환이 맞은 뒤 근처 적에게 1회 튕겨 나감'},
   {id:'giant',u:'탄환 크기와 피해가 커져요. 크기 +60% → +90% → +120%, 피해 +15% → +25% → +35%.',t:'g',n:'거인의 탄',tags:['card'],d:'탄환 크기 +90%, 탄환 피해 +25%'},
-  {id:'focus',u:'탄환이 1발일 때 받는 공격력 보너스가 커져요. ★1은 +35%, ★2는 +50%, ★3은 +65%. 2발 이상이면 +10%만 받아요.',t:'s',n:'집중 사격',tags:['card'],d:'탄환이 1발이면 공격력 +50%. 탄환이 많은 빌드엔 약함'},
+  {id:'focus',u:'탄환이 1발일 때 받는 공격력 보너스가 커져요. ★1은 +35%, ★2는 +50%, ★3은 +65%. 2발 이상이면 +10%만 받아요.',t:'s',n:'집중 사격',tags:['sniper'],d:'탄환이 1발이면 공격력 +50%. 탄환이 많은 빌드엔 약함'},
   {id:'echo',u:'메아리 탄환의 피해가 커져요. ★1은 원래의 50%, ★2는 70%, ★3은 90%.',t:'p',n:'메아리',tags:['card','card'],d:'공격 0.25초 뒤 같은 방향으로 한 번 더 발사 (피해 70%). 카드 2개로 계산'},
   {id:'spiral',u:'4번째 공격마다 사방으로 퍼지는 탄환 수가 늘어나요. ★1은 8발, ★2는 10발, ★3은 12발.',t:'g',n:'소용돌이 패',tags:['card','roulette'],d:'4번째 공격마다 주변 원형으로 탄환 10발 (피해 60%)'},
   {id:'combo',u:'같은 적을 계속 때릴 때 쌓이는 피해 중첩 최대치가 늘어나요. ★1은 10중첩, ★2는 15중첩, ★3은 20중첩. 중첩당 +4%.',t:'s',n:'연타',tags:['card'],d:'같은 적을 연속으로 맞히면 피해 +6%씩 중첩 (최대 +90%). 대상이 바뀌면 초기화'},
   {id:'second',u:'치명타가 안 터졌을 때 한 번 더 굴릴 확률이 올라가요. ★1은 30%, ★2는 45%, ★3은 60%.',t:'s',n:'두 번째 주사위',tags:['dice'],d:'치명타가 실패하면 45% 확률로 한 번 더 굴림'},
   {id:'execute',u:'일반 적을 즉시 처치하는 체력 기준이 올라가요. ★1은 12%, ★2는 16%, ★3은 20%. 정예·보스는 그 체력 이하에서 피해 +50%.',t:'g',n:'처형',tags:['curse'],d:'체력 16% 이하 일반 적은 맞으면 즉사. 정예·보스는 그 구간에서 피해 +50%'},
-  {id:'burn',u:'치명타로 붙는 화상의 초당 피해가 커져요. 공격력의 40% → 60% → 80%.',t:'g',n:'점화',tags:['poison'],d:'치명타가 적에게 3초 화상 (초당 공격력 60%). 독과 별개로 중첩'},
-  {id:'frost',u:'적중 시 적을 둔화시킬 확률이 올라가요. ★1은 25%, ★2는 35%, ★3은 45%.',t:'s',n:'서리 탄',tags:['dice'],d:'적중 시 35% 확률로 1.5초간 크게 둔화'},
+  {id:'burn',u:'치명타로 붙는 화상의 초당 피해가 커져요. 공격력의 40% → 60% → 80%.',t:'g',n:'점화',tags:['fire'],d:'치명타가 적에게 3초 화상 (초당 공격력 60%). 독과 별개로 중첩'},
+  {id:'frost',u:'적중 시 적을 둔화시킬 확률이 올라가요. ★1은 25%, ★2는 35%, ★3은 45%.',t:'s',n:'서리 탄',tags:['frost'],d:'적중 시 35% 확률로 1.5초간 크게 둔화'},
   {id:'contagion',u:'중독된 적이 죽을 때 터지는 폭발 피해가 커져요. 공격력의 120% → 160% → 200%.',t:'p',n:'감염 폭발',tags:['poison','poison'],d:'중독된 적이 죽으면 폭발 (공격력 160%), 맞은 적은 중독. 독 2개로 계산'},
   {id:'venomcloud',u:'6초마다 떨어지는 독구름 개수가 늘어나요. ★1은 1개, ★2는 2개, ★3은 3개.',t:'g',n:'독구름',tags:['poison'],d:'8초마다 적이 가장 많은 곳에 4초짜리 독구름. 공속이 오를수록 더 자주'},
-  {id:'drone',u:'함께 싸우는 칩 드론 수가 늘어나요. ★1은 1기, ★2는 2기, ★3은 3기.',t:'g',n:'칩 드론',tags:['roulette','card'],d:'주변을 도는 드론 2기가 0.6초마다 가까운 적을 사격 (공격력 60%). 공속이 오를수록 더 자주'},
+  {id:'drone',u:'함께 싸우는 칩 드론 수가 늘어나요. ★1은 1기, ★2는 2기, ★3은 3기.',t:'g',n:'칩 드론',tags:['summon','roulette'],d:'주변을 도는 드론 2기가 0.6초마다 가까운 적을 사격 (공격력 60%). 공속이 오를수록 더 자주'},
   {id:'nova',u:'10초마다 터지는 노바의 피해가 커져요. 공격력의 5배 → 7배 → 9배, 반경 180.',t:'p',n:'노바',tags:['roulette','roulette'],d:'10초마다 내 주변에 대폭발 (공격력 9배). 공속이 오를수록 더 자주. 룰렛 2개로 계산'},
-  {id:'thunder',u:'5초마다 떨어지는 낙뢰 수가 늘어나요. ★1은 3발, ★2는 4발, ★3은 5발.',t:'p',n:'천둥',tags:['jackpot','jackpot'],d:'6초마다 화면 안 무작위 적 3명에게 낙뢰 (공격력 3.5배). 공속이 오를수록 더 자주. 잭팟 2개로 계산'},
-  {id:'mine',u:'지뢰를 까는 간격이 짧아져요. ★1은 2.5초, ★2는 2초, ★3은 1.5초.',t:'s',n:'지뢰',tags:['blitz'],d:'2초마다 발밑에 지뢰. 적이 밟으면 폭발 (공격력 180%). 공속이 오를수록 더 자주'},
+  {id:'thunder',u:'5초마다 떨어지는 낙뢰 수가 늘어나요. ★1은 3발, ★2는 4발, ★3은 5발.',t:'p',n:'천둥',tags:['thunder','thunder'],d:'6초마다 화면 안 무작위 적 3명에게 낙뢰 (공격력 3.5배). 공속이 오를수록 더 자주. 번개 2개로 계산'},
+  {id:'mine',u:'지뢰를 까는 간격이 짧아져요. ★1은 2.5초, ★2는 2초, ★3은 1.5초.',t:'s',n:'지뢰',tags:['summon','blitz'],d:'2초마다 발밑에 지뢰. 적이 밟으면 폭발 (공격력 180%). 공속이 오를수록 더 자주'},
   {id:'adrenaline',u:'대시 후 3초간 오르는 공격력이 커져요. ★1은 +20%, ★2는 +30%, ★3은 +40%. 이동 속도 +20%는 그대로.',t:'s',n:'아드레날린',tags:['blitz'],d:'대시 후 3초간 공격력 +30%, 이동 속도 +20%'},
   {id:'bloodrage',u:'공격 속도가 더 올라요. ★1은 +30%, ★2는 +40%, ★3은 +50%.',t:'p',n:'피의 광란',tags:['curse','curse'],d:'공격 속도 +40%. 적중할 때마다 체력 0.3 회복. 저주 2개로 계산'},
   {id:'shieldbash',u:'보호막이 남아 있는 동안 오르는 공격력이 커져요. ★1은 +20%, ★2는 +30%, ★3은 +40%.',t:'g',n:'보호막 충격',tags:['guard'],d:'보호막이 남아 있는 동안 공격력 +30%'},
   {id:'regenarmor',u:'방어력 1당 초당 체력 재생이 커져요. ★1은 0.02, ★2는 0.03, ★3은 0.04.',t:'s',n:'재생 장갑',tags:['guard'],d:'방어력 1당 초당 체력 재생 +0.03 (방어력 100이면 초당 +3)'},
-  {id:'gravity',u:'주변 적이 느려지는 정도가 커져요. ★1은 −20%, ★2는 −30%, ★3은 −40%. 범위 150.',t:'g',n:'중력장',tags:['roulette','guard'],d:'내 주변 150 안의 적 이동 속도 −30%'},
+  {id:'gravity',u:'주변 적이 느려지는 정도가 커져요. ★1은 −20%, ★2는 −30%, ★3은 −40%. 범위 150.',t:'g',n:'중력장',tags:['frost','roulette'],d:'내 주변 150 안의 적 이동 속도 −30%'},
   {id:'goldbullet',u:'보너스 상한이 커져요. ★1은 최대 +30%, ★2는 +45%, ★3은 +60%.',t:'g',n:'황금 탄환',tags:['house','card'],d:'보유 골드 100당 탄환 피해 +3% (최대 +45%)'},
   {id:'interest',u:'보유 골드에 비례한 공격 속도 보너스가 커져요. 골드 100당 +2% → +3% → +4%, 최대 +40% → +60% → +80%.',t:'p',n:'복리',tags:['house','house'],d:'보유 골드 100당 공격 속도 +3% (최대 +60%). 하우스 2개로 계산'},
   {id:'luckycoin',u:'강화할 때마다 행운 +1, 골드 획득 +10%가 한 번 더 붙어요.',t:'s',n:'행운의 동전',tags:['dice'],d:'행운 +2, 골드 획득 +20%',f:p=>{p.luck+=1;p.goldM+=.1;}},
@@ -756,13 +761,13 @@ const AUGS=[
   {id:'toxic',u:'독 피해 자체가 세져요. ★1은 기본, ★2는 +50%, ★3은 +100%.',t:'s',n:'독 묻은 탄',tags:['poison'],d:'탄환이 적을 중독시킵니다 (독 피해 +50%)'},
   {id:'neuro',u:'중독된 적이 느려지는 정도가 커져요. ★1은 이동 속도 −40%, ★2는 −55%, ★3은 −70%.',t:'s',n:'마비 독',tags:['poison'],d:'중독된 적 이동 속도 −55%'},
   {id:'spill',u:'중독된 적이 죽으면서 남기는 독 웅덩이가 커지고 오래가요. 반경 50 → 65 → 80, 지속 3초 → 4초 → 5초.',t:'g',n:'독 웅덩이',tags:['poison'],d:'중독된 적이 죽으면 4초간 독 웅덩이 (반경 65)'},
-  {id:'molotov',u:'대시 경로에 남는 불길의 피해가 세져요. ★1은 기본, ★2는 2배, ★3은 3배.',t:'g',n:'화염병',tags:['poison','blitz'],d:'대시 경로에 2.5초간 불길 (피해 2배)'},
+  {id:'molotov',u:'대시 경로에 남는 불길의 피해가 세져요. ★1은 기본, ★2는 2배, ★3은 3배.',t:'g',n:'화염병',tags:['fire','blitz'],d:'대시 경로에 2.5초간 불길 (피해 2배)'},
   {id:'plague',u:'1초마다 중독이 번지는 적 수가 늘어나요. ★1은 1명, ★2는 2명, ★3은 3명.',t:'p',n:'역병',tags:['poison','poison'],d:'중독이 1.5초마다 가까운 적 1명에게 번집니다. 독 피해 +20%. 독 2개로 계산'},
   // 추가 증강
   {id:'soul',u:'',t:'p',n:'영혼 수확',tags:['curse','curse'],d:'일반 적을 처치할 때마다 공격력 +0.1% 영구 중첩 (최대 +50%). 저주 2개로 계산'},
   {id:'corrode',u:'',t:'g',n:'부식 독',tags:['poison','guard'],d:'중독된 적에게 받는 피해 −35%. 중독된 적을 처치하면 체력 +1'},
   {id:'lottery',u:'',t:'g',n:'복권',tags:['house','jackpot'],d:'처치마다 2% 확률로 당첨: 골드 획득 + 그 자리에 대폭발 (공격력 3배)'},
-  {id:'static',u:'',t:'g',n:'정전기',tags:['blitz'],d:'300만큼 움직일 때마다 가까운 적부터 4명에게 번개 연쇄 (공격력 150%)'},
+  {id:'static',u:'',t:'g',n:'정전기',tags:['thunder','blitz'],d:'300만큼 움직일 때마다 가까운 적부터 4명에게 번개 연쇄 (공격력 150%)'},
   {id:'chipshot',u:'',t:'g',n:'칩 사출',tags:['roulette','card'],d:'3초마다 모든 회전 칩이 바깥으로 탄환을 쏨 (공격력 80%, 관통 2). 공속이 오를수록 더 자주'},
   // 추가 증강 2: 시너지별 컨셉 강화
   {id:'deck',u:'',t:'g',n:'덱 빌딩',tags:['card'],d:'탄환 1발당 공격력 +6%'},
@@ -770,7 +775,7 @@ const AUGS=[
   {id:'highbet',u:'',t:'g',n:'큰 판',tags:['dice'],d:'치명타 피해 +70%, 치명타 확률 −8%',f:p=>{p.critM+=.35;p.crit-=.04;}},
   {id:'reroll2',u:'',t:'g',n:'한 번 더',tags:['dice','card'],d:'치명타가 터지면 같은 적에게 탄환 1발 추가 (공격력 70%)'},
   {id:'bigwheel',u:'',t:'p',n:'대형 룰렛',tags:['roulette','roulette'],d:'회전 칩 +3, 회전 칩 피해 +50%. 룰렛 2개로 계산',f:p=>{p.orbM*=1.225;}},
-  {id:'sawblade',u:'',t:'g',n:'톱날 칩',tags:['roulette'],d:'회전 칩에 맞은 적이 3초간 출혈 (초당 공격력 40%)'},
+  {id:'sawblade',u:'',t:'g',n:'톱날 칩',tags:['roulette','fire'],d:'회전 칩에 맞은 적이 3초간 출혈 (초당 공격력 40%)'},
   {id:'bank',u:'',t:'g',n:'은행 금고',tags:['house','guard'],d:'보유 골드 300당 방어력 +2 (최대 +50)'},
   {id:'goldbomb',u:'',t:'p',n:'돈다발 폭탄',tags:['house','house'],d:'8초마다 주변 대폭발 (공격력 3배 + 보유 골드 2%만큼 추가 피해). 하우스 2개로 계산. 공속이 오를수록 더 자주'},
   {id:'madblade',u:'처치 후 공격력 보너스가 커져요. ★1은 +25%, ★2는 +35%, ★3은 +45%.',t:'g',n:'광기의 칼날',tags:['curse'],d:'처치하면 3초간 공격력 +35% (처치하면 시간 갱신)'},
@@ -781,19 +786,34 @@ const AUGS=[
   {id:'rapid',u:'초당 공격 1회당 공격력이 커져요. ★1은 3%, ★2는 5%, ★3은 7%.',t:'g',n:'연사 숙련',tags:['card'],d:'초당 공격 횟수 1회당 공격력 +5%'},
   {id:'boots',u:'강화할 때마다 이동 속도 +8%가 한 번 더 붙어요.',t:'s',n:'날쌘 장화',tags:['blitz'],d:'이동 속도 +16%',f:p=>{p.speed*=1.08;}},
   {id:'tailwind',u:'이동 속도 10당 공격 속도가 커져요. ★1은 1.5%, ★2는 2%, ★3은 2.5%.',t:'g',n:'뒷바람',tags:['blitz'],d:'이동 속도 10당 공격 속도 +2%'},
-  {id:'rifling',u:'강화할 때마다 탄속 +22%, 사거리 +6%가 한 번 더 붙어요.',t:'s',n:'강선',tags:['card'],d:'탄속 +50%, 사거리 +12%',f:p=>{p.bspd*=1.22;p.range*=1.06;}},
-  {id:'velocity',u:'탄속 100당 탄환 피해가 커져요. ★1은 3.5%, ★2는 5%, ★3은 6.5%.',t:'g',n:'초음속 탄',tags:['card'],d:'탄속 100당 탄환 피해 +5%'},
-  {id:'railgun',u:'강화할 때마다 탄속 +34%, 관통 +1이 한 번 더 붙어요.',t:'p',n:'레일건',tags:['card','card'],d:'탄속 +80%, 관통 +2. 카드 2개로 계산',f:p=>{p.bspd*=1.34;p.pierce+=1;}},
-  {id:'scope',u:'강화할 때마다 사거리 +12%가 한 번 더 붙어요.',t:'s',n:'조준경',tags:['card'],d:'사거리 +25%',f:p=>{p.range*=1.12;}},
-  {id:'longshot',u:'사거리 100당 공격력이 커져요. ★1은 4%, ★2는 6%, ★3은 8%.',t:'g',n:'원거리 숙련',tags:['card'],d:'사거리 100당 공격력 +6%'},
+  {id:'rifling',u:'강화할 때마다 탄속 +22%, 사거리 +6%가 한 번 더 붙어요.',t:'s',n:'강선',tags:['sniper'],d:'탄속 +50%, 사거리 +12%',f:p=>{p.bspd*=1.22;p.range*=1.06;}},
+  {id:'velocity',u:'탄속 100당 탄환 피해가 커져요. ★1은 3.5%, ★2는 5%, ★3은 6.5%.',t:'g',n:'초음속 탄',tags:['sniper','card'],d:'탄속 100당 탄환 피해 +5%'},
+  {id:'railgun',u:'강화할 때마다 탄속 +34%, 관통 +1이 한 번 더 붙어요.',t:'p',n:'레일건',tags:['sniper','sniper'],d:'탄속 +80%, 관통 +2. 원거리 2개로 계산',f:p=>{p.bspd*=1.34;p.pierce+=1;}},
+  {id:'scope',u:'강화할 때마다 사거리 +12%가 한 번 더 붙어요.',t:'s',n:'조준경',tags:['sniper'],d:'사거리 +25%',f:p=>{p.range*=1.12;}},
+  {id:'longshot',u:'사거리 100당 공격력이 커져요. ★1은 4%, ★2는 6%, ★3은 8%.',t:'g',n:'원거리 숙련',tags:['sniper'],d:'사거리 100당 공격력 +6%'},
   {id:'heart',u:'강화할 때마다 최대 체력 +10%가 한 번 더 붙어요.',t:'g',n:'거인의 심장',tags:['guard'],d:'최대 체력 +21%',f:p=>{const v=Math.round(p.maxHp*.1);p.maxHp+=v;p.hp+=v;}},
   {id:'troll',u:'강화할 때마다 초당 체력 재생 +1.5가 한 번 더 붙어요.',t:'s',n:'트롤의 피',tags:['guard'],d:'초당 체력 재생 +3',f:p=>{p.regen+=1.5;}},
+  {id:'frostnova',u:'냉기 폭발 피해가 커져요. ★1은 120%, ★2는 150%, ★3은 180%.',t:'g',n:'서리 폭발',tags:['frost'],d:'5초마다 주변 140 안의 적에게 공격력 150% 피해, 2초간 둔화'},
+  {id:'icebolt',u:'얼음탄 피해가 커져요. ★1은 120%, ★2는 150%, ★3은 180%.',t:'s',n:'얼음 화살',tags:['frost','card'],d:'4번째 공격마다 얼음탄 (공격력 150%, 관통 3, 맞은 적 둔화)'},
+  {id:'glacier',u:'둔화된 적에게 치명타 확률이 더 올라요. ★1은 +20%, ★2는 +25%, ★3은 +30%.',t:'p',n:'빙하',tags:['frost','frost'],d:'둔화된 적에게 치명타 확률 +25%, 치명타 피해 +50%. 냉기 2개로 계산'},
+  {id:'turret',u:'포탑 지속 시간이 늘어나요. ★1은 5초, ★2는 6초, ★3은 8초.',t:'g',n:'칩 포탑',tags:['summon'],d:'8초마다 발밑에 포탑 설치. 6초간 0.4초마다 사격 (공격력 50%)'},
+  {id:'wisp',u:'도깨비불 피해가 커져요. ★1은 60%, ★2는 80%, ★3은 100%.',t:'s',n:'도깨비불',tags:['summon','fire'],d:'도깨비불 1기가 따라다니며 1초마다 화염구 (공격력 80%, 화상)'},
+  {id:'legion',u:'',t:'p',n:'드론 군단',tags:['summon','summon'],d:'칩 드론 +2기. 소환 2개로 계산'},
+  {id:'piercer',u:'강화할 때마다 관통 +1이 한 번 더 붙어요.',t:'s',n:'꿰뚫는 탄',tags:['sniper'],d:'관통 +2',f:p=>{p.pierce+=1;}},
+  {id:'marksman',u:'먼 적 치명타 확률이 커져요. ★1은 +20%, ★2는 +30%, ★3은 +40%.',t:'g',n:'명중 표식',tags:['sniper','dice'],d:'300보다 먼 적에게 치명타 확률 +30%'},
+  {id:'artillery',u:'',t:'p',n:'포격',tags:['sniper','sniper'],d:'탄환이 사라지는 자리에서 폭발 (범위 70, 공격력 100%). 원거리 2개로 계산'},
+  {id:'tesla',u:'번개 대상이 늘어나요. ★1은 2명, ★2는 3명, ★3은 4명.',t:'g',n:'테슬라 코일',tags:['thunder'],d:'3초마다 주변 200 안의 적에게 연쇄 번개 (3명)'},
+  {id:'overload',u:'번개 확률이 커져요. ★1은 15%, ★2는 20%, ★3은 25%.',t:'s',n:'과부하',tags:['thunder','dice'],d:'치명타가 터지면 20% 확률로 연쇄 번개 (3명)'},
+  {id:'stormlord',u:'',t:'p',n:'뇌신',tags:['thunder','thunder'],d:'번개 피해 2배, 연쇄 대상 +2. 번개 2개로 계산'},
+  {id:'fireball',u:'화염구 피해가 커져요. ★1은 180%, ★2는 220%, ★3은 260%.',t:'g',n:'화염구',tags:['fire'],d:'6번째 공격마다 화염구 (범위 80 폭발, 공격력 220%, 화상)'},
+  {id:'kindle',u:'화상 피해가 더 커져요. ★1은 +30%, ★2는 +40%, ★3은 +50%.',t:'s',n:'불씨',tags:['fire'],d:'화상 시간 +2초, 화상 피해 +40%'},
+  {id:'inferno',u:'',t:'p',n:'업화',tags:['fire','fire'],d:'1초마다 주변 120 안의 적에게 화상, 화상 피해 +50%. 화염 2개로 계산'},
   {id:'crossfire',u:'반대쪽 탄환이 나갈 확률이 커져요. ★1은 25%, ★2는 35%, ★3은 45%.',t:'s',n:'십자포화',tags:['card'],d:'공격할 때 35% 확률로 반대 방향에도 탄환 1발'},
   {id:'bigshot',u:'대포알 피해가 커져요. ★1은 2.5배, ★2는 3배, ★3은 3.5배.',t:'g',n:'대포알',tags:['card'],d:'5번째 공격마다 거대한 탄환 (공격력 3배, 관통 5)'},
   {id:'overcharge',u:'과충전 피해 배율이 커져요. ★1은 1.8배, ★2는 2.2배, ★3은 2.6배.',t:'p',n:'과충전',tags:['jackpot','jackpot'],d:'10번째 공격마다 다음 3번 공격 피해 2.2배. 잭팟 2개로 계산'},
-  {id:'stunner',u:'기절 시간이 늘어나요. ★1은 0.6초, ★2는 0.9초, ★3은 1.2초.',t:'s',n:'기절 주사위',tags:['dice'],d:'치명타를 맞은 일반 적이 0.9초간 거의 멈춤'},
+  {id:'stunner',u:'기절 시간이 늘어나요. ★1은 0.6초, ★2는 0.9초, ★3은 1.2초.',t:'s',n:'기절 주사위',tags:['frost'],d:'치명타를 맞은 일반 적이 0.9초간 거의 멈춤'},
   {id:'goldrain',u:'7번째 처치 보너스가 커져요. ★1은 +5, ★2는 +7, ★3은 처치마다 +2에 7번째 +9.',t:'g',n:'돈벼락',tags:['house'],d:'처치마다 골드 +1, 7번째 처치마다 골드 +7'},
-  {id:'warcry',u:'둔화 시간이 늘어나요. ★1은 0.8초, ★2는 1.2초, ★3은 1.6초.',t:'g',n:'함성',tags:['blitz','guard'],d:'대시하면 주변 160 안의 적이 1.2초간 크게 느려지고, 2초간 받는 피해 −30%'},
+  {id:'warcry',u:'둔화 시간이 늘어나요. ★1은 0.8초, ★2는 1.2초, ★3은 1.6초.',t:'g',n:'함성',tags:['blitz','frost'],d:'대시하면 주변 160 안의 적이 1.2초간 크게 느려지고, 2초간 받는 피해 −30%'},
   {id:'miasma',u:'독기 범위가 넓어져요. ★1은 110, ★2는 130, ★3은 150.',t:'s',n:'독기',tags:['poison'],d:'2초마다 주변 130 안의 적을 중독'},
   {id:'magnet2',u:'강화할 때마다 흡수 범위 ×1.3, 골드 획득 +7%가 한 번 더 붙어요.',t:'s',n:'자석 칩',tags:['house'],d:'흡수 범위 +70%, 골드 획득 +14%',f:p=>{p.magnet*=1.3;p.goldM+=.07;}},
   {id:'deathmark',u:'',t:'p',n:'죽음의 표식',tags:['curse','curse'],d:'체력 30% 이하 적(보스 포함)에게 피해 2배. 저주 2개로 계산'},
@@ -873,11 +893,11 @@ const VIPS=[
   {id:'blackjack',t:'v',n:'블랙잭',tags:['card','jackpot'],d:'21번째 공격마다 모든 적을 뚫는 카드 파도 3장 (공격력 5배)'},
   {id:'edge',t:'v',n:'진짜 하우스 엣지',tags:['house','house'],d:'보유 골드 1000당 공격력 +6% (최대 +60%). 하우스 2개로 계산'},
   {id:'vaultbomb',t:'v',n:'금고 폭파',tags:['house','blitz'],d:'대시할 때 폭발 (공격력 1.5배 + 보유 골드 5%만큼 추가 피해)'},
-  {id:'dealers',t:'v',n:'딜러 둘',tags:['roulette','card'],d:'따라다니는 딜러 칩 2개가 0.5초마다 사격 (공격력 50%)'},
+  {id:'dealers',t:'v',n:'딜러 둘',tags:['summon','summon'],d:'따라다니는 딜러 칩 2개가 0.5초마다 사격 (공격력 50%). 소환 2개로 계산'},
   {id:'fate',t:'v',n:'운명의 주사위',tags:['dice','dice'],d:'주사위에 7이 생깁니다. 7이 나온 탄환은 맞은 자리에서 폭발 (공격력 1.8배). 주사위 2개로 계산'},
   {id:'goldskin',t:'v',n:'황금 피부',tags:['guard','house'],d:'보호막 최대치에 보유 골드의 1% 추가 (최대 체력의 50%까지)'},
   {id:'chain',t:'v',n:'연쇄 잭팟',tags:['jackpot','jackpot'],d:'잭팟의 모든 7이 5로 줄어듦. 잭팟 2개로 계산'},
-  {id:'freeze',t:'v',n:'시간 정지',tags:['blitz','roulette'],d:'30초마다 2초간 모든 적과 적 탄환이 멈춤'},
+  {id:'freeze',t:'v',n:'시간 정지',tags:['frost','frost'],d:'30초마다 2초간 모든 적과 적 탄환이 멈춤. 냉기 2개로 계산'},
   {id:'plaguelord',t:'v',n:'역병의 군주',tags:['poison','curse'],d:'중독된 적은 초당 최대 체력 0.6%를 추가로 잃음 (공격력 1.5배 한도)'},
   {id:'phoenix',t:'v',n:'불사조 칩',tags:['curse','guard'],d:'죽으면 골드 없이 체력 40%로 부활하며 화면 폭발. 180초마다'},
   {id:'overflow',t:'v',n:'오버플로',tags:['card','dice'],d:'공격 속도 상한 초당 10회 → 13회'},
@@ -987,6 +1007,7 @@ function applyQ(f,p,q){if(!q||q===1){f(p);return;}
   if(p.maxHp>mh)p.hp+=p.maxHp-mh;p.hp=Math.min(p.hp,p.maxHp);}
 function tagCount(){const c={},o={},oq={};for(const a of S.augs){for(const t of a.tags)c[t]=(c[t]||0)+1;o[a.id]=a.lv;oq[a.id]=a.q||1;if(a.parts)for(const q of a.parts)o[q]=3;}S.tagc=c;S.own=o;S.oq=oq;
   // 가드 2: 최대 체력 +40 (조건이 바뀌면 더하거나 뺌)
+  if(S.p){const sw=tag('sniper')>=2?1.2:1,sh=S.p.snR||1;if(sw!==sh){S.p.range*=sw/sh;S.p.snR=sw;}}
   if(S.p){const want=0,have=S.p.g2hp||0;if(want!==have){S.p.maxHp+=want-have;S.p.hp=Math.max(1,Math.min(S.p.maxHp,S.p.hp+(want-have)));S.p.g2hp=want;}}}
 const HERO=(()=>{
 const sc=document.createElement('canvas');sc.width=40;sc.height=40;const g=sc.getContext('2d',{willReadFrequently:true});
@@ -1207,13 +1228,13 @@ return {canvas:sc,draw:sprite,PAL,get hires(){return hires;},setDir(){},get box(
 })();
 const CLASSES={
   knight:{n:'기사',role:'근접 탱커',d:'짧은 검기를 휘두르는 튼튼한 전사',passive:'방패 막기: 15% 확률로 받는 피해 무효. 4번째 공격마다 주변 회전 베기 (공격력 50%)',atk:.3,
-    stats:{hp:200,maxHp:200,speed:180,dmg:17,rate:1.9,range:210,bspd:430,armor:15,block:.15},fav:['guard','curse','blitz'],dis:['poison'],
+    stats:{hp:200,maxHp:200,speed:180,dmg:17,rate:1.9,range:210,bspd:430,armor:15,block:.15},fav:['guard','frost','blitz'],dis:['poison'],
     cards:['힘의 물약','숫돌','날랜 손놀림','치명상','튼튼한 체력','무거운 갑옷'],lvd:'체력 +2, 방어력 +0.3, 공격력 +1%',lv:p=>{p.maxHp+=2;p.hp+=2;p.armor+=.3;p.dmgP=(p.dmgP||0)+.01;}},
   mage:{n:'마법사',role:'광역 화력',d:'맞으면 터지는 화염구를 쏘는 마법사',passive:'화염 폭발: 화염구가 맞은 자리에 작은 폭발',atk:.35,
-    stats:{hp:150,maxHp:150,speed:185,dmg:14,rate:1.8,range:320,bspd:540,armor:5},fav:['poison','roulette','dice'],dis:['guard'],
+    stats:{hp:150,maxHp:150,speed:185,dmg:14,rate:1.8,range:320,bspd:540,armor:5},fav:['fire','thunder','summon'],dis:['guard'],
     cards:['힘의 물약','숫돌','조준경','치명상','전투 본능','다연발'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
   archer:{n:'궁수',role:'원거리 연사',d:'멀리서 빠르게 화살을 쏘는 사수',passive:'관통 화살: 기본 관통 1, 치명타 +10%',atk:.28,
-    stats:{hp:145,maxHp:145,speed:200,dmg:9,rate:2.8,range:340,bspd:720,pierce:1,crit:.15},fav:['card','jackpot','dice'],dis:['curse'],
+    stats:{hp:145,maxHp:145,speed:200,dmg:9,rate:2.8,range:340,bspd:720,pierce:1,crit:.15},fav:['sniper','card','jackpot'],dis:['curse'],
     cards:['날랜 손놀림','조준경','관통 탄','급소 노리기','다연발','럭키 세븐'],lvd:'공격 속도 +0.4%, 공격력 +0.4%, 체력 +1',lv:p=>{p.rateP=(p.rateP||0)+.004;p.dmgP=(p.dmgP||0)+.004;p.maxHp+=1;p.hp+=1;}},
   rogue:{n:'도적',role:'회피 암살',d:'단검을 난사하며 치고 빠지는 도적',passive:'그림자: 회피 15%, 대시 재사용 −30%',atk:.2,
     stats:{hp:120,maxHp:120,speed:225,dmg:9,rate:3.9,range:260,bspd:600,dodge:.15,dashMul:.7,crit:.12,critM:2.3},fav:['blitz','poison','curse'],dis:['guard'],
@@ -1566,9 +1587,15 @@ function drawBossUI(){
     ctx.fillStyle='#f1e7cf';ctx.font='14px "Gowun Dodum",sans-serif';ctx.fillText('⏸ 시간이 멈췄다. 보스를 쓰러뜨려야 다시 흐른다',W/2,H*.26+82);ctx.globalAlpha=1;}
 }
 /* ---------- combat ---------- */
+// 번개·화상·소환·냉기 공용 배율
+const thM=()=>(tag('thunder')>=4?1.5:1)*(has('stormlord')?2:1)*(1+ex('thunder')*.15);
+const fireM=()=>(tag('fire')>=6?2:1)*(has('kindle')?1+lv3('kindle',.3,.4,.5):1)*(has('inferno')?1.5:1)*(1+ex('fire')*.15);
+const sumM=()=>(tag('summon')>=4?2:1)*(1+ex('summon')*.15),sumR=()=>tag('summon')>=6?.5:1;
+function burnE(e,dps,dur=3){e.burnT=Math.max(e.burnT||0,dur+(has('kindle')?2:0));e.burnD=Math.max(e.burnD||0,dps);}
 function lightning(from,n){
+  n+=(tag('thunder')>=4?3:0)+(has('stormlord')?2:0);
   const hit=new Set([from]);let cur=from;
-  for(let i=0;i<n;i++){const nx=nearestE(cur,220,hit);if(!nx)break;hit.add(nx);S.bolts.push({x1:cur.x,y1:cur.y,x2:nx.x,y2:nx.y,life:.18});dmgE(nx,pDmg()*1.5,'#9fe8ff');cur=nx;}
+  for(let i=0;i<n;i++){const nx=nearestE(cur,220,hit);if(!nx)break;hit.add(nx);S.bolts.push({x1:cur.x,y1:cur.y,x2:nx.x,y2:nx.y,life:.18});dmgE(nx,pDmg()*1.5*thM(),'#9fe8ff');if(tag('thunder')>=6&&!nx.boss&&nx.alive){nx.slowT=Math.max(nx.slowT||0,.8);nx.frozen=true;}cur=nx;}
 }
 function nearestE(from,maxD=1e9,excl){let b=null,bd=maxD*maxD;for(const v of S.en){if(!v.alive||v.phase||(excl&&excl.has(v)))continue;const d=d2(v,from);if(d<bd){bd=d;b=v;}}return b;}
 const bossOn=()=>!!(S.boss&&S.boss.alive);
@@ -1664,6 +1691,9 @@ function playerFire(tg){
   if(has('crossfire')&&Math.random()<lv3('crossfire',.25,.35,.45))pBullet(p.x,p.y,base+Math.PI,d,{child:true});
   if(has('bigshot')&&p.shots%5===0)pBullet(p.x,p.y,base,d*lv3('bigshot',2.5,3,3.5),{pierce:5,r:9,big:true,child:true,life:blife*1.3});
   if(has('overcharge')){if(p.shots%10===0)p.ocN=3;}
+  if(tag('thunder')>=2&&p.shots%10===0)lightning(tg,4);
+  if(has('icebolt')&&p.shots%4===0)pBullet(p.x,p.y,base,d*lv3('icebolt',1.2,1.5,1.8),{pierce:3,r:5,ice:true,child:true,col:'#9fe8ff'});
+  if(has('fireball')&&p.shots%6===0)pBullet(p.x,p.y,base,d*.5,{r:7,child:true,fball:true,burn:true});
 }
 function onPHit(b,t){
   const p=S.p;b.hit.add(t);
@@ -1678,14 +1708,21 @@ function onPHit(b,t){
   if(has('deathmark')&&t.hp<t.maxHp*.3)dmg*=2;
   if(has('slipstream'))dmg*=1+.6*Math.max(0,moveSpd()/(CLASSES[S.cls].stats.speed||195)-1);
   if(has('titan'))dmg*=1+p.maxHp/1000;
+  if(t.slowT>0&&tag('frost')>=4)dmg*=1.3*(1+ex('frost')*.06);
+  if(tag('sniper')>=4){const ds=Math.hypot(t.x-p.x,t.y-p.y);dmg*=1+Math.min(.6,ds/100*.1);}
+  if(tag('sniper')>=6)dmg*=1+.3*(b.hit.size-1);
+  if(ex('sniper'))dmg*=1+ex('sniper')*.05;
   if(has('combo')&&!b.child){if(p.cmbE===t)p.cmbN=Math.min(lv3('combo',10,15,20),(p.cmbN||0)+1);else{p.cmbE=t;p.cmbN=0;}dmg*=1+.06*p.cmbN;}
-  {let cr=Math.random()<critC();if(!cr&&has('second')&&Math.random()<lv3('second',.3,.45,.6))cr=true;
+  {const far=Math.hypot(t.x-p.x,t.y-p.y)>300;let cr=Math.random()<critC()+(has('glacier')&&t.slowT>0?lv3('glacier',.2,.25,.3):0)+(has('marksman')&&far?lv3('marksman',.2,.3,.4):0);if(!cr&&has('second')&&Math.random()<lv3('second',.3,.45,.6))cr=true;
    if(has('bloodrage')&&p.alive)p.hp=Math.min(p.maxHp,p.hp+.3);
-   if(cr){dmg*=critMul();col='#ffd76a';if(has('stunner')&&!t.boss)t.slowT=Math.max(t.slowT||0,lv3('stunner',.6,.9,1.2));if(has('reroll2')&&!b.child)pBullet(p.x,p.y,Math.atan2(t.y-p.y,t.x-p.x),b.dmg*.7,{child:true});if(has('toxicburst')&&t.ps>0){explode(t.x,t.y,80,pDmg()*1.5,'#8ee06a');for(const o of S.en)if(o.alive&&d2(o,t)<80*80)poisonE(o);}if(has('burn')){t.burnT=3;t.burnD=Math.max(t.burnD||0,pDmg()*lv3('burn',.4,.6,.8));if(has('f_frostfire'))t.slowT=Math.max(t.slowT||0,1);}}}
+   if(cr){dmg*=critMul()*(has('glacier')&&t.slowT>0?1.5:1);col='#ffd76a';if(has('overload')&&Math.random()<lv3('overload',.15,.2,.25))lightning(t,3);if(has('stunner')&&!t.boss)t.slowT=Math.max(t.slowT||0,lv3('stunner',.6,.9,1.2));if(has('reroll2')&&!b.child)pBullet(p.x,p.y,Math.atan2(t.y-p.y,t.x-p.x),b.dmg*.7,{child:true});if(has('toxicburst')&&t.ps>0){explode(t.x,t.y,80,pDmg()*1.5,'#8ee06a');for(const o of S.en)if(o.alive&&d2(o,t)<80*80)poisonE(o);}if(has('burn')){t.burnT=3;t.burnD=Math.max(t.burnD||0,pDmg()*lv3('burn',.4,.6,.8));if(has('f_frostfire'))t.slowT=Math.max(t.slowT||0,1);}}}
   if(has('frost')&&Math.random()<lv3('frost',.25,.35,.45)&&!t.boss)t.slowT=Math.max(t.slowT||0,1.5);
   if(has('execute')){const th=lv3('execute',.12,.16,.2)+(has('f_reaper')?.08:0);if(t.hp<=t.maxHp*th||t.hp-dmg<=t.maxHp*th){if(!t.boss&&!t.elite){dmg=Math.max(dmg,t.hp+1);label='처형';col='#c0392b';if(has('f_reaper'))S.gold+=1;}else if(t.hp<=t.maxHp*th)dmg*=1.5;}}
   if(has('triple7')&&!b.child&&Math.random()<lv3('triple7',.07,.1,.14)){dmg*=7;col='#ff4fd8';label='×7 '+Math.round(dmg);}
   if(canPoison()&&!b.dieThrow)poisonE(t);
+  if(tag('frost')>=2&&!t.boss&&Math.random()<.2)t.slowT=Math.max(t.slowT||0,1.5);
+  if(b.ice&&!t.boss)t.slowT=Math.max(t.slowT||0,1.5);
+  if((tag('fire')>=2&&!b.child)||b.burn)burnE(t,pDmg()*.2,3);
   dmgE(t,dmg,col,label);
   if(S.cls==='mage'&&!b.child&&!b.dieThrow){const rr2=28*(has('m_inferno')?1+.3+.3*L('m_inferno'):1);explode(t.x,t.y,rr2,b.dmg*.4,'#ff8a3a');if(has('m_inferno'))for(const o of S.en)if(o.alive&&d2(o,t)<rr2*rr2)poisonE(o);}
   if(b.roll===7)explode(t.x,t.y,85,pDmg()*1.8,'#ff4fd8');
@@ -1750,11 +1787,15 @@ function onKill(e){
   }
   if(has('boom')&&(S.boomD||0)<2){const br=50+10*L('boom');S.boomD=(S.boomD||0)+1;explode(e.x,e.y,br,pDmg()*(.25+.15*L('boom')));S.boomD--;if(has('f_gas')){S.zones.push({x:e.x,y:e.y,r:60,life:3,kind:'pool',tick:0});for(const o of S.en)if(o.alive&&d2(o,e)<br*br)poisonE(o);}}
   if(tag('card')>=2)for(let i=0;i<2;i++){const o=nearestE(e);const a=o?Math.atan2(o.y-e.y,o.x-e.x)+(i?.25:-.25):Math.random()*TAU;pBullet(e.x,e.y,a,pDmg()*.6,{child:true});}
+  if(tag('frost')>=6&&e.slowT>0)for(let i=0;i<8;i++)pBullet(e.x,e.y,i*TAU/8,pDmg()*.6,{child:true,ice:true,r:3,life:.5});
+  if(tag('fire')>=4&&e.burnT>0)explode(e.x,e.y,70,pDmg()*1.2,'#ff7a3a');
   if(tag('curse')>=6&&!e.boss)explode(e.x,e.y,75,e.maxHp*.25,'#b06aff');
   if(tag('curse')>=4&&p.alive){p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.03);for(let i=0;i<6;i++)pBullet(e.x,e.y,i*TAU/6,pDmg()*.5,{child:true,r:4,skull:true});}
   if(tag('jackpot')>=4&&p.pkills%J()===0){S.flash=.25;for(const o of S.en)if(o.alive)dmgE(o,pDmg()*1.5,'#ffd76a');}
 }
-function dronePos(){const p=S.p,n=L('drone')+(has('f_fleet')?2:0),a=-S.t*1.6;return Array.from({length:n},(_,i)=>({x:p.x+Math.cos(a+i*TAU/n)*78,y:p.y+Math.sin(a+i*TAU/n)*78}));}
+const wispPos=()=>{const p=S.p,a=S.t*2.2;return {x:p.x+Math.cos(a)*44,y:p.y-30+Math.sin(a)*10};};
+const droneN=()=>L('drone')+(has('f_fleet')?2:0)+(tag('summon')>=2?1:0)+(has('legion')?2:0);
+function dronePos(){const p=S.p,n=droneN(),a=-S.t*1.6;return Array.from({length:n},(_,i)=>({x:p.x+Math.cos(a+i*TAU/n)*78,y:p.y+Math.sin(a+i*TAU/n)*78}));}
 // N초마다 발동하는 효과의 주기 배율: 공격 속도 보너스가 오를수록 더 자주 (최대 2.5배 빠르게). 후반에 타이머 증강이 뒤처지지 않게
 const tmul=()=>1/Math.min(2.5,1+Math.max(0,S.p.rateP||0)*.6);
 function thunderStrike(n){const p=S.p,vis=S.en.filter(e=>e.alive&&!e.phase&&Math.abs(e.x-p.x)<W/2&&Math.abs(e.y-p.y)<H/2);for(let i=0;i<n&&vis.length;i++){const e=vis.splice(Math.floor(Math.random()*vis.length),1)[0];S.bolts.push({x1:e.x+rand(-30,30),y1:e.y-260,x2:e.x,y2:e.y,life:.22});explode(e.x,e.y,55,pDmg()*3.5,'#bff3ff');}}
@@ -1806,7 +1847,13 @@ function update(dt){
     p.adrT=Math.max(0,(p.adrT||0)-dt);
     if(has('regenarmor'))p.hp=Math.min(p.maxHp,p.hp+armorEff()*lv3('regenarmor',.02,.03,.04)*dt);
     if(S.echoQ&&S.echoQ.length){for(const q of S.echoQ){q.t-=dt;if(q.t<=0)for(let i=0;i<q.n;i++)pBullet(p.x,p.y,q.a+(i-(q.n-1)/2)*.13,q.d,{child:true,r:4});}S.echoQ=S.echoQ.filter(q=>q.t>0);}
-    if(has('drone')){S.drT=(S.drT||0)-dt;if(S.drT<=0){S.drT=(has('f_fleet')?.4:.6)*tmul();for(const q of dronePos()){const e=nearestE(q,p.range*1.1);if(e)pBullet(q.x,q.y,Math.atan2(e.y-q.y,e.x-q.x),pDmg()*.6,{child:true,r:3});}}}
+    if(droneN()>0){S.drT=(S.drT||0)-dt;if(S.drT<=0){S.drT=(has('f_fleet')?.4:.6)*tmul()*sumR();for(const q of dronePos()){const e=nearestE(q,p.range*1.1);if(e)pBullet(q.x,q.y,Math.atan2(e.y-q.y,e.x-q.x),pDmg()*.6*sumM(),{child:true,r:3});}}}
+    if(has('turret')){S.tuT=(S.tuT??2)-dt;if(S.tuT<=0){S.tuT=8;(S.turrets=S.turrets||[]).push({x:p.x,y:p.y,life:lv3('turret',5,6,8),cd:0});}}
+    if(S.turrets&&S.turrets.length){for(const u of S.turrets){u.life-=dt;u.cd-=dt;if(u.cd<=0){u.cd=.4*sumR();const e=nearestE(u,p.range);if(e)pBullet(u.x,u.y,Math.atan2(e.y-u.y,e.x-u.x),pDmg()*.5*sumM(),{child:true,r:3});}}S.turrets=S.turrets.filter(u=>u.life>0);}
+    if(has('wisp')){S.wiT=(S.wiT??1)-dt;if(S.wiT<=0){S.wiT=1*sumR();const w=wispPos(),e=nearestE(w,p.range);if(e)pBullet(w.x,w.y,Math.atan2(e.y-w.y,e.x-w.x),pDmg()*lv3('wisp',.6,.8,1)*sumM(),{child:true,r:4,burn:true});}}
+    if(has('frostnova')){S.fnT=(S.fnT??5)-dt;if(S.fnT<=0){S.fnT=5*tmul();S.rings.push({x:p.x,y:p.y,r:10,max:140,life:.35,col:'#9fe8ff'});for(const e of S.en)if(e.alive&&d2(e,p)<140*140){dmgE(e,pDmg()*lv3('frostnova',1.2,1.5,1.8),'#9fe8ff');if(!e.boss)e.slowT=Math.max(e.slowT||0,2);}}}
+    if(has('tesla')){S.teT=(S.teT??3)-dt;if(S.teT<=0){S.teT=3*tmul();const e=nearestE(p,200);if(e){S.bolts.push({x1:p.x,y1:p.y,x2:e.x,y2:e.y,life:.18});dmgE(e,pDmg()*1.5*thM(),'#9fe8ff');lightning(e,lv3('tesla',2,3,4)-1);}}}
+    if(has('inferno')){S.inT=(S.inT??1)-dt;if(S.inT<=0){S.inT=1;for(const e of S.en)if(e.alive&&d2(e,p)<120*120)burnE(e,pDmg()*.2,2);}}
     if(has('nova')){S.novaT=(S.novaT??10)-dt;if(S.novaT<=0){S.novaT=(10-(has('f_supernova')?3:0))*tmul();explode(p.x,p.y,180,pDmg()*lv3('nova',7,9,11),'#ffd76a');S.shake=Math.max(S.shake,.2);if(has('f_supernova'))thunderStrike(6);}}
     if(has('goldbomb')){S.gbT=(S.gbT??8)-dt;if(S.gbT<=0){S.gbT=8*tmul();if(S.en.some(e=>e.alive&&d2(e,p)<200*200)){explode(p.x,p.y,200,S.gold*.02+pDmg()*3,'#ffd76a');S.shake=Math.max(S.shake,.15);}}}
     if(has('colossus')){S.coT=(S.coT??.5)-dt;if(S.coT<=0){S.coT=.5;for(const e of S.en)if(e.alive&&d2(e,p)<90*90)dmgE(e,p.maxHp*.025,null,null,true);}}
@@ -1816,7 +1863,7 @@ function update(dt){
     if(has('mine')){S.mineT=(S.mineT??1)-dt;if(S.mineT<=0){S.mineT=lv3('mine',2.5,2,1.5)*(has('f_minefield')?.5:1)*tmul();S.zones.push({x:p.x,y:p.y,r:16,life:12,kind:'mine'});}}
     if(has('venomcloud')){S.vcT=(S.vcT??3)-dt;if(S.vcT<=0){S.vcT=8*tmul();for(let k=0;k<Math.max(1,L('venomcloud')-1);k++){let best=null,bc=0;for(let i=0;i<12;i++){const e=S.en[Math.floor(Math.random()*S.en.length)];if(!e||!e.alive||d2(e,p)>500*500)continue;let c=0;for(const o of S.en)if(o.alive&&d2(o,e)<90*90)c++;if(c>bc){bc=c;best=e;}}if(best)S.zones.push({x:best.x,y:best.y,r:90,life:4,kind:'pool',tick:0,cloud:true});}}}
   }
-  if(has('dealers')&&p.alive){S.dcd=(S.dcd||0)-dt;if(S.dcd<=0){S.dcd=.5;for(const q of dealerPos()){const e=nearestE(q,p.range);if(e)pBullet(q.x,q.y,Math.atan2(e.y-q.y,e.x-q.x),pDmg()*.5,{child:true});}}}
+  if(has('dealers')&&p.alive){S.dcd=(S.dcd||0)-dt;if(S.dcd<=0){S.dcd=.5*sumR();for(const q of dealerPos()){const e=nearestE(q,p.range);if(e)pBullet(q.x,q.y,Math.atan2(e.y-q.y,e.x-q.x),pDmg()*.5*sumM(),{child:true});}}}
   for(const k in S.buffT)S.buffT[k]=Math.max(0,S.buffT[k]-dt);
   S.spinCd=Math.max(0,(S.spinCd||0)-dt);
   if(S.spin){S.spin.t+=dt;if(S.spin.t>=.75){slotLive(S.spin.res);S.spin=null;}}
@@ -1862,12 +1909,13 @@ function update(dt){
     if(!e.alive)continue;
     const T=ET[e.type];
     e.hit=Math.max(0,e.hit-dt);e.cd-=dt;e.rot+=dt*(e.boss?.6:1.8);if(e.orbCd>0)e.orbCd-=dt;
-    if(e.burnT>0){e.burnT-=dt;dmgE(e,e.burnD*(has('f_frostfire')&&e.slowT>0?2:1)*dt,null,null,true);if(!e.alive)continue;}
+    if(e.burnT>0){e.burnT-=dt;dmgE(e,e.burnD*fireM()*(has('f_frostfire')&&e.slowT>0?2:1)*dt,null,null,true);if(!e.alive)continue;
+      if(tag('fire')>=6){e.bsT=(e.bsT||0)+dt;if(e.bsT>=1){e.bsT=0;const o=S.en.find(q=>q.alive&&!(q.burnT>0)&&d2(q,e)<90*90);if(o)burnE(o,e.burnD,3);}}}
     if(e.pt>0){e.pt-=dt;const dps=effDmg(S.p)*.35*(1+ex('poison')*.2)*e.ps*(1+.5*Math.max(0,L('toxic')-1)+.5*Math.max(0,L('r_venom')-1))*(has('plague')?1.2:1)*(tag('poison')>=6?2:1)+(has('plaguelord')?Math.min(e.maxHp*.006,pDmg()*(has('f_blackdeath')?3:1.5)):0);e.pTick+=dt;dmgE(e,dps*dt,null,null,true);if(e.pTick>.5){e.pTick=0;if(e.alive)ftext(e.x,e.y-e.r-4,Math.round(dps*.5),'#8ee06a',12);}if(e.pt<=0)e.ps=0;if(!e.alive)continue;}
     if(S.freezeT>0)continue;
     if(e.boss){bossAI(e,dt);continue;}
     const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1;
-    if(e.slowT>0){e.slowT-=dt;if(e.frozen&&e.slowT>0)continue;}
+    if(e.slowT>0){e.slowT-=dt;if(e.frozen&&e.slowT>0)continue;}else e.frozen=false;
     let spd=e.spd*(e.ps>0&&has('neuro')?lv3('neuro',.6,.45,.3):1)*(e.slowT>0?.4:1)*(has('gravity')&&d<150?1-lv3('gravity',.2,.3,.4):1)*(evOn('moon')?1.2:1),vx=dx/d,vy=dy/d;
     if(T.charge){e.ccd=(e.ccd??rand(1,3))-dt;
       if(e.chT>0){e.chT-=dt;vx=e.cx;vy=e.cy;spd=560*(e.slowT>0?.4:1);}
@@ -1899,7 +1947,7 @@ function update(dt){
   for(const z of S.zones){z.life-=dt;
     if(z.kind==='fire'){for(const e of S.en)if(e.alive&&d2(e,z)<(z.r+e.r)**2){dmgE(e,pDmg()*1.2*(z.m||1)*dt,null,null,true);if(z.nap&&e.alive&&!(e.ps>0))poisonE(e);}}
     else if(z.kind==='hole'){for(const e of S.en){if(!e.alive)continue;const dx=z.x-e.x,dy=z.y-e.y,dd=Math.hypot(dx,dy)||1;if(dd<z.r*1.6){if(!e.boss){e.x+=dx/dd*Math.min(dd,170*dt);e.y+=dy/dd*Math.min(dd,170*dt);}if(dd<z.r)dmgE(e,pDmg()*dt,null,null,true);}}}
-    else if(z.kind==='mine'){for(const e of S.en)if(e.alive&&!e.phase&&d2(e,z)<(z.r+e.r+6)**2){z.life=0;explode(z.x,z.y,80,pDmg()*1.8,'#ff9a4a');if(has('f_minefield'))S.zones.push({x:z.x,y:z.y,r:40,life:2.5,kind:'fire',m:1});break;}}
+    else if(z.kind==='mine'){for(const e of S.en)if(e.alive&&!e.phase&&d2(e,z)<(z.r+e.r+6)**2){z.life=0;explode(z.x,z.y,80,pDmg()*1.8*sumM(),'#ff9a4a');if(has('f_minefield'))S.zones.push({x:z.x,y:z.y,r:40,life:2.5,kind:'fire',m:1});break;}}
     else{z.tick-=dt;if(z.tick<=0){z.tick=.5;for(const e of S.en)if(e.alive&&d2(e,z)<(z.r+e.r)**2)poisonE(e);}}}
   S.zones=S.zones.filter(z=>z.life>0);if(S.zones.length>70)S.zones.splice(0,S.zones.length-70);
   // projectiles
@@ -1908,7 +1956,8 @@ function update(dt){
     if(b.mine&&has('dealer')){const e=nearestE(b,lv3('dealer',170,230,300)+(has('f_sharpshooter')?120:0),b.hit);if(e){const cur=Math.atan2(b.vy,b.vx),want=Math.atan2(e.y-b.y,e.x-b.x);let df=want-cur;while(df>Math.PI)df-=TAU;while(df<-Math.PI)df+=TAU;const na=cur+clamp(df,-6*dt,6*dt),sp=Math.hypot(b.vx,b.vy);b.vx=Math.cos(na)*sp;b.vy=Math.sin(na)*sp;}}
     if(!b.mine&&S.freezeT>0)continue;
     b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;
-    if(b.mine){for(const e of S.en){if(!e.alive||e.phase||b.hit.has(e))continue;if(d2(b,e)<(e.r+b.r)**2){onPHit(b,e);if(b.life<=0)break;}}}
+    if(b.mine){for(const e of S.en){if(!e.alive||e.phase||b.hit.has(e))continue;if(d2(b,e)<(e.r+b.r)**2){onPHit(b,e);if(b.life<=0)break;}}
+      if(b.life<=0&&!b.boomed){b.boomed=1;if(b.fball){explode(b.x,b.y,80,pDmg()*lv3('fireball',1.8,2.2,2.6),'#ff7a3a');for(const o of S.en)if(o.alive&&d2(o,b)<80*80)burnE(o,pDmg()*.3,3);}else if(has('artillery')&&!b.child)explode(b.x,b.y,70,b.dmg,'#ffe08a');}}
     else if(p.alive&&d2(b,p)<(p.r+b.r)**2){
       if(has('mirror')&&Math.random()<lv3('mirror',.2,.3,.4)+(has('f_glacier')?.25:0)){b.mine=true;b.vx*=-1.3;b.vy*=-1.3;b.dmg=pDmg()*2;b.hit=new Set();b.pierce=1;b.child=true;b.life=1;continue;}
       if(b.aoe)S.rings.push({x:b.x,y:b.y,r:6,max:b.aoe,life:.3,col:'#c98af0'});
@@ -2106,7 +2155,9 @@ function draw(){
   ctx.textAlign='center';ctx.textBaseline='middle';
   ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.7)';let lastF=0;for(const t of S.tx){if(offV(t.x,t.y))continue;ctx.globalAlpha=Math.min(1,t.life*2.5);if(t.size!==lastF){lastF=t.size;ctx.font=`${t.size}px "Do Hyeon",sans-serif`;}ctx.strokeText(t.s,t.x,t.y);ctx.fillStyle=t.col;ctx.fillText(t.s,t.x,t.y);}
   ctx.globalAlpha=1;
-  if(has('drone')&&S.p.alive)for(const q of dronePos()){ctx.fillStyle='#5fa8e8';ctx.beginPath();ctx.moveTo(q.x,q.y-8);ctx.lineTo(q.x+8,q.y);ctx.lineTo(q.x,q.y+8);ctx.lineTo(q.x-8,q.y);ctx.closePath();ctx.fill();ctx.strokeStyle='#f1e7cf';ctx.lineWidth=1.5;ctx.stroke();}
+  if(S.turrets&&S.p.alive)for(const u of S.turrets){ctx.fillStyle='#5a5f6a';ctx.fillRect(u.x-7,u.y-7,14,14);ctx.fillStyle='#5fa8e8';ctx.fillRect(u.x-3,u.y-11,6,8);}
+  if(has('wisp')&&S.p.alive){const w=wispPos();ctx.fillStyle='rgba(255,140,60,.35)';ctx.beginPath();ctx.arc(w.x,w.y,9,0,TAU);ctx.fill();ctx.fillStyle='#ffb347';ctx.beginPath();ctx.arc(w.x,w.y,5,0,TAU);ctx.fill();ctx.fillStyle='#fff3c4';ctx.beginPath();ctx.arc(w.x,w.y-1,2,0,TAU);ctx.fill();}
+  if(droneN()>0&&S.p.alive)for(const q of dronePos()){ctx.fillStyle='#5fa8e8';ctx.beginPath();ctx.moveTo(q.x,q.y-8);ctx.lineTo(q.x+8,q.y);ctx.lineTo(q.x,q.y+8);ctx.lineTo(q.x-8,q.y);ctx.closePath();ctx.fill();ctx.strokeStyle='#f1e7cf';ctx.lineWidth=1.5;ctx.stroke();}
   if(has('dealers')&&S.p.alive)for(const q of dealerPos()){ctx.fillStyle='#c0392b';ctx.beginPath();ctx.arc(q.x,q.y,9,0,TAU);ctx.fill();ctx.strokeStyle='#f1e7cf';ctx.lineWidth=2;ctx.setLineDash([3,3]);ctx.beginPath();ctx.arc(q.x,q.y,7,0,TAU);ctx.stroke();ctx.setLineDash([]);}
   ctx.setTransform(1,0,0,1,0,0);if(bg)ctx.drawImage(bg,0,0);
   ctx.setTransform(DPR*SC,0,0,DPR*SC,0,0);
@@ -3026,10 +3077,10 @@ function hubBody(m,g){
   if(tab==='stat')h+=`<p class="sub">지금 스탯이 높을수록 비싸요.</p><div class="grid">${m.stock.map(i=>{const x=STACKS[i],c=stackCost(x);const cap=stackCapped(x);return `<button class="btn" data-k="${i}" ${cap||g<c?'disabled':''}>${cap?x.n:withActual(x.n,x.f)}<small>${cap?'최대':c+'골드'}</small></button>`;}).join('')}</div>`;
   if(tab==='aug'){
     h+=ups.length?`<p class="sub">증강 강화 · 카드에 마우스를 올리면 강화 효과</p><div class="grid">${ups.map(([a,i])=>{const c=Math.round(upCost(a)*.85);return `<button class="btn" data-u="${i}" title="${(a.u||'').replace(/"/g,'')}" ${g<c?'disabled':''}>${a.n} <span class="stars">${'★'.repeat(a.lv)}${'☆'.repeat(3-a.lv)}</span><small>★${a.lv+1}로 · ${c}골드</small></button>`;}).join('')}</div>`:'<p class="sub">강화할 증강이 없어요.</p>';
-    {const dis=S.augs.map((a,i)=>[a,i]).filter(([a])=>a.t!=='v'&&a.t!=='f'&&!a.f);
+    {const dis=S.augs.map((a,i)=>[a,i]).filter(([a])=>a.t!=='f'&&(a.t==='v'||!a.f));
      if(dis.length)h+=`<p class="sub" style="margin-top:12px">증강 지우기 · 슬롯 1칸을 비우고 골드를 받아요. 효과와 시너지 태그도 사라져요 (스탯을 직접 올린 증강은 지울 수 없음)</p><div class="grid">${dis.map(([a,i])=>m.disc===i?`<button class="btn" data-dis="${i}" style="border-color:#ff6060;color:#ff9a9a">정말 지울까요?<small>${a.n} 지우고 +${price(40*a.lv)}골드</small></button>`:`<button class="btn" data-disc="${i}" title="${(a.d||'').replace(/"/g,'')}">🗑 ${a.n} <span class="stars">${'★'.repeat(a.lv)}</span><small>지우면 +${price(40*a.lv)}골드</small></button>`).join('')}</div>`;}
     if(fz.length)h+=`<p class="sub" style="margin-top:12px">강제 합체 · 두 증강을 하나로 (슬롯 1칸 확보)</p><div class="grid">${fz.map(f=>`<button class="btn" data-fz="${f.id}" title="${f.d}" ${g<fuseCost()?'disabled':''}>${f.n}<small>${AUGS.find(x=>x.id===f.a).n} + ${AUGS.find(x=>x.id===f.b).n} · ${Math.round(fuseCost())}골드</small></button>`).join('')}</div>`;}
-  if(tab==='vip')h+=`<p class="sub">열쇠 1개로 VIP 1개. 보스를 잡을 때마다 열쇠 1개, 품목도 새로 바뀌어요.</p><div class="grid">${vs.map(v=>{const own=has(v.id),ok=augReq(v);return `<button class="btn" data-v="${v.id}" ${own||!ok||k<1?'disabled':''}>${v.n}<small>${v.d}</small><small style="color:var(--brass)">${own?'보유':!ok?'조건 미충족':'🔑 1'}</small></button>`;}).join('')}</div>`;
+  if(tab==='vip')h+=`<p class="sub">열쇠 1개로 VIP 1개. 보스를 잡을 때마다 열쇠 1개, 품목도 새로 바뀌어요. VIP 칸 <b>${vipCount()}/${VIP_MAX}</b></p>${vipCount()>=VIP_MAX?'<p class="sub" style="color:#ff9a9a">VIP 칸이 가득 찼어요. 증강 탭에서 VIP를 하나 지워주세요</p>':''}<div class="grid">${vs.map(v=>{const own=has(v.id),ok=augReq(v);return `<button class="btn" data-v="${v.id}" ${own||!ok||k<1||vipCount()>=VIP_MAX?'disabled':''}>${v.n}<small>${v.d}</small><small style="color:var(--brass)">${own?'보유':!ok?'조건 미충족':vipCount()>=VIP_MAX?'칸 없음':'🔑 1'}</small></button>`;}).join('')}</div>`;
   if(tab==='etc'){const hc=price(55),dbl=.45+LK()*.005;
     h+=`<div class="grid">
       <button class="btn" data-doc="heal" ${g<hc||p.hp>=p.maxHp||m.used.heal?'disabled':''}>❤️ 체력 전부 회복<small>${m.used.heal?'완료':hc+'골드 · 한 번'}</small></button>
@@ -3075,7 +3126,7 @@ function openShop(back,m){
   }
   if(m.k==='vip'){
     const vc=vipCost(),k=S.keys||0;
-    body+=`<p class="sub">보유 🔑 <b>${k}</b> · VIP 칸 <b>${vipCount()}/${VIP_MAX}</b>${vipCount()>=VIP_MAX?' · 가득 차면 하나를 바꿔요':''}</p>${m.vsel?`<p class="sub"><b>${VIPS.find(x=>x.id===m.vsel).n}</b> 대신 버릴 VIP</p><div class="grid">${S.augs.filter(a=>a.t==='v').map(a=>`<button class="btn" data-vx="${a.id}">${a.n}<small>${a.d}</small></button>`).join('')}</div><button class="btn ghost" data-vx="">취소</button>`:`<div class="uplist">${vipStock().map(v=>{const own=has(v.id),ok=augReq(v),full=vipCount()>=VIP_MAX;return `<div class="uprow"><b>${v.n}</b><button class="btn" data-v="${v.id}" ${own||!ok||k<vc?'disabled':''}>${own?'보유':!ok?'조건 미충족':(full?'교체 🔑 ':'🔑 ')+vc}</button><small>${v.d}</small></div>`;}).join('')}</div>`}`;
+    body+=`<p class="sub">보유 🔑 <b>${k}</b> · VIP 칸 <b>${vipCount()}/${VIP_MAX}</b></p>${vipCount()>=VIP_MAX?'<p class="sub" style="color:#ff9a9a">VIP 칸이 가득 찼어요. 보스 상점의 증강 탭에서 VIP를 하나 지워주세요</p>':''}<div class="uplist">${vipStock().map(v=>{const own=has(v.id),ok=augReq(v),full=vipCount()>=VIP_MAX;return `<div class="uprow"><b>${v.n}</b><button class="btn" data-v="${v.id}" ${own||!ok||k<vc||full?'disabled':''}>${own?'보유':!ok?'조건 미충족':full?'칸 없음':'🔑 '+vc}</button><small>${v.d}</small></div>`;}).join('')}</div>`;
   }
   if(H)show(hubBody(m,g));
   else show(`<div class="shophead"><h2>${M.icon} ${M.n}</h2><button class="btn" id="upBackTop">${S.hub?'상점으로':'떠나기'}</button></div><p class="sub">${M.d}. 보유 <span class="gold">${g} 골드</span>. 게임은 멈춰 있습니다.</p>${body}<button class="btn primary" id="upBack">${S.hub?'상점으로 돌아가기':'떠나기'}</button>`);
@@ -3091,8 +3142,7 @@ function openShop(back,m){
     if(k==='token'){const c=price(320);if(S.gold<c||p.token)return;S.gold-=c;p.token=true;}
     re();});
   ov.querySelectorAll('[data-deal]').forEach(b=>b.onclick=()=>{const d=DEALS.find(x=>x.id===b.dataset.deal),c=d.cost();if(m.used[d.id]||c>S.gold)return;S.gold-=c;m.used[d.id]=1;const r=d.f();toast(d.n+(r?': '+r:''));re();});
-  ov.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{const v=VIPS.find(x=>x.id===b.dataset.v),c=vipCost();if((S.keys||0)<c||has(v.id))return;if(vipCount()>=VIP_MAX){m.vsel=v.id;re();return;}S.keys-=c;S.augs.push({...v,lv:3});if(v.f)v.f(S.p);tagCount();toast('VIP '+v.n);re();});
-  ov.querySelectorAll('[data-vx]').forEach(b=>b.onclick=()=>{const id=b.dataset.vx,v=VIPS.find(x=>x.id===m.vsel);m.vsel=null;if(id&&v&&(S.keys||0)>=vipCost()){const i=S.augs.findIndex(a=>a.id===id);if(i>=0){const o=S.augs[i];S.augs.splice(i,1);S.keys-=vipCost();S.augs.push({...v,lv:3});if(v.f)v.f(S.p);tagCount();toast(o.n+' → '+v.n);}}re();});
+  ov.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{const v=VIPS.find(x=>x.id===b.dataset.v),c=vipCost();if((S.keys||0)<c||has(v.id)||vipCount()>=VIP_MAX)return;S.keys-=c;S.augs.push({...v,lv:3});if(v.f)v.f(S.p);tagCount();toast('VIP '+v.n);re();});
   ov.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{m.tab=b.dataset.tab;m.disc=null;re();});
   ov.querySelectorAll('[data-gb]').forEach(b=>b.onclick=()=>{const k=b.dataset.gb,p=S.p;
     if(k==='box'){const c=boxC();if(S.gold<c)return;S.gold-=c;S.cbuys.box=cb('box')+1;const cd=cardOf(rollRarity(3),3);const res=cd.f(p);m.log=`능력치 상자: <span style="color:${RAR[cd.r].col};filter:brightness(1.5)">[${RAR[cd.r].n}]</span> ${cd.n} · ${res||cd.d}`;}
