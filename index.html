@@ -1574,7 +1574,9 @@ function dmgE(e,amt,col,label,quiet){
   if(!e.alive)return;
   e.hp-=amt;e.hit=.06;S.st.dmg+=amt;
   {let ls=S.p.lifesteal+ex('curse')*.01;if(has('f_feast')&&S.p.hp<S.p.maxHp*.5)ls*=2;if(ls&&S.p.alive)S.p.hp=Math.min(S.p.maxHp,S.p.hp+amt*ls);}
-  if(!quiet)ftext(e.x+rand(-6,6),e.y-e.r-6,label||Math.round(amt),col||'#f1e7cf',col?19:13);
+  // quiet=2: 회전 칩처럼 자주 맞는 피해는 작은 하늘색 숫자로
+  if(quiet===2)ftext(e.x+rand(-8,8),e.y-e.r-4,Math.round(amt),'#9fe8ff',12);
+  else if(!quiet)ftext(e.x+rand(-6,6),e.y-e.r-6,label||Math.round(amt),col||'#f1e7cf',col?19:13);
   if(e.hp<=0){e.alive=false;onKill(e);}
 }
 function poisonE(e,st=1){const cap=(tag('poison')>=6?10:1)+(has('f_plaguebullet')?3:0)+(has('virulence')?3:0);e.ps=Math.min(cap,Math.max(e.ps,0)+(e.ps>=cap?0:st));if(e.ps<1)e.ps=1;e.pt=3;}
@@ -1791,7 +1793,7 @@ function update(dt){
     if(n){const sp=2.8*(has('spinner')?1.5:1),rad=ORB_R*p.orbR,big=tag('roulette')>=6,orr=big?13:9;
       for(let i=0;i<n;i++){const a=S.t*sp+i*TAU/n,ox=p.x+Math.cos(a)*rad,oy=p.y+Math.sin(a)*rad;
         for(const e of S.en){if(!e.alive||e.orbCd>0)continue;
-          if((e.x-ox)**2+(e.y-oy)**2<(e.r+orr)**2){e.orbCd=.3;if(has('wheel'))poisonE(e);if(has('sawblade')){e.burnT=3;e.burnD=Math.max(e.burnD||0,pDmg()*.4);}dmgE(e,pDmg()*.8*p.orbM*(big?2:1)*(has('f_blade')?2:1)*(1+ex('roulette')*.2),null,null,true);
+          if((e.x-ox)**2+(e.y-oy)**2<(e.r+orr)**2){e.orbCd=.3;if(has('wheel'))poisonE(e);if(has('sawblade')){e.burnT=3;e.burnD=Math.max(e.burnD||0,pDmg()*.4);}dmgE(e,pDmg()*.8*p.orbM*(big?2:1)*(has('f_blade')?2:1)*(1+ex('roulette')*.2),null,null,2);
             if(e.alive&&!e.boss){const kx=e.x-p.x,ky=e.y-p.y,kd=Math.hypot(kx,ky)||1;e.x+=kx/kd*14;e.y+=ky/kd*14;}
             if(tag('roulette')>=4&&Math.random()<.25&&e.alive)pBullet(ox,oy,Math.atan2(e.y-oy,e.x-ox),pDmg()*.7,{child:true});}}}}
   }
