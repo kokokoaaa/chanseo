@@ -2964,7 +2964,7 @@ function slotResolve(r){
 }
 function gameOver(win){
   win=win===true;S.mode='over';joy=null;clearSave();
-  let unlocked='';if(win){META.clears=META.clears||{};const d=S.diff||'normal',first=!META.clears[d];META.clears[d]=(META.clears[d]||0)+1;const nx=DKEYS[DKEYS.indexOf(d)+1];if(first&&nx)unlocked=DIFF[nx].n;if(d==='god'&&Object.values(CLASSES).some(c=>c.lock)){META.tk=(META.tk||0)+1;unlocked=(unlocked?unlocked+' · ':'')+'🎟 직업 언록권 +1';}}
+  let unlocked='';if(win){META.clears=META.clears||{};const d=S.diff||'normal',first=!META.clears[d];META.clears[d]=(META.clears[d]||0)+1;const nx=DKEYS[DKEYS.indexOf(d)+1];if(first&&nx)unlocked=DIFF[nx].n;if((d==='god'||d==='hell')&&Object.values(CLASSES).some(c=>c.lock)){META.tk=(META.tk||0)+1;unlocked=(unlocked?unlocked+' 난이도 열림 · ':'')+'🎟 직업 언록권 +1';}}
   const sec=Math.floor(S.gt),score=runScore(),medals=runMedals(score);META.medals+=medals;META.total+=medals;saveMeta();
   if(sec>best){best=sec;try{localStorage.setItem('chipdungeon_best_v5',String(best));}catch(e){}}
   const fmt=x=>`${Math.floor(x/60)}분 ${x%60}초`;
@@ -3019,7 +3019,7 @@ function startScreen(){
   <button class="btn primary" id="go">${CLASSES[pickCls].n}(으)로 시작${sv?' (저장 삭제)':''}</button>
   <button class="btn ghost" id="meta">🏅 영구 강화 <small>보유 메달 ${META.medals}개</small></button>`);
   ov.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{const k=b.dataset.cls;
-    if(!clsOpen(k)){const C=CLASSES[k];$('cdet').innerHTML=clsDetail(k)+(META.tk>0?`<button class="btn primary" id="ulk" style="margin-top:8px">🎟 언록권으로 ${C.n} 열기 <small>보유 ${META.tk}장</small></button>`:`<p class="sub" style="color:#ff9a9a;margin-top:8px">🔒 신 난이도를 클리어하면 언록권을 받아 열 수 있어요</p>`);
+    if(!clsOpen(k)){const C=CLASSES[k];$('cdet').innerHTML=clsDetail(k)+(META.tk>0?`<button class="btn primary" id="ulk" style="margin-top:8px">🎟 언록권으로 ${C.n} 열기 <small>보유 ${META.tk}장</small></button>`:`<p class="sub" style="color:#ff9a9a;margin-top:8px">🔒 지옥·신 난이도를 클리어하면 언록권을 받아 열 수 있어요</p>`);
       if(META.tk>0)$('ulk').onclick=()=>{META.tk--;(META.ucls=META.ucls||[]).push(k);saveMeta();pickCls=k;try{localStorage.setItem('chipdungeon_cls',k);}catch(e){}toast(C.n+' 언록!');startScreen();};return;}
     pickCls=k;try{localStorage.setItem('chipdungeon_cls',pickCls);}catch(e){}
     ov.querySelectorAll('[data-cls]').forEach(x=>x.classList.toggle('on',x===b));$('cdet').innerHTML=clsDetail(pickCls);$('go').firstChild.textContent=`${CLASSES[pickCls].n}(으)로 시작${sv?' (저장 삭제)':''}`;});
@@ -3036,7 +3036,7 @@ function drawPreviews(){
 }
 /* ---------- meta progression ---------- */
 const META=(()=>{try{const m=JSON.parse(localStorage.getItem('chanseo_meta')||'{}');const pc={luck:3,gold:2,xp:3,aug:6,key:5};let rf=0;for(const k in (m.prep||{}))rf+=(m.prep[k]||0)*(pc[k]||0);return {medals:(m.medals||0)+rf,total:m.total||0,lv:m.lv||{},sk:m.sk||{},clears:m.clears||{},cos:m.cos||{own:{},eq:{}},spent:m.spent!=null?m.spent:null,ucls:m.ucls||[],tk:m.tk||0};}catch(e){return {medals:0,total:0,lv:{},sk:{},clears:{},cos:{own:{},eq:{}},ucls:[],tk:0};}})();
-// 직업 언록: 신 난이도를 깰 때마다 언록권 1장, 잠긴 직업 하나를 골라 엶
+// 직업 언록: 지옥·신 난이도를 깰 때마다 언록권 1장, 잠긴 직업 하나를 골라 엶
 const clsOpen=k=>!CLASSES[k].lock||(META.ucls||[]).includes(k);
 function saveMeta(){try{localStorage.setItem('chanseo_meta',JSON.stringify(META));}catch(e){}}
 // 영구 강화: 단계당 효과는 작게, 항목과 단계는 많게 (오래 모으는 성장)
