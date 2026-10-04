@@ -668,7 +668,7 @@ const TAGS={
   mark:    {n:'표식',  t1:'5번째 공격마다 대상에 표식 (5초): 표식된 적은 받는 피해 +20%',t2:'표식 피해 증폭 +10%, 표식 지속 +2초',t4:'표식된 적이 죽으면 가까운 적 2명에게 표식이 옮겨감',t6:'표식된 적에게 치명타 확률 +25%',ex:'표식 피해 증폭 +5%'},
   wave:    {n:'파동',  t1:'5초마다 주변에 충격파 (범위 130, 공격력 100%, 밀쳐냄)',t2:'충격파가 4초마다',t4:'충격파 범위 +30%, 맞은 적 1.5초 둔화',t6:'충격파가 한 번 더 퍼지고 피해 2배',ex:'충격파 피해 +15%'},
   coin:    {n:'동전',  t1:'공격마다 동전 던지기 (앞면 피해 2배, 뒷면 0.5배)',t2:'앞면 3연속마다 동전 폭발 (범위 90, 공격력 300%)',t4:'뒷면이 나오면 다음 공격은 반드시 앞면',t6:'앞면 피해 2배 → 3배',ex:'앞면 확률 +3%'},
-  alchemy: {n:'연금',  t1:'8번째 공격마다 무작위 물약 투척 (산성 중독·폭발 150%·얼음 둔화)',t2:'물약을 6번째 공격마다 던짐',t4:'물약 범위 +30%, 물약 맞은 적은 3초간 받는 피해 +15%',t6:'물약이 두 가지 효과를 동시에 냄',ex:'물약 피해 +15%'},
+  alchemy: {n:'연금',  t1:'8번째 공격마다 무작위 물약 투척 (산성 중독·폭발 150%·얼음 둔화). 깨진 자리에 2.5초 물약 장판',t2:'물약을 6번째 공격마다 던짐',t4:'물약 범위 +30%, 물약 맞은 적은 3초간 받는 피해 +15%',t6:'물약이 두 가지 효과를 동시에 냄',ex:'물약 피해 +15%'},
   nature:  {n:'자연',  t1:'6초마다 주변 적 1명 자리에 덩굴 지대 (3초, 범위 60, 초당 공격력 60%, 둔화)',t2:'초당 체력 재생 +1.5, 덩굴 지대 지속 +1초',t4:'덩굴 지대 안의 적은 받는 피해 +20%',t6:'덩굴 지대가 사라질 때 가시 폭발 (범위 80, 공격력 150%)',ex:'덩굴 피해 +15%'},
   fury:    {n:'분노',  t1:'처치 시 광란 +1 (4초, 중첩당 공격력 +2%, 최대 5)',t2:'광란 최대 10',t4:'광란 중첩당 공격 속도 +1.5%',t6:'광란 최대 +10. 광란이 가득 차면 공격마다 회전 베기 (범위 90, 공격력 60%)',ex:'광란 중첩당 공격력 +0.3%'},
   elem:    {n:'원소',  t1:'8번째 공격마다 원소 구슬 (공격력 150%, 맞으면 화상·둔화·연쇄 2 모두)',t2:'원소 구슬을 6번째 공격마다 쏨',t4:'화상·둔화·감전 중 2가지 이상 걸린 적에게 피해 +25%',t6:'원소 구슬이 맞힌 자리에 원소 폭발 (범위 90, 공격력 200%)',ex:'원소 효과 피해 +12%'},
@@ -1828,7 +1828,7 @@ const CLASSES={
   druid:{lock:true,n:'드루이드',role:'덩굴 지배',d:'가시덩굴로 적을 묶고 버티는 자연술사',passive:'가시덩굴: 3번째 공격마다 대상 자리에 덩굴 지대 (3초, 범위 60, 초당 공격력 70%, 둔화). 초당 체력 재생 +1',atk:.3,
     stats:{hp:175,maxHp:175,speed:185,dmg:15,rate:2.2,range:290,bspd:520,armor:8,regen:1},fav:['nature','poison','guard'],dis:['fire'],
     cards:['힘의 물약','숫돌','튼튼한 체력','붕대','조준경','가죽 갑옷'],lvd:'공격력 +0.8%, 체력 +2',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=2;p.hp+=2;}},
-  alch:{lock:true,n:'연금술사',role:'물약 폭격',d:'터지는 플라스크와 물약을 던지는 연금술사',passive:'플라스크: 맞은 자리에 폭발 (범위 45, 공격력 50%). 4번째 공격마다 무작위 물약 (산성 중독·폭발·얼음 둔화)',atk:.3,
+  alch:{lock:true,n:'연금술사',role:'물약 폭격',d:'터지는 플라스크와 물약을 던지는 연금술사',passive:'플라스크: 맞은 자리에 폭발 (범위 45, 공격력 50%). 4번째 공격마다 무작위 물약 (산성 중독·폭발·얼음 둔화). 물약이 깨진 자리에 2.5초 장판이 남음',atk:.3,
     stats:{hp:155,maxHp:155,speed:188,dmg:14,rate:2.2,range:290,bspd:480,armor:6},fav:['alchemy','poison','fire'],dis:['sniper'],
     cards:['힘의 물약','숫돌','조준경','전투 본능','튼튼한 체력','다연발'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
   gambler:{lock:true,n:'도박사',role:'동전 도박',d:'동전 앞뒤에 모든 걸 거는 도박사',passive:'동전 던지기: 공격마다 앞면이면 피해 2배, 뒷면이면 0.5배. 행운이 높을수록 앞면이 잘 나옴',atk:.25,
@@ -2289,7 +2289,9 @@ function throwPotion(tx,ty,m){const p=S.p;(S.flasks=S.flasks||[]).push({x0:p.x,y
   if(has('elixir')&&p.alive){p.hp=Math.min(p.maxHp,p.hp+(has('f_panacea')?5:2)*healM());if(has('f_panacea'))p.barrier=Math.min(barrierMax(),(p.barrier||0)+5);}}
 function potionHit(f){const r=70*(has('magnumopus')?1.3:1)*(1+(S.p.ptR||0))*(tag('alchemy')>=4?1.3:1),dm=pDmg()*f.m*potM(),ks=(has('f_alkahest')||has('magnumopus'))?[0,1,2]:tag('alchemy')>=6?[f.k,(f.k+1+Math.floor(Math.random()*2))%3]:[f.k];
   for(const o of S.en)if(o.alive&&d2(o,f)<(r+o.r)**2){o.potT=S.t+3;if(ks.includes(0))poisonE(o,2);if((ks.includes(2)||has('frostflask'))&&!o.boss)o.slowT=Math.max(o.slowT||0,2);}
-  for(const k of ks){explode(f.x,f.y,r,dm*[.6,1.5,.8][k],POTC[k]);S.rings.push({x:f.x,y:f.y,r:r*.3,max:r*1.1,life:.45,col:POTC[k]});burst(f.x,f.y,POTC[k],18);}}
+  for(const k of ks){explode(f.x,f.y,r,dm*[.6,1.5,.8][k],POTC[k]);S.rings.push({x:f.x,y:f.y,r:r*.3,max:r*1.1,life:.45,col:POTC[k]});burst(f.x,f.y,POTC[k],18);}
+  // 물약 장판: 깨진 자리에 2.5초간 남아 초당 물약 피해의 20%, 밟은 적에게 물약 효과(중독·둔화) 재적용. 최대 10개
+  {let n=0;for(const z of S.zones)if(z.kind==='brew')n++;if(n<10)S.zones.push({x:f.x,y:f.y,r:r*.8,life:2.5,kind:'brew',dps:dm*.2,ks,col:POTC[ks[0]]});}}
 function vineAt(x,y,m){let n=0;for(const z of S.zones)if(z.kind==='vine')n++;if(n>=14)return;const br=has('d_bramble')?1+lv3('d_bramble',.3,.5,.7):1;
   S.zones.push({x,y,r:60*br*(1+(S.p.vnR||0))*(has('worldtree')?1.3:1)*(has('yggdrasil')?1.3:1)*(has('f_thornking')?1.3:1),life:3+(tag('nature')>=2?1:0)+(has('yggdrasil')?2:0),kind:'vine',m:m*br*(1+(S.p.vnD||0))*(1+.05*mlv('m_nature'))*natM()*(has('d_wrath')?1.3:1)});}
 const inVine=o=>S.zones.some(z=>z.kind==='vine'&&d2(o,z)<z.r*z.r);
@@ -2789,6 +2791,7 @@ function update(dt){
       if(z.life<=0&&!z.bo&&(tag('grav')>=6||has('f_bigcrunch')||has('blackstar'))){z.bo=1;explode(z.x,z.y,130,pDmg()*3*(has('f_bigcrunch')?2:1),'#9a6aff');S.shake=Math.max(S.shake,.12);}}
     if(z.kind==='vine'){for(const e of S.en)if(e.alive&&!e.phase&&d2(e,z)<(z.r+e.r)**2){e.vnT=S.t+.2;if(!e.boss)e.slowT=Math.max(e.slowT||0,.3);S.dsrc='nature';dmgE(e,pDmg()*z.m*dt,null,null,true);S.dsrc=null;if(has('spore')&&e.alive&&!(e.ps>0))poisonE(e,has('f_thornking')?2:1);}
       if(z.life<=0&&tag('nature')>=6&&!z.bo){z.bo=1;explode(z.x,z.y,80,pDmg()*1.5*natM(),'#8ee06a');}}
+    else if(z.kind==='brew'){for(const e of S.en)if(e.alive&&!e.phase&&d2(e,z)<(z.r+e.r)**2){e.potT=Math.max(e.potT||0,S.t+.5);S.dsrc='alchemy';dmgE(e,z.dps*dt,null,null,true);S.dsrc=null;if(!e.alive)continue;if(z.ks.includes(0)&&!(e.ps>0))poisonE(e);if((z.ks.includes(2)||has('frostflask'))&&!e.boss)e.slowT=Math.max(e.slowT||0,.4);}}
     else if(z.kind==='fire'){for(const e of S.en)if(e.alive&&d2(e,z)<(z.r+e.r)**2){dmgE(e,pDmg()*1.2*(z.m||1)*dt,null,null,true);if(z.nap&&e.alive&&!(e.ps>0))poisonE(e);}}
     else if(z.kind==='hole'){for(const e of S.en){if(!e.alive)continue;const dx=z.x-e.x,dy=z.y-e.y,dd=Math.hypot(dx,dy)||1;if(dd<z.r*1.6){if(!e.boss){e.x+=dx/dd*Math.min(dd,170*dt);e.y+=dy/dd*Math.min(dd,170*dt);}if(dd<z.r){S.dsrc=z.grav?'grav':'summon';dmgE(e,pDmg()*dt*(z.grav&&has('crushpull')?2:1),null,null,true);S.dsrc=null;}if(z.grav&&dd<z.r*1.3){e.gvT=S.t+.4;if(has('crushpull')&&!e.boss)e.slowT=Math.max(e.slowT||0,.4);}}}}
     else if(z.kind==='mine'){for(const e of S.en)if(e.alive&&!e.phase&&d2(e,z)<(z.r+e.r+6)**2){z.life=0;S.dsrc='summon';explode(z.x,z.y,80,pDmg()*1.8*sumM()*(has('f_overclock')?2:1),'#ff9a4a');if(has('f_minefield'))S.zones.push({x:z.x,y:z.y,r:40,life:2.5,kind:'fire',m:1});S.dsrc=null;break;}}
@@ -2950,6 +2953,7 @@ function draw(){
   for(const z of S.zones){if(z.kind==='hole'){const g=ctx.createRadialGradient(z.x,z.y,4,z.x,z.y,z.r);g.addColorStop(0,'rgba(0,0,0,.95)');g.addColorStop(.6,'rgba(60,20,90,.55)');g.addColorStop(1,'rgba(60,20,90,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(z.x,z.y,z.r,0,TAU);ctx.fill();
       ctx.strokeStyle='rgba(200,140,255,.6)';ctx.lineWidth=2;for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(z.x,z.y,z.r*(.35+i*.2),S.t*4+i,S.t*4+i+2.2);ctx.stroke();}continue;}
     if(z.kind==='vine'){ctx.globalAlpha=Math.min(.4,z.life*.4);ctx.fillStyle='#4a9a3a';ctx.beginPath();ctx.arc(z.x,z.y,z.r,0,TAU);ctx.fill();ctx.globalAlpha=Math.min(1,z.life*1.5);ctx.strokeStyle='#2f6a24';ctx.lineWidth=2;for(let i=0;i<6;i++){const a=i*1.047+z.x*.01,rr=z.r*.65;ctx.beginPath();ctx.moveTo(z.x,z.y);ctx.quadraticCurveTo(z.x+Math.cos(a+.6)*rr*.6,z.y+Math.sin(a+.6)*rr*.6,z.x+Math.cos(a)*rr,z.y+Math.sin(a)*rr);ctx.stroke();ctx.fillStyle='#9ad85a';ctx.fillRect(z.x+Math.cos(a)*rr-1.5,z.y+Math.sin(a)*rr-1.5,3,3);}ctx.globalAlpha=1;continue;}
+    if(z.kind==='brew'){ctx.globalAlpha=Math.min(.42,z.life*.35);ctx.fillStyle=z.col;ctx.beginPath();ctx.ellipse(z.x,z.y,z.r,z.r*.75,0,0,TAU);ctx.fill();ctx.globalAlpha=Math.min(.85,z.life*.7);ctx.strokeStyle=z.col;ctx.lineWidth=2.5;ctx.setLineDash([6,4]);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=Math.min(.9,z.life*.8);ctx.fillStyle='#ffffff';for(let i=0;i<4;i++){const a=i*1.7+z.x*.01,ph=(S.t*1.6+i*.37)%1;ctx.globalAlpha=Math.min(.8,z.life*.6)*(1-ph);ctx.beginPath();ctx.arc(z.x+Math.cos(a)*z.r*.5,z.y+Math.sin(a)*z.r*.35-ph*8,2+ph*2,0,TAU);ctx.fill();}ctx.globalAlpha=1;continue;}
     if(z.kind==='mine'){ctx.fillStyle='#3a3a44';ctx.beginPath();ctx.arc(z.x,z.y,8,0,TAU);ctx.fill();ctx.fillStyle=Math.floor(S.t*4)%2?'#ff4040':'#7a2020';ctx.beginPath();ctx.arc(z.x,z.y,3,0,TAU);ctx.fill();continue;}
     ctx.globalAlpha=Math.min(.55,z.life*.4);ctx.fillStyle=z.kind==='fire'?'#ff7a2a':'#6cc04a';ctx.beginPath();ctx.arc(z.x,z.y,z.r,0,TAU);ctx.fill();}ctx.globalAlpha=1;
   // 물약: 떨어질 자리에 색 원(예고)과 그림자, 날아가는 병은 크게 + 테두리 + 빛
