@@ -1318,19 +1318,23 @@ CH.paladin={swoosh:CH.knight.swoosh,
    g.fillStyle=CP['8'];for(const [x,y] of [[16,7],[17,6],[18,6],[19,6],[20,6],[21,6],[22,6],[23,7]])g.fillRect(x,y+U,1,1);
   }finally{for(const kk in old)CP[kk]=old[kk];}
  }};
-// 도박사: 실크햇, 보라 조끼, 손에 금화
+// 도박사: 실크햇에 빨간 띠, 넘긴 검은 머리, 보라 조끼·흰 셔츠·빨간 나비넥타이, 손 위로 튕기는 금화
 CH.gambler={
- hat:['.....zzzzzz.....','.....zzzzzz.....','.....zzzzzz.....','.....iiiiii.....','...zzzzzzzzzz...'],
- head:['.lzzzzzzzzl.','lzkkkkkkkkzl','lkkkkkkkkkKl','lkkekkkkekKl','lkkekkkkekKl','lkkkkkkkkKKl','lkkkkkkkkKKl','.lkkkkkkKKl.','..lKKKKKKl..','...WWiiWW...','....WiiW....'],
- torso:['PWWiiWWp','PPWWWWpp','PPgWWgpp','.zzgzzz.','.zzzzzz.','.zz.zz.'],
- draw(st){const U=st.U,A=st.atk;
-  cg(['3z','3z','3z','zv','vv','vvv'],17,29+st.lL);cg(['z3','z3','z3','vz','vv','vvv'],21,29+st.rL);
-  cg(this.torso,16,23+U);
-  cg(['uP','Pp','Pp','kK'],14,23+U+st.ay);
-  const up=A>=0?-3:0;cg(['Pu.','PPp','.Pp','.kK'],24,23+U+up);
-  const fl=A===0?2:0;cg(['.gg.','gGGg','gGGg','.gg.'],25,20+U+up-fl);
-  cg(this.head,14,12+U);if(st.hurt)hurtEyes(16+U);
-  cg(this.hat,12,7+U);
+ hat:['..zzzzzz..','..zvzzzz..','..zvzzzz..','..RRRRRR..','zzzzzzzzzz'],
+ head:['...zzzzzz...','.zzzvzzzzzz.','zzzvzzzzzzzz','zzkkkkkkkkzz','zkkkkkkkkkKz','zkkekkkkekKz','zkkekkkkekKz','zkkkkkkkkKKz','.zkkkkkkkKz.','..zkKKKKKz..','...WWRRWW...'],
+ torso:['PWWRRWWp','PPWWWWpp','PPgWWgpp','.zzgzzz.','.zzzzzz.','.zz.zz.'],
+ draw(st){const U=st.U,A=st.atk,sw={z:'#1e1a26',v:'#3a3448',P:'#6a3aa8',p:'#4a2678',W:'#f4f1e8',R:'#d42c35',g:'#f0c840',G:'#b08a24'},old={};
+  for(const kk in sw){old[kk]=CP[kk];CP[kk]=sw[kk];}
+  try{
+   cg(['zz','zz','zv','vv','vv','vvv'],17,29+st.lL);cg(['zz','zz','vz','vv','vv','vvv'],21,29+st.rL);
+   cg(this.torso,16,23+U);
+   cg(['PP','Pp','Pp','kK'],14,23+U+st.ay);
+   const up=A>=0?-2:0;cg(['pP','pp','kK'],24,23+U+up);
+   const ph=((st.t||0)*3)%1,cy=Math.round(20+U+up-Math.sin(ph*Math.PI)*5),w=Math.abs(Math.cos(ph*Math.PI*4))>.5;
+   cg(w?['.gg.','gGGg','.gg.']:['.g.','.G.','.g.'],w?24:25,cy);
+   cg(this.head,14,12+U);if(st.hurt)hurtEyes(16+U);
+   cg(this.hat,15,7+U);
+  }finally{for(const kk in old)CP[kk]=old[kk];}
  }};
 // 연금술사: 이마에 올린 황동 고글, 부스스한 머리, 흰 실험 가운에 가죽 앞치마, 색색 약병 허리띠, 손에 끓는 플라스크
 CH.alch={
@@ -1385,21 +1389,20 @@ CH.berserk={
    if(st.hurt)hurtEyes(16+U);
   }finally{for(const kk in old)CP[kk]=old[kk];}
  }};
-// 정령사: 지팡이 없이 양손에 원소 불꽃(불·얼음), 긴 청록 머리와 보석 머리띠, 물결치는 치마형 로브
+// 정령사: 어깨까지 내려오는 청록 머리에 보석 머리띠, 청록 로브와 흰 띠, 지팡이 없이 양손에 불꽃·얼음
 CH.elem={
- head:['...777777...','..77777777..','.7777777777.','.7ggggcggg7.','77kkkkkkkk77','77kekkkkek77','77kekkkkek77','77kkkkkkkK77','77.kkkkkKK77','7..kKKKKK..7','7....kk....7','77........77'],
- body:['..uuWWWWuu..','.uPPWWWWPPu.','.uPPPccPPPu.','..uPPPPPPu..','..gggggggg..','..uPPWWPPu..','.uPPWWWWPPu.','.uPPPWWPPPu.','uPPPPWWPPPPu','uPpPPPPPPpPu','upPpPPPPpPpu','.p.p.pp.p.p.'],
- draw(st){const U=st.U,A=st.atk,sw={7:'#7fe0e8',u:'#8fe0ec',P:'#2f9ab8',p:'#1f6a8a',W:'#f4f8ff',c:'#9fe6ff',g:'#f0c840',h:'#3fa0d8',9:'#ff9a2a',8:'#ffe680',0:'#e0451f'},old={};
+ head:['....p77p....','..p7cc77p...','.p7cc77777p.','p7c7777777pp','p7gggGhgggpp','pgkkkkkkkkgp','pkkkkkkkkkKp','pkkekkkkekKp','pkkekkkkekKp','pkkkkkkkkKKp','p7kkkkkkkK7p','p7pKKKKKKp7p','p77p....p77p'],
+ torso:['uPWWPPpm','uPPWPPpm','uPPPWPpm','.gGhgGg.','uPPPPPpm','uPPpPPpm'],
+ draw(st){const U=st.U,A=st.atk,sw={7:'#5fd0dc',c:'#a8f0f4',p:'#1f5a72',u:'#8fe0ec',P:'#2f9ab8',m:'#174a60',W:'#f4f8ff',g:'#f0c840',G:'#b08a24',h:'#ff5a8a',9:'#ff9a2a',8:'#ffe680',0:'#e0451f',E:'#ffffff',B:'#3fa0d8'},old={};
   for(const kk in sw){old[kk]=CP[kk];CP[kk]=sw[kk];}
   try{
-   cg(['kK'],17,36);cg(['Kk'],21,36);
-   cg(this.body,14,23+U);
-   // 양팔을 벌리고 손 위에 원소 불꽃 (왼손 불, 오른손 얼음), 공격하면 커짐
+   cg(['uP','PP','Pp','pm','mm','mmm'],17,29+st.lL);cg(['Pp','PP','pP','mp','mm','mmm'],21,29+st.rL);
+   cg(this.torso,16,23+U);
    const fl=Math.floor((st.t||0)*10)%2,big=A>=0;
-   cg(['uk','.k'],12,25+U+st.ay);cg(['ku','k.'],26,25-st.ay+U);
-   cg(big?['.9.','989','898','.0.']:fl?['.9.','989','.0.']:['.8.','.9.','909'],11,(big?19:21)+U+st.ay);
-   cg(big?['.c.','cEc','EcE','.h.']:fl?['.c.','cEc','.h.']:['.E.','.c.','chc'],26,(big?19:21)+U-st.ay);
-   cg(this.head,14,11+U);if(st.hurt)hurtEyes(16+U);
+   cg(['uP','Pp','kK'],14,24+U+st.ay);cg(['Pp','pm','kK'],24,24+U-st.ay);
+   cg(big?['.9.','989','898','.0.']:fl?['.9.','989','.0.']:['.8.','.9.','909'],13,(big?20:22)+U+st.ay);
+   cg(big?['.c.','cEc','EcE','.B.']:fl?['.c.','cEc','.B.']:['.E.','.c.','cBc'],24,(big?20:22)+U-st.ay);
+   cg(this.head,14,10+U);if(st.hurt)hurtEyes(16+U);
   }finally{for(const kk in old)CP[kk]=old[kk];}
  }};
 // 총잡이: 챙 넓은 카우보이 모자, 빨간 반다나, 갈색 더스터 코트와 조끼, 청바지·부츠, 리볼버
@@ -1420,28 +1423,21 @@ CH.gunner={
    cg(this.hat,12,7+U);
   }finally{for(const kk in old)CP[kk]=old[kk];}
  }};
-// 사령술사: 깊은 후드 + 후드 속 창백한 얼굴과 초록 눈빛, 너덜너덜한 검보라 로브(뼈 장식·해골 브로치), 해골 뼈 지팡이
+// 사령술사: 검보라 후드 속 창백한 얼굴과 초록 눈, 뼈 장식 로브, 너덜너덜한 망토, 해골 뼈 지팡이
 CH.necro={
- hood:['.....mmmm.....','...mmPPPPmm...','..mPPPPPPPPm..','.mPPpppppPPPm.','.mPpvvvvvvpPm.','mPPpvkkkkvpPPm','mPPvkFkkFkvPPm','mPPvkkkkkkvPPm','mPPpvkKKkvpPPm','.mPPvvKKvvPPm.','.mPPPvvvvPPPm.','..mPPPPPPPPm..'],
- robe:['..mPPPPPPm..','.mPPgPPgPPm.','.mPPPEEPPPm.','mPPPPEEPPPPm','mPPPppppPPPm','mPPgpppppgPm','mPPPpgggpPPm','mPPPpppppPPm','mPPPPPPPPPPm','mPPpPPPPpPPm','mPpPPPPPPpPm','mmPmPPmPPmPm','.m.mPm.mPm.m'],
- skull:['.EEE.','EvEvE','EEEEE','.EvE.','.E.E.'],
- draw(st){const U=st.U,A=st.atk,sw={P:'#2b2438',p:'#1c1726',m:'#0e0b14',v:'#050308',k:'#d9d3c4',K:'#a69d8c',F:'#7dff8a',g:'#e8e2d0',E:'#f4f1e6',7:'#cfc6ae',8:'#d8ffd0',9:'#6aff8a',0:'#1fa040'},old={};
+ head:['....mPPm....','..mPuuPPm...','.mPuuPPPPPm.','mPuPPPPPPPmm','mPuPpppppPmm','mpkkkkkkkkpm','mkkkkkkkkkKm','mkkekkkkekKm','mkkekkkkekKm','mkkkkkkkkKKm','mPkkkkkkkKPm','.mPKKKKKKPm.','..mPPPPPPm..'],
+ torso:['PuEPPpPm','PPgPPpPm','PuPPPpPm','.pgEgpp.','PuPPPpPm','PP.PPp.m'],
+ draw(st){const U=st.U,A=st.atk,sw={m:'#0e0b14',P:'#2e2640',u:'#4a3e62',p:'#1c1726',k:'#ddd6c8',K:'#aca291',e:'#5dff7a',E:'#f4f1e6',g:'#cfc6ae',G:'#8e866f',v:'#151018',8:'#d8ffd0',9:'#7dff8a'},old={};
   for(const kk in sw){old[kk]=CP[kk];CP[kk]=sw[kk];}
   try{
-   cg(['zl'],17,35+Math.min(0,st.lL));cg(['lz'],21,35+Math.min(0,st.rL));
-   cg(this.robe,14,22+U);
-   // 왼손: 뼈 손
-   cg(['mP','Pp','kK'],12,24+U+st.ay);
-   // 지팡이: 공격하면 들어 올림, 해골 주위 초록빛
-   const up=A>=0?-3:0,sx=27,top=6+U+up,fl=Math.floor((st.t||0)*8)%3;
-   for(let y=top+5;y<=35+up;y++)cp(y%4?'7':'K',sx,y);
-   cg(['.9.','9F9','.9.'][0]?(fl===0?['.9.9.','9...9','.....']:fl===1?['..9..','.9.9.','9...9']:['9...9','.9.9.','..9..']):[],sx-2,top-3);
-   cg(this.skull,sx-2,top);
-   if(A>=0)cg(['.8.','8F8','.8.'],sx-1,top+1);
-   // 오른손: 지팡이 쥔 손
-   cg(['Pm','pP','Kk'],sx-1,24+U+up);
-   cg(this.hood,13,10+U);
-   if(st.hurt)hurtEyes(15+U);
+   cape(16,23+U,9,7,.25,'u','P','p',st.cf);
+   cg(['Pu','PP','pP','mm','mm','mmm'],17,29+st.lL);cg(['uP','PP','Pp','mm','mm','mmm'],21,29+st.rL);
+   cg(this.torso,16,23+U);
+   const sy=A>=0?-3:0,fl=Math.floor((st.t||0)*8)%3;
+   for(let y=14+U+sy;y<=34+sy;y++){cp(y%4?'g':'G',12,y);cp('G',13,y);}
+   cg(['.EE.','EvvE','EEEE','.EE.'],11,10+U+sy);cg(fl===0?['9..9']:fl===1?['.99.']:['9.9.'],11,9+U+sy);if(A>=0)cg(['8..8','.88.'],11,8+U+sy);
+   cg(['.uP','uPp','.kK'],13,23+U+(A>=0?-3:st.ay));cg(['Pp.','pPm','kK.'],24,23+U-st.ay);
+   cg(this.head,14,10+U);if(st.hurt)hurtEyes(16+U);
   }finally{for(const kk in old)CP[kk]=old[kk];}
  }};
 function hurtEyes(y){g.fillStyle=CP.k;g.fillRect(17,y,6,3);cg(['e.','.e','e.'],17,y);cg(['.e','e.','.e'],21,y);}
@@ -2882,7 +2878,10 @@ const AUG_REQ={
   // 스탯 의존 VIP: 받쳐줄 스탯이 있어야 의미가 있음
   overflow:()=>rawRate()>=RATE_CAP()*.7,ironclad:()=>armorEff()>=25,sharpshot:()=>critC()>=.2
 };
-const augReq=a=>!AUG_REQ[a.id]||AUG_REQ[a.id]();
+// 아직 언록 안 한 직업의 주력 시너지(신성·망자·속사·원소·분노·자연·연금·동전)는 증강·VIP·스탯 카드가 나오지 않음
+const lockedTags=()=>{const t=new Set();for(const k in CLASSES){const C=CLASSES[k];if(C.lock&&!clsOpen(k))t.add(C.fav[0]);}return t;};
+const tagLocked=a=>{const L=lockedTags();return !!(a.tags&&a.tags.some(t=>L.has(t)));};
+const augReq=a=>!tagLocked(a)&&(!AUG_REQ[a.id]||AUG_REQ[a.id]());
 // 태그 중복(가드 2개 등)으로 선호 가중치가 겹쳐 쌓이지 않게: 선호 태그가 하나라도 있으면 ×2.5, 비선호는 ×0.3
 // 이미 가진 증강의 합체 짝은 행운에 비례해 더 잘 나옴 (행운 0: ×1.3, 행운 30: ×3)
 const fuseW=a=>partnerOf(a.id)?1.3+1.7*LK()/LUCK_CAP:1;
@@ -3035,7 +3034,7 @@ const CARD_SRC={'정비 키트':['summon'],'포탑 개조':['summon'],'뼈 가�
 function sumNames(){const S_=S;const a=[];if(droneN()>0)a.push('드론');if(has('turret'))a.push('포탑');if(has('wisp'))a.push('도깨비불');if(has('dealers'))a.push('딜러 칩');if(has('mine'))a.push('지뢰');if(skelMax()>0)a.push('해골');return a.length?a.join('·'):'소환물';}
 function cdNames(){const a=[];if(gravOn())a.push('중력장');if(has('thornseed')||tag('nature')>=1)a.push('덩굴');if(waveOn())a.push('충격파');if(has('stormcall'))a.push('원소 폭풍');if(has('battlecry'))a.push('전쟁 함성');if(shadowOn())a.push('분신');if(S.cls==='necro'||tag('undead')>=4)a.push('해골 소환');if(has('d_bear'))a.push('곰 변신');return a.length?a.join('·'):'주기형 효과';}
 function cardShareW(n){const ks=CARD_SRC[n];if(!ks)return 1;const sh=ks.reduce((q,k)=>q+dShare(k),0);return .35+3*Math.min(.6,sh);}
-function cardOf(r,bonus=0){const pool=CARDS.filter(c=>(c.fr?c.fr===r:true)&&(!c.cls||c.cls===S.cls||(c.src&&c.src()))&&cardOk(c)),fav=CLASSES[S.cls||'knight'].cards,rec=S.recentC||[],w=c=>(fav.includes(c.n)||c.cls?1.6:1)*cardShareW(c.n)*(rec.includes(c.n)?.3:1)*routeW(CARD_TAG[c.n]||[]);
+function cardOf(r,bonus=0){const LT=lockedTags(),pool=CARDS.filter(c=>(c.fr?c.fr===r:true)&&!((CARD_TAG[c.n]||[]).length&&(CARD_TAG[c.n]||[]).every(t=>LT.has(t)))&&(!c.cls||c.cls===S.cls||(c.src&&c.src()))&&cardOk(c)),fav=CLASSES[S.cls||'knight'].cards,rec=S.recentC||[],w=c=>(fav.includes(c.n)||c.cls?1.6:1)*cardShareW(c.n)*(rec.includes(c.n)?.3:1)*routeW(CARD_TAG[c.n]||[]);
   let t=pool.reduce((q,c)=>q+w(c),0),x=Math.random()*t,pick=pool[pool.length-1];for(const c of pool){if((x-=w(c))<0){pick=c;break;}}
   S.recentC=[...rec,pick.n].slice(-9);return rollCard(pick,r,bonus);}
 const SYM=['🍒','🔔','🪙','💎','7️⃣','💀'];
@@ -3153,8 +3152,8 @@ function startScreen(){
   <button class="btn primary" id="go">${CLASSES[pickCls].n}(으)로 시작${sv?' (저장 삭제)':''}</button>
   <button class="btn ghost" id="meta">🏅 영구 강화 <small>보유 메달 ${META.medals}개</small></button>`);
   ov.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{const k=b.dataset.cls;
-    if(!clsOpen(k)){const C=CLASSES[k];$('cdet').innerHTML=clsDetail(k)+(META.tk>0?`<button class="btn primary" id="ulk" style="margin-top:8px">🎟 언록권으로 ${C.n} 열기 <small>보유 ${META.tk}장</small></button>`:`<p class="sub" style="color:#ff9a9a;margin-top:8px">🔒 지옥·신 난이도를 클리어하면 언록권을 받아 열 수 있어요</p>`);
-      if(META.tk>0)$('ulk').onclick=()=>{META.tk--;(META.ucls=META.ucls||[]).push(k);saveMeta();pickCls=k;try{localStorage.setItem('chipdungeon_cls',k);}catch(e){}toast(C.n+' 언록!');startScreen();};return;}
+    if(!clsOpen(k)){const C=CLASSES[k];$('cdet').innerHTML=clsDetail(k)+unlockInfo(k)+(META.tk>0?`<button class="btn primary" id="ulk" style="margin-top:8px">🎟 언록권으로 ${C.n} 열기 <small>보유 ${META.tk}장</small></button>`:`<p class="sub" style="color:#ff9a9a;margin-top:8px">🔒 지옥·신 난이도를 클리어하면 언록권을 받아 열 수 있어요</p>`);
+      if(META.tk>0)$('ulk').onclick=()=>{META.tk--;(META.ucls=META.ucls||[]).push(k);saveMeta();pickCls=k;try{localStorage.setItem('chipdungeon_cls',k);}catch(e){}toast(C.n+' 언록! '+TAGS[C.fav[0]].n+' 시너지 증강도 이제 나와요');startScreen();};return;}
     pickCls=k;try{localStorage.setItem('chipdungeon_cls',pickCls);}catch(e){}
     ov.querySelectorAll('[data-cls]').forEach(x=>x.classList.toggle('on',x===b));$('cdet').innerHTML=clsDetail(pickCls);$('go').firstChild.textContent=`${CLASSES[pickCls].n}(으)로 시작${sv?' (저장 삭제)':''}`;});
   ov.querySelectorAll('[data-diff]').forEach(b=>b.onclick=()=>{pickDiff=b.dataset.diff;try{localStorage.setItem('chanseo_diff',pickDiff);}catch(e){}ov.querySelectorAll('[data-diff]').forEach(x=>x.classList.toggle('primary',x===b));HOF_DIFF=null;refreshBoard();});
@@ -3171,6 +3170,8 @@ function drawPreviews(){
 /* ---------- meta progression ---------- */
 const META=(()=>{try{const m=JSON.parse(localStorage.getItem('chanseo_meta')||'{}');const pc={luck:3,gold:2,xp:3,aug:6,key:5};let rf=0;for(const k in (m.prep||{}))rf+=(m.prep[k]||0)*(pc[k]||0);return {medals:(m.medals||0)+rf,total:m.total||0,lv:m.lv||{},sk:m.sk||{},clears:m.clears||{},cos:m.cos||{own:{},eq:{}},spent:m.spent!=null?m.spent:null,ucls:m.ucls||[],tk:m.tk||0};}catch(e){return {medals:0,total:0,lv:{},sk:{},clears:{},cos:{own:{},eq:{}},ucls:[],tk:0};}})();
 // 직업 언록: 지옥·신 난이도를 깰 때마다 언록권 1장, 잠긴 직업 하나를 골라 엶
+function unlockInfo(k){const C=CLASSES[k],t=C.fav[0],T=TAGS[t],aug=AUGS.filter(a=>!a.cls&&a.tags.includes(t)),own=AUGS.filter(a=>a.cls===k),vip=VIPS.filter(v=>v.tags.includes(t)),cd=Object.keys(CARD_TAG).filter(n=>CARD_TAG[n].length&&CARD_TAG[n].every(x=>x===t));
+  return `<div class="cp" style="margin-top:8px"><em>🔓 언록하면 함께 열려요</em>${T.n} 시너지 증강 ${aug.length}개 (${aug.slice(0,6).map(a=>a.n).join(', ')}${aug.length>6?' 등':''})${vip.length?`, ${T.n} VIP ${vip.length}개`:''}${cd.length?`, 전용 스탯 카드 ${cd.length}종`:''}, ${C.n} 전용 증강 ${own.length}개<br><small style="color:var(--muted)">잠겨 있는 동안은 다른 직업으로 해도 이 시너지 증강이 나오지 않아요</small></div>`;}
 const clsOpen=k=>!CLASSES[k].lock||(META.ucls||[]).includes(k);
 function saveMeta(){try{localStorage.setItem('chanseo_meta',JSON.stringify(META));}catch(e){}}
 // 영구 강화: 단계당 효과는 작게, 항목과 단계는 많게 (오래 모으는 성장)
