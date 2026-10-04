@@ -280,6 +280,7 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 .sgrp h3{margin:14px 0 6px;color:var(--brass)}
 .srow{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid rgba(241,231,207,.08);font-size:15px}
 .srow b{font-family:'Do Hyeon',sans-serif;font-weight:400;font-size:18px;color:var(--ivory);white-space:nowrap}
+.srow b .swrap{display:inline-block;white-space:normal;text-align:right;line-height:1.35;font-size:16px}
 .snote{font-size:12.5px;color:var(--brass);padding:0 0 4px;text-align:right}
 .sitem[data-tip]{cursor:help}.sitem .stip{display:none;font-size:12.5px;line-height:1.45;color:var(--ivory);background:rgba(0,0,0,.35);border-left:3px solid var(--brass);padding:6px 8px;margin:2px 0 6px;border-radius:4px}
 #stipPop{position:fixed;z-index:200;max-width:280px;pointer-events:none;font-size:13px;line-height:1.5;color:var(--ivory);background:#0b1f18;border:1px solid var(--brass);border-radius:8px;padding:8px 10px;box-shadow:0 6px 18px rgba(0,0,0,.55);display:none}.sitem .qi{opacity:.45;font-size:12px;margin-left:4px}
@@ -2276,7 +2277,7 @@ function clsRows(row){const p=S.p,c=S.cls,r=[];
   if(skelMax()>0)r.push(row('해골 병사',`${(S.skel||[]).length} / ${skelMax()}기, 피해 +${Math.round((p.skD||0)*100)}%, 지속 ${12+(p.skL||0)+(has('deathnova')?4:0)}초`));
   if(c==='gunner')r.push(row('탄창',`${magN()}발, 재장전 ${Math.round(2.4/pRate()*(has('g_twin')?.5:1)*(p.rlM||1)*100)/100}초`));
   if(c==='elem'||tag('elem')>=1||has('elemcoin'))r.push(row('원소 효과 피해','+'+Math.round((elM()-1)*100)+'%'));
-  {const c=S.dcat||{};let t=0;for(const k in c)t+=c[k];if(t>0){const l=Object.entries(c).filter(([k,v])=>v/t>=.03).sort((a,b)=>b[1]-a[1]).map(([k,v])=>(DSRC_N[k]||k)+' '+Math.round(v/t*100)+'%');r.push(row('최근 피해 비중',l.join(' · '),'루트 스탯 카드는 이 비중이 클수록 자주 나옴'));}}
+  {const c=S.dcat||{};let t=0;for(const k in c)t+=c[k];if(t>0){const l=Object.entries(c).filter(([k,v])=>v/t>=.03).sort((a,b)=>b[1]-a[1]).map(([k,v])=>(DSRC_N[k]||k)+' '+Math.round(v/t*100)+'%');r.push(row('최근 피해 비중',`<span class="swrap">${l.join('<br>')}</span>`,'루트 스탯 카드는 이 비중이 클수록 자주 나옴'));}}
   if(p.cdR)r.push(row('주기형 효과 쿨타임','−'+Math.round(p.cdR*100)+'% <small>/ 40%</small>'));
   if(furyOn())r.push(row('광란',`${p.fy||0} / ${furyCap()}, 지속 ${4+(p.fyD||0)+(has('bloodlust')?2:0)+(has('b_frenzy')?2:0)}초`));
   if(c==='druid'||has('thornseed')||tag('nature')>=1||has('gravebloom')||has('gravvine'))r.push(row('덩굴 지대',`범위 +${Math.round((p.vnR||0)*100)}%, 피해 +${Math.round((p.vnD||0)*100)}%`));
