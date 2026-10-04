@@ -1949,14 +1949,14 @@ function drawBossUI(){
 const homeTag=()=>(CLASSES[S.cls]||{fav:[]}).fav[0];
 const HOME_DMG=['fire','holy','undead','elem','fury','nature','alchemy','coin','poison','thunder','summon'];
 const homeM=(t,k=.3)=>homeTag()===t?1+k:1;
-const holyM=()=>(1+ex('holy')*.1)*homeM('holy')*(1+(S.p.hoD||0));
+const holyM=()=>(1+ex('holy')*.1)*homeM('holy')*(1+(S.p.hoD||0))*(1+.04*mlv('m_holy'));
 const undM=()=>(1+ex('undead')*.12)*homeM('undead');
 // 속사 추가탄(연사·패닝·튕김·치명타 추가탄)은 기본 탄환 피해만 따라감. 별도 피해 배율 없음
 const rpM=()=>1;
-const elM=()=>(1+ex('elem')*.12)*(1+(S.p.elD||0))*homeM('elem');
+const elM=()=>(1+ex('elem')*.12)*(1+(S.p.elD||0))*homeM('elem')*(1+.04*mlv('m_elem'));
 const natM=()=>(1+ex('nature')*.15)*homeM('nature');
 const coinOn=()=>S.cls==='gambler'||tag('coin')>=1;
-const headP=()=>Math.min((S.p.hdP||0)>0?.8:.75,.5+(S.p.hdP||0)+LK()*.004+ex('coin')*.03+(has('doublehead')?lv3('doublehead',.05,.08,.1):0));
+const headP=()=>Math.min(((S.p.hdP||0)>0?.8:.75)+.01*mlv('m_coin'),.5+(S.p.hdP||0)+.01*mlv('m_coin')+LK()*.004+ex('coin')*.03+(has('doublehead')?lv3('doublehead',.05,.08,.1):0));
 const shadowOn=()=>tag('shadow')>=1||has('shadowstep')||has('doppel')||has('nightlord');
 const shM=()=>(1+ex('shadow')*.15)*(1+(S.p.shD||0));
 const shMax=()=>2+(tag('shadow')>=2?1:0)+(tag('shadow')>=6?2:0)+(has('f_shadowarmy')?3:0);
@@ -1995,7 +1995,7 @@ function clsRows(row){const p=S.p,c=S.cls,r=[];
   if(c==='alch'||tag('alchemy')>=1)r.push(row('물약',`범위 +${Math.round((p.ptR||0)*100)}%, 피해 +${Math.round((potM()-1)*100)}%`));
   if(coinOn())r.push(row('동전 앞면',Math.round(headP()*100)+'%',`앞면 피해 +${Math.round((p.hdD||0)*100)}%, 연속 ${p.cfS||0}회`));
   return r;}
-const potM=()=>(1+ex('alchemy')*.15)*homeM('alchemy')*(1+(S.p.ptD||0))*(has('frostflask')?1.2:1)*(has('philosopher')?1.5:1);
+const potM=()=>(1+ex('alchemy')*.15)*homeM('alchemy')*(1+.05*mlv('m_alchemy'))*(1+(S.p.ptD||0))*(has('frostflask')?1.2:1)*(has('philosopher')?1.5:1);
 const POTC=['#8ee06a','#ff8a3a','#9fe8ff'];
 function throwPotion(tx,ty,m){const p=S.p;(S.flasks=S.flasks||[]).push({x0:p.x,y0:p.y-10,x1:tx,y1:ty,t:0,k:Math.floor(Math.random()*3),m});
   if(has('elixir')&&p.alive){p.hp=Math.min(p.maxHp,p.hp+(has('f_panacea')?5:2)*healM());if(has('f_panacea'))p.barrier=Math.min(barrierMax(),(p.barrier||0)+5);}}
@@ -2003,11 +2003,11 @@ function potionHit(f){const r=70*(1+(S.p.ptR||0))*(tag('alchemy')>=4?1.3:1),dm=p
   for(const o of S.en)if(o.alive&&d2(o,f)<(r+o.r)**2){o.potT=S.t+3;if(ks.includes(0))poisonE(o,2);if((ks.includes(2)||has('frostflask'))&&!o.boss)o.slowT=Math.max(o.slowT||0,2);}
   for(const k of ks){explode(f.x,f.y,r,dm*[.6,1.5,.8][k],POTC[k]);S.rings.push({x:f.x,y:f.y,r:r*.3,max:r*1.1,life:.45,col:POTC[k]});burst(f.x,f.y,POTC[k],18);}}
 function vineAt(x,y,m){let n=0;for(const z of S.zones)if(z.kind==='vine')n++;if(n>=14)return;const br=has('d_bramble')?1+lv3('d_bramble',.3,.5,.7):1;
-  S.zones.push({x,y,r:60*br*(1+(S.p.vnR||0))*(has('worldtree')?1.3:1),life:3+(tag('nature')>=2?1:0),kind:'vine',m:m*br*(1+(S.p.vnD||0))*natM()*(has('d_wrath')?1.3:1)});}
+  S.zones.push({x,y,r:60*br*(1+(S.p.vnR||0))*(has('worldtree')?1.3:1),life:3+(tag('nature')>=2?1:0),kind:'vine',m:m*br*(1+(S.p.vnD||0))*(1+.05*mlv('m_nature'))*natM()*(has('d_wrath')?1.3:1)});}
 const inVine=o=>S.zones.some(z=>z.kind==='vine'&&d2(o,z)<z.r*z.r);
 const furyOn=()=>S.cls==='berserk'||tag('fury')>=1;
 const furyCap=()=>(S.cls==='berserk'?20:tag('fury')>=2?10:5)+(S.p.fyC||0)+(tag('fury')>=6?10:0)+(has('b_frenzy')?lv3('b_frenzy',5,10,15):0);
-function addFury(n){const p=S.p;if(!furyOn())return;p.fy=Math.min(furyCap(),(p.fy||0)+n);p.fyT=4+(p.fyD||0)+(has('bloodlust')?2:0)+(has('b_frenzy')?2:0);}
+function addFury(n){const p=S.p;if(!furyOn())return;p.fy=Math.min(furyCap(),(p.fy||0)+n);p.fyT=4+(p.fyD||0)+.3*mlv('m_fury')+(has('bloodlust')?2:0)+(has('b_frenzy')?2:0);}
 function spinHit(r,dm,col){const p=S.p;p.swingT=.25;S.rings.push({x:p.x,y:p.y,r:20,max:r,life:.25,col});for(const e of S.en)if(e.alive&&!e.phase&&d2(e,p)<(r+e.r)**2)dmgE(e,dm,col);}
 const chilled=e=>e.slowT>0||(e.boss&&tag('frost')>=2);
 const condM=e=>has('conduct')&&(e.burnT>0||chilled(e))?1+lv3('conduct',.3,.4,.5):1;
@@ -2022,7 +2022,7 @@ const magN=()=>6+(S.p.magB||0)+(has('g_extmag')?lv3('g_extmag',2,3,4):0);
 function ricoShot(t,dm,n){const o=nearestE(t,220,new Set([t]));if(o)pBullet(t.x,t.y,Math.atan2(o.y-t.y,o.x-t.x),dm,{child:true,r:3,rc:n,hit:new Set([t]),sure:has('f_trickshot'),life:.6,pierce:0});}
 const skelMax=()=>(S.cls==='necro'?4:0)+(tag('undead')>=1?1:0)+(tag('undead')>=4?2:0)+(has('raise')?2:0)+(has('n_legion')?lv3('n_legion',1,2,3):0)+(has('n_lich')?2:0)+(has('f_bonelord')?2:0);
 const skelC=()=>(S.cls==='necro'?.25:tag('undead')>=1?.08:0)+(tag('undead')>=4?.1:0)+(has('raise')?lv3('raise',.06,.08,.1):0)+(has('n_legion')?.1:0);
-const skelD=()=>pDmg()*.6*(1+(S.p.skD||0))*sumM()*undM()*(tag('undead')>=6?2:1)*(has('f_bonelord')?1+.03*(S.skel?S.skel.length:0):1);
+const skelD=()=>pDmg()*.6*(1+(S.p.skD||0))*(1+.05*mlv('m_undead'))*sumM()*undM()*(tag('undead')>=6?2:1)*(has('f_bonelord')?1+.03*(S.skel?S.skel.length:0):1);
 function raiseSkel(x,y){const sk=S.skel||(S.skel=[]),mx=skelMax();if(mx<=0)return;const lf=12+(has('deathnova')?4:0)+(S.p.skL||0);
   if(sk.length>=mx){let o=sk[0];for(const k of sk)if(k.life<o.life)o=k;o.life=lf;return;}
   const a=Math.random()*TAU;sk.push({x,y,life:lf,cd:.3,ox:Math.cos(a)*40,oy:Math.sin(a)*28,f:1,sw:0});S.rings.push({x,y:y+6,r:3,max:16,life:.3,col:'#8cff9a'});}
@@ -2427,7 +2427,7 @@ function update(dt){
     p.inv=Math.max(0,p.inv-dt);p.all6=Math.max(0,p.all6-dt);p.dashCd=Math.max(0,p.dashCd-dt);p.blitzT=Math.max(0,p.blitzT-dt);p.shockT=Math.max(0,p.shockT-dt);
     if(p.comboT>0){p.comboT-=dt;if(p.comboT<=0)p.combo=0;}
     p.cd-=dt;
-    if(p.cd<=0){const bo=S.boss&&S.boss.alive&&!S.boss.air&&d2(S.boss,p)<(p.range+S.boss.r)**2?S.boss:null,tg=bo||evTarget(p.range)||nearestE(p,p.range);if(tg){playerFire(tg);if(S.cls==='gunner'&&p.mag<=0){p.mag=magN();p.cd=2.4/pRate()*(has('g_twin')?.5:1)*(p.rlM||1);p.rlT=p.cd;p.rlM=p.cd;}else p.cd=1/pRate();}}
+    if(p.cd<=0){const bo=S.boss&&S.boss.alive&&!S.boss.air&&d2(S.boss,p)<(p.range+S.boss.r)**2?S.boss:null,tg=bo||evTarget(p.range)||nearestE(p,p.range);if(tg){playerFire(tg);if(S.cls==='gunner'&&p.mag<=0){p.mag=magN();p.cd=2.4/pRate()*(has('g_twin')?.5:1)*(p.rlM||1)*(1-.05*mlv('m_rapid'));p.rlT=p.cd;p.rlM=p.cd;}else p.cd=1/pRate();}}
     const n=orbitN();
     if(n){const sp=2.8*(has('spinner')?1.5:1),rad=ORB_R*p.orbR,big=tag('roulette')>=6,orr=big?13:9;
       for(let i=0;i<n;i++){const a=S.t*sp+i*TAU/n,ox=p.x+Math.cos(a)*rad,oy=p.y+Math.sin(a)*rad;
@@ -3171,7 +3171,7 @@ function drawPreviews(){
 const META=(()=>{try{const m=JSON.parse(localStorage.getItem('chanseo_meta')||'{}');const pc={luck:3,gold:2,xp:3,aug:6,key:5};let rf=0;for(const k in (m.prep||{}))rf+=(m.prep[k]||0)*(pc[k]||0);return {medals:(m.medals||0)+rf,total:m.total||0,lv:m.lv||{},sk:m.sk||{},clears:m.clears||{},cos:m.cos||{own:{},eq:{}},spent:m.spent!=null?m.spent:null,ucls:m.ucls||[],tk:m.tk||0};}catch(e){return {medals:0,total:0,lv:{},sk:{},clears:{},cos:{own:{},eq:{}},ucls:[],tk:0};}})();
 // 직업 언록: 지옥·신 난이도를 깰 때마다 언록권 1장, 잠긴 직업 하나를 골라 엶
 function unlockInfo(k){const C=CLASSES[k],t=C.fav[0],T=TAGS[t],aug=AUGS.filter(a=>!a.cls&&a.tags.includes(t)),own=AUGS.filter(a=>a.cls===k),vip=VIPS.filter(v=>v.tags.includes(t)),cd=Object.keys(CARD_TAG).filter(n=>CARD_TAG[n].length&&CARD_TAG[n].every(x=>x===t));
-  return `<div class="cp" style="margin-top:8px"><em>🔓 언록하면 함께 열려요</em>${T.n} 시너지 증강 ${aug.length}개 (${aug.slice(0,6).map(a=>a.n).join(', ')}${aug.length>6?' 등':''})${vip.length?`, ${T.n} VIP ${vip.length}개`:''}${cd.length?`, 전용 스탯 카드 ${cd.length}종`:''}, ${C.n} 전용 증강 ${own.length}개<br><small style="color:var(--muted)">잠겨 있는 동안은 다른 직업으로 해도 이 시너지 증강이 나오지 않아요</small></div>`;}
+  return `<div class="cp" style="margin-top:8px"><em>🔓 언록하면 함께 열려요</em>${T.n} 시너지 증강 ${aug.length}개 (${aug.slice(0,6).map(a=>a.n).join(', ')}${aug.length>6?' 등':''})${vip.length?`, ${T.n} VIP ${vip.length}개`:''}${cd.length?`, 전용 스탯 카드 ${cd.length}종`:''}, ${C.n} 전용 증강 ${own.length}개${(MSTAT.find(x=>x.cls===k)||{}).n?`, 영구 강화 '${MSTAT.find(x=>x.cls===k).n}'`:''}<br><small style="color:var(--muted)">잠겨 있는 동안은 다른 직업으로 해도 이 시너지 증강이 나오지 않아요</small></div>`;}
 const clsOpen=k=>!CLASSES[k].lock||(META.ucls||[]).includes(k);
 function saveMeta(){try{localStorage.setItem('chanseo_meta',JSON.stringify(META));}catch(e){}}
 // 영구 강화: 단계당 효과는 작게, 항목과 단계는 많게 (오래 모으는 성장)
@@ -3181,7 +3181,16 @@ const MSTAT=[
   {k:'crit',n:'치명타 확률',d:'+0.5%',max:6,c:9},{k:'critm',n:'치명타 피해',d:'+4%',max:6,c:9},{k:'range',n:'사거리',d:'+2%',max:5,c:6},
   {k:'spd',n:'이동 속도',d:'+1%',max:5,c:6},{k:'dash',n:'대시 재사용',d:'-2%',max:5,c:9},{k:'magnet',n:'흡수 범위',d:'+8%',max:5,c:3},
   {k:'xp',n:'경험치 획득',d:'+3%',max:10,c:9},{k:'gold',n:'골드 획득',d:'+5%',max:8,c:6},{k:'sgold',n:'시작 골드',d:'+25',max:6,c:3},
-  {k:'luck',n:'행운',d:'+1',max:5,c:12}
+  {k:'luck',n:'행운',d:'+1',max:5,c:12},
+  // 직업 숙련: 그 직업을 언록해야 살 수 있음. 효과는 그 메커니즘을 쓰는 모든 판(다른 직업 포함)에 적용
+  {k:'m_holy',cls:'paladin',n:'신성 숙련',d:'빛 피해 +4%',max:5,c:9},
+  {k:'m_undead',cls:'necro',n:'사령 숙련',d:'해골 병사 피해 +5%',max:5,c:9},
+  {k:'m_rapid',cls:'gunner',n:'총기 숙련',d:'재장전 시간 −5%',max:5,c:9},
+  {k:'m_elem',cls:'elem',n:'원소 숙련',d:'원소 효과 피해 +4%',max:5,c:9},
+  {k:'m_fury',cls:'berserk',n:'분노 숙련',d:'광란 지속 +0.3초',max:5,c:9},
+  {k:'m_nature',cls:'druid',n:'자연 숙련',d:'덩굴 지대 피해 +5%',max:5,c:9},
+  {k:'m_alchemy',cls:'alch',n:'연금 숙련',d:'물약 피해 +5%',max:5,c:9},
+  {k:'m_coin',cls:'gambler',n:'동전 숙련',d:'동전 앞면 확률 +1%',max:5,c:9}
 ];
 const MSKILL=[
   {k:'extraAug',n:'준비된 모험가',d:'시작할 때 증강을 하나 더 고르고 시작',c:36},
@@ -3327,21 +3336,24 @@ function cosPreview(x,anchor){
 function cosPreviewHide(){cancelAnimationFrame(cosPrevRAF);const b=document.getElementById('cosPrev');if(b)b.style.display='none';}
 function openMeta(){cosPreviewHide();
   const now=x=>{const l=mlv(x.k);return l?x.d.replace(/[\d.]+/,m=>+(parseFloat(m)*l).toFixed(1)):'없음';};
-  const st=MSTAT.map(x=>{const l=mlv(x.k),c=mcost(x),mx=l>=x.max,can=!mx&&META.medals>=c;
+  const tile=x=>{const l=mlv(x.k),c=mcost(x),mx=l>=x.max,lk=x.cls&&!clsOpen(x.cls),can=!lk&&!mx&&META.medals>=c;
+    if(lk)return `<button class="mtile" disabled><b>🔒 ${x.n}</b><span class="md">${x.d} / 단계</span><span class="mnow">${CLASSES[x.cls].n} 언록 시 열림</span><span class="mc">🔒</span></button>`;
     return `<button class="mtile ${mx?'max':''}" data-ms="${x.k}" ${can?'':'disabled'}><b>${x.n}</b><span class="md">${x.d} / 단계</span>
     <span class="pips">${Array.from({length:x.max},(_,i)=>`<i class="${i<l?'on':''}"></i>`).join('')}</span>
-    <span class="mnow">지금 ${now(x)}</span><span class="mc">${mx?'최대':'🏅 '+c}</span></button>`;}).join('');
+    <span class="mnow">지금 ${now(x)}</span><span class="mc">${mx?'최대':'🏅 '+c}</span></button>`;};
+  const st=MSTAT.filter(x=>!x.cls).map(tile).join(''),cst=MSTAT.filter(x=>x.cls).map(tile).join('');
   const sk=MSKILL.map(x=>{const own=META.sk[x.k],can=!own&&META.medals>=x.c;
     return `<button class="mtile sk ${own?'max':''}" data-mk="${x.k}" ${can?'':'disabled'}><b>${x.n}</b><span class="md">${x.d}</span><span class="mc">${own?'✔ 보유':'🏅 '+x.c}</span></button>`;}).join('');
   show(`<div class="shophead"><h2>🏅 영구 강화</h2><button class="btn" id="mBack">돌아가기</button></div>
   <div class="mbal">보유 메달 <b>🏅 ${META.medals}</b><small>지금까지 ${META.total}개 획득 · 강화는 모든 캐릭터, 모든 판에 적용</small></div>
   <h3>영구 능력치 <small style="color:var(--muted);font-size:13px">단계가 오를수록 가격 상승</small></h3><div class="mgrid">${st}</div>
+  <h3>직업 숙련 <small style="color:var(--muted);font-size:13px">직업을 언록하면 열림 · 그 메커니즘을 쓰는 모든 판에 적용</small></h3><div class="mgrid">${cst}</div>
   <h3>영구 기술 <small style="color:var(--muted);font-size:13px">한 번 사면 계속 적용</small></h3><div class="mgrid">${sk}</div>
   <h3>외형 <small style="color:var(--muted);font-size:13px">능력치 영향 없음 · 눌러서 장착/해제</small></h3>${Object.keys(COS_CAT).map(cat=>`<h3 style="font-size:15px;margin:10px 0 4px;color:var(--muted)">${COS_CAT[cat]}</h3><div class="mgrid">${COS.filter(x=>x.cat===cat).map(x=>{const own=cosOwn(x.k),eq=cosEq(cat)===x;return `<button class="mtile sk ${eq?'max':''} ${own||META.medals>=x.c?'':'poor'}" data-cs="${x.k}"><b>${x.n}</b><span class="md">${x.d}</span><span class="mc">${eq?'✔ 장착 중':own?'장착하기':'🏅 '+x.c}</span></button>`;}).join('')}</div>`).join('')}
   <button class="btn ghost" id="mReset" ${metaSpent()?'':'disabled'}>↺ 전체 초기화 <small>🏅 ${metaSpent()} 환불</small></button>
   <button class="btn primary" id="mBack2">돌아가기</button>`);
   const keepY=()=>{const y=ov.scrollTop;openMeta();ov.scrollTop=y;};
-  ov.querySelectorAll('[data-ms]').forEach(b=>b.onclick=()=>{const x=MSTAT.find(q=>q.k===b.dataset.ms),c=mcost(x);if(META.medals<c||mlv(x.k)>=x.max)return;META.spent=metaSpent()+c;META.medals-=c;META.lv[x.k]=mlv(x.k)+1;saveMeta();keepY();});
+  ov.querySelectorAll('[data-ms]').forEach(b=>b.onclick=()=>{const x=MSTAT.find(q=>q.k===b.dataset.ms),c=mcost(x);if(META.medals<c||mlv(x.k)>=x.max||(x.cls&&!clsOpen(x.cls)))return;META.spent=metaSpent()+c;META.medals-=c;META.lv[x.k]=mlv(x.k)+1;saveMeta();keepY();});
   ov.querySelectorAll('[data-mk]').forEach(b=>b.onclick=()=>{const x=MSKILL.find(q=>q.k===b.dataset.mk);if(META.medals<x.c||META.sk[x.k])return;META.spent=metaSpent()+x.c;META.medals-=x.c;META.sk[x.k]=1;saveMeta();keepY();});
   ov.querySelectorAll('[data-cs]').forEach(b=>{const x=COS.find(q=>q.k===b.dataset.cs);b.addEventListener('mouseenter',()=>cosPreview(x,b));b.addEventListener('mouseleave',cosPreviewHide);
     b.addEventListener('touchstart',()=>{if(b.dataset.pv!=='1'){ov.querySelectorAll('[data-cs]').forEach(o=>o.dataset.pv='');b.dataset.pv='1';b.dataset.tap='1';cosPreview(x,b);}},{passive:true});});
