@@ -658,17 +658,17 @@ const TAGS={
   sniper:  {n:'원거리',t2:'사거리 +20%',t4:'먼 적일수록 피해 증가 (거리 100당 +10%, 최대 +60%)',t6:'탄환이 적을 뚫을 때마다 피해 +30% 누적 (최대 +150%)',ex:'원거리 피해 +5%'},
   thunder: {n:'번개',  t2:'10번째 공격마다 연쇄 번개 (적 4명)',t4:'번개 연쇄 대상 +3, 번개 피해 +50%',t6:'번개 맞은 일반 적 0.8초 기절',ex:'번개 피해 +15%'},
   fire:    {n:'화염',  t2:'적중 시 화상 (3초, 초당 공격력 20%)',t4:'화상 입은 적이 죽으면 불길 폭발 (범위 70, 공격력 120%)',t6:'화상 피해 2배, 화상이 1초마다 주변 적에게 번짐',ex:'화상 피해 +15%'},
-  shadow:  {n:'그림자',t2:'대시할 때와 6초마다 그림자 분신 소환 (4초, 0.5초마다 공격력 40% 사격, 최대 3기)',t4:'분신이 사라질 때 그림자 폭발 (범위 80, 공격력 150%)',t6:'분신 탄환 30%는 반드시 치명타, 분신 최대 +2',ex:'분신 피해 +15%'},
-  grav:    {n:'중력',  t2:'8초마다 적이 가장 많은 곳에 중력장 (2초, 범위 100, 끌어당김)',t4:'중력장에 끌린 적은 받는 피해 +20%',t6:'중력장이 사라질 때 붕괴 폭발 (범위 130, 공격력 300%)',ex:'중력장 범위 +10%'},
-  mark:    {n:'표식',  t2:'5번째 공격마다 대상에 표식 (5초): 표식된 적은 받는 피해 +20%',t4:'표식된 적이 죽으면 가까운 적 2명에게 표식이 옮겨감',t6:'표식된 적에게 치명타 확률 +25%',ex:'표식 피해 증폭 +5%'},
-  wave:    {n:'파동',  t2:'4초마다 주변에 충격파 (범위 130, 공격력 100%, 밀쳐냄)',t4:'충격파 범위 +30%, 맞은 적 1.5초 둔화',t6:'충격파가 한 번 더 퍼지고 피해 2배',ex:'충격파 피해 +15%'},
-  coin:    {n:'동전',  t2:'공격마다 동전 던지기 (앞면 피해 2배, 뒷면 0.5배). 앞면 3연속마다 동전 폭발 (범위 90, 공격력 300%)',t4:'뒷면이 나오면 다음 공격은 반드시 앞면',t6:'앞면 피해 2배 → 3배',ex:'앞면 확률 +3%'},
-  alchemy: {n:'연금',  t2:'6번째 공격마다 무작위 물약 투척 (산성 중독·폭발 150%·얼음 둔화)',t4:'물약 범위 +30%, 물약 맞은 적은 3초간 받는 피해 +15%',t6:'물약이 두 가지 효과를 동시에 냄',ex:'물약 피해 +15%'},
-  nature:  {n:'자연',  t2:'초당 체력 재생 +1.5, 덩굴 지대 지속 +1초',t4:'덩굴 지대 안의 적은 받는 피해 +20%',t6:'덩굴 지대가 사라질 때 가시 폭발 (범위 80, 공격력 150%)',ex:'덩굴 피해 +15%'},
-  fury:    {n:'분노',  t2:'처치 시 광란 +1 (4초, 중첩당 공격력 +2%, 최대 10)',t4:'광란 중첩당 공격 속도 +1.5%',t6:'광란 최대 +10. 광란이 가득 차면 공격마다 회전 베기 (범위 90, 공격력 60%)',ex:'광란 중첩당 공격력 +0.3%'},
-  elem:    {n:'원소',  t2:'6번째 공격마다 원소 구슬 (공격력 150%, 맞으면 화상·둔화·연쇄 2 모두)',t4:'화상·둔화·감전 중 2가지 이상 걸린 적에게 피해 +25%',t6:'원소 구슬이 맞힌 자리에 원소 폭발 (범위 90, 공격력 200%)',ex:'원소 효과 피해 +12%'},
+  shadow:  {n:'그림자',t1:'6초마다 그림자 분신 소환 (4초, 0.5초마다 공격력 40% 사격, 최대 2기)',t2:'대시할 때도 분신 소환, 분신 최대 +1',t4:'분신이 사라질 때 그림자 폭발 (범위 80, 공격력 150%)',t6:'분신 탄환 30%는 반드시 치명타, 분신 최대 +2',ex:'분신 피해 +15%'},
+  grav:    {n:'중력',  t1:'10초마다 적이 가장 많은 곳에 중력장 (2초, 범위 100, 끌어당김)',t2:'중력장이 8초마다 생김',t4:'중력장에 끌린 적은 받는 피해 +20%',t6:'중력장이 사라질 때 붕괴 폭발 (범위 130, 공격력 300%)',ex:'중력장 범위 +10%'},
+  mark:    {n:'표식',  t1:'5번째 공격마다 대상에 표식 (5초): 표식된 적은 받는 피해 +20%',t2:'표식 피해 증폭 +10%, 표식 지속 +2초',t4:'표식된 적이 죽으면 가까운 적 2명에게 표식이 옮겨감',t6:'표식된 적에게 치명타 확률 +25%',ex:'표식 피해 증폭 +5%'},
+  wave:    {n:'파동',  t1:'5초마다 주변에 충격파 (범위 130, 공격력 100%, 밀쳐냄)',t2:'충격파가 4초마다',t4:'충격파 범위 +30%, 맞은 적 1.5초 둔화',t6:'충격파가 한 번 더 퍼지고 피해 2배',ex:'충격파 피해 +15%'},
+  coin:    {n:'동전',  t1:'공격마다 동전 던지기 (앞면 피해 2배, 뒷면 0.5배)',t2:'앞면 3연속마다 동전 폭발 (범위 90, 공격력 300%)',t4:'뒷면이 나오면 다음 공격은 반드시 앞면',t6:'앞면 피해 2배 → 3배',ex:'앞면 확률 +3%'},
+  alchemy: {n:'연금',  t1:'8번째 공격마다 무작위 물약 투척 (산성 중독·폭발 150%·얼음 둔화)',t2:'물약을 6번째 공격마다 던짐',t4:'물약 범위 +30%, 물약 맞은 적은 3초간 받는 피해 +15%',t6:'물약이 두 가지 효과를 동시에 냄',ex:'물약 피해 +15%'},
+  nature:  {n:'자연',  t1:'6초마다 주변 적 1명 자리에 덩굴 지대 (3초, 범위 60, 초당 공격력 60%, 둔화)',t2:'초당 체력 재생 +1.5, 덩굴 지대 지속 +1초',t4:'덩굴 지대 안의 적은 받는 피해 +20%',t6:'덩굴 지대가 사라질 때 가시 폭발 (범위 80, 공격력 150%)',ex:'덩굴 피해 +15%'},
+  fury:    {n:'분노',  t1:'처치 시 광란 +1 (4초, 중첩당 공격력 +2%, 최대 5)',t2:'광란 최대 10',t4:'광란 중첩당 공격 속도 +1.5%',t6:'광란 최대 +10. 광란이 가득 차면 공격마다 회전 베기 (범위 90, 공격력 60%)',ex:'광란 중첩당 공격력 +0.3%'},
+  elem:    {n:'원소',  t1:'8번째 공격마다 원소 구슬 (공격력 150%, 맞으면 화상·둔화·연쇄 2 모두)',t2:'원소 구슬을 6번째 공격마다 쏨',t4:'화상·둔화·감전 중 2가지 이상 걸린 적에게 피해 +25%',t6:'원소 구슬이 맞힌 자리에 원소 폭발 (범위 90, 공격력 200%)',ex:'원소 효과 피해 +12%'},
   rapid:   {n:'속사',  t2:'10번째 공격마다 추가 탄환 3발 (공격력 70%)',t4:'공격할 때마다 공격 속도 +1% (최대 20%, 1.5초 쉬면 초기화)',t6:'치명타가 터지면 탄환 1발 추가 발사 (공격력 60%)',ex:'추가 탄환 피해 +15%'},
-  undead:  {n:'망자',  t2:'처치 시 15% 확률로 원혼이 날아가 가까운 적에게 공격력 120% 피해',t4:'처치 시 10% 확률로 해골 병사 소환, 해골 최대 수 +2',t6:'해골 병사 피해 2배, 해골이 적을 처치하면 체력 1% 회복',ex:'원혼·해골 피해 +12%'},
+  undead:  {n:'망자',  t1:'처치 시 8% 확률로 해골 병사 소환 (최대 1기)',t2:'처치 시 15% 확률로 원혼이 날아가 가까운 적에게 공격력 120% 피해',t4:'처치 시 10% 확률로 해골 병사 소환, 해골 최대 수 +2',t6:'해골 병사 피해 2배, 해골이 적을 처치하면 체력 1% 회복',ex:'원혼·해골 피해 +12%'},
   guard:   {n:'가드',  t2:'맞으면 주변 적을 밀쳐내고 1초간 둔화 (1초에 한 번)',t4:'최대 체력 20%만큼 보호막 (3초간 안 맞으면 재충전). 방어력 4당 공격력 +1% (최대 +60%)',t6:'보호막이 있는 동안 받는 피해 50% 반사, 보호막이 깨지면 폭발',ex:'방어력 +8, 공격력 +5%'},
   poison:  {n:'독',    t2:'적중 시 중독 (3초, 초당 공격력 35%)',t4:'중독된 적이 죽으면 주변에 독 전염',t6:'중독 10중첩, 독 피해 2배',ex:'독 피해 +20%'}
 };
@@ -825,7 +825,7 @@ const AUGS=[
   {id:'n_lich',cls:'necro',u:'',t:'p',n:'리치',tags:['undead','curse'],d:'[사령술사 전용] 원혼 확률 +20%, 원혼 피해 +50%, 해골 최대 수 +2'},
   {id:'umbra',u:'',t:'g',n:'그림자 칼날',tags:['shadow','blitz'],d:'분신이 3발씩 부채꼴로 사격'},
   {id:'nightveil',u:'분신당 피해 감소가 커져요. ★1은 3%, ★2는 4%, ★3은 5%.',t:'s',n:'밤의 장막',tags:['shadow','guard'],d:'분신 1기당 받는 피해 −4% (최대 −20%)'},
-  {id:'shadowstep',u:'강화할 때마다 대시 재사용 −10%가 한 번 더 붙어요.',t:'s',n:'그림자 도약',tags:['shadow','blitz'],d:'대시 재사용 −20%. 대시할 때 분신 소환 (그림자 시너지 없이도)',f:p=>{p.dashMul*=.9;}},
+  {id:'shadowstep',u:'강화할 때마다 대시 재사용 −10%가 한 번 더 붙어요.',t:'s',n:'그림자 도약',tags:['shadow','blitz'],d:'대시 재사용 −20%. 대시할 때 분신 소환',f:p=>{p.dashMul*=.9;}},
   {id:'doppel',u:'',t:'p',n:'도플갱어',tags:['shadow','shadow'],d:'분신이 내 기본 공격을 따라 쏨 (공격력 50%), 분신 지속 +2초. 그림자 2개로 계산'},
   {id:'shadowmark',u:'',t:'s',n:'그림자 사냥',tags:['shadow','mark'],d:'분신 탄환이 맞힌 적에게 표식'},
   {id:'masswell',u:'중력장이 더 커져요. ★1은 +15%, ★2는 +20%, ★3은 +30%.',t:'s',n:'질량',tags:['grav','guard'],d:'중력장 지속 +1초, 범위 +20%'},
@@ -840,7 +840,7 @@ const AUGS=[
   {id:'markburst',u:'표식 폭발 피해가 커져요. ★1은 150%, ★2는 200%, ★3은 250%.',t:'g',n:'표식 폭발',tags:['mark'],d:'표식된 적이 죽으면 폭발 (범위 80, 공격력 200%)'},
   {id:'tracker',u:'표식 1명당 공속이 더 올라요. ★1은 +1.5%, ★2는 +2%, ★3은 +2.5%.',t:'s',n:'추적자',tags:['mark','blitz'],d:'표식된 적 1명당 공격 속도 +2% (최대 +20%)'},
   {id:'deathsent',u:'',t:'p',n:'사형 선고',tags:['mark','mark'],d:'표식을 5번째 → 3번째 공격마다 남김. 표식 지속 +3초. 표식 2개로 계산'},
-  {id:'quake',u:'충격파가 더 자주 퍼져요. ★1은 −0.5초, ★2는 −1초, ★3은 −1.5초.',t:'g',n:'지진',tags:['wave','guard'],d:'충격파 주기 −1초. 파동 시너지 없이도 충격파가 나감'},
+  {id:'quake',u:'충격파가 더 자주 퍼져요. ★1은 −0.5초, ★2는 −1초, ★3은 −1.5초.',t:'g',n:'지진',tags:['wave','guard'],d:'충격파 주기 −1초'},
   {id:'resonance',u:'',t:'s',n:'공명',tags:['wave','thunder'],d:'충격파에 맞은 적 최대 5명에게 번개 연쇄 1 (공격력 60%)'},
   {id:'aftershock',u:'레벨업 파동이 더 세져요. ★1은 2배, ★2는 3배, ★3은 4배.',t:'s',n:'여진',tags:['wave'],d:'레벨업 파동 피해 3배, 충격파 범위 +20%'},
   {id:'sonicboom',u:'',t:'p',n:'소닉붐',tags:['wave','wave'],d:'충격파 범위 2배, 정예·보스에게 피해 +50%. 파동 2개로 계산'},
@@ -1074,23 +1074,23 @@ const CARDS=[
   {req:()=>tag('holy')>0||S.cls==='paladin',n:'성수',v:[[8,15,0]],t:v=>`빛 피해 +${v[0]}%`,a:(p,v)=>{p.hoD=(p.hoD||0)+v[0]/100;}},
   {req:()=>shadowOn(),n:'그림자 정수',v:[[8,15,0]],t:v=>`분신 피해 +${v[0]}%`,a:(p,v)=>{p.shD=(p.shD||0)+v[0]/100;}},
   {req:()=>gravOn(),n:'중력자',v:[[6,12,0]],t:v=>`중력장 범위 +${v[0]}%`,a:(p,v)=>{p.gvR=(p.gvR||0)+v[0]/100;}},
-  {req:()=>tag('mark')>=2||has('judge'),n:'표적 지정',v:[[3,6,0]],t:v=>`표식 피해 증폭 +${v[0]}%`,a:(p,v)=>{p.mkD=(p.mkD||0)+v[0]/100;}},
+  {req:()=>tag('mark')>=1||has('judge'),n:'표적 지정',v:[[3,6,0]],t:v=>`표식 피해 증폭 +${v[0]}%`,a:(p,v)=>{p.mkD=(p.mkD||0)+v[0]/100;}},
   {req:()=>waveOn(),n:'진동판',v:[[8,15,0]],t:v=>`충격파 피해 +${v[0]}%`,a:(p,v)=>{p.wvD=(p.wvD||0)+v[0]/100;}},
-  {req:()=>tag('rapid')>=2||S.cls==='gunner',n:'탄약 상자',v:[[8,15,0]],t:v=>`추가 탄환 피해 +${v[0]}%`,a:(p,v)=>{p.rpD=(p.rpD||0)+v[0]/100;}},
+  {req:()=>tag('rapid')>=1||S.cls==='gunner',n:'탄약 상자',v:[[8,15,0]],t:v=>`추가 탄환 피해 +${v[0]}%`,a:(p,v)=>{p.rpD=(p.rpD||0)+v[0]/100;}},
   {cls:'paladin',n:'성유',v:[[5,10,0]],t:v=>`신성 오라 범위 +${v[0]}%`,a:(p,v)=>{p.auraM=(p.auraM||0)+v[0]/100;}},
   {cls:'paladin',n:'성가',v:[[8,15,0]],t:v=>`신성 오라 피해 +${v[0]}%`,a:(p,v)=>{p.auraD=(p.auraD||0)+v[0]/100;}},
   {src:()=>skelMax()>0,cls:'necro',n:'뼈 가루',v:[[8,15,0]],t:v=>`해골 병사 피해 +${v[0]}%`,a:(p,v)=>{p.skD=(p.skD||0)+v[0]/100;}},
   {src:()=>skelMax()>0,cls:'necro',n:'영혼 사슬',v:[[.5,1,1]],t:v=>`해골 병사 지속 +${v[0]}초`,a:(p,v)=>{p.skL=(p.skL||0)+v[0];}},
   {cls:'gunner',req:()=>(S.p.magB||0)<6,n:'탄띠',v:[[1,1,0]],t:v=>`탄창 +${v[0]}발 (최대 +6)`,a:(p,v)=>{p.magB=(p.magB||0)+v[0];}},
   {cls:'gunner',req:()=>(S.p.rlM||1)>.4,n:'빠른 장전',v:[[5,10,0]],t:v=>`재장전 시간 −${v[0]}%`,a:(p,v)=>{p.rlM=(p.rlM||1)*(1-v[0]/100);}},
-  {src:()=>tag('elem')>=2||has('elemcoin'),cls:'elem',n:'원소 결정',v:[[8,15,0]],t:v=>`원소 효과 피해 +${v[0]}%`,a:(p,v)=>{p.elD=(p.elD||0)+v[0]/100;}},
-  {src:()=>tag('elem')>=2||has('elemcoin'),cls:'elem',n:'정령 공명',v:[[2,4,1],[3,6,0]],t:v=>`공격 속도 +${v[0]}%, 원소 효과 피해 +${v[1]}%`,a:(p,v)=>{p.rateP=(p.rateP||0)+v[0]/100;p.elD=(p.elD||0)+v[1]/100;}},
+  {src:()=>tag('elem')>=1||has('elemcoin'),cls:'elem',n:'원소 결정',v:[[8,15,0]],t:v=>`원소 효과 피해 +${v[0]}%`,a:(p,v)=>{p.elD=(p.elD||0)+v[0]/100;}},
+  {src:()=>tag('elem')>=1||has('elemcoin'),cls:'elem',n:'정령 공명',v:[[2,4,1],[3,6,0]],t:v=>`공격 속도 +${v[0]}%, 원소 효과 피해 +${v[1]}%`,a:(p,v)=>{p.rateP=(p.rateP||0)+v[0]/100;p.elD=(p.elD||0)+v[1]/100;}},
   {src:()=>furyOn(),cls:'berserk',n:'피의 북',v:[[2,3,0]],t:v=>`광란 최대 +${v[0]}`,a:(p,v)=>{p.fyC=(p.fyC||0)+v[0];}},
   {src:()=>furyOn(),cls:'berserk',n:'끝없는 분노',v:[[.3,.6,1]],t:v=>`광란 지속 +${v[0]}초`,a:(p,v)=>{p.fyD=(p.fyD||0)+v[0];}},
-  {src:()=>has('thornseed')||has('gravebloom')||has('gravvine'),cls:'druid',n:'씨앗 주머니',v:[[6,12,0]],t:v=>`덩굴 지대 범위 +${v[0]}%`,a:(p,v)=>{p.vnR=(p.vnR||0)+v[0]/100;}},
-  {src:()=>has('thornseed')||has('gravebloom')||has('gravvine'),cls:'druid',n:'가시 독',v:[[8,15,0]],t:v=>`덩굴 지대 피해 +${v[0]}%`,a:(p,v)=>{p.vnD=(p.vnD||0)+v[0]/100;}},
-  {src:()=>tag('alchemy')>=2,cls:'alch',n:'큰 병',v:[[6,12,0]],t:v=>`물약 범위 +${v[0]}%`,a:(p,v)=>{p.ptR=(p.ptR||0)+v[0]/100;}},
-  {src:()=>tag('alchemy')>=2,cls:'alch',n:'농축액',v:[[8,15,0]],t:v=>`물약 피해 +${v[0]}%`,a:(p,v)=>{p.ptD=(p.ptD||0)+v[0]/100;}},
+  {src:()=>has('thornseed')||tag('nature')>=1||has('gravebloom')||has('gravvine'),cls:'druid',n:'씨앗 주머니',v:[[6,12,0]],t:v=>`덩굴 지대 범위 +${v[0]}%`,a:(p,v)=>{p.vnR=(p.vnR||0)+v[0]/100;}},
+  {src:()=>has('thornseed')||tag('nature')>=1||has('gravebloom')||has('gravvine'),cls:'druid',n:'가시 독',v:[[8,15,0]],t:v=>`덩굴 지대 피해 +${v[0]}%`,a:(p,v)=>{p.vnD=(p.vnD||0)+v[0]/100;}},
+  {src:()=>tag('alchemy')>=1,cls:'alch',n:'큰 병',v:[[6,12,0]],t:v=>`물약 범위 +${v[0]}%`,a:(p,v)=>{p.ptR=(p.ptR||0)+v[0]/100;}},
+  {src:()=>tag('alchemy')>=1,cls:'alch',n:'농축액',v:[[8,15,0]],t:v=>`물약 피해 +${v[0]}%`,a:(p,v)=>{p.ptD=(p.ptD||0)+v[0]/100;}},
   {src:()=>coinOn(),cls:'gambler',req:()=>headP()<.8,n:'타짜의 손',v:[[1,2,1]],t:v=>`동전 앞면 확률 +${v[0]}% (최대 80%)`,a:(p,v)=>{p.hdP=(p.hdP||0)+v[0]/100;}},
   {src:()=>coinOn(),cls:'gambler',n:'판돈',v:[[5,10,0]],t:v=>`앞면 피해 +${v[0]}%`,a:(p,v)=>{p.hdD=(p.hdD||0)+v[0]/100;}},
   {n:'숫돌',v:[[.5,1.1,1]],t:v=>`공격력 +${v[0]}`,a:(p,v)=>{p.dmg+=v[0];}},
@@ -1878,19 +1878,19 @@ const undM=()=>(1+ex('undead')*.12)*homeM('undead');
 const rpM=()=>(1+ex('rapid')*.15)*homeM('rapid')*(1+(S.p.rpD||0));
 const elM=()=>(1+ex('elem')*.12)*(1+(S.p.elD||0))*homeM('elem');
 const natM=()=>(1+ex('nature')*.15)*homeM('nature');
-const coinOn=()=>S.cls==='gambler'||tag('coin')>=2;
+const coinOn=()=>S.cls==='gambler'||tag('coin')>=1;
 const headP=()=>Math.min((S.p.hdP||0)>0?.8:.75,.5+(S.p.hdP||0)+LK()*.004+ex('coin')*.03+(has('doublehead')?lv3('doublehead',.05,.08,.1):0));
-const shadowOn=()=>tag('shadow')>=2||has('shadowstep')||has('doppel')||has('nightlord');
+const shadowOn=()=>tag('shadow')>=1||has('shadowstep')||has('doppel')||has('nightlord');
 const shM=()=>(1+ex('shadow')*.15)*(1+(S.p.shD||0));
-const shMax=()=>3+(tag('shadow')>=6?2:0)+(has('f_shadowarmy')?3:0);
+const shMax=()=>2+(tag('shadow')>=2?1:0)+(tag('shadow')>=6?2:0)+(has('f_shadowarmy')?3:0);
 function spawnClone(){if(!shadowOn())return;const p=S.p,c=S.clones||(S.clones=[]);if(c.length>=shMax())c.shift();
   c.push({x:p.x+rand(-24,24),y:p.y+rand(-18,18),life:(4+(has('doppel')?2:0))*(has('nightlord')?2:1),cd:.15});S.rings.push({x:p.x,y:p.y,r:4,max:26,life:.25,col:'#9a6aff'});}
-const gravOn=()=>tag('grav')>=2||has('eventh')||has('blackstar');
+const gravOn=()=>tag('grav')>=1||has('eventh')||has('blackstar');
 function gravAt(){const p=S.p;let best=null,bn=0;for(const e of S.en){if(!e.alive||e.phase||d2(e,p)>380*380)continue;let n=0;for(const o of S.en)if(o.alive&&d2(o,e)<110*110)n++;if(n>bn){bn=n;best=e;}}
   if(!best)return;const r=100*(1+ex('grav')*.1)*(1+(S.p.gvR||0))*(has('masswell')?1+lv3('masswell',.15,.2,.3):1);S.zones.push({x:best.x,y:best.y,r,life:2+(has('masswell')?1:0),kind:'hole',grav:true});if(has('gravvine'))vineAt(best.x,best.y,.8);}
-const markAmp=e=>(.2+(S.p.mkD||0)+ex('mark')*.05+(has('judge')?.2:0)+(has('f_predator')?.1:0))*(has('huntmark')&&(e.elite||e.boss)?2:1);
-function markE(e){if(!e||!e.alive)return;e.mkT=S.t+5+(has('deathsent')?3:0);if(has('venommark'))poisonE(e,3);if(has('brand'))burnE(e,pDmg()*lv3('brand',.3,.4,.5),5);}
-const waveOn=()=>tag('wave')>=2||has('quake')||has('tectonic');
+const markAmp=e=>(.2+(tag('mark')>=2?.1:0)+(S.p.mkD||0)+ex('mark')*.05+(has('judge')?.2:0)+(has('f_predator')?.1:0))*(has('huntmark')&&(e.elite||e.boss)?2:1);
+function markE(e){if(!e||!e.alive)return;e.mkT=S.t+5+(tag('mark')>=2?2:0)+(has('deathsent')?3:0);if(has('venommark'))poisonE(e,3);if(has('brand'))burnE(e,pDmg()*lv3('brand',.3,.4,.5),5);}
+const waveOn=()=>tag('wave')>=1||has('quake')||has('tectonic');
 const wvM=()=>(1+ex('wave')*.15)*(1+(S.p.wvD||0));
 function doWave(){const p=S.p,R=130*(tag('wave')>=4?1.3:1)*(has('aftershock')?1.2:1)*(has('sonicboom')?2:1),dm=pDmg()*(tag('wave')>=6?2:1)*wvM();let hitN=0,rz=0;
   S.rings.push({x:p.x,y:p.y,r:14,max:R,life:.4,col:'#cfe3ff'});S.rings.push({x:p.x,y:p.y,r:8,max:R*.75,life:.32,col:'#ffffff'});
@@ -1904,10 +1904,10 @@ function clsRows(row){const p=S.p,c=S.cls,r=[];
   if(c==='paladin')r.push(row('신성 오라',`범위 ${Math.round(110*(1+(p.auraM||0)))}, 피해 +${Math.round((p.auraD||0)*100)}%`));
   if(skelMax()>0)r.push(row('해골 병사',`${(S.skel||[]).length} / ${skelMax()}기, 피해 +${Math.round((p.skD||0)*100)}%, 지속 ${12+(p.skL||0)+(has('deathnova')?4:0)}초`));
   if(c==='gunner')r.push(row('탄창',`${magN()}발, 재장전 ${Math.round(2.4/pRate()*(has('g_twin')?.5:1)*(p.rlM||1)*100)/100}초`));
-  if(c==='elem'||tag('elem')>=2||has('elemcoin'))r.push(row('원소 효과 피해','+'+Math.round((elM()-1)*100)+'%'));
+  if(c==='elem'||tag('elem')>=1||has('elemcoin'))r.push(row('원소 효과 피해','+'+Math.round((elM()-1)*100)+'%'));
   if(furyOn())r.push(row('광란',`${p.fy||0} / ${furyCap()}, 지속 ${4+(p.fyD||0)+(has('bloodlust')?2:0)+(has('b_frenzy')?2:0)}초`));
-  if(c==='druid'||has('thornseed')||has('gravebloom')||has('gravvine'))r.push(row('덩굴 지대',`범위 +${Math.round((p.vnR||0)*100)}%, 피해 +${Math.round((p.vnD||0)*100)}%`));
-  if(c==='alch'||tag('alchemy')>=2)r.push(row('물약',`범위 +${Math.round((p.ptR||0)*100)}%, 피해 +${Math.round((potM()-1)*100)}%`));
+  if(c==='druid'||has('thornseed')||tag('nature')>=1||has('gravebloom')||has('gravvine'))r.push(row('덩굴 지대',`범위 +${Math.round((p.vnR||0)*100)}%, 피해 +${Math.round((p.vnD||0)*100)}%`));
+  if(c==='alch'||tag('alchemy')>=1)r.push(row('물약',`범위 +${Math.round((p.ptR||0)*100)}%, 피해 +${Math.round((potM()-1)*100)}%`));
   if(coinOn())r.push(row('동전 앞면',Math.round(headP()*100)+'%',`앞면 피해 +${Math.round((p.hdD||0)*100)}%, 연속 ${p.cfS||0}회`));
   return r;}
 const potM=()=>(1+ex('alchemy')*.15)*homeM('alchemy')*(1+(S.p.ptD||0))*(has('frostflask')?1.2:1)*(has('philosopher')?1.5:1);
@@ -1920,8 +1920,8 @@ function potionHit(f){const r=70*(1+(S.p.ptR||0))*(tag('alchemy')>=4?1.3:1),dm=p
 function vineAt(x,y,m){let n=0;for(const z of S.zones)if(z.kind==='vine')n++;if(n>=14)return;const br=has('d_bramble')?1+lv3('d_bramble',.3,.5,.7):1;
   S.zones.push({x,y,r:60*br*(1+(S.p.vnR||0))*(has('worldtree')?1.3:1),life:3+(tag('nature')>=2?1:0),kind:'vine',m:m*br*(1+(S.p.vnD||0))*natM()*(has('d_wrath')?1.3:1)});}
 const inVine=o=>S.zones.some(z=>z.kind==='vine'&&d2(o,z)<z.r*z.r);
-const furyOn=()=>S.cls==='berserk'||tag('fury')>=2;
-const furyCap=()=>(S.cls==='berserk'?20:10)+(S.p.fyC||0)+(tag('fury')>=6?10:0)+(has('b_frenzy')?lv3('b_frenzy',5,10,15):0);
+const furyOn=()=>S.cls==='berserk'||tag('fury')>=1;
+const furyCap=()=>(S.cls==='berserk'?20:tag('fury')>=2?10:5)+(S.p.fyC||0)+(tag('fury')>=6?10:0)+(has('b_frenzy')?lv3('b_frenzy',5,10,15):0);
 function addFury(n){const p=S.p;if(!furyOn())return;p.fy=Math.min(furyCap(),(p.fy||0)+n);p.fyT=4+(p.fyD||0)+(has('bloodlust')?2:0)+(has('b_frenzy')?2:0);}
 function spinHit(r,dm,col){const p=S.p;p.swingT=.25;S.rings.push({x:p.x,y:p.y,r:20,max:r,life:.25,col});for(const e of S.en)if(e.alive&&!e.phase&&d2(e,p)<(r+e.r)**2)dmgE(e,dm,col);}
 const condM=e=>has('conduct')&&(e.burnT>0||e.slowT>0)?1+lv3('conduct',.3,.4,.5):1;
@@ -1934,8 +1934,8 @@ function elemFx(t,k,dm){const ov=has('e_overflow');
 function elemDrop(e){explode(e.x,e.y,70,pDmg()*2*elM(),'#c8a0ff');for(const o of S.en)if(o.alive&&d2(o,e)<70*70){burnE(o,pDmg()*.25*elM(),3);if(!o.boss)o.slowT=Math.max(o.slowT||0,1);}}
 const magN=()=>6+(S.p.magB||0)+(has('g_extmag')?lv3('g_extmag',2,3,4):0);
 function ricoShot(t,dm,n){const o=nearestE(t,220,new Set([t]));if(o)pBullet(t.x,t.y,Math.atan2(o.y-t.y,o.x-t.x),dm,{child:true,r:3,rc:n,hit:new Set([t]),sure:has('f_trickshot'),life:.6,pierce:0});}
-const skelMax=()=>(S.cls==='necro'?4:0)+(tag('undead')>=4?2:0)+(has('raise')?2:0)+(has('n_legion')?lv3('n_legion',1,2,3):0)+(has('n_lich')?2:0)+(has('f_bonelord')?2:0);
-const skelC=()=>(S.cls==='necro'?.25:0)+(tag('undead')>=4?.1:0)+(has('raise')?lv3('raise',.06,.08,.1):0)+(has('n_legion')?.1:0);
+const skelMax=()=>(S.cls==='necro'?4:0)+(tag('undead')>=1?1:0)+(tag('undead')>=4?2:0)+(has('raise')?2:0)+(has('n_legion')?lv3('n_legion',1,2,3):0)+(has('n_lich')?2:0)+(has('f_bonelord')?2:0);
+const skelC=()=>(S.cls==='necro'?.25:tag('undead')>=1?.08:0)+(tag('undead')>=4?.1:0)+(has('raise')?lv3('raise',.06,.08,.1):0)+(has('n_legion')?.1:0);
 const skelD=()=>pDmg()*.6*(1+(S.p.skD||0))*sumM()*undM()*(tag('undead')>=6?2:1)*(has('f_bonelord')?1+.03*(S.skel?S.skel.length:0):1);
 function raiseSkel(x,y){const sk=S.skel||(S.skel=[]),mx=skelMax();if(mx<=0)return;const lf=12+(has('deathnova')?4:0)+(S.p.skL||0);
   if(sk.length>=mx){let o=sk[0];for(const k of sk)if(k.life<o.life)o=k;o.life=lf;return;}
@@ -2062,16 +2062,16 @@ function playerFire(tg){
   if(has('overcharge')){if(p.shots%10===0)p.ocN=3;}
   if(S.cls==='paladin'&&p.shots%5===0&&p.alive)p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.03*healM());
   if(has('smite2')&&p.shots%6===0){explode(tg.x,tg.y,80,pDmg()*lv3('smite2',2,2.5,3)*holyM(),'#fff3c4');S.rings.push({x:tg.x,y:tg.y,r:4,max:30,life:.4,col:'#ffffff'});}
-  {const pe=S.cls==='alch'?4:tag('alchemy')>=2?6:0;if(pe&&p.shots%Math.max(2,pe-(has('philosopher')?2:0))===0){const n=has('al_grand')?3:1;for(let i=0;i<n;i++)throwPotion(tg.x+(i?rand(-50,50):0),tg.y+(i?rand(-50,50):0),1);}}
+  {const pe=S.cls==='alch'?4:tag('alchemy')>=2?6:tag('alchemy')>=1?8:0;if(pe&&p.shots%Math.max(2,pe-(has('philosopher')?2:0))===0){const n=has('al_grand')?3:1;for(let i=0;i<n;i++)throwPotion(tg.x+(i?rand(-50,50):0),tg.y+(i?rand(-50,50):0),1);}}
   if(S.cls==='druid'&&p.shots%(has('d_wrath')?2:3)===0)vineAt(tg.x,tg.y,.7);
   if(has('doppel')&&S.clones)for(const c of S.clones)pBullet(c.x,c.y,Math.atan2(tg.y-c.y,tg.x-c.x),d*.5*shM(),{child:true,r:3,shd:true,mk:has('shadowmark')});
-  if(has('judge'))markE(tg);else if(tag('mark')>=2&&p.shots%(has('deathsent')?3:5)===0)markE(tg);
+  if(has('judge'))markE(tg);else if(tag('mark')>=1&&p.shots%(has('deathsent')?3:5)===0)markE(tg);
   if(S.coinB){S.coinB=0;explode(tg.x,tg.y,90,pDmg()*3,'#ffd76a');ftext(p.x,p.y-34,'앞면 ×3!','#ffd76a',16);}
   if(S.coinJ){S.coinJ=0;ftext(p.x,p.y-48,'대박!','#ff4fd8',22);S.shake=Math.max(S.shake,.2);for(const e of S.en)if(e.alive&&!e.phase&&Math.abs(e.x-p.x)<W/2&&Math.abs(e.y-p.y)<H/2)dmgE(e,pDmg()*5,'#ff4fd8');}
   if(S.coinS){S.coinS=0;for(let i=0;i<3;i++)pBullet(p.x,p.y,base+(i-1)*.2,pDmg()*lv3('coinshower',.5,.7,.9),{child:true,r:4,gcoin:true});}
   if(has('b_cleave')&&p.shots%3===0)spinHit(100,pDmg()*lv3('b_cleave',.8,1,1.2),'#ff8a6a');
   if(tag('fury')>=6&&p.fy>=furyCap())spinHit(90,pDmg()*.6,'#ff6a4a');
-  if(tag('elem')>=2&&p.shots%6===0)pBullet(p.x,p.y,base,pDmg()*1.5*elM(),{child:true,r:6,el:3,orb:true,pierce:0});
+  if(tag('elem')>=1&&p.shots%(tag('elem')>=2?6:8)===0)pBullet(p.x,p.y,base,pDmg()*1.5*elM(),{child:true,r:6,el:3,orb:true,pierce:0});
   if(has('e_trinity')&&p.shots%3===0){const r=90;explode(tg.x,tg.y,r,pDmg()*lv3('e_trinity',1.5,2,2.5)*elM(),'#c8a0ff');for(const o of S.en)if(o.alive&&d2(o,tg)<r*r){burnE(o,pDmg()*.25*elM(),3);if(!o.boss)o.slowT=Math.max(o.slowT||0,1);}}
   if(tag('rapid')>=2&&p.shots%10===0)for(let i=0;i<3;i++)pBullet(p.x,p.y,base+(i-1)*.08,d*.7*rpM(),{child:true,r:3});
   if(has('fanfire')&&p.shots%(has('f_gunkata')?4:8)===0){const k=has('f_gunkata')?7:5;for(let i=0;i<k;i++)pBullet(p.x,p.y,base+(i-(k-1)/2)*.18,pDmg()*lv3('fanfire',.6,.8,1)*rpM(),{child:true,r:3});}
@@ -2212,7 +2212,7 @@ function dealerPos(){const p=S.p,a=S.t*1.2;return [0,1].map(i=>({x:p.x+Math.cos(
 function dash(){
   const p=S.p;if(!p.alive||p.dashCd>0||p.dashT>0)return;
   let dx=p.lmx,dy=p.lmy;const l=Math.hypot(dx,dy)||1;dx/=l;dy/=l;
-  p.dx=dx;p.dy=dy;p.dashT=.14;p.chargeHit=new Set();if(has('phantom'))p.phT=3;if(shadowOn()){spawnClone();if(has('f_eclipse'))spawnClone();}
+  p.dx=dx;p.dy=dy;p.dashT=.14;p.chargeHit=new Set();if(has('phantom'))p.phT=3;if(tag('shadow')>=2||has('shadowstep')){spawnClone();if(has('f_eclipse'))spawnClone();}
   if(has('vaultbomb'))explode(p.x,p.y,140,S.gold*.05+pDmg()*1.5,'#ffd76a');
   if(has('warcry')){p.wcT=2;for(const e of S.en)if(e.alive&&!e.boss&&d2(e,p)<160*160)e.slowT=Math.max(e.slowT||0,lv3('warcry',.8,1.2,1.6));S.rings.push({x:p.x,y:p.y,r:10,max:160,life:.3,col:'#ffe08a'});}
   const cd=dashCdVal();p.dashCd=cd;p.dashMax=cd;
@@ -2265,14 +2265,14 @@ function update(dt){
     if(S.turrets&&S.turrets.length){const rg=p.range*(has('overwatch')?1+lv3('overwatch',.4,.5,.6):1);for(const u of S.turrets){u.life-=dt;u.cd-=dt;if(u.cd<=0){u.cd=(has('f_sentry')?.2:.4)*sumR()*tmul();const e=nearestE(u,rg);if(e){const an=Math.atan2(e.y-u.y,e.x-u.x),bs=S.p.bspd*(has('overwatch')?1.5:1);pBullet(u.x,u.y,an,pDmg()*.5*sumM()*(has('boltturret')?1+lv3('boltturret',.3,.4,.5):1),{child:true,r:3,pierce:has('boltturret')?2:0,vx:Math.cos(an)*bs,vy:Math.sin(an)*bs});}}
       if(u.life<=0&&has('selfdestruct'))explode(u.x,u.y,130,pDmg()*4*sumM(),'#ffb347');}S.turrets=S.turrets.filter(u=>u.life>0);}
     if(has('wisp')){S.wiT=(S.wiT??1)-dt;if(S.wiT<=0){S.wiT=(has('f_willo')?.5:1)*sumR();const w=wispPos(),e=nearestE(w,p.range);if(e)pBullet(w.x,w.y,Math.atan2(e.y-w.y,e.x-w.x),pDmg()*lv3('wisp',.6,.8,1)*sumM(),{child:true,r:4,burn:true});}}
-    if(tag('shadow')>=2||has('nightlord')){S.shT=(S.shT??6)-dt;if(S.shT<=0){S.shT=6;spawnClone();}}
+    if(shadowOn()){S.shT=(S.shT??6)-dt;if(S.shT<=0){S.shT=6;spawnClone();}}
     if(S.clones&&S.clones.length){for(const c of S.clones){c.life-=dt;c.cd-=dt;if(c.cd<=0){c.cd=.5*sumR()*(has('nightlord')?.5:1);const e=nearestE(c,p.range);if(e){const a=Math.atan2(e.y-c.y,e.x-c.x),n=has('umbra')?3:1;for(let i=0;i<n;i++)pBullet(c.x,c.y,a+(i-(n-1)/2)*.15,pDmg()*.4*shM(),{child:true,r:3,shd:true,mk:has('shadowmark'),sure:tag('shadow')>=6&&Math.random()<.3});}}
       if(c.life<=0&&tag('shadow')>=4)explode(c.x,c.y,80,pDmg()*1.5*shM(),'#9a6aff');}S.clones=S.clones.filter(c=>c.life>0);}
-    if(gravOn()){S.gvT=(S.gvT??8)-dt;if(S.gvT<=0){S.gvT=has('eventh')?4:8;gravAt();if(has('blackstar'))gravAt();}}
+    if(gravOn()){S.gvT=(S.gvT??8)-dt;if(S.gvT<=0){S.gvT=has('eventh')?4:tag('grav')>=2?8:10;gravAt();if(has('blackstar'))gravAt();}}
     if(has('tracker')){let n=0;for(const e of S.en)if(e.alive&&e.mkT>S.t)n++;S.mkN=n;}
-    if(waveOn()){S.wvT=(S.wvT??4)-dt;if(S.wvT<=0){S.wvT=Math.max(1,4-(has('quake')?lv3('quake',.5,1,1.5):0)-(has('f_epicenter')?1:0)-(has('tectonic')?2:0));doWave();if(tag('wave')>=6)S.wv2=.3;}
+    if(waveOn()){S.wvT=(S.wvT??4)-dt;if(S.wvT<=0){S.wvT=Math.max(1,(tag('wave')>=2?4:5)-(has('quake')?lv3('quake',.5,1,1.5):0)-(has('f_epicenter')?1:0)-(has('tectonic')?2:0));doWave();if(tag('wave')>=6)S.wv2=.3;}
       if(S.wv2>0){S.wv2-=dt;if(S.wv2<=0)doWave();}}
-    if(has('thornseed')){S.tsT=(S.tsT??5)-dt;if(S.tsT<=0){S.tsT=has('f_overgrow')?3:5;const c=S.en.filter(e=>e.alive&&!e.phase&&d2(e,p)<300*300);for(let i=0;i<(has('f_overgrow')?3:2)&&c.length;i++){const e=c.splice(Math.floor(Math.random()*c.length),1)[0];vineAt(e.x,e.y,lv3('thornseed',.6,.8,1));}}}
+    if(has('thornseed')||tag('nature')>=1){const ts=has('thornseed');S.tsT=(S.tsT??5)-dt;if(S.tsT<=0){S.tsT=ts?(has('f_overgrow')?3:5):6;const c=S.en.filter(e=>e.alive&&!e.phase&&d2(e,p)<300*300);for(let i=0;i<(ts?(has('f_overgrow')?3:2):1)&&c.length;i++){const e=c.splice(Math.floor(Math.random()*c.length),1)[0];vineAt(e.x,e.y,ts?lv3('thornseed',.6,.8,1):.6);}}}
     if(has('d_bear')){if(p.bearT>0)p.bearT-=dt;S.brT=(S.brT??10)-dt;if(S.brT<=0){S.brT=10;p.bearT=4;ftext(p.x,p.y-34,'곰 변신!','#c98a52',16);S.rings.push({x:p.x,y:p.y,r:10,max:70,life:.35,col:'#c98a52'});}}
     if(p.fy>0){p.fyT-=dt;if(p.fyT<=0){p.fy--;p.fyT=.3;}}
     if(has('battlecry')){S.wcT=(S.wcT??8)-dt;if(S.wcT<=0){S.wcT=has('f_warlord')?4:8;S.rings.push({x:p.x,y:p.y,r:10,max:150,life:.4,col:'#ff6a4a'});ftext(p.x,p.y-34,'함성!','#ff6a4a',16);for(const e of S.en)if(e.alive&&!e.boss&&d2(e,p)<150*150)e.slowT=Math.max(e.slowT||0,1.5);addFury(lv3('battlecry',3,5,7));if(has('f_warlord'))p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.05*healM());}}
@@ -2769,8 +2769,7 @@ const AUG_REQ={
   evade:()=>S.p.dodge<DODGE_CAP,luckydie:()=>!critFull(),
   neuro:poisonSrc,spill:poisonSrc,plague:poisonSrc,contagion:poisonSrc,plaguelord:poisonSrc,
   shieldbash:()=>barrierMax()>0,chipshot:()=>orbitN()>0,corrode:poisonSrc,sawblade:()=>orbitN()>0,virulence:poisonSrc,toxicburst:poisonSrc,highbet:()=>!critMFull(),
-  bonewall:()=>skelMax()>0||S.cls==='necro',
-  bonefire:()=>skelMax()>0,gravebloom:()=>skelMax()>0,frostflask:()=>S.cls==='alch'||tag('alchemy')>0,luckyshot:coinOn,elemcoin:coinOn,warpaint:furyOn,stormfury:furyOn,
+  // 신규 시너지 증강은 1개만 가져도 기본 메커니즘이 켜지므로 등장 조건 없음
   // 시너지 VIP: 해당 시너지 증강을 1개 이상 가졌을 때만 상점에 뜸
   nightlord:()=>tag('shadow')>0,blackstar:()=>tag('grav')>0,judge:()=>tag('mark')>0,tectonic:()=>tag('wave')>0,
   // 스탯 의존 VIP: 받쳐줄 스탯이 있어야 의미가 있음
