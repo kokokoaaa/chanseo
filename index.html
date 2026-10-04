@@ -2753,7 +2753,9 @@ const AUG_REQ={
   neuro:poisonSrc,spill:poisonSrc,plague:poisonSrc,contagion:poisonSrc,plaguelord:poisonSrc,
   shieldbash:()=>barrierMax()>0,chipshot:()=>orbitN()>0,corrode:poisonSrc,sawblade:()=>orbitN()>0,virulence:poisonSrc,toxicburst:poisonSrc,highbet:()=>!critMFull(),
   bonewall:()=>skelMax()>0||S.cls==='necro',
-  bonefire:()=>skelMax()>0,gravebloom:()=>skelMax()>0,frostflask:()=>S.cls==='alch'||tag('alchemy')>0,luckyshot:coinOn,elemcoin:coinOn,warpaint:furyOn,stormfury:furyOn
+  bonefire:()=>skelMax()>0,gravebloom:()=>skelMax()>0,frostflask:()=>S.cls==='alch'||tag('alchemy')>0,luckyshot:coinOn,elemcoin:coinOn,warpaint:furyOn,stormfury:furyOn,
+  // 시너지 VIP: 해당 시너지 증강을 1개 이상 가졌을 때만 상점에 뜸
+  nightlord:()=>tag('shadow')>0,blackstar:()=>tag('grav')>0,judge:()=>tag('mark')>0,tectonic:()=>tag('wave')>0
 };
 const augReq=a=>!AUG_REQ[a.id]||AUG_REQ[a.id]();
 // 태그 중복(가드 2개 등)으로 선호 가중치가 겹쳐 쌓이지 않게: 선호 태그가 하나라도 있으면 ×2.5, 비선호는 ×0.3
