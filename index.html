@@ -3284,13 +3284,20 @@ async function submitScore(nick,comment,run){
 
 /* ---------- auto mode ---------- */
 // 자동 선택: 등급, 공격 기여, 직업 전용, 합체, 시너지 단계 도달을 함께 고려
+// 메인 시너지: 보유 수가 가장 많은 시너지 (같으면 직업 선호 순). 아직 없으면 직업 선호 1·2순위
+function mainTags(){const fav=CLASSES[S.cls].fav||[],ks=Object.keys(S.tagc||{}).filter(t=>TAGS[t]&&tag(t)>0);
+  ks.sort((a,b)=>tag(b)-tag(a)||((fav.indexOf(a)+1||9)-(fav.indexOf(b)+1||9)));
+  const r=[...ks];for(const f of fav)if(!r.includes(f))r.push(f);return [r[0],r[1]];}
 function scoreAug(a){
   if(a.up)return 2+(3-a.ref.lv)+(isOff(a.ref)?2.5:0)+({s:0,g:.5,p:1}[a.ref.t]||0);
   let sc={s:1,g:2.5,p:4}[a.t]||1;
   if(a.fuseNow)sc+=20;else if(partnerOf(a.id))sc+=5;
   if(isOff(a))sc+=4;if(a.cls)sc+=3;
   const cnt={};for(const t of a.tags)cnt[t]=(cnt[t]||0)+1;
-  for(const t in cnt){const c=tag(t),n=c+cnt[t];sc+=c*1.2;for(const th of [2,4,6])if(c<th&&n>=th)sc+=th;}
+  const [m1,m2]=mainTags();
+  for(const t in cnt){const c=tag(t),n=c+cnt[t];sc+=c*1.2;for(const th of [2,4,6])if(c<th&&n>=th)sc+=th;
+    // 사람처럼 메인 시너지 하나(+보조 하나)에 몰아서 쌓음. 관련 없는 시너지로 흩어지면 감점
+    if(t===m1)sc+=4*cnt[t];else if(t===m2)sc+=2*cnt[t];else if(c===0)sc-=1.5;}
   if(S.p.hp<S.p.maxHp*.4&&!isOff(a))sc+=2;
   return sc+Math.random()*.8;
 }
