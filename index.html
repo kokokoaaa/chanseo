@@ -3058,7 +3058,7 @@ function totBuys(){let n=0;for(const k in S.buys)n+=S.buys[k];return n;}
 // VIP는 보스 열쇠로만 구매: 보스 1마리 = 열쇠 1개 = VIP 1개. 품목은 보스를 잡을 때마다 미보유 VIP 중 무작위 3개로 새로 뽑힘
 const vipOwned=()=>S.augs.filter(a=>a.t==='v').length;
 const vipCost=()=>1;
-const vipStock=()=>{if(!S.vipStock||S.vipRoll!==S.chap){S.vipRoll=S.chap;S.vipStock=VIPS.filter(v=>!has(v.id)).sort(()=>Math.random()-.5).slice(0,3).map(v=>v.id);}return S.vipStock.map(id=>VIPS.find(v=>v.id===id)).filter(Boolean);};
+const vipStock=()=>{if(!S.vipStock||S.vipRoll!==S.chap){S.vipRoll=S.chap;S.vipStock=VIPS.filter(v=>!has(v.id)&&augReq(v)).sort(()=>Math.random()-.5).slice(0,3).map(v=>v.id);}return S.vipStock.map(id=>VIPS.find(v=>v.id===id)).filter(v=>v&&augReq(v));};
 const MERCH={
   chips:{n:'칩 상인',icon:'🪙',col:'#7a5a12',w:()=>24,d:'능력치를 골드로 삽니다. 매번 파는 품목이 다름'},
   smith:{n:'강화 장인',icon:'🔨',col:'#4a4f5a',w:()=>S.augs.some(a=>AUG_UP&&a.lv<3&&a.t!=='v'&&a.t!=='f')?20:0,d:'증강 ★ 강화'},
@@ -3101,7 +3101,7 @@ function openMerch(m){
 function vipShopHtml(m,k){
   const full=vipCount()>=VIP_MAX,vc=vipCost();
   if(m.vsel){const v=VIPS.find(x=>x.id===m.vsel);return `<p class="sub"><b>${v.n}</b>를 무엇 대신 넣을까요? (🔑 ${vc})</p><div class="grid">${S.augs.map((a,i)=>[a,i]).filter(([a])=>a.t==='v').map(([a,i])=>`<button class="btn" data-vx="${i}">${a.n} 버리기<small>${a.d}</small></button>`).join('')}</div><button class="btn ghost" data-vx="-1">취소</button>`;}
-  return `<p class="sub">열쇠 ${vc}개로 VIP 1개. 보스를 잡을 때마다 열쇠 1개, 품목도 새로 바뀌어요. VIP 칸 <b>${vipCount()}/${VIP_MAX}</b>${full?' · 가득 참, 사면 기존 VIP와 교체':''}</p><div class="grid">${vipStock().map(v=>{const own=has(v.id),ok=augReq(v);return `<button class="btn" data-v="${v.id}" ${own||!ok||k<vc?'disabled':''}>${v.n}<small>${v.d}</small><small style="color:var(--brass)">${own?'보유':!ok?'조건 미충족':(full?'교체 · ':'')+'🔑 '+vc}</small></button>`;}).join('')}</div>`;
+  return `<p class="sub">열쇠 ${vc}개로 VIP 1개. 보스를 잡을 때마다 열쇠 1개, 품목도 새로 바뀌어요. VIP 칸 <b>${vipCount()}/${VIP_MAX}</b>${full?' · 가득 참, 사면 기존 VIP와 교체':''}</p><div class="grid">${vipStock().map(v=>{const own=has(v.id);return `<button class="btn" data-v="${v.id}" ${own||k<vc?'disabled':''}>${v.n}<small>${v.d}</small><small style="color:var(--brass)">${own?'보유':(full?'교체 · ':'')+'🔑 '+vc}</small></button>`;}).join('')}</div>`;
 }
 function hubBody(m,g){
   const tab=m.tab||'stat',k=S.keys||0,p=S.p;
