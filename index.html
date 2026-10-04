@@ -1031,7 +1031,7 @@ const VFUSIONS=[
   {id:'f_phoenixfire',vip:1,a:'phoenix',b:'molotov',n:'불사조의 불꽃',d:'부활 대기 180초 → 110초. 대시 불길 피해 2배'}
 ];
 const augDef=id=>AUGS.find(x=>x.id===id)||VIPS.find(x=>x.id===id);
-function fusionObj(f){const A=augDef(f.a),B=augDef(f.b);return {...f,t:f.vip?'v':'f',vf:!!f.vip,tags:[...A.tags,...B.tags],parts:[f.a,f.b],lv:3,u:''};}
+function fusionObj(f){const A=augDef(f.a),B=augDef(f.b);return {...f,t:f.vip?'v':'f',vf:!!f.vip,tags:[...A.tags,...B.tags],parts:[f.a,f.b],lv:3,u:'',d:`${A.d} / ${B.d} / ${f.d}`,dx:f.d};}
 // 증강은 강화 없이 고정 수치. 대신 슬롯 10개를 채우며 조합·시너지·합체로 빌드를 만듦
 const MAXA=10,AUG_UP=false,AUG_EVERY=4,VIP_MAX=2;
 const vipCount=()=>S.augs.filter(a=>a.t==='v').length;
@@ -2992,7 +2992,7 @@ function augHtml(a,i){
   const pf=partnerOf(a.id),po=pf?augDef(pf.a===a.id?pf.b:pf.a):null,pn=po?po.n:'';
   // 짝이 있으면 카드 앞면에 합체 안내를 크게 표시 (마우스를 안 올려도 보임)
   // 합체 안내: 어떤 보유 증강과 합쳐지는지 + 합체로 붙는 추가 효과
-  const fz=pf?`<span class="fzbox"><span class="fzh">💥 보유한 <b>${pn}</b> + 이 증강 → <b class="fzn">${pf.n}</b></span><span class="fzd">• <b>${a.n}</b>: ${a.d}</span><span class="fzd">• <b>${pn}</b> (보유): ${po.d}</span><span class="fzd" style="color:#ffd76a">• 합체 추가: ${pf.d}</span></span>`:'';
+  const fz=pf?`<span class="fzbox"><span class="fzh">💥 합체 시 → <b class="fzn">${pf.n}</b></span><span class="fzd" style="opacity:.8">${pf.n} 효과 (아래 전부 적용)</span><span class="fzd">• ${a.d}</span><span class="fzd">• ${po.d}</span><span class="fzd" style="color:#ffd76a">• ${pf.d} <small>(새 효과)</small></span></span>`:'';
   return `<button class="card aug tier-${a.t} ${pf?'canfuse':''}" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}${a.swap?' · <span style="color:#ff9ad0">교체</span>':''}</span><b>${a.n}</b><span class="chips">${chips}</span>${augPreview(a)}${fz}<span class="tip">${a.d}${hpLoss(a.f,a.d,a.t==='v'||a.t==='f'?1:2)}${lines?'<br>':''}${lines}</span></button>`;
 }
 function bindPeek(){
