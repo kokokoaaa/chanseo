@@ -1653,8 +1653,8 @@ function spawnBurst(){
 // 보스전이 아닐 때 50~70초마다 무작위 이벤트. 같은 이벤트는 연속으로 안 나옴
 const EVENTS={
   horde:{n:'대군 습격',icon:'⚔️',col:'#ff9a4a',d:'15초간 한 종류의 적이 몰려옵니다. 버티면 골드'},
-  hunt:{n:'정예 사냥',icon:'🎯',col:'#ffd76a',d:'정예 3마리를 30초 안에 처치하면 고급 스탯 카드'},
-  goblin:{n:'보물 고블린',icon:'💰',col:'#e8bb4f',d:'도망치는 고블린을 30초 안에 잡으면 골드 폭탄'},
+  hunt:{n:'정예 사냥',icon:'🎯',col:'#ffd76a',d:'🎯 표시 정예 3마리를 40초 안에 처치하면 고급 스탯 카드. 사거리 안에 들어오면 자동 조준이 먼저 노림'},
+  goblin:{n:'보물 고블린',icon:'💰',col:'#e8bb4f',d:'도망치는 고블린을 30초 안에 잡으면 골드 폭탄. 사거리 안에 들어오면 자동 조준이 먼저 노림'},
   shrine:{n:'고대 제단',icon:'✨',col:'#9fd3ff',d:'제단 위에 2.5초 서 있으면 30초 축복'},
   moon:{n:'붉은 달',icon:'🌕',col:'#ff5050',d:'25초간 적이 빠르고 세지만 경험치·골드 2배'}
 };
@@ -1666,12 +1666,15 @@ const BLESS=[
 ];
 const evOn=k=>S.ev&&S.ev.k===k;
 const blessOn=k=>S.bless&&S.bless.t>0&&S.bless.k===k;
+// 이벤트 표적(정예 사냥 🎯, 보물 고블린 💰)이 사거리 안에 있으면 자동 조준이 먼저 노림
+function evTarget(rg){const p=S.p;let b=null,bd=(rg+40)**2;for(const e of S.en){if(!e.alive||e.phase||!(e.hunt||e.type==='goblin'))continue;const d=d2(e,p);if(d<bd){bd=d;b=e;}}return b;}
 function farPos(r){const a=Math.random()*TAU,p=S.p;return [clamp(p.x+Math.cos(a)*r,80,WW-80),clamp(p.y+Math.sin(a)*r,80,WH-80)];}
 function startEvent(){
   const ks=Object.keys(EVENTS).filter(k=>k!==S.lastEv);const k=ks[Math.floor(Math.random()*ks.length)];S.lastEv=k;
-  const E=EVENTS[k],ev={k,t:0,T:{horde:15,hunt:30,goblin:30,shrine:25,moon:25}[k]};S.ev=ev;
+  const E=EVENTS[k],ev={k,t:0,T:{horde:15,hunt:40,goblin:30,shrine:25,moon:25}[k]};S.ev=ev;
   if(k==='horde'){const pool=['grunt','runner','slime','boar','ghost','bomber'].filter(t=>t!=='boar'||S.round>=2.5);ev.type=pool[Math.floor(Math.random()*pool.length)];}
-  if(k==='hunt'){for(let i=0;i<3;i++){const [x,y]=ringPos(60);const t=['grunt','tank','boar','ranger'][Math.floor(Math.random()*4)];const e=spawnAt(t,x,y,false,true);e.hunt=true;}}
+  // 정예 사냥: 표적 3마리를 화면 바로 밖 한 방향에 모아서 소환. 체력은 일반 정예의 60%
+  if(k==='hunt'){const [cx,cy]=ringPos(20);for(let i=0;i<3;i++){const t=['grunt','tank','boar','ranger'][Math.floor(Math.random()*4)];const e=spawnAt(t,clamp(cx+rand(-50,50),20,WW-20),clamp(cy+rand(-50,50),20,WH-20),false,true);e.hunt=true;e.hp*=.6;e.maxHp*=.6;}}
   if(k==='goblin'){const [x,y]=farPos(260);const e=spawnAt('goblin',x,y,true);e.gold=true;}
   if(k==='shrine'){const [x,y]=farPos(380);ev.x=x;ev.y=y;ev.r=70;ev.ch=0;pushOut(ev,ev.r*.5);}
   S.evBanner={s:`${E.icon} ${E.n}`,d:E.d,col:E.col,t:2.6};
@@ -1688,7 +1691,8 @@ function updEvent(dt){
   if(S.bossI>=0||S.win)return;
   if(S.evBanner){S.evBanner.t-=dt;if(S.evBanner.t<=0)S.evBanner=null;}
   if(S.bless&&S.bless.t>0){S.bless.t-=dt;if(S.bless.k==='guard'&&S.p.alive)S.p.hp=Math.min(S.p.maxHp,S.p.hp+S.p.maxHp*.02*dt);}
-  if(!S.ev){S.evT=(S.evT??50)-dt;if(S.evT<=0)startEvent();return;}
+  // 보스 등장 45초 전부터는 새 퀘스트를 시작하지 않음 (보스가 나오면 진행 중 퀘스트가 실패 처리되므로)
+  if(!S.ev){S.evT=(S.evT??50)-dt;if(S.evT<=0&&(S.chap+1)*CH_LEN-S.gt>45)startEvent();return;}
   const ev=S.ev,p=S.p;ev.t+=dt;
   if(ev.k==='hunt'&&!S.en.some(e=>e.alive&&e.hunt)){endEvent(true);return;}
   if(ev.k==='goblin'&&!S.en.some(e=>e.alive&&e.type==='goblin')){endEvent(true);return;}
@@ -2343,7 +2347,7 @@ function update(dt){
     p.inv=Math.max(0,p.inv-dt);p.all6=Math.max(0,p.all6-dt);p.dashCd=Math.max(0,p.dashCd-dt);p.blitzT=Math.max(0,p.blitzT-dt);p.shockT=Math.max(0,p.shockT-dt);
     if(p.comboT>0){p.comboT-=dt;if(p.comboT<=0)p.combo=0;}
     p.cd-=dt;
-    if(p.cd<=0){const bo=S.boss&&S.boss.alive&&!S.boss.air&&d2(S.boss,p)<(p.range+S.boss.r)**2?S.boss:null,tg=bo||nearestE(p,p.range);if(tg){playerFire(tg);if(S.cls==='gunner'&&p.mag<=0){p.mag=magN();p.cd=2.4/pRate()*(has('g_twin')?.5:1)*(p.rlM||1);p.rlT=p.cd;p.rlM=p.cd;}else p.cd=1/pRate();}}
+    if(p.cd<=0){const bo=S.boss&&S.boss.alive&&!S.boss.air&&d2(S.boss,p)<(p.range+S.boss.r)**2?S.boss:null,tg=bo||evTarget(p.range)||nearestE(p,p.range);if(tg){playerFire(tg);if(S.cls==='gunner'&&p.mag<=0){p.mag=magN();p.cd=2.4/pRate()*(has('g_twin')?.5:1)*(p.rlM||1);p.rlT=p.cd;p.rlM=p.cd;}else p.cd=1/pRate();}}
     const n=orbitN();
     if(n){const sp=2.8*(has('spinner')?1.5:1),rad=ORB_R*p.orbR,big=tag('roulette')>=6,orr=big?13:9;
       for(let i=0;i<n;i++){const a=S.t*sp+i*TAU/n,ox=p.x+Math.cos(a)*rad,oy=p.y+Math.sin(a)*rad;
