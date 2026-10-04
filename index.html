@@ -149,6 +149,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 .pips i{width:8px;height:8px;border-radius:2px;background:rgba(241,231,207,.15)}
 .pips i.on{background:var(--brass)}
 .mtile.sk .md{flex:1}
+.mbtns{display:flex;gap:4px;width:100%;margin-top:2px}.mbtns .mb{flex:1;min-height:34px;padding:4px 2px;border-radius:7px;border:1px solid rgba(214,169,74,.6);background:rgba(214,169,74,.12);color:var(--ivory);font:inherit;font-size:14px;cursor:pointer}.mbtns .mb:first-child{flex:.7}.mbtns .mb[disabled]{opacity:.35;cursor:default}.mbtns .mb small{font-size:11px;color:var(--brass)}
 @media (max-width:520px){.mgrid{grid-template-columns:1fr 1fr}}
 .hubgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px}
 .hubb{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 8px}
@@ -3672,9 +3673,12 @@ function openMeta(){cosPreviewHide();
   const now=x=>{const l=mlv(x.k);return l?x.d.replace(/[\d.]+/,m=>+(parseFloat(m)*l).toFixed(1)):'없음';};
   const tile=x=>{const l=mlv(x.k),c=mcost(x),mx=l>=x.max,lk=x.cls&&!clsOpen(x.cls),can=!lk&&!mx&&META.medals>=c;
     if(lk)return `<button class="mtile" disabled><b>🔒 ${x.n}</b><span class="md">${x.d} / 단계</span><span class="mnow">${CLASSES[x.cls].n} 봉인 해제 시 열림</span><span class="mc">🔒</span></button>`;
-    return `<button class="mtile ${mx?'max':''}" data-ms="${x.k}" ${can?'':'disabled'}><b>${x.n}</b><span class="md">${x.d} / 단계</span>
+    // 여러 단계 한 번에 사기(최대까지) + 한 단계씩 되돌리기(전액 환불)
+    let nb=0,tot=0;while(l+nb<x.max&&tot+x.c*(l+nb+1)<=META.medals){tot+=x.c*(l+nb+1);nb++;}
+    return `<div class="mtile ${mx?'max':''}"><b>${x.n}</b><span class="md">${x.d} / 단계</span>
     <span class="pips">${Array.from({length:x.max},(_,i)=>`<i class="${i<l?'on':''}"></i>`).join('')}</span>
-    <span class="mnow">지금 ${now(x)}</span><span class="mc">${mx?'최대':'🏅 '+c}</span></button>`;};
+    ${l?`<span class="mnow">지금 ${now(x)}</span>`:''}<span class="mc">${mx?'최대':'🏅 '+c}</span>
+    <span class="mbtns"><button class="mb" data-mm="${x.k}" ${l?'':'disabled'} title="한 단계 되돌리기 (🏅 ${x.c*l} 환불)">−</button><button class="mb" data-ms="${x.k}" ${can?'':'disabled'}>+1</button><button class="mb" data-mx="${x.k}" ${nb>1?'':'disabled'}>${nb>1?`+${nb} <small>🏅${tot}</small>`:'최대'}</button></span></div>`;};
   const st=MSTAT.filter(x=>!x.cls).map(tile).join(''),cst=MSTAT.filter(x=>x.cls).map(tile).join('');
   const sk=MSKILL.map(x=>{const own=META.sk[x.k],can=!own&&META.medals>=x.c;
     return `<button class="mtile sk ${own?'max':''}" data-mk="${x.k}" ${can?'':'disabled'}><b>${x.n}</b><span class="md">${x.d}</span><span class="mc">${own?'✔ 보유':'🏅 '+x.c}</span></button>`;}).join('');
@@ -3687,7 +3691,10 @@ function openMeta(){cosPreviewHide();
   <button class="btn ghost" id="mReset" ${metaSpent()?'':'disabled'}>↺ 전체 초기화 <small>🏅 ${metaSpent()} 환불</small></button>
   <button class="btn primary" id="mBack2">돌아가기</button>`);
   const keepY=()=>{const y=ov.scrollTop;openMeta();ov.scrollTop=y;};
-  ov.querySelectorAll('[data-ms]').forEach(b=>b.onclick=()=>{const x=MSTAT.find(q=>q.k===b.dataset.ms),c=mcost(x);if(META.medals<c||mlv(x.k)>=x.max||(x.cls&&!clsOpen(x.cls)))return;META.spent=metaSpent()+c;META.medals-=c;META.lv[x.k]=mlv(x.k)+1;saveMeta();keepY();});
+  const buy1=x=>{const c=mcost(x);if(META.medals<c||mlv(x.k)>=x.max||(x.cls&&!clsOpen(x.cls)))return false;META.spent=metaSpent()+c;META.medals-=c;META.lv[x.k]=mlv(x.k)+1;return true;};
+  ov.querySelectorAll('[data-ms]').forEach(b=>b.onclick=()=>{if(buy1(MSTAT.find(q=>q.k===b.dataset.ms))){saveMeta();keepY();}});
+  ov.querySelectorAll('[data-mx]').forEach(b=>b.onclick=()=>{const x=MSTAT.find(q=>q.k===b.dataset.mx);let n=0;while(buy1(x))n++;if(n){saveMeta();keepY();}});
+  ov.querySelectorAll('[data-mm]').forEach(b=>b.onclick=()=>{const x=MSTAT.find(q=>q.k===b.dataset.mm),l=mlv(x.k);if(!l)return;const r=x.c*l;META.lv[x.k]=l-1;META.medals+=r;META.spent=Math.max(0,metaSpent()-r);saveMeta();keepY();});
   ov.querySelectorAll('[data-mk]').forEach(b=>b.onclick=()=>{const x=MSKILL.find(q=>q.k===b.dataset.mk);if(META.medals<x.c||META.sk[x.k])return;META.spent=metaSpent()+x.c;META.medals-=x.c;META.sk[x.k]=1;saveMeta();keepY();});
   ov.querySelectorAll('[data-cs]').forEach(b=>{const x=COS.find(q=>q.k===b.dataset.cs);b.addEventListener('mouseenter',()=>cosPreview(x,b));b.addEventListener('mouseleave',cosPreviewHide);
     b.addEventListener('touchstart',()=>{if(b.dataset.pv!=='1'){ov.querySelectorAll('[data-cs]').forEach(o=>o.dataset.pv='');b.dataset.pv='1';b.dataset.tap='1';cosPreview(x,b);}},{passive:true});});
@@ -4216,7 +4223,8 @@ function renderStats(){
    stEl.querySelectorAll('.sitem[data-tip]').forEach(x=>{x.onmouseenter=e=>place(x,e);x.onmousemove=e=>place(x,e);x.onmouseleave=()=>{pop.style.display='none';};
      x.onclick=e=>{if(pop.style.display==='block'&&pop.dataset.k===x.textContent){pop.style.display='none';return;}pop.dataset.k=x.textContent;place(x,e);};});}
   $('stSave').onclick=()=>{saveGame(false);};
-  $('stQuit').onclick=()=>{if(saveGame(false)){toggleStats();newRun();startScreen();}};
+  // 아직 시작 전(첫 증강·카드 선택 화면)이면 저장할 게 없으니 그냥 메인으로
+  $('stQuit').onclick=()=>{if(!S.started||saveGame(false)){toggleStats();newRun();startScreen();}};
 }
 
 /* ---------- loop ---------- */
