@@ -2921,13 +2921,14 @@ function autoMoveVec(){
     let mn=420;
     for(const e of near){const w=e.elite?1.6:e.boss?1.2:1;const d=Math.hypot(e.x-tx,e.y-ty)/w;if(d<mn)mn=d;
       const dot=((e.x-p.x)*cx+(e.y-p.y)*cy)/(Math.hypot(e.x-p.x,e.y-p.y)||1);if(dot>.6)sc-=40*dot*(1-Math.min(1,Math.hypot(e.x-p.x,e.y-p.y)/300));}
-    sc+=Math.min(mn,desired)*2.2;
+    sc+=Math.min(mn,bossOn?Math.max(desired,160):desired)*(bossOn?2.9:2.2);
     if(wide.length){let dn=1e9;for(const e of wide){const d=Math.hypot(e.x-tx,e.y-ty);if(d<dn)dn=d;}if(!bossOn){if(dn>reach)sc-=(dn-reach)*(danger>=3||low?1.2:2.6);else sc+=25;}}
     // 탄환은 현재 위치가 아니라 앞으로 0.6초간 날아갈 경로 기준으로 회피
     for(const b of shots){const ex=b.vx*.6,ey=b.vy*.6,L2=ex*ex+ey*ey||1,u=clamp(((tx-b.x)*ex+(ty-b.y)*ey)/L2,0,1),d=Math.hypot(b.x+ex*u-tx,b.y+ey*u-ty),R0=(b.r||5)+p.r+22;if(d<R0)sc-=(R0-d)*6;}
-    // 보스전: 보스를 사거리 안 적정 거리(사거리의 70%, 최소 보스 몸통+70)에 두도록 유도
-    // 사거리 끝 쪽(85%)에서 때리고, 가까이 붙는 쪽을 더 크게 감점. 보스 몸통+120 안쪽은 금지 수준
-    if(bossOn){const e=S.boss,want=Math.max(e.r+p.r+90,p.range*(low?.88:.74)),db=Math.hypot(e.x-tx,e.y-ty);sc-=db<want?(want-db)*2.4:db>p.range*.95?(db-p.range*.95)*3:0;}
+    // 보스전: 보스를 사거리의 50~95% 안에 두면 됨 (사거리가 길수록 움직일 여유가 커짐). 체력이 낮으면 70% 이상 거리 유지
+    // 주변에 잡몹이 붙어 있으면 보스 거리보다 잡몹 회피를 우선. 보스 몸통 가까이는 언제나 크게 감점
+    if(bossOn){const e=S.boss,minW=e.r+p.r+90,lo=Math.max(minW,p.range*(low?.7:.5)),hi=p.range*.95,db=Math.hypot(e.x-tx,e.y-ty),k=danger>=3?.45:danger>=1?.7:1;
+      sc-=k*(db<lo?(lo-db)*2.4:db>hi?(db-hi)*3:0);if(db<minW)sc-=(minW-db)*4;}
     // 보스 예고 공격·장판 회피
     for(const t of S.tele){if(!t.dmg&&t.k==='c')continue;
       if(t.k==='c'){const d=Math.hypot(t.x-tx,t.y-ty),m2=Math.hypot(t.x-(p.x+cx*STEP*.5),t.y-(p.y+cy*STEP*.5));if(d<t.r+p.r+10)sc-=900*(1-d/(t.r+p.r+10))+300;if(m2<t.r)sc-=200;}
