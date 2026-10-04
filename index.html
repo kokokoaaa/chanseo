@@ -2801,9 +2801,10 @@ function augHtml(a,i){
   const T=TIER[a.t],cnt={};for(const t of a.tags)cnt[t]=(cnt[t]||0)+1;
   let lines='';
   const chips=Object.keys(cnt).map(t=>{const cur=tag(t),aft=cur+cnt[t],D=TAGS[t];let up='';
+    // 처음 집는 시너지면 1단계(이 증강만으로 켜지는 기본 효과)를 먼저 보여줌
+    if(cur<1&&D.t1)lines+=`<span class="ta">▲ ${D.n} 1단계: ${D.t1}</span>`;
     for(const n of [6,4,2])if(cur<n&&aft>=n){up=`${n}단계: ${D['t'+n]}`;break;}
     if(!up&&aft>=5)up=`초과 +${aft-Math.max(4,cur)}: ${D.ex}`;
-    if(!up&&cur<1&&D.t1)up=D.t1;
     if(up)lines+=`<span class="ta">▲ ${D.n} ${up}</span>`;
     return `<span class="chip ${up?'on':''}">${D.n} ${cur}→${aft}</span>`;}).join('');
   const pf=partnerOf(a.id),pn=pf?AUGS.find(x=>x.id===(pf.a===a.id?pf.b:pf.a)).n:'';
@@ -2893,7 +2894,7 @@ function gainAug(a){
   {const lv=a.t==='v'||a.t==='f'?1:2;S.augs.push({...a,lv,fuseNow:undefined});if(a.f)for(let i=0;i<lv;i++)applyQ(a.f,S.p,a.q);}tagCount();
   const T=TIER[a.t]||TIER.s;augFx(`✨ ${a.n}`,a.d,T.col,a.t==='p'||a.t==='v');
   const p=S.p;S.rings.push({x:p.x,y:p.y,r:10,max:260,life:.6,col:T.col});S.flash=Math.max(S.flash,.25);
-  const ups=[];for(const t in S.tagc){const c0=before[t]||0,c1=S.tagc[t];for(const n of [6,4,2])if(c0<n&&c1>=n){ups.push([t,n]);break;}}
+  const ups=[];for(const t in S.tagc){const c0=before[t]||0,c1=S.tagc[t];if(c0<1&&TAGS[t]&&TAGS[t].t1)ups.push([t,1]);for(const n of [6,4,2])if(c0<n&&c1>=n){ups.push([t,n]);break;}}
   ups.forEach(([t,n],i)=>augFx(`⚡ 시너지 ${TAGS[t].n} ${n}단계`,TAGS[t]['t'+n],'#7be08f',n>=6,.55*(i+1)));
   tryFuse();
 }
