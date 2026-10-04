@@ -2231,7 +2231,7 @@ function dashEnd(){
 /* ---------- update ---------- */
 function fmtN(v){v=Math.round(v);return v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e4?(v/1e3).toFixed(1)+'K':v.toLocaleString();}
 // 실시간 DPS: 최근 5초 동안 입힌 피해 평균
-function trackDps(dt){S.dpsT=(S.dpsT||0)+dt;if(S.dpsT<.5)return;const now=S.st.dmg,q=S.dpsQ||(S.dpsQ=[]);q.push(now-(S.dpsLast??now));S.dpsLast=now;S.dpsT=0;if(q.length>10)q.shift();S.dps=q.reduce((a,b)=>a+b,0)/(q.length*.5);}
+function trackDps(dt){S.dpsT=(S.dpsT||0)+dt;if(S.dpsT<.5)return;const now=S.st.dmg,q=S.dpsQ||(S.dpsQ=[]);q.push(now-(S.dpsLast??now));S.dpsLast=now;S.dpsT=0;if(q.length>10)q.shift();S.dps=q.reduce((a,b)=>a+b,0)/(q.length*.5);if(q.length>=4)S.dpsMax=Math.max(S.dpsMax||0,S.dps);}
 function update(dt){
   const p=S.p;S.t+=dt;if(S.bossI<0&&!S.win)S.gt+=dt;else if(!S.win)S.bt+=dt;S.round=diffAt(effT());trackDps(dt);
   S.bannerT=Math.max(0,S.bannerT-dt);
@@ -2727,7 +2727,7 @@ function hud(){
   $('bpf').style.width=Math.min(100,p.barrier/p.maxHp*100)+'%';
   $('hpt').textContent=`${Math.ceil(p.hp)} / ${Math.round(p.maxHp)}${p.barrier>=1?' +'+Math.ceil(p.barrier):''}`;
   $('round').innerHTML=`${S.diff&&S.diff!=='normal'?`<span style="color:${dfM().col}">${dfM().n}</span> `:''}${S.bossI>=0?`<span style="color:#ff6060">⏸ ${mm}:${ss} 보스전</span>`:`${mm}:${ss}<span style="color:var(--muted)"> / 10:00</span>`} <span style="color:var(--brass)">${S.bossI===3?'마지막 장':Math.min(4,S.chap+1)+'장'}</span> <span style="color:var(--muted)">${BIOMES[S.biome||0].n}</span> <span style="color:${S.round>12?'#ff6060':S.round>6?'#ffb347':'var(--muted)'}">위협 ${S.round.toFixed(1)}</span>`;
-  $('left').innerHTML=`처치 ${S.st.kills} <span style="color:#ff9a6a">· DPS ${fmtN(S.dps||0)}</span> <span style="color:var(--brass)">· 종합 점수 : ${clearScore().toLocaleString()}점</span>`;
+  $('left').innerHTML=`처치 ${S.st.kills} <span style="color:#ff9a6a">· DPS ${fmtN(S.dps||0)} <small style="opacity:.75">(최대 ${fmtN(S.dpsMax||0)})</small></span> <span style="color:var(--brass)">· 종합 점수 : ${clearScore().toLocaleString()}점</span>`;
   $('gold').textContent=`${S.gold} 골드${S.keys?' · 🔑'+S.keys:''}`;
   $('lv').textContent=`레벨 ${S.lvl}`;
   $('xpf').style.width=(S.xp/S.next*100)+'%';
@@ -3002,6 +3002,7 @@ function gameOver(win){
     <span>레벨</span><span>${S.lvl}</span>
     <span>처치한 몬스터</span><span>${S.st.kills}</span>
     <span>입힌 피해</span><span>${Math.round(S.st.dmg).toLocaleString()}</span>
+    <span>최대 DPS</span><span>${fmtN(S.dpsMax||0)}</span>
     <span>슬롯 돌린 횟수</span><span>${S.st.spins}</span>
     <span>최고 기록</span><span>${fmt(best)}</span>
   </div>
