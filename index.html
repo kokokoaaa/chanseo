@@ -265,6 +265,7 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 .stats span:nth-child(even){font-family:'Do Hyeon',sans-serif;font-size:19px;color:var(--ivory);text-align:right}
 #statBtn{position:absolute;right:12px;top:10px;z-index:2;background:rgba(4,18,12,.65);color:var(--ivory);border:1px solid var(--brass);border-radius:8px;padding:6px 12px;font-family:'Do Hyeon',sans-serif;font-size:16px;cursor:pointer}
 #hud{padding-right:100px}
+.hbrk{flex-basis:100%;height:0}
 #shopBtn{position:absolute;right:110px;top:10px;z-index:2;background:rgba(60,8,12,.65);color:var(--ivory);border:1px solid var(--chip-red);border-radius:8px;padding:6px 12px;font-family:'Do Hyeon',sans-serif;font-size:16px;cursor:pointer}
 .bar .bf{background:#7fc4f2;opacity:.85}
 #st{position:absolute;inset:0;display:none;align-items:flex-start;justify-content:center;background:rgba(3,14,10,.88);padding:16px;overflow-y:auto;touch-action:auto;z-index:5}
@@ -286,9 +287,10 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
   <div id="hud">
     <div class="bar"><i id="hpf"></i><i id="bpf" class="bf"></i><span id="hpt"></span></div>
     <div id="round"></div>
-    <div id="left"></div>
     <div id="gold" class="gold"></div>
     <div id="lv"></div>
+    <div class="hbrk"></div>
+    <div id="left"></div>
   </div>
   <div id="botLeft"><div id="syn"></div><div id="augBar"></div></div><div id="augTip"></div>
   <button id="dash" aria-label="대시">대시<small>Space</small></button>
@@ -2287,9 +2289,9 @@ function hud(){
   $('bpf').style.width=Math.min(100,p.barrier/p.maxHp*100)+'%';
   $('hpt').textContent=`${Math.ceil(p.hp)} / ${Math.round(p.maxHp)}${p.barrier>=1?' +'+Math.ceil(p.barrier):''}`;
   $('round').innerHTML=`${S.diff&&S.diff!=='normal'?`<span style="color:${dfM().col}">${dfM().n}</span> `:''}${S.bossI>=0?`<span style="color:#ff6060">⏸ ${mm}:${ss} 보스전</span>`:`${mm}:${ss}<span style="color:var(--muted)"> / 10:00</span>`} <span style="color:var(--brass)">${S.bossI===3?'마지막 장':Math.min(4,S.chap+1)+'장'}</span> <span style="color:var(--muted)">${BIOMES[S.biome||0].n}</span> <span style="color:${S.round>12?'#ff6060':S.round>6?'#ffb347':'var(--muted)'}">위협 ${S.round.toFixed(1)}</span>`;
-  $('left').innerHTML=`처치 ${S.st.kills} <span style="color:#ff9a6a">· DPS ${fmtN(S.dps||0)}</span> <span style="color:var(--brass)">· 클리어 시 ${clearScore().toLocaleString()}점</span>`;
+  $('left').innerHTML=`처치 ${S.st.kills} <span style="color:#ff9a6a">· DPS ${fmtN(S.dps||0)}</span> <span style="color:var(--brass)">· 종합 점수 : ${clearScore().toLocaleString()}점</span>`;
   $('gold').textContent=`${S.gold} 골드${S.keys?' · 🔑'+S.keys:''}`;
-  $('lv').textContent=!augReady()?`레벨 ${S.lvl}, 증강 슬롯 가득`:`레벨 ${S.lvl}, 증강까지 ${nx}`;
+  $('lv').textContent=`레벨 ${S.lvl}`;
   $('xpf').style.width=(S.xp/S.next*100)+'%';
   renderAugBar();
   {const sk=Object.keys(TAGS).map(t=>tag(t)).join(',');if(sk!==synKey){synKey=sk;$('syn').innerHTML=Object.keys(TAGS).filter(t=>tag(t)>0).map(t=>{const c=tag(t);return `<span class="pill ${c>=6?'on6':c>=4?'on4':c>=2?'on2':''}" data-tg="${t}">${TAGS[t].n} ${c}${c>=5?' ▲'+(c-4):''}</span>`;}).join('');}}
