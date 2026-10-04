@@ -2847,6 +2847,7 @@ function hud(){
   if(S.buffT.vuln>0)bf.push(`<span style="color:#ff6060">받는 피해 +50% ${S.buffT.vuln.toFixed(1)}</span>`);if(S.buffT.slow>0)bf.push(`<span style="color:#9fd3ff">둔화 ${S.buffT.slow.toFixed(1)}</span>`);
   if(S.ev){const E=EVENTS[S.ev.k],left=Math.max(0,S.ev.T-S.ev.t).toFixed(0);const ex=S.ev.k==='hunt'?` 남은 ${S.en.filter(e=>e.alive&&e.hunt).length}`:S.ev.k==='shrine'&&S.ev.ch>0?` ${Math.round(S.ev.ch/2.5*100)}%`:'';bf.push(`<span style="color:${E.col}">${E.icon} ${E.n}${ex} ${left}</span>`);}
   if(S.bless&&S.bless.t>0)bf.push(`<span style="color:#9fd3ff">${S.bless.n} ${S.bless.t.toFixed(0)}</span>`);
+  if(skelMax()>0)bf.push(`<span style="color:#8cff9a">💀 해골 ${(S.skel||[]).length}/${skelMax()}</span>`);
   if(p.cfS>=2)bf.push(`<span style="color:#ffd76a">앞면 ${p.cfS}연속</span>`);
   if(p.bearT>0)bf.push(`<span style="color:#c98a52">곰 변신</span>`);
   if(p.fy>0)bf.push(`<span style="color:#ff6a4a">광란 ${p.fy}</span>`);
