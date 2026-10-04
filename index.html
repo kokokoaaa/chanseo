@@ -1846,8 +1846,11 @@ function dashEnd(){
 }
 
 /* ---------- update ---------- */
+function fmtN(v){v=Math.round(v);return v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e4?(v/1e3).toFixed(1)+'K':v.toLocaleString();}
+// 실시간 DPS: 최근 5초 동안 입힌 피해 평균
+function trackDps(dt){S.dpsT=(S.dpsT||0)+dt;if(S.dpsT<.5)return;const now=S.st.dmg,q=S.dpsQ||(S.dpsQ=[]);q.push(now-(S.dpsLast??now));S.dpsLast=now;S.dpsT=0;if(q.length>10)q.shift();S.dps=q.reduce((a,b)=>a+b,0)/(q.length*.5);}
 function update(dt){
-  const p=S.p;S.t+=dt;if(S.bossI<0&&!S.win)S.gt+=dt;else if(!S.win)S.bt+=dt;S.round=diffAt(effT());
+  const p=S.p;S.t+=dt;if(S.bossI<0&&!S.win)S.gt+=dt;else if(!S.win)S.bt+=dt;S.round=diffAt(effT());trackDps(dt);
   S.bannerT=Math.max(0,S.bannerT-dt);
   if(S.win){p.inv=99;S.winT-=dt;if(S.winT<=0){gameOver(true);return;}}
   if(S.bossI<0&&!S.win&&S.gt>=(S.chap+1)*CH_LEN){S.gt=(S.chap+1)*CH_LEN;spawnBoss(S.chap);}
@@ -2284,7 +2287,7 @@ function hud(){
   $('bpf').style.width=Math.min(100,p.barrier/p.maxHp*100)+'%';
   $('hpt').textContent=`${Math.ceil(p.hp)} / ${Math.round(p.maxHp)}${p.barrier>=1?' +'+Math.ceil(p.barrier):''}`;
   $('round').innerHTML=`${S.diff&&S.diff!=='normal'?`<span style="color:${dfM().col}">${dfM().n}</span> `:''}${S.bossI>=0?`<span style="color:#ff6060">⏸ ${mm}:${ss} 보스전</span>`:`${mm}:${ss}<span style="color:var(--muted)"> / 10:00</span>`} <span style="color:var(--brass)">${S.bossI===3?'마지막 장':Math.min(4,S.chap+1)+'장'}</span> <span style="color:var(--muted)">${BIOMES[S.biome||0].n}</span> <span style="color:${S.round>12?'#ff6060':S.round>6?'#ffb347':'var(--muted)'}">위협 ${S.round.toFixed(1)}</span>`;
-  $('left').innerHTML=`처치 ${S.st.kills} <span style="color:var(--brass)">· 클리어 시 ${clearScore().toLocaleString()}점</span>`;
+  $('left').innerHTML=`처치 ${S.st.kills} <span style="color:#ff9a6a">· DPS ${fmtN(S.dps||0)}</span> <span style="color:var(--brass)">· 클리어 시 ${clearScore().toLocaleString()}점</span>`;
   $('gold').textContent=`${S.gold} 골드${S.keys?' · 🔑'+S.keys:''}`;
   $('lv').textContent=!augReady()?`레벨 ${S.lvl}, 증강 슬롯 가득`:`레벨 ${S.lvl}, 증강까지 ${nx}`;
   $('xpf').style.width=(S.xp/S.next*100)+'%';
