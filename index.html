@@ -658,6 +658,7 @@ const TAGS={
   sniper:  {n:'원거리',t2:'사거리 +20%',t4:'먼 적일수록 피해 증가 (거리 100당 +10%, 최대 +60%)',t6:'탄환이 적을 뚫을 때마다 피해 +30% 누적 (최대 +150%)',ex:'원거리 피해 +5%'},
   thunder: {n:'번개',  t2:'10번째 공격마다 연쇄 번개 (적 4명)',t4:'번개 연쇄 대상 +3, 번개 피해 +50%',t6:'번개 맞은 일반 적 0.8초 기절',ex:'번개 피해 +15%'},
   fire:    {n:'화염',  t2:'적중 시 화상 (3초, 초당 공격력 20%)',t4:'화상 입은 적이 죽으면 불길 폭발 (범위 70, 공격력 120%)',t6:'화상 피해 2배, 화상이 1초마다 주변 적에게 번짐',ex:'화상 피해 +15%'},
+  coin:    {n:'동전',  t2:'공격마다 동전 던지기 (앞면 피해 2배, 뒷면 0.5배). 앞면 3연속마다 동전 폭발 (범위 90, 공격력 300%)',t4:'뒷면이 나오면 다음 공격은 반드시 앞면',t6:'앞면 피해 2배 → 3배',ex:'앞면 확률 +3%'},
   alchemy: {n:'연금',  t2:'6번째 공격마다 무작위 물약 투척 (산성 중독·폭발 150%·얼음 둔화)',t4:'물약 범위 +30%, 물약 맞은 적은 3초간 받는 피해 +15%',t6:'물약이 두 가지 효과를 동시에 냄',ex:'물약 피해 +15%'},
   nature:  {n:'자연',  t2:'초당 체력 재생 +1.5, 덩굴 지대 지속 +1초',t4:'덩굴 지대 안의 적은 받는 피해 +20%',t6:'덩굴 지대가 사라질 때 가시 폭발 (범위 80, 공격력 150%)',ex:'덩굴 피해 +15%'},
   fury:    {n:'분노',  t2:'처치 시 광란 +1 (4초, 중첩당 공격력 +2%, 최대 10)',t4:'광란 중첩당 공격 속도 +1.5%',t6:'광란 최대 +10. 광란이 가득 차면 공격마다 회전 베기 (범위 90, 공격력 60%)',ex:'광란 중첩당 공격력 +0.3%'},
@@ -818,6 +819,13 @@ const AUGS=[
   {id:'n_legion',cls:'necro',u:'해골 최대 수가 늘어나요. ★1은 +1, ★2는 +2, ★3은 +3.',t:'s',n:'해골 군단',tags:['undead','summon'],d:'[사령술사 전용] 해골 최대 수 +2, 해골 소환 확률 +10%'},
   {id:'n_bone',cls:'necro',u:'뼈창 피해가 커져요. ★1은 200%, ★2는 250%, ★3은 300%.',t:'g',n:'뼈창',tags:['undead'],d:'[사령술사 전용] 5번째 공격마다 관통하는 뼈창 (공격력 250%, 관통 4)'},
   {id:'n_lich',cls:'necro',u:'',t:'p',n:'리치',tags:['undead','curse'],d:'[사령술사 전용] 원혼 확률 +20%, 원혼 피해 +50%, 해골 최대 수 +2'},
+  {id:'doublehead',u:'앞면 확률이 올라요. ★1은 +5%, ★2는 +8%, ★3은 +10%.',t:'s',n:'양면 앞면',tags:['coin','dice'],d:'동전 앞면 확률 +8%'},
+  {id:'tailwind',u:'뒷면 보호막이 커져요. ★1은 +3, ★2는 +4, ★3은 +5.',t:'s',n:'뒷면 보험',tags:['coin','guard'],d:'동전 뒷면이 나오면 보호막 +4'},
+  {id:'coinshower',u:'동전 피해가 커져요. ★1은 50%, ★2는 70%, ★3은 90%.',t:'g',n:'동전 비',tags:['coin','jackpot'],d:'앞면마다 15% 확률로 동전 3개 추가 발사 (공격력 70%)'},
+  {id:'allin',u:'',t:'p',n:'올인',tags:['coin','coin'],d:'앞면 피해 +1배, 뒷면 피해 0.5배 → 0.25배. 동전 2개로 계산'},
+  {id:'gb_lucky',cls:'gambler',u:'강화할 때마다 행운 +4가 한 번 더 붙어요.',t:'s',n:'행운의 동전',tags:['coin','dice'],d:'[도박사 전용] 행운 +8',f:p=>{p.luck+=4;}},
+  {id:'gb_streak',cls:'gambler',u:'연속 앞면 보너스가 커져요. ★1은 +10%, ★2는 +15%, ★3은 +20%.',t:'g',n:'연승',tags:['coin','jackpot'],d:'[도박사 전용] 앞면이 이어질 때마다 피해 +15% 누적 (최대 10회, 뒷면에 초기화)'},
+  {id:'gb_jackpot',cls:'gambler',u:'',t:'p',n:'대박',tags:['coin','jackpot'],d:'[도박사 전용] 앞면 5연속마다 화면 안 모든 적에게 공격력 500% 피해'},
   {id:'catalyst',u:'폭발 범위가 더 커져요. ★1은 +15%, ★2는 +20%, ★3은 +25%.',t:'s',n:'촉매',tags:['alchemy','fire'],d:'모든 폭발 범위 +20%'},
   {id:'elixir',u:'강화할 때마다 최대 체력 +5%가 한 번 더 붙어요.',t:'s',n:'엘릭서',tags:['alchemy','guard'],d:'최대 체력 +10%, 물약을 던질 때마다 체력 +2',f:p=>{const v=Math.round(p.maxHp*.05);p.maxHp+=v;p.hp+=v;}},
   {id:'transmute',u:'금화가 더 나와요. ★1은 3, ★2는 4, ★3은 5.',t:'g',n:'연성',tags:['alchemy','house'],d:'물약에 맞아 죽은 적은 금화 +4'},
@@ -950,7 +958,9 @@ const FUSIONS=[
   {id:'f_overgrow',a:'thornseed',b:'spore',n:'무성한 숲',d:'가시 씨앗이 3초마다, 3명에게'},
   {id:'f_ancient',a:'worldtree',b:'barkskin',n:'고대 수호자',d:'덩굴 지대 안에 서 있으면 초당 체력 2% 회복'},
   {id:'f_alkahest',a:'catalyst',b:'philosopher',n:'만능 용매',d:'물약이 항상 세 가지 효과를 모두 냄'},
-  {id:'f_panacea',a:'elixir',b:'transmute',n:'만병통치약',d:'물약을 던질 때 체력 +2 → +5, 보호막 +5'}
+  {id:'f_panacea',a:'elixir',b:'transmute',n:'만병통치약',d:'물약을 던질 때 체력 +2 → +5, 보호막 +5'},
+  {id:'f_twoface',a:'doublehead',b:'tailwind',n:'투페이스',d:'뒷면이 나와도 피해가 줄지 않음'},
+  {id:'f_goldrush',a:'coinshower',b:'allin',n:'골드 러시',d:'동전 비 확률 15% → 40%'}
 ];
 // VIP 합체: VIP 증강 + 일반 증강. 둘 다 가져도 바로 합쳐지지 않고, 레벨업·증강 때마다 낮은 확률(12%, 행운 30이면 30%)로 합체
 const VFUSIONS=[
@@ -1218,6 +1228,20 @@ rogue:{
 CH.paladin={swoosh:CH.knight.swoosh,draw(st){const sw={B:'#f6f1e2',h:'#ffffff',b:'#cfc4a2',d:'#9a8e6a',q:'#fff0a0',R:'#f0c840',r:'#b08a24',c:'#ffe680'},old={};
   for(const k in sw){old[k]=CP[k];CP[k]=sw[k];}try{CH.knight.draw.call(CH.knight,st);}finally{for(const k in old)CP[k]=old[k];}
   const U=st.U;g.fillStyle='#ffe680';for(const [x,y] of [[16,2],[17,1],[18,1],[19,1],[20,1],[21,1],[22,1],[23,2]])g.fillRect(x,y+U,1,1);g.fillStyle='#fff8d0';g.fillRect(18,1+U,2,1);}};
+// 도박사: 실크햇, 보라 조끼, 손에 금화
+CH.gambler={
+ hat:['.....zzzzzz.....','.....zzzzzz.....','.....zzzzzz.....','.....iiiiii.....','...zzzzzzzzzz...'],
+ head:['.lzzzzzzzzl.','lzkkkkkkkkzl','lkkkkkkkkkKl','lkkekkkkekKl','lkkekkkkekKl','lkkkkkkkkKKl','lkkkkkkkkKKl','.lkkkkkkKKl.','..lKKKKKKl..','...WWiiWW...','....WiiW....'],
+ torso:['PWWiiWWp','PPWWWWpp','PPgWWgpp','.zzgzzz.','.zzzzzz.','.zz.zz.'],
+ draw(st){const U=st.U,A=st.atk;
+  cg(['3z','3z','3z','zv','vv','vvv'],17,29+st.lL);cg(['z3','z3','z3','vz','vv','vvv'],21,29+st.rL);
+  cg(this.torso,16,23+U);
+  cg(['uP','Pp','Pp','kK'],14,23+U+st.ay);
+  const up=A>=0?-3:0;cg(['Pu.','PPp','.Pp','.kK'],24,23+U+up);
+  const fl=A===0?2:0;cg(['.gg.','gGGg','gGGg','.gg.'],25,20+U+up-fl);
+  cg(this.head,14,12+U);if(st.hurt)hurtEyes(16+U);
+  cg(this.hat,12,7+U);
+ }};
 // 연금술사: 고글 쓴 머리, 갈색 앞치마, 손에 플라스크
 CH.alch={
  hair:['....YYYYYY....','..YYLYYYYLYY..','.YLLYYYYYYLLY.'],
@@ -1396,24 +1420,27 @@ const CLASSES={
   paladin:{lock:true,n:'성기사',role:'신성 근접',d:'빛의 오라로 주변을 태우며 버티는 성전사',passive:'신성 오라: 주변 110 안의 적에게 초당 공격력 35% 빛 피해. 5번째 공격마다 체력 3% 회복',atk:.32,
     stats:{hp:210,maxHp:210,speed:178,dmg:16,rate:1.75,range:200,bspd:430,armor:12,block:.08},fav:['holy','guard','fire'],dis:['curse'],
     cards:['힘의 물약','숫돌','튼튼한 체력','가죽 갑옷','붕대','철벽 자세'],lvd:'체력 +2, 공격력 +0.8%, 방어력 +0.2',lv:p=>{p.maxHp+=2;p.hp+=2;p.dmgP=(p.dmgP||0)+.008;p.armor+=.2;}},
-  alch:{lock:true,n:'연금술사',role:'물약 폭격',d:'터지는 플라스크와 물약을 던지는 연금술사',passive:'플라스크: 맞은 자리에 폭발 (범위 45, 공격력 50%). 4번째 공격마다 무작위 물약 (산성 중독·폭발·얼음 둔화)',atk:.3,
-    stats:{hp:155,maxHp:155,speed:188,dmg:14,rate:2.2,range:290,bspd:480,armor:6},fav:['alchemy','poison','fire'],dis:['sniper'],
-    cards:['힘의 물약','숫돌','조준경','전투 본능','튼튼한 체력','다연발'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
-  druid:{lock:true,n:'드루이드',role:'덩굴 지배',d:'가시덩굴로 적을 묶고 버티는 자연술사',passive:'가시덩굴: 3번째 공격마다 대상 자리에 덩굴 지대 (3초, 범위 60, 초당 공격력 70%, 둔화). 초당 체력 재생 +1',atk:.3,
-    stats:{hp:175,maxHp:175,speed:185,dmg:15,rate:2.2,range:290,bspd:520,armor:8,regen:1},fav:['nature','poison','guard'],dis:['fire'],
-    cards:['힘의 물약','숫돌','튼튼한 체력','붕대','조준경','가죽 갑옷'],lvd:'공격력 +0.8%, 체력 +2',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=2;p.hp+=2;}},
-  berserk:{lock:true,n:'광전사',role:'광란 근접',d:'처치할수록 빨라지고 강해지는 도끼 전사',passive:'광란: 처치 시 광란 +1 (4초, 최대 20). 중첩당 공격력 +2%',atk:.32,
-    stats:{hp:185,maxHp:185,speed:192,dmg:17,rate:1.8,range:195,bspd:430,armor:8},fav:['fury','curse','blitz'],dis:['guard'],
-    cards:['힘의 물약','숫돌','흡혈 송곳니','튼튼한 체력','날랜 손놀림','가벼운 장화'],lvd:'공격력 +1%, 체력 +2',lv:p=>{p.dmgP=(p.dmgP||0)+.01;p.maxHp+=2;p.hp+=2;}},
-  elem:{lock:true,n:'정령사',role:'원소 순환',d:'화염·냉기·번개를 번갈아 쏘는 정령술사',passive:'원소 순환: 화염(화상) → 냉기(1초 둔화) → 번개(주변 2명에게 60% 연쇄) 순서로 공격',atk:.3,
-    stats:{hp:165,maxHp:165,speed:190,dmg:16,rate:2.4,range:310,bspd:560,armor:6},fav:['elem','fire','frost'],dis:['poison'],
-    cards:['힘의 물약','숫돌','조준경','전투 본능','튼튼한 체력','날랜 손놀림'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
+  necro:{lock:true,n:'사령술사',role:'해골 소환',d:'쓰러진 적을 해골 병사로 일으키는 술사',passive:'해골 소환: 처치 시 25% 확률로 해골 병사 소환 (최대 4기, 12초, 공격력 60%로 근접 공격)',atk:.35,
+    stats:{hp:155,maxHp:155,speed:185,dmg:15,rate:2.1,range:300,bspd:500,armor:7},fav:['undead','summon','curse'],dis:['holy'],
+    cards:['힘의 물약','숫돌','조준경','튼튼한 체력','전투 본능','흡혈 송곳니'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
   gunner:{lock:true,n:'총잡이',role:'연사 저격',d:'리볼버를 연사하고 재장전하는 총잡이',passive:'6발 탄창: 6발 쏘면 짧게 재장전. 마지막 탄은 반드시 치명타 + 관통 2',atk:.18,
     stats:{hp:140,maxHp:140,speed:200,dmg:11,rate:3.6,range:300,bspd:820,crit:.1,critM:2.1},fav:['rapid','sniper','card'],dis:['summon'],
     cards:['날랜 손놀림','조준경','급소 노리기','치명상','힘의 물약','가벼운 장화'],lvd:'공격력 +0.6%, 치명타 +0.2%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.006;p.crit+=.002;p.maxHp+=1;p.hp+=1;}},
-  necro:{lock:true,n:'사령술사',role:'해골 소환',d:'쓰러진 적을 해골 병사로 일으키는 술사',passive:'해골 소환: 처치 시 25% 확률로 해골 병사 소환 (최대 4기, 12초, 공격력 60%로 근접 공격)',atk:.35,
-    stats:{hp:155,maxHp:155,speed:185,dmg:15,rate:2.1,range:300,bspd:500,armor:7},fav:['undead','summon','curse'],dis:['holy'],
-    cards:['힘의 물약','숫돌','조준경','튼튼한 체력','전투 본능','흡혈 송곳니'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}}
+  elem:{lock:true,n:'정령사',role:'원소 순환',d:'화염·냉기·번개를 번갈아 쏘는 정령술사',passive:'원소 순환: 화염(화상) → 냉기(1초 둔화) → 번개(주변 2명에게 60% 연쇄) 순서로 공격. 기본 관통 1',atk:.3,
+    stats:{hp:165,maxHp:165,speed:190,dmg:17,rate:2.4,range:310,bspd:560,armor:6,pierce:1},fav:['elem','fire','frost'],dis:['poison'],
+    cards:['힘의 물약','숫돌','조준경','전투 본능','튼튼한 체력','날랜 손놀림'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
+  berserk:{lock:true,n:'광전사',role:'광란 근접',d:'처치할수록 빨라지고 강해지는 도끼 전사',passive:'광란: 처치 시 광란 +1 (4초, 최대 20). 중첩당 공격력 +2%',atk:.32,
+    stats:{hp:185,maxHp:185,speed:192,dmg:17,rate:1.8,range:195,bspd:430,armor:8},fav:['fury','curse','blitz'],dis:['guard'],
+    cards:['힘의 물약','숫돌','흡혈 송곳니','튼튼한 체력','날랜 손놀림','가벼운 장화'],lvd:'공격력 +1%, 체력 +2',lv:p=>{p.dmgP=(p.dmgP||0)+.01;p.maxHp+=2;p.hp+=2;}},
+  druid:{lock:true,n:'드루이드',role:'덩굴 지배',d:'가시덩굴로 적을 묶고 버티는 자연술사',passive:'가시덩굴: 3번째 공격마다 대상 자리에 덩굴 지대 (3초, 범위 60, 초당 공격력 70%, 둔화). 초당 체력 재생 +1',atk:.3,
+    stats:{hp:175,maxHp:175,speed:185,dmg:15,rate:2.2,range:290,bspd:520,armor:8,regen:1},fav:['nature','poison','guard'],dis:['fire'],
+    cards:['힘의 물약','숫돌','튼튼한 체력','붕대','조준경','가죽 갑옷'],lvd:'공격력 +0.8%, 체력 +2',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=2;p.hp+=2;}},
+  alch:{lock:true,n:'연금술사',role:'물약 폭격',d:'터지는 플라스크와 물약을 던지는 연금술사',passive:'플라스크: 맞은 자리에 폭발 (범위 45, 공격력 50%). 4번째 공격마다 무작위 물약 (산성 중독·폭발·얼음 둔화)',atk:.3,
+    stats:{hp:155,maxHp:155,speed:188,dmg:14,rate:2.2,range:290,bspd:480,armor:6},fav:['alchemy','poison','fire'],dis:['sniper'],
+    cards:['힘의 물약','숫돌','조준경','전투 본능','튼튼한 체력','다연발'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
+  gambler:{lock:true,n:'도박사',role:'동전 도박',d:'동전 앞뒤에 모든 걸 거는 도박사',passive:'동전 던지기: 공격마다 앞면이면 피해 2배, 뒷면이면 0.5배. 행운이 높을수록 앞면이 잘 나옴',atk:.25,
+    stats:{hp:145,maxHp:145,speed:200,dmg:12,rate:2.6,range:300,bspd:600,crit:.08,luck:5},fav:['coin','dice','jackpot'],dis:['guard'],
+    cards:['럭키 세븐','날랜 손놀림','조준경','힘의 물약','급소 노리기','가벼운 장화'],lvd:'공격력 +0.7%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.007;p.maxHp+=1;p.hp+=1;}}
 };
 function applyClass(cls){S.cls=cls;Object.assign(S.p,CLASSES[cls].stats);S.p.face=1;}
 const ex=t=>Math.max(0,tag(t)-4);
@@ -1773,6 +1800,8 @@ const undM=()=>1+ex('undead')*.12;
 const rpM=()=>1+ex('rapid')*.15;
 const elM=()=>1+ex('elem')*.12;
 const natM=()=>1+ex('nature')*.15;
+const coinOn=()=>S.cls==='gambler'||tag('coin')>=2;
+const headP=()=>Math.min(.75,.5+LK()*.004+ex('coin')*.03+(has('doublehead')?lv3('doublehead',.05,.08,.1):0));
 const potM=()=>(1+ex('alchemy')*.15)*(has('philosopher')?1.5:1);
 const POTC=['#8ee06a','#ff8a3a','#9fe8ff'];
 function throwPotion(tx,ty,m){const p=S.p;(S.flasks=S.flasks||[]).push({x0:p.x,y0:p.y-10,x1:tx,y1:ty,t:0,k:Math.floor(Math.random()*3),m});
@@ -1791,7 +1820,7 @@ const condM=e=>has('conduct')&&(e.burnT>0||e.slowT>0)?1+lv3('conduct',.3,.4,.5):
 const elCnt=e=>(e.burnT>0?1:0)+(e.slowT>0?1:0)+(e.shkT>S.t?1:0);
 function elemChain(t,n,dm){const hit=new Set([t]);let cur=t;t.shkT=S.t+2;for(let i=0;i<n;i++){const nx=nearestE(cur,180,hit);if(!nx)break;hit.add(nx);S.bolts.push({x1:cur.x,y1:cur.y,x2:nx.x,y2:nx.y,life:.15});nx.shkT=S.t+2;dmgE(nx,dm*condM(nx)*elM(),'#fff08a');cur=nx;}}
 function elemFx(t,k,dm){const ov=has('e_overflow');
-  if(k===0||k===3)burnE(t,pDmg()*.25*elM()*(ov?1+lv3('e_overflow',.3,.5,.7):1),3);
+  if(k===0||k===3)burnE(t,pDmg()*.4*elM()*(ov?1+lv3('e_overflow',.3,.5,.7):1),3);
   if((k===1||k===3)&&!t.boss)t.slowT=Math.max(t.slowT||0,1+(ov?.5:0));
   if(k===2||k===3)elemChain(t,2+(ov?1:0),dm*.6);}
 function elemDrop(e){explode(e.x,e.y,70,pDmg()*2*elM(),'#c8a0ff');for(const o of S.en)if(o.alive&&d2(o,e)<70*70){burnE(o,pDmg()*.25*elM(),3);if(!o.boss)o.slowT=Math.max(o.slowT||0,1);}}
@@ -1891,6 +1920,10 @@ function playerFire(tg){
   if(p.revT>0){shock*=lv3('revenge',2,2.5,3);p.revT=0;}
   const el=S.cls==='elem'?(has('e_avatar')?3:(p.shots-1)%3):null;
   let lastB=false;if(S.cls==='gunner'){p.mag=(p.mag??magN())-1;if(p.mag<=0){lastB=true;shock*=has('g_hollow')?lv3('g_hollow',2.5,3,3.5):1;}}
+  let coin=0;if(coinOn()){const hd=p.cfF||Math.random()<headP();p.cfF=false;coin=hd?1:-1;
+    if(hd){p.cfS=(p.cfS||0)+1;shock*=(tag('coin')>=6?3:2)+(has('allin')?1:0);if(has('gb_streak'))shock*=1+Math.min(10,p.cfS-1)*lv3('gb_streak',.1,.15,.2);
+      if(tag('coin')>=2&&p.cfS%3===0)S.coinB=1;if(has('gb_jackpot')&&p.cfS%5===0)S.coinJ=1;if(has('coinshower')&&Math.random()<(has('f_goldrush')?.4:.15))S.coinS=1;}
+    else{p.cfS=0;shock*=has('f_twoface')?1:has('allin')?.25:.5;if(tag('coin')>=4)p.cfF=true;if(has('tailwind')){p.barrier=Math.min(Math.max(barrierMax(),20),(p.barrier||0)+lv3('tailwind',3,4,5));}}}
   if(tag('rapid')>=4){p.rpS=Math.min(20,(p.rpS||0)+1);p.rpT=1.5;}
   let n=p.multi+(tag('card')>=6?2:0)+(has('bulletstorm')?3:0)+(has('g_twin')?1:0);if(has('bulletstorm'))shock*=.85;if(has('shuffle')&&Math.random()<lv3('shuffle',.2,.35,.5)+(has('f_magician')?.25:0))n*=2;
   if(has('focus'))shock*=n<=1?1+lv3('focus',.35,.5,.65):1.1;
@@ -1904,7 +1937,7 @@ function playerFire(tg){
   if(S.cls==='knight'){const ev=has('k_cleave')?lv3('k_cleave',3,3,2):4;if(p.shots%ev===0){const rad=95*(has('k_cleave')?1.3:1),k=has('k_cleave')?lv3('k_cleave',1.2,1.6,2):.5;p.swingT=.25;S.rings.push({x:p.x,y:p.y,r:20,max:rad,life:.25,col:'#cfe3ff'});for(const e of S.en)if(e.alive&&!e.phase&&d2(e,p)<(rad+e.r)**2)dmgE(e,pDmg()*mult*shock*k,'#cfe3ff');}
     if(has('k_smite')&&p.shots%lv3('k_smite',6,5,4)===0){explode(tg.x,tg.y,100,pDmg()*3+armorEff(),'#fff3c4');S.rings.push({x:tg.x,y:tg.y,r:4,max:30,life:.4,col:'#ffffff'});S.shake=Math.max(S.shake,.12);}}
   const x7=has('f_lucky777')&&p.shots%J()===0;
-  for(let i=0;i<n;i++){const an=base+(i-(n-1)/2)*.13;pBullet(p.x,p.y,an,d*(big?3:1),{roll,big,x7,el,sure:lastB,hollow:lastB&&has('g_hollow'),life:blife,pierce:p.pierce+(big?3:0)+(lastB?2:0),r:(big||shock>1.5||x7?6:(S.cls==='knight'||S.cls==='berserk'?7:S.cls==='mage'||S.cls==='alch'?5:3))*(has('giant')?1+lv3('giant',.6,.9,1.2):1)});
+  for(let i=0;i<n;i++){const an=base+(i-(n-1)/2)*.13;pBullet(p.x,p.y,an,d*(big?3:1),{roll,big,x7,el,coin,sure:lastB,hollow:lastB&&has('g_hollow'),life:blife,pierce:p.pierce+(big?3:0)+(lastB?2:0),r:(big||(shock>1.5&&S.cls!=='gambler')||x7?6:(S.cls==='gambler'?4:S.cls==='knight'||S.cls==='berserk'?7:S.cls==='mage'||S.cls==='alch'?5:3))*(has('giant')?1+lv3('giant',.6,.9,1.2):1)});
     if(has('clone')&&Math.random()<lv3('clone',.2,.3,.4))pBullet(p.x,p.y,an+rand(-.08,.08),d,{roll,pierce:p.pierce});}
   if(has('blackjack')&&p.shots%21===0){const rf=has('f_royal'),nb=rf?6:3;for(let i=0;i<nb;i++)pBullet(p.x,p.y,base+(i-(nb-1)/2)*.12,pDmg()*(rf?8:5),{pierce:999,r:9,life:1.6,child:true,card:true});ftext(p.x,p.y-30,'21','#ffd76a',20);}
   if(has('shower')&&p.shots%7===0){const vis=S.en.filter(e=>e.alive&&!e.phase&&Math.abs(e.x-p.x)<W/2&&Math.abs(e.y-p.y)<H/2);for(let i=0;i<4&&vis.length;i++){const e=vis.splice(Math.floor(Math.random()*vis.length),1)[0];S.bolts.push({x1:e.x,y1:e.y-200,x2:e.x,y2:e.y,life:.15});explode(e.x,e.y,40,pDmg()*1.2,'#f1e7cf');}}
@@ -1920,6 +1953,9 @@ function playerFire(tg){
   if(has('smite2')&&p.shots%6===0){explode(tg.x,tg.y,80,pDmg()*lv3('smite2',2,2.5,3)*holyM(),'#fff3c4');S.rings.push({x:tg.x,y:tg.y,r:4,max:30,life:.4,col:'#ffffff'});}
   {const pe=S.cls==='alch'?4:tag('alchemy')>=2?6:0;if(pe&&p.shots%Math.max(2,pe-(has('philosopher')?2:0))===0){const n=has('al_grand')?3:1;for(let i=0;i<n;i++)throwPotion(tg.x+(i?rand(-50,50):0),tg.y+(i?rand(-50,50):0),1);}}
   if(S.cls==='druid'&&p.shots%(has('d_wrath')?2:3)===0)vineAt(tg.x,tg.y,.7);
+  if(S.coinB){S.coinB=0;explode(tg.x,tg.y,90,pDmg()*3,'#ffd76a');ftext(p.x,p.y-34,'앞면 ×3!','#ffd76a',16);}
+  if(S.coinJ){S.coinJ=0;ftext(p.x,p.y-48,'대박!','#ff4fd8',22);S.shake=Math.max(S.shake,.2);for(const e of S.en)if(e.alive&&!e.phase&&Math.abs(e.x-p.x)<W/2&&Math.abs(e.y-p.y)<H/2)dmgE(e,pDmg()*5,'#ff4fd8');}
+  if(S.coinS){S.coinS=0;for(let i=0;i<3;i++)pBullet(p.x,p.y,base+(i-1)*.2,pDmg()*lv3('coinshower',.5,.7,.9),{child:true,r:4,gcoin:true});}
   if(has('b_cleave')&&p.shots%3===0)spinHit(100,pDmg()*lv3('b_cleave',.8,1,1.2),'#ff8a6a');
   if(tag('fury')>=6&&p.fy>=furyCap())spinHit(90,pDmg()*.6,'#ff6a4a');
   if(tag('elem')>=2&&p.shots%6===0)pBullet(p.x,p.y,base,pDmg()*1.5*elM(),{child:true,r:6,el:3,orb:true,pierce:0});
@@ -2419,6 +2455,7 @@ function draw(){
       if(!b.child&&!b.dieThrow&&!b.card&&S.cls){const an=Math.atan2(b.vy,b.vx),gl=b.big||b.x7;ctx.save();ctx.translate(b.x,b.y);ctx.rotate(an);
         if(S.cls==='knight'||S.cls==='paladin'||S.cls==='berserk'){const r=(b.r+4)*(gl?1.4:1),bz=S.cls==='berserk';ctx.strokeStyle=gl?'rgba(255,215,106,.6)':bz?'rgba(255,110,80,.5)':'rgba(160,210,255,.45)';ctx.lineWidth=6;ctx.beginPath();ctx.arc(-r*.6,0,r,-1.15,1.15);ctx.stroke();ctx.strokeStyle='#f4f9ff';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(-r*.6,0,r,-1,1);ctx.stroke();}
         else if(S.cls==='mage'){const r=b.r*(gl?1.5:1);ctx.fillStyle='rgba(255,90,30,.35)';ctx.beginPath();ctx.ellipse(-r*.8,0,r*2,r*1.1,0,0,TAU);ctx.fill();ctx.fillStyle='#e0451f';ctx.beginPath();ctx.arc(0,0,r+1,0,TAU);ctx.fill();ctx.fillStyle='#ff9a2a';ctx.beginPath();ctx.arc(.5,0,r*.7,0,TAU);ctx.fill();ctx.fillStyle='#ffe27a';ctx.beginPath();ctx.arc(1,0,r*.35,0,TAU);ctx.fill();}
+        else if(S.cls==='gambler'){const hd=b.coin>=0,w=Math.abs(Math.cos(S.t*18))*(b.r+2)+1;ctx.rotate(-an);ctx.fillStyle=hd?'rgba(255,215,106,.4)':'rgba(180,180,190,.3)';ctx.beginPath();ctx.arc(0,0,b.r+5,0,TAU);ctx.fill();ctx.fillStyle=hd?'#ffd76a':'#a8a8b4';ctx.beginPath();ctx.ellipse(0,0,w,b.r+2,0,0,TAU);ctx.fill();ctx.fillStyle=hd?'#b08a24':'#6a6a78';ctx.fillRect(-.5,-2,1,4);}
         else if(S.cls==='alch'){ctx.rotate(S.t*14);ctx.fillStyle='rgba(142,224,106,.3)';ctx.beginPath();ctx.arc(0,0,b.r+4,0,TAU);ctx.fill();ctx.fillStyle='#e8f0f4';ctx.fillRect(-1.5,-b.r-3,3,3);ctx.fillStyle='#8ee06a';ctx.beginPath();ctx.arc(0,0,b.r+1,0,TAU);ctx.fill();ctx.fillStyle='rgba(255,255,255,.7)';ctx.fillRect(-2,-2,1.5,1.5);}
         else if(S.cls==='druid'){const r=b.r+1;ctx.fillStyle='rgba(140,220,90,.3)';ctx.beginPath();ctx.ellipse(-r,0,r*2.2,r*1.1,0,0,TAU);ctx.fill();ctx.fillStyle='#4a9a3a';ctx.beginPath();ctx.ellipse(0,0,r+2,r*.8,0,0,TAU);ctx.fill();ctx.fillStyle='#9ad85a';ctx.fillRect(-r,-.5,r*2,1);}
         else if(S.cls==='elem'){const c=[['#ff5a2a','#ffb347'],['#3fa0d8','#c8f4ff'],['#e8c020','#fff8b0'],['#9a6aff','#e8dcff']][b.el??3],r=b.r+1;ctx.fillStyle=c[0]+'55';ctx.beginPath();ctx.ellipse(-r,0,r*2.2,r*1.1,0,0,TAU);ctx.fill();ctx.fillStyle=c[0];ctx.beginPath();ctx.arc(0,0,r+1,0,TAU);ctx.fill();ctx.fillStyle=c[1];ctx.beginPath();ctx.arc(.5,0,r*.6,0,TAU);ctx.fill();}
@@ -2427,6 +2464,7 @@ function draw(){
         else if(S.cls==='archer'){ctx.strokeStyle='#8a5a32';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-12,0);ctx.lineTo(4,0);ctx.stroke();ctx.fillStyle=gl?'#ffd76a':'#c9ced6';ctx.beginPath();ctx.moveTo(8,0);ctx.lineTo(3,-3);ctx.lineTo(3,3);ctx.closePath();ctx.fill();ctx.fillStyle='#b9332d';ctx.fillRect(-13,-3,4,2);ctx.fillRect(-13,1,4,2);}
         else{ctx.rotate(S.t*22);ctx.fillStyle=gl?'#ffd76a':'#d8dee6';ctx.fillRect(-1,-6,2,8);ctx.fillStyle='#5a4a3a';ctx.fillRect(-2,2,4,2);ctx.fillRect(-1,4,2,3);}
         ctx.restore();continue;}
+      if(b.gcoin){ctx.fillStyle='rgba(255,215,106,.35)';ctx.beginPath();ctx.arc(b.x,b.y,b.r+4,0,TAU);ctx.fill();ctx.fillStyle='#ffd76a';ctx.beginPath();ctx.ellipse(b.x,b.y,Math.abs(Math.cos(S.t*18))*b.r+1,b.r,0,0,TAU);ctx.fill();continue;}
       if(b.orb){const c=['#ff5a2a','#3fa0d8','#e8c020'],a=S.t*12;ctx.fillStyle='rgba(200,160,255,.35)';ctx.beginPath();ctx.arc(b.x,b.y,b.r+5,0,TAU);ctx.fill();for(let i=0;i<3;i++){ctx.fillStyle=c[i];ctx.beginPath();ctx.arc(b.x+Math.cos(a+i*2.09)*3,b.y+Math.sin(a+i*2.09)*3,b.r*.6,0,TAU);ctx.fill();}continue;}
       if(b.ghost){ctx.fillStyle='rgba(140,255,154,.3)';ctx.beginPath();ctx.arc(b.x,b.y,b.r+5,0,TAU);ctx.fill();ctx.fillStyle='#d8ffe0';ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,TAU);ctx.fill();ctx.fillStyle='#1d5a2c';ctx.fillRect(b.x-2,b.y-1.5,1.5,1.5);ctx.fillRect(b.x+.5,b.y-1.5,1.5,1.5);continue;}
       if(b.bone){ctx.save();ctx.translate(b.x,b.y);ctx.rotate(Math.atan2(b.vy,b.vx));ctx.fillStyle='rgba(140,255,154,.3)';ctx.fillRect(-14,-4,26,8);ctx.fillStyle='#e8e4d8';ctx.fillRect(-12,-1.5,20,3);ctx.beginPath();ctx.moveTo(14,0);ctx.lineTo(7,-4);ctx.lineTo(7,4);ctx.closePath();ctx.fill();ctx.restore();continue;}
@@ -2501,7 +2539,7 @@ function drawMini(){
   mctx.fillStyle='#ffffff';mctx.beginPath();mctx.arc(M/2,M/2,7,0,TAU);mctx.fill();
 }
 // 왼쪽 아래 증강 아이콘 줄: 보유 증강 + 빈 슬롯. PC는 마우스 올리면, 모바일은 누르면 설명
-const TAG_ICO={card:'🃏',dice:'🎲',roulette:'🎡',house:'🏦',curse:'💀',jackpot:'🎰',blitz:'💨',guard:'🛡',poison:'☠',holy:'✝',frost:'❄',summon:'🤖',sniper:'🎯',thunder:'⚡',fire:'🔥',undead:'🦴',rapid:'🔫',elem:'🌀',fury:'💢',nature:'🌿',alchemy:'⚗'};
+const TAG_ICO={card:'🃏',dice:'🎲',roulette:'🎡',house:'🏦',curse:'💀',jackpot:'🎰',blitz:'💨',guard:'🛡',poison:'☠',holy:'✝',frost:'❄',summon:'🤖',sniper:'🎯',thunder:'⚡',fire:'🔥',undead:'🦴',rapid:'🔫',elem:'🌀',fury:'💢',nature:'🌿',alchemy:'⚗',coin:'🪙'};
 let augBarKey='',synKey='';
 function renderAugBar(){const el=$('augBar');const k=!S||S.mode==='start'?'':S.augs.map(a=>a.id).join(',')+'|'+MAXA;if(k===augBarKey)return;augBarKey=k;synKey='';if(!k){el.innerHTML='';return;}
   const cell=(a,i)=>{const col=(TIER[a.t]||{}).col||'#d6a94a',ic=a.vf?'💥':a.t==='f'?'💥':a.t==='v'?'👑':(TAG_ICO[a.tags[0]]||'✦');
@@ -2544,6 +2582,7 @@ function hud(){
   if(S.buffT.vuln>0)bf.push(`<span style="color:#ff6060">받는 피해 +50% ${S.buffT.vuln.toFixed(1)}</span>`);if(S.buffT.slow>0)bf.push(`<span style="color:#9fd3ff">둔화 ${S.buffT.slow.toFixed(1)}</span>`);
   if(S.ev){const E=EVENTS[S.ev.k],left=Math.max(0,S.ev.T-S.ev.t).toFixed(0);const ex=S.ev.k==='hunt'?` 남은 ${S.en.filter(e=>e.alive&&e.hunt).length}`:S.ev.k==='shrine'&&S.ev.ch>0?` ${Math.round(S.ev.ch/2.5*100)}%`:'';bf.push(`<span style="color:${E.col}">${E.icon} ${E.n}${ex} ${left}</span>`);}
   if(S.bless&&S.bless.t>0)bf.push(`<span style="color:#9fd3ff">${S.bless.n} ${S.bless.t.toFixed(0)}</span>`);
+  if(p.cfS>=2)bf.push(`<span style="color:#ffd76a">앞면 ${p.cfS}연속</span>`);
   if(p.bearT>0)bf.push(`<span style="color:#c98a52">곰 변신</span>`);
   if(p.fy>0)bf.push(`<span style="color:#ff6a4a">광란 ${p.fy}</span>`);
   if(p.rage>0)bf.push(`<span style="color:#ff6a4a">분노 ${p.rage}</span>`);
