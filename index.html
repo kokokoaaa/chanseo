@@ -951,7 +951,7 @@ const FUSIONS=[
   {id:'f_shadow',a:'evade',b:'counter',n:'그림자 춤',d:'회피 +15%. 반격 탄환 2배, 회피하면 0.5초 무적',f:p=>{p.dodge+=.15;}},
   {id:'f_napalm',a:'molotov',b:'neuro',n:'네이팜',d:'불길 크기 2배, 불길이 적을 중독시킴'},
   {id:'f_luckyshot',a:'luckydie',b:'quick',n:'행운의 연사',d:'치명타 확률 +10%, 공격 속도 +12%',f:p=>{p.crit+=.1;p.rateP=(p.rateP||0)+.12;}},
-  {id:'f_vaultkeeper',a:'piggy',b:'insure',n:'금고지기',d:'보험이 막을 때마다 골드 +5, 보호막 최대치 +30'},
+  {id:'f_vaultkeeper',a:'piggy',b:'gen',n:'금고지기',d:'보호막 최대치 +30. 보호막이 피해를 막을 때마다 골드 +3 (0.5초에 한 번)'},
   {id:'f_sharpshooter',a:'dealer',b:'quick',n:'명사수',d:'유도 범위 +120, 관통 +1',f:p=>{p.pierce+=1;}},
   {id:'f_highstakes',a:'highroll',b:'loaded',n:'판돈 올리기',d:'눈금 6이 나올 확률 증가 (5 이상이면 6으로 취급)'},
   {id:'f_windwalker',a:'sprint',b:'fog',n:'바람걸음',d:'이동 속도 +15%, 독 웅덩이 크기 2배',f:p=>{p.speed*=1.15;}},
@@ -963,7 +963,7 @@ const FUSIONS=[
   {id:'f_frostfire',a:'frost',b:'burn',n:'냉열',d:'둔화된 적에게 화상 피해 2배. 화상 입은 적은 둔화'},
   {id:'f_fleet',a:'drone',b:'dealer',n:'드론 함대',d:'드론 +2기, 드론 공격 간격 0.6초 → 0.4초'},
   {id:'f_minefield',a:'mine',b:'molotov',n:'지뢰밭',d:'지뢰 간격 절반, 지뢰 폭발 자리에 불길'},
-  {id:'f_reaper',a:'execute',b:'combo',n:'사신',d:'처형 기준 +8%p, 처형하면 골드 +1'},
+  {id:'f_reaper',a:'execute',b:'soul',n:'사신',d:'처형 기준 +8%p. 처형할 때마다 영혼 수확 1개 추가 (공격력 +0.1%, 영혼 수확 상한과 공유)'},
   {id:'f_compound',a:'interest',b:'goldbullet',n:'복리 탄환',d:'황금 탄환 보너스 상한 2배'},
   {id:'f_plaguebomb',a:'contagion',b:'venomcloud',n:'역병 폭탄',d:'감염 폭발 자리에 독구름, 폭발 반경 +50%'},
   {id:'f_juggernaut',a:'shieldbash',b:'regenarmor',n:'저거너트',d:'보호막 최대치 + 방어력 ×1'},
@@ -2122,7 +2122,7 @@ function hurtP(amt,src){
   if(has('nightveil')&&S.clones&&S.clones.length)amt*=1-Math.min(.2,S.clones.length*lv3('nightveil',.03,.04,.05));
   if(p.bearT>0)amt*=.6;
   if(has('b_unstop')&&p.fy>0)amt*=1-Math.min(.3,.015*p.fy);
-  if(p.shield>0){p.shield--;if(has('f_ghoststep'))p.ghT=2;if(has('f_vaultkeeper'))S.gold+=5;ftext(p.x,p.y-24,'보험','#7be08f',14);p.inv=.25;return;}
+  if(p.shield>0){p.shield--;if(has('f_ghoststep'))p.ghT=2;ftext(p.x,p.y-24,'보험','#7be08f',14);p.inv=.25;return;}
   if(Math.random()<dodgeC()){ftext(p.x,p.y-24,'회피','#5fc9d9',15);if(has('evade'))p.evT=2;p.inv=has('f_shadow')?.5:.15;if(has('counter')){const k=Math.round((3+3*L('counter'))*(has('f_shadow')?2:1)*(has('f_counterarmor')?1.5:1));for(let i=0;i<k;i++)pBullet(p.x,p.y,i*TAU/k,pDmg()*.8,{child:true});}return;}
   if(p.block&&Math.random()<p.block+(has('k_wall')?lv3('k_wall',.15,.2,.25):0)+(has('p_divine')?.2:0)){ftext(p.x,p.y-26,'막기','#cfe3ff',16);p.inv=.2;addRage();if(has('k_wall'))explode(p.x,p.y,75,pDmg()*1.5,'#9fd3ff');if(has('p_divine'))exS('holy',p.x,p.y,90,pDmg()*1.5*holyM(),'#fff3a0');return;}
   p.hits++;
@@ -2149,7 +2149,7 @@ function hurtP(amt,src){
   // 가드 6: 맞을 때마다 방어 전 피해의 30% × (1 + 방어력/100) 반사, 보호막이 있으면 2배. 보스전에서는 보스에게
   if(tag('guard')>=6){const t=src&&src.alive?src:bossOn()&&!S.boss.air&&!S.boss.phase?S.boss:nearestE(p,150);if(t)dmgE(t,raw*.3*(p.barrier>0?2:1)*(1+armorEff()/100),'#9fd3ff');}
   if(p.barrier>0){
-    const ab=Math.min(p.barrier,amt);p.barrier-=ab;amt-=ab;
+    const ab=Math.min(p.barrier,amt);p.barrier-=ab;amt-=ab;if(has('f_vaultkeeper')&&!(p.vkCd>S.t)){p.vkCd=S.t+.5;S.gold+=3;}
     if(p.barrier<=0&&tag('guard')>=6){explode(p.x,p.y,110,pDmg()*2,'#9fd3ff');toast('보호막 폭발');}
     if(amt<=0){ftext(p.x,p.y-24,'-'+Math.round(ab),'#9fd3ff',14);p.inv=.25;return;}
   }
@@ -2290,7 +2290,7 @@ function onPHit(b,t){
    if(cr&&tag('rapid')>=6&&!b.child)pBullet(p.x,p.y,Math.atan2(t.y-p.y,t.x-p.x)+rand(-.1,.1),pDmg()*.6*rpM(),{child:true,r:3});
    if(cr){dmg*=critMul()*(has('glacier')&&chilled(t)?1.5:1);col='#ffd76a';if(has('luckydie')&&Math.random()<lv3('luckydie',.05,.07,.09)*(has('f_jackdie')?2:1)){dmg*=has('f_jackdie')?4:3;label='대박 '+Math.round(dmg);}if(has('highbet')&&Math.random()<.1)dmg*=2;if(has('deadeye'))p.deT=1;if(has('f_shatter')&&chilled(t))explode(t.x,t.y,70,pDmg(),'#9fe8ff');if(has('overload')&&Math.random()<lv3('overload',.15,.2,.25)*(has('f_tesla2')?2:1))lightning(t,3);if(has('stunner')&&!t.boss)t.slowT=Math.max(t.slowT||0,lv3('stunner',.6,.9,1.2));if(has('reroll2')&&!b.child)pBullet(p.x,p.y,Math.atan2(t.y-p.y,t.x-p.x),b.dmg*.7,{child:true});if(has('toxicburst')&&t.ps>0){explode(t.x,t.y,80,pDmg()*1.5,'#8ee06a');for(const o of S.en)if(o.alive&&d2(o,t)<80*80)poisonE(o);}if(has('burn')){t.burnT=3;t.burnD=Math.max(t.burnD||0,pDmg()*lv3('burn',.4,.6,.8));if(has('f_frostfire'))t.slowT=Math.max(t.slowT||0,1);}}}
   if(has('frost')&&Math.random()<lv3('frost',.25,.35,.45)&&!t.boss)t.slowT=Math.max(t.slowT||0,1.5);
-  if(has('execute')){const th=lv3('execute',.12,.16,.2)+(has('f_reaper')?.08:0)+(has('f_beheader')?.05:0);if(t.hp<=t.maxHp*th||t.hp-dmg<=t.maxHp*th){if(!t.boss&&!t.elite){dmg=Math.max(dmg,t.hp+1);label='처형';col='#c0392b';if(has('f_reaper'))S.gold+=1;}else if(t.hp<=t.maxHp*th)dmg*=1.5;}}
+  if(has('execute')){const th=lv3('execute',.12,.16,.2)+(has('f_reaper')?.08:0)+(has('f_beheader')?.05:0);if(t.hp<=t.maxHp*th||t.hp-dmg<=t.maxHp*th){if(!t.boss&&!t.elite){dmg=Math.max(dmg,t.hp+1);label='처형';col='#c0392b';if(has('f_reaper')&&(p.soulN||0)<500){p.soulN=(p.soulN||0)+1;p.dmgP=(p.dmgP||0)+.001;}}else if(t.hp<=t.maxHp*th)dmg*=1.5;}}
   if(has('triple7')&&!b.child&&Math.random()<lv3('triple7',.07,.1,.14)){dmg*=7;col='#ff4fd8';label='×7 '+Math.round(dmg);}
   if(canPoison()&&!b.dieThrow)poisonE(t);
   if(tag('frost')>=2&&!t.boss&&Math.random()<.2)t.slowT=Math.max(t.slowT||0,1.5);
