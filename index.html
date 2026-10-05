@@ -898,7 +898,7 @@ const AUGS=[
   {id:'quickdraw',u:'강화할 때마다 공격 속도 +6%가 한 번 더 붙어요.',t:'s',n:'빠른 손',tags:['rapid','blitz'],d:'공격 속도 +12%. 대시가 끝나면 가까운 적에게 탄환 3발 (공격력 100%)',f:p=>{p.rateP=(p.rateP||0)+.06;}},
   {id:'ricoshot',u:'튕긴 탄 피해가 커져요. ★1은 50%, ★2는 60%, ★3은 70%.',t:'s',n:'튕김 사격',tags:['rapid','sniper'],d:'기본 탄환이 처음 맞힌 뒤 가까운 적에게 한 번 튕김 (공격력 60%)'},
   {id:'deadeye',u:'',t:'p',n:'저격 본능',tags:['rapid','rapid'],d:'치명타 확률 +10%, 치명타 피해 +50%. 속사 2개로 계산. 치명타가 터지면 1초간 공격 속도 +25%',f:p=>{p.crit+=.05;p.critM+=.25;}},
-  {id:'g_extmag',cls:'gunner',u:'탄창이 더 커져요. ★1은 +2발, ★2는 +3발, ★3은 +4발.',t:'s',n:'확장 탄창',tags:['rapid'],d:'[총잡이 전용] 탄창 +3발'},
+  {id:'g_extmag',cls:'gunner',u:'폭발 피해가 커져요. ★1은 40%, ★2는 50%, ★3은 60%.',t:'s',n:'특수 탄두',tags:['rapid'],d:'[총잡이 전용] 모든 매그넘 탄이 처음 맞힌 자리에 폭발 (범위 55, 공격력 50%)'},
   {id:'g_hollow',cls:'gunner',u:'마지막 탄 피해가 커져요. ★1은 2.5배, ★2는 3배, ★3은 3.5배.',t:'g',n:'할로우 포인트',tags:['rapid','sniper'],d:'[총잡이 전용] 마지막 탄 피해 3배, 맞으면 폭발 (범위 70)'},
   {id:'g_twin',cls:'gunner',u:'',t:'p',n:'쌍권총',tags:['rapid','blitz'],d:'[총잡이 전용] 탄환 +1발, 재장전 시간 −50%'},
   {id:'p_divine',cls:'paladin',u:'',t:'p',n:'신의 가호',tags:['holy','guard'],d:'[성기사 전용] 막기 확률 +20%. 막을 때마다 빛 폭발 (범위 90, 공격력 150%)'},
@@ -1033,7 +1033,7 @@ const FUSIONS=[
   {id:'f_goldclover',a:'luckycoin',b:'clover',n:'황금 클로버',d:'행운 +3, 행운 폭발 확률 4% → 10%',f:p=>{p.luck=Math.min(LUCK_CAP,p.luck+3);}},
   {id:'f_goldmag',a:'magnet2',b:'piggy',n:'황금 자석',d:'골드 획득 +30%, 경험치 회복 2배',f:p=>{p.goldM+=.3;}},
   {id:'f_elemfire',a:'elembody',b:'steam',n:'원소 점화',d:'화상·둔화된 적 추가 피해 2배'},
-  {id:'f_bigmag',a:'trigger',b:'echo',n:'확장 탄창',d:'방아쇠 추가 탄환 2발 → 4발'},
+  {id:'f_bigmag',a:'trigger',b:'echo',n:'연발 방아쇠',d:'방아쇠 추가 탄환 2발 → 4발'},
   {id:'f_racer',a:'boots',b:'runngun',n:'폭주족',d:'움직이는 동안 받는 피해 감소 2배'},
   {id:'f_counterarmor',a:'counter',b:'armor',n:'반격 갑주',d:'판금 갑옷 반격이 0.5초 → 0.2초마다, 반격 탄환 +50%'},
   {id:'f_beheader',a:'execute',b:'madblade',n:'참수',d:'처형 기준 +5%p, 광기의 칼날 공격력 보너스 2배'},
@@ -1196,8 +1196,8 @@ const FUSIONS=[
   {id:'f_y088',a:'miasma',b:'corrode',n:'부식 안개',pb:1.15,fx:'h:2:poison:.8:110',d:'독기 수치 +15%, 새 능력: 맞으면 (2초에 한 번) 독 폭발 (범위 110, 공격력 80%, 중독 2중첩)'},
   {id:'f_y089',a:'corrode',b:'toxicburst',n:'부식 폭발',pb:1.15,fx:'k:.12:poison:.8:80',d:'새 능력: 처치 시 12% 확률로 독 폭발 (범위 80, 공격력 80%, 중독 2중첩)'},
   {id:'f_y090',a:'toxicburst',b:'contagion',n:'독 연쇄 폭발',pb:1.15,fx:'c:.2:poison:1:70',d:'감염 폭발 수치 +15%, 새 능력: 치명타 시 20% 확률로 독 폭발 (범위 70, 공격력 100%, 중독 2중첩)'},
-  {id:'f_y091',a:'g_extmag',b:'g_twin',n:'듀얼 매거진',pb:1.15,fx:'n:12:ring:8:.6',d:'확장 탄창 수치 +15%, 새 능력: 12번째 공격마다 탄환 8발을 원형으로 (공격력 60%)'},
-  {id:'f_y092',a:'g_extmag',b:'g_hollow',n:'할로우 탄창',pb:1.15,fx:'n:6:fan:1:2',d:'확장 탄창 수치 +15%, 할로우 포인트 수치 +15%, 새 능력: 6번째 공격마다 탄환 1발 (공격력 200%)'},
+  {id:'f_y091',a:'g_extmag',b:'g_twin',n:'듀얼 매거진',pb:1.15,fx:'n:12:ring:8:.6',d:'특수 탄두 수치 +15%, 새 능력: 12번째 공격마다 탄환 8발을 원형으로 (공격력 60%)'},
+  {id:'f_y092',a:'g_extmag',b:'g_hollow',n:'할로우 탄창',pb:1.15,fx:'n:6:fan:1:2',d:'특수 탄두 수치 +15%, 할로우 포인트 수치 +15%, 새 능력: 6번째 공격마다 탄환 1발 (공격력 200%)'},
   {id:'f_y093',a:'g_twin',b:'quickdraw',n:'쌍권 속사',pb:1.15,fx:'d:fan:6:.7',d:'새 능력: 대시가 끝나면 탄환 6발 (공격력 70%)'},
   {id:'f_y094',a:'chipshot',b:'sawblade',n:'톱날 사출',pb:1.15,fx:'t:3:ring:8:.4',d:'새 능력: 3초마다 탄환 8발을 원형으로 (공격력 40%)'},
   {id:'f_y095',a:'chipshot',b:'bigwheel',n:'칩 폭풍',pb:1.15,fx:'k:.08:ring:6:.5',d:'새 능력: 처치 시 8% 확률로 탄환 6발을 원형으로 (공격력 50%)'},
@@ -1321,8 +1321,8 @@ const CARDS=[
   {cls:'paladin',n:'성가',g:'성기사 오라',v:[[8,15,0]],t:v=>`신성 오라 피해 +${v[0]}%`,a:(p,v)=>{p.auraD=(p.auraD||0)+v[0]/100;}},
   {src:()=>skelMax()>0,cls:'necro',n:'뼈 가루',g:'해골 병사',v:[[8,15,0]],t:v=>`해골 병사 피해 +${v[0]}%`,a:(p,v)=>{p.skD=(p.skD||0)+v[0]/100;}},
   {src:()=>skelMax()>0,cls:'necro',n:'영혼 사슬',g:'해골 병사',v:[[.5,1,1]],t:v=>`해골 병사 지속 +${v[0]}초`,a:(p,v)=>{p.skL=(p.skL||0)+v[0];}},
-  {cls:'gunner',req:()=>(S.p.magB||0)<6,n:'탄띠',g:'총잡이 탄창',v:[[1,1,0]],t:v=>`탄창 +${v[0]}발 (최대 +6)`,a:(p,v)=>{p.magB=(p.magB||0)+v[0];}},
-  {cls:'gunner',req:()=>(S.p.rlM||1)>.4,n:'빠른 장전',g:'총잡이 탄창',v:[[5,10,0]],t:v=>`재장전 시간 −${v[0]}%`,a:(p,v)=>{p.rlM=(p.rlM||1)*(1-v[0]/100);}},
+  {cls:'gunner',n:'탄두 가공',g:'총잡이 리볼버',v:[[8,15,0]],t:v=>`매그넘 탄 피해 +${v[0]}%`,a:(p,v)=>{p.lbD=(p.lbD||0)+v[0]/100;}},
+  {cls:'gunner',req:()=>(S.p.rlM||1)>.4,n:'빠른 장전',g:'총잡이 리볼버',v:[[5,10,0]],t:v=>`재장전 시간 −${v[0]}%`,a:(p,v)=>{p.rlM=(p.rlM||1)*(1-v[0]/100);}},
   {src:()=>tag('elem')>=1||has('elemcoin'),cls:'elem',n:'원소 결정',g:'원소 효과',v:[[8,15,0]],t:v=>`화상·둔화·연쇄·원소 구슬 피해 +${v[0]}%`,a:(p,v)=>{p.elD=(p.elD||0)+v[0]/100;}},
   {src:()=>tag('elem')>=1||has('elemcoin'),cls:'elem',n:'정령 공명',g:'원소 효과',v:[[2,4,1],[3,6,0]],t:v=>`공격 속도 +${v[0]}%, 원소 효과 피해 +${v[1]}%`,a:(p,v)=>{p.rateP=(p.rateP||0)+v[0]/100;p.elD=(p.elD||0)+v[1]/100;}},
   {src:()=>furyOn(),cls:'berserk',n:'피의 북',g:'광란',v:[[2,3,0]],t:v=>`광란 최대 중첩 +${v[0]}`,a:(p,v)=>{p.fyC=(p.fyC||0)+v[0];}},
@@ -1819,8 +1819,8 @@ const CLASSES={
   necro:{lock:true,n:'사령술사',role:'해골 소환',d:'쓰러진 적을 해골 병사로 일으키는 술사',passive:'해골 소환: 처치 시 25% 확률, 그리고 2.5초마다 해골 병사 소환 (최대 5기, 12초, 공격력 100%로 근접 공격). 해골은 주변 근접 적을 끌어당기는 방패 역할 (체력 = 내 최대 체력 50%, 받는 피해 절반)',atk:.35,
     stats:{hp:155,maxHp:155,speed:185,dmg:16,rate:2.1,range:300,bspd:500,armor:7},fav:['undead','summon','curse'],dis:['holy'],
     cards:['힘의 물약','숫돌','조준경','튼튼한 체력','전투 본능','흡혈 송곳니'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
-  gunner:{lock:true,n:'총잡이',role:'연사 저격',d:'리볼버를 연사하고 재장전하는 총잡이',passive:'6발 탄창: 6발 쏘면 짧게 재장전. 마지막 탄은 반드시 치명타 + 관통 2',atk:.18,
-    stats:{hp:140,maxHp:140,speed:200,dmg:10,rate:3.3,range:300,bspd:820,crit:.1,critM:2.1},fav:['rapid','sniper','card'],dis:['summon'],
+  gunner:{lock:true,n:'총잡이',role:'매그넘 저격',d:'한 발 한 발이 묵직한 매그넘 리볼버 총잡이',passive:'매그넘 리볼버: 모든 탄이 일반 공격의 1.7배 피해 + 관통 1. 6발 쏘면 짧게 재장전 (탄창 6발 고정). 6발째는 확정 치명타 + 관통 2',atk:.18,
+    stats:{hp:140,maxHp:140,speed:200,dmg:10,rate:1.8,range:300,bspd:820,crit:.1,critM:2.1},fav:['rapid','sniper','card'],dis:['summon'],
     cards:['날랜 손놀림','조준경','급소 노리기','치명상','힘의 물약','가벼운 장화'],lvd:'공격력 +0.6%, 치명타 +0.2%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.006;p.crit+=.002;p.maxHp+=1;p.hp+=1;}},
   elem:{lock:true,n:'정령사',role:'원소 순환',d:'화염·냉기·번개를 번갈아 쏘는 정령술사',passive:'원소 순환: 화염(화상) → 냉기(1초 둔화) → 번개(주변 2명에게 60% 연쇄) 순서로 공격. 기본 관통 1',atk:.3,
     stats:{hp:170,maxHp:170,speed:190,dmg:17,rate:2.5,range:310,bspd:560,armor:9,pierce:1},fav:['elem','fire','frost','thunder'],dis:['poison'],
@@ -2311,7 +2311,8 @@ function elemFx(t,k,dm){const ov=has('e_overflow');
   if((k===1||k===3)&&!t.boss)t.slowT=Math.max(t.slowT||0,1+(ov?.5:0));
   if(k===2||k===3)elemChain(t,2+(ov?1:0),dm*.6);}
 function elemDrop(e){explode(e.x,e.y,70,pDmg()*2*elM(),'#c8a0ff');for(const o of S.en)if(o.alive&&d2(o,e)<70*70){burnE(o,pDmg()*.25*elM(),3);if(!o.boss)o.slowT=Math.max(o.slowT||0,1);}}
-const magN=()=>6+(S.p.magB||0)+(has('g_extmag')?lv3('g_extmag',2,3,4):0);
+// 리볼버: 탄창 6발 고정
+const magN=()=>6;
 function ricoShot(t,dm,n){const o=nearestE(t,220,new Set([t]));if(o)pBullet(t.x,t.y,Math.atan2(o.y-t.y,o.x-t.x),dm,{child:true,r:3,rc:n,hit:new Set([t]),sure:has('f_trickshot'),life:.6,pierce:0});}
 const skelMax=()=>(S.cls==='necro'?5:0)+(tag('undead')>=1?1:0)+(tag('undead')>=4?2:0)+(has('raise')?2:0)+(has('n_legion')?lv3('n_legion',1,2,3):0)+(has('n_lich')?2:0)+(has('f_bonelord')?2:0);
 const skelC=()=>(has('f_deathlord')?.1:0)+(S.cls==='necro'?.25:tag('undead')>=1?.08:0)+(tag('undead')>=4?.1:0)+(has('raise')?lv3('raise',.06,.08,.1):0)+(has('n_legion')?.1:0);
@@ -2424,7 +2425,7 @@ function playerFire(tg){
   let shock=1;if(p.shockT>0){shock=2+2*L('shock');p.shockT=0;}
   if(p.revT>0){shock*=lv3('revenge',2,2.5,3);p.revT=0;}
   const el=S.cls==='elem'?(has('e_avatar')?3:(p.shots-1)%3):null;
-  let lastB=false;if(S.cls==='gunner'){p.mag=(p.mag??magN())-1;if(p.mag<=0){lastB=true;shock*=has('g_hollow')?lv3('g_hollow',2.5,3,3.5):1;if(has('f_deadshot'))S.deadShot=1;}}
+  let lastB=false;if(S.cls==='gunner'){shock*=1.7*(1+(p.lbD||0));p.mag=(p.mag??magN())-1;if(p.mag<=0){lastB=true;shock*=has('g_hollow')?lv3('g_hollow',2.5,3,3.5):1;if(has('f_deadshot'))S.deadShot=1;}}
   let coin=0;if(coinOn()){const hd=p.cfF||Math.random()<headP()||(has('f_goddess')&&Math.random()<.25);p.cfF=false;coin=hd?1:-1;
     if(hd){p.cfS=(p.cfS||0)+1;shock*=((tag('coin')>=6?3:2)+(has('allin')?1:0))*(1+(p.hdD||0))*homeM('coin');if(has('gb_streak'))shock*=1+Math.min(has('f_streakrun')?20:10,p.cfS-1)*lv3('gb_streak',.1,.15,.2);
       if(tag('coin')>=2&&p.cfS%3===0)S.coinB=1;if(has('gb_jackpot')&&p.cfS%5===0)S.coinJ=1;if(has('coinshower')&&Math.random()<(has('f_goldrush')?.4:.15))S.coinS=1;}
@@ -2444,7 +2445,7 @@ function playerFire(tg){
   if(S.cls==='knight'){const ev=has('k_cleave')?lv3('k_cleave',3,3,2):4;if(p.shots%ev===0){const rad=95*(has('k_cleave')?1.3:1),k=has('k_cleave')?lv3('k_cleave',1.2,1.6,2):.5;p.swingT=.25;S.rings.push({x:p.x,y:p.y,r:20,max:rad,life:.25,col:'#cfe3ff'});for(const e of S.en)if(e.alive&&!e.phase&&d2(e,p)<(rad+e.r)**2)dmgE(e,pDmg()*mult*shock*k,'#cfe3ff');}
     if(has('k_smite')&&p.shots%lv3('k_smite',6,5,4)===0){explode(tg.x,tg.y,100,pDmg()*3+armorEff(),'#fff3c4');S.rings.push({x:tg.x,y:tg.y,r:4,max:30,life:.4,col:'#ffffff'});S.shake=Math.max(S.shake,.12);}}
   const x7=has('f_lucky777')&&p.shots%J()===0;
-  for(let i=0;i<n;i++){const an=base+(i-(n-1)/2)*.13;pBullet(p.x,p.y,an,d*(big?3:1),{roll,big,x7,el:el??(coin>0&&has('elemcoin')?Math.floor(Math.random()*3):null),coin,sure:lastB,hollow:lastB&&has('g_hollow'),life:blife,pierce:p.pierce+(big?3:0)+(lastB?2:0)+(coin>0&&has('luckyshot')?2:0),r:(big||(shock>1.5&&S.cls!=='gambler')||x7?6:(S.cls==='gambler'?4:S.cls==='knight'||S.cls==='berserk'?7:S.cls==='mage'||S.cls==='alch'?5:3))*(has('giant')?1+lv3('giant',.6,.9,1.2):1)});
+  for(let i=0;i<n;i++){const an=base+(i-(n-1)/2)*.13;pBullet(p.x,p.y,an,d*(big?3:1),{roll,big,x7,el:el??(coin>0&&has('elemcoin')?Math.floor(Math.random()*3):null),coin,sure:lastB,hollow:lastB&&has('g_hollow'),life:blife,pierce:p.pierce+(big?3:0)+(lastB?2:0)+(S.cls==='gunner'?1:0)+(coin>0&&has('luckyshot')?2:0),r:(big||(shock>1.5&&S.cls!=='gambler')||x7?6:(S.cls==='gambler'?4:S.cls==='knight'||S.cls==='berserk'?7:S.cls==='mage'||S.cls==='alch'?5:3))*(has('giant')?1+lv3('giant',.6,.9,1.2):1)});
     if(has('clone')&&Math.random()<lv3('clone',.2,.3,.4))pBullet(p.x,p.y,an+rand(-.08,.08),d,{roll,pierce:p.pierce});}
   if(has('blackjack')&&p.shots%21===0){const rf=has('f_royal'),nb=rf?6:3;for(let i=0;i<nb;i++)pBullet(p.x,p.y,base+(i-(nb-1)/2)*.12,pDmg()*(rf?8:5),{pierce:999,r:9,life:1.6,child:true,card:true});ftext(p.x,p.y-30,'21','#ffd76a',20);}
   if(has('shower')&&p.shots%7===0){const vis=S.en.filter(e=>e.alive&&!e.phase&&Math.abs(e.x-p.x)<W/2&&Math.abs(e.y-p.y)<H/2);for(let i=0;i<4&&vis.length;i++){const e=vis.splice(Math.floor(Math.random()*vis.length),1)[0];S.bolts.push({x1:e.x,y1:e.y-200,x2:e.x,y2:e.y,life:.15});explode(e.x,e.y,40,pDmg()*1.2,'#f1e7cf');}}
@@ -2503,6 +2504,7 @@ function onPHit(b,t){
   if(b.el!=null){elemFx(t,b.el,b.dmg);if(b.orb&&tag('elem')>=6)explode(t.x,t.y,90,pDmg()*2*elM(),'#c8a0ff');}
   if(has('ricoshot')&&!b.child&&!b.ric){b.ric=1;ricoShot(t,b.dmg*lv3('ricoshot',.5,.6,.7)*rpM(),has('f_trickshot')?2:0);}
   if(b.rc>0){const n=b.rc;b.rc=0;ricoShot(t,b.dmg,n-1);}
+  if(S.cls==='gunner'&&has('g_extmag')&&!b.child&&!b.ex6){b.ex6=1;explode(t.x,t.y,55,pDmg()*lv3('g_extmag',.4,.5,.6)*(1+(p.lbD||0)),'#ffb347');}
   if(b.hollow&&!b.hb){b.hb=1;explode(t.x,t.y,70,pDmg()*1.5,'#ffd76a');}
   if(b.ghost&&has('soulburst'))exS('undead',t.x,t.y,70*(has('f_wraith')?1.5:1),pDmg()*lv3('soulburst',.6,.8,1)*undM(),'#8cff9a');
   if(chilled(t)&&tag('frost')>=4)dmg*=1.3*(1+ex('frost')*.06);
@@ -2740,7 +2742,7 @@ function update(dt){
     p.inv=Math.max(0,p.inv-dt);p.all6=Math.max(0,p.all6-dt);p.dashCd=Math.max(0,p.dashCd-dt);p.blitzT=Math.max(0,p.blitzT-dt);p.shockT=Math.max(0,p.shockT-dt);
     if(p.comboT>0){p.comboT-=dt;if(p.comboT<=0)p.combo=0;}
     p.cd-=dt;
-    if(p.cd<=0){const bo=S.boss&&S.boss.alive&&!S.boss.air&&d2(S.boss,p)<(p.range+S.boss.r)**2?S.boss:null,tg=bo||evTarget(p.range)||nearestE(p,p.range);if(tg){playerFire(tg);if(S.cls==='gunner'&&p.mag<=0){p.mag=magN();p.cd=2.8/pRate()*(has('g_twin')?.5:1)*(p.rlM||1)*(1-.05*mlv('m_rapid'));p.rlT=p.cd;p.rlM=p.cd;}else p.cd=1/pRate();}}
+    if(p.cd<=0){const bo=S.boss&&S.boss.alive&&!S.boss.air&&d2(S.boss,p)<(p.range+S.boss.r)**2?S.boss:null,tg=bo||evTarget(p.range)||nearestE(p,p.range);if(tg){playerFire(tg);if(S.cls==='gunner'&&p.mag<=0){p.mag=magN();p.cd=1.8/pRate()*(has('g_twin')?.5:1)*(p.rlM||1)*(1-.05*mlv('m_rapid'));p.rlT=p.cd;p.rlM=p.cd;}else p.cd=1/pRate();}}
     const n=orbitN();
     if(n){const sp=2.8*(has('spinner')?1.5:1),rad=ORB_R*p.orbR,big=tag('roulette')>=6,orr=big?13:9;
       for(let i=0;i<n;i++){const a=S.t*sp+i*TAU/n,ox=p.x+Math.cos(a)*rad,oy=p.y+Math.sin(a)*rad;
