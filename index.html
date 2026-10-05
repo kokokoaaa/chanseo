@@ -1418,7 +1418,14 @@ const GRADE=u=>u>=.9?{n:'최상',col:'#ffd76a'}:u>=.6?{n:'상',col:'#7fc4f2'}:u>
 const sgn=(v,d)=>(v>=0?'+':'−')+Math.abs(v).toFixed(d).replace(/\.0+$/,'');
 // 증강의 최대 체력 % 감소도 실제로 깎이는 양을 괄호로 (n번 적용 기준)
 function hpLoss(f,d,n=1){if(!f||!S||!S.p||!/최대 체력 [−-][\d.]+%/.test(d||''))return '';const c={...S.p};try{for(let k=0;k<n;k++)f(c);}catch(e){return '';}const x=Math.round(c.maxHp-S.p.maxHp);return x?` <small style="opacity:.65">(최대 체력 ${sgn(x,0)})</small>`:'';}
-function withActual(desc){return desc.split(', ').map(l=>`<div>${l}</div>`).join('');}
+// 스탯 카드: '%'로 오르는 줄에만 실제로 오르는 수치를 괄호로 붙임. 카드를 복사본에 적용해 최종 수치 차이를 계산
+const PV=[['공격력',()=>pDmg(),1],['공격 속도',()=>pRate(),2],['최대 체력',()=>(hpSync(),S.p.maxHp),0],['이동 속도',()=>moveSpd(),0]];
+function withActual(desc,f){const W=a=>a.map(l=>`<div>${l}</div>`).join(''),L=desc.split(', ');if(!S||!S.p||!f)return W(L);
+  const P0=S.p,c={...P0},v=g=>{try{return g();}catch(e){return null;}};
+  return W(L.map(line=>{const m=line.includes('%')&&PV.find(([k])=>line.startsWith(k));if(!m)return line;
+    const a=v(m[1]);let b=null;S.p=c;try{if(!c.__ap){c.__ap=1;f(c);}b=v(m[1]);}catch(e){}finally{S.p=P0;}
+    if(a==null||b==null||Math.abs(b-a)<Math.pow(10,-m[2])/2)return line;const d=b-a;
+    return `${line} <small style="opacity:.7">(${d>0?'+':'−'}${Math.abs(d).toFixed(m[2])})</small>`;}));}
 // 증강 미리보기: 이 증강을 얻었을 때(★2) 주요 스탯이 얼마나 바뀌는지. 잠깐 적용해서 계산한 뒤 그대로 되돌림
 const PREV_ST=[['공격력',()=>pDmg(),1],['공격 속도',()=>pRate(),2,'/초'],['최대 체력',()=>(hpSync(),S.p.maxHp),0],['방어력',()=>armorEff(),0],['회피',()=>dodgeC()*100,1,'%'],['치명타 확률',()=>critC()*100,1,'%'],['치명타 피해',()=>critMul()*100,0,'%'],['이동 속도',()=>moveSpd(),0],['사거리',()=>S.p.range,0],['탄속',()=>S.p.bspd,0],['관통',()=>S.p.pierce,0],['탄환',()=>S.p.multi,0,'발'],['흡혈',()=>S.p.lifesteal*100,1,'%'],['초당 재생',()=>S.p.regen,1],['행운',()=>LK(),1],['골드 획득',()=>S.p.goldM*100,0,'%'],['대시 재사용',()=>dashCdVal(),2,'초']];
 function augPreview(a){
