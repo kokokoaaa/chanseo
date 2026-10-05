@@ -1943,10 +1943,11 @@ const AFFIX={
 };
 // 난이도 모드. 보통 = 자동 플레이로도 클리어 가능한 기준, 어려움 = 직접 플레이용 (점수 ×1.5)
 // 난이도 4단계. xp 처치 경험치(적이 단단해 처치 수가 줄어도 레벨 체감은 같게), hp 일반 몹 체력, bhp 보스 체력, dm 적 공격력, sp 스폰 간격, el 정예 확률 추가, sc 점수(메달) 배율. 랭킹은 난이도별로 따로
-const DIFF={normal:{md:1,cb:5,rg:.12,pen:.2,n:'일반',col:'#cfe3c4',hp:1.1,bhp:1,dm:1,sp:1,el:0,sc:1,bc:22},
-  hard:{md:1.35,cb:12,rg:.18,pen:.3,n:'어려움',col:'#ffb347',xp:2.5,hp:2.5,bhp:1.7,dm:1.6,sp:.8,el:.12,sc:1.5},
-  hell:{md:1.6,cb:25,rg:.25,pen:.4,n:'지옥',col:'#ff5a3a',xp:3.4,hp:3.9,bhp:2.4,dm:2.1,sp:.7,el:.2,sc:2.2},
-  god:{md:1.6,cb:40,rg:.3,pen:.45,n:'신',col:'#e9c4ff',xp:4.5,hp:6,bhp:3.4,dm:2.8,sp:.6,el:.3,sc:3.2}};
+// oc: 한 방 피해 상한(최대 체력 대비). 높은 난이도일수록 제한이 풀림
+const DIFF={normal:{oc:.35,md:1,cb:5,rg:.12,pen:.2,n:'일반',col:'#cfe3c4',hp:1.1,bhp:1,dm:1,sp:1,el:0,sc:1,bc:22},
+  hard:{oc:.45,md:1.35,cb:12,rg:.18,pen:.3,n:'어려움',col:'#ffb347',xp:2.5,hp:2.5,bhp:1.7,dm:1.6,sp:.8,el:.12,sc:1.5},
+  hell:{oc:.55,md:1.6,cb:25,rg:.25,pen:.4,n:'지옥',col:'#ff5a3a',xp:3.4,hp:3.9,bhp:2.4,dm:2.1,sp:.7,el:.2,sc:2.2},
+  god:{oc:.65,md:1.6,cb:40,rg:.3,pen:.45,n:'신',col:'#e9c4ff',xp:4.5,hp:6,bhp:3.4,dm:2.8,sp:.6,el:.3,sc:3.2}};
 const dfM=()=>DIFF[S.diff]||DIFF.normal;
 // 난이도 해금: 바로 앞 난이도를 클리어해야 다음 난이도가 열림
 const DKEYS=['normal','hard','hell','god'];
@@ -2178,7 +2179,7 @@ function updBoss(dt){
   const p=S.p;
   if(S.freezeT>0)return;
   for(const t of S.tele){t.t-=dt;if(t.t>0)continue;
-    if(t.dmg&&p.alive&&t.k==='c'&&d2(t,p)<(t.r+p.r*.5)**2){if(t.vol){if(!(p.inv>0)){hurtP(Math.min(t.dmg,p.maxHp*.3),null);p.inv=Math.max(p.inv,.3);}}else hurtP(t.dmg,null);}
+    if(t.dmg&&p.alive&&t.k==='c'&&d2(t,p)<(t.r+p.r*.5)**2){if(t.vol){if(!(p.inv>0)){hurtP(Math.min(t.dmg,p.maxHp*(dfM().oc||.35)*.85),null);p.inv=Math.max(p.inv,.3);}}else hurtP(t.dmg,null);}
     if(t.k==='c')S.rings.push({x:t.x,y:t.y,r:t.r*.6,max:t.r,life:.25,col:t.col||'#ff6060'});
     if(t.fx)t.fx(t);}
   S.tele=S.tele.filter(t=>t.t>0);
@@ -2387,9 +2388,9 @@ function hurtP(amt,src){
   // 보스전: 보스 공격은 방어력 일부를 무시 (일반 20%, 어려움 30%, 지옥 40%, 신 45%), 광폭화 단계마다 12%씩 더 무시
   // 잡몹의 근접 공격에는 적용하지 않음 (보스 몸·탄·장판만)
   {const bR=bossOn()&&(!src||src===S.boss)?(S.boss.rage||0):-1,ar=armorEff()*(bR<0?1:Math.max(0,1-(dfM().pen||.2)-.12*bR));amt*=100/(100+ar);}
-  // 한 방 즉사 방지: 보스 몸통 공격을 뺀 모든 공격은 한 번에 최대 체력의 35%까지만
+  // 한 방 즉사 방지: 보스 몸통 공격을 뺀 모든 공격은 한 번에 최대 체력의 일정 비율까지만 (일반 35% · 어려움 45% · 지옥 55% · 신 65%)
   // 최종 광폭(6단계, 제한 시간 + 2분 30초) 이후에는 즉사 방지 해제 → 최소 딜 스펙이 있어야 클리어
-  if((src!==S.boss||!src)&&!(bossOn()&&(S.boss.rage||0)>=6))amt=Math.min(amt,p.maxHp*.35);
+  if((src!==S.boss||!src)&&!(bossOn()&&(S.boss.rage||0)>=6))amt=Math.min(amt,p.maxHp*(dfM().oc||.35));
   p.noHitT=0;
   // 가드 6: 맞을 때마다 방어 전 피해의 30% × (1 + 방어력/100) 반사, 보호막이 있으면 2배. 보스전에서는 보스에게
   if(tag('guard')>=6){const t=src&&src.alive?src:bossOn()&&!S.boss.air&&!S.boss.phase?S.boss:nearestE(p,150);if(t)dmgE(t,raw*.3*(p.barrier>0?2:1)*(1+armorEff()/100),'#9fd3ff');}
