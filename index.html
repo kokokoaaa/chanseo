@@ -1823,7 +1823,7 @@ const CLASSES={
   gunner:{lock:true,n:'총잡이',role:'매그넘 저격',d:'한 발 한 발이 묵직한 매그넘 리볼버 총잡이',passive:'매그넘 리볼버: 모든 탄이 일반 공격의 1.7배 피해 + 관통 1. 6발 쏘면 짧게 재장전 (탄창 6발 고정)',atk:.18,
     stats:{hp:140,maxHp:140,speed:200,dmg:10,rate:1.8,range:300,bspd:820,crit:.1,critM:2.1},fav:['rapid','sniper','card'],dis:['summon'],
     cards:['날랜 손놀림','조준경','급소 노리기','치명상','힘의 물약','가벼운 장화'],lvd:'공격력 +0.6%, 치명타 +0.2%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.006;p.crit+=.002;p.maxHp+=1;p.hp+=1;}},
-  elem:{lock:true,n:'정령사',role:'원소 순환',d:'화염·냉기·번개를 번갈아 쏘는 정령술사',passive:'원소 순환: 화염(화상) → 냉기(1초 둔화) → 번개(주변 2명에게 60% 연쇄) 순서로 공격. 기본 관통 1',atk:.3,
+  elem:{lock:true,n:'정령사',role:'원소 순환',d:'화염·냉기·번개를 번갈아 쏘는 정령술사',passive:'원소 공격: 화염(화상)·냉기(1초 둔화)·번개(주변 2명에게 60% 연쇄)를 섞어 쏨. 화염·냉기·번개 시너지를 모을수록 그 원소가 더 자주 나감. 기본 관통 1',atk:.3,
     stats:{hp:170,maxHp:170,speed:190,dmg:17,rate:2.5,range:310,bspd:560,armor:9,pierce:1},fav:['elem','fire','frost','thunder'],dis:['poison'],
     cards:['힘의 물약','숫돌','조준경','전투 본능','튼튼한 체력','날랜 손놀림'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
   berserk:{lock:true,n:'광전사',role:'광란 근접',d:'처치할수록 빨라지고 강해지는 도끼 전사',passive:'광란: 처치 시 광란 +1 (4초, 최대 20). 중첩당 공격력 +2%. 흡혈 2%',atk:.32,
@@ -1832,7 +1832,7 @@ const CLASSES={
   druid:{lock:true,n:'드루이드',role:'덩굴 지배',d:'가시덩굴로 적을 묶고 버티는 자연술사',passive:'가시덩굴: 3번째 공격마다 대상 자리에 덩굴 지대 (3초, 범위 60, 초당 공격력 70%, 둔화). 초당 체력 재생 +1',atk:.3,
     stats:{hp:175,maxHp:175,speed:185,dmg:15,rate:2.2,range:290,bspd:520,armor:8,regen:1},fav:['nature','poison','guard'],dis:['fire'],
     cards:['힘의 물약','숫돌','튼튼한 체력','붕대','조준경','가죽 갑옷'],lvd:'공격력 +0.8%, 체력 +2',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=2;p.hp+=2;}},
-  alch:{lock:true,n:'연금술사',role:'물약 폭격',d:'터지는 플라스크와 물약을 던지는 연금술사',passive:'플라스크: 맞은 자리에 폭발 (범위 45, 공격력 50%). 4번째 공격마다 무작위 물약 (산성 중독·폭발·얼음 둔화). 물약이 깨진 자리에 2.5초 장판이 남음',atk:.3,
+  alch:{lock:true,n:'연금술사',role:'물약 폭격',d:'터지는 플라스크와 물약을 던지는 연금술사',passive:'플라스크: 맞은 자리에 폭발 (범위 45, 공격력 50%). 4번째 공격마다 물약 (산성 중독·폭발·얼음 둔화, 독·화염·냉기 시너지를 모을수록 그 물약이 더 자주 나옴). 물약이 깨진 자리에 2.5초 장판이 남음',atk:.3,
     stats:{hp:155,maxHp:155,speed:188,dmg:14,rate:2.2,range:290,bspd:480,armor:6},fav:['alchemy','poison','fire'],dis:['sniper'],
     cards:['힘의 물약','숫돌','조준경','전투 본능','튼튼한 체력','다연발'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
   gambler:{lock:true,n:'도박사',role:'동전 도박',d:'동전 앞뒤에 모든 걸 거는 도박사',passive:'동전 던지기: 공격마다 앞면이면 피해 2배, 뒷면이면 0.5배. 행운이 높을수록 앞면이 잘 나옴',atk:.25,
@@ -2278,6 +2278,8 @@ const dShare=k=>{const c=S.dcat||{};let t=0;for(const q in c)t+=c[q];return t>0?
 function clsRows(row){const p=S.p,c=S.cls,r=[];
   if(c==='paladin')r.push(row('신성 오라',`범위 ${Math.round(110*(1+(p.auraM||0)))}, 피해 +${Math.round((p.auraD||0)*100)}%`));
   if(skelMax()>0)r.push(row('해골 병사',`${(S.skel||[]).length} / ${skelMax()}기, 피해 +${Math.round((p.skD||0)*100)}%, 지속 ${12+(p.skL||0)+(has('deathnova')?4:0)}초`));
+  if(c==='elem'&&!has('e_avatar')){const q=routePct(ELEM_TAGS);r.push(row('원소 비율',`화염 ${q[0]}% · 냉기 ${q[1]}% · 번개 ${q[2]}%`,'화염·냉기·번개 시너지를 모을수록 그 원소 공격이 더 자주 나감'));}
+  if(c==='alch'||tag('alchemy')>=1){const q=routePct(POT_TAGS);r.push(row('물약 비율',`산성 ${q[0]}% · 폭발 ${q[1]}% · 얼음 ${q[2]}%`,'독·화염·냉기 시너지를 모을수록 그 물약이 더 자주 나옴'));}
   if(c==='gunner')r.push(row('탄창',`${magN()}발, 재장전 ${reloadT().toFixed(2)}초`,'재장전은 공격 속도와 무관 (빠른 장전·쌍권총·총기 숙련으로만 단축, 최소 0.35초)'));
   if(c==='elem'||tag('elem')>=1||has('elemcoin'))r.push(row('원소 효과 피해','+'+Math.round((elM()-1)*100)+'%'));
   {const c=S.dcat||{};let t=0;for(const k in c)t+=c[k];if(t>0){const l=Object.entries(c).filter(([k,v])=>v/t>=.03).sort((a,b)=>b[1]-a[1]).map(([k,v])=>(DSRC_N[k]||k)+' '+Math.round(v/t*100)+'%');r.push(row('최근 피해 비중',`<span class="swrap">${l.join('<br>')}</span>`,'루트 스탯 카드는 이 비중이 클수록 자주 나옴'));}}
@@ -2289,7 +2291,11 @@ function clsRows(row){const p=S.p,c=S.cls,r=[];
   return r;}
 const potM=()=>(has('f_perfectstone')?1.5:1)*(1+ex('alchemy')*.15)*homeM('alchemy')*(1+.05*mlv('m_alchemy'))*(1+(S.p.ptD||0))*(has('frostflask')?1.2:1)*(has('philosopher')?1.5:1);
 const POTC=['#8ee06a','#ff8a3a','#9fe8ff'];
-function throwPotion(tx,ty,m){const p=S.p;(S.flasks=S.flasks||[]).push({x0:p.x,y0:p.y-10,x1:tx,y1:ty,t:0,k:Math.floor(Math.random()*3),m});
+// 루트 몰아주기: 모은 시너지 쪽 종류가 더 자주 나옴. 물약 = 독(산성)·화염(폭발)·냉기(얼음), 정령사 = 화염·냉기·번개
+const routePick=ts=>{const w=ts.map(t=>1+1.5*Math.min(6,tag(t)));let x=Math.random()*w.reduce((a,b)=>a+b,0);for(let i=0;i<w.length;i++){if((x-=w[i])<0)return i;}return 0;};
+const routePct=ts=>{const w=ts.map(t=>1+1.5*Math.min(6,tag(t))),T=w.reduce((a,b)=>a+b,0);return w.map(v=>Math.round(v/T*100));};
+const POT_TAGS=['poison','fire','frost'],ELEM_TAGS=['fire','frost','thunder'];
+function throwPotion(tx,ty,m){const p=S.p;(S.flasks=S.flasks||[]).push({x0:p.x,y0:p.y-10,x1:tx,y1:ty,t:0,k:routePick(POT_TAGS),m});
   if(has('elixir')&&p.alive){p.hp=Math.min(p.maxHp,p.hp+(has('f_panacea')?5:2)*healM());if(has('f_panacea'))p.barrier=Math.min(barrierMax(),(p.barrier||0)+5);}}
 function potionHit(f){const r=70*(has('magnumopus')?1.3:1)*(1+(S.p.ptR||0))*(tag('alchemy')>=4?1.3:1),dm=pDmg()*f.m*potM(),ks=(has('f_alkahest')||has('magnumopus'))?[0,1,2]:tag('alchemy')>=6?[f.k,(f.k+1+Math.floor(Math.random()*2))%3]:[f.k];
   for(const o of S.en)if(o.alive&&d2(o,f)<(r+o.r)**2){o.potT=S.t+3;if(ks.includes(0))poisonE(o,2);if((ks.includes(2)||has('frostflask'))&&!o.boss)o.slowT=Math.max(o.slowT||0,2);}
@@ -2428,7 +2434,7 @@ function playerFire(tg){
   const big=tag('jackpot')>=2&&p.shots%J()===0;
   let shock=1;if(p.shockT>0){shock=2+2*L('shock');p.shockT=0;}
   if(p.revT>0){shock*=lv3('revenge',2,2.5,3);p.revT=0;}
-  const el=S.cls==='elem'?(has('e_avatar')?3:(p.shots-1)%3):null;
+  const el=S.cls==='elem'?(has('e_avatar')?3:(p.elN??0)):null;if(S.cls==='elem')p.elN=routePick(ELEM_TAGS);
   let lastB=false;if(S.cls==='gunner'){shock*=1.7*(1+(p.lbD||0));p.mag=(p.mag??magN())-1;if(p.mag<=0){lastB=true;if(has('f_deadshot'))S.deadShot=1;}}
   let coin=0;if(coinOn()){const hd=p.cfF||Math.random()<headP()||(has('f_goddess')&&Math.random()<.25);p.cfF=false;coin=hd?1:-1;
     if(hd){p.cfS=(p.cfS||0)+1;shock*=((tag('coin')>=6?3:2)+(has('allin')?1:0))*(1+(p.hdD||0))*homeM('coin');if(has('gb_streak'))shock*=1+Math.min(has('f_streakrun')?20:10,p.cfS-1)*lv3('gb_streak',.1,.15,.2);
@@ -3043,7 +3049,7 @@ function draw(){
   ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.7)';let lastF=0;for(const t of S.tx){if(offV(t.x,t.y))continue;ctx.globalAlpha=Math.min(1,t.life*2.5);if(t.size!==lastF){lastF=t.size;ctx.font=`${t.size}px "Do Hyeon",sans-serif`;}ctx.strokeText(t.s,t.x,t.y);ctx.fillStyle=t.col;ctx.fillText(t.s,t.x,t.y);}
   ctx.globalAlpha=1;
   if(S.p.bearT>0&&S.p.alive){ctx.fillStyle='rgba(201,138,82,.18)';ctx.beginPath();ctx.arc(S.p.x,S.p.y,26,0,TAU);ctx.fill();ctx.strokeStyle='rgba(201,138,82,.55)';ctx.lineWidth=2;ctx.stroke();}
-  if(S.cls==='elem'&&S.p.alive){const P=S.p,c=['#ff5a2a','#5ac8f0','#f0d030'],nx=has('e_avatar')?-1:P.shots%3;for(let i=0;i<3;i++){const a=S.t*2.4+i*2.094,x=P.x+Math.cos(a)*22,y=P.y-10+Math.sin(a)*8,on=i===nx||nx<0;ctx.fillStyle=c[i]+(on?'66':'33');ctx.beginPath();ctx.arc(x,y,on?6:4,0,TAU);ctx.fill();ctx.fillStyle=c[i];ctx.fillRect(Math.round(x)-(on?2:1),Math.round(y)-(on?2:1),on?4:2,on?4:2);}}
+  if(S.cls==='elem'&&S.p.alive){const P=S.p,c=['#ff5a2a','#5ac8f0','#f0d030'],nx=has('e_avatar')?-1:(P.elN??0);for(let i=0;i<3;i++){const a=S.t*2.4+i*2.094,x=P.x+Math.cos(a)*22,y=P.y-10+Math.sin(a)*8,on=i===nx||nx<0;ctx.fillStyle=c[i]+(on?'66':'33');ctx.beginPath();ctx.arc(x,y,on?6:4,0,TAU);ctx.fill();ctx.fillStyle=c[i];ctx.fillRect(Math.round(x)-(on?2:1),Math.round(y)-(on?2:1),on?4:2,on?4:2);}}
   if(S.cls==='gunner'&&S.p.alive){const P=S.p,m=magN(),c=P.rlT>0?0:(P.mag??m),w=m*4;for(let i=0;i<m;i++){ctx.fillStyle='rgba(0,0,0,.45)';ctx.fillRect(P.x-w/2+i*4-.5,P.y+P.r+9-.5,4,5);ctx.fillStyle=i<c?'#ffd76a':'#4a4030';ctx.fillRect(P.x-w/2+i*4,P.y+P.r+9,3,4);}
     if(P.rlT>0){ctx.fillStyle='#ffd76a';ctx.fillRect(P.x-w/2,P.y+P.r+15,w*(1-P.rlT/(P.rlMax||1)),2);}}
   if(S.cls==='paladin'&&S.p.alive){const ar=110*(1+(S.p.auraM||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1);ctx.fillStyle=`rgba(255,230,140,${.07+Math.sin(S.t*3)*.02})`;ctx.beginPath();ctx.arc(S.p.x,S.p.y,ar,0,TAU);ctx.fill();ctx.strokeStyle='rgba(255,230,140,.28)';ctx.lineWidth=2;ctx.stroke();}
