@@ -3441,8 +3441,7 @@ function gameOver(win){
     <span>실제 플레이 시간</span><span>${fmt(Math.floor(S.gt+(S.bt||0)))} <small>(보스전 ${fmt(Math.floor(S.bt||0))})</small></span>
     <span>잡은 보스</span><span>${S.st.bosses||0} / 4</span>${(S.st.btimes||[]).length?`
     <span>보스 처치 시간</span><span>${S.st.btimes.map((t,i)=>`${i+1}장 ${Math.round(t)}초`).join(', ')}</span>
-    <span>보스 속도 보너스</span><span>+${bossSpeedPts().toLocaleString()} <small>(기준 ${BOSS_PAR.join('/')}초, 1초 빠를 때마다 10점)</small></span>`:''}${win?`
-    <span>남은 골드 → 점수</span><span>${S.gold.toLocaleString()} → +${goldPts().toLocaleString()}</span>
+`:''}${win?`
     <span>클리어 보너스</span><span>+${winPts().toLocaleString()}</span>`:''}
     <span>레벨</span><span>${S.lvl}</span>
     <span>처치한 몬스터</span><span>${S.st.kills} <small>(점수 +${killPts().toLocaleString()})</small></span>
@@ -3575,15 +3574,15 @@ function applyMeta(){const p=S.p;p.dmgP=(p.dmgP||0)+.02*mlv('atk');p.rateP=(p.ra
 // 보스 처치 속도 보너스: 보스마다 기준 시간보다 빨리 잡은 1초당 10점. 보스전 중엔 생존 시간이 멈추므로 실제 걸린 시간은 여기서만 반영
 const BOSS_PAR=[90,90,110,140],BOSS_DM=[.55,.75,1,1];
 const bossSpeedPts=()=>(S.st.btimes||[]).reduce((q,t,i)=>q+Math.round(Math.max(0,BOSS_PAR[i]-t)*10),0);
-// 점수: 처치·골드는 많을수록 효율이 줄어드는 완만한 상한(soft cap). 화력이 폭발한 판이 처치 수만으로 점수를 몇 배씩 벌리지 않게 함
-// 처치 2000마리(4000점)까지, 골드 1만(1000점)까지는 그대로, 넘는 부분은 로그로 완만하게. 클리어하면 +3000
+// 점수: 명예의 전당에 저장되는 값(생존 시간·처치·레벨·보스·난이도)만으로 계산 → 예전 기록도 같은 식으로 다시 매김
+// 골드·보스 처치 속도는 빼고(골드 증강 빌드가 점수로 튀지 않게), 처치는 2000마리(4000점)부터 로그로 완만하게. 보스 4마리(클리어)면 +3000
 const softC=(x,c)=>x<=c?x:c*(1+Math.log(x/c));
+const scoreOf=r=>{const b=+r.bosses||0,d=DIFF[r.diff]||DIFF.normal;return Math.round(((+r.time||0)*12+softC((+r.kills||0)*2,4000)+(+r.lvl||0)*30+b*400+(b>=4?3000:0))*(d.sc||1));};
 const killPts=()=>Math.round(softC(S.st.kills*2,4000));
-const goldPts=()=>S.win?Math.round(softC(S.gold/10,1000)):0;
 const winPts=()=>S.win?3000:0;
-function baseScore(gold){return Math.round(effT()*10+killPts()+S.lvl*30+(S.st.bosses||0)*400)+gold+bossSpeedPts();}
-function clearScore(){return Math.round((baseScore(Math.round(softC(S.gold/10,1000)))+3000)*dfM().sc);}
-function runScore(){return Math.round((baseScore(goldPts())+winPts())*dfM().sc);}
+const curRun=(win)=>({time:Math.floor(S.gt),kills:S.st.kills,lvl:S.lvl,bosses:win?4:(S.st.bosses||0),diff:S.diff||'normal'});
+function clearScore(){return scoreOf(curRun(true));}
+function runScore(){return scoreOf(curRun(false));}
 // 메달: 점수 2000점당 1개 × 난이도 메달 배율(md) + 클리어 보너스(cb). 랭킹 점수와 별개로 높은 난이도 보상을 키움
 const medalClear=()=>S.win?(dfM().cb||0):0;
 function runMedals(sc){return Math.floor(sc/2000*(dfM().md||1))+medalClear()+(META.sk.bossMedal?(S.st.bosses||0):0);}
@@ -3717,8 +3716,8 @@ let RDB=null,RMYID=null,BOARD=null,RSTATE='loading',SHEET=false;
 const SHEET_URL='https://script.google.com/macros/s/AKfycbzn75dnRK3s6yixe30pL2Dvc7aQSGCirLQDyYxYFh-FJB8F-ZrNQY42pOdi1CeDga5S/exec';
 const myNick=()=>{try{return localStorage.getItem('chipdungeon_nick')||'';}catch(e){return '';}};
 const dOf=b=>{const c=String(b.cls||'').split('#')[0];return b.diff||(c.includes(':')?c.split(':')[1]:'normal');};
-const calcScore=b=>Math.round((+b.time||0)*10+(+b.kills||0)*2+(+b.lvl||0)*30+(+b.bosses||0)*400)+Math.floor((+b.gold||0)/10);
-function normBoard(list){return list.map(b=>({...b,diff:dOf(b),fx:String(b.cls||'').split('#')[1]||b.fx||'',cls:String(b.cls||'').split('#')[0].split(':')[0],name:String(b.name||''),time:+b.time||0,lvl:+b.lvl||0,kills:+b.kills||0,bosses:+b.bosses||0,comment:String(b.comment||''),score:+b.score||calcScore(b)})).sort((a,b)=>b.score-a.score);}
+const calcScore=b=>scoreOf({...b,diff:dOf(b)});
+function normBoard(list){return list.map(b=>({...b,diff:dOf(b),fx:String(b.cls||'').split('#')[1]||b.fx||'',cls:String(b.cls||'').split('#')[0].split(':')[0],name:String(b.name||''),time:+b.time||0,lvl:+b.lvl||0,kills:+b.kills||0,bosses:+b.bosses||0,comment:String(b.comment||''),score:calcScore(b)})).sort((a,b)=>b.score-a.score);}
 async function loadSheet(){try{const r=await fetch(SHEET_URL,{cache:'no-store'});const j=await r.json();if(!Array.isArray(j))throw 0;
   BOARD=normBoard(j).map(b=>({...b,id:'s_'+b.name+'_'+b.diff}));SHEET=true;RSTATE='on';refreshBoard();}
   catch(e){if(!SHEET){RSTATE='off';refreshBoard();}}}
