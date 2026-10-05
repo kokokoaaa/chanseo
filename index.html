@@ -2051,8 +2051,20 @@ function spawnBoss(i){
    const d=Math.hypot(b.x-cx,b.y-cy);if(d>tr*.7){b.x=cx+(b.x-cx)/d*tr*.7;b.y=cy+(b.y-cy)/d*tr*.7;}}
   S.shake=.5;S.bannerT=3.2;
 }
+// 보스 격파 연출: 슬로 모션, 화면 번쩍임, 겹겹이 퍼지는 고리, 큰 파편, 쿵 하는 저음 + 승리 화음
+function bossFx(e,final){const x=e.x||S.p.x,y=e.y||S.p.y;S.smT=final?1.1:.7;S.flash=Math.max(S.flash||0,.7);S.shake=Math.max(S.shake,.9);
+  const cs=final?['#ffd76a','#ffffff','#ff8be6']:['#ffd76a','#ffffff','#ff9a4a'];
+  for(let i=0;i<4;i++)S.rings.push({x,y,r:10+i*6,max:180+i*110,life:.5+i*.18,col:cs[i%3]});
+  for(let i=0;i<3;i++)burst(x+rand(-30,30),y+rand(-30,30),cs[i],40);
+  for(let i=0;i<24;i++){const a=i*TAU/24;S.bolts.push({x1:x,y1:y,x2:x+Math.cos(a)*rand(120,260),y2:y+Math.sin(a)*rand(120,260),life:.35});}
+  ftext(x,y-(e.r||40)-20,final?'하우스 붕괴!':'보스 격파!','#ffd76a',30);
+  if(!BGM.on)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const t0=AC.currentTime;
+    const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.setValueAtTime(140,t0);o.frequency.exponentialRampToValueAtTime(32,t0+.9);g.gain.setValueAtTime(.45,t0);g.gain.exponentialRampToValueAtTime(.001,t0+1);o.connect(g).connect(AC.destination);o.start(t0);o.stop(t0+1.05);
+    const n=AC.createBuffer(1,AC.sampleRate*.7,AC.sampleRate),d=n.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2.2);const src=AC.createBufferSource(),lp=AC.createBiquadFilter(),g2=AC.createGain();src.buffer=n;lp.type='lowpass';lp.frequency.value=900;g2.gain.value=.5;src.connect(lp).connect(g2).connect(AC.destination);src.start(t0);
+    setTimeout(()=>chime(final?[392,523,659,784,1047,1319]:[523,659,784,1047],'triangle'),450);}catch(err){}}
 function bossDown(e){
-  S.shake=.5;S.st.bosses=(S.st.bosses||0)+1;(S.st.btimes=S.st.btimes||[]).push(Math.round(((S.bt||0)-(S.bStart||0))*10)/10);for(const c of S.dr){if(c.xp)gainXp(c.v);else addGold(c.v);}S.dr=[];S.bossI=-1;S.boss=null;S.arena=null;S.tele=[];S.hz=[];S.pr=S.pr.filter(b=>b.mine);S.chap++;
+  bossFx(e,S.chap+1>=CHAPTERS);
+  S.shake=Math.max(S.shake,.5);S.st.bosses=(S.st.bosses||0)+1;(S.st.btimes=S.st.btimes||[]).push(Math.round(((S.bt||0)-(S.bStart||0))*10)/10);for(const c of S.dr){if(c.xp)gainXp(c.v);else addGold(c.v);}S.dr=[];S.bossI=-1;S.boss=null;S.arena=null;S.tele=[];S.hz=[];S.pr=S.pr.filter(b=>b.mine);S.chap++;
   const p=S.p;p.hp=Math.min(p.maxHp,p.hp+p.maxHp*(META.sk.bossHeal?.6:.3));
   if(S.chap>=CHAPTERS){S.win=true;S.winT=null;S.clT=0;p.inv=99;S.bannerT=0;toast('🏆 하우스를 무너뜨렸다! 남은 적을 모두 처치하세요');}
   else{S.bonusAug++;S.shopPend=true;S.keys=(S.keys||0)+1;toast('보스 격파! 🔑 열쇠 획득. 보상 후 상점이 열립니다');}
@@ -2653,6 +2665,8 @@ function fmtN(v){v=Math.round(v);return v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e4?(v/
 // 실시간 DPS: 최근 5초 동안 입힌 피해 평균
 function trackDps(dt){S.dpsT=(S.dpsT||0)+dt;if(S.dpsT<.5)return;const now=S.st.dmg,q=S.dpsQ||(S.dpsQ=[]);q.push(now-(S.dpsLast??now));S.dpsLast=now;S.dpsT=0;if(q.length>10)q.shift();S.dps=q.reduce((a,b)=>a+b,0)/(q.length*.5);if(q.length>=4)S.dpsMax=Math.max(S.dpsMax||0,S.dps);if(S.dcat)for(const k in S.dcat)S.dcat[k]*=.97;}
 function update(dt){
+  // 보스 격파 연출: 잠깐 슬로 모션
+  if(S.smT>0){S.smT-=dt;dt*=.3;}
   const p=S.p;S.t+=dt;if(S.bossI<0&&!S.win)S.gt+=dt;else if(!S.win)S.bt+=dt;S.round=diffAt(effT());trackDps(dt);
   S.bannerT=Math.max(0,S.bannerT-dt);
   // 최종 보스 격파 후: 새 적은 안 나오고, 남은 잡몹을 다 잡으면(또는 45초가 지나면) 게임 종료. 그동안 무적
