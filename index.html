@@ -3724,6 +3724,8 @@ const COS=[
   {k:'hf_crown',cat:'hof',n:'황제',d:'명예의 전당 이름 앞 왕관 + 황금 테두리',c:4000}
 ];
 const COS_CAT={skin:'캐릭터 색',trail:'탄환 궤적',kill:'처치 효과',aura:'오라',hof:'명예의 전당'};
+// 초기화 환불 총액: 영구 강화 + 산 외형 전부
+const cosSpent=()=>COS.reduce((q,x)=>q+(cosOwn(x.k)?x.c:0),0),allSpent=()=>metaSpent()+cosSpent();
 const cosOwn=k=>!!(META.cos&&META.cos.own&&META.cos.own[k]);
 const cosEq=cat=>{const k=META.cos&&META.cos.eq&&META.cos.eq[cat];return k?COS.find(x=>x.k===k):null;};
 const rainbowCol=(o=0)=>`hsl(${(S?S.t*120:0)+o}deg,90%,65%)`;
@@ -3855,7 +3857,7 @@ function openMeta(){cosPreviewHide();
   <h3>직업 숙련 <small style="color:var(--muted);font-size:13px">직업 봉인을 해제하면 열림 · 그 메커니즘을 쓰는 모든 판에 적용</small></h3><div class="mgrid">${cst}</div>
   <h3>영구 기술 <small style="color:var(--muted);font-size:13px">한 번 사면 계속 적용</small></h3><div class="mgrid">${sk}</div>
   <h3>외형 <small style="color:var(--muted);font-size:13px">능력치 영향 없음 · 눌러서 장착/해제</small></h3>${Object.keys(COS_CAT).map(cat=>`<h3 style="font-size:15px;margin:10px 0 4px;color:var(--muted)">${COS_CAT[cat]}</h3><div class="mgrid">${COS.filter(x=>x.cat===cat).map(x=>{const own=cosOwn(x.k),eq=cosEq(cat)===x;return `<button class="mtile sk ${eq?'max':''} ${own||META.medals>=x.c?'':'poor'}" data-cs="${x.k}"><b>${x.n}</b><span class="md">${x.d}</span><span class="mc">${eq?'✔ 장착 중':own?'장착하기':'🏅 '+x.c}</span></button>`;}).join('')}</div>`).join('')}
-  <button class="btn ghost" id="mReset" ${metaSpent()?'':'disabled'}>↺ 전체 초기화 <small>🏅 ${metaSpent()} 환불</small></button>
+  <button class="btn ghost" id="mReset" ${allSpent()?'':'disabled'}>↺ 전체 초기화 (외형 포함) <small>🏅 ${allSpent()} 환불</small></button>
   <button class="btn primary" id="mBack2">돌아가기</button>`);
   const keepY=()=>{const y=ov.scrollTop;openMeta();ov.scrollTop=y;};
   const buy1=x=>{const c=mcost(x);if(META.medals<c||mlv(x.k)>=x.max||(x.cls&&!clsOpen(x.cls)))return false;META.spent=metaSpent()+c;META.medals-=c;META.lv[x.k]=mlv(x.k)+1;return true;};
@@ -3869,7 +3871,7 @@ function openMeta(){cosPreviewHide();
     if(b.dataset.tap==='1'&&!cosOwn(x.k)){b.dataset.tap='';return;}
     if(!cosOwn(x.k)){if(META.medals<x.c)return;cosPreviewHide();META.medals-=x.c;META.cos.own[x.k]=1;META.cos.eq[x.cat]=x.k;}
     else META.cos.eq[x.cat]=META.cos.eq[x.cat]===x.k?null:x.k;saveMeta();keepY();});
-  $('mReset').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.innerHTML='한 번 더 누르면 초기화 <small>🏅 '+metaSpent()+' 환불</small>';return;}META.medals+=metaSpent();META.spent=0;META.lv={};META.sk={};saveMeta();keepY();};
+  $('mReset').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.innerHTML='한 번 더 누르면 외형까지 초기화 <small>🏅 '+allSpent()+' 환불</small>';return;}META.medals+=allSpent();META.spent=0;META.lv={};META.sk={};META.cos={own:{},eq:{}};saveMeta();keepY();};
   $('mBack').onclick=()=>{cosPreviewHide();startScreen();};$('mBack2').onclick=()=>{cosPreviewHide();startScreen();};
 }
 function beginRun(cls){clearSave();newRun();S.diff=pickDiff;applyClass(cls);applyMeta();S.bonusAug=1+(META.sk.extraAug?1:0);openNext();}
