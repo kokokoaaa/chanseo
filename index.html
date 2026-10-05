@@ -1416,12 +1416,9 @@ const GRADE=u=>u>=.9?{n:'최상',col:'#ffd76a'}:u>=.6?{n:'상',col:'#7fc4f2'}:u>
 // 공격력·최대 체력 % 효과에만 실제로 바뀌는 양을 괄호로 표시 (예: 공격력 +6% (+0.9)). 플레이어 사본에 효과를 적용해 차이를 계산
 // %가 곧 실제 수치인 항목(치명타, 회피, 흡혈, 골드·경험치 획득 등)은 같은 숫자 반복이라 표시 안 함
 const sgn=(v,d)=>(v>=0?'+':'−')+Math.abs(v).toFixed(d).replace(/\.0+$/,'');
-const PV=[['공격력','dmg',(a,b)=>`내 공격력 ${a.toFixed(1)} → ${b.toFixed(1)}, 실제로는 +${((b/a-1)*100).toFixed(1)}%`],['최대 체력','maxHp',(a,b)=>`내 최대 체력 ${Math.round(a)} → ${Math.round(b)}`]];
 // 증강의 최대 체력 % 감소도 실제로 깎이는 양을 괄호로 (n번 적용 기준)
 function hpLoss(f,d,n=1){if(!f||!S||!S.p||!/최대 체력 [−-][\d.]+%/.test(d||''))return '';const c={...S.p};try{for(let k=0;k<n;k++)f(c);}catch(e){return '';}const x=Math.round(c.maxHp-S.p.maxHp);return x?` <small style="opacity:.65">(최대 체력 ${sgn(x,0)})</small>`:'';}
-function withActual(desc,f){const W=a=>a.map(l=>`<div>${l}</div>`).join('');if(!S||!S.p||!f)return W(desc.split(', '));const c={...S.p};try{f(c);}catch(e){}
-  return W(desc.split(', ').map(line=>{const m=PV.find(([k])=>line.startsWith(k));if(!m)return line;if(!m)return line;const [,key,fmt]=m,g=o=>{if(key!=='dmg'&&key!=='maxHp')return o[key];const P0=S.p;S.p=o;try{if(key==='maxHp'){hpSync();return o.maxHp;}return pDmg();}catch(e){return null;}finally{S.p=P0;}},a=g(S.p)??0,b=g(c)??a;if(a===b)return line;
-    return `${line} <small style="opacity:.65">(${fmt(a,b)})</small>`;}));}
+function withActual(desc){return desc.split(', ').map(l=>`<div>${l}</div>`).join('');}
 // 증강 미리보기: 이 증강을 얻었을 때(★2) 주요 스탯이 얼마나 바뀌는지. 잠깐 적용해서 계산한 뒤 그대로 되돌림
 const PREV_ST=[['공격력',()=>pDmg(),1],['공격 속도',()=>pRate(),2,'/초'],['최대 체력',()=>(hpSync(),S.p.maxHp),0],['방어력',()=>armorEff(),0],['회피',()=>dodgeC()*100,1,'%'],['치명타 확률',()=>critC()*100,1,'%'],['치명타 피해',()=>critMul()*100,0,'%'],['이동 속도',()=>moveSpd(),0],['사거리',()=>S.p.range,0],['탄속',()=>S.p.bspd,0],['관통',()=>S.p.pierce,0],['탄환',()=>S.p.multi,0,'발'],['흡혈',()=>S.p.lifesteal*100,1,'%'],['초당 재생',()=>S.p.regen,1],['행운',()=>LK(),1],['골드 획득',()=>S.p.goldM*100,0,'%'],['대시 재사용',()=>dashCdVal(),2,'초']];
 function augPreview(a){
@@ -4354,7 +4351,7 @@ function renderStats(){
   if(p.dwT>0)bonus.push(`죽음의 소원 +${Math.round(12*(p.dwS||0))}%`);
   if(raw>RATE_CAP())bonus.push(`공속 초과 ×${(1+(raw/RATE_CAP()-1)*.5).toFixed(2)}`);
   const atk=[
-    row('공격력',pDmg().toFixed(1),`기본 ${p.dmg.toFixed(1)} × (1 + 보너스 합계 ${Math.round((p.dmgP||0)*100)}%)`+(bonus.length?`, ${bonus.join(', ')}`:'')+(()=>{const d0=pDmg(),P0=S.p,g=o=>{S.p=o;try{return pDmg();}finally{S.p=P0;}},a=g({...p,dmg:p.dmg+1})-d0,b=g({...p,dmgP:(p.dmgP||0)+.01})-d0,f=x=>`+${x.toFixed(2)} (+${(x/d0*100).toFixed(2)}%)`;return `<br><span style="color:var(--brass)">실제 공격력 변화: 공격력 +1 → ${f(a)}, 공격력 +1% → ${f(b)}</span>`;})()),
+    row('공격력',pDmg().toFixed(1),`기본 ${p.dmg.toFixed(1)} × (1 + 보너스 합계 ${Math.round((p.dmgP||0)*100)}%)`+(bonus.length?`, ${bonus.join(', ')}`:'')),
     row('공격 속도',rate.toFixed(2)+`회/초 <small>/ ${RATE_CAP()}</small>`,raw>RATE_CAP()?`상한 초과 ${Math.round((raw/RATE_CAP()-1)*100)}% → 공격력 ×${(1+(raw/RATE_CAP()-1)*.5).toFixed(2)}`:''),
     row('치명타 확률',pct(critC())+' <small>/ 100%</small>',critRaw()>CRIT_CAP?`초과 ${Math.round((critRaw()-CRIT_CAP)*100)}% → 치명타 피해 +${Math.round((critRaw()-CRIT_CAP)*50)}%`:critFull()?'최대치. 치명타 확률 카드가 더 안 나와요':''),
     row('치명타 피해',pct(critMul())+' <small>/ 500%</small>',critMFull()?'최대치 500%. 치명타 피해 카드가 더 안 나와요':''),
