@@ -1997,6 +1997,8 @@ const dfM=()=>DIFF[S.diff]||DIFF.normal;
 // 난이도 해금: 바로 앞 난이도를 클리어해야 다음 난이도가 열림
 const DKEYS=['normal','hard','hell','god','nightmare'];
 const endless=()=>!!dfM().endless;
+// 한 방 상한 (최대 체력 대비). 악몽은 10분부터 1분마다 +3%, 최대 85% → 풀피면 어떤 잡몹 공격도 한 방에 죽지 않음
+const ocOf=()=>{const b=dfM().oc||.35;return endless()?Math.min(.85,b+.03*nmMin()):b;};
 // 악몽 단계 배율: 5단계(4장 이후)부터 단계마다 보스 체력 ×2.2, 피해 ×1.15
 const diffOpen=k=>{const i=DKEYS.indexOf(k);return i<=0||!!(META.clears||{})[DKEYS[i-1]];};
 let pickDiff=(()=>{try{return localStorage.getItem('chanseo_diff')||'normal';}catch(e){return 'normal';}})();
@@ -2442,7 +2444,7 @@ function hurtP(amt,src){
   {const bR=bossOn()&&(!src||src===S.boss)?(S.boss.rage||0):-1,ar=armorEff()*(bR<0?1:1-Math.min(.8,(dfM().pen||.2)+.12*bR));amt*=100/(100+ar);}
   // 한 방 즉사 방지: 보스 몸통 공격을 뺀 모든 공격은 한 번에 최대 체력의 일정 비율까지만 (일반 35% · 어려움 45% · 지옥 55% · 신 65%)
   // 최종 광폭(6단계, 제한 시간 + 2분 30초) 이후에는 즉사 방지 해제 → 최소 딜 스펙이 있어야 클리어
-  if((src!==S.boss||!src)&&!(bossOn()&&(S.boss.rage||0)>=6)){const oc=(dfM().oc||.35)+.05*nmMin();if(oc<1)amt=Math.min(amt,p.maxHp*oc);}
+  if((src!==S.boss||!src)&&!(bossOn()&&(S.boss.rage||0)>=6)){const oc=ocOf();if(oc<1)amt=Math.min(amt,p.maxHp*oc);}
   p.noHitT=0;
   // 가드 6: 맞을 때마다 방어 전 피해의 30% × (1 + 방어력/100) 반사, 보호막이 있으면 2배. 보스전에서는 보스에게
   if(tag('guard')>=6){const t=src&&src.alive?src:bossOn()&&!S.boss.air&&!S.boss.phase?S.boss:nearestE(p,150);if(t)dmgE(t,raw*.3*(p.barrier>0?2:1)*(1+armorEff()/100),'#9fd3ff');}
@@ -3253,7 +3255,7 @@ function hud(){
   if(S.spin){lv.classList.add('on');lv.querySelectorAll('span').forEach((x,i)=>{x.textContent=S.spin.t<.3+i*.2?SYM[Math.floor(Math.random()*SYM.length)]:S.spin.res[i];});}
   else if(S.liveT>0&&play){S.liveT-=1/60;lv.classList.add('on');lv.querySelectorAll('span').forEach((x,i)=>x.textContent=S.liveRes[i]);}
   else lv.classList.remove('on');
-  const bf=[];if(endless()&&nmMin()>0)bf.push(`<span style="color:#ff4f6a">☠ 악몽 압박 · 적 피해 ×${nmDm().toFixed(1)} · 회복 −${Math.round((1-nmHeal())*100)}% · 한 방 상한 ${Math.min(100,Math.round(((dfM().oc||.35)+.05*nmMin())*100))}%</span>`);if(endless()&&S.nmB)bf.push(`<span style="color:#ffd76a">✦ 악몽 축복 ${S.nmB}중첩 (공격력 +${S.nmB*15}%)</span>`);if(S.win&&S.winT==null){const n=S.en.filter(e=>e.alive&&!e.boss).length;bf.push(`<span style="color:#ffd76a">🧹 남은 적 ${n} · ${Math.max(0,45-Math.floor(S.clT||0))}초</span>`);}if(S.buffT.jack>0)bf.push(`<span style="color:#ffd76a">잭팟 ${S.buffT.jack.toFixed(1)}</span>`);if(S.buffT.atk>0)bf.push(`<span style="color:#ffb347">공격력 +30% ${S.buffT.atk.toFixed(1)}</span>`);
+  const bf=[];if(endless()&&nmMin()>0)bf.push(`<span style="color:#ff4f6a">☠ 악몽 압박 · 적 피해 ×${nmDm().toFixed(1)} · 회복 −${Math.round((1-nmHeal())*100)}% · 한 방 상한 ${Math.round(ocOf()*100)}%</span>`);if(endless()&&S.nmB)bf.push(`<span style="color:#ffd76a">✦ 악몽 축복 ${S.nmB}중첩 (공격력 +${S.nmB*15}%)</span>`);if(S.win&&S.winT==null){const n=S.en.filter(e=>e.alive&&!e.boss).length;bf.push(`<span style="color:#ffd76a">🧹 남은 적 ${n} · ${Math.max(0,45-Math.floor(S.clT||0))}초</span>`);}if(S.buffT.jack>0)bf.push(`<span style="color:#ffd76a">잭팟 ${S.buffT.jack.toFixed(1)}</span>`);if(S.buffT.atk>0)bf.push(`<span style="color:#ffb347">공격력 +30% ${S.buffT.atk.toFixed(1)}</span>`);
   if(S.buffT.vuln>0)bf.push(`<span style="color:#ff6060">받는 피해 +50% ${S.buffT.vuln.toFixed(1)}</span>`);if(S.buffT.slow>0)bf.push(`<span style="color:#9fd3ff">둔화 ${S.buffT.slow.toFixed(1)}</span>`);
   if(S.ev){const E=EVENTS[S.ev.k],left=Math.max(0,S.ev.T-S.ev.t).toFixed(0);const ex=S.ev.k==='hunt'?` 남은 ${S.en.filter(e=>e.alive&&e.hunt).length}`:S.ev.k==='shrine'&&S.ev.ch>0?` ${Math.round(S.ev.ch/2.5*100)}%`:'';bf.push(`<span style="color:${E.col}">${E.icon} ${E.n}${ex} ${left}</span>`);}
   if(S.bless&&S.bless.t>0)bf.push(`<span style="color:#9fd3ff">${S.bless.n} ${S.bless.t.toFixed(0)}</span>`);
