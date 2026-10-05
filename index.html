@@ -189,7 +189,7 @@ h3{font-family:'Do Hyeon',sans-serif;font-weight:400;font-size:19px;margin:18px 
 .card{background:var(--ivory);color:var(--ink);border:3px solid var(--rc);border-radius:10px;padding:12px;text-align:left;cursor:pointer;font:inherit;line-height:1.45;font-size:15px}
 .card:hover{transform:translateY(-2px)}
 #dsel{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}#dsel .btn{margin:0;min-height:48px;align-self:stretch;padding:8px 4px}
-.dtabs{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin:4px 0 10px}.dtabs .btn,.dtabs .btn.primary{margin:0!important;padding:6px 2px!important;font-size:14px!important;min-height:0}#dsel .btn,#dsel .btn.primary{margin:0!important;padding:8px 4px!important;font-size:17px!important}
+.dtabs{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:4px 0 10px}.dtabs .btn,.dtabs .btn.primary{margin:0!important;padding:6px 2px!important;font-size:14px!important;min-height:0}#dsel .btn,#dsel .btn.primary{margin:0!important;padding:8px 4px!important;font-size:17px!important}
 .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:6px 0 10px}.tabs .btn,.tabs .btn.primary{margin:0!important;padding:8px 4px!important;font-size:14px!important;min-height:48px;line-height:1.25}.tabs .btn small{font-size:11px!important}
 .card{position:relative}
 @keyframes cPop{0%{transform:scale(.55) rotate(-5deg);opacity:0}60%{transform:scale(1.1) rotate(1deg);opacity:1}100%{transform:scale(1)}}
@@ -567,7 +567,7 @@ const BIO=(()=>{const pat=[],decoC={};
     const w=document.createElement('canvas');w.width=s[0];w.height=s[1];const g=w.getContext('2d',{willReadFrequently:true});(tree?BART.T:BART.D)[k](g);ART.outline(w);c.getContext('2d').drawImage(w,0,0);decoC[k]=c;return c;}
   return {ground,deco};
 })();
-function biomeIdx(){return S.bossI===3?4:Math.min(3,S.chap||0);}
+function biomeIdx(){return S.bossI%4===3?4:Math.min(3,S.chap||0)%4;}
 function hash(a,b){let h=(a*374761393+b*668265263)^0x5bf03635;h=(h^(h>>>13))*1274126177;return ((h^(h>>>16))>>>0)/4294967295;}
 const DC=260;
 function decoAt(cx,cy,q){const h=hash(cx*3+q,cy*7-q);if(h>.62)return null;const px2=cx*DC+hash(cx+11*q,cy+5)*DC,py2=cy*DC+hash(cx-7,cy+13*q)*DC;
@@ -1947,10 +1947,14 @@ const AFFIX={
 const DIFF={normal:{oc:.35,md:1,cb:5,rg:.12,pen:.2,n:'일반',col:'#cfe3c4',hp:1.1,bhp:1,dm:1,sp:1,el:0,sc:1,bc:22},
   hard:{oc:.45,md:1.35,cb:12,rg:.18,pen:.3,n:'어려움',col:'#ffb347',xp:2.5,hp:2.5,bhp:1.7,dm:1.6,sp:.8,el:.12,sc:1.5},
   hell:{oc:.55,md:1.6,cb:25,rg:.25,pen:.4,n:'지옥',col:'#ff5a3a',xp:3.4,hp:3.9,bhp:2.4,dm:2.1,sp:.7,el:.2,sc:2.2},
-  god:{oc:.65,md:1.6,cb:40,rg:.3,pen:.45,n:'신',col:'#e9c4ff',xp:4.5,hp:6,bhp:3.4,dm:2.8,sp:.6,el:.3,sc:3.2}};
+  god:{oc:.65,md:1.6,cb:40,rg:.3,pen:.45,n:'신',col:'#e9c4ff',xp:4.5,hp:6,bhp:3.4,dm:2.8,sp:.6,el:.3,sc:3.2},
+  // 악몽: 시간 제한 없는 무한 모드. 2.5분마다 보스가 계속 나오고(1~4장 보스 반복), 단계가 오를수록 보스·몹이 강해짐. 죽을 때까지 점수 경쟁
+  nightmare:{oc:.7,md:2,cb:0,rg:.33,pen:.5,n:'악몽',col:'#ff4f6a',xp:5,hp:7,bhp:3.8,dm:3.1,sp:.55,el:.35,sc:4,endless:true}};
 const dfM=()=>DIFF[S.diff]||DIFF.normal;
 // 난이도 해금: 바로 앞 난이도를 클리어해야 다음 난이도가 열림
-const DKEYS=['normal','hard','hell','god'];
+const DKEYS=['normal','hard','hell','god','nightmare'];
+const endless=()=>!!dfM().endless;
+// 악몽 단계 배율: 5단계(4장 이후)부터 단계마다 보스 체력 ×1.6, 피해 ×1.15
 const diffOpen=k=>{const i=DKEYS.indexOf(k);return i<=0||!!(META.clears||{})[DKEYS[i-1]];};
 let pickDiff=(()=>{try{return localStorage.getItem('chanseo_diff')||'normal';}catch(e){return 'normal';}})();
 // 장별 추가 난이도. 3장부터 일반 몹 체력·피해·스폰량, 정예 확률이 더 오름 (보스 체력은 제외)
@@ -2045,8 +2049,8 @@ function spawnBoss(i){
     const far=S.en.filter(e=>!vis(e)&&!e.elite).sort((a,b)=>d2(b,p0)-d2(a,p0)),drop=new Set(far.slice(0,Math.max(0,S.en.length-kN)));S.en=S.en.filter(e=>!drop.has(e));}
   S.p.hp=Math.min(S.p.maxHp,S.p.hp+S.p.maxHp*.3);
   S.bossI=i;S.tele=[];S.hz=[];S.bStart=S.bt||0;
-  const a=Math.random()*TAU;spawnAt(BOSSES[i].type,clamp(S.p.x+Math.cos(a)*300,60,WW-60),clamp(S.p.y+Math.sin(a)*300,60,WH-60));
-  const b=S.en[S.en.length-1];b.dmg*=BOSS_DM[i]||1;b.maxHp*=BOSS_HPM[i]||1;b.hp=b.maxHp;b.bk=0;go(b,'intro');S.boss=b;
+  const j=i%4,lp=Math.max(0,i-3);const a=Math.random()*TAU;spawnAt(BOSSES[j].type,clamp(S.p.x+Math.cos(a)*300,60,WW-60),clamp(S.p.y+Math.sin(a)*300,60,WH-60));
+  const b=S.en[S.en.length-1];b.dmg*=(BOSS_DM[j]||1)*Math.pow(1.15,lp);b.maxHp*=(BOSS_HPM[j]||1)*Math.pow(1.6,lp);b.hp=b.maxHp;b.bk=0;go(b,'intro');S.boss=b;
   // 보스 결계: 전체 맵의 약 1/4 넓이(3000×3000) 사각 구역. 분노(체력 50%) 시 85%로, 광폭화마다 5%씩 좁아짐. r = 한 변의 절반
   {const tr=1500,cx=clamp(S.p.x,tr,WW-tr),cy=clamp(S.p.y,tr,WH-tr);S.arena={x:cx,y:cy,r:tr*1.3,tr};
    const d=Math.hypot(b.x-cx,b.y-cy);if(d>tr*.7){b.x=cx+(b.x-cx)/d*tr*.7;b.y=cy+(b.y-cy)/d*tr*.7;}}
@@ -2064,10 +2068,10 @@ function bossFx(e,final){const x=e.x||S.p.x,y=e.y||S.p.y;S.smT=final?1.1:.7;S.fl
     const n=AC.createBuffer(1,AC.sampleRate*.7,AC.sampleRate),d=n.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2.2);const src=AC.createBufferSource(),lp=AC.createBiquadFilter(),g2=AC.createGain();src.buffer=n;lp.type='lowpass';lp.frequency.value=900;g2.gain.value=.5;src.connect(lp).connect(g2).connect(AC.destination);src.start(t0);
     setTimeout(()=>chime(final?[392,523,659,784,1047,1319]:[523,659,784,1047],'triangle'),450);}catch(err){}}
 function bossDown(e){
-  bossFx(e,S.chap+1>=CHAPTERS);
+  bossFx(e,S.chap+1>=CHAPTERS&&!endless());
   S.shake=Math.max(S.shake,.5);S.st.bosses=(S.st.bosses||0)+1;(S.st.btimes=S.st.btimes||[]).push(Math.round(((S.bt||0)-(S.bStart||0))*10)/10);for(const c of S.dr){if(c.xp)gainXp(c.v);else addGold(c.v);}S.dr=[];S.bossI=-1;S.boss=null;S.arena=null;S.tele=[];S.hz=[];S.pr=S.pr.filter(b=>b.mine);S.chap++;
   const p=S.p;p.hp=Math.min(p.maxHp,p.hp+p.maxHp*(META.sk.bossHeal?.6:.3));
-  if(S.chap>=CHAPTERS){S.win=true;S.winT=null;S.clT=0;p.inv=99;S.bannerT=0;toast('🏆 하우스를 무너뜨렸다! 남은 적을 모두 처치하세요');}
+  if(S.chap>=CHAPTERS&&!endless()){S.win=true;S.winT=null;S.clT=0;p.inv=99;S.bannerT=0;toast('🏆 하우스를 무너뜨렸다! 남은 적을 모두 처치하세요');}
   else{S.bonusAug++;S.shopPend=true;S.keys=(S.keys||0)+1;toast('보스 격파! 🔑 열쇠 획득. 보상 후 상점이 열립니다');}
 }
 function go(e,st){e.bst=st;e.bt=0;e.f=1;}
@@ -2082,7 +2086,7 @@ function keepDist(e,o,dt,lo,hi){const {p,d,sp}=o;if(d<lo)stepTo(e,e.x*2-p.x,e.y*
 const nearP=r=>{const p=S.p,a=Math.random()*TAU,k=Math.random()*r;return [clamp(p.x+Math.cos(a)*k,30,WW-30),clamp(p.y+Math.sin(a)*k,30,WH-30)];};
 // 광폭화: 기준 시간을 넘기면 30초마다 단계 상승 (최대 5단계). 단계당 공격력 +12%(일반)~+30%(신), 이동 속도 +5%, 결계 −5%, 방어력 무시 +12%, 내 회복량 −15%
 // 보스 체력이 높은 난이도일수록 기준 시간도 늘어남 (어려움 ×1.35, 지옥 ×1.7, 신 ×2.2)
-const bossPar=()=>Math.round((BOSS_PAR[S.bossI]||120)*(1+(dfM().bhp-1)*.5));
+const bossPar=()=>Math.round((BOSS_PAR[S.bossI%4]||120)*(1+(dfM().bhp-1)*.5));
 function bossRage(e){const el=(S.bt||0)-(S.bStart||0),par=bossPar();return el<par?0:Math.min(20,1+Math.floor((el-par)/30));}
 function bossAI(e,dt){
   const p=S.p,T=ET[e.type],dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1,ph2=e.hp<e.maxHp*.5;
@@ -2207,7 +2211,7 @@ function drawBossUI(){
     ctx.fillStyle='rgba(0,0,0,.65)';ctx.fillRect(bx-3,by-3,bw+6,20);ctx.fillStyle=e.ph2?'#ff4040':'#c8323a';ctx.fillRect(bx,by,bw*Math.max(0,e.hp/e.maxHp),14);
     ctx.strokeStyle='#d6a94a';ctx.lineWidth=2;ctx.strokeRect(bx-3,by-3,bw+6,20);
     ctx.font='17px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.8)';const el=(S.bt||0)-(S.bStart||0),par=bossPar(),s=`${ET[e.type].n}${e.ph2?' (분노)':''}${e.rage>=6?` 💀최종 광폭 ${e.rage-5}`:e.rage?` 🔥광폭화 ${e.rage} · 최종 광폭까지 ${Math.max(0,Math.ceil(par+150-el))}초`:` · 광폭화까지 ${Math.max(0,Math.ceil(par-el))}초`}`;ctx.strokeText(s,W/2,by-6);ctx.fillStyle='#f1e7cf';ctx.fillText(s,W/2,by-6);}
-  if(S.bannerT>0&&S.bossI>=0){const B=BOSSES[S.bossI],a=Math.max(0,Math.min(1,S.bannerT*1.5,(3.2-S.bannerT)*4));ctx.globalAlpha=a;
+  if(S.bannerT>0&&S.bossI>=0){const B0=BOSSES[S.bossI%4],B=S.bossI>=4?{...B0,ch:'악몽 '+(S.bossI+1)+'단계'}:B0,a=Math.max(0,Math.min(1,S.bannerT*1.5,(3.2-S.bannerT)*4));ctx.globalAlpha=a;
     ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,H*.26,W,96);ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillStyle='#d6a94a';ctx.font='18px "Do Hyeon",sans-serif';ctx.fillText(`${B.ch} 보스 · ${B.t}`,W/2,H*.26+20);
     ctx.fillStyle='#ff6060';ctx.font=`${W<500?32:40}px "Do Hyeon",sans-serif`;ctx.fillText(ET[B.type].n,W/2,H*.26+52);
@@ -3219,7 +3223,7 @@ function hud(){
   $('hpf').style.width=(p.hp/p.maxHp*100)+'%';
   $('bpf').style.width=Math.min(100,p.barrier/p.maxHp*100)+'%';
   $('hpt').textContent=`${Math.ceil(p.hp)} / ${Math.round(p.maxHp)}${p.barrier>=1?' +'+Math.ceil(p.barrier):''}`;
-  $('round').innerHTML=`${S.diff&&S.diff!=='normal'?`<span style="color:${dfM().col}">${dfM().n}</span> `:''}${S.bossI>=0?`<span style="color:#ff6060">⏸ ${mm}:${ss} 보스전</span>`:`${mm}:${ss}<span style="color:var(--muted)"> / 10:00</span>`} <span style="color:var(--brass)">${S.bossI===3?'마지막 장':Math.min(4,S.chap+1)+'장'}</span> <span style="color:var(--muted)">${BIOMES[S.biome||0].n}</span> <span style="color:${S.round>12?'#ff6060':S.round>6?'#ffb347':'var(--muted)'}">위협 ${S.round.toFixed(1)}</span>`;
+  $('round').innerHTML=`${S.diff&&S.diff!=='normal'?`<span style="color:${dfM().col}">${dfM().n}</span> `:''}${S.bossI>=0?`<span style="color:#ff6060">⏸ ${mm}:${ss} 보스전</span>`:`${mm}:${ss}<span style="color:var(--muted)">${endless()?'':' / 10:00'}</span>`} <span style="color:var(--brass)">${endless()?(S.chap+1)+'단계':S.bossI===3?'마지막 장':Math.min(4,S.chap+1)+'장'}</span> <span style="color:var(--muted)">${BIOMES[S.biome||0].n}</span> <span style="color:${S.round>12?'#ff6060':S.round>6?'#ffb347':'var(--muted)'}">위협 ${S.round.toFixed(1)}</span>`;
   $('left').innerHTML=`처치 ${S.st.kills} <span style="color:#ff9a6a">· DPS ${fmtN(S.dps||0)} <small style="opacity:.75">(최대 ${fmtN(S.dpsMax||0)})</small></span> <span style="color:var(--brass)">· 종합 점수 : ${clearScore().toLocaleString()}점</span>`;
   $('gold').textContent=`${S.gold} 골드${S.keys?' · 🔑'+S.keys:''}`;
   $('lv').textContent=`레벨 ${S.lvl}`;
@@ -3493,17 +3497,22 @@ function slotResolve(r){
 }
 function gameOver(win){
   win=win===true;S.mode='over';joy=null;clearSave();
-  let unlocked='';if(win){META.clears=META.clears||{};const d=S.diff||'normal',first=!META.clears[d];META.clears[d]=(META.clears[d]||0)+1;const nx=DKEYS[DKEYS.indexOf(d)+1];if(first&&nx)unlocked=DIFF[nx].n;if((d==='god'||d==='hell')&&Object.values(CLASSES).some(c=>c.lock)){META.tk=(META.tk||0)+1;unlocked=(unlocked?unlocked+' 난이도 열림 · ':'')+'🎟 직업 봉인 해제권 +1';}}
+  // 봉인 해제권은 아직 봉인된 직업이 남아 있을 때만 (이미 가진 해제권 수만큼은 빼고)
+  const tkNeed=()=>Object.keys(CLASSES).filter(k=>CLASSES[k].lock&&!clsOpen(k)).length-(META.tk||0);
+  let unlocked='';
+  // 악몽: 10분 이상 버티면 봉인 해제권 2장
+  if(endless()&&S.gt>=600&&tkNeed()>0){const g=Math.min(2,tkNeed());META.tk=(META.tk||0)+g;unlocked='🎟 직업 봉인 해제권 +'+g;}
+  if(win){META.clears=META.clears||{};const d=S.diff||'normal',first=!META.clears[d];META.clears[d]=(META.clears[d]||0)+1;const nx=DKEYS[DKEYS.indexOf(d)+1];if(first&&nx)unlocked=DIFF[nx].n;if((d==='god'||d==='hell')&&tkNeed()>0){META.tk=(META.tk||0)+1;unlocked=(unlocked?unlocked+' 난이도 열림 · ':'')+'🎟 직업 봉인 해제권 +1';}}
   const sec=Math.floor(S.gt),score=runScore(),medals=runMedals(score);META.medals+=medals;META.total+=medals;saveMeta();
   if(sec>best){best=sec;try{localStorage.setItem('chipdungeon_best_v5',String(best));}catch(e){}}
   const fmt=x=>`${Math.floor(x/60)}분 ${x%60}초`;
-  show(`${unlocked?`<div class="medal" style="justify-content:center"><span>🔓 <b>${unlocked}</b>${unlocked.includes('봉인 해제권')?'':' 난이도가 열렸습니다!'}</span></div>`:''}${win?`<h2>🏆 클리어!</h2><p class="sub">10분을 버티고 하우스 딜러를 쓰러뜨렸습니다. 보스전에 ${fmt(Math.floor(S.bt))} 걸렸어요.</p>`:`<h2>쓰러졌습니다</h2><p class="sub">${Math.min(4,S.chap+1)}장에서 ${fmt(sec)} 버텼습니다.${S.bossI>=0?` (${ET[BOSSES[S.bossI].type].n}에게 패배)`:''}</p>`}
+  show(`${unlocked?`<div class="medal" style="justify-content:center"><span>🔓 <b>${unlocked}</b>${unlocked.includes('봉인 해제권')?'':' 난이도가 열렸습니다!'}</span></div>`:''}${win?`<h2>🏆 클리어!</h2><p class="sub">10분을 버티고 하우스 딜러를 쓰러뜨렸습니다. 보스전에 ${fmt(Math.floor(S.bt))} 걸렸어요.</p>`:`<h2>${endless()?'악몽 '+(S.chap+1)+'단계 도달':'쓰러졌습니다'}</h2><p class="sub">${endless()?`보스 ${S.st.bosses||0}마리를 잡고`:Math.min(4,S.chap+1)+'장에서'} ${fmt(sec)} 버텼습니다.${S.bossI>=0?` (${ET[BOSSES[S.bossI%4].type].n}에게 패배)`:''}</p>`}
   <div class="medal"><span>최종 점수 <b>${score.toLocaleString()}</b></span><span>🏅 메달 <b>+${medals}</b> <small>${medalClear()?`(클리어 보너스 +${medalClear()} 포함) `:''}(보유 ${META.medals})</small></span></div>
   <div class="stats">
     <span>난이도</span><span>${dfM().n}${dfM().sc>1?` (점수 ×${dfM().sc})`:''}</span>
     <span>생존 시간</span><span>${fmt(sec)}</span>
     <span>실제 플레이 시간</span><span>${fmt(Math.floor(S.gt+(S.bt||0)))} <small>(보스전 ${fmt(Math.floor(S.bt||0))})</small></span>
-    <span>잡은 보스</span><span>${S.st.bosses||0} / 4</span>${(S.st.btimes||[]).length?`
+    <span>잡은 보스</span><span>${S.st.bosses||0}${endless()?"":" / 4"}</span>${(S.st.btimes||[]).length?`
     <span>보스 처치 시간</span><span>${S.st.btimes.map((t,i)=>`${i+1}장 ${Math.round(t)}초`).join(', ')}</span>
 `:''}${win?`
     <span>클리어 보너스</span><span>+${winPts().toLocaleString()}</span>`:''}
@@ -3544,7 +3553,7 @@ function startScreen(){
   ${sv?`<button class="btn primary" id="cont">이어하기 (${CLASSES[sv.s.cls||'knight'].n})<br><small style="color:var(--ink)">${Math.floor(sv.s.gt/60)}분 ${Math.floor(sv.s.gt%60)}초, 레벨 ${sv.s.lvl}, 증강 ${sv.augs.length}개</small></button><h3>새 게임</h3>`:''}
   <h3>캐릭터 선택</h3><div class="clsgrid">${cards}</div>
   <div class="cdet" id="cdet">${clsDetail(pickCls)}</div>
-  <h3>난이도</h3><div class="btnrow" id="dsel">${DKEYS.map(k=>{const op=diffOpen(k),cl=(META.clears||{})[k];return `<button class="btn ${k===pickDiff?'primary':''}" data-diff="${k}" ${op?'':'disabled'} title="${op?'':DIFF[DKEYS[DKEYS.indexOf(k)-1]].n+' 클리어 시 열림'}">${op?'':'🔒 '}${DIFF[k].n}${cl?' ✔':''}<small>메달 ×${Math.round((DIFF[k].sc||1)*(DIFF[k].md||1)*10)/10} · 클리어 +${DIFF[k].cb||0}</small></button>`;}).join('')}</div>
+  <h3>난이도</h3><div class="btnrow" id="dsel">${DKEYS.map(k=>{const op=diffOpen(k),cl=(META.clears||{})[k];return `<button class="btn ${k===pickDiff?'primary':''}" data-diff="${k}" ${op?'':'disabled'} title="${op?'':DIFF[DKEYS[DKEYS.indexOf(k)-1]].n+' 클리어 시 열림'}">${op?'':'🔒 '}${DIFF[k].n}${cl?' ✔':''}<small>${DIFF[k].endless?'시간 제한 없음 · 메달 ×'+Math.round((DIFF[k].sc||1)*(DIFF[k].md||1)*10)/10:`메달 ×${Math.round((DIFF[k].sc||1)*(DIFF[k].md||1)*10)/10} · 클리어 +${DIFF[k].cb||0}`}</small></button>`;}).join('')}</div>
   ${diffOpen(DKEYS[DKEYS.length-1])?'':`<p class="sub" style="margin-top:4px">${DIFF[DKEYS.find(k=>!diffOpen(k))].n} 난이도는 ${DIFF[DKEYS[DKEYS.indexOf(DKEYS.find(k=>!diffOpen(k)))-1]].n} 난이도를 클리어하면 열려요.</p>`}
   <button class="btn primary" id="go">${CLASSES[pickCls].n}(으)로 시작${sv?' (저장 삭제)':''}</button>
   <button class="btn ghost" id="meta">🏅 영구 강화 <small>보유 메달 ${META.medals}개</small></button>
@@ -3662,7 +3671,7 @@ function applyMeta(){const p=S.p;p.dmgP=(p.dmgP||0)+.02*mlv('atk');p.rateP=(p.ra
   p.xpM=1+.03*mlv('xp');p.goldM+=.05*mlv('gold');S.gold+=25*mlv('sgold');p.luck+=mlv('luck');if(META.sk.token)p.token=true;if(META.sk.key)S.keys=1;if(META.sk.startCard){S.pendingLv++;S.boost=true;}}
 // 보스 처치 속도 보너스: 보스마다 기준 시간보다 빨리 잡은 1초당 10점. 보스전 중엔 생존 시간이 멈추므로 실제 걸린 시간은 여기서만 반영
 const BOSS_PAR=[90,90,110,140],BOSS_DM=[.55,.75,1,1];
-const bossSpeedPts=()=>(S.st.btimes||[]).reduce((q,t,i)=>q+Math.round(Math.max(0,BOSS_PAR[i]-t)*10),0);
+const bossSpeedPts=()=>(S.st.btimes||[]).reduce((q,t,i)=>q+Math.round(Math.max(0,BOSS_PAR[i%4]-t)*10),0);
 // 점수: 명예의 전당에 저장되는 값(생존 시간·처치·레벨·보스·난이도)만으로 계산 → 예전 기록도 같은 식으로 다시 매김
 // 골드·보스 처치 속도는 빼고(골드 증강 빌드가 점수로 튀지 않게), 처치는 2000마리(4000점)부터 로그로 완만하게. 보스 4마리(클리어)면 +3000
 const softC=(x,c)=>x<=c?x:c*(1+Math.log(x/c));
@@ -4142,7 +4151,7 @@ function hubBody(m,g){
   const tab=m.tab||'stat',k=S.keys||0,p=S.p;
   const ups=S.augs.map((a,i)=>[a,i]).filter(([a])=>AUG_UP&&a.lv<3&&a.t!=='v'&&a.t!=='f'),fz=fusable(),vs=vipStock();
   const T=[['stat','📈 능력치',''],['aug','✨ 증강',ups.length+fz.length?ups.length+fz.length:''],['vip','💎 VIP',k?'🔑'+k:''],['etc','🎲 회복·도박','']];
-  let h=`<div class="shophead"><h2>🛒 보스 상점 <span style="font-size:.6em;color:var(--muted)">${S.chap} / 3</span></h2></div>
+  let h=`<div class="shophead"><h2>🛒 보스 상점 <span style="font-size:.6em;color:var(--muted)">${endless()?S.chap+'단계 돌파':S.chap+' / 3'}</span></h2></div>
   <p class="sub">보유 <span class="gold">${g} 골드</span> · 🔑 ${k} · 체력 ${Math.ceil(p.hp)}/${Math.round(p.maxHp)}</p>
   <div class="tabs">${T.map(([id,n,b])=>`<button class="btn ${tab===id?'primary':''}" data-tab="${id}">${n}${b?` <small style="display:inline">${b}</small>`:''}</button>`).join('')}</div>
   ${m.log?`<div class="log" aria-live="polite">${m.log}</div>`:''}`;
