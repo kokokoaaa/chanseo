@@ -2404,6 +2404,7 @@ function dmgE(e,amt,col,label,quiet){
   if(e.hp<=0){e.alive=false;onKill(e);}
 }
 function poisonE(e,st=1){const cap=(tag('poison')>=6?10:1)+(has('f_plaguebullet')?3:0)+(has('virulence')?3:0);e.ps=Math.min(cap,Math.max(e.ps,0)+(e.ps>=cap?0:st));if(e.ps<1)e.ps=1;e.pt=3;}
+const bspdB=()=>Math.min(1,Math.max(0,S.p.bspd/(CLASSES[S.cls].stats.bspd||560)-1)*.5);
 function pBullet(x,y,ang,dmg,o={}){const p=S.p;if(o.child&&(S.chN2||0)>=CHILD_CAP)return;if(o.child)S.chN2=(S.chN2||0)+1;S.pr.push(Object.assign({x,y,vx:Math.cos(ang)*p.bspd,vy:Math.sin(ang)*p.bspd,mine:true,dmg,life:1.2,pierce:p.pierce,hit:new Set(),r:3,roll:0},o));}
 function explode(x,y,rad,dmg,col='#ffb347'){if(has('catalyst'))rad*=1+lv3('catalyst',.15,.2,.25);
   S.rings.push({x,y,r:6,max:rad,life:.3,col});burst(x,y,col,12);
@@ -2431,6 +2432,8 @@ function playerFire(tg){
   let n=p.multi+(tag('card')>=6?2:0)+(has('bulletstorm')?3:0)+(has('g_twin')?1:0);if(has('bulletstorm'))shock*=.85;if(has('shuffle')&&Math.random()<lv3('shuffle',.2,.35,.5)+(has('f_magician')?.25:0))n*=2;
   if(has('focus'))shock*=n<=1?1+lv3('focus',.35,.5,.65):1.1;
   if(has('giant'))shock*=1+lv3('giant',.15,.25,.35);
+  // 탄속 보너스: 직업 기본 탄속보다 빠른 만큼(1%당) 기본 공격 탄환 피해 +0.5% (최대 +100%). 탄속 카드·증강이 딜 선택지가 되게
+  shock*=1+bspdB();
   if(has('velocity'))shock*=1+Math.min(has('f_accel')?1.5:1,p.bspd/100*lv3('velocity',.035,.05,.065)*(has('f_accel')?2:1));
   if(p.ocN>0){shock*=lv3('overcharge',1.8,2.2,2.6);p.ocN--;}
   if(has('goldbullet'))shock*=1+Math.min(lv3('goldbullet',.3,.45,.6)*(has('f_compound')?2:1),Math.floor(S.gold/100)*.03);
@@ -4189,6 +4192,7 @@ function renderStats(){
     row('탄환 수',n+'발'),
     row('관통',p.pierce),
     row('사거리',Math.round(p.range)),
+    row('탄속',Math.round(p.bspd),bspdB()>0?`기본보다 빠른 만큼 탄환 피해 +${Math.round(bspdB()*100)}%`:'기본 탄속보다 빠르면 1%당 탄환 피해 +0.5%'),
     ...clsRows(row),
     row('기대 초당 피해',Math.round(dps),'탄환 기본 피해 기준. 회전 칩, 폭발, 독 제외')
   ].join('');
