@@ -1224,7 +1224,7 @@ const FUSIONS=[
   {id:'f_y116',a:'gravebloom',b:'deathnova',n:'무덤 파동',pb:1.15,fx:'k:.1:vine:.8',d:'새 능력: 처치 시 10% 확률로 덩굴 지대 생성'},
   {id:'f_y117',a:'frostwave',b:'quake',n:'얼음 지진',pb:1.15,fx:'n:7:frost:1:100',d:'지진 수치 +15%, 새 능력: 7번째 공격마다 냉기 폭발 (범위 100, 공격력 100%, 1.5초 둔화)'}
 ];
-// VIP 합체: VIP 증강 + 일반 증강. 둘 다 가져도 바로 합쳐지지 않고, 레벨업·증강 때마다 낮은 확률(12%, 행운 30이면 30%)로 합체
+// VIP 합체: VIP 증강 + 일반 증강. 둘 다 가지면 다음에 증강을 얻을 때 합체
 const VFUSIONS=[
   {id:'f_seraph',vip:1,a:'archangel',b:'halo',n:'세라핌',d:'빛기둥 8초 → 4초마다, 후광 범위 +50%'},
   {id:'f_deathlord',vip:1,a:'lichking',b:'raise',n:'죽음의 군주',d:'해골 체력 2배, 해골 소환 확률 +10%'},
@@ -1255,10 +1255,10 @@ function doFuse(f){
   const col=f.vip?'#ffd76a':'#ff4fd8';S.flash=.35;const p=S.p;S.rings.push({x:p.x,y:p.y,r:10,max:f.vip?320:200,life:.6,col});S.fused=(S.fused||0)+1;
   augFx(`${f.vip?'👑 VIP 합체!':'💥 합체!'} ${f.n}`,f.d,col,true,.5);return o;
 }
-function tryFuse(){
+function tryFuse(fromAug){
   const el=fusable();
   if(!el.length){const v=VFUSIONS.filter(f=>S.augs.some(a=>a.id===f.a)&&S.augs.some(a=>a.id===f.b));
-    if(v.length&&Math.random()<.12+.18*LK()/LUCK_CAP)return doFuse(v[0]);return null;}
+    if(v.length&&fromAug)return doFuse(v[0]);return null;}
   // 여러 합체가 가능하면 증강 카드에서 고른 쪽(S.fuseChoice)을 우선
   const ch=S.fuseChoice&&el.find(f=>f.id===S.fuseChoice);S.fuseChoice=null;
   return doFuse(ch||el[0]);
@@ -2551,8 +2551,8 @@ function onKill(e){
   if(e.mkT>S.t){if(has('stigma')&&p.alive)p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.01*healM());
     if(has('markburst')){const r=80*(has('f_execution')?1.5:1);explode(e.x,e.y,r,pDmg()*lv3('markburst',1.5,2,2.5),'#ff5a6a');if(has('f_execution'))for(const o of S.en)if(o.alive&&d2(o,e)<r*r)markE(o);}
     if(tag('mark')>=4){const ex2=new Set([e]);for(let i=0;i<2;i++){const o=nearestE(e,260,ex2);if(!o)break;ex2.add(o);markE(o);}}}
-  // 폭풍의 분노: 번개로 죽은 적이 또 번개를 부르는 연쇄 폭주 방지 (번개가 만든 처치는 다시 발동 안 함)
-  if(has('stormfury')&&!S.sfD&&(p.fy||0)>=10&&Math.random()<lv3('stormfury',.25,.35,.45)){S.sfD=1;try{lightning(e,2);}finally{S.sfD=0;}}
+  // 폭풍의 분노: 번개로 죽은 적이 번개를 한 번까지만 더 부름 (무한 연쇄 방지)
+  if(has('stormfury')&&(S.sfD||0)<2&&(p.fy||0)>=10&&Math.random()<lv3('stormfury',.25,.35,.45)){S.sfD=(S.sfD||0)+1;try{lightning(e,2);}finally{S.sfD--;}}
   if(e.potT>S.t){if(has('transmute'))addGold(lv3('transmute',3,4,5));if(has('al_chain')&&(S.chN||0)<(has('f_chainpot')?30:12)){S.chN=(S.chN||0)+1;exS('alchemy',e.x,e.y,60,pDmg()*lv3('al_chain',.6,.8,1)*potM()*(has('f_chainpot')?1.5:1),'#c8ff6a');}}
   if(p.alive){addFury(1);if(has('bloodlust'))p.hp=Math.min(p.maxHp,p.hp+lv3('bloodlust',1,1.5,2)*healM());}
   if(!e.boss&&p.alive){const c=skelC();if(c>0&&Math.random()<c)raiseSkel(e.x,e.y);
@@ -3117,7 +3117,7 @@ function renderAugBar(){const el=$('augBar');const k=!S||S.mode==='start'?'':S.a
   el.innerHTML=nor.map(([a,i])=>cell(a,i)).join('')+'<div class="aico empty"></div>'.repeat(Math.max(0,MAXA-nor.length))+'<div class="vipgap"></div>'+vip.map(([a,i])=>cell(a,i)).join('')+'<div class="aico empty vip"><i>👑</i></div>'.repeat(Math.max(0,VIP_MAX-vip.length));}
 {const bar=document.getElementById('augBar'),tip=document.getElementById('augTip');
   const show=(t)=>{const a=S&&S.augs[+t.dataset.ai];if(!a)return;const T=TIER[a.t]||{n:'',col:'#d6a94a'};tip.style.setProperty('--ac',T.col);
-    tip.innerHTML=`<b>${a.n}</b><small>${T.n}${a.tags.length?' · '+[...new Set(a.tags)].map(t=>TAGS[t].n+(a.tags.filter(x=>x===t).length>1?'×2':'')).join(', '):''}</small>${a.d}${a.t==='v'?(()=>{const v=VFUSIONS.find(f=>f.a===a.id);return v?`<small style="color:#ffd76a;margin-top:4px">👑 ${augDef(v.b).n}와 VIP 합체 가능 (낮은 확률) → ${v.n}</small>`:'';})():''}`;
+    tip.innerHTML=`<b>${a.n}</b><small>${T.n}${a.tags.length?' · '+[...new Set(a.tags)].map(t=>TAGS[t].n+(a.tags.filter(x=>x===t).length>1?'×2':'')).join(', '):''}</small>${a.d}${a.t==='v'?(()=>{const v=VFUSIONS.find(f=>f.a===a.id);return v?`<small style="color:#ffd76a;margin-top:4px">👑 ${augDef(v.b).n}와 VIP 합체 가능 (함께 가지면 다음 증강 때 합체) → ${v.n}</small>`:'';})():''}`;
     tip.style.display='block';const r=t.getBoundingClientRect();tip.style.left=Math.min(innerWidth-tip.offsetWidth-8,Math.max(8,r.left))+'px';tip.style.top=Math.max(8,r.top-tip.offsetHeight-8)+'px';};
   const hideT=()=>{tip.style.display='none';};
   // 시너지 알약: 단계별 효과, 현재 단계는 ✔ 표시
@@ -3256,7 +3256,7 @@ function augHtml(a,i){
   // 합체 안내: 어떤 보유 증강과 합쳐지는지 + 합체로 붙는 추가 효과
   const fz=pfs.length>1?`<span class="fzbox"><span class="fzh">💥 합체할 짝을 고르세요</span>${pfs.map(f=>`<span class="fzopt" data-fz="${f.id}"><span class="fzn2">→ <b class="fzn">${f.n}</b> <small>(${pOf(f).n}와 합체)</small></span><span class="fzd">${tot(f)}</span></span>`).join('')}<span class="fzd" style="opacity:.6">고른 짝과 합체하고, 나머지 짝은 그대로 남아요</span></span>`
     :pf?`<span class="fzbox"><span class="fzh">💥 합체 시 → <b class="fzn">${pf.n}</b></span><span class="fzd">${tot(pf)}</span></span>`:'';
-  return `<button class="card aug tier-${a.t} ${pf?'canfuse':''}" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}${a.swap?' · <span style="color:#ff9ad0">교체</span>':''}</span><b>${a.n}</b><span class="chips">${chips}</span>${augPreview(a)}${fz}${a.up?'':VFUSIONS.filter(f=>f.b===a.id&&has(f.a)).map(f=>`<span class="fzbox" style="border-color:#ffd76a"><span class="fzh" style="color:#ffd76a">👑 보유 VIP ${augDef(f.a).n}와 합체 가능 → <b class="fzn">${f.n}</b></span><span class="fzd">${f.d} (레벨업·증강 때마다 확률로 합체)</span></span>`).join('')}<span class="tip">${a.d}${hpLoss(a.f,a.d,a.t==='v'||a.t==='f'?1:2)}${lines?'<br>':''}${lines}</span></button>`;
+  return `<button class="card aug tier-${a.t} ${pf?'canfuse':''}" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}${a.swap?' · <span style="color:#ff9ad0">교체</span>':''}</span><b>${a.n}</b><span class="chips">${chips}</span>${augPreview(a)}${fz}${a.up?'':VFUSIONS.filter(f=>f.b===a.id&&has(f.a)).map(f=>`<span class="fzbox" style="border-color:#ffd76a"><span class="fzh" style="color:#ffd76a">👑 보유 VIP ${augDef(f.a).n}와 합체 가능 → <b class="fzn">${f.n}</b></span><span class="fzd">${f.d} (다음 증강을 얻을 때 합체)</span></span>`).join('')}<span class="tip">${a.d}${hpLoss(a.f,a.d,a.t==='v'||a.t==='f'?1:2)}${lines?'<br>':''}${lines}</span></button>`;
 }
 function bindPeek(){
   ov.querySelectorAll('.card').forEach(c=>{let t=null;
@@ -3342,7 +3342,7 @@ function gainAug(a){
   const p=S.p;S.rings.push({x:p.x,y:p.y,r:10,max:260,life:.6,col:T.col});S.flash=Math.max(S.flash,.25);
   const ups=[];for(const t in S.tagc){const c0=before[t]||0,c1=S.tagc[t];if(c0<1&&TAGS[t]&&TAGS[t].t1)ups.push([t,1]);for(const n of [6,4,2])if(c0<n&&c1>=n){ups.push([t,n]);break;}}
   ups.forEach(([t,n],i)=>augFx(`⚡ 시너지 ${TAGS[t].n} ${n}단계`,TAGS[t]['t'+n],'#7be08f',n>=6,.55*(i+1)));
-  tryFuse();
+  tryFuse(true);
 }
 function augFx(title,sub,col,big,delay=0){
   setTimeout(()=>{
@@ -4054,7 +4054,7 @@ function openMerch(m){
 function vipShopHtml(m,k){
   const full=vipCount()>=VIP_MAX,vc=vipCost();
   if(m.vsel){const v=VIPS.find(x=>x.id===m.vsel);return `<p class="sub"><b>${v.n}</b>를 무엇 대신 넣을까요? (🔑 ${vc})</p><div class="grid">${S.augs.map((a,i)=>[a,i]).filter(([a])=>a.t==='v').map(([a,i])=>`<button class="btn" data-vx="${i}">${a.n} 버리기<small>${a.d}</small></button>`).join('')}</div><button class="btn ghost" data-vx="-1">취소</button>`;}
-  return `<p class="sub">열쇠 ${vc}개로 VIP 1개. 보스를 잡을 때마다 열쇠 1개, 품목도 새로 바뀌어요. VIP 칸 <b>${vipCount()}/${VIP_MAX}</b>${full?' · 가득 참, 사면 기존 VIP와 교체':''}</p><div class="grid">${vipStock().map(v=>{const own=has(v.id);return `<button class="btn" data-v="${v.id}" ${own||k<vc?'disabled':''}>${v.n}<small>${v.d}</small>${(()=>{const vf=VFUSIONS.filter(f=>f.a===v.id&&has(f.b));return vf.map(f=>`<small style="color:#ff8be6;display:block;margin-top:3px">💥 보유한 <b>${augDef(f.b).n}</b>와 VIP 합체 가능 → <b>${f.n}</b>: ${f.d} <span style="opacity:.7">(레벨업·증강 때마다 확률로 합체)</span></small>`).join('');})()}<small style="color:var(--brass)">${own?'보유':(full?'교체 · ':'')+'🔑 '+vc}</small></button>`;}).join('')}</div>`;
+  return `<p class="sub">열쇠 ${vc}개로 VIP 1개. 보스를 잡을 때마다 열쇠 1개, 품목도 새로 바뀌어요. VIP 칸 <b>${vipCount()}/${VIP_MAX}</b>${full?' · 가득 참, 사면 기존 VIP와 교체':''}</p><div class="grid">${vipStock().map(v=>{const own=has(v.id);return `<button class="btn" data-v="${v.id}" ${own||k<vc?'disabled':''}>${v.n}<small>${v.d}</small>${(()=>{const vf=VFUSIONS.filter(f=>f.a===v.id&&has(f.b));return vf.map(f=>`<small style="color:#ff8be6;display:block;margin-top:3px">💥 보유한 <b>${augDef(f.b).n}</b>와 VIP 합체 가능 → <b>${f.n}</b>: ${f.d} <span style="opacity:.7">(다음 증강을 얻을 때 합체)</span></small>`).join('');})()}<small style="color:var(--brass)">${own?'보유':(full?'교체 · ':'')+'🔑 '+vc}</small></button>`;}).join('')}</div>`;
 }
 function hubBody(m,g){
   const tab=m.tab||'stat',k=S.keys||0,p=S.p;
