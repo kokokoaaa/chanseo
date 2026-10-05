@@ -142,14 +142,15 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 .mtile.max{opacity:1;border-color:#9fe8b0;background:rgba(159,232,176,.08)}
 .mtile b{font-family:'Do Hyeon',sans-serif;font-weight:400;font-size:17px}
 .mtile .md{font-size:12px;color:var(--muted);line-height:1.35}
-.mtile .mnow{font-size:12px;color:#9fe8b0}
+.mtile .mnow{font-size:12px;color:#9fe8b0;line-height:16px;min-height:16px}
 .mtile .mc{font-family:'Do Hyeon',sans-serif;font-size:17px;color:var(--brass)}
 .mtile.max .mc{color:#9fe8b0}
 .pips{display:flex;gap:2px;flex-wrap:wrap;justify-content:center}
 .pips i{width:8px;height:8px;border-radius:2px;background:rgba(241,231,207,.15)}
 .pips i.on{background:var(--brass)}
 .mtile.sk .md{flex:1}
-.mbtns{display:flex;gap:4px;width:100%;margin-top:2px}.mbtns .mb{flex:1;min-height:34px;padding:4px 2px;border-radius:7px;border:1px solid rgba(214,169,74,.6);background:rgba(214,169,74,.12);color:var(--ivory);font:inherit;font-size:14px;cursor:pointer}.mbtns .mb:first-child{flex:.7}.mbtns .mb[disabled]{opacity:.35;cursor:default}.mbtns .mb small{font-size:11px;color:var(--brass)}
+.mtile:not(.sk) .md{min-height:2.7em;display:flex;align-items:center;justify-content:center}
+.mbtns{display:flex;gap:4px;width:100%;margin-top:auto;padding-top:2px}.mbtns .mb{flex:1;min-height:34px;padding:4px 2px;border-radius:7px;border:1px solid rgba(214,169,74,.6);background:rgba(214,169,74,.12);color:var(--ivory);font:inherit;font-size:14px;cursor:pointer}.mbtns .mb:first-child{flex:.7}.mbtns .mb[disabled]{opacity:.35;cursor:default}.mbtns .mb small{font-size:11px;color:var(--brass)}
 @media (max-width:520px){.mgrid{grid-template-columns:1fr 1fr}}
 .hubgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px}
 .hubb{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 8px}
@@ -3681,7 +3682,7 @@ function openMeta(){cosPreviewHide();
     let nb=0,tot=0;while(l+nb<x.max&&tot+x.c*(l+nb+1)<=META.medals){tot+=x.c*(l+nb+1);nb++;}
     return `<div class="mtile ${mx?'max':''}"><b>${x.n}</b><span class="md">${x.d} / 단계</span>
     <span class="pips">${Array.from({length:x.max},(_,i)=>`<i class="${i<l?'on':''}"></i>`).join('')}</span>
-    ${l?`<span class="mnow">지금 ${now(x)}</span>`:''}<span class="mc">${mx?'최대':'🏅 '+c}</span>
+    <span class="mnow">${l?`지금 ${now(x)}`:'&nbsp;'}</span><span class="mc">${mx?'최대':'🏅 '+c}</span>
     <span class="mbtns"><button class="mb" data-mm="${x.k}" ${l?'':'disabled'} title="한 단계 되돌리기 (🏅 ${x.c*l} 환불)">−</button><button class="mb" data-ms="${x.k}" ${can?'':'disabled'}>+1</button><button class="mb" data-mx="${x.k}" ${nb>1?'':'disabled'}>${nb>1?`+${nb} <small>🏅${tot}</small>`:'최대'}</button></span></div>`;};
   const st=MSTAT.filter(x=>!x.cls).map(tile).join(''),cst=MSTAT.filter(x=>x.cls).map(tile).join('');
   const sk=MSKILL.map(x=>{const own=META.sk[x.k],can=!own&&META.medals>=x.c;
