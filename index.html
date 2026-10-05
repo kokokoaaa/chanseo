@@ -3506,7 +3506,7 @@ function gameOver(win){
   const sec=Math.floor(S.gt),score=runScore(),medals=runMedals(score);META.medals+=medals;META.total+=medals;saveMeta();
   if(sec>best){best=sec;try{localStorage.setItem('chipdungeon_best_v5',String(best));}catch(e){}}
   const fmt=x=>`${Math.floor(x/60)}분 ${x%60}초`;
-  show(`${unlocked?`<div class="medal" style="justify-content:center"><span>🔓 <b>${unlocked}</b>${unlocked.includes('봉인 해제권')?'':' 난이도가 열렸습니다!'}</span></div>`:''}${win?`<h2>🏆 클리어!</h2><p class="sub">10분을 버티고 하우스 딜러를 쓰러뜨렸습니다. 보스전에 ${fmt(Math.floor(S.bt))} 걸렸어요.</p>`:`<h2>${endless()?'악몽 '+(S.chap+1)+'단계 도달':'쓰러졌습니다'}</h2><p class="sub">${endless()?`보스 ${S.st.bosses||0}마리를 잡고`:Math.min(4,S.chap+1)+'장에서'} ${fmt(sec)} 버텼습니다.${S.bossI>=0?` (${ET[BOSSES[S.bossI%4].type].n}에게 패배)`:''}</p>`}
+  show(`${unlocked?`<div class="medal" style="justify-content:center"><span>🔓 <b>${unlocked}</b>${unlocked.includes('봉인 해제권')?'':' 난이도가 열렸습니다!'}</span></div>`:''}${win?`<h2>🏆 클리어!</h2><p class="sub">10분을 버티고 하우스 딜러를 쓰러뜨렸습니다. 보스전에 ${fmt(Math.floor(S.bt))} 걸렸어요.</p>`:`<h2>${endless()?'악몽 '+(S.chap+1)+'단계 도달':S.quitEnd?'여기서 정산했습니다':'쓰러졌습니다'}</h2><p class="sub">${endless()?`보스 ${S.st.bosses||0}마리를 잡고`:Math.min(4,S.chap+1)+'장에서'} ${fmt(sec)} 버텼습니다.${S.bossI>=0?` (${ET[BOSSES[S.bossI%4].type].n}에게 패배)`:''}</p>`}
   <div class="medal"><span>최종 점수 <b>${score.toLocaleString()}</b></span><span>🏅 메달 <b>+${medals}</b> <small>${medalClear()?`(클리어 보너스 +${medalClear()} 포함) `:''}(보유 ${META.medals})</small></span></div>
   <div class="stats">
     <span>난이도</span><span>${dfM().n}${dfM().sc>1?` (점수 ×${dfM().sc})`:''}</span>
@@ -4320,6 +4320,7 @@ function renderStats(){
   <h3>시너지</h3>${syn}
   <h3 title="일반 증강은 최대 ${MAXA}개. VIP 증강은 슬롯을 차지하지 않습니다. 슬롯이 가득 차면 합체 짝이 되는 증강만 나옵니다">증강 슬롯 ${slotCount()}/${MAXA}${S.augs.length>slotCount()?` (+VIP ${S.augs.length-slotCount()})`:''}</h3>${S.augs.map(a=>row(a.n,(a.t==='v'?'VIP':a.t==='f'?'합체':''),'',`<b style="color:${(TIER[a.t]||{}).col||'var(--brass)'};filter:brightness(1.4)">${(TIER[a.t]||{n:''}).n}</b> · ${a.tags.map(t=>TAGS[t].n).join(', ')}<br>${a.d}${a.u&&a.t!=='v'&&a.t!=='f'?`<br><span style="color:var(--muted)">강화하면: ${a.u}</span>`:''}`)).join('')||'<p class="sub">없음</p>'}
   <div class="btnrow"><button class="btn" id="stSave">저장</button><button class="btn" id="stQuit">저장하고 메인으로</button></div>
+  ${S.started?`<button class="btn ghost" id="stEnd" style="width:100%">🏁 여기서 끝내고 정산 <small>${endless()?'지금까지 점수로 메달·기록 확정':'포기 처리 · 지금까지 점수로 메달 지급'}</small></button>`:''}
   <button class="btn primary" id="stClose">닫기</button></div>`;
   $('stClose').onclick=toggleStats;$('stCloseTop').onclick=toggleStats;
   {let pop=document.getElementById('stipPop');if(!pop){pop=document.createElement('div');pop.id='stipPop';document.body.appendChild(pop);}
@@ -4330,6 +4331,8 @@ function renderStats(){
   $('stSave').onclick=()=>{saveGame(false);};
   // 아직 시작 전(첫 증강·카드 선택 화면)이면 저장할 게 없으니 그냥 메인으로
   $('stQuit').onclick=()=>{if(!S.started||saveGame(false)){toggleStats();newRun();startScreen();}};
+  // 정산 종료: 쓰러진 것과 같게 처리(메달·명예의 전당 등록·악몽 10분 해제권). 실수 방지로 두 번 눌러야 함
+  if($('stEnd'))$('stEnd').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.innerHTML='한 번 더 누르면 정산하고 끝냅니다';return;}toggleStats();S.quitEnd=true;gameOver(false);};
 }
 
 /* ---------- loop ---------- */
