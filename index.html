@@ -1406,7 +1406,7 @@ const GRADE=u=>u>=.9?{n:'최상',col:'#ffd76a'}:u>=.6?{n:'상',col:'#7fc4f2'}:u>
 // 공격력·최대 체력 % 효과에만 실제로 바뀌는 양을 괄호로 표시 (예: 공격력 +6% (+0.9)). 플레이어 사본에 효과를 적용해 차이를 계산
 // %가 곧 실제 수치인 항목(치명타, 회피, 흡혈, 골드·경험치 획득 등)은 같은 숫자 반복이라 표시 안 함
 const sgn=(v,d)=>(v>=0?'+':'−')+Math.abs(v).toFixed(d).replace(/\.0+$/,'');
-const PV=[['공격력','dmg',(a,b)=>`실제 공격력 ${a.toFixed(1)} → ${b.toFixed(1)}, +${((b/a-1)*100).toFixed(1)}%`],['최대 체력','maxHp',(a,b)=>sgn(b-a,0)]];
+const PV=[['공격력','dmg',(a,b)=>`내 공격력 ${a.toFixed(1)} → ${b.toFixed(1)}, 실제로는 +${((b/a-1)*100).toFixed(1)}%`],['최대 체력','maxHp',(a,b)=>sgn(b-a,0)]];
 // 증강의 최대 체력 % 감소도 실제로 깎이는 양을 괄호로 (n번 적용 기준)
 function hpLoss(f,d,n=1){if(!f||!S||!S.p||!/최대 체력 [−-][\d.]+%/.test(d||''))return '';const c={...S.p};try{for(let k=0;k<n;k++)f(c);}catch(e){return '';}const x=Math.round(c.maxHp-S.p.maxHp);return x?` <small style="opacity:.65">(최대 체력 ${sgn(x,0)})</small>`:'';}
 function withActual(desc,f){const W=a=>a.map(l=>`<div>${l}</div>`).join('');if(!S||!S.p||!f)return W(desc.split(', '));const c={...S.p};try{f(c);}catch(e){}
