@@ -1832,7 +1832,7 @@ const CLASSES={
   druid:{lock:true,n:'드루이드',role:'덩굴 지배',d:'가시덩굴로 적을 묶고 버티는 자연술사',passive:'가시덩굴: 3번째 공격마다 대상 자리에 덩굴 지대 (3초, 범위 60, 초당 공격력 70%, 둔화). 초당 체력 재생 +1',atk:.3,
     stats:{hp:175,maxHp:175,speed:185,dmg:15,rate:2.2,range:290,bspd:520,armor:8,regen:1},fav:['nature','poison','guard'],dis:['fire'],
     cards:['힘의 물약','숫돌','튼튼한 체력','붕대','조준경','가죽 갑옷'],lvd:'공격력 +0.8%, 체력 +2',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=2;p.hp+=2;}},
-  alch:{lock:true,n:'연금술사',role:'물약 폭격',d:'터지는 플라스크와 물약을 던지는 연금술사',passive:'플라스크: 맞은 자리에 폭발 (범위 45, 공격력 50%). 4번째 공격마다 물약 (산성 중독·폭발·얼음 둔화, 독·화염·냉기 시너지를 모을수록 그 물약이 더 자주 나옴). 물약이 깨진 자리에 2.5초 장판이 남음',atk:.3,
+  alch:{lock:true,n:'연금술사',role:'물약 폭격',d:'터지는 플라스크와 물약을 던지는 연금술사',passive:'플라스크: 맞은 자리에 폭발 (범위 45, 공격력 50%). 플라스크도 물약 비율을 따라 산성(중독)·폭발(피해 1.4배)·얼음(둔화)으로 터짐. 4번째 공격마다 물약 (산성 중독·폭발·얼음 둔화, 독·화염·냉기 시너지를 모을수록 그 물약이 더 자주 나옴). 물약이 깨진 자리에 2.5초 장판이 남음',atk:.3,
     stats:{hp:155,maxHp:155,speed:188,dmg:14,rate:2.2,range:290,bspd:480,armor:6},fav:['alchemy','poison','fire'],dis:['sniper'],
     cards:['힘의 물약','숫돌','조준경','전투 본능','튼튼한 체력','다연발'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
   gambler:{lock:true,n:'도박사',role:'동전 도박',d:'동전 앞뒤에 모든 걸 거는 도박사',passive:'동전 던지기: 공격마다 앞면이면 피해 2배, 뒷면이면 0.5배. 행운이 높을수록 앞면이 잘 나옴',atk:.25,
@@ -2279,7 +2279,7 @@ function clsRows(row){const p=S.p,c=S.cls,r=[];
   if(c==='paladin')r.push(row('신성 오라',`범위 ${Math.round(110*(1+(p.auraM||0)))}, 피해 +${Math.round((p.auraD||0)*100)}%`));
   if(skelMax()>0)r.push(row('해골 병사',`${(S.skel||[]).length} / ${skelMax()}기, 피해 +${Math.round((p.skD||0)*100)}%, 지속 ${12+(p.skL||0)+(has('deathnova')?4:0)}초`));
   if(c==='elem'&&!has('e_avatar')){const q=routePct(ELEM_TAGS);r.push(row('원소 비율',`화염 ${q[0]}% · 냉기 ${q[1]}% · 번개 ${q[2]}%`,'화염·냉기·번개 시너지를 모을수록 그 원소 공격이 더 자주 나감'));}
-  if(c==='alch'||tag('alchemy')>=1){const q=routePct(POT_TAGS);r.push(row('물약 비율',`산성 ${q[0]}% · 폭발 ${q[1]}% · 얼음 ${q[2]}%`,'독·화염·냉기 시너지를 모을수록 그 물약이 더 자주 나옴'));}
+  if(c==='alch'||tag('alchemy')>=1){const q=routePct(POT_TAGS);r.push(row('물약 비율',`산성 ${q[0]}% · 폭발 ${q[1]}% · 얼음 ${q[2]}%`,'독·화염·냉기 시너지를 모을수록 그 물약이 더 자주 나옴 (기본 플라스크 포함)'));}
   if(c==='gunner')r.push(row('탄창',`${magN()}발, 재장전 ${reloadT().toFixed(2)}초`,'재장전은 공격 속도와 무관 (빠른 장전·쌍권총·총기 숙련으로만 단축, 최소 0.35초)'));
   if(c==='elem'||tag('elem')>=1||has('elemcoin'))r.push(row('원소 효과 피해','+'+Math.round((elM()-1)*100)+'%'));
   {const c=S.dcat||{};let t=0;for(const k in c)t+=c[k];if(t>0){const l=Object.entries(c).filter(([k,v])=>v/t>=.03).sort((a,b)=>b[1]-a[1]).map(([k,v])=>(DSRC_N[k]||k)+' '+Math.round(v/t*100)+'%');r.push(row('최근 피해 비중',`<span class="swrap">${l.join('<br>')}</span>`,'루트 스탯 카드는 이 비중이 클수록 자주 나옴'));}}
@@ -2534,7 +2534,10 @@ function onPHit(b,t){
   if(b.ice&&!t.boss)t.slowT=Math.max(t.slowT||0,1.5);
   if((tag('fire')>=2&&!b.child)||b.burn)burnE(t,pDmg()*.2,3);
   {const o=S.dsrc;if(b.src)S.dsrc=b.src;dmgE(t,dmg,col,label);S.dsrc=o;}
-  if(S.cls==='alch'&&!b.child&&!b.dieThrow){const fl=has('al_flask');explode(t.x,t.y,45*(fl?1+lv3('al_flask',.2,.3,.4):1),b.dmg*.5*(fl?1.2:1),'#8ee06a');}
+  if(S.cls==='alch'&&!b.child&&!b.dieThrow){const fl=has('al_flask'),rr=45*(fl?1+lv3('al_flask',.2,.3,.4):1),k=routePick(POT_TAGS);
+    // 기본 플라스크도 물약 비율을 따름: 산성 = 중독, 폭발 = 피해 1.4배, 얼음 = 0.8초 둔화
+    explode(t.x,t.y,rr,b.dmg*.5*(fl?1.2:1)*(k===1?1.4:1),POTC[k]);
+    if(k!==1)for(const o of S.en)if(o.alive&&d2(o,t)<(rr+o.r)**2){if(k===0)poisonE(o);else if(!o.boss)o.slowT=Math.max(o.slowT||0,.8);}}
   if(S.cls==='mage'&&!b.child&&!b.dieThrow){const rr2=40*(has('m_inferno')?1+.3+.3*L('m_inferno'):1);explode(t.x,t.y,rr2,b.dmg*.55,'#ff8a3a');if(has('m_inferno'))for(const o of S.en)if(o.alive&&d2(o,t)<rr2*rr2)poisonE(o);}
   if(b.roll===7)explode(t.x,t.y,85,pDmg()*1.8,'#ff4fd8');
   if(b.roll===6){if(tag('dice')>=2||(b.dieThrow&&has('f_dicestorm')))explode(t.x,t.y,75,pDmg()*1.6);if(has('highroll'))S.gold+=L('highroll')*(has('f_heist')?3:1);}
@@ -2926,6 +2929,23 @@ function drawChip(e){
   if(e.hp<e.maxHp&&(e.boss||e.elite||e.type==='tank')){const w=R*2+6,ty=top-4;ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(x-w/2,ty,w,4);ctx.fillStyle='#ff6060';ctx.fillRect(x-w/2,ty,w*Math.max(0,e.hp/e.maxHp),4);}
 }
 // 기사 도트: 한 칸이 화면에서 정확히 정수 픽셀이 되게 배율을 반올림하고 위치도 화면 픽셀에 맞춤 (1.5배 같은 배율이면 칸 크기가 들쭉날쭉해져 깨져 보임)
+// 드루이드 곰 변신: 캐릭터 대신 큰 곰 도트 (뒷발로 선 갈색 곰, 나뭇잎 목걸이, 빛나는 눈). 변신 직후 0.3초 크게 튀어나옴
+function drawBear(x,y,f,mv,bt){const K=2.3*(bt>3.7?1+(bt-3.7)*1.2:1),X=Math.round(x),Y=Math.round(y),b=mv?Math.floor(S.t*9)%2:0;
+  const P=(c,px,py,w,h)=>{ctx.fillStyle=c;ctx.fillRect(X+(f>0?px:-px-w)*K,Y+py*K,w*K,h*K);},O='#22140a',F='#8a5a32',L='#b07a46',D='#5e3a1e';
+  ctx.fillStyle='rgba(0,0,0,.3)';ctx.beginPath();ctx.ellipse(X,Y,11*K,3*K,0,0,TAU);ctx.fill();
+  // 다리
+  P(O,-7,-7-b,6,7+b);P(O,1,-7-(1-b),6,7+(1-b));P(D,-6,-6-b,4,5+b);P(D,2,-6-(1-b),4,5+(1-b));
+  // 몸통
+  P(O,-9,-21,18,15);P(F,-8,-20,16,13);P(L,-4,-17,9,9);P(D,-8,-20,2,13);
+  // 나뭇잎 목걸이
+  P('#2f6a24',-7,-21,14,2);P('#6ac04a',-5,-21,2,1);P('#6ac04a',0,-21,2,1);P('#6ac04a',4,-21,2,1);
+  // 앞발(들어 올린 발톱)
+  P(O,6,-20,6,9);P(F,7,-19,4,7);P('#f0e8d8',11,-13,1,2);P('#f0e8d8',11,-16,1,2);P(O,-11,-18,4,8);P(D,-10,-17,2,6);
+  // 머리
+  P(O,-4,-32,14,12);P(F,-3,-31,12,10);P(D,-3,-31,2,10);
+  P(O,-3,-35,4,4);P(D,-2,-34,2,2);P(O,6,-35,4,4);P(D,7,-34,2,2);
+  P('#d8b48a',6,-26,6,4);P(O,11,-27,2,2);P('#3a1a10',7,-23,5,1);P('#f0e8d8',8,-24,1,1);P('#f0e8d8',10,-24,1,1);
+  P('#ffe08a',4,-29,2,2);P('#fff6c0',4,-29,1,1);}
 function heroBlit(img,x,y,pf,snap){const K=PXW;
   if(snap){const T=ctx.getTransform(),a=T.a,n=Math.max(1,Math.round(a*K));ctx.setTransform(n*pf,0,0,n,Math.round(x*a+T.e),Math.round(y*a+T.f));}
   else{ctx.translate(x,y);ctx.scale(pf*K,K);}
@@ -2957,7 +2977,7 @@ function drawPlayer(p){
     if(COS_TIER[sk.k]===4){p.gh=p.gh||[];if(!p.ghT||S.t-p.ghT>.05){p.ghT=S.t;p.gh.unshift({x:p.x,y:p.y});p.gh.length=Math.min(p.gh.length,5);}
       for(let i=1;i<p.gh.length;i+=2){const g=p.gh[i];ctx.save();ctx.globalAlpha=.22-i*.03;heroBlit(skinSprite(sk),g.x,g.y+R+3,pf,k8);ctx.restore();}}
     if(sk.a)ctx.globalAlpha=sk.a;}
-  heroBlit(sk?skinSprite(sk):HERO.canvas,p.x,p.y+R+3,pf,k8);
+  if(p.bearT>0)drawBear(p.x,p.y+R+3,pf,p.moving,p.bearT);else heroBlit(sk?skinSprite(sk):HERO.canvas,p.x,p.y+R+3,pf,k8);
   ctx.filter='none';ctx.globalAlpha=1;ctx.restore();
   if(sk)skinPost(ctx,p.x,p.y,sk,S.t);
   if(p.barrier>0){ctx.strokeStyle='rgba(127,196,242,.85)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(p.x,p.y,R+9,0,TAU*Math.min(1,p.barrier/(barrierMax()||1)));ctx.stroke();}
@@ -2976,7 +2996,10 @@ function draw(){
     ctx.strokeStyle=`rgba(255,${S.boss&&S.boss.ph2?60:120},60,${.7+Math.sin(S.t*6)*.2})`;ctx.lineWidth=6;ctx.setLineDash([22,12]);ctx.lineDashOffset=-S.t*40;ctx.strokeRect(x0,y0,sz,sz);ctx.restore();}
   for(const z of S.zones){if(z.kind==='hole'){const g=ctx.createRadialGradient(z.x,z.y,4,z.x,z.y,z.r);g.addColorStop(0,'rgba(0,0,0,.95)');g.addColorStop(.6,'rgba(60,20,90,.55)');g.addColorStop(1,'rgba(60,20,90,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(z.x,z.y,z.r,0,TAU);ctx.fill();
       ctx.strokeStyle='rgba(200,140,255,.6)';ctx.lineWidth=2;for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(z.x,z.y,z.r*(.35+i*.2),S.t*4+i,S.t*4+i+2.2);ctx.stroke();}continue;}
-    if(z.kind==='vine'){ctx.globalAlpha=Math.min(.4,z.life*.4);ctx.fillStyle='#4a9a3a';ctx.beginPath();ctx.arc(z.x,z.y,z.r,0,TAU);ctx.fill();ctx.globalAlpha=Math.min(1,z.life*1.5);ctx.strokeStyle='#2f6a24';ctx.lineWidth=2;for(let i=0;i<6;i++){const a=i*1.047+z.x*.01,rr=z.r*.65;ctx.beginPath();ctx.moveTo(z.x,z.y);ctx.quadraticCurveTo(z.x+Math.cos(a+.6)*rr*.6,z.y+Math.sin(a+.6)*rr*.6,z.x+Math.cos(a)*rr,z.y+Math.sin(a)*rr);ctx.stroke();ctx.fillStyle='#9ad85a';ctx.fillRect(z.x+Math.cos(a)*rr-1.5,z.y+Math.sin(a)*rr-1.5,3,3);}ctx.globalAlpha=1;continue;}
+    // 덩굴 지대: 풀밭과 안 겹치게 진한 흙색 바닥 + 밝은 연두 가시 테두리 + 자주색 가시
+    if(z.kind==='vine'){const fa=Math.min(1,z.life*1.5);ctx.globalAlpha=Math.min(.55,z.life*.5);ctx.fillStyle='#3a1a10';ctx.beginPath();ctx.arc(z.x,z.y,z.r,0,TAU);ctx.fill();
+      ctx.globalAlpha=fa*.9;ctx.strokeStyle='#d8ff6a';ctx.lineWidth=2.5;ctx.setLineDash([7,5]);ctx.lineDashOffset=-S.t*12;ctx.beginPath();ctx.arc(z.x,z.y,z.r,0,TAU);ctx.stroke();ctx.setLineDash([]);
+      ctx.globalAlpha=fa;ctx.strokeStyle='#b84ac8';ctx.lineWidth=2.5;for(let i=0;i<6;i++){const a=i*1.047+z.x*.01,rr=z.r*.75;ctx.beginPath();ctx.moveTo(z.x,z.y);ctx.quadraticCurveTo(z.x+Math.cos(a+.6)*rr*.6,z.y+Math.sin(a+.6)*rr*.6,z.x+Math.cos(a)*rr,z.y+Math.sin(a)*rr);ctx.stroke();ctx.fillStyle='#f0a0ff';ctx.fillRect(z.x+Math.cos(a)*rr-2,z.y+Math.sin(a)*rr-2,4,4);}ctx.globalAlpha=1;continue;}
     if(z.kind==='brew'){ctx.globalAlpha=Math.min(.42,z.life*.35);ctx.fillStyle=z.col;ctx.beginPath();ctx.ellipse(z.x,z.y,z.r,z.r*.75,0,0,TAU);ctx.fill();ctx.globalAlpha=Math.min(.85,z.life*.7);ctx.strokeStyle=z.col;ctx.lineWidth=2.5;ctx.setLineDash([6,4]);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=Math.min(.9,z.life*.8);ctx.fillStyle='#ffffff';for(let i=0;i<4;i++){const a=i*1.7+z.x*.01,ph=(S.t*1.6+i*.37)%1;ctx.globalAlpha=Math.min(.8,z.life*.6)*(1-ph);ctx.beginPath();ctx.arc(z.x+Math.cos(a)*z.r*.5,z.y+Math.sin(a)*z.r*.35-ph*8,2+ph*2,0,TAU);ctx.fill();}ctx.globalAlpha=1;continue;}
     if(z.kind==='mine'){ctx.fillStyle='#3a3a44';ctx.beginPath();ctx.arc(z.x,z.y,8,0,TAU);ctx.fill();ctx.fillStyle=Math.floor(S.t*4)%2?'#ff4040':'#7a2020';ctx.beginPath();ctx.arc(z.x,z.y,3,0,TAU);ctx.fill();continue;}
     ctx.globalAlpha=Math.min(.55,z.life*.4);ctx.fillStyle=z.kind==='fire'?'#ff7a2a':'#6cc04a';ctx.beginPath();ctx.arc(z.x,z.y,z.r,0,TAU);ctx.fill();}ctx.globalAlpha=1;
