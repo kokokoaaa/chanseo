@@ -77,6 +77,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 #autoBar #speedBtn{min-width:44px;font-size:16px}
 #autoBar button.on{color:#04120c;background:#7be08f;border-color:#7be08f}
 #buffs{position:absolute;right:12px;top:84px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;pointer-events:none;font-family:'Do Hyeon',sans-serif;font-size:15px}
+#buffs>span{background:rgba(8,20,14,.62);padding:1px 8px;border-radius:9px;line-height:1.35}
 #buffs span{background:rgba(0,0,0,.55);padding:2px 8px;border-radius:6px}
 @media (max-width:520px){#autoBar{flex-direction:column;align-items:flex-end;top:54px}#autoBar button{padding:3px 7px;font-size:12px}#autoBar #speedBtn{font-size:14px}#buffs{top:186px}}
 .shophead{position:sticky;top:-22px;z-index:3;display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--felt);margin:-22px -20px 6px;padding:16px 20px 10px;border-bottom:1px solid rgba(214,169,74,.3);border-radius:16px 16px 0 0}
@@ -3158,7 +3159,7 @@ function hud(){
   if(S.buffT.vuln>0)bf.push(`<span style="color:#ff6060">받는 피해 +50% ${S.buffT.vuln.toFixed(1)}</span>`);if(S.buffT.slow>0)bf.push(`<span style="color:#9fd3ff">둔화 ${S.buffT.slow.toFixed(1)}</span>`);
   if(S.ev){const E=EVENTS[S.ev.k],left=Math.max(0,S.ev.T-S.ev.t).toFixed(0);const ex=S.ev.k==='hunt'?` 남은 ${S.en.filter(e=>e.alive&&e.hunt).length}`:S.ev.k==='shrine'&&S.ev.ch>0?` ${Math.round(S.ev.ch/2.5*100)}%`:'';bf.push(`<span style="color:${E.col}">${E.icon} ${E.n}${ex} ${left}</span>`);}
   if(S.bless&&S.bless.t>0)bf.push(`<span style="color:#9fd3ff">${S.bless.n} ${S.bless.t.toFixed(0)}</span>`);
-  if(skelMax()>0)bf.push(`<span style="color:#8cff9a">💀 해골 ${(S.skel||[]).length}/${skelMax()}</span>`);
+  if(skelMax()>0)bf.push(`<span style="color:#8cff9a">💀 해골 ${(S.skel||[]).length}/${skelMax()}</span>`);if(has('turret'))bf.push(`<span style="color:#9fd3ff">🗼 포탑 ${(S.turrets||[]).length}기 · 다음 ${Math.max(0,S.tuT||0).toFixed(0)}초</span>`);if(shadowOn())bf.push(`<span style="color:#c9a0ff">👥 분신 ${(S.clones||[]).length}/${shMax()}</span>`);if(droneN()>0)bf.push(`<span style="color:#9fe8ff">🛸 드론 ${droneN()}기</span>`);
   if(p.cfS>=2)bf.push(`<span style="color:#ffd76a">앞면 ${p.cfS}연속</span>`);
   if(p.bearT>0)bf.push(`<span style="color:#c98a52">곰 변신</span>`);
   if(p.fy>0)bf.push(`<span style="color:#ff6a4a">광란 ${p.fy}</span>`);
