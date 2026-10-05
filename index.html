@@ -2053,7 +2053,7 @@ function spawnBoss(i){
 function bossDown(e){
   S.shake=.5;S.st.bosses=(S.st.bosses||0)+1;(S.st.btimes=S.st.btimes||[]).push(Math.round(((S.bt||0)-(S.bStart||0))*10)/10);for(const c of S.dr){if(c.xp)gainXp(c.v);else addGold(c.v);}S.dr=[];S.bossI=-1;S.boss=null;S.arena=null;S.tele=[];S.hz=[];S.pr=S.pr.filter(b=>b.mine);S.chap++;
   const p=S.p;p.hp=Math.min(p.maxHp,p.hp+p.maxHp*(META.sk.bossHeal?.6:.3));
-  if(S.chap>=CHAPTERS){S.win=true;S.winT=2.5;p.inv=99;toast('🏆 하우스를 무너뜨렸다!');}
+  if(S.chap>=CHAPTERS){S.win=true;S.winT=null;S.clT=0;p.inv=99;S.bannerT=0;toast('🏆 하우스를 무너뜨렸다! 남은 적을 모두 처치하세요');}
   else{S.bonusAug++;S.shopPend=true;S.keys=(S.keys||0)+1;toast('보스 격파! 🔑 열쇠 획득. 보상 후 상점이 열립니다');}
 }
 function go(e,st){e.bst=st;e.bt=0;e.f=1;}
@@ -2644,7 +2644,12 @@ function trackDps(dt){S.dpsT=(S.dpsT||0)+dt;if(S.dpsT<.5)return;const now=S.st.d
 function update(dt){
   const p=S.p;S.t+=dt;if(S.bossI<0&&!S.win)S.gt+=dt;else if(!S.win)S.bt+=dt;S.round=diffAt(effT());trackDps(dt);
   S.bannerT=Math.max(0,S.bannerT-dt);
-  if(S.win){p.inv=99;S.winT-=dt;if(S.winT<=0){gameOver(true);return;}}
+  // 최종 보스 격파 후: 새 적은 안 나오고, 남은 잡몹을 다 잡으면(또는 45초가 지나면) 게임 종료. 그동안 무적
+  if(S.win){p.inv=99;S.clT=(S.clT||0)+dt;const left=S.en.filter(e=>e.alive&&!e.boss).length;
+    // 남은 적은 플레이어에게 몰려옴 (멀수록 빠르게) → 찾아다닐 필요 없이 빠르게 정리
+    if(S.winT==null)for(const e of S.en){if(!e.alive||e.boss)continue;const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1;if(d>160){const v=Math.min(d-150,(160+d*.6)*dt);e.x+=dx/d*v;e.y+=dy/d*v;}}
+    if(S.winT==null&&(left===0||S.clT>45)){S.winT=1.8;toast(left?'정리 시간 종료':'🧹 모두 처치! 클리어');}
+    if(S.winT!=null){S.winT-=dt;if(S.winT<=0){gameOver(true);return;}}}
   if(S.bossI<0&&!S.win&&S.gt>=(S.chap+1)*CH_LEN){S.gt=(S.chap+1)*CH_LEN;spawnBoss(S.chap);}
   {const bi=biomeIdx();if(S.biome==null)S.biome=bi;if(bi!==S.biome){S.prevBiome=S.biome;S.biome=bi;S.biomeT=3;toast('🌲 '+BIOMES[bi].n+'에 들어섰다');}S.biomeT=Math.max(0,(S.biomeT||0)-dt);}
   // spawn & timers
@@ -3149,7 +3154,7 @@ function hud(){
   if(S.spin){lv.classList.add('on');lv.querySelectorAll('span').forEach((x,i)=>{x.textContent=S.spin.t<.3+i*.2?SYM[Math.floor(Math.random()*SYM.length)]:S.spin.res[i];});}
   else if(S.liveT>0&&play){S.liveT-=1/60;lv.classList.add('on');lv.querySelectorAll('span').forEach((x,i)=>x.textContent=S.liveRes[i]);}
   else lv.classList.remove('on');
-  const bf=[];if(S.buffT.jack>0)bf.push(`<span style="color:#ffd76a">잭팟 ${S.buffT.jack.toFixed(1)}</span>`);if(S.buffT.atk>0)bf.push(`<span style="color:#ffb347">공격력 +30% ${S.buffT.atk.toFixed(1)}</span>`);
+  const bf=[];if(S.win&&S.winT==null){const n=S.en.filter(e=>e.alive&&!e.boss).length;bf.push(`<span style="color:#ffd76a">🧹 남은 적 ${n} · ${Math.max(0,45-Math.floor(S.clT||0))}초</span>`);}if(S.buffT.jack>0)bf.push(`<span style="color:#ffd76a">잭팟 ${S.buffT.jack.toFixed(1)}</span>`);if(S.buffT.atk>0)bf.push(`<span style="color:#ffb347">공격력 +30% ${S.buffT.atk.toFixed(1)}</span>`);
   if(S.buffT.vuln>0)bf.push(`<span style="color:#ff6060">받는 피해 +50% ${S.buffT.vuln.toFixed(1)}</span>`);if(S.buffT.slow>0)bf.push(`<span style="color:#9fd3ff">둔화 ${S.buffT.slow.toFixed(1)}</span>`);
   if(S.ev){const E=EVENTS[S.ev.k],left=Math.max(0,S.ev.T-S.ev.t).toFixed(0);const ex=S.ev.k==='hunt'?` 남은 ${S.en.filter(e=>e.alive&&e.hunt).length}`:S.ev.k==='shrine'&&S.ev.ch>0?` ${Math.round(S.ev.ch/2.5*100)}%`:'';bf.push(`<span style="color:${E.col}">${E.icon} ${E.n}${ex} ${left}</span>`);}
   if(S.bless&&S.bless.t>0)bf.push(`<span style="color:#9fd3ff">${S.bless.n} ${S.bless.t.toFixed(0)}</span>`);
