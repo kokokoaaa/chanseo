@@ -747,7 +747,7 @@ const AUGS=[
   {id:'b_thirst',uc:1,cls:'berserk',u:'흡혈이 공격력으로 바뀌는 효율이 커져요. ★1은 흡혈 1%당 +8%, ★2는 +10%, ★3은 +12%.',t:'s',n:'피의 갈증',tags:['curse'],d:'[광전사 전용] 흡혈 1%당 공격력 +10%, 상한 없음'},
   {id:'d_cycle',uc:1,cls:'druid',u:'체력 재생이 공격력으로 바뀌는 효율이 커져요. ★1은 초당 재생 1당 +8%, ★2는 +10%, ★3은 +12%.',t:'s',n:'생명의 순환',tags:['guard'],d:'[드루이드 전용] 초당 체력 재생 1당 공격력 +10%, 상한 없음'},
   {id:'al_master',uc:2,cls:'alch',u:'물약 투척 횟수가 공격력으로 바뀌는 효율이 커져요. ★1은 12번당 +1%, ★2는 10번당, ★3은 8번당.',t:'s',n:'연성 숙련',tags:['alchemy'],d:'[연금술사 전용] 이번 판 물약을 10번 던질 때마다 공격력 +1%, 상한 없음'},
-  {id:'gb_allin',uc:2,cls:'gambler',u:'행운이 앞면 피해로 바뀌는 효율이 커져요. ★1은 행운 1당 +2%, ★2는 +3%, ★3은 +4%.',t:'s',n:'판돈 올리기',tags:['coin'],d:'[도박사 전용] 행운 1당 동전 앞면 피해 +3%, 상한 없음'},
+  {id:'gb_allin',uc:2,cls:'gambler',u:'행운이 앞면 피해로 바뀌는 효율이 커져요. ★1은 행운 1당 +2%, ★2는 +3%, ★3은 +4%.',t:'s',n:'판돈 올리기',tags:['coin'],d:'[도박사 전용] 행운 1당 동전 앞면 피해 +3%. 행운 상한(30)을 넘은 행운도 계산, 상한 없음'},
   {id:'k_charger',uc:1,cls:'knight',u:'이동 속도가 공격력으로 바뀌는 효율이 커져요. 이동 속도 150을 넘는 10당 ★1은 +1.5%, ★2는 +2%, ★3은 +2.5%.',t:'s',n:'돌격 기사',tags:['blitz'],d:'[기사 전용] 이동 속도 150을 넘는 10당 공격력 +2%, 상한 없음'},
   {id:'m_overload',uc:1,cls:'mage',u:'공격 속도가 공격력으로 바뀌는 효율이 커져요. ★1은 공격 속도 1당 +4%, ★2는 +5%, ★3은 +6%. 공격 속도 상한을 넘은 만큼도 계산해요.',t:'s',n:'마력 과부하',tags:['thunder'],d:'[마법사 전용] 공격 속도 1당 공격력 +5% (상한 넘은 공격 속도도 계산), 상한 없음'},
   {id:'a_pierce',uc:1,cls:'archer',u:'관통이 공격력으로 바뀌는 효율이 커져요. ★1은 관통 1당 +6%, ★2는 +8%, ★3은 +10%.',t:'s',n:'꿰뚫는 화살',tags:['card'],d:'[궁수 전용] 관통 1당 공격력 +8%, 상한 없음'},
@@ -757,7 +757,7 @@ const AUGS=[
   {id:'g_fan',uc:1,cls:'gunner',u:'공격 속도가 공격력으로 바뀌는 효율이 커져요. ★1은 공격 속도 1당 +4%, ★2는 +5%, ★3은 +6%. 공격 속도 상한을 넘은 만큼도 계산해요.',t:'s',n:'패닝 사격',tags:['rapid'],d:'[총잡이 전용] 공격 속도 1당 공격력 +5% (상한 넘은 공격 속도도 계산), 상한 없음'},
   {id:'b_carnage',uc:2,cls:'berserk',u:'피의 축적 효율이 커져요. 축적 100당 ★1은 +1.5%, ★2는 +2%, ★3은 +2.5%.',t:'s',n:'학살자',tags:['fury'],d:'[광전사 전용] 광란이 최대일 때 처치하면 피의 축적 +1 (영구). 축적 100당 공격력 +2%, 상한 없음'},
   {id:'d_overgrowth',uc:2,cls:'druid',u:'생장 효율이 커져요. 덩굴 10개당 ★1은 +0.8%, ★2는 +1%, ★3은 +1.2%.',t:'s',n:'끝없는 생장',tags:['nature'],d:'[드루이드 전용] 덩굴 지대가 생길 때마다 생장 +1 (영구). 생장 10당 공격력 +1%, 상한 없음'},
-  {id:'gb_dice',uc:1,cls:'gambler',u:'행운이 치명타 피해로 바뀌는 효율이 커져요. ★1은 행운 1당 +2%, ★2는 +3%, ★3은 +4%.',t:'s',n:'운명의 주사위',tags:['dice'],d:'[도박사 전용] 행운 1당 치명타 피해 +3% (치명타 피해 상한 무시), 상한 없음'},
+  {id:'gb_dice',uc:1,cls:'gambler',u:'행운이 치명타 피해로 바뀌는 효율이 커져요. ★1은 행운 1당 +2%, ★2는 +3%, ★3은 +4%.',t:'s',n:'운명의 주사위',tags:['dice'],d:'[도박사 전용] 행운 1당 치명타 피해 +3%. 행운 상한(30)을 넘은 행운도 계산, 상한 없음'},
   {id:'k_cleave',cls:'knight',u:'회전 베기가 더 자주, 더 세게 나가요. ★1은 3번째 공격마다 120%, ★2는 3번째마다 160%, ★3은 2번째마다 200%. 반경도 30% 넓어져요.',t:'s',n:'회오리 베기',tags:['blitz','card'],d:'[기사 전용] 회전 베기가 3번째 공격마다, 공격력 160%로 강화'},
   {id:'k_berserk',cls:'knight',u:'맞을 때 쌓이는 분노 중첩의 최대치가 늘어나요. ★1은 5중첩, ★2는 7중첩, ★3은 9중첩. 중첩당 공격력 +8%, 공격 속도 +6%.',t:'g',n:'분노의 기사',tags:['curse','jackpot'],d:'[기사 전용] 피격·막기 시 5초간 분노 1중첩 (공격력 +8%, 공격 속도 +6%, 최대 7중첩)'},
   {id:'k_smite',cls:'knight',u:'심판의 빛기둥이 떨어지는 주기가 짧아져요. ★1은 6번째, ★2는 5번째, ★3은 4번째 공격마다. 피해는 공격력 4배 + 방어력 ×1.',t:'p',n:'심판',tags:['guard','jackpot'],d:'[기사 전용] 5번째 공격마다 대상에 빛기둥. 공격력 3배 + 방어력만큼 범위 피해'},
@@ -1941,7 +1941,7 @@ function pRate(){return Math.min(RATE_CAP(),rawRate());}
 const critRaw=()=>S.p.crit+ex('dice')*.04+(has('a_still')&&!S.p.moving?.1:0)+(has('fortune')?LK()*lv3('fortune',.006,.008,.01):0);
 const critC=()=>Math.min(CRIT_CAP,critRaw());
 const CRIT_DMG_CAP_F=()=>has('sharpshot')?8:5;
-const critMul=()=>(has('sharpshot')?1:0)+(has('f_luckstar')?LK()*.02:0)+(has('r_vital')?critRaw()*100*lv3('r_vital',.01,.015,.02):0)+(has('gb_dice')?LK()*lv3('gb_dice',.02,.03,.04):0)+Math.min(CRIT_DMG_CAP_F(),S.p.critM+ex('dice')*.15+Math.max(0,critRaw()-CRIT_CAP)*.5);
+const critMul=()=>(has('sharpshot')?1:0)+(has('f_luckstar')?LK()*.02:0)+(has('r_vital')?critRaw()*100*lv3('r_vital',.01,.015,.02):0)+(has('gb_dice')?Math.max(0,S.p.luck)*lv3('gb_dice',.02,.03,.04):0)+Math.min(CRIT_DMG_CAP_F(),S.p.critM+ex('dice')*.15+Math.max(0,critRaw()-CRIT_CAP)*.5);
 const critFull=()=>critRaw()>=CRIT_CAP,critMFull=()=>critMul()>=CRIT_DMG_CAP_F();
 const stackCapped=x=>(x.k==='crit'&&critFull())||(x.k==='critm'&&critMFull())||(x.k==='luck'&&S.p.luck>=LUCK_CAP)||(x.k==='dodge'&&S.p.dodge>=DODGE_CAP)||(x.k==='rate'&&rawRate()>=RATE_CAP());
 const dodgeC=()=>Math.min(DODGE_CAP,S.p.dodge+(has('f_ghoststep')&&S.p.ghT>0?.3:0));
@@ -2500,7 +2500,7 @@ function playerFire(tg){
   const el=S.cls==='elem'?(has('e_avatar')?3:(p.elN??0)):null;if(S.cls==='elem')p.elN=routePick(ELEM_TAGS);
   let lastB=false;if(S.cls==='gunner'){shock*=1.7*(1+(p.lbD||0));p.mag=(p.mag??magN())-1;if(p.mag<=0){lastB=true;if(has('f_deadshot'))S.deadShot=1;}}
   let coin=0;if(coinOn()){const hd=p.cfF||Math.random()<headP()||(has('f_goddess')&&Math.random()<.25);p.cfF=false;coin=hd?1:-1;
-    if(hd){p.cfS=(p.cfS||0)+1;shock*=((tag('coin')>=6?3:2)+(has('allin')?1:0))*(1+(p.hdD||0)+(has('gb_allin')?LK()*lv3('gb_allin',.02,.03,.04):0))*homeM('coin');if(has('gb_streak'))shock*=1+Math.min(has('f_streakrun')?20:10,p.cfS-1)*lv3('gb_streak',.1,.15,.2);
+    if(hd){p.cfS=(p.cfS||0)+1;shock*=((tag('coin')>=6?3:2)+(has('allin')?1:0))*(1+(p.hdD||0)+(has('gb_allin')?Math.max(0,S.p.luck)*lv3('gb_allin',.02,.03,.04):0))*homeM('coin');if(has('gb_streak'))shock*=1+Math.min(has('f_streakrun')?20:10,p.cfS-1)*lv3('gb_streak',.1,.15,.2);
       if(tag('coin')>=2&&p.cfS%3===0)S.coinB=1;if(has('gb_jackpot')&&p.cfS%5===0)S.coinJ=1;if(has('coinshower')&&Math.random()<(has('f_goldrush')?.4:.15))S.coinS=1;}
     else{p.cfS=0;shock*=has('f_twoface')?1:has('allin')?.25:.5;if(tag('coin')>=4)p.cfF=true;if(has('coinguard')){p.barrier=Math.min(Math.max(barrierMax(),20),(p.barrier||0)+lv3('coinguard',3,4,5));}}}
   if(tag('rapid')>=4){p.rpS=Math.min(20,(p.rpS||0)+1);p.rpT=1.5;}
@@ -3336,8 +3336,8 @@ const CARD_TAG={'시계 태엽':['grav','nature','wave','shadow','undead','elem'
   '숫돌':['poison','fire','frost','thunder','summon'],'힘의 물약':['poison','fire','frost','thunder','summon'],'배움의 서':[]};
 // 이미 모은 시너지일수록 그 시너지 증강이 더 잘 뜸 (6개면 ×2, 행운 최대면 ×3) → 중간에 고른 빌드 쪽으로 몰아주기
 function routeW(tags){let m=0;for(const t of tags)m=Math.max(m,Math.min(6,tag(t)));return 1+(1+LK()/30)*m/6;}
-// 고점 돌파 증강: 기본은 아주 드묾 (주력 특화 ×0.25, 보조 ×0.12). 같은 태그 증강을 가질수록, 행운이 높을수록, 악몽일수록 잘 나옴. 일반 전용 증강 수준(4)이 상한
-const ucW=a=>Math.min(4,4*(a.uc===2?.25:.12)*(1+.3*(a.tags||[]).reduce((n,t)=>n+tag(t),0))*(1+LK()/40)*(endless()?2:1));
+// 고점 돌파 증강: 기본은 아주 드묾 (주력 특화 ×0.25, 보조 ×0.12). 같은 태그 증강을 가질수록, 행운이 높을수록(행운 30이면 2배), 악몽일수록 잘 나옴. 일반 전용 증강 수준(4)이 상한
+const ucW=a=>Math.min(4,4*(a.uc===2?.25:.12)*(1+.3*(a.tags||[]).reduce((n,t)=>n+tag(t),0))*(1+LK()/LUCK_CAP)*(endless()?2:1));
 function augW(a){const C=CLASSES[S.cls||'knight'];if(a.cls)return a.cls===S.cls?(a.uc?ucW(a):4*fuseW(a)):0;const ts=new Set(a.tags);let w=routeW([...ts]);if([...ts].some(t=>C.fav.includes(t)))w*=2.5;if([...ts].some(t=>C.dis.includes(t)))w*=.3;return w*fuseW(a);}
 function pickW(pool,n){const out=[];pool=[...pool];while(out.length<n&&pool.length){const t=pool.reduce((q,a)=>q+augW(a),0);let x=Math.random()*t,i=0;for(;i<pool.length-1;i++){if((x-=augW(pool[i]))<0)break;}out.push(pool.splice(i,1)[0]);}return out;}
 function augOptions(tier){
