@@ -1818,7 +1818,7 @@ const CLASSES={
     stats:{hp:155,maxHp:155,speed:185,dmg:16,rate:2.1,range:300,bspd:500,armor:7},fav:['undead','summon','curse'],dis:['holy'],
     cards:['힘의 물약','숫돌','조준경','튼튼한 체력','전투 본능','흡혈 송곳니'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
   gunner:{lock:true,n:'총잡이',role:'연사 저격',d:'리볼버를 연사하고 재장전하는 총잡이',passive:'6발 탄창: 6발 쏘면 짧게 재장전. 마지막 탄은 반드시 치명타 + 관통 2',atk:.18,
-    stats:{hp:140,maxHp:140,speed:200,dmg:10,rate:3.6,range:300,bspd:820,crit:.1,critM:2.1},fav:['rapid','sniper','card'],dis:['summon'],
+    stats:{hp:140,maxHp:140,speed:200,dmg:10,rate:3.3,range:300,bspd:820,crit:.1,critM:2.1},fav:['rapid','sniper','card'],dis:['summon'],
     cards:['날랜 손놀림','조준경','급소 노리기','치명상','힘의 물약','가벼운 장화'],lvd:'공격력 +0.6%, 치명타 +0.2%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.006;p.crit+=.002;p.maxHp+=1;p.hp+=1;}},
   elem:{lock:true,n:'정령사',role:'원소 순환',d:'화염·냉기·번개를 번갈아 쏘는 정령술사',passive:'원소 순환: 화염(화상) → 냉기(1초 둔화) → 번개(주변 2명에게 60% 연쇄) 순서로 공격. 기본 관통 1',atk:.3,
     stats:{hp:170,maxHp:170,speed:190,dmg:17,rate:2.5,range:310,bspd:560,armor:9,pierce:1},fav:['elem','fire','frost'],dis:['poison'],
