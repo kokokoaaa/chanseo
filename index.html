@@ -2551,7 +2551,8 @@ function onKill(e){
   if(e.mkT>S.t){if(has('stigma')&&p.alive)p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.01*healM());
     if(has('markburst')){const r=80*(has('f_execution')?1.5:1);explode(e.x,e.y,r,pDmg()*lv3('markburst',1.5,2,2.5),'#ff5a6a');if(has('f_execution'))for(const o of S.en)if(o.alive&&d2(o,e)<r*r)markE(o);}
     if(tag('mark')>=4){const ex2=new Set([e]);for(let i=0;i<2;i++){const o=nearestE(e,260,ex2);if(!o)break;ex2.add(o);markE(o);}}}
-  if(has('stormfury')&&(p.fy||0)>=10&&Math.random()<lv3('stormfury',.25,.35,.45))lightning(e,2);
+  // 폭풍의 분노: 번개로 죽은 적이 또 번개를 부르는 연쇄 폭주 방지 (번개가 만든 처치는 다시 발동 안 함)
+  if(has('stormfury')&&!S.sfD&&(p.fy||0)>=10&&Math.random()<lv3('stormfury',.25,.35,.45)){S.sfD=1;try{lightning(e,2);}finally{S.sfD=0;}}
   if(e.potT>S.t){if(has('transmute'))addGold(lv3('transmute',3,4,5));if(has('al_chain')&&(S.chN||0)<(has('f_chainpot')?30:12)){S.chN=(S.chN||0)+1;exS('alchemy',e.x,e.y,60,pDmg()*lv3('al_chain',.6,.8,1)*potM()*(has('f_chainpot')?1.5:1),'#c8ff6a');}}
   if(p.alive){addFury(1);if(has('bloodlust'))p.hp=Math.min(p.maxHp,p.hp+lv3('bloodlust',1,1.5,2)*healM());}
   if(!e.boss&&p.alive){const c=skelC();if(c>0&&Math.random()<c)raiseSkel(e.x,e.y);
