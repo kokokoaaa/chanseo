@@ -3820,8 +3820,12 @@ const myNick=()=>{try{return localStorage.getItem('chipdungeon_nick')||'';}catch
 const dOf=b=>{const c=String(b.cls||'').split('#')[0];return b.diff||(c.includes(':')?c.split(':')[1]:'normal');};
 const calcScore=b=>scoreOf({...b,diff:dOf(b)});
 function normBoard(list){return list.map(b=>({...b,diff:dOf(b),fx:String(b.cls||'').split('#')[1]||b.fx||'',cls:String(b.cls||'').split('#')[0].split(':')[0],name:String(b.name||''),time:+b.time||0,lvl:+b.lvl||0,kills:+b.kills||0,bosses:+b.bosses||0,comment:String(b.comment||''),score:calcScore(b)})).sort((a,b)=>b.score-a.score);}
+// 내 등록 기록 백업: 서버가 어떤 기록(예: 새 난이도)을 반영하지 못해도 내 화면에서는 사라지지 않게. 서버에 더 높은 기록이 있으면 서버 것을 씀
+const myRecs=()=>{try{return JSON.parse(localStorage.getItem('chanseo_myrec')||'{}');}catch(e){return {};}};
+const saveMyRec=r=>{try{const m=myRecs();const old=m[r.diff];if(!old||scoreOf({...r})>=scoreOf({...old}))m[r.diff]=r;localStorage.setItem('chanseo_myrec',JSON.stringify(m));}catch(e){}};
+function mergeMine(list){const m=myRecs();for(const k in m){const r=m[k];const sv=list.find(b=>b.name===r.name&&b.diff===k);if(!sv||sv.score<scoreOf({...r,diff:k}))list=[...list.filter(b=>b!==sv),...normBoard([r]).map(b=>({...b,id:'s_'+b.name+'_'+b.diff,local:true}))];}return normBoard(list).map(b=>({...b,id:b.id||'s_'+b.name+'_'+b.diff}));}
 async function loadSheet(){try{const r=await fetch(SHEET_URL,{cache:'no-store'});const j=await r.json();if(!Array.isArray(j))throw 0;
-  BOARD=normBoard(j).map(b=>({...b,id:'s_'+b.name+'_'+b.diff}));SHEET=true;RSTATE='on';refreshBoard();}
+  BOARD=mergeMine(normBoard(j).map(b=>({...b,id:'s_'+b.name+'_'+b.diff})));SHEET=true;RSTATE='on';refreshBoard();}
   catch(e){if(!SHEET){RSTATE='off';refreshBoard();}}}
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 (async()=>{try{
@@ -3844,9 +3848,9 @@ function boardHtml(){
   const f=x=>`${Math.floor(x/60)}:${String(Math.floor(x%60)).padStart(2,'0')}`;
   const me=b=>SHEET?(b.name&&b.name===myNick()):!!RMYID&&String(b.id).startsWith(RMYID);
   const cn=b=>CLASSES[b.cls]?CLASSES[b.cls].n:'?';
-  const nm=b=>`<span class="hn ${b.fx?'hx-'+b.fx:''}">${b.fx==='hf_crown'?'👑 ':''}${esc(b.name.slice(0,12)||'이름 없음')}</span>`;
-  const top=B.slice(0,3).map((b,i)=>`<div class="pcard p${i+1} ${me(b)?'me':''} ${b.fx?'hc-'+b.fx:''}"><span class="pm">${['🥇','🥈','🥉'][i]}</span><span class="pn">${nm(b)}</span><span class="pc">${b.bosses>=4?'👑 클리어 · ':''}${cn(b)} · Lv ${b.lvl} · ${f(b.time)}</span><span class="ps">${b.score.toLocaleString()}점</span><span class="pq ${b.comment?'':'empty'}">${b.comment?'“'+esc(b.comment.slice(0,40))+'”':'한마디 없음'}</span></div>`).join('');
-  const rest=B.slice(3,HOF_ALL?30:7).map((b,i)=>`<div class="rrow ${me(b)?'me':''} ${b.fx?'hc-'+b.fx:''}"><span class="rn">${i+4}</span><span class="rnm"><b>${nm(b)}${me(b)?' (나)':''}</b>${b.comment?`<i>“${esc(b.comment.slice(0,40))}”</i>`:''}</span><span class="rc">${b.bosses>=4?'👑 ':''}${cn(b)}<br>Lv ${b.lvl} · ${f(b.time)}</span><span class="rt">${b.score.toLocaleString()}</span></div>`).join('');
+  const nm=b=>`<span class="hn ${b.fx?'hx-'+b.fx:''}">${b.fx==='hf_crown'?'👑 ':''}${esc(b.name.slice(0,12)||'이름 없음')}</span>${b.local?'<small title="서버에 아직 반영되지 않은 이 기기의 기록" style="opacity:.7"> 📱</small>':''}`;
+  const top=B.slice(0,3).map((b,i)=>`<div class="pcard p${i+1} ${me(b)?'me':''} ${b.fx?'hc-'+b.fx:''}"><span class="pm">${['🥇','🥈','🥉'][i]}</span><span class="pn">${nm(b)}</span><span class="pc">${DIFF[b.diff]&&DIFF[b.diff].endless?'☠ '+((+b.bosses||0)+1)+'단계 · ':b.bosses>=4?'👑 클리어 · ':''}${cn(b)} · Lv ${b.lvl} · ${f(b.time)}</span><span class="ps">${b.score.toLocaleString()}점</span><span class="pq ${b.comment?'':'empty'}">${b.comment?'“'+esc(b.comment.slice(0,40))+'”':'한마디 없음'}</span></div>`).join('');
+  const rest=B.slice(3,HOF_ALL?30:7).map((b,i)=>`<div class="rrow ${me(b)?'me':''} ${b.fx?'hc-'+b.fx:''}"><span class="rn">${i+4}</span><span class="rnm"><b>${nm(b)}${me(b)?' (나)':''}</b>${b.comment?`<i>“${esc(b.comment.slice(0,40))}”</i>`:''}</span><span class="rc">${DIFF[b.diff]&&DIFF[b.diff].endless?'☠'+((+b.bosses||0)+1)+'단계 ':b.bosses>=4?'👑 ':''}${cn(b)}<br>Lv ${b.lvl} · ${f(b.time)}</span><span class="rt">${b.score.toLocaleString()}</span></div>`).join('');
   const more=B.length>7?`<button class="btn more" id="hofMore">${HOF_ALL?'접기':`전체 순위 보기 (${Math.min(B.length,30)}위까지)`}</button>`:'';
   return head+`<div class="podium">${top}</div>${rest?`<div class="rank">${rest}</div>`:''}${more}`;
 }
@@ -3866,7 +3870,7 @@ async function submitScore(nick,comment,run){
   say('등록 중…');if(btn)btn.disabled=true;
   try{
     if(sheet){
-      await fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(rec)});
+      await fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(rec)});if(better)saveMyRec(rec);
       const row=better?{...rec,id:'s_'+nick+'_'+dk}:{...cur,comment};BOARD=normBoard([...(BOARD||[]).filter(b=>!(b.name===nick&&b.diff===dk)),row]).map(b=>({...b,id:b.id||'s_'+b.name}));
       setTimeout(loadSheet,2500);
     }else{
