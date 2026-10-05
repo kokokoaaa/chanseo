@@ -3380,7 +3380,7 @@ function bindPeek(){
 function openAugKeep(opts,free,why,tier){openAug(free,why,opts,tier);}
 const augReady=()=>slotCount()<MAXA||fullOptions().length>0;
 // 슬롯이 가득 차면: 합체 짝(최대 2) + 나머지는 '교체' 후보 (고르면 기존 증강 하나를 버리고 바꿈)
-const swappable=()=>S.augs.map((a,i)=>[a,i]).filter(([a])=>a.t!=='v'&&a.t!=='f'&&!a.f);
+const swappable=()=>S.augs.map((a,i)=>[a,i]).filter(([a])=>a.t!=='v'&&a.t!=='f'&&!a.f&&!a.uc);
 function fullOptions(){
   const fz=AUGS.filter(a=>!has(a.id)&&(!a.cls||a.cls===S.cls)&&augReq(a)&&partnerOf(a.id)).sort(()=>Math.random()-.5).slice(0,2).map(a=>({...a,fuseNow:true,q:rollQ()}));
   if(!swappable().length)return fz;
