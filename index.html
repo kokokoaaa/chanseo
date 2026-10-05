@@ -753,7 +753,7 @@ const AUGS=[
   {id:'a_pierce',uc:1,cls:'archer',u:'관통이 공격력으로 바뀌는 효율이 커져요. ★1은 관통 1당 +6%, ★2는 +8%, ★3은 +10%.',t:'s',n:'꿰뚫는 화살',tags:['card'],d:'[궁수 전용] 관통 1당 공격력 +8%, 상한 없음'},
   {id:'r_phantom',uc:1,cls:'rogue',u:'회피가 공격력으로 바뀌는 효율이 커져요. ★1은 회피 1%당 +1%, ★2는 +1.5%, ★3은 +2%. 회피 상한(60%)을 넘은 만큼도 계산해요.',t:'s',n:'환영 무희',tags:['blitz'],d:'[도적 전용] 회피 1%당 공격력 +1.5% (상한 넘은 회피도 계산), 상한 없음'},
   {id:'p_sun',uc:2,cls:'paladin',u:'오라 범위 보너스가 오라 피해로 바뀌는 효율이 커져요. ★1은 범위 +1%당 +0.6%, ★2는 +0.8%, ★3은 +1%.',t:'s',n:'작열하는 태양',tags:['holy'],d:'[성기사 전용] 신성 오라 범위 보너스 1%당 오라 피해 +0.8%, 상한 없음'},
-  {id:'n_horde',uc:2,cls:'necro',u:'해골 최대 수가 공격력으로 바뀌는 효율이 커져요. ★1은 1기당 +4%, ★2는 +5%, ★3은 +6%.',t:'s',n:'망자의 왕',tags:['undead','summon'],d:'[사령술사 전용] 해골 최대 수 1기당 공격력 +5% (해골 포함), 상한 없음'},
+  {id:'n_horde',uc:2,cls:'necro',u:'해골 최대 수가 공격력으로 바뀌는 효율이 커져요. ★1은 1기당 +4%, ★2는 +5%, ★3은 +6%.',t:'s',n:'망자의 왕',tags:['undead','summon'],d:'[사령술사 전용] 언데드+소환 태그가 5개를 넘는 1개마다 해골 최대 수 +1. 해골 최대 수 1기당 공격력 +5% (해골 포함), 상한 없음'},
   {id:'g_fan',uc:1,cls:'gunner',u:'공격 속도가 공격력으로 바뀌는 효율이 커져요. ★1은 공격 속도 1당 +4%, ★2는 +5%, ★3은 +6%. 공격 속도 상한을 넘은 만큼도 계산해요.',t:'s',n:'패닝 사격',tags:['rapid'],d:'[총잡이 전용] 공격 속도 1당 공격력 +5% (상한 넘은 공격 속도도 계산), 상한 없음'},
   {id:'b_carnage',uc:2,cls:'berserk',u:'피의 축적 효율이 커져요. 축적 100당 ★1은 +1.5%, ★2는 +2%, ★3은 +2.5%.',t:'s',n:'학살자',tags:['fury'],d:'[광전사 전용] 광란이 최대일 때 처치하면 피의 축적 +1 (영구). 축적 100당 공격력 +2%, 상한 없음'},
   {id:'d_overgrowth',uc:2,cls:'druid',u:'생장 효율이 커져요. 덩굴 10개당 ★1은 +0.8%, ★2는 +1%, ★3은 +1.2%.',t:'s',n:'끝없는 생장',tags:['nature'],d:'[드루이드 전용] 덩굴 지대가 생길 때마다 생장 +1 (영구). 생장 10당 공격력 +1%, 상한 없음'},
@@ -1391,6 +1391,7 @@ const CARDS=[
   {n:'질주 본능',v:[[1,2,1],[2,3.5,1]],t:v=>`이동 속도 +${v[0]}%, 대시 재사용 −${v[1]}%`,a:(p,v)=>{p.speed*=1+v[0]/100;p.dashMul*=1-v[1]/100;}},
   {fr:'r',n:'도박꾼의 주사위',d:'공격력 −15% ~ +25%, 굴려봐야 압니다',f:p=>{const m=Math.round(-15+Math.random()*40);p.dmgP=(p.dmgP||0)+m/100;return `공격력 ${m>=0?'+':''}${m}%`;}},
   {fr:'e',n:'관통 탄',d:'관통 +1',f:p=>{p.pierce+=1;}},
+  {fr:'e',cls:'necro',n:'해골 증원',d:'해골 최대 수 +1 (30기를 넘으면 넘는 만큼 해골 피해로)',f:p=>{p.skN=(p.skN||0)+1;}},
   {n:'불사의 맹세',v:[[.15,.3,2],[.12,.25,2]],t:v=>`흡혈 +${v[0]}%, 초당 체력 재생 +${v[1]}`,a:(p,v)=>{p.lifesteal+=v[0]/100;p.regen+=v[1];}},
   {fr:'l',n:'다연발',d:'탄환 +1발',f:p=>{p.multi+=1;}},
   {fr:'l',n:'올인',v:[[18,28,0]],t:v=>`공격력 +${v[0]}%, 받는 피해 +50%`,a:(p,v)=>{p.dmgP=(p.dmgP||0)+v[0]/100;p.vuln*=1.5;}},
@@ -1410,7 +1411,7 @@ const PV=[['공격력','dmg',(a,b)=>`내 공격력 ${a.toFixed(1)} → ${b.toFix
 // 증강의 최대 체력 % 감소도 실제로 깎이는 양을 괄호로 (n번 적용 기준)
 function hpLoss(f,d,n=1){if(!f||!S||!S.p||!/최대 체력 [−-][\d.]+%/.test(d||''))return '';const c={...S.p};try{for(let k=0;k<n;k++)f(c);}catch(e){return '';}const x=Math.round(c.maxHp-S.p.maxHp);return x?` <small style="opacity:.65">(최대 체력 ${sgn(x,0)})</small>`:'';}
 function withActual(desc,f){const W=a=>a.map(l=>`<div>${l}</div>`).join('');if(!S||!S.p||!f)return W(desc.split(', '));const c={...S.p};try{f(c);}catch(e){}
-  return W(desc.split(', ').map(line=>{if(!line.includes('%'))return line;const m=PV.find(([k])=>line.startsWith(k));if(!m)return line;const [,key,fmt]=m,g=o=>{if(key!=='dmg')return o[key];const P0=S.p;S.p=o;try{return pDmg();}catch(e){return null;}finally{S.p=P0;}},a=g(S.p)??0,b=g(c)??a;if(a===b)return line;
+  return W(desc.split(', ').map(line=>{const m=PV.find(([k])=>line.startsWith(k));if(!m||(!line.includes('%')&&m[1]!=='dmg'))return line;if(!m)return line;const [,key,fmt]=m,g=o=>{if(key!=='dmg')return o[key];const P0=S.p;S.p=o;try{return pDmg();}catch(e){return null;}finally{S.p=P0;}},a=g(S.p)??0,b=g(c)??a;if(a===b)return line;
     return `${line} <small style="opacity:.65">(${fmt(a,b)})</small>`;}));}
 // 증강 미리보기: 이 증강을 얻었을 때(★2) 주요 스탯이 얼마나 바뀌는지. 잠깐 적용해서 계산한 뒤 그대로 되돌림
 const PREV_ST=[['공격력',()=>pDmg(),1],['공격 속도',()=>pRate(),2,'/초'],['최대 체력',()=>S.p.maxHp,0],['방어력',()=>armorEff(),0],['회피',()=>dodgeC()*100,1,'%'],['치명타 확률',()=>critC()*100,1,'%'],['치명타 피해',()=>critMul()*100,0,'%'],['이동 속도',()=>moveSpd(),0],['사거리',()=>S.p.range,0],['탄속',()=>S.p.bspd,0],['관통',()=>S.p.pierce,0],['탄환',()=>S.p.multi,0,'발'],['흡혈',()=>S.p.lifesteal*100,1,'%'],['초당 재생',()=>S.p.regen,1],['행운',()=>LK(),1],['골드 획득',()=>S.p.goldM*100,0,'%'],['대시 재사용',()=>dashCdVal(),2,'초']];
@@ -1906,7 +1907,7 @@ function pDmg(){const p=S.p;let d=effDmg(p);
   if(has('g_fan'))d*=1+rawRate()*lv3('g_fan',.04,.05,.06);
   if(has('a_pierce'))d*=1+p.pierce*lv3('a_pierce',.06,.08,.1);
   if(has('r_phantom'))d*=1+p.dodge*100*lv3('r_phantom',.01,.015,.02);
-  if(has('n_horde'))d*=1+skelMax()*lv3('n_horde',.04,.05,.06);
+  if(has('n_horde'))d*=1+skelRaw()*lv3('n_horde',.04,.05,.06);
   if(has('b_carnage'))d*=1+(p.fyO||0)/100*lv3('b_carnage',.015,.02,.025);
   if(has('d_overgrowth'))d*=1+(S.vineN||0)/10*lv3('d_overgrowth',.008,.01,.012);
   if(has('al_master'))d*=1+(S.potN||0)/(14-2*Math.min(3,L('al_master')))*.01;
@@ -2383,9 +2384,10 @@ const magN=()=>6;
 // 재장전: 공격 속도와 무관하게 기본 1초. 재장전 카드·쌍권총·총기 숙련으로만 줄고 최소 0.35초
 const reloadT=()=>Math.max(.35,1*(has('g_twin')?.5:1)*(S.p.rlM||1)*(1-.05*mlv('m_rapid')));
 function ricoShot(t,dm,n){const o=nearestE(t,220,new Set([t]));if(o)pBullet(t.x,t.y,Math.atan2(o.y-t.y,o.x-t.x),dm,{child:true,r:3,rc:n,hit:new Set([t]),sure:has('f_trickshot'),life:.6,pierce:0});}
-const skelMax=()=>(S.cls==='necro'?5:0)+(tag('undead')>=1?1:0)+(tag('undead')>=4?2:0)+(has('raise')?2:0)+(has('n_legion')?lv3('n_legion',1,2,3):0)+(has('n_lich')?2:0)+(has('f_bonelord')?2:0);
+// 해골 최대 수: 실제로 나오는 해골은 30기까지, 넘는 만큼은 해골 피해 배율로 바뀜 (skelRaw/30)
+const SKEL_CAP=30,skelMax=()=>Math.min(SKEL_CAP,skelRaw()),skelRaw=()=>(S.cls==='necro'?5:0)+(S.p.skN||0)+(has('n_horde')?Math.max(0,tag('undead')+tag('summon')-5):0)+(tag('undead')>=1?1:0)+(tag('undead')>=4?2:0)+(has('raise')?2:0)+(has('n_legion')?lv3('n_legion',1,2,3):0)+(has('n_lich')?2:0)+(has('f_bonelord')?2:0);
 const skelC=()=>(has('f_deathlord')?.1:0)+(S.cls==='necro'?.25:tag('undead')>=1?.08:0)+(tag('undead')>=4?.1:0)+(has('raise')?lv3('raise',.06,.08,.1):0)+(has('n_legion')?.1:0);
-const skelD=()=>pDmg()*(S.cls==='necro'?1:.6)*(1+(S.p.skD||0))*(1+.05*mlv('m_undead'))*sumM()*undM()*(tag('undead')>=6?2:1)*(has('f_bonelord')?1+.03*(S.skel?S.skel.length:0):1);
+const skelD=()=>Math.max(1,skelRaw()/SKEL_CAP)*pDmg()*(S.cls==='necro'?1:.6)*(1+(S.p.skD||0))*(1+.05*mlv('m_undead'))*sumM()*undM()*(tag('undead')>=6?2:1)*(has('f_bonelord')?1+.03*(S.skel?S.skel.length:0):1);
 // 해골이 맞음: 받는 피해 절반 + 내 방어력 적용, 체력 0이면 사라짐 (사라질 때 효과 발동)
 // 해골이 받는 피해: 절반 + 내 방어력 적용. 후반엔 적 피해가 커지므로 시간이 지날수록 더 줄어듦(10분이면 1/3)
 function skHit(k,dmg){k.hp-=dmg*.5*100/(100+armorEff())/(1+effT()/300);k.hit=.12;if(k.hp<=0){k.hp=0;k.life=0;}}
@@ -2771,7 +2773,7 @@ function update(dt){
     if(has('archangel')){S.agT=(S.agT??4)-dt;if(S.agT<=0){S.agT=has('f_seraph')?4:8;const c=S.en.filter(e=>e.alive&&!e.phase&&d2(e,p)<320*320);for(let i=0;i<4&&c.length;i++){const e=c.splice(Math.floor(Math.random()*c.length),1)[0];S.bolts.push({x1:e.x,y1:e.y-220,x2:e.x,y2:e.y,life:.18});exS('holy',e.x,e.y,80,pDmg()*2.5*holyM(),'#fff3a0');}}}
     if(has('stormcall')){S.scT=(S.scT??4)-dt;if(S.scT<=0){S.scT=Math.max(1,(has('f_tempest')?2:4)-(has('f_genesis')?1:0))*cdM();const c=S.en.filter(e=>e.alive&&!e.phase&&d2(e,p)<320*320);for(let i=0;i<(has('f_tempest')?5:3)+(has('f_genesis')?3:0)&&c.length;i++){const e=c.splice(Math.floor(Math.random()*c.length),1)[0];S.bolts.push({x1:e.x,y1:e.y-220,x2:e.x,y2:e.y,life:.18});elemDrop(e);}}}
     if(p.rpT>0){p.rpT-=dt;if(p.rpT<=0)p.rpS=0;}if(p.rlT>0)p.rlT-=dt;
-    if(S.cls==='necro'||tag('undead')>=4){S.skT=(S.skT??3)-dt;if(S.skT<=0){S.skT=(S.cls==='necro'?((S.skel||[]).length<skelMax()/2?1:2.5):5)*cdM();if((S.skel||[]).length<skelMax())raiseSkel(p.x+rand(-40,40),p.y+rand(-40,40));}}
+    if(S.cls==='necro'||tag('undead')>=4){S.skT=(S.skT??3)-dt;if(S.skT<=0){S.skT=(S.cls==='necro'?Math.min((S.skel||[]).length<skelMax()/2?1:2.5,(12+(has('deathnova')?4:0)+(p.skL||0))*.9/skelMax()):5)*cdM();if((S.skel||[]).length<skelMax())raiseSkel(p.x+rand(-40,40),p.y+rand(-40,40));}}
     if(S.skel&&S.skel.length){const sd=skelD(),fr=420*420;for(const k of S.skel){k.ag=0;k.life-=dt;k.cd-=dt;k.sw=Math.max(0,k.sw-dt);let e=k.tg&&k.tg.alive&&!k.tg.phase&&d2(k.tg,p)<fr?k.tg:null;
       if(!e){e=sumTarget(k,260);if(e&&d2(e,p)>fr)e=null;k.tg=e;}if(e&&!e.boss&&k.tg===e&&bossOn()&&!S.boss.air&&!S.boss.phase&&d2(S.boss,k)<260*260){e=S.boss;k.tg=e;}
       const tx=e?e.x:p.x+k.ox,ty=e?e.y:p.y+k.oy,dx=tx-k.x,dy=ty-k.y,dd=Math.hypot(dx,dy)||1,rr=e?e.r+9:4;
@@ -3255,7 +3257,7 @@ function hud(){
   if(S.buffT.vuln>0)bf.push(`<span style="color:#ff6060">받는 피해 +50% ${S.buffT.vuln.toFixed(1)}</span>`);if(S.buffT.slow>0)bf.push(`<span style="color:#9fd3ff">둔화 ${S.buffT.slow.toFixed(1)}</span>`);
   if(S.ev){const E=EVENTS[S.ev.k],left=Math.max(0,S.ev.T-S.ev.t).toFixed(0);const ex=S.ev.k==='hunt'?` 남은 ${S.en.filter(e=>e.alive&&e.hunt).length}`:S.ev.k==='shrine'&&S.ev.ch>0?` ${Math.round(S.ev.ch/2.5*100)}%`:'';bf.push(`<span style="color:${E.col}">${E.icon} ${E.n}${ex} ${left}</span>`);}
   if(S.bless&&S.bless.t>0)bf.push(`<span style="color:#9fd3ff">${S.bless.n} ${S.bless.t.toFixed(0)}</span>`);
-  if(skelMax()>0)bf.push(`<span style="color:#8cff9a">💀 해골 ${(S.skel||[]).length}/${skelMax()}</span>`);if(has('turret'))bf.push(`<span style="color:#9fd3ff">🗼 포탑 ${(S.turrets||[]).length}기 · 다음 ${Math.max(0,S.tuT||0).toFixed(0)}초</span>`);if(shadowOn())bf.push(`<span style="color:#c9a0ff">👥 분신 ${(S.clones||[]).length}/${shMax()}</span>`);if(droneN()>0)bf.push(`<span style="color:#9fe8ff">🛸 드론 ${droneN()}기</span>`);{const vn=S.zones.filter(z=>z.kind==='vine').length;if(vn||S.cls==='druid'||tag('nature')>=1||has('thornseed'))bf.push(`<span style="color:#d8ff6a">🌿 덩굴 ${vn}/14</span>`);}
+  if(skelMax()>0)bf.push(`<span style="color:#8cff9a">💀 해골 ${(S.skel||[]).length}/${skelMax()}${skelRaw()>SKEL_CAP?` · 초과 ${skelRaw()-SKEL_CAP} → 해골 피해 ×${(skelRaw()/SKEL_CAP).toFixed(2)}`:''}</span>`);if(has('turret'))bf.push(`<span style="color:#9fd3ff">🗼 포탑 ${(S.turrets||[]).length}기 · 다음 ${Math.max(0,S.tuT||0).toFixed(0)}초</span>`);if(shadowOn())bf.push(`<span style="color:#c9a0ff">👥 분신 ${(S.clones||[]).length}/${shMax()}</span>`);if(droneN()>0)bf.push(`<span style="color:#9fe8ff">🛸 드론 ${droneN()}기</span>`);{const vn=S.zones.filter(z=>z.kind==='vine').length;if(vn||S.cls==='druid'||tag('nature')>=1||has('thornseed'))bf.push(`<span style="color:#d8ff6a">🌿 덩굴 ${vn}/14</span>`);}
   if(p.cfS>=2)bf.push(`<span style="color:#ffd76a">앞면 ${p.cfS}연속</span>`);
   if(p.bearT>0)bf.push(`<span style="color:#c98a52">곰 변신</span>`);
   if(p.fy>0)bf.push(`<span style="color:#ff6a4a">광란 ${p.fy}</span>`);
@@ -4072,7 +4074,7 @@ refreshAutoBtns();
 
 /* ---------- save ---------- */
 const SAVE_KEY='chipdungeon_save_v1';
-const PKEYS=['dmgP','rateP','xpM','block','token','hp','maxHp','speed','dmg','rate','bspd','range','multi','pierce','crit','critM','luck','goldM','vuln','orbR','orbM','dashMul','armor','dodge','lifesteal','regen','magnet','shots','pkills','lastCd','soulN','fyO'];
+const PKEYS=['dmgP','rateP','xpM','block','token','hp','maxHp','speed','dmg','rate','bspd','range','multi','pierce','crit','critM','luck','goldM','vuln','orbR','orbM','dashMul','armor','dodge','lifesteal','regen','magnet','shots','pkills','lastCd','soulN','fyO','skN'];
 const SKEYS=['nmB','gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','takeAll','keys','vipStock','vipRoll','buys','cbuys','fused','potN','vineN'];
 function saveGame(silent){
   if(!S||!S.started||!S.p.alive||S.mode==='over'||S.mode==='dying'||S.mode==='revive')return false;
@@ -4334,7 +4336,7 @@ function renderStats(){
   if(p.dwT>0)bonus.push(`죽음의 소원 +${Math.round(12*(p.dwS||0))}%`);
   if(raw>RATE_CAP())bonus.push(`공속 초과 ×${(1+(raw/RATE_CAP()-1)*.5).toFixed(2)}`);
   const atk=[
-    row('공격력',pDmg().toFixed(1),`기본 ${p.dmg.toFixed(1)} × (1 + 보너스 합계 ${Math.round((p.dmgP||0)*100)}%)`+(bonus.length?`, ${bonus.join(', ')}`:'')),
+    row('공격력',pDmg().toFixed(1),`기본 ${p.dmg.toFixed(1)} × (1 + 보너스 합계 ${Math.round((p.dmgP||0)*100)}%)`+(bonus.length?`, ${bonus.join(', ')}`:'')+(()=>{const d0=pDmg(),P0=S.p,g=o=>{S.p=o;try{return pDmg();}finally{S.p=P0;}},a=g({...p,dmg:p.dmg+1})-d0,b=g({...p,dmgP:(p.dmgP||0)+.01})-d0,f=x=>`+${x.toFixed(2)} (+${(x/d0*100).toFixed(2)}%)`;return `<br><span style="color:var(--brass)">실제 공격력 변화: 공격력 +1 → ${f(a)}, 공격력 +1% → ${f(b)}</span>`;})()),
     row('공격 속도',rate.toFixed(2)+`회/초 <small>/ ${RATE_CAP()}</small>`,raw>RATE_CAP()?`상한 초과 ${Math.round((raw/RATE_CAP()-1)*100)}% → 공격력 ×${(1+(raw/RATE_CAP()-1)*.5).toFixed(2)}`:''),
     row('치명타 확률',pct(critC())+' <small>/ 100%</small>',critRaw()>CRIT_CAP?`초과 ${Math.round((critRaw()-CRIT_CAP)*100)}% → 치명타 피해 +${Math.round((critRaw()-CRIT_CAP)*50)}%`:critFull()?'최대치. 치명타 확률 카드가 더 안 나와요':''),
     row('치명타 피해',pct(critMul())+' <small>/ 500%</small>',critMFull()?'최대치 500%. 치명타 피해 카드가 더 안 나와요':''),
