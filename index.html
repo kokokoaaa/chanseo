@@ -1339,7 +1339,8 @@ const CARDS=[
   {n:'튼튼한 체력',v:[[8,16,0]],t:v=>`최대 체력 +${v[0]}`,a:(p,v)=>{p.maxHp+=v[0];p.hp+=v[0];}},
   {n:'가죽 갑옷',v:[[3,6,0]],t:v=>`방어력 +${v[0]}`,a:(p,v)=>{p.armor+=v[0];}},
   {req:()=>moveSpd()<SPEED_CAP,n:'가벼운 장화',v:[[2,5,1]],t:v=>`이동 속도 +${v[0]}%`,a:(p,v)=>{p.speed*=1+v[0]/100;}},
-  {n:'조준경',v:[[4,8,0]],t:v=>`사거리 +${v[0]}%`,a:(p,v)=>{p.range*=1+v[0]/100;}},
+  // 사거리는 딜을 직접 올리지 않음(안전 거리용) → 원거리 시너지·궁수일 때만 등장
+  {req:()=>tag('sniper')>0||S.cls==='archer'||has('longshot'),n:'조준경',v:[[4,8,0]],t:v=>`사거리 +${v[0]}%`,a:(p,v)=>{p.range*=1+v[0]/100;}},
   {n:'자석',v:[[10,20,0]],t:v=>`경험치·골드 흡수 범위 +${v[0]}%`,a:(p,v)=>{p.magnet*=1+v[0]/100;}},
   {req:()=>S.p.luck<LUCK_CAP,n:'네잎클로버',v:[[.8,1.6,1]],t:v=>`행운 +${v[0]}. 높은 등급과 좋은 수치가 잘 나옵니다`,a:(p,v)=>{p.luck=Math.min(LUCK_CAP,Math.round((p.luck+v[0])*10)/10);}},
   {cc:1,n:'급소 노리기',v:[[1.5,3,1]],t:v=>`치명타 확률 +${v[0]}%`,a:(p,v)=>{p.crit+=v[0]/100;}},
@@ -3253,7 +3254,7 @@ function augHtml(a,i){
   // 합체 안내: 어떤 보유 증강과 합쳐지는지 + 합체로 붙는 추가 효과
   const fz=pfs.length>1?`<span class="fzbox"><span class="fzh">💥 합체할 짝을 고르세요</span>${pfs.map(f=>`<span class="fzopt" data-fz="${f.id}"><span class="fzn2">→ <b class="fzn">${f.n}</b> <small>(${pOf(f).n}와 합체)</small></span><span class="fzd">${tot(f)}</span></span>`).join('')}<span class="fzd" style="opacity:.6">고른 짝과 합체하고, 나머지 짝은 그대로 남아요</span></span>`
     :pf?`<span class="fzbox"><span class="fzh">💥 합체 시 → <b class="fzn">${pf.n}</b></span><span class="fzd">${tot(pf)}</span></span>`:'';
-  return `<button class="card aug tier-${a.t} ${pf?'canfuse':''}" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}${a.swap?' · <span style="color:#ff9ad0">교체</span>':''}</span><b>${a.n}</b><span class="chips">${chips}</span>${augPreview(a)}${fz}<span class="tip">${a.d}${hpLoss(a.f,a.d,a.t==='v'||a.t==='f'?1:2)}${lines?'<br>':''}${lines}</span></button>`;
+  return `<button class="card aug tier-${a.t} ${pf?'canfuse':''}" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}${a.swap?' · <span style="color:#ff9ad0">교체</span>':''}</span><b>${a.n}</b><span class="chips">${chips}</span>${augPreview(a)}${fz}${a.up?'':VFUSIONS.filter(f=>f.b===a.id&&has(f.a)).map(f=>`<span class="fzbox" style="border-color:#ffd76a"><span class="fzh" style="color:#ffd76a">👑 보유 VIP ${augDef(f.a).n}와 합체 가능 → <b class="fzn">${f.n}</b></span><span class="fzd">${f.d} (레벨업·증강 때마다 확률로 합체)</span></span>`).join('')}<span class="tip">${a.d}${hpLoss(a.f,a.d,a.t==='v'||a.t==='f'?1:2)}${lines?'<br>':''}${lines}</span></button>`;
 }
 function bindPeek(){
   ov.querySelectorAll('.card').forEach(c=>{let t=null;
@@ -4049,7 +4050,7 @@ function openMerch(m){
 function vipShopHtml(m,k){
   const full=vipCount()>=VIP_MAX,vc=vipCost();
   if(m.vsel){const v=VIPS.find(x=>x.id===m.vsel);return `<p class="sub"><b>${v.n}</b>를 무엇 대신 넣을까요? (🔑 ${vc})</p><div class="grid">${S.augs.map((a,i)=>[a,i]).filter(([a])=>a.t==='v').map(([a,i])=>`<button class="btn" data-vx="${i}">${a.n} 버리기<small>${a.d}</small></button>`).join('')}</div><button class="btn ghost" data-vx="-1">취소</button>`;}
-  return `<p class="sub">열쇠 ${vc}개로 VIP 1개. 보스를 잡을 때마다 열쇠 1개, 품목도 새로 바뀌어요. VIP 칸 <b>${vipCount()}/${VIP_MAX}</b>${full?' · 가득 참, 사면 기존 VIP와 교체':''}</p><div class="grid">${vipStock().map(v=>{const own=has(v.id);return `<button class="btn" data-v="${v.id}" ${own||k<vc?'disabled':''}>${v.n}<small>${v.d}</small><small style="color:var(--brass)">${own?'보유':(full?'교체 · ':'')+'🔑 '+vc}</small></button>`;}).join('')}</div>`;
+  return `<p class="sub">열쇠 ${vc}개로 VIP 1개. 보스를 잡을 때마다 열쇠 1개, 품목도 새로 바뀌어요. VIP 칸 <b>${vipCount()}/${VIP_MAX}</b>${full?' · 가득 참, 사면 기존 VIP와 교체':''}</p><div class="grid">${vipStock().map(v=>{const own=has(v.id);return `<button class="btn" data-v="${v.id}" ${own||k<vc?'disabled':''}>${v.n}<small>${v.d}</small>${(()=>{const vf=VFUSIONS.filter(f=>f.a===v.id&&has(f.b));return vf.map(f=>`<small style="color:#ff8be6;display:block;margin-top:3px">💥 보유한 <b>${augDef(f.b).n}</b>와 VIP 합체 가능 → <b>${f.n}</b>: ${f.d} <span style="opacity:.7">(레벨업·증강 때마다 확률로 합체)</span></small>`).join('');})()}<small style="color:var(--brass)">${own?'보유':(full?'교체 · ':'')+'🔑 '+vc}</small></button>`;}).join('')}</div>`;
 }
 function hubBody(m,g){
   const tab=m.tab||'stat',k=S.keys||0,p=S.p;
@@ -4191,7 +4192,7 @@ function renderStats(){
     row('치명타 피해',pct(critMul())+' <small>/ 500%</small>',critMFull()?'최대치 500%. 치명타 피해 카드가 더 안 나와요':''),
     row('탄환 수',n+'발'),
     row('관통',p.pierce),
-    row('사거리',Math.round(p.range)),
+    row('사거리',Math.round(p.range),'',`적이 다가오기 전에 먼저 공격하는 안전 거리. 딜을 직접 올리지는 않고, 원거리 시너지(원거리 숙련: 사거리 100당 공격력, 먼 적 추가 피해)와 소환물의 탐지 범위에 쓰임`),
     row('탄속',Math.round(p.bspd),bspdB()>0?`기본보다 빠른 만큼 탄환 피해 +${Math.round(bspdB()*100)}%`:'기본 탄속보다 빠르면 1%당 탄환 피해 +0.5%'),
     ...clsRows(row),
     row('기대 초당 피해',Math.round(dps),'탄환 기본 피해 기준. 회전 칩, 폭발, 독 제외')
