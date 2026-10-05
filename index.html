@@ -3817,7 +3817,8 @@ function beginRun(cls){clearSave();newRun();S.diff=pickDiff;applyClass(cls);appl
 let RDB=null,RMYID=null,BOARD=null,RSTATE='loading',SHEET=false;
 const SHEET_URL='https://script.google.com/macros/s/AKfycbzn75dnRK3s6yixe30pL2Dvc7aQSGCirLQDyYxYFh-FJB8F-ZrNQY42pOdi1CeDga5S/exec';
 const myNick=()=>{try{return localStorage.getItem('chipdungeon_nick')||'';}catch(e){return '';}};
-const dOf=b=>{const c=String(b.cls||'').split('#')[0];return b.diff||(c.includes(':')?c.split(':')[1]:'normal');};
+// 난이도: diff 칸 우선, 없으면 직업 칸의 ':' 뒤. 예전 서버가 12자로 잘라 저장한 것('knight:night' 등)도 앞글자로 알아봄
+const dOf=b=>{const c=String(b.cls||'').split('#')[0];let k=String(b.diff||(c.includes(':')?c.split(':')[1]:'normal'));if(DIFF[k])return k;return Object.keys(DIFF).find(x=>k&&x.startsWith(k))||'normal';};
 const calcScore=b=>scoreOf({...b,diff:dOf(b)});
 function normBoard(list){return list.map(b=>({...b,diff:dOf(b),fx:String(b.cls||'').split('#')[1]||b.fx||'',cls:String(b.cls||'').split('#')[0].split(':')[0],name:String(b.name||''),time:+b.time||0,lvl:+b.lvl||0,kills:+b.kills||0,bosses:+b.bosses||0,comment:String(b.comment||''),score:calcScore(b)})).sort((a,b)=>b.score-a.score);}
 // 내 등록 기록 백업: 서버가 어떤 기록(예: 새 난이도)을 반영하지 못해도 내 화면에서는 사라지지 않게. 서버에 더 높은 기록이 있으면 서버 것을 씀
