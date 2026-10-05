@@ -1192,8 +1192,7 @@ const FUSIONS=[
   {id:'f_y057',a:'iron',b:'spikearmor',n:'강철 가시',pb:1.15,fx:'h:2:boom:1.2:100',d:'철의 의지 수치 +15%, 새 능력: 맞으면 (2초에 한 번) 폭발 (범위 100, 공격력 120%)'},
   {id:'f_y058',a:'spikearmor',b:'thorns',n:'가시 요새',pb:1.15,fx:'t:2:boom:.8:90',d:'새 능력: 2초마다 폭발 (범위 90, 공격력 80%)'},
   {id:'f_y059',a:'titan',b:'heart',n:'타이탄 하트',pb:1.15,fx:'t:5:heal:.03',d:'새 능력: 5초마다 체력 3% 회복'},
-  {id:'f_y060',a:'k_holy',b:'k_wall',n:'성벽 기사',pb:1.15,fx:'h:2:holy:1.5:100',d:'철벽 수치 +15%, 새 능력: 맞으면 (2초에 한 번) 빛 폭발 (범위 100, 공격력 150%)'},
-  {id:'f_y061',a:'k_holy',b:'k_smite',n:'성스러운 심판',pb:1.15,fx:'n:5:holy:1.5:80',d:'심판 수치 +15%, 새 능력: 5번째 공격마다 빛 폭발 (범위 80, 공격력 150%)'},
+  {id:'f_y060',a:'k_wall',b:'k_smite',n:'성벽 심판',pb:1.15,fx:'h:2:holy:1.5:100',d:'철벽 수치 +15%, 심판 수치 +15%, 새 능력: 맞으면 (2초에 한 번) 빛 폭발 (범위 100, 공격력 150%)'},
   {id:'f_y062',a:'k_wall',b:'k_charge',n:'방패 돌격',pb:1.15,fx:'d:wave',d:'철벽 수치 +15%, 새 능력: 대시가 끝나면 충격파 발동'},
   {id:'f_y063',a:'unbreak',b:'insure',n:'불굴의 보험',pb:1.15,fx:'h:4:shield:.12',d:'불굴 수치 +15%, 새 능력: 맞으면 (4초에 한 번) 보호막 +최대 체력의 12%'},
   {id:'f_y064',a:'unbreak',b:'fortress',n:'불굴의 요새',pb:1.15,fx:'h:3:boom:2:110',d:'불굴 수치 +15%, 요새 수치 +15%, 새 능력: 맞으면 (3초에 한 번) 폭발 (범위 110, 공격력 200%)'},
@@ -1273,8 +1272,9 @@ function fusionObj(f){const A=augDef(f.a),B=augDef(f.b);return {...f,t:f.vip?'v'
 const MAXA=10,AUG_UP=false,AUG_EVERY=4,VIP_MAX=2;
 const vipCount=()=>S.augs.filter(a=>a.t==='v').length;
 const slotCount=()=>S.augs.filter(a=>a.t!=='v').length;
-function fusable(){return FUSIONS.filter(f=>S.augs.some(a=>a.id===f.a)&&S.augs.some(a=>a.id===f.b));}
-function partnersOf(id){return FUSIONS.filter(f=>(f.a===id&&S.augs.some(a=>a.id===f.b))||(f.b===id&&S.augs.some(a=>a.id===f.a)));}
+const noFuse=id=>{const a=AUGS.find(x=>x.id===id);return !!(a&&a.uc);};
+function fusable(){return FUSIONS.filter(f=>!noFuse(f.a)&&!noFuse(f.b)&&S.augs.some(a=>a.id===f.a)&&S.augs.some(a=>a.id===f.b));}
+function partnersOf(id){if(noFuse(id))return [];return FUSIONS.filter(f=>!noFuse(f.a)&&!noFuse(f.b)&&(f.a===id&&S.augs.some(a=>a.id===f.b))||(f.b===id&&S.augs.some(a=>a.id===f.a)));}
 function partnerOf(id){return partnersOf(id)[0]||null;}
 function doFuse(f){
   for(const a of S.augs)if((a.id===f.a||a.id===f.b)&&a.f)for(let k=a.lv;k<3;k++)applyQ(a.f,S.p,a.q);
