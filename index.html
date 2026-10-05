@@ -217,6 +217,11 @@ h3{font-family:'Do Hyeon',sans-serif;font-weight:400;font-size:19px;margin:18px 
 .card.aug.tier-p::after{content:'';position:absolute;inset:0;border-radius:8px;pointer-events:none;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.85) 48%,transparent 66%);background-size:260% 100%;animation:shine 1.6s ease-in-out .2s infinite}
 .card.aug.tier-p::before{content:'✦ ✧ ✦';position:absolute;top:6px;right:8px;font-size:12px;color:#b552d6;letter-spacing:2px;animation:twk 1.2s ease-in-out infinite}
 @keyframes twk{50%{opacity:.25}}
+.card.aug.ucard{border:3px solid transparent;background:radial-gradient(circle at 50% 0,#fff6dc,#ffe0e6 60%,#ffd3b0) padding-box,linear-gradient(90deg,#ff2e4d,#ffb000,#fff2a8,#ff7a00,#ff2e4d) border-box;background-size:100% 100%,300% 100%;animation:prz 1.6s linear infinite,ucg 1s ease-in-out infinite alternate;overflow:visible}
+@keyframes ucg{from{box-shadow:0 0 0 2px #ff9a3c,0 0 16px 4px rgba(255,70,40,.6)}to{box-shadow:0 0 0 4px #ffe27a,0 0 34px 10px rgba(255,170,40,.85)}}
+.card.aug.ucard::before{content:'♾ 고점 돌파 ♾';position:absolute;top:-13px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:12px;font-weight:900;letter-spacing:1px;color:#fff;padding:2px 10px;border-radius:999px;background:linear-gradient(90deg,#c4122f,#ff6a00,#c4122f);box-shadow:0 0 10px rgba(255,90,0,.9);animation:none;opacity:1;right:auto}
+.card.aug.ucard b{color:#a3121f;text-shadow:0 0 10px rgba(255,170,60,.95),0 0 2px #fff}
+.card.aug.ucard::after{content:'';position:absolute;inset:0;border-radius:8px;pointer-events:none;background:linear-gradient(110deg,transparent 30%,rgba(255,240,200,.9) 48%,transparent 66%);background-size:260% 100%;animation:shine 1.3s ease-in-out infinite}
 .card.aug.tier-p.canfuse{animation:prz 2.4s linear infinite,fzp 1.4s ease-in-out infinite}
 .card.aug.canfuse{border-color:#ff4fd8;box-shadow:0 0 0 2px #ff4fd8,0 0 18px rgba(255,79,216,.55);animation:fzp 1.4s ease-in-out infinite}
 @keyframes fzp{50%{box-shadow:0 0 0 2px #ff4fd8,0 0 30px rgba(255,79,216,.9)}}
@@ -731,18 +736,28 @@ const AUGS=[
   {id:'unbreak',u:'피해를 무효로 하고 폭발하는 주기가 짧아져요. ★1은 7번째, ★2는 6번째, ★3은 5번째 피격마다.',t:'p',n:'불굴',tags:['guard','jackpot'],d:'6번째 피격마다 피해를 무효로 하고 주변 폭발'},
   // class exclusive
   {id:'k_charge',cls:'knight',u:'대시로 부딪힌 적에게 주는 피해가 커져요. ★1은 공격력 2배, ★2는 3배, ★3은 4배. 보스가 아니면 뒤로 밀려나요.',t:'g',n:'방패 돌진',tags:['guard','blitz'],d:'[기사 전용] 대시로 부딪힌 적에게 공격력 3배 피해와 밀쳐내기'},
-  {id:'k_holy',uc:1,cls:'knight',u:'방어력이 공격력으로 바뀌는 효율이 좋아져요. ★1은 방어력 5당 공격력 1%, ★2는 4당, ★3은 3당. 방어력을 쌓을수록 세져요.',t:'s',n:'수호 기사',tags:['guard'],d:'[기사 전용] 방어력 4당 공격력 +1%, 상한 없음'},
-  {id:'m_archmage',uc:1,cls:'mage',u:'레벨당 오르는 공격력이 커져요. ★1은 레벨 1당 +1.2%, ★2는 +1.6%, ★3은 +2%. 상한 없음.',t:'s',n:'대마법사',tags:['fire'],d:'[마법사 전용] 레벨 1당 공격력 +1.6%, 상한 없음'},
-  {id:'a_gale',uc:1,cls:'archer',u:'탄속 보너스 효율이 커져요. ★1은 1.3배, ★2는 1.6배, ★3은 2배. 탄속 보너스 상한(+100%)이 사라져요.',t:'s',n:'질풍 화살',tags:['sniper'],d:'[궁수 전용] 탄속 보너스 상한 없음, 효율 1.6배 (기본보다 빠른 1%당 탄환 피해 +0.8%)'},
-  {id:'r_vital',uc:1,cls:'rogue',u:'치명타 확률이 치명타 피해로 바뀌는 효율이 커져요. ★1은 1%당 +1%, ★2는 +1.5%, ★3은 +2%. 치명타 피해 상한도 무시해요.',t:'s',n:'급소 해부',tags:['curse'],d:'[도적 전용] 치명타 확률 1%당 치명타 피해 +1.5% (100% 넘는 확률도 계산), 상한 없음'},
-  {id:'p_zeal',uc:1,cls:'paladin',u:'최대 체력이 공격력으로 바뀌는 효율이 커져요. ★1은 체력 100당 +8%, ★2는 +10%, ★3은 +12%.',t:'s',n:'신앙의 무게',tags:['holy'],d:'[성기사 전용] 최대 체력 100당 공격력 +10%, 상한 없음 (오라 포함 모든 피해)'},
-  {id:'n_harvest',uc:1,cls:'necro',u:'처치 수가 공격력으로 바뀌는 효율이 커져요. ★1은 100마리당 +1.5%, ★2는 +2%, ★3은 +2.5%.',t:'s',n:'영혼 수확',tags:['undead'],d:'[사령술사 전용] 이번 판 처치 100마리당 공격력 +2%, 상한 없음 (해골 포함)'},
-  {id:'g_deadeye',uc:1,cls:'gunner',u:'치명타 피해가 공격력으로 바뀌는 효율이 커져요. 150% 넘는 치명타 피해 10%당 ★1은 +2%, ★2는 +2.5%, ★3은 +3%.',t:'s',n:'데드아이',tags:['sniper'],d:'[총잡이 전용] 치명타 피해가 150%를 넘는 10%당 공격력 +2.5%, 상한 없음'},
-  {id:'e_resonance',uc:1,cls:'elem',u:'원소 증강 1개당 오르는 공격력이 커져요. ★1은 +3%, ★2는 +4%, ★3은 +5%.',t:'s',n:'원소 공명',tags:['elem'],d:'[정령사 전용] 원소·화염·냉기·번개 증강 1개당 공격력 +4%, 상한 없음'},
-  {id:'b_thirst',uc:1,cls:'berserk',u:'흡혈이 공격력으로 바뀌는 효율이 커져요. ★1은 흡혈 1%당 +8%, ★2는 +10%, ★3은 +12%.',t:'s',n:'피의 갈증',tags:['fury'],d:'[광전사 전용] 흡혈 1%당 공격력 +10%, 상한 없음'},
-  {id:'d_cycle',uc:1,cls:'druid',u:'체력 재생이 공격력으로 바뀌는 효율이 커져요. ★1은 초당 재생 1당 +8%, ★2는 +10%, ★3은 +12%.',t:'s',n:'생명의 순환',tags:['nature'],d:'[드루이드 전용] 초당 체력 재생 1당 공격력 +10%, 상한 없음'},
-  {id:'al_master',uc:1,cls:'alch',u:'물약 투척 횟수가 공격력으로 바뀌는 효율이 커져요. ★1은 12번당 +1%, ★2는 10번당, ★3은 8번당.',t:'s',n:'연성 숙련',tags:['alchemy'],d:'[연금술사 전용] 이번 판 물약을 10번 던질 때마다 공격력 +1%, 상한 없음'},
-  {id:'gb_allin',uc:1,cls:'gambler',u:'행운이 앞면 피해로 바뀌는 효율이 커져요. ★1은 행운 1당 +2%, ★2는 +3%, ★3은 +4%.',t:'s',n:'판돈 올리기',tags:['coin'],d:'[도박사 전용] 행운 1당 동전 앞면 피해 +3%, 상한 없음'},
+  {id:'k_holy',uc:2,cls:'knight',u:'방어력이 공격력으로 바뀌는 효율이 좋아져요. ★1은 방어력 5당 공격력 1%, ★2는 4당, ★3은 3당. 방어력을 쌓을수록 세져요.',t:'s',n:'수호 기사',tags:['guard'],d:'[기사 전용] 방어력 4당 공격력 +1%, 상한 없음'},
+  {id:'m_archmage',uc:2,cls:'mage',u:'레벨당 오르는 공격력이 커져요. ★1은 레벨 1당 +1.2%, ★2는 +1.6%, ★3은 +2%. 상한 없음.',t:'s',n:'대마법사',tags:['fire'],d:'[마법사 전용] 레벨 1당 공격력 +1.6%, 상한 없음'},
+  {id:'a_gale',uc:2,cls:'archer',u:'탄속 보너스 효율이 커져요. ★1은 1.3배, ★2는 1.6배, ★3은 2배. 탄속 보너스 상한(+100%)이 사라져요.',t:'s',n:'질풍 화살',tags:['sniper'],d:'[궁수 전용] 탄속 보너스 상한 없음, 효율 1.6배 (기본보다 빠른 1%당 탄환 피해 +0.8%)'},
+  {id:'r_vital',uc:2,cls:'rogue',u:'치명타 확률이 치명타 피해로 바뀌는 효율이 커져요. ★1은 1%당 +1%, ★2는 +1.5%, ★3은 +2%. 치명타 피해 상한도 무시해요.',t:'s',n:'급소 해부',tags:['curse'],d:'[도적 전용] 치명타 확률 1%당 치명타 피해 +1.5% (100% 넘는 확률도 계산), 상한 없음'},
+  {id:'p_zeal',uc:1,cls:'paladin',u:'최대 체력이 공격력으로 바뀌는 효율이 커져요. ★1은 체력 100당 +8%, ★2는 +10%, ★3은 +12%.',t:'s',n:'신앙의 무게',tags:['guard'],d:'[성기사 전용] 최대 체력 100당 공격력 +10%, 상한 없음 (오라 포함 모든 피해)'},
+  {id:'n_harvest',uc:1,cls:'necro',u:'처치 수가 공격력으로 바뀌는 효율이 커져요. ★1은 100마리당 +1.5%, ★2는 +2%, ★3은 +2.5%.',t:'s',n:'영혼 수확',tags:['curse'],d:'[사령술사 전용] 이번 판 처치 100마리당 공격력 +2%, 상한 없음 (해골 포함)'},
+  {id:'g_deadeye',uc:2,cls:'gunner',u:'치명타 피해가 공격력으로 바뀌는 효율이 커져요. 150% 넘는 치명타 피해 10%당 ★1은 +2%, ★2는 +2.5%, ★3은 +3%.',t:'s',n:'데드아이',tags:['sniper'],d:'[총잡이 전용] 치명타 피해가 150%를 넘는 10%당 공격력 +2.5%, 상한 없음'},
+  {id:'e_resonance',uc:2,cls:'elem',u:'원소 증강 1개당 오르는 공격력이 커져요. ★1은 +3%, ★2는 +4%, ★3은 +5%.',t:'s',n:'원소 공명',tags:['elem'],d:'[정령사 전용] 원소·화염·냉기·번개 증강 1개당 공격력 +4%, 상한 없음'},
+  {id:'b_thirst',uc:1,cls:'berserk',u:'흡혈이 공격력으로 바뀌는 효율이 커져요. ★1은 흡혈 1%당 +8%, ★2는 +10%, ★3은 +12%.',t:'s',n:'피의 갈증',tags:['curse'],d:'[광전사 전용] 흡혈 1%당 공격력 +10%, 상한 없음'},
+  {id:'d_cycle',uc:1,cls:'druid',u:'체력 재생이 공격력으로 바뀌는 효율이 커져요. ★1은 초당 재생 1당 +8%, ★2는 +10%, ★3은 +12%.',t:'s',n:'생명의 순환',tags:['guard'],d:'[드루이드 전용] 초당 체력 재생 1당 공격력 +10%, 상한 없음'},
+  {id:'al_master',uc:2,cls:'alch',u:'물약 투척 횟수가 공격력으로 바뀌는 효율이 커져요. ★1은 12번당 +1%, ★2는 10번당, ★3은 8번당.',t:'s',n:'연성 숙련',tags:['alchemy'],d:'[연금술사 전용] 이번 판 물약을 10번 던질 때마다 공격력 +1%, 상한 없음'},
+  {id:'gb_allin',uc:2,cls:'gambler',u:'행운이 앞면 피해로 바뀌는 효율이 커져요. ★1은 행운 1당 +2%, ★2는 +3%, ★3은 +4%.',t:'s',n:'판돈 올리기',tags:['coin'],d:'[도박사 전용] 행운 1당 동전 앞면 피해 +3%, 상한 없음'},
+  {id:'k_charger',uc:1,cls:'knight',u:'이동 속도가 공격력으로 바뀌는 효율이 커져요. 이동 속도 150을 넘는 10당 ★1은 +1.5%, ★2는 +2%, ★3은 +2.5%.',t:'s',n:'돌격 기사',tags:['blitz'],d:'[기사 전용] 이동 속도 150을 넘는 10당 공격력 +2%, 상한 없음'},
+  {id:'m_overload',uc:1,cls:'mage',u:'공격 속도가 공격력으로 바뀌는 효율이 커져요. ★1은 공격 속도 1당 +4%, ★2는 +5%, ★3은 +6%. 공격 속도 상한을 넘은 만큼도 계산해요.',t:'s',n:'마력 과부하',tags:['thunder'],d:'[마법사 전용] 공격 속도 1당 공격력 +5% (상한 넘은 공격 속도도 계산), 상한 없음'},
+  {id:'a_pierce',uc:1,cls:'archer',u:'관통이 공격력으로 바뀌는 효율이 커져요. ★1은 관통 1당 +6%, ★2는 +8%, ★3은 +10%.',t:'s',n:'꿰뚫는 화살',tags:['card'],d:'[궁수 전용] 관통 1당 공격력 +8%, 상한 없음'},
+  {id:'r_phantom',uc:1,cls:'rogue',u:'회피가 공격력으로 바뀌는 효율이 커져요. ★1은 회피 1%당 +1%, ★2는 +1.5%, ★3은 +2%. 회피 상한(60%)을 넘은 만큼도 계산해요.',t:'s',n:'환영 무희',tags:['blitz'],d:'[도적 전용] 회피 1%당 공격력 +1.5% (상한 넘은 회피도 계산), 상한 없음'},
+  {id:'p_sun',uc:2,cls:'paladin',u:'오라 범위 보너스가 오라 피해로 바뀌는 효율이 커져요. ★1은 범위 +1%당 +0.6%, ★2는 +0.8%, ★3은 +1%.',t:'s',n:'작열하는 태양',tags:['holy'],d:'[성기사 전용] 신성 오라 범위 보너스 1%당 오라 피해 +0.8%, 상한 없음'},
+  {id:'n_horde',uc:2,cls:'necro',u:'해골 최대 수가 공격력으로 바뀌는 효율이 커져요. ★1은 1기당 +4%, ★2는 +5%, ★3은 +6%.',t:'s',n:'망자의 왕',tags:['undead','summon'],d:'[사령술사 전용] 해골 최대 수 1기당 공격력 +5% (해골 포함), 상한 없음'},
+  {id:'g_fan',uc:1,cls:'gunner',u:'공격 속도가 공격력으로 바뀌는 효율이 커져요. ★1은 공격 속도 1당 +4%, ★2는 +5%, ★3은 +6%. 공격 속도 상한을 넘은 만큼도 계산해요.',t:'s',n:'패닝 사격',tags:['rapid'],d:'[총잡이 전용] 공격 속도 1당 공격력 +5% (상한 넘은 공격 속도도 계산), 상한 없음'},
+  {id:'b_carnage',uc:2,cls:'berserk',u:'피의 축적 효율이 커져요. 축적 100당 ★1은 +1.5%, ★2는 +2%, ★3은 +2.5%.',t:'s',n:'학살자',tags:['fury'],d:'[광전사 전용] 광란이 최대일 때 처치하면 피의 축적 +1 (영구). 축적 100당 공격력 +2%, 상한 없음'},
+  {id:'d_overgrowth',uc:2,cls:'druid',u:'생장 효율이 커져요. 덩굴 10개당 ★1은 +0.8%, ★2는 +1%, ★3은 +1.2%.',t:'s',n:'끝없는 생장',tags:['nature'],d:'[드루이드 전용] 덩굴 지대가 생길 때마다 생장 +1 (영구). 생장 10당 공격력 +1%, 상한 없음'},
+  {id:'gb_dice',uc:1,cls:'gambler',u:'행운이 치명타 피해로 바뀌는 효율이 커져요. ★1은 행운 1당 +2%, ★2는 +3%, ★3은 +4%.',t:'s',n:'운명의 주사위',tags:['dice'],d:'[도박사 전용] 행운 1당 치명타 피해 +3% (치명타 피해 상한 무시), 상한 없음'},
   {id:'k_cleave',cls:'knight',u:'회전 베기가 더 자주, 더 세게 나가요. ★1은 3번째 공격마다 120%, ★2는 3번째마다 160%, ★3은 2번째마다 200%. 반경도 30% 넓어져요.',t:'s',n:'회오리 베기',tags:['blitz','card'],d:'[기사 전용] 회전 베기가 3번째 공격마다, 공격력 160%로 강화'},
   {id:'k_berserk',cls:'knight',u:'맞을 때 쌓이는 분노 중첩의 최대치가 늘어나요. ★1은 5중첩, ★2는 7중첩, ★3은 9중첩. 중첩당 공격력 +8%, 공격 속도 +6%.',t:'g',n:'분노의 기사',tags:['curse','jackpot'],d:'[기사 전용] 피격·막기 시 5초간 분노 1중첩 (공격력 +8%, 공격 속도 +6%, 최대 7중첩)'},
   {id:'k_smite',cls:'knight',u:'심판의 빛기둥이 떨어지는 주기가 짧아져요. ★1은 6번째, ★2는 5번째, ★3은 4번째 공격마다. 피해는 공격력 4배 + 방어력 ×1.',t:'p',n:'심판',tags:['guard','jackpot'],d:'[기사 전용] 5번째 공격마다 대상에 빛기둥. 공격력 3배 + 방어력만큼 범위 피해'},
@@ -1886,6 +1901,14 @@ function pDmg(){const p=S.p;let d=effDmg(p);
   if(has('e_resonance'))d*=1+(tag('elem')+tag('fire')+tag('frost')+tag('thunder'))*lv3('e_resonance',.03,.04,.05);
   if(has('b_thirst'))d*=1+p.lifesteal*100*lv3('b_thirst',.08,.1,.12);
   if(has('d_cycle'))d*=1+Math.max(0,p.regen)*lv3('d_cycle',.08,.1,.12);
+  if(has('k_charger'))d*=1+Math.max(0,moveSpd()-150)/10*lv3('k_charger',.015,.02,.025);
+  if(has('m_overload'))d*=1+rawRate()*lv3('m_overload',.04,.05,.06);
+  if(has('g_fan'))d*=1+rawRate()*lv3('g_fan',.04,.05,.06);
+  if(has('a_pierce'))d*=1+p.pierce*lv3('a_pierce',.06,.08,.1);
+  if(has('r_phantom'))d*=1+p.dodge*100*lv3('r_phantom',.01,.015,.02);
+  if(has('n_horde'))d*=1+skelMax()*lv3('n_horde',.04,.05,.06);
+  if(has('b_carnage'))d*=1+(p.fyO||0)/100*lv3('b_carnage',.015,.02,.025);
+  if(has('d_overgrowth'))d*=1+(S.vineN||0)/10*lv3('d_overgrowth',.008,.01,.012);
   if(has('al_master'))d*=1+(S.potN||0)/(14-2*Math.min(3,L('al_master')))*.01;
   if(p.rage>0)d*=1+.08*p.rage;
   if(p.fy>0)d*=1+p.fy*(.02+ex('fury')*.003)*homeM('fury');
@@ -1918,7 +1941,7 @@ function pRate(){return Math.min(RATE_CAP(),rawRate());}
 const critRaw=()=>S.p.crit+ex('dice')*.04+(has('a_still')&&!S.p.moving?.1:0)+(has('fortune')?LK()*lv3('fortune',.006,.008,.01):0);
 const critC=()=>Math.min(CRIT_CAP,critRaw());
 const CRIT_DMG_CAP_F=()=>has('sharpshot')?8:5;
-const critMul=()=>(has('sharpshot')?1:0)+(has('f_luckstar')?LK()*.02:0)+(has('r_vital')?critRaw()*100*lv3('r_vital',.01,.015,.02):0)+Math.min(CRIT_DMG_CAP_F(),S.p.critM+ex('dice')*.15+Math.max(0,critRaw()-CRIT_CAP)*.5);
+const critMul=()=>(has('sharpshot')?1:0)+(has('f_luckstar')?LK()*.02:0)+(has('r_vital')?critRaw()*100*lv3('r_vital',.01,.015,.02):0)+(has('gb_dice')?LK()*lv3('gb_dice',.02,.03,.04):0)+Math.min(CRIT_DMG_CAP_F(),S.p.critM+ex('dice')*.15+Math.max(0,critRaw()-CRIT_CAP)*.5);
 const critFull=()=>critRaw()>=CRIT_CAP,critMFull=()=>critMul()>=CRIT_DMG_CAP_F();
 const stackCapped=x=>(x.k==='crit'&&critFull())||(x.k==='critm'&&critMFull())||(x.k==='luck'&&S.p.luck>=LUCK_CAP)||(x.k==='dodge'&&S.p.dodge>=DODGE_CAP)||(x.k==='rate'&&rawRate()>=RATE_CAP());
 const dodgeC=()=>Math.min(DODGE_CAP,S.p.dodge+(has('f_ghoststep')&&S.p.ghT>0?.3:0));
@@ -2339,12 +2362,12 @@ function potionHit(f){const r=70*(has('magnumopus')?1.3:1)*(1+(S.p.ptR||0))*(tag
   for(const k of ks){explode(f.x,f.y,r,dm*[.6,1.5,.8][k],POTC[k]);S.rings.push({x:f.x,y:f.y,r:r*.3,max:r*1.1,life:.45,col:POTC[k]});burst(f.x,f.y,POTC[k],18);}
   // 물약 장판: 깨진 자리에 2.5초간 남아 초당 물약 피해의 20%, 밟은 적에게 물약 효과(중독·둔화) 재적용. 최대 10개
   {let n=0;for(const z of S.zones)if(z.kind==='brew')n++;if(n<10)S.zones.push({x:f.x,y:f.y,r:r*.8,life:2.5,kind:'brew',dps:dm*.2,ks,col:POTC[ks[0]]});}}
-function vineAt(x,y,m){let n=0;for(const z of S.zones)if(z.kind==='vine')n++;if(n>=14)return;const br=has('d_bramble')?1+lv3('d_bramble',.3,.5,.7):1;
+function vineAt(x,y,m){let n=0;for(const z of S.zones)if(z.kind==='vine')n++;if(n>=14)return;S.vineN=(S.vineN||0)+1;const br=has('d_bramble')?1+lv3('d_bramble',.3,.5,.7):1;
   S.zones.push({x,y,r:60*br*(1+(S.p.vnR||0))*(has('worldtree')?1.3:1)*(has('yggdrasil')?1.3:1)*(has('f_thornking')?1.3:1),life:3+(tag('nature')>=2?1:0)+(has('yggdrasil')?2:0),kind:'vine',m:m*br*(1+(S.p.vnD||0))*(1+.05*mlv('m_nature'))*natM()*(has('d_wrath')?1.3:1)});}
 const inVine=o=>S.zones.some(z=>z.kind==='vine'&&d2(o,z)<z.r*z.r);
 const furyOn=()=>S.cls==='berserk'||tag('fury')>=1;
 const furyCap=()=>(S.cls==='berserk'?20:tag('fury')>=2?10:5)+(has('bloodking')?15:0)+(S.p.fyC||0)+(tag('fury')>=6?10:0)+(has('b_frenzy')?lv3('b_frenzy',5,10,15):0);
-function addFury(n){const p=S.p;if(!furyOn())return;p.fy=Math.min(furyCap(),(p.fy||0)+n);p.fyT=4+(p.fyD||0)+.3*mlv('m_fury')+(has('bloodlust')?2:0)+(has('b_frenzy')?2:0);}
+function addFury(n){const p=S.p;if(!furyOn())return;if(has('b_carnage')&&(p.fy||0)>=furyCap())p.fyO=(p.fyO||0)+n;p.fy=Math.min(furyCap(),(p.fy||0)+n);p.fyT=4+(p.fyD||0)+.3*mlv('m_fury')+(has('bloodlust')?2:0)+(has('b_frenzy')?2:0);}
 function spinHit(r,dm,col){const p=S.p;p.swingT=.25;S.rings.push({x:p.x,y:p.y,r:20,max:r,life:.25,col});for(const e of S.en)if(e.alive&&!e.phase&&d2(e,p)<(r+e.r)**2)dmgE(e,dm,col);}
 const chilled=e=>e.slowT>0||(e.boss&&tag('frost')>=2);
 const condM=e=>has('conduct')&&(e.burnT>0||chilled(e))?1+lv3('conduct',.3,.4,.5):1;
@@ -2414,7 +2437,7 @@ function hurtP(amt,src){
   const raw=amt;
   // 보스전: 보스 공격은 방어력 일부를 무시 (일반 20%, 어려움 30%, 지옥 40%, 신 45%), 광폭화 단계마다 12%씩 더 무시
   // 잡몹의 근접 공격에는 적용하지 않음 (보스 몸·탄·장판만)
-  {const bR=bossOn()&&(!src||src===S.boss)?(S.boss.rage||0):-1,ar=armorEff()*(bR<0?1:Math.max(0,1-(dfM().pen||.2)-.12*bR));amt*=100/(100+ar);}
+  {const bR=bossOn()&&(!src||src===S.boss)?(S.boss.rage||0):-1,ar=armorEff()*(bR<0?1:1-Math.min(.8,(dfM().pen||.2)+.12*bR));amt*=100/(100+ar);}
   // 한 방 즉사 방지: 보스 몸통 공격을 뺀 모든 공격은 한 번에 최대 체력의 일정 비율까지만 (일반 35% · 어려움 45% · 지옥 55% · 신 65%)
   // 최종 광폭(6단계, 제한 시간 + 2분 30초) 이후에는 즉사 방지 해제 → 최소 딜 스펙이 있어야 클리어
   if((src!==S.boss||!src)&&!(bossOn()&&(S.boss.rage||0)>=6)){const oc=(dfM().oc||.35)+.05*nmMin();if(oc<1)amt=Math.min(amt,p.maxHp*oc);}
@@ -2758,7 +2781,7 @@ function update(dt){
       S.skel=S.skel.filter(k=>k.life>0);}
     if(has('frostnova')){S.fnT=(S.fnT??5)-dt;if(S.fnT<=0){S.fnT=(has('f_permafrost')?3:5)*tmul();S.rings.push({x:p.x,y:p.y,r:10,max:140,life:.35,col:'#9fe8ff'});for(const e of S.en)if(e.alive&&d2(e,p)<140*140){dmgE(e,pDmg()*lv3('frostnova',1.2,1.5,1.8),'#9fe8ff');if(!e.boss)e.slowT=Math.max(e.slowT||0,2);}}}
     if(has('tesla')){S.teT=(S.teT??3)-dt;if(S.teT<=0){S.teT=(has('f_tesla2')?1.5:3)*tmul();const e=nearestE(p,200);if(e){S.bolts.push({x1:p.x,y1:p.y,x2:e.x,y2:e.y,life:.18});dmgE(e,pDmg()*1.5*thM(),'#9fe8ff');lightning(e,lv3('tesla',2,3,4)-1);}}}
-    if(S.cls==='paladin'||has('halo')){S.auT=(S.auT??.5)-dt;if(S.auT<=0){S.auT=.5;const ar=110*(1+(p.auraM||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1),ad=S.cls==='paladin'?pDmg()*.5*(1+(p.auraD||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1)*holyM():0,hd=has('halo')?pDmg()*.3*holyM():0;
+    if(S.cls==='paladin'||has('halo')){S.auT=(S.auT??.5)-dt;if(S.auT<=0){S.auT=.5;const ar=110*(1+(p.auraM||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1),ad=S.cls==='paladin'?pDmg()*.5*(1+(p.auraD||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1)*holyM()*(has('p_sun')?1+Math.max(0,ar/110-1)*100*lv3('p_sun',.006,.008,.01):1):0,hd=has('halo')?pDmg()*.3*holyM():0;
       for(const e of S.en){if(!e.alive)continue;const dd=d2(e,p);let v=0;if(ad&&dd<(ar+e.r)**2)v+=ad;if(hd&&dd<((has('f_seraph')?210:140)+e.r)**2)v+=hd;if(v){S.dsrc='holy';dmgE(e,v,null,null,true);S.dsrc=null;}}}}
     if(has('inferno')){S.inT=(S.inT??1)-dt;if(S.inT<=0){S.inT=1;for(const e of S.en)if(e.alive&&d2(e,p)<120*120)burnE(e,pDmg()*.2,2);}}
     if(has('nova')){S.novaT=(S.novaT??10)-dt;if(S.novaT<=0){S.novaT=(10-(has('f_supernova')?3:0))*tmul();explode(p.x,p.y,180,pDmg()*lv3('nova',7,9,11),'#ffd76a');S.shake=Math.max(S.shake,.2);if(has('f_supernova'))thunderStrike(6);}}
@@ -3313,7 +3336,9 @@ const CARD_TAG={'시계 태엽':['grav','nature','wave','shadow','undead','elem'
   '숫돌':['poison','fire','frost','thunder','summon'],'힘의 물약':['poison','fire','frost','thunder','summon'],'배움의 서':[]};
 // 이미 모은 시너지일수록 그 시너지 증강이 더 잘 뜸 (6개면 ×2, 행운 최대면 ×3) → 중간에 고른 빌드 쪽으로 몰아주기
 function routeW(tags){let m=0;for(const t of tags)m=Math.max(m,Math.min(6,tag(t)));return 1+(1+LK()/30)*m/6;}
-function augW(a){const C=CLASSES[S.cls||'knight'];if(a.cls)return a.cls===S.cls?4*fuseW(a)*(a.uc?(endless()?1.5:.3):1):0;const ts=new Set(a.tags);let w=routeW([...ts]);if([...ts].some(t=>C.fav.includes(t)))w*=2.5;if([...ts].some(t=>C.dis.includes(t)))w*=.3;return w*fuseW(a);}
+// 고점 돌파 증강: 기본은 아주 드묾 (주력 특화 ×0.25, 보조 ×0.12). 같은 태그 증강을 가질수록, 행운이 높을수록, 악몽일수록 잘 나옴. 일반 전용 증강 수준(4)이 상한
+const ucW=a=>Math.min(4,4*(a.uc===2?.25:.12)*(1+.3*(a.tags||[]).reduce((n,t)=>n+tag(t),0))*(1+LK()/40)*(endless()?2:1));
+function augW(a){const C=CLASSES[S.cls||'knight'];if(a.cls)return a.cls===S.cls?(a.uc?ucW(a):4*fuseW(a)):0;const ts=new Set(a.tags);let w=routeW([...ts]);if([...ts].some(t=>C.fav.includes(t)))w*=2.5;if([...ts].some(t=>C.dis.includes(t)))w*=.3;return w*fuseW(a);}
 function pickW(pool,n){const out=[];pool=[...pool];while(out.length<n&&pool.length){const t=pool.reduce((q,a)=>q+augW(a),0);let x=Math.random()*t,i=0;for(;i<pool.length-1;i++){if((x-=augW(pool[i]))<0)break;}out.push(pool.splice(i,1)[0]);}return out;}
 function augOptions(tier){
   const avail=AUGS.filter(a=>!has(a.id)&&augW(a)>0&&augReq(a)&&!(a.id==='luckydie'&&critFull()));
@@ -3340,7 +3365,7 @@ function augHtml(a,i){
   const cut=x=>x.replace(/[.\s]+$/,''),optH=f=>`<span class="fzd"><span style="color:#9fd3ff">+ ${pOf(f).n}</span>: ${cut(pOf(f).d)}</span><span class="fzd" style="color:#ffd76a">★ 합체 보너스: ${cut(f.d)}</span>`;
   const fz=pfs.length>1?`<span class="fzbox"><span class="fzh">💥 합체할 짝을 고르세요</span><span class="fzd" style="opacity:.75">어느 쪽이든 <b>${a.n}</b> 효과 + 짝의 효과 + 합체 보너스가 모두 적용</span>${pfs.map(f=>`<span class="fzopt" data-fz="${f.id}"><span class="fzn2">→ <b class="fzn">${f.n}</b> <small>(보유한 ${pOf(f).n}와 합체)</small></span>${optH(f)}</span>`).join('')}<span class="fzd" style="opacity:.6">누른 짝과 합체하고, 나머지 짝은 그대로 남아요</span></span>`
     :pf?`<span class="fzbox"><span class="fzh">💥 합체 시 → <b class="fzn">${pf.n}</b></span><span class="fzd" style="opacity:.75"><b>${a.n}</b> 효과 + 보유한 짝의 효과 + 합체 보너스가 모두 적용</span>${optH(pf)}</span>`:'';
-  return `<button class="card aug tier-${a.t} ${pf?'canfuse':''}" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}${a.uc?' · <span style="color:#ff7ad9">♾ 고점 돌파</span>':''}${a.swap?' · <span style="color:#ff9ad0">교체</span>':''}</span><b>${a.n}</b><span class="chips">${chips}</span>${augPreview(a)}${fz}${a.up?'':VFUSIONS.filter(f=>f.b===a.id&&has(f.a)).map(f=>`<span class="fzbox" style="border-color:#ffd76a"><span class="fzh" style="color:#ffd76a">👑 보유 VIP ${augDef(f.a).n}와 합체 가능 → <b class="fzn">${f.n}</b></span><span class="fzd">${f.d} (다음 증강을 얻을 때 합체)</span></span>`).join('')}<span class="tip">${a.d}${hpLoss(a.f,a.d,a.t==='v'||a.t==='f'?1:2)}${lines?'<br>':''}${lines}</span></button>`;
+  return `<button class="card aug tier-${a.t} ${pf?'canfuse':''} ${a.uc?'ucard':''}" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}${a.swap?' · <span style="color:#ff9ad0">교체</span>':''}</span><b>${a.n}</b><span class="chips">${chips}</span>${augPreview(a)}${fz}${a.up?'':VFUSIONS.filter(f=>f.b===a.id&&has(f.a)).map(f=>`<span class="fzbox" style="border-color:#ffd76a"><span class="fzh" style="color:#ffd76a">👑 보유 VIP ${augDef(f.a).n}와 합체 가능 → <b class="fzn">${f.n}</b></span><span class="fzd">${f.d} (다음 증강을 얻을 때 합체)</span></span>`).join('')}<span class="tip">${a.d}${hpLoss(a.f,a.d,a.t==='v'||a.t==='f'?1:2)}${lines?'<br>':''}${lines}</span></button>`;
 }
 function bindPeek(){
   ov.querySelectorAll('.card').forEach(c=>{let t=null;
@@ -4047,8 +4072,8 @@ refreshAutoBtns();
 
 /* ---------- save ---------- */
 const SAVE_KEY='chipdungeon_save_v1';
-const PKEYS=['dmgP','rateP','xpM','block','token','hp','maxHp','speed','dmg','rate','bspd','range','multi','pierce','crit','critM','luck','goldM','vuln','orbR','orbM','dashMul','armor','dodge','lifesteal','regen','magnet','shots','pkills','lastCd','soulN'];
-const SKEYS=['nmB','gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','takeAll','keys','vipStock','vipRoll','buys','cbuys','fused','potN'];
+const PKEYS=['dmgP','rateP','xpM','block','token','hp','maxHp','speed','dmg','rate','bspd','range','multi','pierce','crit','critM','luck','goldM','vuln','orbR','orbM','dashMul','armor','dodge','lifesteal','regen','magnet','shots','pkills','lastCd','soulN','fyO'];
+const SKEYS=['nmB','gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','takeAll','keys','vipStock','vipRoll','buys','cbuys','fused','potN','vineN'];
 function saveGame(silent){
   if(!S||!S.started||!S.p.alive||S.mode==='over'||S.mode==='dying'||S.mode==='revive')return false;
   const d={v:1,at:Date.now(),p:{},s:{},augs:S.augs.map(a=>[a.id,a.lv,a.q||1]),st:S.st};
