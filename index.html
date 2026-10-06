@@ -1916,6 +1916,7 @@ const CARDS=[
   {src:()=>coinOn(),cls:'gambler',n:'판돈',g:'동전 던지기',v:[[5,10,0]],t:v=>`앞면이 나온 공격의 피해 +${v[0]}%`,a:(p,v)=>{p.hdD=(p.hdD||0)+v[0]/100;}},
   {n:'숫돌',v:[[.5,1.1,1]],t:v=>`공격력 +${v[0]}`,a:(p,v)=>{p.dmg+=v[0];}},
   {n:'힘의 물약',v:[[4,8,1]],t:v=>`공격력 +${v[0]}%`,a:(p,v)=>{p.dmgP=(p.dmgP||0)+v[0]/100;}},
+  {req:()=>rawRate()<RATE_CAP(),n:'손목 단련',v:[[.04,.09,2]],t:v=>`공격 속도 +${v[0]}회/초`,a:(p,v)=>{p.rate+=v[0];}},
   {req:()=>rawRate()<RATE_CAP(),n:'날랜 손놀림',v:[[4,8,1]],t:v=>`공격 속도 +${v[0]}%`,a:(p,v)=>{p.rateP=(p.rateP||0)+v[0]/100;}},
   {n:'튼튼한 체력',v:[[8,16,0]],t:v=>`최대 체력 +${v[0]}`,a:(p,v)=>{p.maxHp+=v[0];p.hp+=v[0];}},
   {n:'가죽 갑옷',v:[[3,6,0]],t:v=>`방어력 +${v[0]}`,a:(p,v)=>{p.armor+=v[0];}},
@@ -1985,11 +1986,14 @@ function augPreview(a){
   return rows.length?`<span class="apv">${rows.slice(0,5).join('')}</span>`:'';
 }
 // 숫자로 오르는 기본 스탯(공격력·최대 체력·방어력·체력 재생)은 레벨에 비례해 커짐: × (1 + 레벨 × 4%). 퍼센트·초·행운·광란은 그대로
-const LVS_KEYS=['공격력 +','최대 체력 +','방어력 +','초당 체력 재생 +'];
+const LVS_KEYS=['공격력 +','최대 체력 +','방어력 +','초당 체력 재생 +','공격 속도 +'];
+// 퍼센트 카드(공격력·공격 속도·최대 체력 % 합계에 더해져 이후에도 계속 적용): 5분 전엔 안 나오고, 이후엔 드물게(×0.35) 대신 수치 ×1.6
+const PCT_CARDS=new Set(['힘의 물약','날랜 손놀림','강철 심장','유리 대포','광기','전투 본능','쾌속 장전','올인']);
+const pctOpen=()=>(S.gt||0)>=300;
 function lvScaleIdx(T){if(T._ls)return T._ls;const sen=T.v.map((_,i)=>'§'+i+'§'),t=T.t(sen);
   return T._ls=T.v.map((_,i)=>{const at=t.indexOf(sen[i]);if(at<0||t[at+sen[i].length]==='%')return false;const pre=t.slice(0,at);return LVS_KEYS.some(k=>pre.endsWith(k));});}
 const lvScale=()=>1+.04*Math.max(0,(S&&S.lvl||1)-1);
-function rollCard(T,r,bonus){if(!T.v)return {...T,r:T.fr||r,u:null};const k=T.fr?1:RMUL[r],u=luckU(bonus),ls=lvScaleIdx(T),lm=lvScale();
+function rollCard(T,r,bonus){if(!T.v)return {...T,r:T.fr||r,u:null};const k=(T.fr?1:RMUL[r])*(PCT_CARDS.has(T.n)?1.6:1),u=luckU(bonus),ls=lvScaleIdx(T),lm=lvScale();
   const rng=T.v.map(([lo,hi,dp],i)=>{const q=Math.pow(10,dp),m=k*(ls[i]?lm:1);return [Math.round(lo*m*q)/q,Math.round(hi*m*q)/q,q];});
   const v=rng.map(([lo,hi,q])=>Math.round((lo+(hi-lo)*u)*q)/q);
   const gp=T.g?`[${T.g} 전용] `:'';
@@ -2395,7 +2399,7 @@ return {canvas:sc,draw:sprite,PAL,get hires(){return hires;},setDir(){},get box(
 const CLASSES={
   knight:{n:'기사',role:'근접 탱커',d:'짧은 검기를 휘두르는 튼튼한 전사',passive:'방패 막기: 15% 확률로 받는 피해 무효. 4번째 공격마다 주변 회전 베기 (공격력 50%)',atk:.3,
     stats:{hp:200,maxHp:200,speed:180,dmg:19,rate:1.9,range:210,bspd:430,armor:15,block:.15},fav:['guard','frost','blitz'],dis:['poison'],
-    cards:['힘의 물약','숫돌','날랜 손놀림','치명상','튼튼한 체력','무거운 갑옷'],lvd:'체력 +2, 방어력 +0.3, 공격력 +1%',lv:p=>{p.maxHp+=2;p.hp+=2;p.armor+=.3;p.dmgP=(p.dmgP||0)+.01;}},
+    cards:['힘의 물약','숫돌','날랜 손놀림','손목 단련','치명상','튼튼한 체력','무거운 갑옷'],lvd:'체력 +2, 방어력 +0.3, 공격력 +1%',lv:p=>{p.maxHp+=2;p.hp+=2;p.armor+=.3;p.dmgP=(p.dmgP||0)+.01;}},
   mage:{n:'마법사',role:'광역 화력',d:'맞으면 터지는 화염구를 쏘는 마법사',passive:'화염 폭발: 화염구가 맞은 자리에 폭발 (범위 40, 공격력 55%)',atk:.35,
     stats:{hp:175,maxHp:175,speed:185,dmg:17,rate:2.1,range:320,bspd:540,armor:8},fav:['fire','thunder','summon'],dis:['guard'],
     cards:['힘의 물약','숫돌','조준경','치명상','전투 본능','다연발'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
@@ -4477,7 +4481,7 @@ const fuseW=a=>partnerOf(a.id)?.4+.3*LK()/LUCK_CAP:1;
 const CARD_TAG={'시계 태엽':['grav','nature','wave','shadow','undead','elem','fury'],'정비 키트':['summon'],'포탑 개조':['summon'],'독샘':['poison'],'연료':['fire'],'축전지':['thunder'],'서리 결정':['frost'],'성수':['holy'],'그림자 정수':['shadow'],'중력자':['grav'],'표적 지정':['mark'],'진동판':['wave'],'뼈 가루':['undead','summon'],'영혼 사슬':['undead'],'원소 결정':['elem'],'정령 공명':['elem'],'피의 북':['fury'],'끝없는 분노':['fury'],'씨앗 주머니':['nature'],'가시 독':['nature'],'큰 병':['alchemy'],'농축액':['alchemy'],'타짜의 손':['coin'],'판돈':['coin'],'튼튼한 체력':['guard','holy'],'가죽 갑옷':['guard'],'무거운 갑옷':['guard'],'철벽 자세':['guard'],'거인의 심장':['guard'],'불사의 맹세':['guard','curse'],'붕대':['guard','holy'],
   '조준경':['sniper','card'],'가속 탄':['sniper','card'],'관통 탄':['sniper','card'],'다연발':['card'],'사냥꾼의 눈':['sniper','dice'],'쾌속 장전':['card','thunder','summon'],
   '급소 노리기':['dice'],'치명상':['dice'],'도박꾼의 주사위':['dice'],'네잎클로버':['dice','house'],'럭키 세븐':['jackpot','dice'],'전투 본능':['jackpot','fire','frost'],
-  '가벼운 장화':['blitz'],'날렵한 몸놀림':['blitz','guard'],'순발력':['blitz'],'질주 본능':['blitz'],'날랜 손놀림':['blitz','card','summon'],
+  '가벼운 장화':['blitz'],'날렵한 몸놀림':['blitz','guard'],'순발력':['blitz'],'질주 본능':['blitz'],'손목 단련':['blitz','card'],'날랜 손놀림':['blitz','card','summon'],
   '흡혈 송곳니':['curse'],'광기':['curse'],'유리 대포':['curse','fire'],'황금 주머니':['house'],'자석':['house'],'올인':['house','jackpot'],'회전 칩 연마':['roulette'],
   '숫돌':['poison','fire','frost','thunder','summon'],'힘의 물약':['poison','fire','frost','thunder','summon'],'배움의 서':[]};
 // 이미 모은 시너지일수록 그 시너지 증강이 더 잘 뜸 (6개면 ×2, 행운 최대면 ×3) → 중간에 고른 빌드 쪽으로 몰아주기
@@ -4632,14 +4636,14 @@ function rarityFx(){
 }
 // 스탯 카드 등급 (행운 0: 영웅 4.6% 전설 0.6%, 행운 30: 영웅 7.5% 전설 1.7%)
 function rollRarity(bonus=0){const L=LK(bonus);const w=[['c',66],['r',26+.55*L],['e',4.5+.15*L],['l',.55+.05*L]];let t=w.reduce((a,b)=>a+b[1],0),x=Math.random()*t;for(const [k,v] of w){if((x-=v)<0)return k;}return 'c';}
-const cardOk=c=>!(MELEE_CLS.includes(S.cls)&&c.n==='가속 탄')&&!(c.cc&&critFull())&&!(c.cm&&critMFull())&&(!c.req||c.req());
+const cardOk=c=>!(PCT_CARDS.has(c.n)&&!pctOpen())&&!(MELEE_CLS.includes(S.cls)&&c.n==='가속 탄')&&!(c.cc&&critFull())&&!(c.cm&&critMFull())&&(!c.req||c.req());
 // 직업 선호 카드는 ×1.6, 최근 9장 안에 나온 카드는 ×0.3 (같은 카드 반복 방지)
 // 루트 스탯 카드: 열렸다고 계속 뜨지 않고, 그 루트가 최근 내 피해에서 차지하는 비중만큼 자주 뜸 (비중 0이면 드물게)
 const CARD_SRC={'정비 키트':['summon'],'포탑 개조':['summon'],'뼈 가루':['summon','undead'],'영혼 사슬':['summon','undead'],'독샘':['poison'],'연료':['fire'],'축전지':['thunder','elem'],'원소 결정':['elem','fire','thunder'],'정령 공명':['elem'],'씨앗 주머니':['nature'],'가시 독':['nature'],'큰 병':['alchemy'],'농축액':['alchemy'],'진동판':['wave'],'그림자 정수':['shadow'],'중력자':['grav'],'성수':['holy'],'성유':['holy'],'성가':['holy'],'시계 태엽':['grav','nature','wave','shadow','summon','elem']};
 function sumNames(){const S_=S;const a=[];if(droneN()>0)a.push('드론');if(has('turret'))a.push('포탑');if(has('wisp'))a.push('도깨비불');if(has('dealers'))a.push('딜러 칩');if(has('mine'))a.push('지뢰');return a.length?a.join('·'):'소환물';}
 function cdNames(){const a=[];if(gravOn())a.push('중력장');if(has('thornseed')||tag('nature')>=1)a.push('덩굴');if(waveOn())a.push('충격파');if(has('stormcall'))a.push('원소 폭풍');if(has('battlecry'))a.push('전쟁 함성');if(shadowOn())a.push('분신');if(S.cls==='necro'||tag('undead')>=4)a.push('해골 소환');if(has('d_bear'))a.push('곰 변신');return a.length?a.join('·'):'주기형 효과';}
 function cardShareW(n){const ks=CARD_SRC[n];if(!ks)return 1;const sh=ks.reduce((q,k)=>q+dShare(k),0);return .35+3*Math.min(.6,sh);}
-function cardOf(r,bonus=0){const LT=lockedTags(),pool=CARDS.filter(c=>(c.fr?c.fr===r:true)&&!((CARD_TAG[c.n]||[]).length&&(CARD_TAG[c.n]||[]).every(t=>LT.has(t)))&&(!c.cls||c.cls===S.cls||(c.src&&c.src()))&&cardOk(c)),fav=CLASSES[S.cls||'knight'].cards,rec=S.recentC||[],w=c=>(fav.includes(c.n)||c.cls?1.6:1)*cardShareW(c.n)*(rec.includes(c.n)?.3:1)*routeW(CARD_TAG[c.n]||[]);
+function cardOf(r,bonus=0){const LT=lockedTags(),pool=CARDS.filter(c=>(c.fr?c.fr===r:true)&&!((CARD_TAG[c.n]||[]).length&&(CARD_TAG[c.n]||[]).every(t=>LT.has(t)))&&(!c.cls||c.cls===S.cls||(c.src&&c.src()))&&cardOk(c)),fav=CLASSES[S.cls||'knight'].cards,rec=S.recentC||[],w=c=>(fav.includes(c.n)||c.cls?1.6:1)*(PCT_CARDS.has(c.n)?.35:1)*cardShareW(c.n)*(rec.includes(c.n)?.3:1)*routeW(CARD_TAG[c.n]||[]);
   let t=pool.reduce((q,c)=>q+w(c),0),x=Math.random()*t,pick=pool[pool.length-1];for(const c of pool){if((x-=w(c))<0){pick=c;break;}}
   S.recentC=[...rec,pick.n].slice(-9);return rollCard(pick,r,bonus);}
 const SYM=['🍒','🔔','🪙','💎','7️⃣','💀'];
@@ -5413,7 +5417,7 @@ function autoAug(){
   gainAug(a);
 }
 const BADCARD=['러시안 룰렛','동전 던지기','도박꾼의 주사위','올인'];
-const OFFCARD=['숫돌','힘의 물약','날랜 손놀림','치명상','급소 노리기','전투 본능','유리 대포','광기','쾌속 장전','사냥꾼의 눈','다연발','관통 탄'];
+const OFFCARD=['숫돌','힘의 물약','날랜 손놀림','손목 단련','치명상','급소 노리기','전투 본능','유리 대포','광기','쾌속 장전','사냥꾼의 눈','다연발','관통 탄'];
 function autoStat(){
   const cards=[];let tries=0;while(cards.length<3&&tries<60){tries++;const c=cardOf(rollRarity());if(!cards.some(x=>x.n===c.n))cards.push(c);}
   const sc=c=>({c:1,r:2,e:3.5,l:5}[c.r])-(BADCARD.includes(c.n)?5:0)+(OFFCARD.includes(c.n)?1.2:0)+(c.u!=null?c.u:.4)+Math.random()*.5;
