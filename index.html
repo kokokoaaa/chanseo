@@ -2059,7 +2059,9 @@ const hpPct=()=>{const p=S.p;return (p.hpP||0)+(has('k_bulwark')?armorEff()/10*l
 function hpSync(){const p=S.p;if(!p)return;const m=Math.max(.2,1+hpPct());if(p.hpB==null){p.hpB=p.maxHp;p.hpLM=p.maxHp;}
   if(p.maxHp!==p.hpLM)p.hpB=Math.max(1,p.hpB+(p.maxHp-p.hpLM));
   const nm=Math.max(1,Math.round(p.hpB*m));if(nm!==p.maxHp){if(nm>p.maxHp)p.hp+=nm-p.maxHp;p.maxHp=nm;}p.hp=Math.min(p.hp,p.maxHp);p.hpLM=p.maxHp;}
-// 한 방 상한 (최대 체력 대비). 악몽은 10분부터 1분마다 +3% (최대 85%), 20분부터 다시 1분마다 +5% → 23분이면 상한 해제 (끝없이 버티지 못하게)
+// 한 방 상한 (최대 체력 대비). 악몽은 10분부터 1분마다 +3% (최대 85%), 20분부터 다시 1분마다 +5%. 상한은 없어지지 않고 계속 오름
+// (23분 100% → 한 대에 풀피가 날아가지만 보호막·회피·막기가 있으면 버팀, 28분 125%). 갑자기 원샷이 아니라 점점 아슬아슬해지게
+const LS_CAP=.2;
 const ocOf=()=>{const b=dfM().oc||.35,m=nmMin();if(!endless())return b;return m<=10?Math.min(.85,b+.03*m):.85+.05*(m-10);};
 // 악몽 단계 배율: 5단계(4장 이후)부터 단계마다 보스 체력 ×2.2, 피해 ×1.15
 const diffOpen=k=>{const i=DKEYS.indexOf(k);return i<=0||!!(META.clears||{})[DKEYS[i-1]];};
@@ -2477,7 +2479,9 @@ const bossOn=()=>!!(S.boss&&S.boss.alive);
 // 보스 광폭화 단계마다 내 회복량 −15%
 // 악몽 압박: 10분(보스전 포함 실제 경과)부터 1분마다 적 피해 ×1.45, 잡몹 체력 ×1.12, 내 회복 −8% (최소 20%)
 const nmMin=()=>endless()?Math.max(0,((S.gt||0)+(S.bt||0)-600)/60):0;
-const nmDm=()=>Math.pow(1.45,nmMin()),nmHp=()=>Math.pow(1.12,nmMin()),nmHeal=()=>Math.max(.2,1-.08*nmMin());
+const nmDm=()=>Math.pow(1.45,nmMin()),nmHp=()=>Math.pow(1.12,nmMin());
+// 악몽 회복 감소: 20분까지 1분마다 −8% (20%까지), 그 뒤로는 1분마다 15%씩 더 줄어듦 (25분 약 9%)
+const nmHeal=()=>{const m=nmMin();return m<=10?Math.max(.2,1-.08*m):.2*Math.pow(.85,m-10);};
 const healM=()=>(bossOn()?Math.max(.25,1-((S.diff||'normal')==='normal'?.08:.15)*(S.boss.rage||0)):1)*nmHeal();
 function hurtP(amt,src){
   const p=S.p;if(!p.alive||p.inv>0||p.dashT>0)return;
@@ -2508,7 +2512,7 @@ function hurtP(amt,src){
   {const bR=bossOn()&&(!src||src===S.boss)?(S.boss.rage||0):-1,ar=armorEff()*(bR<0?1:1-Math.min(.8,(dfM().pen||.2)+.12*bR));amt*=100/(100+ar);}
   // 한 방 즉사 방지: 보스 몸통 공격을 뺀 모든 공격은 한 번에 최대 체력의 일정 비율까지만 (일반 35% · 어려움 45% · 지옥 55% · 신 65%)
   // 최종 광폭(6단계, 제한 시간 + 2분 30초) 이후에는 즉사 방지 해제 → 최소 딜 스펙이 있어야 클리어
-  if((src!==S.boss||!src)&&!(bossOn()&&(S.boss.rage||0)>=6)){const oc=ocOf();if(oc<1)amt=Math.min(amt,p.maxHp*oc);}
+  if((src!==S.boss||!src)&&!(bossOn()&&(S.boss.rage||0)>=6)){const oc=ocOf();amt=Math.min(amt,p.maxHp*oc);}
   p.noHitT=0;
   // 가드 6: 맞을 때마다 방어 전 피해의 30% × (1 + 방어력/100) 반사, 보호막이 있으면 2배. 보스전에서는 보스에게
   if(tag('guard')>=6){const t=src&&src.alive?src:bossOn()&&!S.boss.air&&!S.boss.phase?S.boss:nearestE(p,150);if(t)dmgE(t,raw*.3*(p.barrier>0?2:1)*(1+armorEff()/100),'#9fd3ff');}
@@ -2540,7 +2544,7 @@ function dmgE(e,amt,col,label,quiet){
   if(e.mkT>S.t)amt*=1+markAmp(e)+(has('stigma')?.2*(tag('holy')>0?1:0):0);
   {const k=S.dsrc||'base',c=S.dcat||(S.dcat={});c[k]=(c[k]||0)+amt;}
   e.hp-=amt;e.hit=.06;S.st.dmg+=amt;
-  {let ls=S.p.lifesteal+(has('f_bloodsport')&&S.p.mbT>0?.05:0)+ex('curse')*.01+(has('vampirelord')?.08:0)+(has('bloodking')?Math.floor((S.p.fy||0)/10)*.01:0);if(tag('curse')>=6)ls*=2;if(ls&&S.p.alive){const P=S.p,nh=P.hp+amt*ls*(has('f_vampknight')&&P.hp<P.maxHp*.5?2:1)*healM();if(nh>P.maxHp&&has('vampirelord'))P.barrier=Math.min(barrierMax(),(P.barrier||0)+nh-P.maxHp);P.hp=Math.min(P.maxHp,nh);}}
+  {let ls=S.p.lifesteal+(has('f_bloodsport')&&S.p.mbT>0?.05:0)+ex('curse')*.01+(has('vampirelord')?.08:0)+(has('bloodking')?Math.floor((S.p.fy||0)/10)*.01:0);if(tag('curse')>=6)ls*=2;if(ls&&S.p.alive){const P=S.p,g=Math.min(P.lsB||0,amt*ls*(has('f_vampknight')&&P.hp<P.maxHp*.5?2:1)*healM());P.lsB=(P.lsB||0)-g;const nh=P.hp+g;if(nh>P.maxHp&&has('vampirelord'))P.barrier=Math.min(barrierMax(),(P.barrier||0)+nh-P.maxHp);P.hp=Math.min(P.maxHp,nh);}}
   // quiet=2: 회전 칩처럼 자주 맞는 피해는 작은 하늘색 숫자로
   if(quiet===2)ftext(e.x+rand(-8,8),e.y-e.r-4,Math.round(amt),'#9fe8ff',12);
   else if(!quiet)ftext(e.x+rand(-6,6),e.y-e.r-6,label||Math.round(amt),col||'#f1e7cf',col?19:13);
@@ -2798,7 +2802,9 @@ function trackDps(dt){S.dpsT=(S.dpsT||0)+dt;if(S.dpsT<.5)return;const now=S.st.d
 function update(dt){
   // 보스 격파 연출: 잠깐 슬로 모션
   if(S.smT>0){S.smT-=dt;dt*=.3;}
-  hpSync();const p=S.p;S.t+=dt;if(S.bossI<0&&!S.win)S.gt+=dt;else if(!S.win)S.bt+=dt;S.round=diffAt(effT());trackDps(dt);
+  hpSync();const p=S.p;S.t+=dt;
+  // 흡혈 회복 상한: 초당 최대 체력의 20% × 회복 배율 (딜이 아무리 높아도 흡혈만으로 순식간에 풀피가 되지 않게)
+  {const c=p.maxHp*LS_CAP*healM();p.lsB=Math.min(c,(p.lsB||0)+c*dt);}if(S.bossI<0&&!S.win)S.gt+=dt;else if(!S.win)S.bt+=dt;S.round=diffAt(effT());trackDps(dt);
   S.bannerT=Math.max(0,S.bannerT-dt);
   // 최종 보스 격파 후: 새 적은 안 나오고, 남은 잡몹을 다 잡으면(또는 45초가 지나면) 게임 종료. 그동안 무적
   if(S.win){p.inv=99;S.clT=(S.clT||0)+dt;const left=S.en.filter(e=>e.alive&&!e.boss).length;
@@ -3359,7 +3365,7 @@ function hud(){
   if(S.spin){lv.classList.add('on');lv.querySelectorAll('span').forEach((x,i)=>{x.textContent=S.spin.t<.3+i*.2?SYM[Math.floor(Math.random()*SYM.length)]:S.spin.res[i];});}
   else if(S.liveT>0&&play){S.liveT-=1/60;lv.classList.add('on');lv.querySelectorAll('span').forEach((x,i)=>x.textContent=S.liveRes[i]);}
   else lv.classList.remove('on');
-  const bf=[];if(endless()&&nmMin()>0)bf.push(`<span style="color:#ff4f6a">☠ 악몽 압박 · 적 피해 ×${nmDm().toFixed(1)} · 회복 −${Math.round((1-nmHeal())*100)}% · ${ocOf()>=1?'한 방 상한 없음':'한 방 상한 '+Math.round(ocOf()*100)+'%'}</span>`);if(endless()&&S.nmB)bf.push(`<span style="color:#ffd76a">✦ 악몽 축복 ${S.nmB}중첩 (공격력 +${S.nmB*15}%)</span>`);if(S.win&&S.winT==null){const n=S.en.filter(e=>e.alive&&!e.boss).length;bf.push(`<span style="color:#ffd76a">🧹 남은 적 ${n} · ${Math.max(0,45-Math.floor(S.clT||0))}초</span>`);}if(S.buffT.jack>0)bf.push(`<span style="color:#ffd76a">잭팟 ${S.buffT.jack.toFixed(1)}</span>`);if(S.buffT.atk>0)bf.push(`<span style="color:#ffb347">공격력 +30% ${S.buffT.atk.toFixed(1)}</span>`);
+  const bf=[];if(endless()&&nmMin()>0)bf.push(`<span style="color:#ff4f6a">☠ 악몽 압박 · 적 피해 ×${nmDm().toFixed(1)} · 회복 −${Math.round((1-nmHeal())*100)}% · 한 방 상한 ${Math.round(ocOf()*100)}%</span>`);if(endless()&&S.nmB)bf.push(`<span style="color:#ffd76a">✦ 악몽 축복 ${S.nmB}중첩 (공격력 +${S.nmB*15}%)</span>`);if(S.win&&S.winT==null){const n=S.en.filter(e=>e.alive&&!e.boss).length;bf.push(`<span style="color:#ffd76a">🧹 남은 적 ${n} · ${Math.max(0,45-Math.floor(S.clT||0))}초</span>`);}if(S.buffT.jack>0)bf.push(`<span style="color:#ffd76a">잭팟 ${S.buffT.jack.toFixed(1)}</span>`);if(S.buffT.atk>0)bf.push(`<span style="color:#ffb347">공격력 +30% ${S.buffT.atk.toFixed(1)}</span>`);
   if(S.buffT.vuln>0)bf.push(`<span style="color:#ff6060">받는 피해 +50% ${S.buffT.vuln.toFixed(1)}</span>`);if(S.buffT.slow>0)bf.push(`<span style="color:#9fd3ff">둔화 ${S.buffT.slow.toFixed(1)}</span>`);
   if(S.ev){const E=EVENTS[S.ev.k],left=Math.max(0,S.ev.T-S.ev.t).toFixed(0);const ex=S.ev.k==='hunt'?` 남은 ${S.en.filter(e=>e.alive&&e.hunt).length}`:S.ev.k==='shrine'&&S.ev.ch>0?` ${Math.round(S.ev.ch/2.5*100)}%`:'';bf.push(`<span style="color:${E.col}">${E.icon} ${E.n}${ex} ${left}</span>`);}
   if(S.bless&&S.bless.t>0)bf.push(`<span style="color:#9fd3ff">${S.bless.n} ${S.bless.t.toFixed(0)}</span>`);
@@ -4527,7 +4533,7 @@ function renderStats(){
     ...(p.block?[row('막기',pct(p.block+(has('k_wall')?lv3('k_wall',.15,.2,.25):0)),'막으면 피해 무효')]:[]),
     row('보호막',Math.round(barrierMax())),
     row('체력 재생',p.regen.toFixed(1)+'/초'),
-    row('흡혈',pct(p.lifesteal)),
+    row('흡혈',pct(p.lifesteal),`흡혈 회복은 초당 최대 체력의 ${Math.round(LS_CAP*healM()*100)}%까지`),
     row('받는 피해 배율','×'+p.vuln.toFixed(2))
   ].join('');
   const util=[
