@@ -77,6 +77,11 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 #autoBar #speedBtn{min-width:44px;font-size:16px}
 #autoBar button.on{color:#04120c;background:#7be08f;border-color:#7be08f}
 #buffs{position:absolute;right:12px;top:84px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;pointer-events:none;font-family:'Do Hyeon',sans-serif;font-size:15px}
+#buffs{z-index:40}
+#buffs span[data-tip]{pointer-events:auto;cursor:help}
+#buffs span[data-tip]::after{content:' ⓘ';opacity:.6;font-size:12px}
+#bfTip{position:fixed;z-index:400;display:none;max-width:320px;padding:8px 10px;border-radius:8px;background:rgba(8,16,12,.96);border:1px solid var(--brass);color:#f1e7cf;font-size:13px;line-height:1.5;pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.5)}
+#bfTip b{color:var(--brass)}
 #buffs>span{background:rgba(8,20,14,.62);padding:1px 8px;border-radius:9px;line-height:1.35}
 #buffs span{background:rgba(0,0,0,.55);padding:2px 8px;border-radius:6px}
 @media (max-width:520px){#autoBar{flex-direction:column;align-items:flex-end;top:54px}#autoBar button{padding:3px 7px;font-size:12px}#autoBar #speedBtn{font-size:14px}#buffs{top:186px}}
@@ -328,7 +333,7 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
   <div id="botLeft"><div id="syn"></div><div id="augBar"></div></div><div id="augTip"></div>
   <button id="dash" aria-label="대시">대시<small>Space</small></button>
   <div id="live"><span></span><span></span><span></span></div>
-  <div id="buffs"></div>
+  <div id="buffs"></div><div id="bfTip"></div>
   <canvas id="mini" width="260" height="260" aria-label="미니맵"></canvas>
   <div id="xp"><i id="xpf"></i></div>
   <div id="toast"></div>
@@ -3276,6 +3281,21 @@ function renderAugBar(){const el=$('augBar');const k=!S||S.mode==='start'?'':S.a
   bar.addEventListener('mouseout',e=>{if(!e.relatedTarget||!bar.contains(e.relatedTarget))hideT();});
   bar.addEventListener('touchstart',e=>{const t=e.target.closest('.aico[data-ai]');if(t){e.preventDefault();e.stopPropagation();if(tip.style.display==='block'&&tip.dataset.k===t.dataset.ai)hideT();else{show(t);tip.dataset.k=t.dataset.ai;}}},{passive:false});
   addEventListener('touchstart',e=>{if(!bar.contains(e.target)&&!syn.contains(e.target))hideT();},{passive:true});}
+// 오른쪽 위 소환물 배지에 마우스를 올리거나(터치는 탭) 적용되는/안 되는 스탯 설명
+const BF_TIP={
+  skel:()=>`<b>💀 해골 병사</b><br>적용: 최종 공격력 (사령술사 100%, 그 외 60%), 해골 피해 %, 소환·망자 시너지, 표식, 흡혈<br>체력: 내 최대 체력 50%, 내 방어력으로 피해 감소<br><b>적용 안 됨</b>: 공격 속도 (0.7초마다 1대 고정), 치명타, 탄속·동전·거인의 힘 등 탄환 전용 효과`,
+  turret:()=>`<b>🗼 포탑</b><br>적용: 최종 공격력의 50%, 소환 시너지, 치명타, 대부분의 탄환 적중 효과, 사거리·탄속, 공격 속도 %의 60% (최대 2.5배 빠르게)<br><b>적용 안 됨</b>: 탄환 수·관통, 연타, 연쇄 번개, 분열, 화염 2개 화상, 직업 기본 폭발(마법사·연금술사)`,
+  drone:()=>`<b>🛸 드론</b><br>적용: 최종 공격력의 60%, 소환 시너지, 치명타, 대부분의 탄환 적중 효과, 공격 속도 %의 60% (최대 2.5배 빠르게)<br><b>적용 안 됨</b>: 탄환 수·관통, 연타, 연쇄 번개, 분열, 화염 2개 화상, 직업 기본 폭발`,
+  clone:()=>`<b>👥 분신</b><br>적용: 최종 공격력의 40%, 그림자 시너지·분신 피해 %, 치명타, 대부분의 탄환 적중 효과, 사거리<br><b>적용 안 됨</b>: 공격 속도 (0.5초마다 고정, 소환 6개·밤의 군주로만 빨라짐), 탄환 수·관통, 연타, 연쇄 번개, 분열`};
+let BFM={x:-1,y:-1},bfPin=null;
+addEventListener('mousemove',e=>{BFM.x=e.clientX;BFM.y=e.clientY;});
+document.addEventListener('pointerdown',e=>{const t=e.target.closest&&e.target.closest('#buffs [data-tip]');bfPin=t&&e.pointerType!=='mouse'?{k:t.dataset.tip,x:e.clientX,y:e.clientY,t:performance.now()+4000}:null;},true);
+function bfTipTick(){const T=$('bfTip');let k=null,x=0,y=0;
+  if(bfPin&&performance.now()<bfPin.t){k=bfPin.k;x=bfPin.x;y=bfPin.y;}
+  else if(BFM.x>=0){const el=document.elementFromPoint(BFM.x,BFM.y),t=el&&el.closest&&el.closest('#buffs [data-tip]');if(t){k=t.dataset.tip;x=BFM.x;y=BFM.y;}}
+  if(!k||!BF_TIP[k]){if(T.style.display!=='none')T.style.display='none';return;}
+  if(T._k!==k){T.innerHTML=BF_TIP[k]();T._k=k;}T.style.display='block';
+  const w=T.offsetWidth,h=T.offsetHeight;T.style.left=Math.max(8,Math.min(innerWidth-w-8,x-w-12))+'px';T.style.top=Math.max(8,Math.min(innerHeight-h-8,y+14))+'px';}
 function hud(){
   if(!S)return;const p=S.p;
   const play=S.mode==='play';
@@ -3293,12 +3313,12 @@ function hud(){
   if(S.buffT.vuln>0)bf.push(`<span style="color:#ff6060">받는 피해 +50% ${S.buffT.vuln.toFixed(1)}</span>`);if(S.buffT.slow>0)bf.push(`<span style="color:#9fd3ff">둔화 ${S.buffT.slow.toFixed(1)}</span>`);
   if(S.ev){const E=EVENTS[S.ev.k],left=Math.max(0,S.ev.T-S.ev.t).toFixed(0);const ex=S.ev.k==='hunt'?` 남은 ${S.en.filter(e=>e.alive&&e.hunt).length}`:S.ev.k==='shrine'&&S.ev.ch>0?` ${Math.round(S.ev.ch/2.5*100)}%`:'';bf.push(`<span style="color:${E.col}">${E.icon} ${E.n}${ex} ${left}</span>`);}
   if(S.bless&&S.bless.t>0)bf.push(`<span style="color:#9fd3ff">${S.bless.n} ${S.bless.t.toFixed(0)}</span>`);
-  if(skelMax()>0)bf.push(`<span style="color:#8cff9a">💀 해골 ${(S.skel||[]).length}/${skelMax()}${skelRaw()>SKEL_CAP?` · 초과 ${skelRaw()-SKEL_CAP} → 해골 피해 ×${(skelRaw()/SKEL_CAP).toFixed(2)}`:''}</span>`);if(has('turret'))bf.push(`<span style="color:#9fd3ff">🗼 포탑 ${(S.turrets||[]).length}기 · 다음 ${Math.max(0,S.tuT||0).toFixed(0)}초</span>`);if(shadowOn())bf.push(`<span style="color:#c9a0ff">👥 분신 ${(S.clones||[]).length}/${shMax()}</span>`);if(droneN()>0)bf.push(`<span style="color:#9fe8ff">🛸 드론 ${droneN()}기</span>`);{const vn=S.zones.filter(z=>z.kind==='vine').length;if(vn||S.cls==='druid'||tag('nature')>=1||has('thornseed'))bf.push(`<span style="color:#d8ff6a">🌿 덩굴 ${vn}/14</span>`);}
+  if(skelMax()>0)bf.push(`<span data-tip="skel" style="color:#8cff9a">💀 해골 ${(S.skel||[]).length}/${skelMax()}${skelRaw()>SKEL_CAP?` · 초과 ${skelRaw()-SKEL_CAP} → 해골 피해 ×${(skelRaw()/SKEL_CAP).toFixed(2)}`:''}</span>`);if(has('turret'))bf.push(`<span data-tip="turret" style="color:#9fd3ff">🗼 포탑 ${(S.turrets||[]).length}기 · 다음 ${Math.max(0,S.tuT||0).toFixed(0)}초</span>`);if(shadowOn())bf.push(`<span data-tip="clone" style="color:#c9a0ff">👥 분신 ${(S.clones||[]).length}/${shMax()}</span>`);if(droneN()>0)bf.push(`<span data-tip="drone" style="color:#9fe8ff">🛸 드론 ${droneN()}기</span>`);{const vn=S.zones.filter(z=>z.kind==='vine').length;if(vn||S.cls==='druid'||tag('nature')>=1||has('thornseed'))bf.push(`<span style="color:#d8ff6a">🌿 덩굴 ${vn}/14</span>`);}
   if(p.cfS>=2)bf.push(`<span style="color:#ffd76a">앞면 ${p.cfS}연속</span>`);
   if(p.bearT>0)bf.push(`<span style="color:#c98a52">곰 변신</span>`);
   if(p.fy>0)bf.push(`<span style="color:#ff6a4a">광란 ${p.fy}</span>`);
   if(p.rage>0)bf.push(`<span style="color:#ff6a4a">분노 ${p.rage}</span>`);
-  $('buffs').innerHTML=play?bf.join(''):'';
+  {const show=play||((S.mode==='aug'||S.mode==='stat')&&innerWidth>=760),h=show?bf.join(''):'',B=$('buffs');if(B._h!==h){B.innerHTML=h;B._h=h;}B.classList.toggle('over',!play);bfTipTick();}
   dashBtn.classList.toggle('cd',p.dashCd>0);
   const mm=Math.floor(S.gt/60),ss=String(Math.floor(S.gt%60)).padStart(2,'0'),nx=AUG_EVERY-(S.picks+S.pendingLv)%AUG_EVERY;
   const key=[S.bossI,S.chap,Math.ceil(p.barrier),Math.ceil(p.hp),Math.round(p.maxHp),S.round,S.gold,S.lvl,Math.floor(S.xp),mm,ss,S.biome,slotCount(),S.round.toFixed(1),S.st.kills,S.augs.length,S.mode==='start',S.st.bosses].join('|');
