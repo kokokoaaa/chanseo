@@ -816,19 +816,47 @@ function ground(B){const c=document.createElement('canvas');c.width=c.height=64;
   for(let k=0;k<70;k++){g.fillStyle=B.g[1+Math.floor(rnd()*3)];g.fillRect(rnd()*64|0,rnd()*64|0,1,1);}
   for(let k=0;k<9;k++){const x=4+rnd()*56|0,y=4+rnd()*56|0;P(g,B.tuft,x,y,1,2);P(g,B.tuft,x+2,y-1,1,3);P(g,B.tuft,x+4,y,1,2);P(g,B.g[3],x+2,y-1,1,1);}
   return c;}
-return {T,D,SZ,ground};})();
+// 맵 건축물 (배경마다 2종). [가로, 세로, 바닥 충돌 반지름]
+const ST=['#3e3a40','#5e5a62','#827e86','#a8a4ac','#cac6ce'],WD=['#3a2414','#5a3a20','#7a522c','#9a6c3a'],RF=['#5a1a14','#8a2a1e','#b8402a','#d8603a'];
+const roof=(g,ramp,x0,x1,y0,h)=>{for(let y=0;y<h;y++){const w=Math.round((x1-x0)/2*(y+1)/h),cx=(x0+x1)>>1;for(let x=-w;x<=w;x++)P(g,ramp[x<-w*.4?3:x<w*.3?2:1],cx+x,y0+y,1,1);P(g,ramp[0],cx-w,y0+y,1,1);P(g,ramp[0],cx+w,y0+y,1,1);}};
+const wall=(g,ramp,x,y,w,h)=>{C(g,ramp,x,y,w,h);for(let yy=y+3;yy<y+h;yy+=4)P(g,ramp[0],x,yy,w,1);};
+const win=(g,x,y,lit)=>{P(g,'#1a1210',x,y,6,6);P(g,lit?'#ffd76a':'#3a5a7a',x+1,y+1,4,4);P(g,'#1a1210',x+3,y,1,6);P(g,'#1a1210',x,y+3,6,1);};
+const door=(g,x,y,h)=>{P(g,'#1a1210',x,y,8,h);P(g,WD[1],x+1,y+1,6,h-1);P(g,R.gold[2],x+5,y+h/2,1,1);};
+const LM={
+ cottage:[80,72,30,g=>{wall(g,['#a89878','#c8b898','#e0d4b4','#f0e8d0'],12,36,56,32);roof(g,RF,6,74,10,28);door(g,36,50,18);win(g,18,44,1);win(g,56,44,1);C(g,ST,58,6,7,16);P(g,'#9a9a9a',60,2,3,3);P(g,'#b8b8b8',62,0,2,2);}],
+ well:[44,46,18,g=>{B(g,ST,22,36,18,8);P(g,'#1a2a3a',10,32,24,4);L(g,WD[2],8,34,8,10);L(g,WD[2],36,34,36,10);roof(g,RF,4,40,2,10);L(g,WD[1],8,14,36,14);P(g,'#8a8a8a',21,15,2,10);P(g,WD[2],18,24,8,5);}],
+ hut:[72,64,28,g=>{for(let y=34;y<62;y+=5){C(g,WD,10,y,52,5);P(g,WD[0],10,y+4,52,1);}roof(g,['#1e3a1a','#2e5a26','#3e7a34','#5a9a44'],4,68,8,28);door(g,32,44,18);win(g,48,42,0);for(let i=0;i<5;i++)P(g,WD[2],2+i*2,56-i,2,6);}],
+ stones:[84,52,34,g=>{for(const [x,h] of [[8,30],[24,38],[42,42],[60,36],[76,28]]){C(g,ST,x-5,50-h,10,h);P(g,ST[4],x-4,50-h,4,2);P(g,'#4a7a3a',x-5,50-h+6,3,3);}P(g,'#6aaa5a',36,26,12,2);for(let i=0;i<4;i++)P(g,'#9fe8ff',38+i*3,22-i,1,1);}],
+ barn:[88,76,34,g=>{wall(g,['#6a1a14','#8a2a1e','#a83a2a','#c85040'],10,36,68,38);roof(g,['#2a2a2a','#3a3a3a','#4a4a4a','#5a5a5a'],4,84,10,28);P(g,'#f0e8d0',34,46,20,26);P(g,'#8a2a1e',36,48,16,24);L(g,'#f0e8d0',36,48,52,72);L(g,'#f0e8d0',52,48,36,72);P(g,'#f0e8d0',40,24,8,8);P(g,'#3a2a1a',42,26,4,4);}],
+ haystack:[44,36,16,g=>{B(g,['#8a6a20','#b89030','#d8b048','#f0d070'],22,24,19,11,(x,y)=>y>34);for(let i=0;i<10;i++)L(g,'#f8e090',6+i*3,20+(i%3),8+i*3,14+(i%2));L(g,WD[1],30,6,34,30);}],
+ ruin:[84,72,30,g=>{C(g,ST,8,16,12,54);C(g,ST,62,24,12,46);for(let i=0;i<14;i++)P(g,ST[2],20+i*3,14+Math.round(Math.abs(i-7)*.8),3,6);P(g,ST[4],8,16,12,2);for(const [x,y] of [[30,62],[44,66],[52,60]])B(g,ST,x,y,5,3);P(g,'#4a7a3a',8,40,4,6);P(g,'#4a7a3a',66,52,5,4);}],
+ witch:[72,80,26,g=>{wall(g,['#2a1e30','#3a2a42','#4a3654','#5e466a'],14,40,44,38);for(let y=0;y<34;y++){const w=Math.round(26*(y+1)/34),cx=38+Math.round(Math.sin(y*.15)*4);for(let x=-w;x<=w;x++)P(g,['#1a0e22','#2a1a3a','#3a2a52'][x<-w/3?2:x<w/3?1:0],cx+x,6+y,1,1);}door(g,30,58,20);P(g,'#1a1210',18,48,6,6);P(g,'#b0ff6a',19,49,4,4);P(g,'#4a8a3a',50,62,8,8);P(g,'#8aff4a',52,60,4,2);}],
+ burnt:[80,66,30,g=>{wall(g,['#1a1210','#2a1e18','#3a2a20','#4a3628'],12,30,56,34);for(let i=0;i<8;i++)P(g,'#1a1210',14+i*7,22+(i%3)*3,4,10);door(g,36,46,18);win(g,18,38,0);P(g,'#ff7a2a',58,34,4,4);P(g,'#ffd76a',59,32,2,2);P(g,'#ff7a2a',22,26,3,3);for(let i=0;i<5;i++)P(g,'#5a5a5a',60+i,10-i*2,3,3);}],
+ pyramid:[96,64,40,g=>{for(let y=0;y<56;y++){const w=Math.round(46*(y+1)/56);for(let x=-w;x<=w;x++)P(g,['#8a6a38','#b08a4a','#cca868','#e4c88a'][x<-w*.2?3:x<w*.4?2:1],48+x,6+y,1,1);if(y%7===6)P(g,'#8a6a38',48-w,6+y,w*2,1);}P(g,'#1a1210',43,46,10,16);P(g,'#ffd76a',46,8,4,3);}],
+ obelisk:[30,78,12,g=>{C(g,['#8a6a38','#b08a4a','#cca868','#e4c88a'],8,10,14,64);for(let y=0;y<8;y++)P(g,'#e4c88a',15-Math.round(y*.8),2+y,1+Math.round(y*1.6),1);for(let i=0;i<5;i++)P(g,'#5a4020',13,18+i*10,4,4);P(g,'#8a6a38',4,72,22,4);}],
+ igloo:[74,48,30,g=>{B(g,['#9ab0c4','#c8d8e8','#eef4fa','#ffffff'],37,44,32,26,(x,y)=>y>46);for(let y=24;y<46;y+=6)L(g,'#9ab0c4',12,y,62,y);for(let x=20;x<60;x+=10)L(g,'#9ab0c4',x,20,x,46);B(g,['#6a8aa8','#c8d8e8','#eef4fa'],37,44,9,10,(x,y)=>y>46);P(g,'#1a2a3a',32,38,10,8);}],
+ icespire:[44,84,18,g=>{const ic=['#2e6a96','#5aa8d8','#a8dcf8','#eaf8ff'];for(const [x,h,w] of [[22,78,9],[10,46,6],[34,52,6]]){for(let y=0;y<h;y++){const ww=Math.max(1,Math.round(w*(y+1)/h));for(let xx=-ww;xx<=ww;xx++)P(g,ic[xx<-ww*.3?3:xx<ww*.3?2:1],x+xx,82-h+y,1,1);}}}],
+ stilt:[76,84,26,g=>{for(const x of [16,30,46,60])C(g,WD,x,54,4,30);P(g,WD[2],8,52,60,4);wall(g,WD,14,26,48,26);roof(g,['#4a5a2a','#6a7a3a','#8a9a4a','#aaba5a'],8,68,4,24);door(g,34,36,16);win(g,18,32,1);P(g,'#2a3a2a',0,80,76,4);}],
+ bigcrystal:[64,88,24,g=>{const pu=['#4a2a8a','#7a4ae0','#b080ff','#e8d0ff'];for(const [x,h,w] of [[32,82,11],[16,52,7],[48,58,8],[8,30,4],[56,34,4]]){for(let y=0;y<h;y++){const ww=y<w?y:w;for(let xx=-ww;xx<=ww;xx++)P(g,pu[xx<-ww*.3?3:xx<ww*.4?2:1],x+xx,86-h+y,1,1);}}P(g,'#ffffff',30,10,2,6);}],
+ mine:[80,64,30,g=>{B(g,ST,40,44,38,24,(x,y)=>y>62);P(g,'#0e0a0a',26,34,28,30);C(g,WD,22,30,5,34);C(g,WD,53,30,5,34);P(g,WD[2],20,28,40,5);L(g,'#5a5a66',30,62,50,62);for(const x of [18,62])P(g,'#ffb030',x,40,3,4);}],
+ mausoleum:[80,76,32,g=>{wall(g,ST,12,30,56,44);for(let y=0;y<14;y++){const w=Math.round(32*(y+1)/14);P(g,ST[y<3?4:2],40-w,16+y,w*2,1);}for(const x of [16,30,46,60])C(g,ST,x,32,5,40);P(g,'#0e0a0a',34,44,12,30);P(g,ST[4],37,6,6,10);P(g,ST[4],34,9,12,3);P(g,'#4a7a3a',12,66,10,6);}],
+ chapel:[70,92,26,g=>{wall(g,['#5a5a52','#76766c','#949488','#b4b4a6'],12,46,46,44);roof(g,['#2a2a30','#3a3a42','#4a4a54','#5e5e6a'],8,62,24,24);C(g,ST,28,10,14,20);roof(g,['#2a2a30','#3a3a42','#4a4a54','#5e5e6a'],26,44,0,12);P(g,ST[4],34,2,2,8);P(g,ST[4],31,4,8,2);door(g,31,70,20);P(g,'#c8323a',22,54,6,8);P(g,'#3a5a8a',42,54,6,8);}],
+ altar:[76,60,30,g=>{const ob=['#0e0a12','#1e1626','#2e2238','#4a3a5a'];C(g,ob,8,40,60,18);C(g,ob,18,28,40,14);for(const x of [12,58]){C(g,ob,x,6,7,36);P(g,'#ff6a1a',x+1,2,5,5);P(g,'#ffe070',x+2,1,3,3);}P(g,'#ff3a1a',30,30,16,3);P(g,'#ffb030',34,30,8,2);}],
+ obsidian:[50,82,20,g=>{const ob=['#0e0a12','#1e1626','#2e2238','#4a3a5a'];for(const [x,h,w] of [[25,78,10],[10,40,6],[40,48,6]]){for(let y=0;y<h;y++){const ww=Math.max(1,Math.round(w*(y+2)/(h+2)));for(let xx=-ww;xx<=ww;xx++)P(g,ob[xx<-ww*.3?3:xx<ww*.3?2:1],x+xx,80-h+y,1,1);}}for(let y=20;y<76;y+=9)P(g,'#ff6a1a',24+(y%3),y,2,4);}]
+};
+return {T,D,SZ,ground,LM};})();
 const BIOMES=[
-  {at:0,n:'푸른 숲',g:['#4f8a34','#5a9a3c','#467d2e','#63a644'],tuft:'#3a6e26',tree:'oak',deco:['flower','bush','rock'],mini:'#2f5a22'},
-  {at:15,n:'깊은 숲',g:['#2f5a2a','#356630','#2a5025','#3b6e34'],tuft:'#1f3f1c',tree:'pine',deco:['mush','bush','fern'],mini:'#1f3d1c'},
-  {at:35,n:'가을 숲',g:['#7a5a2a','#86622e','#6e4e22','#946c33'],tuft:'#b8562a',tree:'autumn',deco:['leaf','mush','rock'],mini:'#5a3d18'},
-  {at:60,n:'저주받은 숲',g:['#3a3446','#433b52','#332d3e','#4b4260'],tuft:'#5e4e7a',tree:'dead',deco:['glow','bone','rock'],mini:'#2a2236'},
-  {at:100,n:'불타는 숲',g:['#3a1a14','#451f17','#2e1510','#552a1c'],tuft:'#7a2a14',tree:'burnt',deco:['ember','bone','rock'],mini:'#3a120c'},
-  {at:110,n:'모래 사막',g:['#c8a860','#d4b46a','#bc9c54','#dcc078'],tuft:'#a08040',tree:'cactus',deco:['sandrock','bone','cactlet'],mini:'#8a7038'},
-  {at:120,n:'눈 덮인 설원',g:['#d6e0ea','#e2eaf2','#c8d4e0','#eef4fa'],tuft:'#a8bcd0',tree:'snowpine',deco:['snowrock','snowbush','icicle'],mini:'#9ab0c4'},
-  {at:130,n:'안개 늪',g:['#3a4a2a','#43552f','#344226','#4c5e36'],tuft:'#5a7a3a',tree:'swamp',deco:['reed','mush','puddle'],mini:'#2a3820'},
-  {at:140,n:'수정 동굴',g:['#2a2a3e','#323248','#262636','#3a3a54'],tuft:'#5a5a8a',tree:'crystal',deco:['crystal','rock','glow'],mini:'#1e1e2e'},
-  {at:150,n:'버려진 묘지',g:['#3e4438','#465040','#383e32','#505a48'],tuft:'#5e6a50',tree:'dead',deco:['tomb','bone','rock'],mini:'#2a3026'},
-  {at:160,n:'용암 지대',g:['#2a1a16','#33201a','#241612','#3e261e'],tuft:'#8a2a14',tree:'lavarock',deco:['ember','lavapool','rock'],mini:'#2a0c08'}
+  {at:0,n:'푸른 숲',g:['#4f8a34','#5a9a3c','#467d2e','#63a644'],tuft:'#3a6e26',tree:'oak',deco:['flower','bush','rock'],lm:['cottage','well'],mini:'#2f5a22'},
+  {at:15,n:'깊은 숲',g:['#2f5a2a','#356630','#2a5025','#3b6e34'],tuft:'#1f3f1c',tree:'pine',deco:['mush','bush','fern'],lm:['hut','stones'],mini:'#1f3d1c'},
+  {at:35,n:'가을 숲',g:['#7a5a2a','#86622e','#6e4e22','#946c33'],tuft:'#b8562a',tree:'autumn',deco:['leaf','mush','rock'],lm:['barn','haystack'],mini:'#5a3d18'},
+  {at:60,n:'저주받은 숲',g:['#3a3446','#433b52','#332d3e','#4b4260'],tuft:'#5e4e7a',tree:'dead',deco:['glow','bone','rock'],lm:['ruin','witch'],mini:'#2a2236'},
+  {at:100,n:'불타는 숲',g:['#3a1a14','#451f17','#2e1510','#552a1c'],tuft:'#7a2a14',tree:'burnt',deco:['ember','bone','rock'],lm:['burnt','ruin'],mini:'#3a120c'},
+  {at:110,n:'모래 사막',g:['#c8a860','#d4b46a','#bc9c54','#dcc078'],tuft:'#a08040',tree:'cactus',deco:['sandrock','bone','cactlet'],lm:['pyramid','obelisk'],mini:'#8a7038'},
+  {at:120,n:'눈 덮인 설원',g:['#d6e0ea','#e2eaf2','#c8d4e0','#eef4fa'],tuft:'#a8bcd0',tree:'snowpine',deco:['snowrock','snowbush','icicle'],lm:['igloo','icespire'],mini:'#9ab0c4'},
+  {at:130,n:'안개 늪',g:['#3a4a2a','#43552f','#344226','#4c5e36'],tuft:'#5a7a3a',tree:'swamp',deco:['reed','mush','puddle'],lm:['stilt','ruin'],mini:'#2a3820'},
+  {at:140,n:'수정 동굴',g:['#2a2a3e','#323248','#262636','#3a3a54'],tuft:'#5a5a8a',tree:'crystal',deco:['crystal','rock','glow'],lm:['bigcrystal','mine'],mini:'#1e1e2e'},
+  {at:150,n:'버려진 묘지',g:['#3e4438','#465040','#383e32','#505a48'],tuft:'#5e6a50',tree:'dead',deco:['tomb','bone','rock'],lm:['mausoleum','chapel'],mini:'#2a3026'},
+  {at:160,n:'용암 지대',g:['#2a1a16','#33201a','#241612','#3e261e'],tuft:'#8a2a14',tree:'lavarock',deco:['ember','lavapool','rock'],lm:['altar','obsidian'],mini:'#2a0c08'}
 ];
 // 장마다 후보 배경 중 판마다 랜덤 (뒤로 갈수록 어두운 분위기는 유지). 마지막 보스전은 불타는 숲/용암 지대
 const BIO_POOL=[[0,5,6],[1,6,7],[2,7,8],[3,8,9],[4,10]];
@@ -836,7 +864,9 @@ const BIO=(()=>{const pat=[],decoC={};
   function ground(i){return pat[i]||(pat[i]=BART.ground(BIOMES[i]));}
   function deco(k){if(decoC[k])return decoC[k];const tree=!!BART.T[k],s=tree?[72,96]:BART.SZ[k],c=document.createElement('canvas');c.width=s[0];c.height=s[1];
     const w=document.createElement('canvas');w.width=s[0];w.height=s[1];const g=w.getContext('2d',{willReadFrequently:true});(tree?BART.T:BART.D)[k](g);ART.outline(w);c.getContext('2d').drawImage(w,0,0);decoC[k]=c;return c;}
-  return {ground,deco};
+  function lm(k){const key='lm_'+k;if(decoC[key])return decoC[key];const L=BART.LM[k],c=document.createElement('canvas');c.width=L[0];c.height=L[1];
+    const w=document.createElement('canvas');w.width=L[0];w.height=L[1];const g=w.getContext('2d',{willReadFrequently:true});L[3](g);ART.outline(w);c.getContext('2d').drawImage(w,0,0);decoC[key]=c;return c;}
+  return {ground,deco,lm};
 })();
 function biomeIdx(){S.bioO=S.bioO||{};const c=S.chap||0,fin=S.bossI%4===3,key=(fin?'f':'c')+c;if(S.bioO[key]==null){const pool=fin?BIO_POOL[4]:c<4?BIO_POOL[c]:BIOMES.map((_,i)=>i);const prev=S.biome;let pick=pool.filter(i=>i!==prev);if(!pick.length)pick=pool;S.bioO[key]=pick[Math.floor(Math.random()*pick.length)];}return S.bioO[key];}
 function hash(a,b){let h=(a*374761393+b*668265263)^0x5bf03635;h=(h^(h>>>13))*1274126177;return ((h^(h>>>16))>>>0)/4294967295;}
@@ -844,7 +874,12 @@ const DC=260;
 function decoAt(cx,cy,q){const h=hash(cx*3+q,cy*7-q);if(h>.62)return null;const px2=cx*DC+hash(cx+11*q,cy+5)*DC,py2=cy*DC+hash(cx-7,cy+13*q)*DC;
   if(px2<20||py2<20||px2>WW-20||py2>WH-20)return null;const B=BIOMES[S&&S.biome!=null?S.biome:0],tree=h<.2;
   return {x:px2,y:py2,tree,k:tree?B.tree:B.deco[Math.floor(hash(cx+q,cy)*B.deco.length)]};}
+// 건축물: 900 격자마다 약 35% 확률로 하나 (배경별 2종 중)
+const LC=900;
+function lmAt(cx,cy){const h=hash(cx*13+5,cy*17+3);if(h>.35)return null;const x=cx*LC+150+hash(cx+31,cy-7)*(LC-300),y=cy*LC+150+hash(cx-19,cy+23)*(LC-300);
+  if(x<120||y<120||x>WW-120||y>WH-120)return null;const B=BIOMES[S&&S.biome!=null?S.biome:0];if(!B.lm)return null;const k=B.lm[Math.floor(hash(cx+3,cy+9)*B.lm.length)],L=BART.LM[k];return {x,y,k,r:L[2]};}
 function solidsNear(x,y,rad){const out=[];const r=rad+80;
+  for(let cx=Math.floor((x-rad-60)/LC);cx<=Math.floor((x+rad+60)/LC);cx++)for(let cy=Math.floor((y-rad-60)/LC);cy<=Math.floor((y+rad+60)/LC);cy++){const m=lmAt(cx,cy);if(m&&Math.abs(m.x-x)<rad+m.r+2&&Math.abs(m.y-12-y)<rad+m.r+2)out.push({x:m.x,y:m.y-12,r:m.r});}
   for(let cx=Math.floor((x-r)/DC);cx<=Math.floor((x+r)/DC);cx++)for(let cy=Math.floor((y-r)/DC);cy<=Math.floor((y+r)/DC);cy++)for(let q=0;q<2;q++){
     const d=decoAt(cx,cy,q);if(!d)continue;let o=null;if(d.tree)o={x:d.x-1,y:d.y+30,r:15};else if(d.k==='rock')o={x:d.x,y:d.y+8,r:12};
     if(o&&Math.abs(o.x-x)<rad+o.r+2&&Math.abs(o.y-y)<rad+o.r+2)out.push(o);}
@@ -866,6 +901,9 @@ function drawWorldBg(){TREEV.length=0;
     for(let q=0;q<2;q++){const dd=decoAt(cx,cy,q);if(!dd)continue;const px2=dd.x,py2=dd.y,tree=dd.tree,k=dd.k,img=BIO.deco(k),by=py2+(tree?40:14);
       ctx.fillStyle='rgba(0,0,0,.22)';ctx.beginPath();ctx.ellipse(px2,by-2,tree?26:img.width*.5,tree?7:3,0,0,TAU);ctx.fill();
       if(tree)TREEV.push({x:px2,y:by,img});else pxDraw(img,px2,by,img.width>>1,img.height-2);}}
+  for(let cx=Math.floor((x0-100)/LC);cx<=Math.floor((x1+100)/LC);cx++)for(let cy=Math.floor((y0-100)/LC);cy<=Math.floor((y1+160)/LC);cy++){const m=lmAt(cx,cy);if(!m)continue;const img=BIO.lm(m.k);
+    if(m.x+img.width<x0-40||m.x-img.width>x1+40||m.y<y0-40||m.y-img.height*1.6>y1+40)continue;
+    ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(m.x,m.y-2,img.width*.55,8,0,0,TAU);ctx.fill();TREEV.push({x:m.x,y:m.y,img,big:1});}
   ctx.imageSmoothingEnabled=true;
   ctx.fillStyle='#0a1714';ctx.fillRect(-40,-40,WW+80,40);ctx.fillRect(-40,WH,WW+80,40);ctx.fillRect(-40,0,40,WH);ctx.fillRect(WW,0,40,WH);
   ctx.strokeStyle='rgba(120,90,50,.9)';ctx.lineWidth=6;ctx.strokeRect(0,0,WW,WH);
@@ -4776,6 +4814,9 @@ function patHide(){cancelAnimationFrame(patRAF);const b=document.getElementById(
 // 일반 몹 첫 등장 시점 (pickType의 위험도 기준을 실제 시간으로 환산)
 const MOB_THR={runner:0,slime:1.5,ranger:2,ghost:3,bomber:3,mage:4,tank:3,support:5,boar:2.5,spider:2,jelly:2.5,shield:3,sniper:4,wraith:4,lancer:5,grunt:0,wolf:2.5,sapling:3,shroom:3,vbat:3.5,scarab:4,imp:4.5,thief:2.5,leech:3,totem:3.5,mortar:4};
 function mobWhen(k){const th=MOB_THR[k];if(th==null)return null;if(th<=1)return '처음부터';let t=0;while(diffAt(t)<th&&t<2000)t+=1;const r=t/TS;return `약 ${Math.floor(r/60)}분 ${String(Math.round(r%60)).padStart(2,'0')}초부터`;}
+// 도감 일반 몹 묶음 (컨셉별)
+const MOB_GROUP=[['고블린 무리',['grunt','mage','sniper','thief','mortar','goblin']],['야수·벌레',['runner','boar','wolf','spider','scarab','leech']],['슬라임·젤리',['slime','slimelet','bomber','jelly','jellym','jellys']],
+  ['숲의 정령',['sapling','support','shroom','tank']],['망자',['ranger','ghost','wraith']],['기사·오크',['shield','lancer']],['저주·심연',['vbat','imp','totem']],['✨ 히든 몹',['gemslime','mimic','luckycat']]];
 const MOB_IMG={};
 function mobImg(k,dark){const key=k+(dark?'d':'');if(MOB_IMG[key])return MOB_IMG[key];const c=ESPR.get(k,0,false,false),q=document.createElement('canvas');q.width=c.width;q.height=c.height;const g=q.getContext('2d');if(dark)g.filter='brightness(0) opacity(.55)';g.drawImage(c,0,0);return MOB_IMG[key]=q.toDataURL();}
 // 도감: 처음 화면에서 증강·합체·VIP·시너지·직업을 검색하고 필터로 훑어보기
@@ -4830,13 +4871,16 @@ function cxList(){
   }else if(CX.tab==='mob'){
     const mk=CX.mk||'',BW={};BIO_MOB.forEach((m,i)=>{for(const k in m)if(m[k]>=1.5)(BW[k]=BW[k]||[]).push(BIOMES[i].n);});
     const bossCh={};BOSS_POOL.forEach((L,i)=>L.forEach(k=>bossCh[k]=['1장','2장','3장','마지막 장'][i]));
-    const keys=Object.keys(ET).filter(k=>MOBINFO[k]&&(mk===''||(mk==='b')===!!ET[k].boss)&&mk!=='e');
+    const gOf=k=>{if(ET[k].boss)return ET[k].hidb?'👑 히든 보스':(bossCh[k]||'')+' 보스';for(const [n,L] of MOB_GROUP)if(L.includes(k))return n;return '기타';},gOrd=k=>{const g=gOf(k),i=MOB_GROUP.findIndex(x=>x[0]===g);return ET[k].boss?100+(ET[k].hidb?9:['1장','2장','3장','마지막 장'].indexOf(bossCh[k])):i<0?50:i;},iOrd=k=>{for(const [,L] of MOB_GROUP){const i=L.indexOf(k);if(i>=0)return i;}return BOSS_POOL.flat().indexOf(k);};
+    const keys=Object.keys(ET).filter(k=>MOBINFO[k]&&(mk===''||(mk==='b')===!!ET[k].boss)&&mk!=='e').sort((a,b)=>gOrd(a)-gOrd(b)||iOrd(a)-iOrd(b));
+    let lastG='';
     const seenN=keys.filter(k=>META.mob[k]).length;
-    rows=keys.filter(k=>{const T=ET[k],I=MOBINFO[k];return META.mob[k]?hit(T.n,I[0],I[1],BTITLE[k]||'',(BW[k]||[]).join(' ')):!qs.length;}).map(k=>{const T=ET[k],I=MOBINFO[k],seen=META.mob[k],sz=T.boss?72:MDEF[k].sz,w=Math.round(sz*(T.boss?1.3:2.2));
+    rows=keys.filter(k=>{const T=ET[k],I=MOBINFO[k];return META.mob[k]?hit(T.n,I[0],I[1],BTITLE[k]||'',(BW[k]||[]).join(' '),gOf(k)):!qs.length;}).map(k=>{const T=ET[k],I=MOBINFO[k],seen=META.mob[k],sz=T.boss?72:MDEF[k].sz,w=Math.round(sz*(T.boss?1.3:2.2));
+      const g=gOf(k),hd=g!==lastG?`<div style="margin:14px 0 2px;padding:3px 10px;border-left:4px solid var(--brass);font-size:16px;color:#ffd76a;background:rgba(214,169,74,.12);border-radius:4px">${g}</div>`:'';lastG=g;
       const img=`<img src="${mobImg(k,!seen)}" style="width:${w}px;height:${w}px;image-rendering:pixelated;flex:none">`;
-      if(!seen)return `<div class="cxrow" style="--rc:#555;display:flex;gap:10px;align-items:center">${img}<div><div class="h"><b>❓ ???</b>${T.boss?'<span class="tg">보스</span>':''}</div><div class="s">아직 만나지 못한 몬스터${T.hidb?' · 👑 히든 보스':T.hid?' · ✨ 히든 몹':T.boss?` · ${bossCh[k]||''} 보스 후보`:''}</div></div></div>`;
+      if(!seen)return hd+`<div class="cxrow" style="--rc:#555;display:flex;gap:10px;align-items:center">${img}<div><div class="h"><b>❓ ???</b>${T.boss?'<span class="tg">보스</span>':''}</div><div class="s">아직 만나지 못한 몬스터${T.hidb?' · 👑 히든 보스':T.hid?' · ✨ 히든 몹':T.boss?` · ${bossCh[k]||''} 보스 후보`:''}</div></div></div>`;
       const where=T.hidb?'히든 보스 · 6분 이후 드물게 출현':T.hid?'히든 몹 · 어디서나 아주 드물게 (행운이 높을수록 자주)':T.boss?`${bossCh[k]} 보스 후보 (2.5분 보스전 때 무작위 등장)`:[mobWhen(k),BW[k]?`자주 나오는 곳: ${BW[k].join(', ')}`:''].filter(Boolean).join(' · ')||'특수 (분열·이벤트)';
-      return `<div class="cxrow" style="--rc:${T.col};display:flex;gap:10px;align-items:center">${img}<div style="min-width:0"><div class="h"><b>${T.n}</b>${T.hidb?'<span class="tg" style="background:#b8800f;color:#fff">👑 히든 보스</span>':T.boss?`<span class="tg" style="background:#7a1f2a;color:#fff">보스 · ${BTITLE[k]||''}</span>`:''}${T.hid?'<span class="tg" style="background:#1a6a8a;color:#fff">✨ 히든</span>':''}<span class="tg">❤ 체력 ${T.hp}</span><span class="tg">⚔ 공격력 ${T.dmg}</span><span class="tg">👟 이동 속도 ${T.spd}</span>${T.range?`<span class="tg">🎯 사거리 ${T.range}</span>`:''}</div>
+      return hd+`<div class="cxrow" style="--rc:${T.col};display:flex;gap:10px;align-items:center">${img}<div style="min-width:0"><div class="h"><b>${T.n}</b>${T.hidb?'<span class="tg" style="background:#b8800f;color:#fff">👑 히든 보스</span>':T.boss?`<span class="tg" style="background:#7a1f2a;color:#fff">보스 · ${BTITLE[k]||''}</span>`:''}${T.hid?'<span class="tg" style="background:#1a6a8a;color:#fff">✨ 히든</span>':''}<span class="tg">❤ 체력 ${T.hp}</span><span class="tg">⚔ 공격력 ${T.dmg}</span><span class="tg">👟 이동 속도 ${T.spd}</span>${T.range?`<span class="tg">🎯 사거리 ${T.range}</span>`:''}</div>
         ${BPAT[k]?`<div class="d"><b>공격 패턴</b> <small style="opacity:.7">(마우스를 올리거나 누르면 미리보기)</small></div><div class="h" style="margin:3px 0">${BPAT[k].map((q,i)=>`<span class="tg patc" data-pt="${k}" data-pi="${i}" style="cursor:help;background:rgba(255,215,106,.18);border:1px solid rgba(255,215,106,.5)">▶ ${q[0]}</span>`).join('')}</div>`:`<div class="d"><b>공격:</b> ${I[0]}</div>`}<div class="s">💡 팁: ${I[1]}</div><div class="s" style="opacity:.8">📍 ${where}</div></div></div>`;});
     if(mk==='e')rows=[`<div class="sub" style="margin:4px 0">정예(금색 테두리, 체력 4배·공격력 1.5배)에 붙는 특성. 약 2분부터.<br>여러 개 붙을 확률: 어려움 2개 15% · 지옥 2개 35% · 신 2개 55%, 3개 12% · 악몽 2개 60%, 3개 20%+ (1분마다 +1%)<br>2개면 각 특성 효과 70%, 3개면 55%만 적용</div>`].concat(Object.keys(AFFIX).map(k=>{const A=AFFIX[k],d=A.d||'';return hit(A.n,d)?`<div class="cxrow" style="--rc:${A.col}"><div class="h"><b style="color:${A.col}">${A.n}</b><span class="tg">정예 특성</span></div><div class="d">${d}</div></div>`:'';}).filter(Boolean));
     CX.mobHdr=mk!=='e'?`발견 ${seenN} / ${keys.length} · 체력·공격력은 일반 난이도 초반 기준 (시간·난이도에 따라 강해짐)`:'';
