@@ -2543,15 +2543,28 @@ function pickType(){
     ['frog',r>=1.3?1.2:0],['crystalgolem',r>=2?1:0],['zombie',r>=1.5?1.2:0],['cultist',r>=2.5?1:0],['firesprite',r>=1.5?1.2:0],['salamander',r>=2?1.2:0]];
   if(S.chap>=3){const W={grunt:.5,runner:.3,slime:.6,tank:2.2,boar:1.8,mage:1.6,ranger:1.3,ghost:1.2,bomber:1,support:1.2,shield:1.6,sniper:1.5,lancer:1.8,wraith:1.4,jelly:1.2,spider:1};for(const q of pool)q[1]*=W[q[0]]||1;}
   // 배경 대표 몹(어느 배경에서 ×2.5 이상)은 다른 배경에선 ×0.35 → 배경마다 분위기가 확실히 다르게
-  {const B=BIO_MOB[S.biome??0];if(B)for(const q of pool)q[1]*=B[q[0]]||(BIO_SIG.has(q[0])?.35:1);}
+  {const B=BIO_MOB[S.biome??0],SET=BIO_SET[S.biome??0];if(B)for(const q of pool)q[1]*=(B[q[0]]||1)*(SET&&!SET.includes(q[0])?.03:1);}
   if(S.boss&&S.boss.alive&&BMIN[S.boss.type]&&Math.random()<.7){const B=BMIN[S.boss.type];return B[Math.floor(Math.random()*B.length)];}
   if(S.ev&&S.ev.k==='horde'&&Math.random()<.75)return S.ev.type;
   let t=pool.reduce((a,b)=>a+b[1],0),x=Math.random()*t;for(const [k,w] of pool){if((x-=w)<0)return k;}return 'grunt';
 }
 // 배경마다 자주 나오는 몬스터 (가중치 배율)
 const BIO_MOB=[{grunt:1.3,boar:1.3,wolf:1.5,hornrabbit:4,bee:3.5},{spider:2.5,runner:1.3,sapling:2,shroom:1.5,bee:2.5,frog:1.5,hornrabbit:2},{boar:2,lancer:1.5,wolf:1.4,thief:2,crow:4,hornrabbit:2.5},{wraith:2.5,ghost:2,vbat:2,totem:2,cultist:3.5,zombie:2.5,crow:2},{bomber:2,lancer:1.5,imp:1.5,mortar:1.8,firesprite:4,salamander:2.5},
-  {sniper:2.5,ranger:1.8,shield:1.5,scarab:2.5,mortar:1.8,scorpion:4,mummy:3.5},{shield:1.3,tank:1.5,sniper:1.3,wolf:1.5,yeti:4,frostsprite:3.5},{jelly:2.5,slime:2,spider:1.5,shroom:2,leech:2.5,frog:4,zombie:1.5},{jelly:1.8,wraith:1.5,tank:1.5,imp:1.5,crystalgolem:4,frostsprite:2},
+  {sniper:2.5,ranger:1.8,shield:1.5,scarab:2.5,mortar:1.8,scorpion:4,mummy:3.5},{shield:1.3,tank:1.5,sniper:1.3,wolf:1.5,yeti:4,frostsprite:3.5},{jelly:2.5,slime:1.1,spider:1.5,shroom:2,leech:2.5,frog:4,zombie:1.5},{jelly:1.8,wraith:1.5,tank:1.5,imp:1.5,crystalgolem:4,frostsprite:2},
   {ranger:2,wraith:2,ghost:1.8,shield:1.5,vbat:1.8,zombie:4,mummy:2.5,cultist:2.5,crow:2},{lancer:2,bomber:2,tank:1.5,imp:2.2,salamander:4,firesprite:3.5}];
+// 배경별 등장 몹 목록: 목록에 없는 몹은 거의 안 나옴 (×0.03). 보스전 졸개·이벤트는 별도
+const BIO_SET=[
+  ['grunt','hornrabbit','bee','runner','slime','boar','wolf','thief','ranger','mage','tank','shield','support','mortar'],
+  ['runner','spider','sapling','shroom','bee','hornrabbit','grunt','ghost','frog','leech','support','tank','wolf','bomber'],
+  ['grunt','crow','hornrabbit','boar','wolf','thief','ranger','lancer','mortar','mage','shield','support','bee'],
+  ['runner','ghost','wraith','cultist','zombie','crow','vbat','totem','spider','ranger','imp','bomber'],
+  ['grunt','firesprite','salamander','bomber','imp','runner','boar','mortar','tank','lancer','ghost','ranger'],
+  ['scorpion','mummy','scarab','sniper','ranger','grunt','runner','shield','mortar','bomber','tank','thief'],
+  ['yeti','frostsprite','wolf','hornrabbit','runner','grunt','shield','tank','ghost','slime','lancer','sniper'],
+  ['frog','slime','jelly','leech','shroom','spider','zombie','runner','bomber','support','ghost','mage'],
+  ['crystalgolem','runner','jelly','imp','wraith','spider','slime','tank','mage','ghost','frostsprite','bomber'],
+  ['zombie','mummy','ranger','ghost','wraith','cultist','crow','runner','vbat','totem','shield','lancer'],
+  ['salamander','firesprite','imp','bomber','tank','lancer','mortar','runner','grunt','boar','mage','ghost']];
 const BIO_SIG=new Set(BIO_MOB.flatMap(m=>Object.keys(m).filter(k=>m[k]>=2.5)));
 function diffAt(t){return 1+t/80+Math.pow(t/110,2.2);}
 // 정예 특성: 정예마다 하나씩 붙어서 같은 정예라도 대처법이 달라짐
@@ -2605,9 +2618,12 @@ const CHAP_MUL=[{hp:1,dm:1,sp:1,n:22,el:0,xp:1,sz:1},{hp:1,dm:1,sp:1,n:22,el:0,x
 const chapM=()=>CHAP_MUL[Math.min(3,S.chap||0)];
 // 높은 난이도의 몹 체력 배율은 시작 때 45%만 적용되고 4분(effT 240)에 걸쳐 100%까지 올라감. 초반에 한 마리 잡는 데 너무 오래 걸리지 않게
 const dfHp=()=>{const h=dfM().hp;return h<=1?h:1+(h-1)*Math.min(1,.45+.55*effT()/240);};
+const eliteN=()=>{let n=0;for(const e of S.en)if(e.alive&&e.elite)n++;return n;};
+const eliteCap=()=>4+2*Math.min(4,S.chap||0)+(endless()?Math.min(6,Math.floor(nmMin()/5)):0);
 function spawnAt(type,x,y,noElite,forceElite){
   const T=ET[type],d=S.round,cm=chapM();
-  const elite=!T.boss&&!T.flee&&!T.hid&&!T.totem&&(forceElite||(!noElite&&effT()>120&&Math.random()<Math.min(.35+cm.el+dfM().el,(effT()-120)/700+cm.el+dfM().el)));
+  // 정예: 확률은 시간에 따라 천천히 (상한 신 약 17%, 악몽 약 19%), 동시에 살아 있는 정예 수도 장마다 상한
+  const elite=!T.boss&&!T.flee&&!T.hid&&!T.totem&&(forceElite||(!noElite&&effT()>120&&eliteN()<eliteCap()&&Math.random()<Math.min(.08+(cm.el+dfM().el)*.35,(effT()-120)/1500+(cm.el+dfM().el)*.25)));
   // 시간 초과 강화: 실제 10분(타이머 10:00)이 지난 뒤부터만 1분마다 1.3배. 내부 시간(1.2배속) 기준이면 8분 20초부터 켜져 4단계 후반 잡몹이 급격히 세짐
   const om=endless()?1:Math.pow(1.3,Math.max(0,(S.gt||0)-600)/60);
   const m=(T.boss?1+.12*(Math.min(d,50)-1):(1+.35*(d-1))*om*nmHp())*(elite?4:1)*(T.boss?dfM().bhp:cm.hp*dfHp()),dm=(T.boss?1+.08*(d-1):(1+.15*(d-1))*om)*nmDm()*(elite?1.5:1)*cm.dm*dfM().dm;
@@ -2665,7 +2681,7 @@ function farPos(r){const a=Math.random()*TAU,p=S.p;return [clamp(p.x+Math.cos(a)
 function startEvent(){
   const ks=Object.keys(EVENTS).filter(k=>k!==S.lastEv);const k=ks[Math.floor(Math.random()*ks.length)];S.lastEv=k;
   const E=EVENTS[k],ev={k,t:0,T:{horde:20,hunt:40,goblin:30,shrine:25,moon:25,chest:45,rift:40,relic:45}[k]};S.ev=ev;
-  if(k==='horde'){const pool=['grunt','runner','slime','boar','ghost','bomber','spider','jelly','wraith'].filter(t=>(t!=='boar'&&t!=='jelly'&&t!=='wraith')||S.round>=(t==='wraith'?4:2.5));ev.type=pool[Math.floor(Math.random()*pool.length)];}
+  if(k==='horde'){const SET=BIO_SET[S.biome??0]||[];let pool=SET.filter(t=>(MOB_THR[t]??0)<=S.round&&!['totem','support','thief','mortar','sniper'].includes(t));if(!pool.length)pool=['grunt','runner'];ev.type=pool[Math.floor(Math.random()*pool.length)];}
   // 정예 사냥: 표적 3마리를 화면 바로 밖 한 방향에 모아서 소환. 체력은 일반 정예의 60%
   if(k==='hunt'){const [cx,cy]=ringPos(20);for(let i=0;i<3;i++){const t=['grunt','tank','boar','ranger'][Math.floor(Math.random()*4)];const e=spawnAt(t,clamp(cx+rand(-50,50),20,WW-20),clamp(cy+rand(-50,50),20,WH-20),false,true);e.hunt=true;e.hp*=.9;e.maxHp*=.9;}}
   if(k==='goblin'){const [x,y]=farPos(260);const e=spawnAt('goblin',x,y,true);e.gold=true;}
@@ -4540,7 +4556,7 @@ function openAug(free,why,fixed,fixedTier){
   $('augSkip').onclick=()=>{S.arr=0;const g=price(40);S.gold+=g;toast(`증강 포기 · ${g} 골드`);openNext();};
   if($('augStop'))$('augStop').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.firstChild.textContent='한 번 더 누르면 증강 그만 받기 ';return;}S.noAug=true;toast('이번 판은 증강을 더 받지 않아요 · 대신 스탯 카드');S.boost=true;openStat();};
   // 봉인: 이번 판에서 이 증강 제외, 그 자리는 새 증강으로 바로 교체
-  ov.querySelectorAll('[data-seal]').forEach(b=>b.onclick=()=>{if(!(S.seals>0))return;const i=+b.dataset.seal,a=opts[i];S.seals--;(S.banL=S.banL||[]).push(a.id);toast(`🔒 ${a.n} 봉인 · 이번 판에서 다시 안 나옴`);
+  ov.querySelectorAll('[data-seal]').forEach(b=>b.onclick=()=>{if(!(S.seals>0))return;const i=+b.dataset.seal,a=opts[i];S.seals--;(S.banL=S.banL||[]).push(a.id);toast(`🔒 ${a.n} 봉인 · 이번 판에서 다시 안 나옴 (그 칸만 새로 뽑음, 다시 뽑기 가격은 그대로)`);
     const pool=(slotCount()>=MAXA?fullOptions():augOptions(tier)).filter(x=>!opts.some(o=>o.id===x.id));const nx=[...opts];if(pool.length)nx[i]=pool[0];else nx.splice(i,1);openAug(free,why,nx,tier);});
   $('reroll').onclick=()=>{if(!free){S.gold-=cost;S.arr++;}const left=free===true?(META.sk.reroll?1:0):(typeof free==='number'?free-1:0);openAug(left>0?left:false,why);};
 }
@@ -5189,7 +5205,7 @@ function openAch(){const done=k=>!!(META.ach&&META.ach[k]);
   $('achBack').onclick=startScreen;ov.querySelectorAll('[data-tt]').forEach(b=>b.onclick=()=>{const k=b.dataset.tt;if(!k)return;META.title=META.title===k?'':k;saveMeta();openAch();});}
 function openCodexGame(){if(!S||S.mode==='start')return;if(statsOpen&&!cxGame)toggleStats();cxGame=true;statsOpen=true;joy=null;openCodex();}
 function openCodex(o){Object.assign(CX,o||{});
-  const tabs=[['aug','증강'],['fuse','합체'],['vip','VIP'],['syn','시너지'],['cls','직업'],['mob','몬스터']];
+  const tabs=[['aug','증강'],['fuse','합체'],['vip','VIP'],['syn','시너지'],['cls','직업'],['mob','몬스터'],['ev','돌발 이벤트']];
   const clsOpt=`<option value="">전체 직업</option><option value="-">공용</option>`+Object.keys(CLASSES).map(k=>`<option value="${k}" ${CX.cls===k?'selected':''}>${CLASSES[k].n}</option>`).join('');
   const tierOpt=`<option value="">전체 등급</option>`+['s','g','p'].map(k=>`<option value="${k}" ${CX.tier===k?'selected':''}>${TIER[k].n}</option>`).join('')+`<option value="uc" ${CX.tier==='uc'?'selected':''}>♾ 고점 돌파</option><option value="d" ${CX.tier==='d'?'selected':''}>🐉 용의 보물</option>`;
   cxShow(`<div class="shophead"><h2>📖 도감</h2><button class="btn" id="cxBack">${cxGame?'닫기 (게임으로)':'돌아가기'}</button></div>
@@ -5231,6 +5247,10 @@ function cxList(){
   }else if(CX.tab==='syn'){
     rows=Object.keys(TAGS).filter(t=>{const T=TAGS[t];return hit(T.n,T.t1,T.t2,T.t4,T.t6,T.ex);}).map(t=>{const T=TAGS[t],n=AUGS.filter(a=>(a.tags||[]).includes(t)).length,cl=Object.keys(CLASSES).filter(k=>CLASSES[k].fav.includes(t)).map(k=>CLASSES[k].n);
       return `<div class="cxrow" style="--rc:var(--brass)"><div class="h"><b>${TAG_ICO[t]||''} ${T.n}</b><span class="tg">증강 ${n}개</span>${cl.length?`<span class="tg">주력 직업: ${cl.join(', ')}</span>`:''}<button class="cxchip" data-cxj="${t}">증강 보기 →</button></div>${[[1,T.t1],[2,T.t2],[4,T.t4],[6,T.t6]].filter(x=>x[1]).map(([k,d])=>`<div class="d"><b style="font-size:14px;color:var(--brass)">${k}개</b> ${d}</div>`).join('')}<div class="s">5개부터 1개마다: ${T.ex}</div></div>`;});
+  }else if(CX.tab==='ev'){
+    const DUR={horde:20,hunt:40,goblin:30,shrine:25,moon:25,chest:45,rift:40,relic:45};
+    const TIP={horde:'그 배경에 나오는 몹 중 한 종류가 몰려옴. 광역 공격이 유리',hunt:'금색 테두리 표적 3마리가 한 방향에 모여 나옴',goblin:'빠르게 도망치니 대시·원거리로 쫓기',shrine:'제단 원 안에서 2.5초 버티면 축복 (공격·속도 등 무작위)',moon:'적이 20% 빠르고 세짐. 대신 경험치·골드 2배',chest:'상자를 열면 수호자(강한 정예)가 나옴',rift:'균열 원 안에 계속 머물러야 함. 적이 몰려오니 주의',relic:'흩어진 유물 3개를 화살표 따라 모으기'};
+    rows=[`<div class="sub" style="margin:4px 0">보스전이 아닐 때 50~70초마다 무작위로 하나 발생 (같은 이벤트는 연속으로 안 나옴, 보스 직전 45초엔 안 나옴)</div>`].concat(Object.keys(EVENTS).filter(k=>hit(EVENTS[k].n,EVENTS[k].d,TIP[k])).map(k=>{const E=EVENTS[k];return `<div class="cxrow" style="--rc:${E.col}"><div class="h"><b>${E.icon} ${E.n}</b><span class="tg">⏱ ${DUR[k]}초</span></div><div class="d">${E.d}</div><div class="s">💡 팁: ${TIP[k]}</div></div>`;}));
   }else if(CX.tab==='mob'){
     const mk=CX.mk||'',BW={};BIO_MOB.forEach((m,i)=>{for(const k in m)if(m[k]>=1.5)(BW[k]=BW[k]||[]).push(BIOMES[i].n);});
     const bossCh={};BOSS_POOL.forEach((L,i)=>L.forEach(k=>bossCh[k]=['1장','2장','3장','마지막 장'][i]));
@@ -5251,7 +5271,7 @@ function cxList(){
     rows=Object.keys(CLASSES).filter(k=>{const C=CLASSES[k];return hit(C.n,C.role,C.d,C.passive);}).map(k=>{const C=CLASSES[k],ex=AUGS.filter(a=>a.cls===k);
       return `<div class="cxrow" style="--rc:var(--brass)"><div class="h"><b>${C.n}</b><span class="tg">${C.role}</span>${clsOpen(k)?'':'<span class="tg">🔒 봉인</span>'}</div><div class="d">${C.d}</div><div class="s">특성: ${C.passive}</div><div class="s">잘 맞는 시너지: ${tg(C.fav)}${C.dis&&C.dis.length?` · 안 맞는 시너지: ${tg(C.dis)}`:''}</div><div class="s">레벨업: ${C.lvd||''}</div><div class="s">전용 증강: ${ex.map(a=>a.uc?`♾${a.n}`:a.n).join(', ')} <button class="cxchip" data-cxc="${k}">전용 증강 보기 →</button></div></div>`;});
   }
-  $('cxN').textContent=CX.tab==='mob'&&CX.mobHdr?CX.mobHdr:`${rows.length}개`;$('cxL').innerHTML=rows.join('')||'<p class="sub">찾는 항목이 없어요</p>';
+  $('cxN').textContent=CX.tab==='mob'&&CX.mobHdr?CX.mobHdr:CX.tab==='ev'?`${rows.length-1}개`:`${rows.length}개`;$('cxL').innerHTML=rows.join('')||'<p class="sub">찾는 항목이 없어요</p>';
   $('cxL').querySelectorAll('[data-pt]').forEach(b=>{const sh=()=>patShow(b.dataset.pt,+b.dataset.pi,b);b.onmouseenter=sh;b.onclick=sh;b.onmouseleave=patHide;});
   $('cxL').querySelectorAll('[data-cxj]').forEach(b=>b.onclick=()=>openCodex({tab:'aug',tag:[b.dataset.cxj],cls:'',tier:'',q:''}));
   $('cxL').querySelectorAll('[data-cxc]').forEach(b=>b.onclick=()=>openCodex({tab:'aug',cls:b.dataset.cxc,tag:[],tier:'',q:''}));
