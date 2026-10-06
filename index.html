@@ -4414,7 +4414,7 @@ function hubBody(m,g){
     h+=`<div class="grid">
       <button class="btn" data-doc="heal" ${g<hc||p.hp>=p.maxHp||m.used.heal?'disabled':''}>❤️ 체력 전부 회복<small>${m.used.heal?'완료':hc+'골드 · 한 번'}</small></button>
       <button class="btn" data-gb="box" ${g<boxC()?'disabled':''}>🎁 능력치 상자<small>${boxC()}골드 · 무작위 스탯 카드</small></button>
-      <button class="btn" data-gb="double" style="grid-column:1/-1" ${g<1||m.used.double?'disabled':''}>🪙 더블 오어 낫싱<small>${m.used.double?'이번 상점에서 사용함':`보유 골드 전부 · 승률 ${Math.round(dbl*100)}%`}</small></button></div>`;}
+      <button class="btn" data-gb="double" style="grid-column:1/-1" ${g<1?'disabled':''}>🪙 더블 오어 낫싱<small>보유 골드 전부 · 승률 ${Math.round(dbl*100)}%${m.used.double?` · ${m.used.double}번째 도전`:''}</small></button></div>`;}
   return h+`<button class="btn ghost" data-stats>내 스탯 보기</button><button class="btn primary" id="upBack">상점 나가기 · 다음 장으로</button>`;
 }
 function openShop(back,m){
@@ -4476,7 +4476,7 @@ function openShop(back,m){
   ov.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{m.tab=b.dataset.tab;m.disc=null;re();});
   ov.querySelectorAll('[data-gb]').forEach(b=>b.onclick=()=>{const k=b.dataset.gb,p=S.p;
     if(k==='box'){const c=boxC();if(S.gold<c)return;S.gold-=c;S.cbuys.box=cb('box')+1;const cd=cardOf(rollRarity(3),3);const res=cd.f(p);m.log=`능력치 상자: <span style="color:${RAR[cd.r].col};filter:brightness(1.5)">[${RAR[cd.r].n}]</span> ${cd.n} · ${res||cd.d}`;}
-    if(k==='double'){if(m.used.double||S.gold<1)return;m.used.double=1;const bet=S.gold;if(Math.random()<.45+LK()*.005){S.gold+=bet;m.log=`더블 오어 낫싱: 앞면! ${bet} 골드를 따서 ${S.gold} 골드`;}else{S.gold=0;m.log=`더블 오어 낫싱: 뒷면. ${bet} 골드를 전부 잃었습니다`;}}
+    if(k==='double'){if(S.gold<1)return;m.used.double=(m.used.double||0)+1;const bet=S.gold;if(Math.random()<.45+LK()*.005){S.gold+=bet;m.log=`더블 오어 낫싱: 앞면! ${bet} 골드를 따서 ${S.gold} 골드`;}else{S.gold=0;m.log=`더블 오어 낫싱: 뒷면. ${bet} 골드를 전부 잃었습니다`;}}
     re();});
   $('upBack').onclick=back;{const t=$('upBackTop');if(t)t.onclick=back;}
 }
