@@ -620,6 +620,72 @@ M.boss4={sz:72,draw(g,f){const su=T3(R.suit);
   P(g,su[0],20,14,32,3);C(g,su,26,2,20,13);P(g,'#c8323a',26,10,20,2);
   for(let k=0;k<2;k++){const cx=55+k*5,cy=46+f*2-k*3;P(g,'#fffaf0',cx,cy,7,10);P(g,'#c8c0b0',cx+6,cy,1,10);P(g,k?'#1a1a22':'#c8323a',cx+2,cy+3,3,4);}}};
 // 해골 기사: 뿔 투구, 붉은 눈 해골, 갑옷, 방패와 큰 검
+// 새 졸개: 늑대, 묘목 정령, 흡혈 박쥐, 포자 버섯, 모래 딱정벌레, 심연 임프
+M.wolf={sz:28,draw(g,f){const fu=['#3a3a48','#5a5a6a','#8a8a9a','#b8b8c8'],T=T3(fu);
+  for(let i=0;i<4;i++){const lx=6+i*4,lf=(i+f)%2;P(g,fu[1],lx,20+lf,2,6-lf);}
+  B(g,T,13,17,8,4.5);for(let i=0;i<4;i++)B(g,T,4-i*.5,14-i,2);
+  B(g,T,21,13,5,4.5);B(g,T,25,15,3,2);P(g,K,27,14,1,1);P(g,fu[1],18,7,2,3);P(g,fu[1],22,7,2,3);P(g,'#ffe040',21,12,2,1);P(g,W,24,17,1,1);}};
+M.sapling={sz:24,draw(g,f){C(g,T3(R.bark),9,12,6,9);L(g,R.bark[1],10,21,8+(f?1:0),22);L(g,R.bark[1],13,21,15-(f?1:0),22);L(g,R.bark[2],9,15,4,11-f);L(g,R.bark[2],15,15,20,11+f);
+  B(g,T3(R.leaf),12,8,8,6);P(g,R.leaf[4],8,4,2,2);P(g,R.leaf[4],14,3,1,1);P(g,'#0e1a0a',10,14,1,2);P(g,'#0e1a0a',13,14,1,2);P(g,'#9aff6a',10,14,1,1);P(g,'#9aff6a',13,14,1,1);}};
+M.vbat={sz:22,draw(g,f){const b=['#3a0a12','#6a1420','#9a2030'];const up=!f;for(let i=0;i<5;i++){const yy=up?9-i+(i>>1):11+(i>>1);P(g,b[i<2?1:0],6-i,yy,1,3);P(g,b[i<2?1:0],15+i,yy,1,3);}
+  B(g,b,11,12,5,4.5);P(g,b[1],7,7,2,2);P(g,b[1],13,7,2,2);P(g,'#ffe040',9,12,1,1);P(g,'#ffe040',12,12,1,1);P(g,W,10,15,1,2);P(g,W,12,15,1,2);}};
+M.shroom={sz:24,draw(g,f){C(g,T3(R.cream),8,13,8,8);P(g,R.cream[1],7,21,3,1);P(g,R.cream[1],14,21,3,1);B(g,['#4a1a5a','#7a2a8a','#b04aa0','#e870c0'],12,10,10,6,(x,y)=>y>13);
+  for(const [x,y] of [[7,7],[13,5],[16,9]])P(g,'#f8e8ff',x,y,2,2);dot(g,10,16);dot(g,14,16);if(f)P(g,'#e870c0',4,2,1,1);else P(g,'#e870c0',19,3,1,1);}};
+M.scarab={sz:24,draw(g,f){const sh=['#0e2a2a','#1a5a5a','#2a8a7a','#6ad0b0'];for(let i=0;i<3;i++){const o=(i+f)%2;L(g,K,8,12+i*3,3,14+i*3+o);L(g,K,16,12+i*3,21,14+i*3+o);}
+  B(g,T3(sh),12,14,7,6.5);P(g,sh[0],12,9,1,11);B(g,['#3a2a10','#6a4a20','#9a7038'],12,6,4,3);P(g,'#ffe040',10,5,1,1);P(g,'#ffe040',13,5,1,1);P(g,sh[3],9,11,2,1);}};
+M.imp={sz:26,draw(g,f){const dk=['#2a1040','#4a2a7a','#7a4ac8'];P(g,dk[0],9,20,2,4);P(g,dk[0],14,20,2,4);B(g,dk,12.5,16,5,4.5);
+  for(let i=0;i<4;i++){P(g,dk[1],5-i,10+(f?i:i>>1),1,4);P(g,dk[1],20+i,10+(f?i:i>>1),1,4);}B(g,dk,12.5,9,5.5,5);P(g,'#e0d0ff',7,3,2,3);P(g,'#e0d0ff',17,3,2,3);
+  P(g,'#ffe040',10,8,1,2);P(g,'#ffe040',14,8,1,2);P(g,K,11,12,3,1);B(g,['#a040e0','#f0c0ff'],20,16,2);}};
+// 늑대 우두머리: 은회색 거대 늑대, 노란 눈, 옆구리 초승달 흉터
+M.bossW={sz:72,draw(g,f){const fu=['#3a3a48','#5a5a6a','#8a8a9a','#b8b8c8'],T=T3(fu);
+  for(let i=0;i<4;i++){const lx=18+i*11,lf=(i+f)%2;C(g,[fu[0],fu[1]],lx,52+lf,5,15-lf);P(g,'#1a1a22',lx-1,67,7,2);}
+  for(let i=0;i<8;i++)B(g,T,12-i*.8,42-i*1.5-(f?1:0),3.5-i*.2);
+  B(g,T,34,46,22,12);for(let i=0;i<8;i++)P(g,fu[0],18+i*4,33+(i%2),2,4);
+  B(g,T,55,36,11,10);B(g,T,64,42,6,4.5);P(g,K,68,40,3,2);
+  P(g,fu[1],48,22,4,7);P(g,fu[1],57,21,4,7);P(g,'#c88a9a',49,24,2,4);
+  P(g,'#ffe040',54,33,3,2);P(g,'#fff6a0',54,33,1,1);P(g,W,62,46,1,3);P(g,W,66,46,1,3);P(g,K,60,45,9,1);
+  P(g,'#e8e8f8',28,40,6,2);P(g,'#e8e8f8',27,42,2,3);}};
+// 고목 정령: 나무껍질 몸통, 초록 눈, 가지 팔에 잎, 뿌리 다리
+M.bossT={sz:72,draw(g,f){const bk=T3(R.bark),lf=R.leaf;
+  for(let i=0;i<5;i++)L(g,R.bark[1],28+i*4,58,20+i*8,69);
+  C(g,bk,24,26,24,34);for(let y=28;y<58;y+=6)L(g,R.bark[0],30+(y%4),y,32+(y%4),y+4);
+  L(g,R.bark[2],24,36,10,24-f);L(g,R.bark[2],25,37,11,25-f);L(g,R.bark[2],48,36,62,22+f);L(g,R.bark[2],47,37,61,23+f);
+  B(g,T3(lf),9,20-f,7,6);B(g,T3(lf),63,18+f,7,6);
+  B(g,T3(lf),36,16,22,13);B(g,T3(lf),20,22,9,7);B(g,T3(lf),52,21,10,7);for(const [x,y] of [[28,10],[40,8],[46,16],[32,20]])P(g,lf[4],x,y,2,2);
+  P(g,'#0e1a0a',29,33,5,4);P(g,'#0e1a0a',39,33,5,4);P(g,'#9aff6a',30,34,3,2);P(g,'#9aff6a',40,34,3,2);P(g,'#0e1a0a',31,43,10,3);}};
+// 흡혈귀 백작: 붉은 안감 망토, 높은 깃, 창백한 얼굴, 붉은 눈과 송곳니
+M.bossV={sz:72,draw(g,f){const cp=['#0e0a12','#1c1424','#2c2038'],rd=['#5a0a14','#8a1a2a','#c8202a'];
+  for(let y=0;y<34;y++){const w=Math.round(10+y*.7+(f?1:0));for(let x=-w;x<=w;x++)P(g,Math.abs(x)>w-3?rd[1]:cp[x<-w/2?2:x<w/3?1:0],36+x,34+y,1,1);}
+  P(g,K,29,68,7,1);P(g,K,37,68,7,1);P(g,'#e8e0e8',33,36,6,14);P(g,rd[2],35,38,2,8);P(g,R.gold[2],34,44,4,3);
+  for(let i=0;i<8;i++){P(g,rd[1],22+i,24-i,2,10);P(g,rd[1],48-i,24-i,2,10);}
+  B(g,['#a898b0','#d0c4d8','#f0e8f4'],36,24,11,11);
+  P(g,cp[0],25,12,22,6);for(let i=0;i<4;i++)P(g,cp[0],33+i,18,1,4-i);P(g,cp[0],25,14,3,10);P(g,cp[0],44,14,3,10);
+  P(g,'#ff2030',30,23,3,2);P(g,'#ff2030',39,23,3,2);P(g,'#ffa0a0',30,23,1,1);P(g,'#ffa0a0',39,23,1,1);
+  P(g,K,32,30,8,1);P(g,W,33,31,1,2);P(g,W,38,31,1,2);B(g,['#c8c0c8','#f0e8f0'],16,50+(f?1:0),3);B(g,['#c8c0c8','#f0e8f0'],56,50+(f?0:1),3);}};
+// 버섯 군주: 거대한 보라 갓에 흰 점, 작은 왕관, 포자 지팡이
+M.bossM={sz:72,draw(g,f){const cp=['#4a1a5a','#7a2a8a','#b04aa0','#e870c0'];
+  C(g,T3(R.cream),24,38,24,30-(f?1:0));P(g,R.cream[0],22,68,8,1);P(g,R.cream[0],42,68,8,1);
+  B(g,T3(R.cream),18,50+(f?1:0),5,5);B(g,T3(R.cream),54,50+(f?0:1),5,5);
+  B(g,T3(cp),36,26,30,16,(x,y)=>y>36);P(g,cp[0],7,35,58,2);
+  for(const [x,y,w] of [[16,22,5],[30,16,6],[46,19,5],[56,27,4],[24,30,3],[40,27,3]])B(g,['#d8d0e0','#fff8ff'],x,y,w/2+1);
+  crown(g,26,12,20);
+  P(g,K,29,44,4,4);P(g,K,40,44,4,4);P(g,'#ffe040',30,45,2,2);P(g,'#ffe040',41,45,2,2);P(g,K,28,42,6,1);P(g,K,39,42,6,1);P(g,K,32,53,9,2);
+  L(g,R.wood[2],62,64,64,32);B(g,['#7a1a8a','#b04aa0','#f0b0e0'],64,29,4);}};
+// 모래 웜: 모래에서 솟은 마디 몸통, 이빨 둘린 둥근 입
+M.bossD={sz:72,draw(g,f){const sd=['#6a4a20','#9a7038','#c8a060','#e8c888'],T=T3(sd);
+  B(g,['#8a6a30','#b8944a','#d4b46a'],36,66,28,5,(x,y)=>y>69);
+  for(let i=0;i<5;i++){const y=60-i*9,x=36+Math.round(Math.sin(i*.9+(f?.4:0))*4);B(g,T,x,y,13-i*.5,6);P(g,sd[0],x-11+i,y+3,22-2*i,1);}
+  B(g,T,34,16,15,12);B(g,['#2a0a0a','#4a1010','#6a2020'],33,18,9,8);
+  for(let i=0;i<10;i++){const a=i/10*TAU;P(g,W,Math.round(32+Math.cos(a)*8),Math.round(17+Math.sin(a)*7),2,2);}
+  P(g,'#ff8030',21,9,2,2);P(g,'#ff8030',46,9,2,2);}};
+// 심연의 군주: 뿔 달린 어둠의 형체, 보라 눈, 주위를 도는 심연 구슬
+M.bossR={sz:72,draw(g,f){const dk=['#0a0612','#1a1028','#2c1c44','#4a2a7a'],T=T3(dk);
+  for(let y=0;y<22;y++){const w=Math.round(14-y*.5);for(let x=-w;x<=w;x++)if((x+y+(f?1:0))%5||y<12)P(g,dk[x<-w/2?2:x<w/2?1:0],36+x,46+y,1,1);}
+  B(g,T,36,38,15,12);B(g,T,36,20,11,10);
+  for(let i=0;i<9;i++){P(g,'#c8b8e8',24-i,13-Math.round(i*1.2),3,3);P(g,'#c8b8e8',46+i,13-Math.round(i*1.2),3,3);}
+  P(g,'#e040ff',30,19,4,2);P(g,'#e040ff',39,19,4,2);P(g,'#ffffff',31,19,1,1);P(g,'#ffffff',40,19,1,1);P(g,'#e040ff',33,26,7,1);
+  B(g,T,18,40+(f?1:0),5,6);B(g,T,54,40+(f?0:1),5,6);P(g,'#a040e0',33,34,7,7);P(g,'#f0c0ff',35,36,3,3);
+  for(let i=0;i<4;i++){const a=i/4*TAU+(f?.4:0);B(g,['#4a1a7a','#a040e0','#f0c0ff'],36+Math.cos(a)*28,36+Math.sin(a)*12,3.2);}}};
 M.bossK={sz:72,draw(g,f){const bn=T3(R.bone),st=T3(R.stone);
   C(g,[R.bone[1],R.bone[2]],28,56+(f?0:1),5,13-(f?0:1));C(g,[R.bone[1],R.bone[2]],39,56+(f?1:0),5,13-(f?1:0));P(g,'#1e1a14',26,69,9,1);P(g,'#1e1a14',37,69,9,1);
   B(g,st,36,48,13,10);P(g,st[0],27,47,18,2);P(g,'#7a1e24',34,43,4,13);
@@ -816,6 +882,12 @@ const ET={
   sniper: {n:'고블린 저격수',r:10,hp:24, spd:85, dmg:22,col:'#5a7a3a',xp:3,coin:4,range:380,snipe:true},
   lancer: {n:'돌격 기사',r:14,hp:90, spd:80, dmg:20,col:'#9aa4b4',xp:3,coin:5,charge:true,lance:true},
   wraith: {n:'망령',r:11,hp:32, spd:90, dmg:10,col:'#7a5ac8',xp:3,coin:4,blink:true},
+  wolf:   {n:'늑대',r:11,hp:32, spd:165,dmg:9, col:'#8a8a9a',xp:2,coin:2},
+  sapling:{n:'묘목 정령',r:10,hp:40, spd:70, dmg:8, col:'#6aa040',xp:2,coin:3,range:170},
+  vbat:   {n:'흡혈 박쥐',r:8, hp:16, spd:185,dmg:7, col:'#9a2030',xp:1,coin:1},
+  shroom: {n:'포자 버섯',r:10,hp:30, spd:85, dmg:8, col:'#b04aa0',xp:2,coin:2,spore:true},
+  scarab: {n:'모래 딱정벌레',r:10,hp:55, spd:120,dmg:10,col:'#2a8a7a',xp:2,coin:3},
+  imp:    {n:'심연 임프',r:9, hp:26, spd:110,dmg:11,col:'#7a4ac8',xp:2,coin:3,range:200},
   goblin: {n:'보물 고블린',r:11,hp:140,spd:150,dmg:0,col:'#e8bb4f',xp:3,coin:0,flee:true},
   boss:   {n:'오우거 왕',r:34,hp:3500,spd:70,dmg:26,col:'#8a9a4a',xp:60,coin:100,boss:true},
   boss2:  {n:'고블린 대주술사',r:30,hp:3000,spd:95,dmg:22,col:'#8a3fc0',xp:90,coin:150,boss:true},
@@ -826,7 +898,13 @@ const ET={
   bossS:  {n:'거대 거미',r:36,hp:4300,spd:110,dmg:17,col:'#5c3a64',xp:120,coin:200,boss:true},
   bossG:  {n:'화염 골렘',r:38,hp:5200,spd:60,dmg:18,col:'#ff7a1a',xp:120,coin:200,boss:true},
   bossA:  {n:'그림자 암살자',r:28,hp:5400,spd:120,dmg:24,col:'#8a4ac8',xp:0,coin:300,boss:true},
-  bossL:  {n:'번개 정령',r:32,hp:5800,spd:90,dmg:24,col:'#ffe040',xp:0,coin:300,boss:true}
+  bossL:  {n:'번개 정령',r:32,hp:5800,spd:90,dmg:24,col:'#ffe040',xp:0,coin:300,boss:true},
+  bossW:  {n:'늑대 우두머리',r:30,hp:3300,spd:130,dmg:24,col:'#8a8a9a',xp:60,coin:100,boss:true},
+  bossT:  {n:'고목 정령',r:38,hp:4000,spd:55,dmg:24,col:'#6a8a3a',xp:60,coin:100,boss:true},
+  bossV:  {n:'흡혈귀 백작',r:30,hp:3200,spd:100,dmg:22,col:'#c8202a',xp:90,coin:150,boss:true},
+  bossM:  {n:'버섯 군주',r:34,hp:3400,spd:70,dmg:20,col:'#b04aa0',xp:90,coin:150,boss:true},
+  bossD:  {n:'모래 웜',r:36,hp:4800,spd:120,dmg:22,col:'#c8a060',xp:120,coin:200,boss:true},
+  bossR:  {n:'심연의 군주',r:34,hp:5600,spd:85,dmg:25,col:'#7a4ac8',xp:0,coin:300,boss:true}
 };
 const ESPR=(()=>{
   const cache={};
@@ -2176,16 +2254,18 @@ function resume(){S.mode='play';hide();}
 function pickType(){
   const r=S.round;
   const pool=[['grunt',10],['runner',r>=2?6:2],['slime',r>=1.5?5:0],['ranger',r>=2?4:0],['ghost',r>=3?3:0],['bomber',r>=3?3:0],['mage',r>=4?3:0],['tank',r>=3?2+r*.2:0],['support',r>=5?1.5:0],['boar',r>=2.5?3:0],
-    ['spider',r>=2?3:0],['jelly',r>=2.5?3:0],['shield',r>=3?2.5:0],['sniper',r>=4?2:0],['wraith',r>=4?2.5:0],['lancer',r>=5?2:0]];
+    ['spider',r>=2?3:0],['jelly',r>=2.5?3:0],['shield',r>=3?2.5:0],['sniper',r>=4?2:0],['wraith',r>=4?2.5:0],['lancer',r>=5?2:0],
+    ['wolf',r>=2.5?2:0],['sapling',r>=3?1.5:0],['shroom',r>=3?1.5:0],['vbat',r>=3.5?1.5:0],['scarab',r>=4?1.5:0],['imp',r>=4.5?1.5:0]];
   if(S.chap>=3){const W={grunt:.5,runner:.3,slime:.6,tank:2.2,boar:1.8,mage:1.6,ranger:1.3,ghost:1.2,bomber:1,support:1.2,shield:1.6,sniper:1.5,lancer:1.8,wraith:1.4,jelly:1.2,spider:1};for(const q of pool)q[1]*=W[q[0]]||1;}
   {const B=BIO_MOB[S.biome??0];if(B)for(const q of pool)q[1]*=B[q[0]]||1;}
+  if(S.boss&&S.boss.alive&&BMIN[S.boss.type]&&Math.random()<.7){const B=BMIN[S.boss.type];return B[Math.floor(Math.random()*B.length)];}
   if(S.ev&&S.ev.k==='horde'&&Math.random()<.75)return S.ev.type;
   let t=pool.reduce((a,b)=>a+b[1],0),x=Math.random()*t;for(const [k,w] of pool){if((x-=w)<0)return k;}return 'grunt';
 }
 // 배경마다 자주 나오는 몬스터 (가중치 배율)
-const BIO_MOB=[{grunt:1.3,boar:1.3},{spider:2.5,runner:1.3},{boar:2,lancer:1.5},{wraith:2.5,ghost:2},{bomber:2,lancer:1.5},
-  {sniper:2.5,ranger:1.8,shield:1.5},{shield:2,tank:1.5,sniper:1.3},{jelly:2.5,slime:2,spider:1.5},{jelly:1.8,wraith:1.5,tank:1.5},
-  {ranger:2,wraith:2,ghost:1.8,shield:1.5},{lancer:2,bomber:2,tank:1.5}];
+const BIO_MOB=[{grunt:1.3,boar:1.3,wolf:2},{spider:2.5,runner:1.3,sapling:2,shroom:1.5},{boar:2,lancer:1.5,wolf:1.8},{wraith:2.5,ghost:2,vbat:2},{bomber:2,lancer:1.5,imp:1.5},
+  {sniper:2.5,ranger:1.8,shield:1.5,scarab:2.5},{shield:2,tank:1.5,sniper:1.3,wolf:1.5},{jelly:2.5,slime:2,spider:1.5,shroom:2},{jelly:1.8,wraith:1.5,tank:1.5,imp:1.5},
+  {ranger:2,wraith:2,ghost:1.8,shield:1.5,vbat:1.8},{lancer:2,bomber:2,tank:1.5,imp:2.2}];
 function diffAt(t){return 1+t/80+Math.pow(t/110,2.2);}
 // 정예 특성: 정예마다 하나씩 붙어서 같은 정예라도 대처법이 달라짐
 const AFFIX={
@@ -2325,8 +2405,13 @@ const BOSSES=[
 // 2·3장 보스는 성장한 화력에 몇 초 만에 녹아서 체력 보정
 const BOSS_HPM=[1,1.8,2.2,1];
 // 보스 후보: 장마다 비슷한 난이도의 보스 중 판마다 랜덤. 악몽 5단계부터는 전체에서 랜덤 (같은 보스 연속 없음)
-const BOSS_POOL=[['boss','bossK'],['boss2','bossF'],['boss3','bossS','bossG'],['boss4','bossA','bossL']];
-const BTITLE={boss:'숲의 문지기',bossK:'뼈의 검사',boss2:'저주의 인도자',bossF:'얼어붙은 숨결',boss3:'늪의 군주',bossS:'어둠 둥지의 여왕',bossG:'불타는 심장',boss4:'카지노의 주인',bossA:'소리 없는 칼날',bossL:'폭풍의 핵'};
+const BOSS_POOL=[['boss','bossK','bossW','bossT'],['boss2','bossF','bossV','bossM'],['boss3','bossS','bossG','bossD'],['boss4','bossA','bossL','bossR']];
+// 보스전 졸개: 보스마다 어울리는 몹이 70% 확률로 나옴
+const BMIN={boss:['grunt','boar','tank'],bossK:['ranger','shield','lancer'],bossW:['wolf','wolf','runner'],bossT:['sapling','spider','shroom'],
+  boss2:['mage','grunt','ranger'],bossF:['ghost','wraith','sniper'],bossV:['vbat','vbat','ghost','wraith'],bossM:['shroom','support','slime'],
+  boss3:['slime','jelly'],bossS:['spider','runner'],bossG:['bomber','tank'],bossD:['scarab','scarab','sniper'],
+  boss4:['shield','sniper','lancer'],bossA:['wraith','sniper'],bossL:['wraith','mage'],bossR:['imp','imp','wraith','ghost']};
+const BTITLE={boss:'숲의 문지기',bossK:'뼈의 검사',boss2:'저주의 인도자',bossF:'얼어붙은 숨결',boss3:'늪의 군주',bossS:'어둠 둥지의 여왕',bossG:'불타는 심장',boss4:'카지노의 주인',bossA:'소리 없는 칼날',bossL:'폭풍의 핵',bossW:'달빛 사냥꾼',bossT:'숲의 노여움',bossV:'피의 만찬',bossM:'포자의 왕',bossD:'사막의 포식자',bossR:'끝없는 어둠'};
 function bossTypeOf(i){S.bossT=S.bossT||[];if(S.bossT[i])return S.bossT[i];let t;
   if(i<4){const P=BOSS_POOL[i];t=P[Math.floor(Math.random()*P.length)];}else{const all=BOSS_POOL.flat().filter(x=>x!==S.bossT[i-1]);t=all[Math.floor(Math.random()*all.length)];}
   S.bossT[i]=t;return t;}
@@ -2368,6 +2453,8 @@ function go(e,st){e.bst=st;e.bt=0;e.f=1;}
 function tele(o){o.t=o.T;S.tele.push(o);}
 // 일반 몹 탄환 상한 (렉 방지). 상한에 걸리면 그 몹은 이번엔 안 쏨. 보스 탄은 제외
 const EB_CAP=80;
+// 원거리 몹 탄 모양
+const ESHM={ranger:['arrow','#e6dfcc'],sapling:['spit','#8ee06a'],imp:['orb','#b47aff']};
 // 적 탄 모양: 색으로 종류를 정함 (뼈·얼음·단검·독·번개·카드·칩·불·바위·마법구)
 const ESH={'#e6dfcc':'bone','#a8dcf8':'ice','#d8f0ff':'ice','#d8dce4':'dagger','#7be04a':'spit','#8ee06a':'spit','#ffe040':'bolt','#fffaf0':'card','#ff7070':'card','#1c1c1c':'chip','#c8323a':'chip','#ffb030':'fire','#c8e070':'rock'};
 function eShot(x,y,a,spd,dmg,r=6,col,life=4,sh){S.pr.push({x,y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,mine:false,dmg,life,r,bc:col,sh:sh||ESH[col]||'orb'});}
@@ -2392,7 +2479,7 @@ function bossAI(e,dt){
   BAI[e.type](e,dt,{p,d,dx,dy,sp,ph2});
   e.x=clamp(e.x,40,WW-40);e.y=clamp(e.y,40,WH-40);
   if(S.arena){const A=S.arena,m=Math.max(20,A.r-e.r);e.x=clamp(e.x,A.x-m,A.x+m);e.y=clamp(e.y,A.y-m,A.y+m);}
-  if(p.alive&&d<e.r+p.r+3&&e.cd<=0){hurtP(e.dmg,e);e.cd=.9;}
+  if(p.alive&&!e.phase&&d<e.r+p.r+3&&e.cd<=0){hurtP(e.dmg,e);e.cd=.9;}
 }
 const BAI={
   // 오우거 왕: 돌진, 내려찍기, 바위 던지기
@@ -2550,6 +2637,111 @@ const BAI={
     case 'storm':{const n=ph2?12:9;if(e.f){e.f=0;e.n=0;}
       if(e.n<n&&e.bt>e.n*.15){e.n++;const [x,y]=e.n%3?nearP(260):[p.x,p.y];tele({k:'c',x,y,r:58,T:.8,dmg:e.dmg*1.2,col:'#ffe040',fx:t=>{burst(t.x,t.y,'#fff6a0',10);S.bolts.push({x1:t.x,y1:t.y-220,x2:t.x,y2:t.y,life:.15});}});}
       if(e.bt>n*.15+1)go(e,'drift');break;}
+    }},
+  // 늑대 우두머리: 거리를 재며 발톱 투척, 돌진 연타, 울부짖기(늑대 소환 + 원형 탄), 할퀴기(내 자리 예고)
+  bossW(e,dt,o){const {p,ph2,sp}=o;
+    switch(e.bst){
+    case 'intro':if(e.bt>1.4)go(e,'prowl');break;
+    case 'prowl':keepDist(e,o,dt,140,220);e.sh=(e.sh||0)-dt;if(e.sh<=0){e.sh=ph2?.8:1.2;eFan(e,3,.4,300,e.dmg*.4,5,'#d8dce4');}
+      if(e.bt>(ph2?1.4:2))go(e,['lunge','howl','claw','lunge'][e.bk++%4]);break;
+    case 'lunge':{const W=ph2?.4:.55;if(e.f){e.f=0;e.n=ph2?4:3;e.aim=null;}
+      if(e.aim==null){e.aim=Math.atan2(p.y-e.y,p.x-e.x);e.ht=0;e.hitP=0;tele({k:'l',x:e.x,y:e.y,a:e.aim,len:330,w:e.r*1.5,T:W,dmg:0,col:'#cfd6e0'});}
+      e.ht+=dt;if(e.ht>W){const v=1000*dt;e.x+=Math.cos(e.aim)*v;e.y+=Math.sin(e.aim)*v;
+        if(p.alive&&!e.hitP&&d2(e,p)<(e.r+p.r+6)**2){e.hitP=1;hurtP(e.dmg*1.3,e);}
+        if(e.ht>W+.33){e.n--;e.aim=null;if(e.n<=0)go(e,'prowl');}}break;}
+    case 'howl':if(e.f){e.f=0;S.rings.push({x:e.x,y:e.y,r:20,max:260,life:.6,col:'#cfd6e0'});S.shake=.2;if(S.en.length<150){const k=ph2?5:3;for(let i=0;i<k;i++){const a=i/k*TAU;spawnAt('wolf',e.x+Math.cos(a)*70,e.y+Math.sin(a)*70,true);}}eRing(e,ph2?14:10,170,e.dmg*.4,Math.random(),6,'#d8dce4');}
+      if(e.bt>1)go(e,'prowl');break;
+    case 'claw':{const n=ph2?4:3;if(e.f){e.f=0;e.n=0;}if(e.n<n&&e.bt>e.n*.45){e.n++;tele({k:'c',x:p.x,y:p.y,r:65,T:.6,dmg:e.dmg*1.2,col:'#cfd6e0',fx:t=>S.rings.push({x:t.x,y:t.y,r:10,max:65,life:.2,col:'#ffffff'})});}
+      stepTo(e,p.x,p.y,sp*.6,dt);if(e.bt>n*.45+.7)go(e,'prowl');break;}
+    }},
+  // 고목 정령: 느리게 걸으며 뿌리 솟구침(직선 예고 여러 줄), 가시 고리, 묘목 소환, 덩굴(둔화 장판)
+  bossT(e,dt,o){const {p,ph2,sp}=o;
+    switch(e.bst){
+    case 'intro':if(e.bt>1.4)go(e,'walk');break;
+    case 'walk':stepTo(e,p.x,p.y,sp,dt);if(e.bt>(ph2?1.6:2.4))go(e,['roots','thorns','grove','vines'][e.bk++%4]);break;
+    case 'roots':{const n=ph2?5:3;if(e.f){e.f=0;e.n=0;}
+      if(e.n<n&&e.bt>e.n*.35){const a=Math.atan2(p.y-e.y,p.x-e.x)+(e.n-(n-1)/2)*.35;e.n++;tele({k:'l',x:e.x,y:e.y,a,len:520,w:38,T:.85,dmg:e.dmg*1.3,col:'#8a6a3a'});}
+      if(e.bt>n*.35+1.1)go(e,'walk');break;}
+    case 'thorns':{const n=ph2?3:2;if(e.f){e.f=0;e.n=0;}if(e.n<n&&e.bt>e.n*.6){eRing(e,ph2?20:16,170,e.dmg*.42,e.n*.15,6,'#8ee06a');e.n++;}
+      if(e.bt>n*.6+.5)go(e,'walk');break;}
+    case 'grove':if(e.f){e.f=0;if(S.en.length<150){const k=ph2?5:3;for(let i=0;i<k;i++){const a=i/k*TAU;spawnAt('sapling',e.x+Math.cos(a)*90,e.y+Math.sin(a)*90,true);}}S.rings.push({x:e.x,y:e.y,r:20,max:120,life:.4,col:'#8ee06a'});}
+      if(e.bt>.9)go(e,'walk');break;
+    case 'vines':{const n=ph2?5:3;if(e.f){e.f=0;e.n=0;}
+      if(e.n<n&&e.bt>e.n*.4){const [x,y]=e.n?nearP(200):[p.x,p.y];e.n++;tele({k:'c',x,y,r:70,T:.9,dmg:e.dmg*1.1,col:'#6aa040',fx:t=>S.hz.push({x:t.x,y:t.y,r:60,life:4,dmg:0,slow:1,col:'#4a7a2a'})});}
+      if(e.bt>n*.4+1)go(e,'walk');break;}
+    }},
+  // 흡혈귀 백작: 박쥐 소환(나를 물면 백작 회복), 안개 순간이동 + 핏빛 고리, 흡혈(나를 끌어당김), 핏덩이 부채꼴
+  bossV(e,dt,o){const {p,ph2,sp}=o;
+    switch(e.bst){
+    case 'intro':if(e.bt>1.4)go(e,'glide');break;
+    case 'glide':keepDist(e,o,dt,180,280);e.sh=(e.sh||0)-dt;if(e.sh<=0){e.sh=ph2?.9:1.3;eFan(e,3,.45,240,e.dmg*.45,7,'#c8202a');}
+      if(e.bt>(ph2?1.6:2.3))go(e,['bats','mist','drain','orbs'][e.bk++%4]);break;
+    case 'bats':if(e.f){e.f=0;if(S.en.length<150){const k=ph2?7:5;for(let i=0;i<k;i++){const a=i/k*TAU;spawnAt('vbat',e.x+Math.cos(a)*60,e.y+Math.sin(a)*60,true);}}S.rings.push({x:e.x,y:e.y,r:20,max:110,life:.4,col:'#c8202a'});}
+      if(e.bt>.8)go(e,'glide');break;
+    case 'mist':{const n=ph2?3:2;if(e.f){e.f=0;e.n=0;}
+      if(e.n<n&&e.bt>e.n*.9){e.n++;burst(e.x,e.y,'#5a0a14',18);const a=Math.random()*TAU,bd=meleeOn()?140:230;e.x=clamp(p.x+Math.cos(a)*bd,60,WW-60);e.y=clamp(p.y+Math.sin(a)*bd,60,WH-60);burst(e.x,e.y,'#c8202a',18);eRing(e,ph2?14:10,190,e.dmg*.42,Math.random(),6,'#c8202a');}
+      if(e.bt>n*.9+.4)go(e,'glide');break;}
+    case 'drain':{const dur=ph2?2.4:1.8;if(e.f){e.f=0;S.rings.push({x:e.x,y:e.y,r:e.r,max:320,life:.5,col:'#c8202a'});e.sh=0;}
+      if(p.alive&&!(p.dashT>0)){const dx=e.x-p.x,dy=e.y-p.y,dd=Math.hypot(dx,dy)||1;if(dd>e.r+40&&dd<420){p.x+=dx/dd*95*dt;p.y+=dy/dd*95*dt;if(Math.random()<dt*25&&S.pa.length<230)S.pa.push({x:p.x,y:p.y,vx:dx*1.6,vy:dy*1.6,dr:1,life:.6,col:'#ff4050',sh:'ember',s:3});}}
+      e.sh-=dt;if(e.sh<=0){e.sh=.45;eRing(e,8,150,e.dmg*.4,e.bt,6,'#c8202a');}
+      if(e.bt>dur)go(e,'glide');break;}
+    case 'orbs':{const n=ph2?4:3;if(e.f){e.f=0;e.n=0;}if(e.n<n&&e.bt>e.n*.5){e.n++;eFan(e,5,.9,150,e.dmg*.6,10,'#c8202a');}
+      keepDist(e,o,dt,180,280);if(e.bt>n*.5+.8)go(e,'glide');break;}
+    }},
+  // 버섯 군주: 포자 구름(독 장판), 점프 내려찍기, 포자 버섯 소환, 포자 고리
+  bossM(e,dt,o){const {p,ph2,sp}=o;
+    switch(e.bst){
+    case 'intro':if(e.bt>1.4)go(e,'waddle');break;
+    case 'waddle':stepTo(e,p.x,p.y,sp,dt);if(e.bt>(ph2?1.6:2.3))go(e,['spores','hop','sprout','puff'][e.bk++%4]);break;
+    case 'spores':{const n=ph2?7:5;if(e.f){e.f=0;e.n=0;}
+      if(e.n<n&&e.bt>e.n*.25){const [x,y]=e.n%2?nearP(220):[p.x,p.y];e.n++;tele({k:'c',x,y,r:62,T:.9,dmg:e.dmg*.9,col:'#b04aa0',fx:t=>S.hz.push({x:t.x,y:t.y,r:58,life:4.5,dmg:e.dmg*.35,col:'#b04aa0'})});}
+      stepTo(e,p.x,p.y,sp*.4,dt);if(e.bt>n*.25+1)go(e,'waddle');break;}
+    case 'hop':{const H=ph2?.8:.95;if(e.f){e.f=0;e.n=ph2?3:2;e.hop=0;}
+      if(e.hop===0&&e.n>0){e.n--;e.hop=H;e.sx=e.x;e.sy=e.y;e.tx=p.x;e.ty=p.y;tele({k:'c',x:p.x,y:p.y,r:105,T:H,dmg:e.dmg*1.5,col:'#e870c0',fx:t=>{S.shake=.3;eRing(e,10,160,e.dmg*.42,Math.random(),7,'#e870c0');}});}
+      if(e.hop>0){e.hop-=dt;const k=1-Math.max(0,e.hop)/H;e.x=e.sx+(e.tx-e.sx)*k;e.y=e.sy+(e.ty-e.sy)*k;e.air=Math.sin(k*Math.PI);if(e.hop<=0){e.air=0;e.hop=-.35;}}
+      else if(e.hop<0)e.hop=Math.min(0,e.hop+dt);
+      if(e.n<=0&&e.hop===0)go(e,'waddle');break;}
+    case 'sprout':if(e.f){e.f=0;if(S.en.length<150){const k=ph2?6:4;for(let i=0;i<k;i++){const a=i/k*TAU;spawnAt('shroom',e.x+Math.cos(a)*80,e.y+Math.sin(a)*80,true);}}S.rings.push({x:e.x,y:e.y,r:20,max:120,life:.4,col:'#e870c0'});}
+      if(e.bt>.9)go(e,'waddle');break;
+    case 'puff':{const n=ph2?3:2;if(e.f){e.f=0;e.n=0;}if(e.n<n&&e.bt>e.n*.55){eRing(e,ph2?18:14,140,e.dmg*.42,e.n*.2,7,'#e870c0');e.n++;}
+      if(e.bt>n*.55+.5)go(e,'waddle');break;}
+    }},
+  // 모래 웜: 땅속으로 숨었다가(무적) 내 발밑에서 솟구침, 바위 부채꼴, 꼬리 휩쓸기(직선 3줄), 딱정벌레 소환
+  bossD(e,dt,o){const {p,ph2,sp}=o;
+    switch(e.bst){
+    case 'intro':if(e.bt>1.4)go(e,'slither');break;
+    case 'slither':stepTo(e,p.x,p.y,sp*.8,dt);e.sh=(e.sh||0)-dt;if(e.sh<=0){e.sh=ph2?1:1.4;eFan(e,5,.7,230,e.dmg*.42,7,'#c8e070');}
+      if(e.bt>(ph2?1.6:2.3))go(e,['burrow','sweep','burrow','scarab'][e.bk++%4]);break;
+    case 'burrow':{const U=ph2?1:1.2;if(e.f){e.f=0;e.n=ph2?3:2;e.st2=0;}
+      if(e.st2===0){e.st2=1;e.dg=.4;burst(e.x,e.y,'#c8a060',20);}
+      if(e.st2===1){e.dg-=dt;e.under=1;e.phase=true;if(e.dg<=0){e.st2=2;e.dg=U;tele({k:'c',x:p.x,y:p.y,r:100,T:U,dmg:e.dmg*1.6,col:'#c8a060',fx:t=>{e.x=t.x;e.y=t.y;e.under=0;e.phase=false;S.shake=.35;burst(t.x,t.y,'#c8a060',24);eRing(e,ph2?14:10,180,e.dmg*.42,Math.random(),7,'#c8e070');}});}}
+      else if(e.st2===2){e.dg-=dt;if(e.dg<=-.5){e.n--;if(e.n>0)e.st2=0;else{e.under=0;e.phase=false;go(e,'slither');}}}
+      break;}
+    case 'sweep':{if(e.f){e.f=0;const a0=Math.atan2(p.y-e.y,p.x-e.x);for(let i=-1;i<=1;i++)tele({k:'l',x:e.x,y:e.y,a:a0+i*(ph2?.5:.6),len:480,w:44,T:.9,dmg:e.dmg*1.3,col:'#c8a060'});}
+      if(e.bt>1.4)go(e,'slither');break;}
+    case 'scarab':if(e.f){e.f=0;if(S.en.length<150){const k=ph2?6:4;for(let i=0;i<k;i++){const a=i/k*TAU;spawnAt('scarab',e.x+Math.cos(a)*80,e.y+Math.sin(a)*80,true);}}S.rings.push({x:e.x,y:e.y,r:20,max:120,life:.4,col:'#c8a060'});}
+      if(e.bt>.9)go(e,'slither');break;
+    }},
+  // 심연의 군주: 심연(나를 끌어당긴 뒤 큰 폭발), 어둠의 비(무작위 예고), 임프 소환, 쌍나선 탄막
+  bossR(e,dt,o){const {p,ph2,sp}=o;
+    switch(e.bst){
+    case 'intro':if(e.bt>1.4)go(e,'hover');break;
+    case 'hover':keepDist(e,o,dt,200,300);e.sh=(e.sh||0)-dt;if(e.sh<=0){e.sh=ph2?.7:1;eFan(e,3,.3,300,e.dmg*.45,6,'#b47aff');}
+      if(e.bt>(ph2?1.5:2.2))go(e,['void','darkrain','imps','twin'][e.bk++%4]);break;
+    case 'void':{const dur=ph2?3:2.4;if(e.f){e.f=0;e.sh=0;e.vt=0;}
+      if(e.bt<dur-.9&&p.alive&&!(p.dashT>0)){const dx=e.x-p.x,dy=e.y-p.y,dd=Math.hypot(dx,dy)||1;if(dd>e.r+30&&dd<480){p.x+=dx/dd*110*dt;p.y+=dy/dd*110*dt;}
+        if(Math.random()<dt*30&&S.pa.length<230){const a=Math.random()*TAU;S.pa.push({x:e.x+Math.cos(a)*200,y:e.y+Math.sin(a)*200,vx:-Math.cos(a)*300,vy:-Math.sin(a)*300,dr:1,life:.6,col:'#b47aff',sh:'ember',s:3});}}
+      e.sh-=dt;if(e.sh<=0){e.sh=.5;eRing(e,10,150,e.dmg*.4,e.bt,6,'#b47aff');}
+      if(!e.vt&&e.bt>dur-.9){e.vt=1;tele({k:'c',x:e.x,y:e.y,r:150,T:.9,dmg:e.dmg*1.7,col:'#7a4ac8',fx:t=>{S.shake=.4;burst(t.x,t.y,'#b47aff',26);}});}
+      if(e.bt>dur)go(e,'hover');break;}
+    case 'darkrain':{const n=ph2?14:10;if(e.f){e.f=0;e.n=0;}
+      if(e.n<n&&e.bt>e.n*.14){e.n++;const [x,y]=e.n%3?nearP(260):[p.x,p.y];tele({k:'c',x,y,r:55,T:.85,dmg:e.dmg*1.2,col:'#7a4ac8',fx:t=>burst(t.x,t.y,'#b47aff',10)});}
+      keepDist(e,o,dt,200,300);if(e.bt>n*.14+1)go(e,'hover');break;}
+    case 'imps':if(e.f){e.f=0;if(S.en.length<150){const k=ph2?6:4;for(let i=0;i<k;i++){const a=i/k*TAU;spawnAt('imp',e.x+Math.cos(a)*90,e.y+Math.sin(a)*90,true);}}S.rings.push({x:e.x,y:e.y,r:20,max:120,life:.4,col:'#b47aff'});}
+      if(e.bt>.9)go(e,'hover');break;
+    case 'twin':if(e.f){e.f=0;e.sa=Math.random()*TAU;e.sh=0;}
+      e.sh-=dt;if(e.sh<=0){e.sh=.12;e.sa+=.3;const arms=ph2?3:2;for(let i=0;i<arms;i++){eShot(e.x,e.y,e.sa+i*TAU/arms,150,e.dmg*.42,6,'#b47aff');eShot(e.x,e.y,-e.sa+i*TAU/arms+.5,150,e.dmg*.42,6,'#7a4ac8');}}
+      if(e.bt>3)go(e,'hover');break;
     }},
   boss4(e,dt,o){const {p,ph2}=o;
     switch(e.bst){
@@ -3046,6 +3238,7 @@ function onKill(e){
   burst(e.x,e.y,T.col,e.boss?40:10);S.st.kills++;
   {const ck=cosEq('kill');if(ck&&S.pa.length<200)killFx(e.x,e.y,ck,q=>{if(S.pa.length<260)S.pa.push(q);},r=>{if(S.rings.length<60)S.rings.push(r);},e.boss||e.elite);}
   if(e.type==='slime')for(let i=0;i<2;i++)spawnAt('slimelet',e.x+(i?9:-9),e.y+rand(-4,4),true);
+  if(T.spore&&S.hz.length<70)S.hz.push({x:e.x,y:e.y,r:42,life:3.5,dmg:e.dmg*.6,col:'#b04aa0'});
   if(T.split&&S.en.length<260)for(let i=0;i<2;i++)spawnAt(T.split,e.x+(i?e.r*.7:-e.r*.7),e.y+rand(-4,4),true);
   // 드롭: 경험치 ±15%, 골드 ±30% 랜덤. 행운(최대 30)이 골드 드롭 확률(18→20%)과 2배 확률(경험치 0→5%, 골드 5→12%)을 올림
   const lr=LK()/LUCK_CAP,xLucky=!e.boss&&Math.random()<lr*.05,gDrop=e.boss||e.elite||Math.random()<.18+lr*.02,gLucky=gDrop&&!e.boss&&Math.random()<.05+lr*.07;if(xLucky||gLucky)ftext(e.x,e.y-e.r-14,'행운!','#7be08f',14);
@@ -3283,9 +3476,11 @@ function update(dt){
     if(T.bomb&&d<e.r+p.r+4){e.alive=false;e.bombed=true;S.rings.push({x:e.x,y:e.y,r:6,max:55,life:.3,col:'#f0c419'});burst(e.x,e.y,'#f0c419',16);if(d<55+p.r)hurtP(e.dmg,null);onKill(e);continue;}
     if(T.snipe&&!(e.aim>0)&&d<T.range&&e.cd<=0&&S.ebN<EB_CAP){e.aim=1;e.aa=Math.atan2(dy,dx);e.cd=rand(3,4);tele({k:'l',x:e.x,y:e.y,a:e.aa,len:560,w:6,T:1,dmg:0,col:'#ff4040'});}
     else if(T.web&&d<T.range&&e.cd<=0&&S.ebN<EB_CAP){S.ebN++;S.pr.push({x:e.x,y:e.y,vx:dx/d*260,vy:dy/d*260,mine:false,dmg:e.dmg,life:Math.min(1.1,d/260+.1),r:6,sh:'web',bc:'#e8e8f0',web:1});e.cd=rand(2.2,3);}
-    else if(T.range&&!T.snipe&&!T.web&&e.type!=='support'&&d<T.range&&e.cd<=0&&S.ebN<EB_CAP){S.ebN++;const a=Math.atan2(dy,dx);S.pr.push({x:e.x,y:e.y,vx:Math.cos(a)*300,vy:Math.sin(a)*300,mine:false,dmg:e.dmg,aoe:T.aoe||0,life:1.4,r:T.aoe?5:4,sh:T.aoe?'orb':e.type==='ranger'?'arrow':'orb',bc:T.aoe?'#c98af0':e.type==='ranger'?'#e6dfcc':null});e.cd=rand(1.2,1.9);}
+    else if(T.range&&!T.snipe&&!T.web&&e.type!=='support'&&d<T.range&&e.cd<=0&&S.ebN<EB_CAP){S.ebN++;const a=Math.atan2(dy,dx);S.pr.push({x:e.x,y:e.y,vx:Math.cos(a)*300,vy:Math.sin(a)*300,mine:false,dmg:e.dmg,aoe:T.aoe||0,life:1.4,r:T.aoe?5:4,sh:T.aoe?'orb':(ESHM[e.type]||['orb'])[0],bc:T.aoe?'#c98af0':(ESHM[e.type]||[])[1]||null});e.cd=rand(1.2,1.9);}
     else if(sk){if(d<e.r+11&&e.cd<=0){skHit(sk,e.dmg);e.cd=.9;}}
-    else if(!T.range&&!T.flee&&d<e.r+p.r+3&&e.cd<=0){hurtP(e.dmg,e);e.cd=.9;}
+    else if(!T.range&&!T.flee&&d<e.r+p.r+3&&e.cd<=0){hurtP(e.dmg,e);e.cd=.9;
+      // 흡혈 박쥐: 나를 물면 보스 체력 0.4% 회복
+      if(e.type==='vbat'&&S.boss&&S.boss.alive){const B=S.boss;B.hp=Math.min(B.maxHp,B.hp+B.maxHp*.004);ftext(B.x,B.y-B.r-10,'흡혈','#ff6070',13);}}
     if(e.type==='ghost'){e.phT=(e.phT??rand(0,4))-dt;if(e.phT<0)e.phT+=4;e.phase=e.phT<1.1;}
   }
   S.en=S.en.filter(e=>e.alive);
@@ -3406,7 +3601,7 @@ function drawChip(e){
   if(e.elite){ctx.fillStyle='rgba(255,215,106,.18)';ctx.beginPath();ctx.arc(x,y,R+10,0,TAU);ctx.fill();}
   const spr=ESPR.get(e.type,Math.floor(S.t*(e.type==='runner'?10:5)+e.rot*3)%2,e.hit>0,S.p.x<e.x);
   const sz=spr.width,DS=sz*PXW,top=y-air+R*.9-(sz-2)*PXW;
-  if(e.type==='ghost')ctx.globalAlpha=e.phase?.22:.85;else if(e.type==='wraith')ctx.globalAlpha=e.bl>0?Math.max(.1,e.bl/.6*.8):.9;
+  if(e.type==='ghost')ctx.globalAlpha=e.phase?.22:.85;else if(e.type==='wraith')ctx.globalAlpha=e.bl>0?Math.max(.1,e.bl/.6*.8):.9;else if(e.under)ctx.globalAlpha=.12;
   ctx.imageSmoothingEnabled=false;pxDraw(spr,x,y-air+R*.9,sz>>1,sz-2);ctx.globalAlpha=1;
   if(e.slowT>0){ctx.fillStyle=e.frozen?'rgba(170,220,255,.5)':'rgba(170,220,255,.22)';ctx.beginPath();ctx.arc(x,y,R,0,TAU);ctx.fill();}
   if(e.elite){ctx.strokeStyle='#ffd76a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,R+5,0,TAU);ctx.stroke();
@@ -4383,6 +4578,18 @@ const MOBINFO={
   sniper:['1초 조준선 후 빠르고 강한 한 발','빨간 조준선이 보이면 선 밖으로 비켜서기. 조준 중엔 멈춰 있음'],
   lancer:['예고선 후 돌진 3연속 (매번 다시 조준)','돌진 사이 0.4초에 방향을 꺾어 피하기'],
   wraith:['내 근처로 순간이동 (도착 지점 보라색 예고) → 탄 6발','예고 원에서 벗어나기. 이동 중엔 무적'],
+  wolf:['빠른 몸통 박치기','늑대 우두머리의 무리. 빠르니 뭉쳐 있을 때 광역으로'],
+  sapling:['초록 가시 발사','고목 정령의 졸개. 느리지만 멀리서 쏨'],
+  vbat:['빠르게 날아와 물기','흡혈귀 백작의 박쥐. 나를 물 때마다 보스 체력 0.4% 회복 → 먼저 정리'],
+  shroom:['몸통 박치기','죽으면 그 자리에 독 포자 구름 (3.5초). 근접은 잡고 바로 비켜서기'],
+  scarab:['몸통 박치기','단단하고 빠른 딱정벌레. 모래 웜의 졸개'],
+  imp:['보라 마법구 발사','심연의 군주의 졸개. 원거리라 먼저 처리'],
+  bossW:['돌진 연타, 울부짖기, 할퀴기, 발톱 투척','빠르게 거리를 재며 몰아침. 늑대 무리는 광역으로'],
+  bossT:['뿌리 솟구침, 가시 고리, 묘목 소환, 덩굴','느리지만 직선 뿌리가 길게 뻗음. 예고선 옆으로'],
+  bossV:['박쥐 소환, 안개 이동, 흡혈, 핏덩이','박쥐가 보스를 회복시킴. 흡혈 중엔 대시로 끌림 끊기'],
+  bossM:['포자 구름, 점프, 포자 버섯 소환, 포자 고리','독 장판이 쌓이니 넓게 돌며 싸우기'],
+  bossD:['땅속 기습, 바위 부채꼴, 꼬리 휩쓸기, 딱정벌레 소환','땅속에 있을 땐 무적. 발밑 예고 원이 뜨면 바로 이탈'],
+  bossR:['심연 흡입 후 폭발, 어둠의 비, 임프 소환, 쌍나선','끌려가는 동안 대시로 버티고 폭발 원 밖으로'],
   boss:['돌진, 내려찍기 (큰 원형), 바위 던지기','예고 범위가 크니 미리 바깥으로'],
   boss2:['나선 탄막, 메테오, 순간이동, 졸개 소환','거리를 유지하며 탄막 사이 틈으로'],
   boss3:['점프 내려찍기, 독 웅덩이, 산성 침, 분열','독 웅덩이 위에서 싸우지 않기'],
@@ -4405,6 +4612,12 @@ const BPAT={
   bossS:[['덮치기','내 위치로 2~3번 뛰어듦. 착지마다 독 고리','jump'],['거미줄','거미줄 장판 4~6개 (둔화)','pool'],['독 부채꼴','독 부채꼴 3~4번','fan'],['새끼 소환','박쥐 4~5마리','summon']],
   bossG:[['불길 자국','지나간 자리에 계속 불길','pool'],['불기둥','내 주변에 불기둥 5~7개 연속','rain'],['지진','자기 주변 큰 원 (반경 200) + 불꽃 고리','slam'],['용암 낙하','용암 덩어리 → 불 장판','target']],
   bossA:[['그림자 돌진','내 뒤쪽으로 순간이동 후 관통 돌진 2~3번','blink'],['단검 고리','사방 단검. 한 군데 빈틈으로 빠져나가기','ring'],['표식 폭발','내 위치를 따라오는 폭발 4~5번','target'],['단검 투척','빠른 단검 3발씩','fan']],
+  bossW:[['돌진 연타','짧은 예고선 후 3~4번 연속 돌진','charge'],['울부짖기','늑대 3~5마리 소환 + 원형 탄','summon'],['할퀴기','내 위치를 따라오는 발톱 공격 3~4번','target'],['발톱 투척','거리를 재며 발톱 3발씩','fan']],
+  bossT:[['뿌리 솟구침','나를 향해 직선 뿌리 3~5줄 (예고선)','line'],['가시 고리','사방 가시 2~3겹','ring'],['묘목 소환','가시를 쏘는 묘목 3~5마리','summon'],['덩굴','내 주변에 덩굴 장판 (둔화)','pool']],
+  bossV:[['박쥐 떼','흡혈 박쥐 5~7마리. 나를 물면 백작 회복','summon'],['안개 이동','내 근처로 2~3번 순간이동하며 핏빛 고리','blink'],['흡혈','나를 끌어당기며 원형 탄. 대시로 끊기','pull'],['핏덩이','느리고 큰 핏덩이 부채꼴','fan']],
+  bossM:[['포자 구름','내 위치·주변에 독 장판 5~7개','rain'],['점프','내 위치로 2~3번 점프, 착지마다 포자 고리','jump'],['버섯 소환','죽으면 독 구름을 남기는 버섯 4~6마리','summon'],['포자 고리','사방 포자 2~3겹','ring']],
+  bossD:[['땅속 기습','땅속에 숨어 무적 → 내 발밑에서 솟구침 2~3번','burrow'],['꼬리 휩쓸기','3방향 직선 동시 공격','line'],['바위 부채꼴','바위 5발씩','fan'],['딱정벌레 소환','딱정벌레 4~6마리','summon']],
+  bossR:[['심연','나를 끌어당긴 뒤 주변 대폭발 (반경 150)','pull'],['어둠의 비','내 주변에 어둠 낙하 10~14번','rain'],['임프 소환','마법구를 쏘는 임프 4~6마리','summon'],['쌍나선','반대로 도는 두 나선 탄막','spiral']],
   bossL:[['번개 광선','3~4줄 번개 광선이 회전','beam'],['연쇄 낙뢰','직선 번개 3~4번 (예고선)','line'],['폭풍','내 주변 무작위 낙뢰 9~12번','rain'],['번개탄','빠른 번개탄 연사','fan']]
 };
 // 미리보기 그림: 왼쪽 보스, 오른쪽 나. 2.2초 반복
@@ -4439,7 +4652,7 @@ function patShow(type,i,anchor){const P=(BPAT[type]||[])[i];if(!P)return;let box
   const r=anchor.getBoundingClientRect();let left=r.left,top=r.bottom+6;if(left+256>innerWidth)left=innerWidth-260;if(top+box.offsetHeight>innerHeight-8)top=r.top-box.offsetHeight-6;box.style.left=Math.max(4,left)+'px';box.style.top=Math.max(4,top)+'px';}
 function patHide(){cancelAnimationFrame(patRAF);const b=document.getElementById('patPrev');if(b)b.style.display='none';}
 // 일반 몹 첫 등장 시점 (pickType의 위험도 기준을 실제 시간으로 환산)
-const MOB_THR={runner:0,slime:1.5,ranger:2,ghost:3,bomber:3,mage:4,tank:3,support:5,boar:2.5,spider:2,jelly:2.5,shield:3,sniper:4,wraith:4,lancer:5,grunt:0};
+const MOB_THR={runner:0,slime:1.5,ranger:2,ghost:3,bomber:3,mage:4,tank:3,support:5,boar:2.5,spider:2,jelly:2.5,shield:3,sniper:4,wraith:4,lancer:5,grunt:0,wolf:2.5,sapling:3,shroom:3,vbat:3.5,scarab:4,imp:4.5};
 function mobWhen(k){const th=MOB_THR[k];if(th==null)return null;if(th<=1)return '처음부터';let t=0;while(diffAt(t)<th&&t<2000)t+=1;const r=t/TS;return `약 ${Math.floor(r/60)}분 ${String(Math.round(r%60)).padStart(2,'0')}초부터`;}
 const MOB_IMG={};
 function mobImg(k,dark){const key=k+(dark?'d':'');if(MOB_IMG[key])return MOB_IMG[key];const c=ESPR.get(k,0,false,false),q=document.createElement('canvas');q.width=c.width;q.height=c.height;const g=q.getContext('2d');if(dark)g.filter='brightness(0) opacity(.55)';g.drawImage(c,0,0);return MOB_IMG[key]=q.toDataURL();}
@@ -4502,7 +4715,7 @@ function cxList(){
       if(!seen)return `<div class="cxrow" style="--rc:#555;display:flex;gap:10px;align-items:center">${img}<div><div class="h"><b>❓ ???</b>${T.boss?'<span class="tg">보스</span>':''}</div><div class="s">아직 만나지 못한 몬스터${T.boss?` · ${bossCh[k]||''} 보스 후보`:''}</div></div></div>`;
       const where=T.boss?`${bossCh[k]} 보스 후보 (2.5분 보스전 때 무작위 등장)`:[mobWhen(k),BW[k]?`자주 나오는 곳: ${BW[k].join(', ')}`:''].filter(Boolean).join(' · ')||'특수 (분열·이벤트)';
       return `<div class="cxrow" style="--rc:${T.col};display:flex;gap:10px;align-items:center">${img}<div style="min-width:0"><div class="h"><b>${T.n}</b>${T.boss?`<span class="tg" style="background:#7a1f2a;color:#fff">보스 · ${BTITLE[k]||''}</span>`:''}<span class="tg">❤ 체력 ${T.hp}</span><span class="tg">⚔ 공격력 ${T.dmg}</span><span class="tg">👟 이동 속도 ${T.spd}</span>${T.range?`<span class="tg">🎯 사거리 ${T.range}</span>`:''}</div>
-        ${BPAT[k]?`<div class="d"><b>공격 패턴</b> <small style="opacity:.7">(마우스를 올리거나 누르면 미리보기)</small></div><div class="h" style="margin:3px 0">${BPAT[k].map((q,i)=>`<span class="tg patc" data-pt="${k}" data-pi="${i}" style="cursor:help;background:rgba(255,215,106,.18);border:1px solid rgba(255,215,106,.5)">▶ ${q[0]}</span>`).join('')}</div>`:`<div class="d"><b>공격:</b> ${I[0]}</div>`}<div class="s">${I[1]}</div><div class="s" style="opacity:.8">📍 ${where}</div></div></div>`;});
+        ${BPAT[k]?`<div class="d"><b>공격 패턴</b> <small style="opacity:.7">(마우스를 올리거나 누르면 미리보기)</small></div><div class="h" style="margin:3px 0">${BPAT[k].map((q,i)=>`<span class="tg patc" data-pt="${k}" data-pi="${i}" style="cursor:help;background:rgba(255,215,106,.18);border:1px solid rgba(255,215,106,.5)">▶ ${q[0]}</span>`).join('')}</div>`:`<div class="d"><b>공격:</b> ${I[0]}</div>`}<div class="s">💡 팁: ${I[1]}</div><div class="s" style="opacity:.8">📍 ${where}</div></div></div>`;});
     if(mk==='e')rows=Object.keys(AFFIX).map(k=>{const A=AFFIX[k],d={swift:'이동 속도 1.5배',giant:'크기 1.25배, 체력 1.6배, 조금 느림',split:'죽으면 작은 적 3마리로 분열',volatile:'죽으면 0.85초 뒤 주변 폭발 (예고 원)',gunner:'2.6초마다 사방으로 탄 8발'}[k]||'';return hit(A.n,d)?`<div class="cxrow" style="--rc:${A.col}"><div class="h"><b style="color:${A.col}">${A.n}</b><span class="tg">정예 특성</span></div><div class="d">${d}</div><div class="s">정예(금색 테두리, 체력 4배·공격력 1.5배)에 하나씩 붙음. 약 2분부터</div></div>`:'';}).filter(Boolean);
     CX.mobHdr=mk!=='e'?`발견 ${seenN} / ${keys.length} · 체력·공격력은 일반 난이도 초반 기준 (시간·난이도에 따라 강해짐)`:'';
   }else{
