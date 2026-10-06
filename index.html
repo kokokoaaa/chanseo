@@ -905,7 +905,7 @@ const ET={
   sniper: {n:'고블린 저격수',r:10,hp:24, spd:85, dmg:22,col:'#5a7a3a',xp:3,coin:4,range:380,snipe:true},
   lancer: {n:'돌격 기사',r:14,hp:90, spd:80, dmg:20,col:'#9aa4b4',xp:3,coin:5,charge:true,lance:true},
   wraith: {n:'망령',r:11,hp:32, spd:90, dmg:10,col:'#7a5ac8',xp:3,coin:4,blink:true},
-  wolf:   {n:'늑대',r:11,hp:32, spd:165,dmg:9, col:'#8a8a9a',xp:2,coin:2},
+  wolf:   {n:'늑대',r:11,hp:26, spd:140,dmg:9, col:'#8a8a9a',xp:2,coin:2},
   sapling:{n:'묘목 정령',r:10,hp:40, spd:70, dmg:8, col:'#6aa040',xp:2,coin:3,range:170},
   vbat:   {n:'흡혈 박쥐',r:8, hp:16, spd:185,dmg:7, col:'#9a2030',xp:1,coin:1},
   shroom: {n:'포자 버섯',r:10,hp:30, spd:85, dmg:8, col:'#b04aa0',xp:2,coin:2,spore:true},
@@ -2286,7 +2286,7 @@ function pickType(){
   const r=S.round;
   const pool=[['grunt',10],['runner',r>=2?6:2],['slime',r>=1.5?5:0],['ranger',r>=2?4:0],['ghost',r>=3?3:0],['bomber',r>=3?3:0],['mage',r>=4?3:0],['tank',r>=3?2+r*.2:0],['support',r>=5?1.5:0],['boar',r>=2.5?3:0],
     ['spider',r>=2?3:0],['jelly',r>=2.5?3:0],['shield',r>=3?2.5:0],['sniper',r>=4?2:0],['wraith',r>=4?2.5:0],['lancer',r>=5?2:0],
-    ['wolf',r>=2.5?2:0],['sapling',r>=3?1.5:0],['shroom',r>=3?1.5:0],['vbat',r>=3.5?1.5:0],['scarab',r>=4?1.5:0],['imp',r>=4.5?1.5:0],
+    ['wolf',r>=2.5?1.2:0],['sapling',r>=3?1.5:0],['shroom',r>=3?1.5:0],['vbat',r>=3.5?1.5:0],['scarab',r>=4?1.5:0],['imp',r>=4.5?1.5:0],
     ['thief',r>=2.5?1.5:0],['leech',r>=3?2:0],['totem',r>=3.5?1:0],['mortar',r>=4?1.5:0]];
   if(S.chap>=3){const W={grunt:.5,runner:.3,slime:.6,tank:2.2,boar:1.8,mage:1.6,ranger:1.3,ghost:1.2,bomber:1,support:1.2,shield:1.6,sniper:1.5,lancer:1.8,wraith:1.4,jelly:1.2,spider:1};for(const q of pool)q[1]*=W[q[0]]||1;}
   {const B=BIO_MOB[S.biome??0];if(B)for(const q of pool)q[1]*=B[q[0]]||1;}
@@ -2295,7 +2295,7 @@ function pickType(){
   let t=pool.reduce((a,b)=>a+b[1],0),x=Math.random()*t;for(const [k,w] of pool){if((x-=w)<0)return k;}return 'grunt';
 }
 // 배경마다 자주 나오는 몬스터 (가중치 배율)
-const BIO_MOB=[{grunt:1.3,boar:1.3,wolf:2},{spider:2.5,runner:1.3,sapling:2,shroom:1.5},{boar:2,lancer:1.5,wolf:1.8,thief:2},{wraith:2.5,ghost:2,vbat:2,totem:2},{bomber:2,lancer:1.5,imp:1.5,mortar:1.8},
+const BIO_MOB=[{grunt:1.3,boar:1.3,wolf:1.5},{spider:2.5,runner:1.3,sapling:2,shroom:1.5},{boar:2,lancer:1.5,wolf:1.4,thief:2},{wraith:2.5,ghost:2,vbat:2,totem:2},{bomber:2,lancer:1.5,imp:1.5,mortar:1.8},
   {sniper:2.5,ranger:1.8,shield:1.5,scarab:2.5,mortar:1.8},{shield:2,tank:1.5,sniper:1.3,wolf:1.5},{jelly:2.5,slime:2,spider:1.5,shroom:2,leech:2.5},{jelly:1.8,wraith:1.5,tank:1.5,imp:1.5},
   {ranger:2,wraith:2,ghost:1.8,shield:1.5,vbat:1.8},{lancer:2,bomber:2,tank:1.5,imp:2.2}];
 function diffAt(t){return 1+t/80+Math.pow(t/110,2.2);}
@@ -2464,7 +2464,7 @@ const BOSS_HPM=[1,1.8,2.2,1];
 // 보스 후보: 장마다 비슷한 난이도의 보스 중 판마다 랜덤. 악몽 5단계부터는 전체에서 랜덤 (같은 보스 연속 없음)
 const BOSS_POOL=[['boss','bossK','bossW','bossT'],['boss2','bossF','bossV','bossM'],['boss3','bossS','bossG','bossD'],['boss4','bossA','bossL','bossR']];
 // 보스전 졸개: 보스마다 어울리는 몹이 70% 확률로 나옴
-const BMIN={boss:['grunt','boar','tank'],bossK:['ranger','shield','lancer'],bossW:['wolf','wolf','runner'],bossT:['sapling','spider','shroom'],
+const BMIN={boss:['grunt','boar','tank'],bossK:['ranger','shield','lancer'],bossW:['wolf','grunt','runner'],bossT:['sapling','spider','shroom'],
   boss2:['mage','grunt','ranger'],bossF:['ghost','wraith','sniper'],bossV:['vbat','vbat','ghost','wraith'],bossM:['shroom','support','slime'],
   boss3:['slime','jelly'],bossS:['spider','runner'],bossG:['bomber','tank'],bossD:['scarab','scarab','sniper'],
   boss4:['shield','sniper','lancer'],bossA:['wraith','sniper'],bossL:['wraith','mage'],bossR:['imp','imp','wraith','ghost']};
@@ -2707,7 +2707,7 @@ const BAI={
       e.ht+=dt;if(e.ht>W){const v=1000*dt;e.x+=Math.cos(e.aim)*v;e.y+=Math.sin(e.aim)*v;
         if(p.alive&&!e.hitP&&d2(e,p)<(e.r+p.r+6)**2){e.hitP=1;hurtP(e.dmg*1.3,e);}
         if(e.ht>W+.33){e.n--;e.aim=null;if(e.n<=0)go(e,'prowl');}}break;}
-    case 'howl':if(e.f){e.f=0;S.rings.push({x:e.x,y:e.y,r:20,max:260,life:.6,col:'#cfd6e0'});S.shake=.2;if(S.en.length<150){const k=ph2?5:3;for(let i=0;i<k;i++){const a=i/k*TAU;spawnAt('wolf',e.x+Math.cos(a)*70,e.y+Math.sin(a)*70,true);}}eRing(e,ph2?14:10,170,e.dmg*.4,Math.random(),6,'#d8dce4');}
+    case 'howl':if(e.f){e.f=0;S.rings.push({x:e.x,y:e.y,r:20,max:260,life:.6,col:'#cfd6e0'});S.shake=.2;if(S.en.length<150){const k=ph2?4:2;for(let i=0;i<k;i++){const a=i/k*TAU;spawnAt('wolf',e.x+Math.cos(a)*70,e.y+Math.sin(a)*70,true);}}eRing(e,ph2?14:10,170,e.dmg*.4,Math.random(),6,'#d8dce4');}
       if(e.bt>1)go(e,'prowl');break;
     case 'claw':{const n=ph2?4:3;if(e.f){e.f=0;e.n=0;}if(e.n<n&&e.bt>e.n*.45){e.n++;tele({k:'c',x:p.x,y:p.y,r:65,T:.6,dmg:e.dmg*1.2,col:'#cfd6e0',fx:t=>S.rings.push({x:t.x,y:t.y,r:10,max:65,life:.2,col:'#ffffff'})});}
       stepTo(e,p.x,p.y,sp*.6,dt);if(e.bt>n*.45+.7)go(e,'prowl');break;}
@@ -4732,7 +4732,7 @@ const BPAT={
   bossG:[['불길 자국','지나간 자리에 계속 불길','pool'],['불기둥','내 주변에 불기둥 5~7개 연속','rain'],['지진','자기 주변 큰 원 (반경 200) + 불꽃 고리','slam'],['용암 낙하','용암 덩어리 → 불 장판','target']],
   bossA:[['그림자 돌진','내 뒤쪽으로 순간이동 후 관통 돌진 2~3번','blink'],['단검 고리','사방 단검. 한 군데 빈틈으로 빠져나가기','ring'],['표식 폭발','내 위치를 따라오는 폭발 4~5번','target'],['단검 투척','빠른 단검 3발씩','fan']],
   bossH:[['화염 숨결','좌우로 흔들리며 불 줄기를 뿜음','spiral'],['황금 비','내 주변에 금덩이 10~14개 낙하','rain'],['급강하','예고선 후 2~3번 돌진, 끝마다 불꽃 고리','charge'],['날갯바람','사방 바람 탄 3겹','ring']],
-  bossW:[['돌진 연타','짧은 예고선 후 3~4번 연속 돌진','charge'],['울부짖기','늑대 3~5마리 소환 + 원형 탄','summon'],['할퀴기','내 위치를 따라오는 발톱 공격 3~4번','target'],['발톱 투척','거리를 재며 발톱 3발씩','fan']],
+  bossW:[['돌진 연타','짧은 예고선 후 3~4번 연속 돌진','charge'],['울부짖기','늑대 2~4마리 소환 + 원형 탄','summon'],['할퀴기','내 위치를 따라오는 발톱 공격 3~4번','target'],['발톱 투척','거리를 재며 발톱 3발씩','fan']],
   bossT:[['뿌리 솟구침','나를 향해 직선 뿌리 3~5줄 (예고선)','line'],['가시 고리','사방 가시 2~3겹','ring'],['묘목 소환','가시를 쏘는 묘목 3~5마리','summon'],['덩굴','내 주변에 덩굴 장판 (둔화)','pool']],
   bossV:[['박쥐 떼','흡혈 박쥐 5~7마리. 나를 물면 백작 회복','summon'],['안개 이동','내 근처로 2~3번 순간이동하며 핏빛 고리','blink'],['흡혈','나를 끌어당기며 원형 탄. 대시로 끊기','pull'],['핏덩이','느리고 큰 핏덩이 부채꼴','fan']],
   bossM:[['포자 구름','내 위치·주변에 독 장판 5~7개','rain'],['점프','내 위치로 2~3번 점프, 착지마다 포자 고리','jump'],['버섯 소환','죽으면 독 구름을 남기는 버섯 4~6마리','summon'],['포자 고리','사방 포자 2~3겹','ring']],
