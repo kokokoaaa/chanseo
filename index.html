@@ -2815,12 +2815,17 @@ function update(dt){
     if(has('stormcall')){S.scT=(S.scT??4)-dt;if(S.scT<=0){S.scT=Math.max(1,(has('f_tempest')?2:4)-(has('f_genesis')?1:0))*cdM();const c=S.en.filter(e=>e.alive&&!e.phase&&d2(e,p)<320*320);for(let i=0;i<(has('f_tempest')?5:3)+(has('f_genesis')?3:0)&&c.length;i++){const e=c.splice(Math.floor(Math.random()*c.length),1)[0];S.bolts.push({x1:e.x,y1:e.y-220,x2:e.x,y2:e.y,life:.18});elemDrop(e);}}}
     if(p.rpT>0){p.rpT-=dt;if(p.rpT<=0)p.rpS=0;}if(p.rlT>0)p.rlT-=dt;
     if(S.cls==='necro'||tag('undead')>=4){S.skT=(S.skT??3)-dt;if(S.skT<=0){S.skT=(S.cls==='necro'?Math.min((S.skel||[]).length<skelMax()/2?1:2.5,(12+(has('deathnova')?4:0)+(p.skL||0))*.9/skelMax()):5)*cdM();if((S.skel||[]).length<skelMax())raiseSkel(p.x+rand(-40,40),p.y+rand(-40,40));}}
-    if(S.skel&&S.skel.length){const sd=skelD(),fr=420*420;for(const k of S.skel){k.ag=0;k.life-=dt;k.cd-=dt;k.sw=Math.max(0,k.sw-dt);let e=k.tg&&k.tg.alive&&!k.tg.phase&&d2(k.tg,p)<fr?k.tg:null;
+    if(S.skel&&S.skel.length){const sd=skelD(),fr=420*420;
+      // 대기 위치: 겹치지 않게 내 주변 여러 겹의 원에 고르게 배치 (1겹 8기, 2겹 12기, 3겹 그 이상)
+      S.skel.forEach((k,i)=>{const ring=i<8?0:i<20?1:2,st=ring?(ring===1?8:20):0,n=ring===0?Math.min(8,S.skel.length):ring===1?Math.min(12,S.skel.length-8):S.skel.length-20,a=(i-st)/Math.max(1,n)*TAU+ring*.4,R=58+ring*46;k.ox=Math.cos(a)*R;k.oy=Math.sin(a)*R*.75;});
+      for(const k of S.skel){k.ag=0;k.life-=dt;k.cd-=dt;k.sw=Math.max(0,k.sw-dt);let e=k.tg&&k.tg.alive&&!k.tg.phase&&d2(k.tg,p)<fr?k.tg:null;
       if(!e){e=sumTarget(k,260);if(e&&d2(e,p)>fr)e=null;k.tg=e;}if(e&&!e.boss&&k.tg===e&&bossOn()&&!S.boss.air&&!S.boss.phase&&d2(S.boss,k)<260*260){e=S.boss;k.tg=e;}
       const tx=e?e.x:p.x+k.ox,ty=e?e.y:p.y+k.oy,dx=tx-k.x,dy=ty-k.y,dd=Math.hypot(dx,dy)||1,rr=e?e.r+9:4;
       if(dd>rr){const sp=Math.min(dd-rr,(e?175:240)*dt);k.x+=dx/dd*sp;k.y+=dy/dd*sp;k.f=dx>=0?1:-1;k.mv=1;}else k.mv=0;
       if(e&&dd<=rr+4&&k.cd<=0){k.cd=.7*sumR();k.sw=.18;if(has('bonefire'))burnE(e,pDmg()*.3,3);S.dsrc='summon';dmgE(e,sd,null,null,2);S.dsrc=null;if(!e.alive&&tag('undead')>=6&&p.alive)p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.01*healM());}
       if(k.life<=0&&has('lichking'))soulShot(k.x,k.y,2);if(k.life<=0&&has('gravebloom'))vineAt(k.x,k.y,.6);if(k.life<=0&&has('deathnova'))exS('undead',k.x,k.y,90*(has('f_wraith')?1.5:1),pDmg()*2*undM(),'#8cff9a');}
+      // 해골끼리 서로 밀어내서 같은 적에 붙어도 겹쳐 보이지 않게
+      for(let i=0;i<S.skel.length;i++)for(let j=i+1;j<S.skel.length;j++){const a=S.skel[i],b=S.skel[j],dx=b.x-a.x,dy=b.y-a.y,dd=dx*dx+dy*dy;if(dd<36*36){const d=Math.sqrt(dd)||.01,push=(36-d)/2,ux=dd?dx/d:Math.cos(i+j),uy=dd?dy/d:Math.sin(i+j);a.x-=ux*push;a.y-=uy*push;b.x+=ux*push;b.y+=uy*push;}}
       S.skel=S.skel.filter(k=>k.life>0);}
     if(has('frostnova')){S.fnT=(S.fnT??5)-dt;if(S.fnT<=0){S.fnT=(has('f_permafrost')?3:5)*tmul();S.rings.push({x:p.x,y:p.y,r:10,max:140,life:.35,col:'#9fe8ff'});for(const e of S.en)if(e.alive&&d2(e,p)<140*140){dmgE(e,pDmg()*lv3('frostnova',1.2,1.5,1.8),'#9fe8ff');if(!e.boss)e.slowT=Math.max(e.slowT||0,2);}}}
     if(has('tesla')){S.teT=(S.teT??3)-dt;if(S.teT<=0){S.teT=(has('f_tesla2')?1.5:3)*tmul();const e=nearestE(p,200);if(e){S.bolts.push({x1:p.x,y1:p.y,x2:e.x,y2:e.y,life:.18});dmgE(e,pDmg()*1.5*thM(),'#9fe8ff');lightning(e,lv3('tesla',2,3,4)-1);}}}
