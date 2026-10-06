@@ -979,6 +979,52 @@ function decoAt(cx,cy,q){const h=hash(cx*3+q,cy*7-q);if(h>.62)return null;const 
 const LC=900;
 function lmAt(cx,cy){const h=hash(cx*13+5,cy*17+3);if(h>.35)return null;const x=cx*LC+150+hash(cx+31,cy-7)*(LC-300),y=cy*LC+150+hash(cx-19,cy+23)*(LC-300);
   if(x<120||y<120||x>WW-120||y>WH-120)return null;const B=BIOMES[S&&S.biome!=null?S.biome:0];if(!B.lm)return null;const k=B.lm[Math.floor(hash(cx+3,cy+9)*B.lm.length)],L=BART.LM[k];return {x,y,k,r:L[2]};}
+// 이스터에그: 건축물 앞에 5초 서 있으면 주인이 나와 한마디 하고 밀어냄 (게임에는 영향 없음). 발견한 종류는 도감·칭호용으로 기록
+const EGG={cottage:['👵',['이 녀석아! 남의 집 앞에서 뭘 기웃거려?','우리 집 감자 훔쳐가려고 그러지?!','썩 꺼져! 빗자루 맛 좀 볼래?']],
+ well:['🐸',['우물 안 개구리라고 무시하지 마라 개굴!','동전 던질 거 아니면 비켜!']],
+ hut:['🧔',['도끼 들고 있는 거 안 보이냐? 저리 가!','장작 패는 중이다. 다치기 싫으면 비켜.']],
+ stones:['🧙',['고대의 돌이 너를 거부한다…','여긴 신성한 곳이다. 신발은 벗고 와라.']],
+ barn:['🐄',['음메에에! (꺼지라는 뜻)','우유는 안 판다 음메.']],
+ haystack:['🐔',['꼬꼬댁! 알 낳는 중이야!','건초더미에서 바늘 찾냐? 꺼져!']],
+ ruin:['👻',['여긴 내 폐허야… 우우우…','돌 하나라도 가져가면 저주할 거야.']],
+ witch:['🧙‍♀️',['이히히! 마침 솥에 넣을 재료가 필요했는데?','두꺼비로 만들어 버리기 전에 사라져라!']],
+ burnt:['🧑‍🚒',['불 다 꺼졌어! 구경 그만하고 가!','집 태운 거 너지? 너 맞지?']],
+ pyramid:['🤴',['파라오의 잠을 깨운 자, 저주를 받으리라!','관광은 오전 9시부터다.']],
+ obelisk:['🦅',['끼에엑! 내 둥지 건드리지 마!','여기 꼭대기는 내 자리다!']],
+ igloo:['🐧',['펭! 여긴 펭귄 전용이다!','문 닫아! 찬바람 들어와!']],
+ icespire:['⛄',['녹이지 마… 녹이지 마…','여기 서 있으면 너도 얼어붙는다.']],
+ stilt:['🐊',['집 밑에서 뭐 하냐? 저녁거리 되고 싶어?','이 늪은 내 거다.']],
+ bigcrystal:['🧚',['반짝이는 거 좋아하지? 만지면 손 잘라.','이 수정은 비매품입니다!']],
+ mine:['👷',['안전모 없이는 출입 금지!','금 캐러 왔냐? 다 캤다, 돌아가.']],
+ mausoleum:['💀',['조용히 해… 다들 자고 있잖아.','여기 자리 없다. 다음에 와.']],
+ chapel:['👼',['회개하라!','헌금함은 오른쪽입니다.']],
+ altar:['😈',['제물이 제 발로 오다니!','흐흐… 너의 영혼 냄새가 좋구나.']],
+ obsidian:['🦎',['뜨거워! 뜨겁다고!','여기 앉으면 엉덩이 탄다.']],
+ windmill:['👨‍🌾',['바람개비 구경 그만하고 밀가루나 사 가!','돌리지 마! 내가 돌려!']],
+ tent:['🧕',['천막 안 들여다보지 마!','내 낙타 봤어? 못 봤으면 가.']],
+ shrine:['🧘',['…명상 중이다. 방해하지 마라.','마음을 비우고 오너라. 그리고 지갑도.']],
+ camp:['🧑‍🦰',['불 쬐러 왔냐? 자리 없어.','마시멜로는 내 거다.']],
+ scarecrow:['🎃',['나… 사실 살아 있어.','까마귀보다 네가 더 무섭다.']],
+ tower:['💂',['정지! 통행증을 보여라!','탑 위에서 다 지켜보고 있었다.']],
+ oasis:['🐫',['퉤! (침 뱉음)','물은 공짜 아니다. 낙타세 내라.']],
+ snowfort:['🧒',['눈싸움 하자! 받아라!','우리 요새 무너뜨리면 엄마한테 이를 거야!']],
+ statue:['🗿',['……(석상이 고개를 돌린다)','움직이지 않는 척하는 것도 힘들다고.']],
+ wreck:['🦜',['보물은 없다! 꽥!','배 고치는 중이야, 저리 가!']],
+ gate:['🧛',['이 문은 산 자를 위한 것이 아니다.','밤 12시 이후에 다시 와라…']],
+ forge:['⚒️',['장비 수리는 줄 서서!','뜨거운 쇳물 맛 좀 볼래?']],
+ cursed:['👁️',['눈을 마주치지 마라…','심연이 너를 들여다본다.']],
+ minecart:['🐀',['찍찍! 내 수레야!','타고 싶으면 표 끊어.']]};
+function eggTick(dt){const p=S.p;if(!p.alive||S.npc)return;let best=null,bd=1e9;
+  for(let cx=Math.floor((p.x-300)/LC);cx<=Math.floor((p.x+300)/LC);cx++)for(let cy=Math.floor((p.y-300)/LC);cy<=Math.floor((p.y+300)/LC);cy++){const m=lmAt(cx,cy);if(!m)continue;const d=Math.hypot(m.x-p.x,m.y-12-p.y);if(d<m.r+90&&d<bd){bd=d;best=m;}}
+  const id=best?best.x+','+best.y:null;if(!id||id!==S.eggId){S.eggId=id;S.eggT=0;return;}
+  S.eggDone=S.eggDone||{};if(S.eggDone[id])return;S.eggT+=dt;if(S.eggT<5)return;
+  S.eggDone[id]=1;const E=EGG[best.k];if(!E)return;const line=E[1][Math.floor(Math.random()*E[1].length)];S.npc={x:best.x,y:best.y+6,em:E[0],txt:line,t:0};
+  const a=Math.atan2(p.y-(best.y-12),p.x-best.x);p.x=clamp(p.x+Math.cos(a)*80,20,WW-20);p.y=clamp(p.y+Math.sin(a)*80,20,WH-20);S.rings.push({x:p.x,y:p.y,r:6,max:40,life:.3,col:'#ffffff'});
+  META.egg=META.egg||{};if(!META.egg[best.k]){META.egg[best.k]=1;saveMeta();toast(`🥚 이스터에그 발견! (${Object.keys(META.egg).length}/${Object.keys(EGG).length})`);}}
+function drawNpc(){const n=S.npc;if(!n)return;const k=Math.min(1,n.t/.25),out=n.t>3.2?Math.max(0,1-(n.t-3.2)/.4):1;if(out<=0)return;
+  ctx.save();ctx.globalAlpha=out;ctx.textAlign='center';ctx.textBaseline='bottom';ctx.font=`${Math.round(30*(.4+.6*k)+Math.sin(n.t*12)*2)}px serif`;ctx.fillText(n.em,n.x,n.y);
+  ctx.font='15px "Do Hyeon",sans-serif';const w=ctx.measureText(n.txt).width+20,bx=n.x-w/2,by=n.y-80;ctx.fillStyle='rgba(255,250,235,.96)';ctx.strokeStyle='#3a2a1a';ctx.lineWidth=2;rr(ctx,bx,by,w,30,10);ctx.fill();ctx.stroke();
+  ctx.beginPath();ctx.moveTo(n.x-6,by+30);ctx.lineTo(n.x,by+40);ctx.lineTo(n.x+6,by+30);ctx.closePath();ctx.fill();ctx.fillStyle='#2a1a10';ctx.textBaseline='middle';ctx.fillText(n.txt,n.x,by+15);ctx.restore();}
 function solidsNear(x,y,rad){const out=[];const r=rad+80;
   for(let cx=Math.floor((x-rad-60)/LC);cx<=Math.floor((x+rad+60)/LC);cx++)for(let cy=Math.floor((y-rad-60)/LC);cy<=Math.floor((y+rad+60)/LC);cy++){const m=lmAt(cx,cy);if(m&&Math.abs(m.x-x)<rad+m.r+2&&Math.abs(m.y-12-y)<rad+m.r+2)out.push({x:m.x,y:m.y-12,r:m.r});}
   for(let cx=Math.floor((x-r)/DC);cx<=Math.floor((x+r)/DC);cx++)for(let cy=Math.floor((y-r)/DC);cy<=Math.floor((y+r)/DC);cy++)for(let q=0;q<2;q++){
@@ -3826,7 +3872,7 @@ function update(dt){
     if(e.type==='ghost'){e.phT=(e.phT??rand(0,4))-dt;if(e.phT<0)e.phT+=4;e.phase=e.phT<1.1;}
   }
   S.en=S.en.filter(e=>e.alive);
-  updBoss(dt);hbTick(dt);
+  updBoss(dt);hbTick(dt);eggTick(dt);if(S.npc){S.npc.t+=dt;if(S.npc.t>3.6)S.npc=null;}
   // 광전사 쌍격: 0.12초 뒤 두 번째 베기
   if(S.twinQ&&S.twinQ.length){for(const q of S.twinQ){q.t-=dt;if(q.t<=0&&p.alive)meleeSwing(q.base,q.d,q.n,{sub:'쌍격'});}S.twinQ=S.twinQ.filter(q=>q.t>0);}
   // 기사 도발: 2초마다 주변 적 끌어당김
@@ -4102,7 +4148,9 @@ function draw(){
      if(S.p.alive)drawPlayer(S.p);
      else if(S.p.deadAt!=null&&HERO.canvas){const p=S.p;HERO.draw(S.cls||'knight','dead',(S.t-p.deadAt)/.16,0,false);{ctx.save();ctx.imageSmoothingEnabled=false;heroBlit(HERO.canvas,p.x,p.y+p.r+3,1,true);ctx.restore();}}}}
    ctx.imageSmoothingEnabled=true;}
-  drawBeams();
+  drawBeams();drawNpc();
+  // 이스터에그 힌트: 건축물 앞에 2초 넘게 서 있으면 ❔
+  if(S.eggT>2&&S.eggId&&!S.npc&&!(S.eggDone&&S.eggDone[S.eggId])){const [ex,ey]=S.eggId.split(',').map(Number);ctx.font='22px serif';ctx.textAlign='center';ctx.globalAlpha=.5+.5*Math.sin(S.t*8);ctx.fillText('❔',ex,ey-60-(S.eggT-2)*6);ctx.globalAlpha=1;}
   const offV=(x,y,m=40)=>x<camX-m||x>camX+W+m||y<camY-m||y>camY+H+m;
   const trl=cosEq('trail');
   for(const b of S.pr){if(offV(b.x,b.y))continue;
@@ -4715,7 +4763,7 @@ function drawPreviews(){
     HERO.draw(k,anim,t,anim==='attack'?cycle/.6:0,false);const x=c.getContext('2d');x.imageSmoothingEnabled=false;const sz=Math.max(40,Math.round(c.clientWidth*(window.devicePixelRatio||1)));if(c.width!==sz){c.width=c.height=sz;}const x2=c.getContext('2d');x2.imageSmoothingEnabled=false;x2.clearRect(0,0,sz,sz);{const k=Math.max(1,Math.floor(sz/40)),o=(sz-40*k)>>1;x2.drawImage(HERO.canvas,o,o+k*2,40*k,40*k);}});
 }
 /* ---------- meta progression ---------- */
-const META=(()=>{try{const m=JSON.parse(localStorage.getItem('chanseo_meta')||'{}');const pc={luck:3,gold:2,xp:3,aug:6,key:5};let rf=0;for(const k in (m.prep||{}))rf+=(m.prep[k]||0)*(pc[k]||0);return {medals:(m.medals||0)+rf,total:m.total||0,lv:m.lv||{},sk:m.sk||{},clears:m.clears||{},cos:m.cos||{own:{},eq:{}},spent:m.spent!=null?m.spent:null,ucls:m.ucls||[],tk:m.tk||0,mob:m.mob||{}};}catch(e){return {medals:0,total:0,lv:{},sk:{},clears:{},cos:{own:{},eq:{}},ucls:[],tk:0,mob:{}};}})();
+const META=(()=>{try{const m=JSON.parse(localStorage.getItem('chanseo_meta')||'{}');const pc={luck:3,gold:2,xp:3,aug:6,key:5};let rf=0;for(const k in (m.prep||{}))rf+=(m.prep[k]||0)*(pc[k]||0);return {medals:(m.medals||0)+rf,total:m.total||0,lv:m.lv||{},sk:m.sk||{},clears:m.clears||{},cos:m.cos||{own:{},eq:{}},spent:m.spent!=null?m.spent:null,ucls:m.ucls||[],tk:m.tk||0,mob:m.mob||{},egg:m.egg||{}};}catch(e){return {medals:0,total:0,lv:{},sk:{},clears:{},cos:{own:{},eq:{}},ucls:[],tk:0,mob:{},egg:{}};}})();
 // 직업 언록: 지옥·신 난이도를 깰 때마다 언록권 1장, 잠긴 직업 하나를 골라 엶
 function unlockInfo(k){const C=CLASSES[k],t=C.fav[0],T=TAGS[t],aug=AUGS.filter(a=>!a.cls&&a.tags.includes(t)),own=AUGS.filter(a=>a.cls===k),vip=VIPS.filter(v=>v.tags.includes(t)),cd=Object.keys(CARD_TAG).filter(n=>CARD_TAG[n].length&&CARD_TAG[n].every(x=>x===t));
   return `<div class="cp" style="margin-top:8px"><em>🔓 봉인 해제하면 함께 열려요</em>${T.n} 시너지 증강 ${aug.length}개 (${aug.slice(0,6).map(a=>a.n).join(', ')}${aug.length>6?' 등':''})${vip.length?`, ${T.n} VIP ${vip.length}개`:''}${cd.length?`, 전용 스탯 카드 ${cd.length}종`:''}, ${C.n} 전용 증강 ${own.length}개${(MSTAT.find(x=>x.cls===k)||{}).n?`, 영구 강화 '${MSTAT.find(x=>x.cls===k).n}'`:''}<br><small style="color:var(--muted)">잠겨 있는 동안은 다른 직업으로 해도 이 시너지 증강이 나오지 않아요</small></div>`;}
