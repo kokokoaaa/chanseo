@@ -3461,10 +3461,11 @@ function augHtml(a,i){
   const pfs=a.up?[]:partnersOf(a.id),pf=pfs[0]||null,pOf=f=>augDef(f.a===a.id?f.b:f.a),tot=f=>[a.d,pOf(f).d,f.d].map(x=>x.replace(/[.\s]+$/,'')).join('. ');
   // 짝이 있으면 카드 앞면에 합체 안내를 크게 표시 (마우스를 안 올려도 보임)
   // 합체 안내: 어떤 보유 증강과 합쳐지는지 + 합체로 붙는 추가 효과
-  // 합체 안내: 이 증강 효과는 한 번만, 짝마다 '보유한 짝의 효과'와 '합체 보너스'만 구분해서 보여줌 (세 가지가 모두 합쳐짐)
-  const cut=x=>x.replace(/[.\s]+$/,''),optH=f=>`<span class="fzd"><span style="color:#9fd3ff">+ ${pOf(f).n}</span>: ${cut(pOf(f).d)}</span><span class="fzd" style="color:#ffd76a">★ 합체 보너스: ${cut(f.d)}</span>`;
-  const fz=pfs.length>1?`<span class="fzbox"><span class="fzh">💥 합체할 짝을 고르세요</span><span class="fzd" style="opacity:.75">어느 쪽이든 <b>${a.n}</b> 효과 + 짝의 효과 + 합체 보너스가 모두 적용</span>${pfs.map(f=>`<span class="fzopt" data-fz="${f.id}"><span class="fzn2">→ <b class="fzn">${f.n}</b> <small>(보유한 ${pOf(f).n}와 합체)</small></span>${optH(f)}</span>`).join('')}<span class="fzd" style="opacity:.6">누른 짝과 합체하고, 나머지 짝은 그대로 남아요</span></span>`
-    :pf?`<span class="fzbox"><span class="fzh">💥 합체 시 → <b class="fzn">${pf.n}</b></span><span class="fzd" style="opacity:.75"><b>${a.n}</b> 효과 + 보유한 짝의 효과 + 합체 보너스가 모두 적용</span>${optH(pf)}</span>`:'';
+  // 합체 안내: '확장 오라와 합체 → 성광 오라' + 합체 보너스만 간단히. (원래 효과가 그대로 남는 건 설명하지 않음)
+  const wa=w=>{const c=w.charCodeAt(w.length-1)-0xAC00;return c>=0&&c<11172&&c%28?'과':'와';};
+  const cut=x=>x.replace(/[.\s]+$/,''),bon=f=>cut(f.d).split(/,\s*(?=새 능력)/).map(x=>`<span class="fzd" style="color:#ffd76a">★ ${x}</span>`).join('');
+  const fz=pfs.length>1?`<span class="fzbox"><span class="fzh">💥 합체 가능 · 짝을 골라 누르세요</span>${pfs.map(f=>`<span class="fzopt" data-fz="${f.id}"><span class="fzn2"><b>${pOf(f).n}</b>${wa(pOf(f).n)} 합체 → <b class="fzn">${f.n}</b></span>${bon(f)}</span>`).join('')}<span class="fzd" style="opacity:.6">고르지 않은 짝은 그대로 남아요</span></span>`
+    :pf?`<span class="fzbox"><span class="fzh">💥 <b>${pOf(pf).n}</b>${wa(pOf(pf).n)} 합체 → <b class="fzn">${pf.n}</b></span>${bon(pf)}</span>`:'';
   return `<button class="card aug tier-${a.t} ${pf?'canfuse':''} ${a.uc?'ucard':''}" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}${a.swap?' · <span style="color:#ff9ad0">교체</span>':''}</span><b>${a.n}</b><span class="chips">${chips}</span>${augPreview(a)}${fz}${a.up?'':VFUSIONS.filter(f=>f.b===a.id&&has(f.a)).map(f=>`<span class="fzbox" style="border-color:#ffd76a"><span class="fzh" style="color:#ffd76a">👑 보유 VIP ${augDef(f.a).n}와 합체 가능 → <b class="fzn">${f.n}</b></span><span class="fzd">${f.d} (다음 증강을 얻을 때 합체)</span></span>`).join('')}<span class="tip">${a.d}${hpLoss(a.f,a.d,a.t==='v'||a.t==='f'?1:2)}${lines?'<br>':''}${lines}</span></button>`;
 }
 function bindPeek(){
