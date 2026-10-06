@@ -2564,7 +2564,9 @@ const MELEE_CLS=['berserk','knight','paladin'];
 const meleeOn=()=>MELEE_CLS.includes(S.cls)||(S.cls==='druid'&&S.p.bearT>0);
 // 베기 반경 = 사거리의 65% (기본 약 130). 사거리 스탯이 오르면 같이 넓어짐
 const meleeR=()=>(S.cls==='druid'?Math.min(S.p.range,200):S.p.range)*.65;
-function meleeSwing(base,dmg,n,o){const p=S.p,R=meleeR(),half=Math.min(Math.PI,(55+(n-1)*20)*Math.PI/180),cap=(S.cls==='berserk'?2:3)+2*Math.max(0,p.pierce+(o.big?3:0));
+// 근접은 반경이 짧은 대신 피해 ×1.5 (붙어서 싸우는 위험의 대가)
+const MELEE_DM=1.5;
+function meleeSwing(base,dmg,n,o){dmg*=MELEE_DM;const p=S.p,R=meleeR(),half=Math.min(Math.PI,(55+(n-1)*20)*Math.PI/180),cap=(S.cls==='berserk'?2:3)+2*Math.max(0,p.pierce+(o.big?3:0));
   const hits=S.en.filter(e=>{if(!e.alive||e.phase)return false;const dx=e.x-p.x,dy=e.y-p.y,dd=Math.hypot(dx,dy);if(dd>R+e.r)return false;let da=Math.abs(Math.atan2(dy,dx)-base)%TAU;if(da>Math.PI)da=TAU-da;return da<=half+Math.atan2(e.r,Math.max(1,dd));}).sort((a,b)=>d2(a,p)-d2(b,p)).slice(0,cap);
   const bear=S.cls==='druid';(S.slashes=S.slashes||[]).push({x:p.x,y:p.y,a:base,half,R,life:.26,dir:(p.swD=-(p.swD||1)),big:!!o.big,col:bear?'#e0a060':o.big?'#ffd76a':S.cls==='berserk'?'#ff8a6a':S.cls==='knight'?'#8fd0ff':'#fff0a0',bear});
   for(const t of hits){const sp=p.bspd,b=Object.assign({x:t.x,y:t.y,vx:Math.cos(base)*sp,vy:Math.sin(base)*sp,mine:true,dmg,life:.5,pierce:0,hit:new Set(),r:4,roll:0,melee:true},o);
