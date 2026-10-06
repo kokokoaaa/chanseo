@@ -2857,8 +2857,8 @@ const pureMelee=()=>MELEE_CLS.includes(S.cls);
 const meleeCap=n=>(S.cls==='berserk'?2:3)+2*Math.max(0,S.p.pierce);
 const meleeArc=n=>Math.round(Math.min(360,2*(55+(n-1)*20)));
 const meleeR=()=>(S.cls==='druid'?Math.min(S.p.range,200):S.p.range)*.65;
-// 근접은 반경이 짧은 대신 피해 ×1.5 (붙어서 싸우는 위험의 대가)
-const MELEE_DM=1.5;
+// 근접 피해 보정 ×1.6 (탄속 보너스를 못 받는 대신 0.1 더)
+const MELEE_DM=1.6;
 function meleeSwing(base,dmg,n,o){dmg*=MELEE_DM;const p=S.p,R=meleeR(),half=Math.min(Math.PI,(55+(n-1)*20)*Math.PI/180),cap=(S.cls==='berserk'?2:3)+2*Math.max(0,p.pierce+(o.big?3:0));
   const hits=S.en.filter(e=>{if(!e.alive||e.phase)return false;const dx=e.x-p.x,dy=e.y-p.y,dd=Math.hypot(dx,dy);if(dd>R+e.r)return false;let da=Math.abs(Math.atan2(dy,dx)-base)%TAU;if(da>Math.PI)da=TAU-da;return da<=half+Math.atan2(e.r,Math.max(1,dd));}).sort((a,b)=>d2(a,p)-d2(b,p)).slice(0,cap);
   const bear=S.cls==='druid';(S.slashes=S.slashes||[]).push({x:p.x,y:p.y,a:base,half,R,life:.26,dir:(p.swD=-(p.swD||1)),big:!!o.big,col:bear?'#e0a060':o.big?'#ffd76a':S.cls==='berserk'?'#ff8a6a':S.cls==='knight'?'#8fd0ff':'#fff0a0',bear,cls:S.cls});
@@ -5006,7 +5006,7 @@ function renderStats(){
     row('사거리',Math.round(p.range),'',`적이 다가오기 전에 먼저 공격하는 안전 거리. 딜을 직접 올리지는 않고, 원거리 시너지(원거리 숙련: 사거리 100당 공격력, 먼 적 추가 피해)와 소환물의 탐지 범위에 쓰임`),
     row('탄속',Math.round(p.bspd),bspdB()>0?`기본보다 빠른 만큼 탄환 피해 +${Math.round(bspdB()*100)}%`:'기본 탄속보다 빠르면 1%당 탄환 피해 +0.5%')]),
     ...clsRows(row),
-    row('기대 초당 피해',Math.round(pureMelee()?pDmg()*rate*MELEE_DM*(1+critC()*(critMul()-1)):dps),pureMelee()?'적 1마리 기준 근접 피해 (×1.5 근접 보정 포함). 회전 베기, 폭발, 독 제외':'탄환 기본 피해 기준. 회전 칩, 폭발, 독 제외')
+    row('기대 초당 피해',Math.round(pureMelee()?pDmg()*rate*MELEE_DM*(1+critC()*(critMul()-1)):dps),pureMelee()?'적 1마리 기준 근접 피해 (×1.6 근접 보정 포함). 회전 베기, 폭발, 독 제외':'탄환 기본 피해 기준. 회전 칩, 폭발, 독 제외')
   ].join('');
   const def=[
     ...(mlv('seal')>0?[row('🔒 봉인',`남은 ${S.seals||0}회`,(S.banL||[]).length?'봉인한 증강: '+S.banL.map(id=>{const x=AUGS.find(q=>q.id===id)||VIPS.find(q=>q.id===id);return x?x.n:id;}).join(', '):'증강 선택 창에서 카드 아래 🔒 봉인 버튼')]:[]),
