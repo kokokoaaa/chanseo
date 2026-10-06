@@ -2059,9 +2059,9 @@ const hpPct=()=>{const p=S.p;return (p.hpP||0)+(has('k_bulwark')?armorEff()/10*l
 function hpSync(){const p=S.p;if(!p)return;const m=Math.max(.2,1+hpPct());if(p.hpB==null){p.hpB=p.maxHp;p.hpLM=p.maxHp;}
   if(p.maxHp!==p.hpLM)p.hpB=Math.max(1,p.hpB+(p.maxHp-p.hpLM));
   const nm=Math.max(1,Math.round(p.hpB*m));if(nm!==p.maxHp){if(nm>p.maxHp)p.hp+=nm-p.maxHp;p.maxHp=nm;}p.hp=Math.min(p.hp,p.maxHp);p.hpLM=p.maxHp;}
-// 한 방 상한 (최대 체력 대비). 악몽은 10분부터 1분마다 +3% (최대 85%), 20분부터 다시 1분마다 +5%. 상한은 없어지지 않고 계속 오름
-// (23분 100% → 한 대에 풀피가 날아가지만 보호막·회피·막기가 있으면 버팀, 28분 125%). 갑자기 원샷이 아니라 점점 아슬아슬해지게
-const ocOf=()=>{const b=dfM().oc||.35,m=nmMin();if(!endless())return b;return m<=10?Math.min(.85,b+.03*m):.85+.05*(m-10);};
+// 한 방 상한 (최대 체력 대비). 악몽은 10분부터 1분마다 +3% (최대 85%), 20분부터 1분마다 ×1.12로 점점 빠르게 풀림
+// (22분 107%, 25분 150%, 28분 210%, 30분 264%). 보호막·막기·회피로 조금 더 버틸 수 있지만 결국 끝나게
+const ocOf=()=>{const b=dfM().oc||.35,m=nmMin();if(!endless())return b;return m<=10?Math.min(.85,b+.03*m):.85*Math.pow(1.12,m-10);};
 // 악몽 단계 배율: 5단계(4장 이후)부터 단계마다 보스 체력 ×2.2, 피해 ×1.15
 const diffOpen=k=>{const i=DKEYS.indexOf(k);return i<=0||!!(META.clears||{})[DKEYS[i-1]];};
 let pickDiff=(()=>{try{return localStorage.getItem('chanseo_diff')||'normal';}catch(e){return 'normal';}})();
