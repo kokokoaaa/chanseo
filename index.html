@@ -2552,7 +2552,7 @@ function spawnBurst(){
 const HID_MOB=['gemslime','mimic','luckycat'];
 function hidRoll(){if(S.bossI>=0||effT()<60||(S.hidN||0)>=6||S.en.some(e=>ET[e.type].hid))return;if(Math.random()>.008*(1+LK()/LUCK_CAP))return;
   S.hidN=(S.hidN||0)+1;const t=HID_MOB[Math.floor(Math.random()*HID_MOB.length)],p=S.p,a=Math.random()*TAU,r=t==='mimic'?260:330;spawnAt(t,clamp(p.x+Math.cos(a)*r,30,WW-30),clamp(p.y+Math.sin(a)*r,30,WH-30),true);
-  toast(t==='gemslime'?'💎 보석 슬라임 출현! 도망가기 전에 잡으세요':t==='luckycat'?'🐱 행운 고양이 출현! 잡으면 행운 +2':'🎁 근처에 수상한 상자가 보인다…');}
+  toast(t==='gemslime'?'💎 보석 슬라임 출현! 도망가기 전에 잡으세요':t==='luckycat'?'🐱 행운 고양이 출현! 잡으면 행운 +4 · 프리즘 증강':'🎁 근처에 수상한 상자가 보인다…');}
 // 히든 보스: 6분 이후 보스전이 아닐 때 30초마다 3% (히든 몹을 잡을 때마다 +6%). 한 판에 한 번
 function hbTick(dt){if(S.hbDone||S.bossI>=0||S.win||(S.gt||0)<360)return;S.hbT=(S.hbT??30)-dt;if(S.hbT>0)return;S.hbT=30;if(Math.random()<.03+.06*(S.hidK||0))spawnHB();}
 function spawnHB(){S.hbDone=1;const p=S.p,a=Math.random()*TAU,e=spawnAt('bossH',clamp(p.x+Math.cos(a)*320,60,WW-60),clamp(p.y+Math.sin(a)*320,60,WH-60),true),j=Math.min(3,S.chap||0);
@@ -3516,7 +3516,7 @@ function onKill(e){
   if(T.hid){S.hidK=(S.hidK||0)+1;
     if(e.type==='gemslime'){const v=S.next*1.5/(TS*(p.xpM||1))/14;for(let i=0;i<14;i++)S.dr.push({x:e.x+rand(-40,40),y:e.y+rand(-40,40),v,xp:1});toast('💎 보석 슬라임 처치! 경험치 폭탄');}
     if(e.type==='mimic'){S.bonusAug++;const g=price(80);for(let i=0;i<10;i++)S.dr.push({x:e.x+rand(-30,30),y:e.y+rand(-30,30),v:g/10/TS});toast('🎁 미믹 처치! 증강 1개 + 골드');}
-    if(e.type==='luckycat'){p.luck+=2;const g=price(60);for(let i=0;i<8;i++)S.dr.push({x:e.x+rand(-30,30),y:e.y+rand(-30,30),v:g/8/TS});toast('🐱 행운 고양이! 행운 +2 + 골드');}}
+    if(e.type==='luckycat'){p.luck+=4;S.prismN=(S.prismN||0)+1;const g=price(120);for(let i=0;i<12;i++)S.dr.push({x:e.x+rand(-30,30),y:e.y+rand(-30,30),v:g/12/TS});toast('🐱 행운 고양이! 행운 +4 · 골드 · 다음 증강은 💎 프리즘 확정');}}
   if(e.stole){const g=Math.round(e.stole*1.5);S.gold+=g;ftext(e.x,e.y-e.r-14,'+'+g+' 골드 되찾음','#ffd76a',16);}
   if(hasAf(e,'split'))for(let i=0;i<(e.ak<1?2:3);i++)spawnAt(e.type==='slime'?'slimelet':'runner',e.x+rand(-12,12),e.y+rand(-12,12),true);
   if(hasAf(e,'volatile'))tele({k:'c',vol:1,x:e.x,y:e.y,r:90,T:.85,dmg:e.dmg*1.2*e.ak,col:'#ff7a3a',fx:t=>burst(t.x,t.y,'#ff7a3a',16)});
@@ -4318,7 +4318,7 @@ function synTable(){
     return `<div class="tile ${c>=2?'on':''}"><h4>${T.n}<small>${c}개</small></h4>${T.t1?R(1,T.t1):''}${R(2,T.t2)}${R(4,T.t4)}${R(6,T.t6)}<div class="tr ${c>=5?'a':''}"><i>5+</i><span>1개마다 ${T.ex}${c>=5?` (현재 +${c-4})`:''}</span></div></div>`;}).join('');
   return `<div class="tgrid">${tiles}</div>`;
 }
-function rollTier(){const L=LK(),r=Math.min(12,S.round);const w=[['s',Math.max(20,58-r*2)],['g',32+L*.5+r],['p',8+L*.6+r*.8]];let t=w.reduce((a,b)=>a+b[1],0),x=Math.random()*t;for(const [k,v] of w){if((x-=v)<0)return k;}return 's';}
+function rollTier(){if(S.prismN>0){S.prismN--;return 'p';}const L=LK(),r=Math.min(12,S.round);const w=[['s',Math.max(20,58-r*2)],['g',32+L*.5+r],['p',8+L*.6+r*.8]];let t=w.reduce((a,b)=>a+b[1],0),x=Math.random()*t;for(const [k,v] of w){if((x-=v)<0)return k;}return 's';}
 // 공격력을 직접 올리지 않는 증강 (생존·경제·이동). 선택지마다 공격 증강이 최소 1개는 나오도록 하는 데 씀
 const DEF_AUGS=new Set(['regenarmor','gravity','luckycoin','frost','piggy','tip','insure','king','highroll','thick','armor','evade','iron','gen','fortress','icecoin','rush','sprint','lucky7','lastcard','vamp','neuro','engine','k_wall','counter','unbreak','thorns','mirror','guardian']);
 const isOff=a=>!a.up&&!DEF_AUGS.has(a.id);
@@ -4900,7 +4900,7 @@ const MOBINFO={
   mortar:['멀리서 내 위치(움직이면 앞쪽)에 포탄 (1.2초 예고)','주황 예고 원 밖으로. 사거리가 길어 원거리로 처리'],
   gemslime:['공격 안 함. 빠르게 도망침','히든 몹. 22초 안에 잡으면 경험치 폭탄 (레벨 1.5개 분량)'],
   mimic:['가까이 가면 깨어나 물어뜯음 (강함)','히든 몹. 상자인 척 가만히 있음. 잡으면 증강 1개 + 골드'],
-  luckycat:['공격 안 함. 맞으면 멀리 순간이동 (3번)','히든 몹. 잡으면 행운 +2 + 골드'],
+  luckycat:['공격 안 함. 맞으면 멀리 순간이동 (3번)','히든 몹. 잡으면 행운 +4 + 골드 + 다음 증강 선택은 💎 프리즘 확정'],
   bossH:['화염 숨결, 황금 비, 급강하, 날갯바람','히든 보스. 6분 이후 드물게 출현 (히든 몹을 잡을수록 잘 나옴). 60초 안에 처치하면 증강 2개·열쇠 2개·골드·메달 3'],
   wolf:['빠른 몸통 박치기','늑대 우두머리의 무리. 빠르니 뭉쳐 있을 때 광역으로'],
   sapling:['초록 가시 발사','고목 정령의 졸개. 느리지만 멀리서 쏨'],
@@ -5318,7 +5318,7 @@ refreshAutoBtns();
 /* ---------- save ---------- */
 const SAVE_KEY='chipdungeon_save_v1';
 const PKEYS=['dmgP','rateP','xpM','block','token','hp','maxHp','speed','dmg','rate','bspd','range','multi','pierce','crit','critM','luck','goldM','vuln','orbR','orbM','dashMul','armor','dodge','lifesteal','regen','magnet','shots','pkills','lastCd','soulN','fyO','skN','hpP','hpB','hpLM'];
-const SKEYS=['hidN','hidK','hbDone','arr','nmB','gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','takeAll','keys','vipStock','vipRoll','buys','cbuys','fused','potN','vineN','seals','banL','noAug','bossT','bioO','dlog'];
+const SKEYS=['prismN','hidN','hidK','hbDone','arr','nmB','gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','takeAll','keys','vipStock','vipRoll','buys','cbuys','fused','potN','vineN','seals','banL','noAug','bossT','bioO','dlog'];
 function saveGame(silent){
   if(!S||!S.started||!S.p.alive||S.mode==='over'||S.mode==='dying'||S.mode==='revive')return false;
   const d={v:1,at:Date.now(),p:{},s:{},augs:S.augs.map(a=>[a.id,a.lv,a.q||1]),st:S.st};
