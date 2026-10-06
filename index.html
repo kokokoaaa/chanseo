@@ -3940,7 +3940,7 @@ function openCodex(o){Object.assign(CX,o||{});
   const tierOpt=`<option value="">전체 등급</option>`+['s','g','p'].map(k=>`<option value="${k}" ${CX.tier===k?'selected':''}>${TIER[k].n}</option>`).join('')+`<option value="uc" ${CX.tier==='uc'?'selected':''}>♾ 고점 돌파</option>`;
   cxShow(`<div class="shophead"><h2>📖 도감</h2><button class="btn" id="cxBack">${cxGame?'닫기 (게임으로)':'돌아가기'}</button></div>
   <div class="cxbar">${tabs.map(([k,n])=>`<button class="cxtab ${CX.tab===k?'on':''}" data-cxt="${k}">${n}</button>`).join('')}</div>
-  <div class="cxbar"><input id="cxQ" placeholder="이름·설명 검색 (예: 보호막, 치명타, 해골)" value="${CX.q.replace(/"/g,'&quot;')}">
+  <div class="cxbar"><input id="cxQ" placeholder="이름·내용 검색 (예: 보호막 / 해골 공격력)" value="${CX.q.replace(/"/g,'&quot;')}">
   ${CX.tab==='aug'||CX.tab==='fuse'?`<select id="cxCls">${clsOpt}</select>`:''}${CX.tab==='aug'?`<select id="cxTier">${tierOpt}</select>`:''}</div>
   ${CX.tab==='aug'||CX.tab==='vip'?`<div class="cxbar">${[['','전체'],...Object.keys(TAGS).map(t=>[t,(TAG_ICO[t]||'')+' '+TAGS[t].n])].map(([t,n])=>`<button class="cxchip ${(t?CX.tag.includes(t):!CX.tag.length)?'on':''}" data-cxg="${t}">${n}</button>`).join('')}<span class="cxcnt" style="margin:0 0 0 4px;align-self:center">최대 2개 선택 (둘 다 가진 증강)</span></div>`:''}
   <div class="cxcnt" id="cxN"></div><div id="cxL"></div>`);
@@ -3954,13 +3954,15 @@ function openCodex(o){Object.assign(CX,o||{});
   cxList();
 }
 function cxList(){
-  const q=CX.q.trim().toLowerCase(),hit=(...t)=>!q||t.some(x=>String(x||'').toLowerCase().includes(q));
+  // 검색: 이름·설명·태그·직업 이름을 합친 글에서 찾음. 띄어쓰기로 여러 단어를 넣으면 모두 들어간 것만 (예: '해골 공격력')
+  const qs=CX.q.trim().toLowerCase().split(/\s+/).filter(Boolean),hit=(...t)=>{if(!qs.length)return true;const all=t.map(x=>String(x||'')).join(' ').toLowerCase();return qs.every(w=>all.includes(w));};
+  const tagTxt=ts=>(ts||[]).map(x=>TAGS[x]?TAGS[x].n:'').join(' ');
   const nm=id=>{const a=AUGS.find(x=>x.id===id)||VIPS.find(x=>x.id===id);return a?a.n:id;};
   const tg=t=>(t||[]).map(x=>TAGS[x]?`<span class="tg">${TAG_ICO[x]||''} ${TAGS[x].n}</span>`:'').join('');
   const clsN=c=>c?`<span class="tg" style="background:rgba(214,169,74,.3)">${CLASSES[c].n} 전용</span>`:'';
   const ucOn=META.sk&&META.sk.uncap;let rows=[];
   if(CX.tab==='aug'){
-    rows=AUGS.filter(a=>(!CX.cls||(CX.cls==='-'?!a.cls:a.cls===CX.cls))&&CX.tag.every(t=>(a.tags||[]).includes(t))&&(!CX.tier||(CX.tier==='uc'?a.uc:a.t===CX.tier&&!a.uc))&&hit(a.n,a.d))
+    rows=AUGS.filter(a=>(!CX.cls||(CX.cls==='-'?!a.cls:a.cls===CX.cls))&&CX.tag.every(t=>(a.tags||[]).includes(t))&&(!CX.tier||(CX.tier==='uc'?a.uc:a.t===CX.tier&&!a.uc))&&hit(a.n,a.d,tagTxt(a.tags),a.cls?CLASSES[a.cls].n:'',a.uc?'고점 돌파':''))
       .map(a=>{const fz=[...FUSIONS.filter(f=>f.a===a.id||f.b===a.id).map(f=>`${f.n} (+${nm(f.a===a.id?f.b:f.a)})`),...VFUSIONS.filter(f=>f.b===a.id||f.a===a.id).map(f=>`${f.n} (+VIP ${nm(f.a===a.id?f.b:f.a)})`)];
         const own=cxGame&&has(a.id),ban=cxGame&&isBanned(a.id);
         return `<div class="cxrow ${a.uc?'uc':''}" style="--rc:${TIER[a.t].col}${ban?';opacity:.5':''}"><div class="h"><b>${a.n}</b>${own?'<span class="tg" style="background:#2f8f4e;color:#fff">✔ 보유</span>':''}${ban?'<span class="tg" style="background:#7a1f2a;color:#fff">🔒 봉인됨</span>':''}<span class="tg" style="background:${TIER[a.t].col};color:#fff">${TIER[a.t].n}</span>${a.uc?`<span class="tg" style="background:#c4122f;color:#fff">♾ 고점 돌파${ucOn?'':' · 🔒 한계 돌파 해금 필요'}</span>`:''}${clsN(a.cls)}${tg(a.tags)}</div><div class="d">${a.d}</div>${fz.length?`<div class="s">합체: ${fz.join(' · ')}</div>`:a.uc?'<div class="s">합체·교체 불가</div>':''}</div>`;});
@@ -3969,7 +3971,7 @@ function cxList(){
     rows=L.filter(f=>{const A=AUGS.find(x=>x.id===f.a)||VIPS.find(x=>x.id===f.a),B=AUGS.find(x=>x.id===f.b)||VIPS.find(x=>x.id===f.b);const c=(A&&A.cls)||(B&&B.cls)||'';return (!CX.cls||(CX.cls==='-'?!c:c===CX.cls))&&hit(f.n,f.d,nm(f.a),nm(f.b));})
       .map(f=>`<div class="cxrow" style="--rc:${f.v?TIER.v.col:TIER.f.col}"><div class="h"><b>${f.n}</b><span class="tg" style="background:${f.v?TIER.v.col:TIER.f.col};color:#fff">${f.v?'VIP 합체':'합체'}</span></div><div class="s">${nm(f.a)} + ${nm(f.b)}</div><div class="d">${f.d}</div></div>`);
   }else if(CX.tab==='vip'){
-    rows=VIPS.filter(v=>CX.tag.every(t=>(v.tags||[]).includes(t))&&hit(v.n,v.d)).map(v=>`<div class="cxrow" style="--rc:${TIER.v.col}"><div class="h"><b>${v.n}</b><span class="tg" style="background:${TIER.v.col};color:#fff">VIP</span>${tg(v.tags)}</div><div class="d">${v.d}</div></div>`);
+    rows=VIPS.filter(v=>CX.tag.every(t=>(v.tags||[]).includes(t))&&hit(v.n,v.d,tagTxt(v.tags))).map(v=>`<div class="cxrow" style="--rc:${TIER.v.col}"><div class="h"><b>${v.n}</b><span class="tg" style="background:${TIER.v.col};color:#fff">VIP</span>${tg(v.tags)}</div><div class="d">${v.d}</div></div>`);
   }else if(CX.tab==='syn'){
     rows=Object.keys(TAGS).filter(t=>{const T=TAGS[t];return hit(T.n,T.t1,T.t2,T.t4,T.t6,T.ex);}).map(t=>{const T=TAGS[t],n=AUGS.filter(a=>(a.tags||[]).includes(t)).length,cl=Object.keys(CLASSES).filter(k=>CLASSES[k].fav.includes(t)).map(k=>CLASSES[k].n);
       return `<div class="cxrow" style="--rc:var(--brass)"><div class="h"><b>${TAG_ICO[t]||''} ${T.n}</b><span class="tg">증강 ${n}개</span>${cl.length?`<span class="tg">주력 직업: ${cl.join(', ')}</span>`:''}<button class="cxchip" data-cxj="${t}">증강 보기 →</button></div>${[[1,T.t1],[2,T.t2],[4,T.t4],[6,T.t6]].filter(x=>x[1]).map(([k,d])=>`<div class="d"><b style="font-size:14px;color:var(--brass)">${k}개</b> ${d}</div>`).join('')}<div class="s">5개부터 1개마다: ${T.ex}</div></div>`;});
