@@ -5013,7 +5013,7 @@ function openCodexGame(){if(!S||S.mode==='start')return;if(statsOpen&&!cxGame)to
 function openCodex(o){Object.assign(CX,o||{});
   const tabs=[['aug','증강'],['fuse','합체'],['vip','VIP'],['syn','시너지'],['cls','직업'],['mob','몬스터']];
   const clsOpt=`<option value="">전체 직업</option><option value="-">공용</option>`+Object.keys(CLASSES).map(k=>`<option value="${k}" ${CX.cls===k?'selected':''}>${CLASSES[k].n}</option>`).join('');
-  const tierOpt=`<option value="">전체 등급</option>`+['s','g','p'].map(k=>`<option value="${k}" ${CX.tier===k?'selected':''}>${TIER[k].n}</option>`).join('')+`<option value="uc" ${CX.tier==='uc'?'selected':''}>♾ 고점 돌파</option>`;
+  const tierOpt=`<option value="">전체 등급</option>`+['s','g','p'].map(k=>`<option value="${k}" ${CX.tier===k?'selected':''}>${TIER[k].n}</option>`).join('')+`<option value="uc" ${CX.tier==='uc'?'selected':''}>♾ 고점 돌파</option><option value="d" ${CX.tier==='d'?'selected':''}>🐉 용의 보물</option>`;
   cxShow(`<div class="shophead"><h2>📖 도감</h2><button class="btn" id="cxBack">${cxGame?'닫기 (게임으로)':'돌아가기'}</button></div>
   <div class="cxbar">${tabs.map(([k,n])=>`<button class="cxtab ${CX.tab===k?'on':''}" data-cxt="${k}">${n}</button>`).join('')}</div>
   <div class="cxbar"><input id="cxQ" placeholder="이름·내용 검색 (예: 보호막 / 해골 공격력)" value="${CX.q.replace(/"/g,'&quot;')}">
@@ -5040,10 +5040,10 @@ function cxList(){
   const clsN=c=>c?`<span class="tg" style="background:rgba(214,169,74,.3)">${CLASSES[c].n} 전용</span>`:'';
   const ucOn=META.sk&&META.sk.uncap;let rows=[];
   if(CX.tab==='aug'){
-    rows=AUGS.filter(a=>(!CX.cls||(CX.cls==='-'?!a.cls:a.cls===CX.cls))&&CX.tag.every(t=>(a.tags||[]).includes(t))&&(!CX.tier||(CX.tier==='uc'?a.uc:a.t===CX.tier&&!a.uc))&&hit(a.n,a.d,tagTxt(a.tags),a.cls?CLASSES[a.cls].n:'',a.uc?'고점 돌파':''))
+    rows=[...AUGS,...DRAGON].filter(a=>(!CX.cls||(CX.cls==='-'?!a.cls:a.cls===CX.cls))&&CX.tag.every(t=>(a.tags||[]).includes(t))&&(!CX.tier||(CX.tier==='uc'?a.uc:a.t===CX.tier&&!a.uc))&&hit(a.n,a.d,tagTxt(a.tags),a.cls?CLASSES[a.cls].n:'',a.uc?'고점 돌파':'',a.t==='d'?'황금 용 용의 보물 히든':''))
       .map(a=>{const fz=[...FUSIONS.filter(f=>f.a===a.id||f.b===a.id).map(f=>`${f.n} (+${nm(f.a===a.id?f.b:f.a)})`),...VFUSIONS.filter(f=>f.b===a.id||f.a===a.id).map(f=>`${f.n} (+VIP ${nm(f.a===a.id?f.b:f.a)})`)];
         const own=cxGame&&has(a.id),ban=cxGame&&isBanned(a.id);
-        return `<div class="cxrow ${a.uc?'uc':''}" style="--rc:${TIER[a.t].col}${ban?';opacity:.5':''}"><div class="h"><b>${a.n}</b>${own?'<span class="tg" style="background:#2f8f4e;color:#fff">✔ 보유</span>':''}${ban?'<span class="tg" style="background:#7a1f2a;color:#fff">🔒 봉인됨</span>':''}<span class="tg" style="background:${TIER[a.t].col};color:#fff">${TIER[a.t].n}</span>${a.uc?`<span class="tg" style="background:#c4122f;color:#fff">♾ 고점 돌파${ucOn?'':' · 🔒 한계 돌파 해금 필요'}</span>`:''}${clsN(a.cls)}${tg(a.tags)}</div><div class="d">${a.d}</div>${fz.length?`<div class="s">합체: ${fz.join(' · ')}</div>`:a.uc?'<div class="s">합체·교체 불가</div>':''}</div>`;});
+        return `<div class="cxrow ${a.uc?'uc':''}" style="--rc:${TIER[a.t].col}${ban?';opacity:.5':''}"><div class="h"><b>${a.n}</b>${own?'<span class="tg" style="background:#2f8f4e;color:#fff">✔ 보유</span>':''}${ban?'<span class="tg" style="background:#7a1f2a;color:#fff">🔒 봉인됨</span>':''}<span class="tg" style="background:${TIER[a.t].col};color:#fff">${TIER[a.t].n}</span>${a.uc?`<span class="tg" style="background:#c4122f;color:#fff">♾ 고점 돌파${ucOn?'':' · 🔒 한계 돌파 해금 필요'}</span>`:''}${clsN(a.cls)}${tg(a.tags)}</div><div class="d">${a.d}</div>${fz.length?`<div class="s">합체: ${fz.join(' · ')}</div>`:a.t==='d'?'<div class="s">👑 히든 보스 황금 용을 잡으면 3개 중 하나 선택 · 슬롯 차지 안 함 · 강화·교체·합체 없음</div>':a.uc?'<div class="s">합체·교체 불가</div>':''}</div>`;});
   }else if(CX.tab==='fuse'){
     const L=[...FUSIONS.map(f=>({...f,v:0})),...VFUSIONS.map(f=>({...f,v:1}))];
     rows=L.filter(f=>{const A=AUGS.find(x=>x.id===f.a)||VIPS.find(x=>x.id===f.a),B=AUGS.find(x=>x.id===f.b)||VIPS.find(x=>x.id===f.b);const c=(A&&A.cls)||(B&&B.cls)||'';return (!CX.cls||(CX.cls==='-'?!c:c===CX.cls))&&hit(f.n,f.d,nm(f.a),nm(f.b));})
