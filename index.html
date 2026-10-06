@@ -1429,6 +1429,11 @@ const AUGS=[
   {id:'worldtree',u:'',t:'p',n:'세계수',tags:['nature','nature'],d:'최대 체력 +20%, 초당 체력 재생 +3, 덩굴 범위 +30%. 자연 2개로 계산',f:p=>{p.hpP=(p.hpP||0)+.1;}},
   {id:'d_bramble',cls:'druid',u:'덩굴 범위·피해가 커져요. ★1은 +30%, ★2는 +50%, ★3은 +70%.',t:'s',n:'가시 장벽',tags:['nature'],d:'[드루이드 전용] 덩굴 지대 범위·피해 +50%'},
   {id:'d_bear',cls:'druid',u:'곰 변신 공격력이 커져요. ★1은 +40%, ★2는 +60%, ★3은 +80%.',t:'g',n:'곰 변신',tags:['nature','guard'],d:'[드루이드 전용] 10초마다 4초간 곰 변신: 받는 피해 −40%, 공격력 +60%'},
+  {id:'d_root',cls:'druid',u:'묶인 적이 받는 피해가 커져요. ★1은 +30%, ★2는 +40%, ★3은 +50%.',t:'g',n:'뿌리 속박',tags:['nature','frost'],d:'[드루이드 전용] 덩굴 위에 1.5초 머문 적은 1초간 뿌리에 묶임(보스는 안 묶임). 묶인 적·덩굴 위에 오래 있던 보스는 받는 피해 +40%'},
+  {id:'d_maul',cls:'druid',u:'내려찍기 피해가 커져요. ★1은 70%, ★2는 90%, ★3은 110%.',t:'g',n:'곰의 일격',tags:['nature','fury'],d:'[드루이드 전용] 곰 변신 중 공격마다 대상에 내려찍기 (반경 80, 공격력 90%, 1초 기절). 곰 상태에서 처치하면 변신 +0.5초 (한 번에 최대 8초)'},
+  {id:'d_photo',cls:'druid',u:'광합성 덩굴 피해가 커져요. ★1은 40%, ★2는 50%, ★3은 60%.',t:'s',n:'광합성',tags:['nature','guard'],d:'[드루이드 전용] 가만히 서 있으면 체력 재생 2배, 3초마다 발밑에 덩굴 지대 (초당 공격력 50%)'},
+  {id:'d_sprout',cls:'druid',u:'새싹이 자랄 확률이 커져요. ★1은 25%, ★2는 35%, ★3은 45%.',t:'g',n:'가시 새싹',tags:['nature','summon'],d:'[드루이드 전용] 덩굴 지대가 생길 때 35% 확률로 가시 새싹이 함께 자람. 새싹은 6초간 0.6초마다 가까운 적에게 가시 발사 (공격력 80%)'},
+  {id:'d_seasons',cls:'druid',u:'',t:'p',n:'사계절',tags:['nature','nature'],d:'[드루이드 전용] 8초마다 계절이 바뀜. 🌸봄: 체력 재생 2배 · ☀️여름: 덩굴 피해 1.5배 · 🍂가을: 치명타 확률 +12% · ❄️겨울: 덩굴 위 적 빙결 둔화 + 받는 피해 +20%. 자연 2개로 계산'},
   {id:'d_wrath',cls:'druid',u:'',t:'p',n:'자연의 분노',tags:['nature','poison'],d:'[드루이드 전용] 덩굴 지대가 3번째 → 2번째 공격마다, 덩굴 피해 +30%'},
   {id:'bloodlust',u:'처치 회복이 커져요. ★1은 +1, ★2는 +1.5, ★3은 +2.',t:'s',n:'피의 갈증',tags:['fury','curse'],d:'광란 지속 +2초, 처치 시 체력 +1.5'},
   {id:'battlecry',u:'함성 광란이 늘어나요. ★1은 +3, ★2는 +5, ★3은 +7.',t:'g',n:'전쟁 함성',tags:['fury'],d:'8초마다 함성: 주변 150 적 1.5초 둔화, 광란 +5'},
@@ -1983,11 +1988,11 @@ const CARDS=[
   {n:'철벽 자세',v:[[1.5,2.5,1],[4,7,0]],t:v=>`방어력 +${v[0]}, 최대 체력 +${v[1]}`,a:(p,v)=>{p.armor+=v[0];p.maxHp+=v[1];p.hp+=v[1];}},
   {req:()=>!pureMelee(),n:'쾌속 장전',v:[[3,6,0],[1.6,3.4,1]],t:v=>`탄속 +${v[0]}%, 공격 속도 +${v[1]}%`,a:(p,v)=>{p.bspd*=1+v[0]/100;p.rateP=(p.rateP||0)+v[1]/100;}},
   {n:'질주 본능',v:[[1,2,1],[2,3.5,1]],t:v=>`이동 속도 +${v[0]}%, 대시 재사용 −${v[1]}%`,a:(p,v)=>{p.speed*=1+v[0]/100;p.dashMul*=1-v[1]/100;}},
-  {fr:'r',n:'도박꾼의 주사위',d:'공격력 −15% ~ +25% (5분 이후 레벨에 따라 커짐), 굴려봐야 압니다',f:p=>{const m=Math.round((-15+Math.random()*40)*(pctOpen()?pctK():1));p.dmgP=(p.dmgP||0)+m/100;return `공격력 ${m>=0?'+':''}${m}%`;}},
+  {fr:'r',n:'도박꾼의 주사위',get d(){const k=(pctOpen()?pctK():1);return `공격력 −${Math.round(15*k)}% ~ +${Math.round(25*k)}%, 굴려봐야 압니다`;},f:p=>{const m=Math.round((-15+Math.random()*40)*(pctOpen()?pctK():1));p.dmgP=(p.dmgP||0)+m/100;return `공격력 ${m>=0?'+':''}${m}%`;}},
   // 도박 카드: 후반에도 의미 있게 레벨·시간에 따라 커짐
-  {fr:'r',n:'운명의 숫돌',d:'공격력 −1 ~ +3 (레벨이 오를수록 커짐), 굴려봐야 압니다',f:p=>{const m=Math.round((-1+Math.random()*4)*lvScale()*10)/10;p.dmg=Math.max(1,p.dmg+m);return `공격력 ${m>=0?'+':''}${m}`;}},
-  {fr:'r',n:'운명의 저울',d:'공격력·공격 속도 중 하나 +8~14%, 다른 하나 −5% (5분 이후 둘 다 레벨에 따라 커짐)',f:p=>{const k=pctOpen()?pctK():1,m=Math.round((8+Math.random()*6)*k),n=Math.round(5*k),A=Math.random()<.5;if(A){p.dmgP=(p.dmgP||0)+m/100;p.rateP=(p.rateP||0)-n/100;}else{p.rateP=(p.rateP||0)+m/100;p.dmgP=(p.dmgP||0)-n/100;}return A?`공격력 +${m}%, 공격 속도 −${n}%`:`공격 속도 +${m}%, 공격력 −${n}%`;}},
-  {fr:'e',n:'잭팟 카드',d:'20% 확률로 공격력 +30%·공격 속도 +12% (5분 이후 레벨에 따라 커짐), 아니면 공격력 +5%',f:p=>{const k=pctOpen()?pctK():1;if(Math.random()<.2){p.dmgP=(p.dmgP||0)+.3*k;p.rateP=(p.rateP||0)+.12*k;return `🎰 잭팟! 공격력 +${Math.round(30*k)}%, 공격 속도 +${Math.round(12*k)}%`;}p.dmgP=(p.dmgP||0)+.05;return '꽝… 공격력 +5%';}},
+  {fr:'r',n:'운명의 숫돌',get d(){const k=lvScale(),f=v=>Math.round(v*k*10)/10;return `공격력 −${f(1)} ~ +${f(3)}, 굴려봐야 압니다`;},f:p=>{const m=Math.round((-1+Math.random()*4)*lvScale()*10)/10;p.dmg=Math.max(1,p.dmg+m);return `공격력 ${m>=0?'+':''}${m}`;}},
+  {fr:'r',n:'운명의 저울',get d(){const k=(pctOpen()?pctK():1);return `공격력·공격 속도 중 하나 +${Math.round(8*k)}~${Math.round(14*k)}%, 다른 하나 −${Math.round(5*k)}%`;},f:p=>{const k=pctOpen()?pctK():1,m=Math.round((8+Math.random()*6)*k),n=Math.round(5*k),A=Math.random()<.5;if(A){p.dmgP=(p.dmgP||0)+m/100;p.rateP=(p.rateP||0)-n/100;}else{p.rateP=(p.rateP||0)+m/100;p.dmgP=(p.dmgP||0)-n/100;}return A?`공격력 +${m}%, 공격 속도 −${n}%`:`공격 속도 +${m}%, 공격력 −${n}%`;}},
+  {fr:'e',n:'잭팟 카드',get d(){const k=(pctOpen()?pctK():1);return `20% 확률로 공격력 +${Math.round(30*k)}%·공격 속도 +${Math.round(12*k)}%, 아니면 공격력 +5%`;},f:p=>{const k=pctOpen()?pctK():1;if(Math.random()<.2){p.dmgP=(p.dmgP||0)+.3*k;p.rateP=(p.rateP||0)+.12*k;return `🎰 잭팟! 공격력 +${Math.round(30*k)}%, 공격 속도 +${Math.round(12*k)}%`;}p.dmgP=(p.dmgP||0)+.05;return '꽝… 공격력 +5%';}},
   {fr:'e',n:'관통 탄',d:'관통 +1',f:p=>{p.pierce+=1;}},
   {fr:'e',cls:'necro',n:'해골 증원',d:'해골 최대 수 +1 (30기를 넘으면 넘는 만큼 해골 피해로)',f:p=>{p.skN=(p.skN||0)+1;}},
   {n:'불사의 맹세',v:[[.15,.3,2],[.12,.25,2]],t:v=>`흡혈 +${v[0]}%, 초당 체력 재생 +${v[1]}`,a:(p,v)=>{p.lifesteal+=v[0]/100;p.regen+=v[1];}},
@@ -2031,7 +2036,7 @@ function augPreview(a){
 const LVS_KEYS=['공격력 +','최대 체력 +','방어력 +','초당 체력 재생 +','공격 속도 +'];
 // 퍼센트 카드(공격력·공격 속도·최대 체력 % 합계에 더해져 이후에도 계속 적용): 5분 전엔 안 나오고, 이후엔 드물게(×0.35) 대신 수치 ×1.6
 const PCT_CARDS=new Set(['힘의 물약','날랜 손놀림','강철 심장','유리 대포','광기','전투 본능','쾌속 장전','올인']);
-const pctOpen=()=>(S.gt||0)>=300;
+const pctOpen=()=>!!S&&(S.gt||0)>=300;
 // 퍼센트 카드 배율: 기본 ×1.6에 레벨당 +2% (Lv50 ≈ ×3.2). 합연산 풀이 커질수록 묽어지는 걸 보정해서 후반에도 절대값 카드와 비슷한 가치
 const pctK=()=>1.6*(1+.02*Math.max(0,((S&&S.lvl)||1)-1));
 function lvScaleIdx(T){if(T._ls)return T._ls;const sen=T.v.map((_,i)=>'§'+i+'§'),t=T.t(sen);
@@ -2553,7 +2558,8 @@ const RATE_CAP=()=>(has('overflow')?13:10)+(has('gatling')?2:0)+(has('f_minigun'
 const SPEED_CAP=230;
 function moveSpd(){const p=S.p;return p.speed*(has('rampage')&&p.fy>0?1+.01*p.fy:1)*(has('quicksilver')?1.35:1)*(has('ironclad')?.9:1)*(1+ex('blitz')*.04)*(p.adrT>0?1.2:1)*(p.spT>0&&has('sprint')?1+lv3('sprint',.2,.3,.4):1)*(p.rushT>0?1+lv3('rush',.35,.5,.65)*(has('f_overdrive')?2:1):1);}
 function pRate(){return Math.min(RATE_CAP(),rawRate());}
-const critRaw=()=>S.p.crit+ex('dice')*.04+(has('a_still')&&!S.p.moving?.1:0)+(has('fortune')?LK()*lv3('fortune',.006,.008,.01):0);
+const season=()=>has('d_seasons')?Math.floor((S.t||0)/8)%4:-1;
+const critRaw=()=>(season()===2?.12:0)+S.p.crit+ex('dice')*.04+(has('a_still')&&!S.p.moving?.1:0)+(has('fortune')?LK()*lv3('fortune',.006,.008,.01):0);
 const critC=()=>Math.min(CRIT_CAP,critRaw());
 const CRIT_DMG_CAP_F=()=>has('sharpshot')?8:5;
 const critMul=()=>(has('sharpshot')?1:0)+(has('f_luckstar')?LK()*.02:0)+(has('r_vital')?critRaw()*100*lv3('r_vital',.01,.015,.02):0)+(has('gb_dice')?Math.max(0,S.p.luck)*lv3('gb_dice',.02,.03,.04):0)+Math.min(CRIT_DMG_CAP_F(),S.p.critM+ex('dice')*.15+Math.max(0,critRaw()-CRIT_CAP)*.5);
@@ -3361,6 +3367,7 @@ function potionHit(f){const r=70*(has('magnumopus')?1.3:1)*(1+(S.p.ptR||0))*(tag
   // 물약 장판: 깨진 자리에 2.5초간 남아 초당 물약 피해의 20%, 밟은 적에게 물약 효과(중독·둔화) 재적용. 최대 10개
   {let n=0;for(const z of S.zones)if(z.kind==='brew')n++;if(n<10)S.zones.push({x:f.x,y:f.y,r:r*.8,life:2.5,kind:'brew',dps:dm*.2,ks,col:POTC[ks[0]]});}}
 function vineAt(x,y,m){let n=0;for(const z of S.zones)if(z.kind==='vine')n++;if(n>=14)return;S.vineN=(S.vineN||0)+1;const br=has('d_bramble')?1+lv3('d_bramble',.3,.5,.7):1;
+  if(has('d_sprout')&&Math.random()<lv3('d_sprout',.25,.35,.45)&&S.zones.length<70)S.zones.push({x:x+rand(-20,20),y:y+rand(-20,20),r:14,life:6,kind:'sprout',st:0});
   S.zones.push({x,y,r:60*br*(1+(S.p.vnR||0))*(has('worldtree')?1.3:1)*(has('yggdrasil')?1.3:1)*(has('f_thornking')?1.3:1),life:3+(tag('nature')>=2?1:0)+(has('yggdrasil')?2:0),kind:'vine',m:m*br*(1+(S.p.vnD||0))*(1+.05*mlv('m_nature'))*natM()*(has('d_wrath')?1.3:1)});}
 const inVine=o=>S.zones.some(z=>z.kind==='vine'&&d2(o,z)<z.r*z.r);
 const furyOn=()=>S.cls==='berserk'||tag('fury')>=1;
@@ -3481,6 +3488,8 @@ function dmgE(e,amt,col,label,quiet){
   if(e.tbT>S.t)amt*=.7;
   if(e.tauT>S.t)amt*=1+lv3('k_taunt',.15,.2,.25);
   e.lh=S.t;if(e.esh>0){const a=Math.min(e.esh,amt);e.esh-=a;amt-=a;if(amt<=0){e.hit=.06;return;}}
+  if(has('d_root')&&e.rootT>S.t)amt*=1+lv3('d_root',.3,.4,.5);
+  if(season()===3&&e.vnT>S.t)amt*=1.2;
   if(has('agony')&&e.burnT>0&&e.pt>0){amt*=1+lv3('agony',.25,.35,.45);if(quiet&&(S.dsrc==='poison'||S.dsrc==='fire')&&Math.random()<critC())amt*=2;}
   if(tag('alchemy')>=4&&e.potT>S.t)amt*=1.15;
   if(tag('grav')>=4&&e.gvT>S.t)amt*=1.2;
@@ -3563,6 +3572,7 @@ function playerFire(tg){
     if(has('k_smite')&&p.shots%lv3('k_smite',6,5,4)===0){explode(tg.x,tg.y,100,pDmg()*3+armorEff(),'#fff3c4');S.rings.push({x:tg.x,y:tg.y,r:4,max:30,life:.4,col:'#ffffff'});S.shake=Math.max(S.shake,.12);}}
   const x7=has('f_lucky777')&&p.shots%J()===0;
   if(meleeOn()&&has('b_twin')&&(p.fy||0)>=furyCap())(S.twinQ=S.twinQ||[]).push({t:.12,base,d:d*(big?3:1)*.7,n});
+  if(has('d_maul')&&p.bearT>0&&tg){exL('곰의 일격',null,tg.x,tg.y,80,pDmg()*lv3('d_maul',.7,.9,1.1),'#c98a52');for(const e of S.en)if(e.alive&&!e.boss&&d2(e,tg)<90*90)e.rootT=Math.max(e.rootT||0,S.t+1);S.shake=Math.max(S.shake,.08);}
   if(meleeOn())meleeSwing(base,d*(big?3:1),n,{roll,big,x7,coin,el:el??null});else
   for(let i=0;i<n;i++){const an=base+(i-(n-1)/2)*.13;pBullet(p.x,p.y,an,d*(big?3:1),{roll,big,x7,el:el??(coin>0&&has('elemcoin')?Math.floor(Math.random()*3):null),coin,hollow:S.cls==='gunner'&&has('g_hollow'),life:blife,pierce:p.pierce+(big?3:0)+(S.cls==='gunner'?1:0)+(coin>0&&has('luckyshot')?2:0),r:(big||(shock>1.5&&S.cls!=='gambler')||x7?6:(S.cls==='gambler'?4:S.cls==='knight'||S.cls==='berserk'?7:S.cls==='mage'||S.cls==='alch'?5:3))*(has('giant')?1+lv3('giant',.6,.9,1.2):1)});
     if(has('clone')&&Math.random()<lv3('clone',.2,.3,.4))pBullet(p.x,p.y,an+rand(-.08,.08),d,{roll,pierce:p.pierce});}
@@ -3716,7 +3726,7 @@ function onKill(e){
   if(has('f_feast'))p.hp=Math.min(p.maxHp,p.hp+2);
   if(has('goldrain')){addGold(lv3('goldrain',1,1,2));if(S.st.kills%7===6)addGold(lv3('goldrain',5,7,9));}
   if(has('lottery')&&!e.boss&&Math.random()<.02){const g=price(25);S.gold+=g;explode(e.x,e.y,110,pDmg()*3,'#ffd76a');ftext(e.x,e.y-e.r-18,'복권 당첨! +'+g,'#ffd76a',18);}
-  burst(e.x,e.y,T.col,e.boss?40:10);S.st.kills++;if(S.ev&&S.ev.k==='horde'&&e.type===S.ev.type)S.ev.kc++;
+  burst(e.x,e.y,T.col,e.boss?40:10);S.st.kills++;if(has('d_maul')&&S.p.bearT>0){S.bearX=(S.bearX||0);if(S.bearX<4){S.p.bearT+=.5;S.bearX+=.5;}}if(S.ev&&S.ev.k==='horde'&&e.type===S.ev.type)S.ev.kc++;
   {const ck=cosEq('kill');if(ck&&S.pa.length<200)killFx(e.x,e.y,ck,q=>{if(S.pa.length<260)S.pa.push(q);},r=>{if(S.rings.length<60)S.rings.push(r);},e.boss||e.elite);}
   if(e.type==='slime')for(let i=0;i<2;i++)spawnAt('slimelet',e.x+(i?9:-9),e.y+rand(-4,4),true);
   if(has('n_drain')&&S.skel&&p.alive){const k=S.skel.find(k=>k.life>0&&d2(k,e)<60*60);if(k){p.hp=Math.min(p.maxHp,p.hp+p.maxHp*lv3('n_drain',.003,.005,.007)*healM());k.life+=2;}}
@@ -3862,7 +3872,9 @@ function update(dt){
     if(waveOn()){S.wvT=(S.wvT??4)-dt;if(S.wvT<=0){S.wvT=Math.max(1,(tag('wave')>=2?4:5)-(has('quake')?lv3('quake',.5,1,1.5):0)-(has('f_epicenter')?1:0)-(has('tectonic')?2:0))*cdM();doWave();if(tag('wave')>=6)S.wv2=.3;}
       if(S.wv2>0){S.wv2-=dt;if(S.wv2<=0)doWave();}}
     if(has('thornseed')||tag('nature')>=1){const ts=has('thornseed');S.tsT=(S.tsT??5)-dt;if(S.tsT<=0){S.tsT=(ts?(has('f_overgrow')?3:5):6)*cdM();const c=S.en.filter(e=>e.alive&&!e.phase&&d2(e,p)<300*300);for(let i=0;i<(ts?(has('f_overgrow')?3:2):1)+(has('f_worldroot')?3:0)&&c.length;i++){const e=c.splice(Math.floor(Math.random()*c.length),1)[0];vineAt(e.x,e.y,ts?lv3('thornseed',.6,.8,1):.6);}}}
-    if(has('d_bear')){if(p.bearT>0)p.bearT-=dt;S.brT=(S.brT??10)-dt;if(S.brT<=0){S.brT=10*cdM();p.bearT=4;ftext(p.x,p.y-34,'곰 변신!','#c98a52',16);S.rings.push({x:p.x,y:p.y,r:10,max:70,life:.35,col:'#c98a52'});}}
+    if(has('d_photo')&&p.alive){if(!p.moving){S.phoT=(S.phoT||0)+dt;if(S.phoT>=3){S.phoT=0;vineAt(p.x,p.y,lv3('d_photo',.4,.5,.6));}}else S.phoT=0;}
+    if(has('d_seasons')){const sn=season();if(sn!==S.lastSn){S.lastSn=sn;ftext(p.x,p.y-40,['🌸 봄','☀️ 여름','🍂 가을','❄️ 겨울'][sn],['#ffb0d0','#ffd76a','#e09a4a','#bfe8ff'][sn],16);}}
+    if(has('d_bear')){if(p.bearT>0)p.bearT-=dt;S.brT=(S.brT??10)-dt;if(S.brT<=0){S.brT=10*cdM();p.bearT=4;S.bearX=0;ftext(p.x,p.y-34,'곰 변신!','#c98a52',16);S.rings.push({x:p.x,y:p.y,r:10,max:70,life:.35,col:'#c98a52'});}}
     if(p.fy>0){p.fyT-=dt;if(p.fyT<=0){p.fy--;p.fyT=.3;}}
     if(has('battlecry')){S.wcT=(S.wcT??8)-dt;if(S.wcT<=0){S.wcT=(has('f_warlord')?4:8)*cdM();S.rings.push({x:p.x,y:p.y,r:10,max:150,life:.4,col:'#ff6a4a'});ftext(p.x,p.y-34,'함성!','#ff6a4a',16);for(const e of S.en)if(e.alive&&!e.boss&&d2(e,p)<150*150)e.slowT=Math.max(e.slowT||0,1.5);addFury(has('f_wargod')?999:lv3('battlecry',3,5,7));if(has('f_warlord'))p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.05*healM());}}
     if(has('bladestorm')&&p.fy>=(has('f_whirlwind')?5:10)){S.bsT=(S.bsT??1)-dt;if(S.bsT<=0){S.bsT=has('f_cyclone')?.5:1;spinHit(110*(has('f_cyclone')?1.3:1),pDmg(),'#ffb08a');}}
@@ -3923,7 +3935,7 @@ function update(dt){
     }else{const sp=Math.min(SPEED_CAP,moveSpd())*(S.buffT.slow>0?.6:1);p.x+=mx*sp*dt;p.y+=my*sp*dt;}
     p.x=clamp(p.x,p.r+10,WW-p.r-10);p.y=clamp(p.y,p.r+10,WH-p.r-10);pushOut(p,p.r);
     if(S.arena){const A=S.arena;A.r+=(A.tr-A.r)*Math.min(1,dt*.8);const m=A.r-p.r-4;p.x=clamp(p.x,A.x-m,A.x+m);p.y=clamp(p.y,A.y-m,A.y+m);}
-    {const bR=(tag('nature')>=2?1.5:0)+(has('yggdrasil')&&inVine(p)?p.maxHp*.02:0)+(has('warpaint')?(p.fy||0)*lv3('warpaint',.08,.1,.15):0)+(has('worldtree')?3:0)+(has('f_ancient')&&inVine(p)?p.maxHp*.02:0)+(has('bastion')&&nearTurret()?3*(has('f_citadel')?2:1):0)+(has('sanctuary')&&!p.moving?lv3('sanctuary',1.5,2,3):0);const rgM=has('f_hydra')?3:(has('thick')&&hitRec()?3:1)*(has('troll')&&p.noHitT>3?3:1);if(p.regen||bR||has('f_immortal'))p.hp=Math.min(p.maxHp,p.hp+(p.regen*rgM*rgHpM()+bR+(has('f_immortal')?p.maxHp*.01:0))*dt*healM());}
+    {const bR=(tag('nature')>=2?1.5:0)+(has('yggdrasil')&&inVine(p)?p.maxHp*.02:0)+(has('warpaint')?(p.fy||0)*lv3('warpaint',.08,.1,.15):0)+(has('worldtree')?3:0)+(has('f_ancient')&&inVine(p)?p.maxHp*.02:0)+(has('bastion')&&nearTurret()?3*(has('f_citadel')?2:1):0)+(has('sanctuary')&&!p.moving?lv3('sanctuary',1.5,2,3):0);const rgM=has('f_hydra')?3:(has('thick')&&hitRec()?3:1)*(has('troll')&&p.noHitT>3?3:1);if(p.regen||bR||has('f_immortal'))p.hp=Math.min(p.maxHp,p.hp+(p.regen*rgM*rgHpM()*(has('d_photo')&&!p.moving?2:1)*(season()===0?2:1)+bR+(has('f_immortal')?p.maxHp*.01:0))*dt*healM());}
     p.noHitT+=dt;{const bm=barrierMax();if(p.barrier>bm)p.barrier=bm;if(p.noHitT>(has('f_insure')?1.5:3)&&p.barrier<bm)p.barrier=Math.min(bm,p.barrier+bm*.35*dt);}
     if(S.buffT.jack>0)p.inv=Math.max(p.inv,.05);
     p.hurtT=Math.max(0,(p.hurtT||0)-dt);p.atkT=Math.max(0,(p.atkT||0)-dt);p.shadowT=Math.max(0,(p.shadowT||0)-dt);p.swingT=Math.max(0,(p.swingT||0)-dt);if(p.rageT>0){p.rageT-=dt;if(p.rageT<=0)p.rage=0;}
@@ -3967,7 +3979,7 @@ function update(dt){
     const tg_=sk||p,dx=tg_.x-e.x,dy=tg_.y-e.y,d=Math.hypot(dx,dy)||1;
     if(T.mimic&&!e.awake){e.cd=1;if(d<130||e.hp<e.maxHp){e.awake=1;S.shake=.2;ftext(e.x,e.y-e.r-8,'미믹이다!','#ff6060',18);}else continue;}
     if(e.slowT>0){e.slowT-=dt;if(e.frozen&&e.slowT>0)continue;}else e.frozen=false;
-    let spd=e.spd*(e.ps>0&&has('neuro')?lv3('neuro',.6,.45,.3):1)*(e.slowT>0?.4:1)*(has('gravity')&&d<150?1-lv3('gravity',.2,.3,.4):1)*(evOn('moon')?1.2:1)*(e.tbT>S.t?1.3:1)*(e.stole?1.15:1),vx=dx/d,vy=dy/d;
+    let spd=e.spd*(e.rootT>S.t&&!e.boss?0:1)*(e.ps>0&&has('neuro')?lv3('neuro',.6,.45,.3):1)*(e.slowT>0?.4:1)*(has('gravity')&&d<150?1-lv3('gravity',.2,.3,.4):1)*(evOn('moon')?1.2:1)*(e.tbT>S.t?1.3:1)*(e.stole?1.15:1),vx=dx/d,vy=dy/d;
     if(T.charge){e.ccd=(e.ccd??rand(1,3))-dt;
       if(e.chT>0){e.chT-=dt;vx=e.cx;vy=e.cy;spd=(T.lance?620:560)*(e.slowT>0?.4:1);
         // 돌격 기사: 3연속 돌진 (돌진이 끝날 때마다 0.4초 다시 조준)
@@ -4048,9 +4060,10 @@ function update(dt){
   if(has('plague')){S.plagueT-=dt;if(S.plagueT<=0){S.plagueT=has('f_blackdeath')?.7:1.5;for(const e of S.en.filter(e=>e.ps>0)){const c=S.en.filter(o=>o.ps<=0&&d2(o,e)<90*90).sort((a,b)=>d2(a,e)-d2(b,e)).slice(0,Math.max(1,L('plague')-1));for(const o of c)poisonE(o);}}}
   // zones
   for(const z of S.zones){z.life-=dt;
+    if(z.kind==='sprout'){z.st-=dt;if(z.st<=0){z.st=.6;const e=nearestE(z,280);if(e){const o=S.dsrc;S.dsrc='nature';pBullet(z.x,z.y-10,Math.atan2(e.y-z.y+10,e.x-z.x),pDmg()*.8,{sub:'가시 새싹',child:true,r:4,col:'#7be08f'});S.dsrc=o;}}}
     if(z.grav){if(has('singularity')){z.sgT=(z.sgT??0)-dt;if(z.sgT<=0){z.sgT=has('f_magnetar')?.25:.5;const e=nearestE(z,z.r);if(e){S.bolts.push({x1:z.x,y1:z.y,x2:e.x,y2:e.y,life:.15});elemChain(e,2,pDmg()*lv3('singularity',.5,.6,.8));}}}
       if(z.life<=0&&!z.bo&&(tag('grav')>=6||has('f_bigcrunch')||has('blackstar'))){z.bo=1;explode(z.x,z.y,130,pDmg()*3*(has('f_bigcrunch')?2:1),'#9a6aff');S.shake=Math.max(S.shake,.12);}}
-    if(z.kind==='vine'){for(const e of S.en)if(e.alive&&!e.phase&&d2(e,z)<(z.r+e.r)**2){e.vnT=S.t+.2;if(!e.boss)e.slowT=Math.max(e.slowT||0,.3);S.dsrc='nature';dmgEs('덩굴',e,pDmg()*z.m*dt,null,null,true);S.dsrc=null;if(has('spore')&&e.alive&&!(e.ps>0))poisonE(e,has('f_thornking')?2:1);}
+    if(z.kind==='vine'){for(const e of S.en)if(e.alive&&!e.phase&&d2(e,z)<(z.r+e.r)**2){if(!(e.vnT>S.t-.05))e.vnS=0;e.vnT=S.t+.2;if(has('d_root')){e.vnS=(e.vnS||0)+dt;if(e.vnS>=1.5){e.vnS=0;e.rootT=S.t+1;if(!e.boss)S.rings.push({x:e.x,y:e.y,r:4,max:e.r+10,life:.3,col:'#8a6a3a'});}}if(!e.boss)e.slowT=Math.max(e.slowT||0,season()===3?.8:.3);S.dsrc='nature';dmgEs('덩굴',e,pDmg()*z.m*(season()===1?1.5:1)*dt,null,null,true);S.dsrc=null;if(has('spore')&&e.alive&&!(e.ps>0))poisonE(e,has('f_thornking')?2:1);}
       if(z.life<=0&&tag('nature')>=6&&!z.bo){z.bo=1;explode(z.x,z.y,80,pDmg()*1.5*natM(),'#8ee06a');}}
     else if(z.kind==='brew'){for(const e of S.en)if(e.alive&&!e.phase&&d2(e,z)<(z.r+e.r)**2){e.potT=Math.max(e.potT||0,S.t+.5);S.dsrc='alchemy';dmgEs('물약 장판',e,z.dps*dt,null,null,true);S.dsrc=null;if(!e.alive)continue;if(z.ks.includes(0)&&!(e.ps>0))poisonE(e);if((z.ks.includes(2)||has('frostflask'))&&!e.boss)e.slowT=Math.max(e.slowT||0,.4);}}
     else if(z.kind==='smoke'){for(const e of S.en)if(e.alive&&!e.boss&&d2(e,z)<(z.r+e.r)**2)e.slowT=Math.max(e.slowT||0,.3);}
@@ -4173,6 +4186,7 @@ function drawChip(e){
   if(e.rmk){ctx.strokeStyle='#ff4a6a';ctx.lineWidth=2;const rr=R+10+Math.sin(S.t*8)*2;ctx.beginPath();ctx.arc(x,y,rr,0,TAU);ctx.moveTo(x-rr-5,y);ctx.lineTo(x-rr+5,y);ctx.moveTo(x+rr-5,y);ctx.lineTo(x+rr+5,y);ctx.moveTo(x,y-rr-5);ctx.lineTo(x,y-rr+5);ctx.moveTo(x,y+rr-5);ctx.lineTo(x,y+rr+5);ctx.stroke();}
   if(e.esh>0){ctx.globalAlpha=.35+.5*e.esh/e.eshM;ctx.strokeStyle='#9fe0ff';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,R+8,0,TAU);ctx.stroke();ctx.globalAlpha=1;}
   if(e.aff||e.hunt||e.type==='goblin'){const A=e.aff&&AFFIX[e.aff],lb=(e.hunt?'🎯 ':'')+(e.affs?e.affs.map(k=>AFFIX[k].n).join('·'):e.type==='goblin'?'💰':'');if(lb){ctx.font='12px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.75)';const ly=top-6;ctx.strokeText(lb,x,ly);ctx.fillStyle=A?A.col:'#ffd76a';ctx.fillText(lb,x,ly);}}
+  if(e.rootT>S.t&&!e.boss){ctx.strokeStyle='#8a6a3a';ctx.lineWidth=2;for(let i=0;i<3;i++){const a=i*2.1+e.rot;ctx.beginPath();ctx.moveTo(x+Math.cos(a)*R*.9,y+R*.6);ctx.quadraticCurveTo(x+Math.cos(a)*R*.3,y-R*.2,x+Math.cos(a+1)*R*.5,y-R*.5);ctx.stroke();}}
   if(e.burnT>0){ctx.fillStyle='rgba(255,120,40,.85)';for(let i=0;i<2;i++){const ba=S.t*3+i*3+e.rot;ctx.beginPath();ctx.arc(x+Math.cos(ba)*R*.6,y-R*.9-((S.t*24+i*9)%12),2.2,0,TAU);ctx.fill();}}
   if(e.ps>0){ctx.fillStyle='rgba(142,224,106,.85)';for(let i=0;i<3;i++){const ba=S.t*2+i*2.1+e.rot;ctx.beginPath();ctx.arc(x+Math.cos(ba)*R*.8,y-R*1.1-((S.t*20+i*7)%10),2,0,TAU);ctx.fill();}}
   if(e.hp<e.maxHp&&(e.boss||e.elite||e.type==='tank')){const w=R*2+6,ty=top-4;ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(x-w/2,ty,w,4);ctx.fillStyle='#ff6060';ctx.fillRect(x-w/2,ty,w*Math.max(0,e.hp/e.maxHp),4);}
@@ -4247,6 +4261,7 @@ function draw(){
   for(const z of S.zones){if(z.kind==='hole'){const g=ctx.createRadialGradient(z.x,z.y,4,z.x,z.y,z.r);g.addColorStop(0,'rgba(0,0,0,.95)');g.addColorStop(.6,'rgba(60,20,90,.55)');g.addColorStop(1,'rgba(60,20,90,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(z.x,z.y,z.r,0,TAU);ctx.fill();
       ctx.strokeStyle='rgba(200,140,255,.6)';ctx.lineWidth=2;for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(z.x,z.y,z.r*(.35+i*.2),S.t*4+i,S.t*4+i+2.2);ctx.stroke();}continue;}
     // 덩굴 지대: 풀밭과 안 겹치게 진한 흙색 바닥 + 밝은 연두 가시 테두리 + 자주색 가시
+    if(z.kind==='sprout'){const g=Math.min(1,(6-z.life)*3),sw=Math.sin(S.t*4+z.x)*2;ctx.globalAlpha=Math.min(1,z.life*2);ctx.fillStyle='#5a3a1a';ctx.fillRect(z.x-2,z.y-10*g,4,10*g);ctx.fillStyle='#5ec44a';ctx.beginPath();ctx.ellipse(z.x-6+sw,z.y-10*g,7*g,4*g,-.5,0,TAU);ctx.fill();ctx.beginPath();ctx.ellipse(z.x+6+sw,z.y-13*g,7*g,4*g,.5,0,TAU);ctx.fill();ctx.fillStyle='#e8f8a0';ctx.beginPath();ctx.arc(z.x+sw,z.y-16*g,2.5*g,0,TAU);ctx.fill();ctx.globalAlpha=1;continue;}
     if(z.kind==='vine'){const fa=Math.min(1,z.life*1.5);ctx.globalAlpha=Math.min(.55,z.life*.5);ctx.fillStyle='#3a1a10';ctx.beginPath();ctx.arc(z.x,z.y,z.r,0,TAU);ctx.fill();
       ctx.globalAlpha=fa*.9;ctx.strokeStyle='#d8ff6a';ctx.lineWidth=2.5;ctx.setLineDash([7,5]);ctx.lineDashOffset=-S.t*12;ctx.beginPath();ctx.arc(z.x,z.y,z.r,0,TAU);ctx.stroke();ctx.setLineDash([]);
       ctx.globalAlpha=fa;ctx.strokeStyle='#b84ac8';ctx.lineWidth=2.5;for(let i=0;i<6;i++){const a=i*1.047+z.x*.01,rr=z.r*.75;ctx.beginPath();ctx.moveTo(z.x,z.y);ctx.quadraticCurveTo(z.x+Math.cos(a+.6)*rr*.6,z.y+Math.sin(a+.6)*rr*.6,z.x+Math.cos(a)*rr,z.y+Math.sin(a)*rr);ctx.stroke();ctx.fillStyle='#f0a0ff';ctx.fillRect(z.x+Math.cos(a)*rr-2,z.y+Math.sin(a)*rr-2,4,4);}ctx.globalAlpha=1;continue;}
@@ -4558,7 +4573,7 @@ function hud(){
   if(S.bless&&S.bless.t>0)bf.push(`<span style="color:#9fd3ff">${S.bless.n} ${S.bless.t.toFixed(0)}</span>`);
   if(skelMax()>0)bf.push(`<span data-tip="skel" style="color:#8cff9a">💀 해골 ${(S.skel||[]).length}/${skelMax()}${skelRaw()>SKEL_CAP?` · 초과 ${skelRaw()-SKEL_CAP} → 해골 피해 ×${(skelRaw()/SKEL_CAP).toFixed(2)}`:''}</span>`);if(has('turret'))bf.push(`<span data-tip="turret" style="color:#9fd3ff">🗼 포탑 ${(S.turrets||[]).length}기 · 다음 ${Math.max(0,S.tuT||0).toFixed(0)}초</span>`);if(shadowOn())bf.push(`<span data-tip="clone" style="color:#c9a0ff">👥 분신 ${(S.clones||[]).length}/${shMax()}</span>`);if(droneN()>0)bf.push(`<span data-tip="drone" style="color:#9fe8ff">🛸 드론 ${droneN()}기</span>`);{const vn=S.zones.filter(z=>z.kind==='vine').length;if(vn||S.cls==='druid'||tag('nature')>=1||has('thornseed'))bf.push(`<span style="color:#d8ff6a">🌿 덩굴 ${vn}/14</span>`);}
   if(p.cfS>=2)bf.push(`<span style="color:#ffd76a">앞면 ${p.cfS}연속</span>`);
-  if(p.bearT>0)bf.push(`<span style="color:#c98a52">곰 변신</span>`);
+  if(p.bearT>0)bf.push(`<span style="color:#c98a52">곰 변신 ${p.bearT.toFixed(1)}초</span>`);if(has('d_seasons')){const sn=season();bf.push(`<span style="color:${['#ffb0d0','#ffd76a','#e09a4a','#bfe8ff'][sn]}">${['🌸 봄','☀️ 여름','🍂 가을','❄️ 겨울'][sn]} ${Math.ceil(8-(S.t%8))}초</span>`);}
   if(p.fy>0)bf.push(`<span style="color:#ff6a4a">광란 ${p.fy}</span>`);
   if(p.rage>0)bf.push(`<span style="color:#ff6a4a">분노 ${p.rage}</span>`);
   bf.push(dpsPanel());
@@ -4608,7 +4623,7 @@ const DEF_AUGS=new Set(['regenarmor','gravity','luckycoin','frost','piggy','tip'
 const isOff=a=>!a.up&&!DEF_AUGS.has(a.id);
 // 선행 조건: 효과가 다른 무언가를 강화만 하는 증강은 그 대상이 있을 때만 등장 (회전 칩 없는데 회전 칩 강화 등 방지)
 const poisonSrc=()=>canPoison()||['wheel','m_inferno','fog','venomcloud','f_napalm','f_gas','f_plaguebullet'].some(has);
-const AUG_REQ={agony:()=>canPoison()&&(tag('fire')>0||S.cls==='mage'),n_spearstorm:()=>has('n_bone'),m_shower:()=>has('m_meteor'),p_hret:()=>has('p_hammer'),p_hstorm:()=>has('p_hammer'),b_whirl:()=>has('b_cleave'),
+const AUG_REQ={d_maul:()=>has('d_bear'),agony:()=>canPoison()&&(tag('fire')>0||S.cls==='mage'),n_spearstorm:()=>has('n_bone'),m_shower:()=>has('m_meteor'),p_hret:()=>has('p_hammer'),p_hstorm:()=>has('p_hammer'),b_whirl:()=>has('b_cleave'),
   turret2:()=>has('turret'),boltturret:()=>has('turret'),overwatch:()=>has('turret'),bastion:()=>has('turret'),selfdestruct:()=>has('turret'),
   clover:()=>S.p.luck<LUCK_CAP-1,fortune:()=>!critFull(),trigger:()=>rawRate()<RATE_CAP(),
   evade:()=>S.p.dodge<DODGE_CAP,luckydie:()=>!critFull(),
