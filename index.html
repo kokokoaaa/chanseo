@@ -1405,6 +1405,23 @@ const AUGS=[
   {id:'g_hollow',cls:'gunner',u:'폭발 피해가 커져요. ★1은 120%, ★2는 150%, ★3은 180%.',t:'g',n:'할로우 포인트',tags:['rapid','sniper'],d:'[총잡이 전용] 매그넘 탄이 치명타로 맞히면 폭발 (범위 70, 공격력 150%)'},
   {id:'g_twin',cls:'gunner',u:'',t:'p',n:'쌍권총',tags:['rapid','blitz'],d:'[총잡이 전용] 탄환 +1발, 재장전 시간 −50%'},
   {id:'p_divine',cls:'paladin',u:'',t:'p',n:'신의 가호',tags:['holy','guard'],d:'[성기사 전용] 막기 확률 +20%. 막을 때마다 빛 폭발 (범위 90, 공격력 150%)'},
+  // 기사 루트: 방패 투척 / 맹세(위기 무적) / 도발(모으기) / 돌격 창(대시)
+  {id:'k_throw',cls:'knight',u:'튕기는 횟수가 늘어나요. ★1은 3번, ★2는 4번, ★3은 6번.',t:'g',n:'방패 투척',tags:['guard','card'],d:'[기사 전용] 5번째 공격마다 방패 투척: 적 사이를 4번 튕기며 공격력 200% + 방어력 ×2 피해'},
+  {id:'k_oath',cls:'knight',u:'재사용 시간이 짧아져요. ★1은 60초, ★2는 45초, ★3은 30초.',t:'p',n:'기사의 맹세',tags:['guard','guard'],d:'[기사 전용] 체력이 40% 아래로 떨어지면 4초간 무적, 끝날 때 주변 충격파 (공격력 500%). 재사용 45초. 가드 2개로 계산'},
+  {id:'k_taunt',cls:'knight',u:'끌려온 적이 받는 피해가 커져요. ★1은 +15%, ★2는 +20%, ★3은 +25%.',t:'s',n:'도발',tags:['guard'],d:'[기사 전용] 2초마다 주변 220 안의 적을 끌어당김 (보스 제외). 끌려온 적은 3초간 받는 피해 +20%'},
+  {id:'k_lance',cls:'knight',u:'충격파 피해가 커져요. ★1은 공격력 200%, ★2는 250%, ★3은 300% (+ 방어력).',t:'g',n:'돌격 창',tags:['blitz','guard'],d:'[기사 전용] 대시가 끝날 때 주변 충격파 (반경 110, 공격력 250% + 방어력)'},
+  // 성기사 루트: 망치 강화 2종 / 성역(정지) / 순교자(받은 피해 → 빛) / 빛기둥
+  {id:'p_hret',cls:'paladin',u:'기절 시간이 길어져요. ★1은 1초, ★2는 1.5초, ★3은 2초.',t:'g',n:'회귀하는 망치',tags:['holy','card'],d:'[성기사 전용] 심판의 망치가 끝까지 날아간 뒤 되돌아오며 한 번 더 피해. 망치에 맞은 적 1.5초 기절 (보스 제외)'},
+  {id:'p_hstorm',cls:'paladin',u:'',t:'p',n:'망치 폭풍',tags:['holy','card'],d:'[성기사 전용] 심판의 망치를 3방향으로 던짐 (양옆 망치 피해 70%), 망치 주기 4번째 → 3번째 공격'},
+  {id:'p_sanct',cls:'paladin',u:'멈춰 있을 때 오라 피해 보너스가 커져요. ★1은 +30%, ★2는 +40%, ★3은 +50%.',t:'s',n:'성역',tags:['holy','guard'],d:'[성기사 전용] 0.5초 이상 멈춰 있으면 신성 오라 범위 +50%, 오라 피해 +40%'},
+  {id:'p_martyr',cls:'paladin',u:'모으는 비율이 커져요. ★1은 40%, ★2는 60%, ★3은 80%.',t:'g',n:'순교자',tags:['holy','guard'],d:'[성기사 전용] 받은 피해의 60%를 모아 3배로 키운 뒤, 다음 오라 때 오라 범위 전체에 빛으로 방출'},
+  {id:'p_beacon',cls:'paladin',u:'빛기둥 피해가 커져요. ★1은 300%, ★2는 400%, ★3은 500%.',t:'s',n:'빛의 기둥',tags:['holy'],d:'[성기사 전용] 5초마다 오라 안에서 체력이 가장 높은 적에게 빛기둥 (공격력 400%, 범위 70)'},
+  // 광전사 루트: 도약 / 쌍격 / 피의 대가(저체력) / 전투 함성 / 피의 회오리
+  {id:'b_leap',cls:'berserk',u:'충격파 피해가 커져요. ★1은 공격력 250%, ★2는 300%, ★3은 350%.',t:'g',n:'도약 강타',tags:['blitz','fury'],d:'[광전사 전용] 대시 착지 지점에 충격파 (반경 120, 공격력 300%). 맞힌 적 1마리당 광란 +1'},
+  {id:'b_twin',cls:'berserk',u:'',t:'p',n:'쌍격',tags:['fury','fury'],d:'[광전사 전용] 광란이 최대일 때 모든 베기가 한 번 더 나감 (두 번째 베기 피해 70%). 광란 2개로 계산'},
+  {id:'b_price',cls:'berserk',u:'잃은 체력당 공격 속도가 커져요. ★1은 1%당 +0.6%, ★2는 +0.8%, ★3은 +1%.',t:'s',n:'피의 대가',tags:['curse','fury'],d:'[광전사 전용] 잃은 체력 1%당 공격 속도 +0.8% (최대 +60%)'},
+  {id:'b_roar',cls:'berserk',u:'함성 주기가 짧아져요. ★1은 20마리, ★2는 15마리, ★3은 10마리마다.',t:'g',n:'전투 함성',tags:['fury','guard'],d:'[광전사 전용] 15마리 처치마다 함성: 주변 200 적을 밀쳐내고 1.5초 기절 (보스 제외), 광란 +5'},
+  {id:'b_whirl',cls:'berserk',u:'회오리 피해가 커져요. ★1은 초당 60%, ★2는 80%, ★3은 100%.',t:'g',n:'피의 회오리',tags:['fury','curse'],d:'[광전사 전용] 대회전이 2초간 피의 회오리를 남김 (반경 90, 초당 공격력 80%, 준 피해의 5% 흡혈)'},
   {id:'frostnova',u:'냉기 폭발 피해가 커져요. ★1은 120%, ★2는 150%, ★3은 180%.',t:'g',n:'서리 폭발',tags:['frost'],d:'5초마다 주변 140 안의 적에게 공격력 150% 피해, 2초간 둔화'},
   {id:'icebolt',u:'얼음탄 피해가 커져요. ★1은 120%, ★2는 150%, ★3은 180%.',t:'s',n:'얼음 화살',tags:['frost','card'],d:'4번째 공격마다 얼음탄 (공격력 150%, 관통 3, 맞은 적 둔화)'},
   {id:'glacier',u:'둔화된 적에게 치명타 확률이 더 올라요. ★1은 +20%, ★2는 +25%, ★3은 +30%.',t:'p',n:'빙하',tags:['frost','frost'],d:'둔화된 적에게 치명타 확률 +25%, 치명타 피해 +50%. 냉기 2개로 계산'},
@@ -2426,6 +2443,7 @@ function rawRate(){const p=S.p;let r=effRate(p)*(1+ex('jackpot')*.03)*(1+Math.ma
   if(tag('fury')>=4&&p.fy>0)r*=1+.015*p.fy;
   if(has('tracker')&&S.mkN)r*=1+Math.min(has('f_predator')?.4:.2,S.mkN*lv3('tracker',.015,.02,.025));
   if(has('bloodrage'))r*=1+lv3('bloodrage',.3,.4,.5);
+  if(has('b_price'))r*=1+Math.min(.6,Math.max(0,1-p.hp/p.maxHp)*100*lv3('b_price',.006,.008,.01));
   if(has('gunslinger')&&p.moving)r*=1.5;
   if(has('tailwind'))r*=1+moveSpd()/10*lv3('tailwind',.015,.02,.025)*(has('f_jetstream')?2:1);
   if(has('interest'))r*=1+Math.min(lv3('interest',.4,.6,.8),Math.floor(S.gold/100)*lv3('interest',.02,.03,.04));
@@ -3113,6 +3131,9 @@ function doWave(){const p=S.p,R=130*(tag('wave')>=4?1.3:1)*(has('aftershock')?1.
   if(has('tectonic')&&hitN)p.barrier=Math.min(Math.max(barrierMax(),20),(p.barrier||0)+2*hitN);}
 // 피해 출처 표시: 이 함수들 안에서 나온 피해는 해당 루트로 집계
 {const w=(f,k)=>function(...a){const o=S.dsrc;S.dsrc=k;try{return f.apply(this,a);}finally{S.dsrc=o;}};doWave=w(doWave,'wave');potionHit=w(potionHit,'alchemy');elemChain=w(elemChain,'elem');lightning=w(lightning,'thunder');}
+function exL(lb,k,...a){const o=S.dsub;S.dsub=lb;try{exS(k,...a);}finally{S.dsub=o;}}
+// 기사 방패 투척: 가까운 적부터 n번 튕기며 피해
+function shieldThrow(t0,n){const p=S.p,hit=new Set();let cur=t0,px=p.x,py=p.y;for(let i=0;i<n&&cur;i++){hit.add(cur);S.bolts.push({x1:px,y1:py,x2:cur.x,y2:cur.y,life:.18,col:'#cfe3ff'});dmgEs('방패 투척',cur,pDmg()*2+armorEff()*2,'#cfe3ff');burst(cur.x,cur.y,'#cfe3ff',5);px=cur.x;py=cur.y;cur=nearestE(cur,260,hit);}}
 function exS(k,...a){const o=S.dsrc;S.dsrc=k;try{explode(...a);}finally{S.dsrc=o;}}
 // 합체 고유 능력: fx='언제:값:무엇:인자…'. 언제 = k 처치 확률 / n N번째 공격 / h 피격(쿨) / d 대시 끝 / c 치명타 확률 / t T초마다
 function fxParse(a){const q=a.fx.split(':'),tr=q[0],has1=tr!=='d';return {id:a.id,tr,v:has1?+q[1]:0,act:has1?q[2]:q[1],g:(has1?q.slice(3):q.slice(2)).map(Number)};}
@@ -3275,7 +3296,9 @@ function hurtP(amt,src){
   if(has('revenge'))p.revT=3;
   if(has('armor')&&!(p.amCd>0)){p.amCd=has('f_counterarmor')?.2:.5;explode(p.x,p.y,90,armorEff()*lv3('armor',2,3,4),'#cfd6e0');}
   addRage();
-  p.hp-=amt;p.inv=.4;p.hurtT=.3;S.shake=Math.max(S.shake,.15);ftext(p.x,p.y-24,'-'+Math.round(amt),'#ff6060',16);
+  p.hp-=amt;p.inv=.4;p.hurtT=.3;
+  if(has('p_martyr'))p.mtyr=(p.mtyr||0)+amt*lv3('p_martyr',.4,.6,.8)*3;
+  if(has('k_oath')&&p.hp>0&&p.hp<p.maxHp*.4&&!(p.oathCd>0)){p.oathCd=lv3('k_oath',60,45,30);p.oathT=4;p.inv=4;ftext(p.x,p.y-40,'기사의 맹세!','#cfe3ff',20);S.rings.push({x:p.x,y:p.y,r:10,max:120,life:.5,col:'#ffffff'});}S.shake=Math.max(S.shake,.15);ftext(p.x,p.y-24,'-'+Math.round(amt),'#ff6060',16);
   if(src&&has('thorns')&&src.alive)dmgEs('가시 반격',src,raw*2.5*L('thorns')+(has('f_spikearmor')?armorEff()*3:0),'#c98af0');
   if(p.hp<=0){
     if(has('lastcard')&&p.lastCd<=0){p.lastCd=lv3('lastcard',60,45,30);p.hp=1;p.inv=2;toast('최후의 패');return;}
@@ -3291,6 +3314,7 @@ function dmgEs(k,...a){const o=S.dsub;S.dsub=o||k;try{dmgE(...a);}finally{S.dsub
 function dmgE(e,amt,col,label,quiet){
   if(!e.alive)return;
   if(e.tbT>S.t)amt*=.7;
+  if(e.tauT>S.t)amt*=1+lv3('k_taunt',.15,.2,.25);
   e.lh=S.t;if(e.esh>0){const a=Math.min(e.esh,amt);e.esh-=a;amt-=a;if(amt<=0){e.hit=.06;return;}}
   if(tag('alchemy')>=4&&e.potT>S.t)amt*=1.15;
   if(tag('grav')>=4&&e.gvT>S.t)amt*=1.2;
@@ -3364,6 +3388,7 @@ function playerFire(tg){
   if(S.cls==='knight'){const ev=has('k_cleave')?lv3('k_cleave',3,3,2):4;if(p.shots%ev===0){const rad=95*(has('k_cleave')?1.3:1),k=has('k_cleave')?lv3('k_cleave',1.2,1.6,2):.5;p.swingT=.25;S.rings.push({x:p.x,y:p.y,r:20,max:rad,life:.25,col:'#cfe3ff'});for(const e of S.en)if(e.alive&&!e.phase&&d2(e,p)<(rad+e.r)**2)dmgEs('기사 회전 베기',e,pDmg()*mult*shock*k,'#cfe3ff');}
     if(has('k_smite')&&p.shots%lv3('k_smite',6,5,4)===0){explode(tg.x,tg.y,100,pDmg()*3+armorEff(),'#fff3c4');S.rings.push({x:tg.x,y:tg.y,r:4,max:30,life:.4,col:'#ffffff'});S.shake=Math.max(S.shake,.12);}}
   const x7=has('f_lucky777')&&p.shots%J()===0;
+  if(meleeOn()&&has('b_twin')&&(p.fy||0)>=furyCap())(S.twinQ=S.twinQ||[]).push({t:.12,base,d:d*(big?3:1)*.7,n});
   if(meleeOn())meleeSwing(base,d*(big?3:1),n,{roll,big,x7,coin,el:el??null});else
   for(let i=0;i<n;i++){const an=base+(i-(n-1)/2)*.13;pBullet(p.x,p.y,an,d*(big?3:1),{roll,big,x7,el:el??(coin>0&&has('elemcoin')?Math.floor(Math.random()*3):null),coin,hollow:S.cls==='gunner'&&has('g_hollow'),life:blife,pierce:p.pierce+(big?3:0)+(S.cls==='gunner'?1:0)+(coin>0&&has('luckyshot')?2:0),r:(big||(shock>1.5&&S.cls!=='gambler')||x7?6:(S.cls==='gambler'?4:S.cls==='knight'||S.cls==='berserk'?7:S.cls==='mage'||S.cls==='alch'?5:3))*(has('giant')?1+lv3('giant',.6,.9,1.2):1)});
     if(has('clone')&&Math.random()<lv3('clone',.2,.3,.4))pBullet(p.x,p.y,an+rand(-.08,.08),d,{roll,pierce:p.pierce});}
@@ -3389,14 +3414,15 @@ function playerFire(tg){
   if(S.coinB){S.coinB=0;explode(tg.x,tg.y,90,pDmg()*3*(has('goldenhand')?2:1),'#ffd76a');ftext(p.x,p.y-34,'앞면 ×3!','#ffd76a',16);}
   if(S.coinJ){S.coinJ=0;ftext(p.x,p.y-48,'대박!','#ff4fd8',22);S.shake=Math.max(S.shake,.2);for(const e of S.en)if(e.alive&&!e.phase&&Math.abs(e.x-p.x)<GW/2&&Math.abs(e.y-p.y)<GH/2)dmgEs('동전 대박',e,pDmg()*5,'#ff4fd8');}
   if(S.coinS){S.coinS=0;for(let i=0;i<3;i++)pBullet(p.x,p.y,base+(i-1)*.2,pDmg()*lv3('coinshower',.5,.7,.9),{sub:'동전 소나기',child:true,r:4,gcoin:true});}
-  if(has('b_cleave')&&p.shots%3===0)spinHit(has('f_whirlwind')?140:100,pDmg()*lv3('b_cleave',.8,1,1.2),'#ff8a6a');
+  if(has('b_cleave')&&p.shots%3===0){spinHit(has('f_whirlwind')?140:100,pDmg()*lv3('b_cleave',.8,1,1.2),'#ff8a6a');if(has('b_whirl')&&S.zones.length<70)S.zones.push({x:p.x,y:p.y,r:90,life:2,kind:'blood',fol:1});}
   if(tag('fury')>=6&&p.fy>=furyCap())spinHit(90,pDmg()*.6,'#ff6a4a');
   if(tag('elem')>=1&&p.shots%Math.max(2,(tag('elem')>=2?6:8)-(has('primordial')?2:0))===0)pBullet(p.x,p.y,base,pDmg()*1.5*elM(),{sub:'원소 시너지',child:true,r:6,el:3,orb:true,pierce:0});
   if(has('e_trinity')&&p.shots%3===0){const r=has('f_prism')?135:90;explode(tg.x,tg.y,r,pDmg()*lv3('e_trinity',1.5,2,2.5)*elM(),'#c8a0ff');for(const o of S.en)if(o.alive&&d2(o,tg)<r*r){burnE(o,pDmg()*.25*elM(),3);if(!o.boss)o.slowT=Math.max(o.slowT||0,1);}}
   if((tag('rapid')>=2||has('gatling'))&&p.shots%(has('gatling')?5:10)===0)for(let i=0;i<3;i++)pBullet(p.x,p.y,base+(i-1)*.08,d*.7*rpM(),{sub:'속사 시너지',child:true,r:3});
   if(has('fanfire')&&(p.shots%(has('f_gunkata')?4:8)===0||S.deadShot)){S.deadShot=0;const k=has('f_gunkata')?7:5;for(let i=0;i<k;i++)pBullet(p.x,p.y,base+(i-(k-1)/2)*.18,pDmg()*lv3('fanfire',.6,.8,1)*rpM(),{sub:'패닝',child:true,r:3});}
   if(has('n_bone')&&p.shots%5===0)pBullet(p.x,p.y,base,pDmg()*lv3('n_bone',2,2.5,3)*undM(),{pierce:has('f_bonestorm')?7:4,r:7,sub:'뼈창',child:true,life:1.1,bone:true,src:'undead',burn:has('f_bonestorm')});
-  if(has('p_hammer')&&p.shots%4===0){pBullet(p.x,p.y,base,pDmg()*lv3('p_hammer',1.8,2.2,2.6)*holyM(),{pierce:5,r:9,big:true,sub:'심판의 망치',child:true,life:1});if(has('f_judgment')){exS('holy',tg.x,tg.y,80,pDmg()*2*holyM(),'#fff3c4');S.rings.push({x:tg.x,y:tg.y,r:4,max:30,life:.4,col:'#ffffff'});}}
+  if(has('k_throw')&&p.shots%5===0)shieldThrow(tg,lv3('k_throw',3,4,6));
+  if(has('p_hammer')&&p.shots%(has('p_hstorm')?3:4)===0){for(const da of has('p_hstorm')?[-.35,0,.35]:[0])pBullet(p.x,p.y,base+da,pDmg()*lv3('p_hammer',1.8,2.2,2.6)*holyM()*(da?.7:1),{pierce:5,r:9,big:true,sub:'심판의 망치',child:true,life:1,hret:has('p_hret')?1:0,stun:has('p_hret')?lv3('p_hret',1,1.5,2):0});if(has('f_judgment')){exS('holy',tg.x,tg.y,80,pDmg()*2*holyM(),'#fff3c4');S.rings.push({x:tg.x,y:tg.y,r:4,max:30,life:.4,col:'#ffffff'});}}
   if(tag('thunder')>=2&&p.shots%10===0)lightning(tg,4);
   if(has('icebolt')&&p.shots%(has('f_permafrost')?2:4)===0)pBullet(p.x,p.y,base,d*lv3('icebolt',1.2,1.5,1.8),{pierce:3,r:5,ice:true,sub:'얼음 화살',child:true,col:'#9fe8ff'});
   if(has('fireball')&&p.shots%(has('f_hellfire')?3:6)===0)pBullet(p.x,p.y,base,d*.5,{r:7,sub:'화염구',child:true,fball:true,burn:true});
@@ -3421,6 +3447,7 @@ function clsHit(t,b){if(S.pa.length>200)return;const R=(a,c)=>a+Math.random()*(c
 function onPHit(b,t){
   const p=S.p;b.hit.add(t);if(!b.child)clsHit(t,b);
   let dmg=b.dmg,col=null,label=null;
+  if(b.stun&&!t.boss){t.slowT=Math.max(t.slowT||0,b.stun);t.frozen=true;}
   // 방패병: 방패 쪽(정면 ±60°)에서 온 탄은 피해 60% 감소. 근접·폭발·장판은 그대로
   if(t.fa!=null&&ET[t.type].shield&&Math.cos(Math.atan2(b.y-t.y,b.x-t.x)-t.fa)>.5){dmg*=.4;if(Math.random()<.3){ftext(t.x,t.y-t.r-6,'막힘','#cfd6e0',12);burst(t.x+Math.cos(t.fa)*t.r,t.y+Math.sin(t.fa)*t.r,'#e4ecf6',3);}}
   if(!b.child&&has('chainlt')){S.p.hitN=(S.p.hitN||0)+1;if(S.p.hitN%J()===0)lightning(t,has('f_storm')?10:3+2*L('chainlt'));}
@@ -3510,6 +3537,7 @@ function onKill(e){
   burst(e.x,e.y,T.col,e.boss?40:10);S.st.kills++;
   {const ck=cosEq('kill');if(ck&&S.pa.length<200)killFx(e.x,e.y,ck,q=>{if(S.pa.length<260)S.pa.push(q);},r=>{if(S.rings.length<60)S.rings.push(r);},e.boss||e.elite);}
   if(e.type==='slime')for(let i=0;i<2;i++)spawnAt('slimelet',e.x+(i?9:-9),e.y+rand(-4,4),true);
+  if(has('b_roar')&&p.alive){p.roarN=(p.roarN||0)+1;if(p.roarN>=lv3('b_roar',20,15,10)){p.roarN=0;S.rings.push({x:p.x,y:p.y,r:10,max:200,life:.4,col:'#ff6a4a'});ftext(p.x,p.y-36,'전투 함성!','#ff8a6a',18);for(const o of S.en){if(!o.alive||o.boss||d2(o,p)>200*200)continue;const a=Math.atan2(o.y-p.y,o.x-p.x);o.x+=Math.cos(a)*80;o.y+=Math.sin(a)*80;o.slowT=Math.max(o.slowT||0,1.5);o.frozen=true;}addFury(5);}}
   if(T.revive&&!e.rev&&S.en.length<240){(S.revQ=S.revQ||[]).push({t:2.5,type:e.type,x:e.x,y:e.y});ftext(e.x,e.y-e.r-6,'다시 일어난다…','#c8d8a0',13);}
   if(e.type==='crystalgolem')eRing(e,6,180,e.dmg*.6,Math.random(),5,'#b080ff');
   if(T.fireD&&S.hz.length<70)S.hz.push({x:e.x,y:e.y,r:36,life:3,dmg:e.dmg*.6,col:'#ff6a1a'});
@@ -3579,7 +3607,9 @@ function dash(){
   else if(has('dicethrow')){const ex=new Set();for(let i=0;i<1+2*L('dicethrow');i++){const e=nearestE(p,320,ex);if(!e)break;ex.add(e);const roll=rollDie();pBullet(p.x,p.y,Math.atan2(e.y-p.y,e.x-p.x),pDmg()*roll*.6,{roll,dieThrow:true,r:5,pierce:0,life:.8});}}
 }
 function dashEnd(){
-  const p=S.p;fxRun('d');if(has('r_shadow'))p.shadowT=1+.5*L('r_shadow');
+  const p=S.p;fxRun('d');
+  if(has('k_lance')){exL('돌격 창',null,p.x,p.y,110,pDmg()*lv3('k_lance',2,2.5,3)+armorEff(),'#cfe3ff');S.shake=Math.max(S.shake,.12);}
+  if(has('b_leap')){let n=0;for(const e of S.en)if(e.alive&&!e.phase&&d2(e,p)<(120+e.r)**2)n++;exL('도약 강타',null,p.x,p.y,120,pDmg()*lv3('b_leap',2.5,3,3.5),'#ff6a4a');addFury(n);S.shake=Math.max(S.shake,.18);S.rings.push({x:p.x,y:p.y,r:10,max:140,life:.35,col:'#ff8a6a'});}if(has('r_shadow'))p.shadowT=1+.5*L('r_shadow');
   if(tag('blitz')>=4)explode(p.x,p.y,75,pDmg()*1.2,'#5fc9d9');
   if(tag('blitz')>=6)p.blitzT=2;
   if(has('after')){const k=6+4*L('after');for(let i=0;i<k;i++)pBullet(p.x,p.y,i*TAU/k,pDmg()*.7,{sub:'잔상',child:true});}
@@ -3663,7 +3693,10 @@ function update(dt){
       S.skel=S.skel.filter(k=>k.life>0);}
     if(has('frostnova')){S.fnT=(S.fnT??5)-dt;if(S.fnT<=0){S.fnT=(has('f_permafrost')?3:5)*tmul();S.rings.push({x:p.x,y:p.y,r:10,max:140,life:.35,col:'#9fe8ff'});for(const e of S.en)if(e.alive&&d2(e,p)<140*140){dmgEs('서리 폭발',e,pDmg()*lv3('frostnova',1.2,1.5,1.8),'#9fe8ff');if(!e.boss)e.slowT=Math.max(e.slowT||0,2);}}}
     if(has('tesla')){S.teT=(S.teT??3)-dt;if(S.teT<=0){S.teT=(has('f_tesla2')?1.5:3)*tmul();const e=nearestE(p,200);if(e){S.bolts.push({x1:p.x,y1:p.y,x2:e.x,y2:e.y,life:.18});dmgEs('테슬라',e,pDmg()*1.5*thM(),'#9fe8ff');lightning(e,lv3('tesla',2,3,4)-1);}}}
-    if(S.cls==='paladin'||has('halo')){S.auT=(S.auT??.5)-dt;if(S.auT<=0){S.auT=.5;const ar=110*(1+(p.auraM||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1),ad=S.cls==='paladin'?pDmg()*.5*(1+(p.auraD||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1)*holyM()*(has('p_sun')?1+Math.max(0,ar/110-1)*100*lv3('p_sun',.006,.008,.01):1):0,hd=has('halo')?pDmg()*.3*holyM():0;
+    if(has('p_sanct')){if(p.moving)p.stillT=0;else p.stillT=(p.stillT||0)+dt;}
+    if(S.cls==='paladin'||has('halo')){S.auT=(S.auT??.5)-dt;if(S.auT<=0){S.auT=.5;const sc=has('p_sanct')&&p.stillT>.5,ar=110*(1+(p.auraM||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1)*(sc?1.5:1),ad=S.cls==='paladin'?pDmg()*.5*(1+(p.auraD||0))*(sc?1+lv3('p_sanct',.3,.4,.5):1)*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1)*holyM()*(has('p_sun')?1+Math.max(0,ar/110-1)*100*lv3('p_sun',.006,.008,.01):1):0,hd=has('halo')?pDmg()*.3*holyM():0;
+      if(has('p_martyr')&&(p.mtyr||0)>0&&S.cls==='paladin'){const v=p.mtyr*holyM();p.mtyr=0;S.rings.push({x:p.x,y:p.y,r:10,max:ar,life:.35,col:'#fff3a0'});for(const e of S.en)if(e.alive&&d2(e,p)<(ar+e.r)**2){S.dsrc='holy';dmgEs('순교자',e,v,'#fff3a0');S.dsrc=null;}}
+      if(has('p_beacon')&&S.cls==='paladin'){p.bcT=(p.bcT||0)+.5;if(p.bcT>=5){p.bcT=0;let bt=null;for(const e of S.en)if(e.alive&&!e.phase&&d2(e,p)<(ar+e.r)**2&&(!bt||e.hp>bt.hp))bt=e;if(bt){exL('빛의 기둥','holy',bt.x,bt.y,70,pDmg()*lv3('p_beacon',3,4,5)*holyM(),'#fff3a0');S.bolts.push({x1:bt.x,y1:bt.y-260,x2:bt.x,y2:bt.y,life:.2});}}}
       for(const e of S.en){if(!e.alive)continue;const dd=d2(e,p);let v=0;if(ad&&dd<(ar+e.r)**2)v+=ad;if(hd&&dd<((has('f_seraph')?210:140)+e.r)**2)v+=hd;if(v){S.dsrc='holy';dmgEs('신성 오라·후광',e,v,null,null,true);S.dsrc=null;}}}}
     if(has('inferno')){S.inT=(S.inT??1)-dt;if(S.inT<=0){S.inT=1;for(const e of S.en)if(e.alive&&d2(e,p)<120*120)burnE(e,pDmg()*.2,2);}}
     if(has('nova')){S.novaT=(S.novaT??10)-dt;if(S.novaT<=0){S.novaT=(10-(has('f_supernova')?3:0))*tmul();explode(p.x,p.y,180,pDmg()*lv3('nova',7,9,11),'#ffd76a');S.shake=Math.max(S.shake,.2);if(has('f_supernova'))thunderStrike(6);}}
@@ -3794,6 +3827,12 @@ function update(dt){
   }
   S.en=S.en.filter(e=>e.alive);
   updBoss(dt);hbTick(dt);
+  // 광전사 쌍격: 0.12초 뒤 두 번째 베기
+  if(S.twinQ&&S.twinQ.length){for(const q of S.twinQ){q.t-=dt;if(q.t<=0&&p.alive)meleeSwing(q.base,q.d,q.n,{sub:'쌍격'});}S.twinQ=S.twinQ.filter(q=>q.t>0);}
+  // 기사 도발: 2초마다 주변 적 끌어당김
+  if(has('k_taunt')&&p.alive){S.tnT=(S.tnT??2)-dt;if(S.tnT<=0){S.tnT=2;S.rings.push({x:p.x,y:p.y,r:220,max:30,life:.35,col:'#ff9a6a'});for(const e of S.en){if(!e.alive||e.boss||d2(e,p)>220*220)continue;e.x+=(p.x-e.x)*.55;e.y+=(p.y-e.y)*.55;e.tauT=S.t+3;}}}
+  // 기사의 맹세: 무적이 끝나면 충격파
+  if(p.oathCd>0)p.oathCd-=dt;if(p.oathT>0){p.oathT-=dt;p.inv=Math.max(p.inv,.05);if(p.oathT<=0){exL('기사의 맹세',null,p.x,p.y,160,pDmg()*5,'#cfe3ff');S.shake=Math.max(S.shake,.3);}}
   // 황금 용 전용 증강
   if(p.alive){if(has('drg_heart'))p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.01*dt*healM());
     if(has('drg_breath')){S.dbT=(S.dbT??3)-dt;if(S.dbT<=0){const t=nearestE(p,300);if(t){S.dbT=3;const a=Math.atan2(t.y-p.y,t.x-p.x);for(const e of S.en){if(!e.alive||e.phase)continue;const dx=e.x-p.x,dy=e.y-p.y,d=Math.hypot(dx,dy);if(d>280+e.r)continue;let da=Math.abs(Math.atan2(dy,dx)-a)%TAU;if(da>Math.PI)da=TAU-da;if(da<.7){dmgEs('용의 숨결',e,pDmg()*6,'#ffb030');if(e.alive)burnE(e,pDmg()*.5,3);}}
@@ -3814,6 +3853,7 @@ function update(dt){
     if(z.kind==='vine'){for(const e of S.en)if(e.alive&&!e.phase&&d2(e,z)<(z.r+e.r)**2){e.vnT=S.t+.2;if(!e.boss)e.slowT=Math.max(e.slowT||0,.3);S.dsrc='nature';dmgEs('덩굴',e,pDmg()*z.m*dt,null,null,true);S.dsrc=null;if(has('spore')&&e.alive&&!(e.ps>0))poisonE(e,has('f_thornking')?2:1);}
       if(z.life<=0&&tag('nature')>=6&&!z.bo){z.bo=1;explode(z.x,z.y,80,pDmg()*1.5*natM(),'#8ee06a');}}
     else if(z.kind==='brew'){for(const e of S.en)if(e.alive&&!e.phase&&d2(e,z)<(z.r+e.r)**2){e.potT=Math.max(e.potT||0,S.t+.5);S.dsrc='alchemy';dmgEs('물약 장판',e,z.dps*dt,null,null,true);S.dsrc=null;if(!e.alive)continue;if(z.ks.includes(0)&&!(e.ps>0))poisonE(e);if((z.ks.includes(2)||has('frostflask'))&&!e.boss)e.slowT=Math.max(e.slowT||0,.4);}}
+    else if(z.kind==='blood'){if(z.fol){z.x=p.x;z.y=p.y;}const bd=pDmg()*lv3('b_whirl',.6,.8,1)*dt;for(const e of S.en)if(e.alive&&d2(e,z)<(z.r+e.r)**2){dmgEs('피의 회오리',e,bd,null,null,true);if(p.alive)p.hp=Math.min(p.maxHp,p.hp+bd*.05*healM());}}
     else if(z.kind==='fire'){for(const e of S.en)if(e.alive&&d2(e,z)<(z.r+e.r)**2){dmgEs('불길 장판',e,pDmg()*1.2*(z.m||1)*dt,null,null,true);if(z.nap&&e.alive&&!(e.ps>0))poisonE(e);}}
     else if(z.kind==='hole'){for(const e of S.en){if(!e.alive)continue;const dx=z.x-e.x,dy=z.y-e.y,dd=Math.hypot(dx,dy)||1;if(dd<z.r*1.6){if(!e.boss){e.x+=dx/dd*Math.min(dd,170*dt);e.y+=dy/dd*Math.min(dd,170*dt);}if(dd<z.r){S.dsrc=z.grav?'grav':'summon';dmgE(e,pDmg()*dt*(z.grav&&has('crushpull')?2:1),null,null,true);S.dsrc=null;}if(z.grav&&dd<z.r*1.3){e.gvT=S.t+.4;if(has('crushpull')&&!e.boss)e.slowT=Math.max(e.slowT||0,.4);}}}}
     else if(z.kind==='mine'){for(const e of S.en)if(e.alive&&!e.phase&&d2(e,z)<(z.r+e.r+6)**2){z.life=0;S.dsrc='summon';explode(z.x,z.y,80,pDmg()*1.8*sumM()*(has('f_overclock')?2:1),'#ff9a4a');if(has('f_minefield'))S.zones.push({x:z.x,y:z.y,r:40,life:2.5,kind:'fire',m:1});S.dsrc=null;break;}}
@@ -3826,7 +3866,7 @@ function update(dt){
     if(!b.mine&&S.freezeT>0)continue;
     b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;
     if(b.mine){for(const e of S.en){if(!e.alive||e.phase||b.hit.has(e))continue;if(d2(b,e)<(e.r+b.r)**2){onPHit(b,e);if(b.life<=0)break;}}
-      if(b.life<=0&&!b.boomed){b.boomed=1;if(b.fball){const fr=has('f_hellfire')?120:80;explode(b.x,b.y,fr,pDmg()*lv3('fireball',1.8,2.2,2.6),'#ff7a3a');for(const o of S.en)if(o.alive&&d2(o,b)<fr*fr)burnE(o,pDmg()*.3,3);if(has('f_ember'))S.zones.push({x:b.x,y:b.y,r:60,life:3,kind:'fire',m:1});}else if(has('artillery')&&!b.child)explode(b.x,b.y,has('f_siege')?140:70,b.dmg,'#ffe08a');}}
+      if(b.life<=0&&!b.boomed){b.boomed=1;if(b.hret===1)pBullet(b.x,b.y,Math.atan2(p.y-b.y,p.x-b.x),b.dmg,{pierce:5,r:9,big:true,sub:'심판의 망치',child:true,life:1,hret:2,stun:b.stun});if(b.fball){const fr=has('f_hellfire')?120:80;explode(b.x,b.y,fr,pDmg()*lv3('fireball',1.8,2.2,2.6),'#ff7a3a');for(const o of S.en)if(o.alive&&d2(o,b)<fr*fr)burnE(o,pDmg()*.3,3);if(has('f_ember'))S.zones.push({x:b.x,y:b.y,r:60,life:3,kind:'fire',m:1});}else if(has('artillery')&&!b.child)explode(b.x,b.y,has('f_siege')?140:70,b.dmg,'#ffe08a');}}
     else if(p.alive&&d2(b,p)<(p.r+b.r)**2){
       if(has('mirror')&&Math.random()<lv3('mirror',.2,.3,.4)+(has('f_glacier')?.25:0)+(has('f_mirrorshield')?.2:0)){b.mine=true;b.vx*=-1.3;b.vy*=-1.3;b.dmg=pDmg()*2;b.hit=new Set();b.pierce=1;b.child=true;b.life=1;continue;}
       if(b.aoe)S.rings.push({x:b.x,y:b.y,r:6,max:b.aoe,life:.3,col:'#c98af0'});
@@ -4344,7 +4384,7 @@ const DEF_AUGS=new Set(['regenarmor','gravity','luckycoin','frost','piggy','tip'
 const isOff=a=>!a.up&&!DEF_AUGS.has(a.id);
 // 선행 조건: 효과가 다른 무언가를 강화만 하는 증강은 그 대상이 있을 때만 등장 (회전 칩 없는데 회전 칩 강화 등 방지)
 const poisonSrc=()=>canPoison()||['wheel','m_inferno','fog','venomcloud','f_napalm','f_gas','f_plaguebullet'].some(has);
-const AUG_REQ={
+const AUG_REQ={p_hret:()=>has('p_hammer'),p_hstorm:()=>has('p_hammer'),b_whirl:()=>has('b_cleave'),
   turret2:()=>has('turret'),boltturret:()=>has('turret'),overwatch:()=>has('turret'),bastion:()=>has('turret'),selfdestruct:()=>has('turret'),
   clover:()=>S.p.luck<LUCK_CAP-1,fortune:()=>!critFull(),trigger:()=>rawRate()<RATE_CAP(),
   evade:()=>S.p.dodge<DODGE_CAP,luckydie:()=>!critFull(),
