@@ -1056,7 +1056,7 @@ const ET={
   slimelet:{n:'꼬마 슬라임',r:7,hp:12, spd:125,dmg:5, col:'#5ec44a',xp:0,coin:0},
   ghost:  {n:'유령',r:10,hp:24, spd:135,dmg:9, col:'#dfe9ff',xp:2,coin:3},
   boar:   {n:'멧돼지',r:13,hp:60, spd:85, dmg:16,col:'#7a4e2e',xp:2,coin:3,charge:true},
-  shield: {n:'오크 방패병',r:13,hp:70, spd:80, dmg:13,col:'#7a8a5a',xp:3,coin:4,shield:true},
+  shield: {n:'오크 방패병',r:13,hp:60, spd:80, dmg:13,col:'#7a8a5a',xp:3,coin:4,shield:true},
   spider: {n:'독거미',r:10,hp:30, spd:120,dmg:8, col:'#5c3a64',xp:2,coin:3,range:200,web:true},
   jelly:  {n:'분열 젤리',r:15,hp:60, spd:75, dmg:10,col:'#4ab0e0',xp:2,coin:2,split:'jellym'},
   jellym: {n:'중간 젤리',r:10,hp:24, spd:105,dmg:7, col:'#4ab0e0',xp:1,coin:0,split:'jellys'},
@@ -1065,8 +1065,8 @@ const ET={
   lancer: {n:'돌격 기사',r:14,hp:90, spd:80, dmg:20,col:'#9aa4b4',xp:3,coin:5,charge:true,lance:true},
   wraith: {n:'망령',r:11,hp:32, spd:90, dmg:10,col:'#7a5ac8',xp:3,coin:4,blink:true},
   wolf:   {n:'늑대',r:11,hp:26, spd:140,dmg:9, col:'#8a8a9a',xp:2,coin:2},
-  sapling:{n:'묘목 정령',r:10,hp:40, spd:70, dmg:8, col:'#6aa040',xp:2,coin:3,range:170},
-  vbat:   {n:'흡혈 박쥐',r:8, hp:16, spd:185,dmg:7, col:'#9a2030',xp:1,coin:1},
+  sapling:{n:'묘목 정령',r:10,hp:32, spd:70, dmg:8, col:'#6aa040',xp:2,coin:3,range:170},
+  vbat:   {n:'흡혈 박쥐',r:8, hp:16, spd:160,dmg:6, col:'#9a2030',xp:1,coin:1},
   shroom: {n:'포자 버섯',r:10,hp:30, spd:85, dmg:8, col:'#b04aa0',xp:2,coin:2,spore:true},
   scarab: {n:'모래 딱정벌레',r:10,hp:55, spd:120,dmg:10,col:'#2a8a7a',xp:2,coin:3},
   imp:    {n:'심연 임프',r:9, hp:26, spd:110,dmg:11,col:'#7a4ac8',xp:2,coin:3,range:200},
@@ -2457,7 +2457,7 @@ function resume(){S.mode='play';hide();}
 function pickType(){
   const r=S.round;
   const pool=[['grunt',7],['runner',r>=2?6:2],['slime',r>=1.5?5:0],['ranger',r>=2?4:0],['ghost',r>=3?3:0],['bomber',r>=3?3:0],['mage',r>=4?3:0],['tank',r>=3?2+r*.2:0],['support',r>=5?1.5:0],['boar',r>=2.5?3:0],
-    ['spider',r>=2?3:0],['jelly',r>=2.5?3:0],['shield',r>=3?2.5:0],['sniper',r>=4?2:0],['wraith',r>=4?2.5:0],['lancer',r>=5?2:0],
+    ['spider',r>=2?3:0],['jelly',r>=2.5?3:0],['shield',r>=3?1.5:0],['sniper',r>=4?2:0],['wraith',r>=4?2.5:0],['lancer',r>=5?2:0],
     ['wolf',r>=2.5?1.2:0],['sapling',r>=3?1.5:0],['shroom',r>=3?1.5:0],['vbat',r>=3.5?1.5:0],['scarab',r>=4?1.5:0],['imp',r>=4.5?1.5:0],
     ['thief',r>=2.5?1.5:0],['leech',r>=3?2:0],['totem',r>=3.5?1:0],['mortar',r>=4?1.5:0],
     ['hornrabbit',1.2],['bee',r>=1.3?1.2:0],['crow',r>=1.5?1.2:0],['scorpion',1.2],['mummy',r>=2?1.2:0],['yeti',r>=1.3?1.2:0],['frostsprite',r>=1.8?1.2:0],
@@ -2471,7 +2471,7 @@ function pickType(){
 }
 // 배경마다 자주 나오는 몬스터 (가중치 배율)
 const BIO_MOB=[{grunt:1.3,boar:1.3,wolf:1.5,hornrabbit:4,bee:3.5},{spider:2.5,runner:1.3,sapling:2,shroom:1.5,bee:2.5,frog:1.5,hornrabbit:2},{boar:2,lancer:1.5,wolf:1.4,thief:2,crow:4,hornrabbit:2.5},{wraith:2.5,ghost:2,vbat:2,totem:2,cultist:3.5,zombie:2.5,crow:2},{bomber:2,lancer:1.5,imp:1.5,mortar:1.8,firesprite:4,salamander:2.5},
-  {sniper:2.5,ranger:1.8,shield:1.5,scarab:2.5,mortar:1.8,scorpion:4,mummy:3.5},{shield:2,tank:1.5,sniper:1.3,wolf:1.5,yeti:4,frostsprite:3.5},{jelly:2.5,slime:2,spider:1.5,shroom:2,leech:2.5,frog:4,zombie:1.5},{jelly:1.8,wraith:1.5,tank:1.5,imp:1.5,crystalgolem:4,frostsprite:2},
+  {sniper:2.5,ranger:1.8,shield:1.5,scarab:2.5,mortar:1.8,scorpion:4,mummy:3.5},{shield:1.3,tank:1.5,sniper:1.3,wolf:1.5,yeti:4,frostsprite:3.5},{jelly:2.5,slime:2,spider:1.5,shroom:2,leech:2.5,frog:4,zombie:1.5},{jelly:1.8,wraith:1.5,tank:1.5,imp:1.5,crystalgolem:4,frostsprite:2},
   {ranger:2,wraith:2,ghost:1.8,shield:1.5,vbat:1.8,zombie:4,mummy:2.5,cultist:2.5,crow:2},{lancer:2,bomber:2,tank:1.5,imp:2.2,salamander:4,firesprite:3.5}];
 const BIO_SIG=new Set(BIO_MOB.flatMap(m=>Object.keys(m).filter(k=>m[k]>=2.5)));
 function diffAt(t){return 1+t/80+Math.pow(t/110,2.2);}
@@ -2898,7 +2898,7 @@ const BAI={
       if(e.bt>n*.35+1.1)go(e,'walk');break;}
     case 'thorns':{const n=ph2?3:2;if(e.f){e.f=0;e.n=0;}if(e.n<n&&e.bt>e.n*.6){eRing(e,ph2?20:16,170,e.dmg*.42,e.n*.15,6,'#8ee06a');e.n++;}
       if(e.bt>n*.6+.5)go(e,'walk');break;}
-    case 'grove':if(e.f){e.f=0;if(S.en.length<150){const k=ph2?5:3;for(let i=0;i<k;i++){const a=i/k*TAU;spawnAt('sapling',e.x+Math.cos(a)*90,e.y+Math.sin(a)*90,true);}}S.rings.push({x:e.x,y:e.y,r:20,max:120,life:.4,col:'#8ee06a'});}
+    case 'grove':if(e.f){e.f=0;if(S.en.length<150){const k=ph2?4:2;for(let i=0;i<k;i++){const a=i/k*TAU;spawnAt('sapling',e.x+Math.cos(a)*90,e.y+Math.sin(a)*90,true);}}S.rings.push({x:e.x,y:e.y,r:20,max:120,life:.4,col:'#8ee06a'});}
       if(e.bt>.9)go(e,'walk');break;
     case 'vines':{const n=ph2?5:3;if(e.f){e.f=0;e.n=0;}
       if(e.n<n&&e.bt>e.n*.4){const [x,y]=e.n?nearP(200):[p.x,p.y];e.n++;tele({k:'c',x,y,r:70,T:.9,dmg:e.dmg*1.1,col:'#6aa040',fx:t=>S.hz.push({x:t.x,y:t.y,r:60,life:4,dmg:0,slow:1,col:'#4a7a2a'})});}
@@ -3406,8 +3406,8 @@ function clsHit(t,b){if(S.pa.length>200)return;const R=(a,c)=>a+Math.random()*(c
 function onPHit(b,t){
   const p=S.p;b.hit.add(t);if(!b.child)clsHit(t,b);
   let dmg=b.dmg,col=null,label=null;
-  // 방패병: 방패 쪽(정면 ±60°)에서 온 탄은 피해 75% 감소. 근접·폭발·장판은 그대로
-  if(t.fa!=null&&ET[t.type].shield&&Math.cos(Math.atan2(b.y-t.y,b.x-t.x)-t.fa)>.5){dmg*=.25;if(Math.random()<.3){ftext(t.x,t.y-t.r-6,'막힘','#cfd6e0',12);burst(t.x+Math.cos(t.fa)*t.r,t.y+Math.sin(t.fa)*t.r,'#e4ecf6',3);}}
+  // 방패병: 방패 쪽(정면 ±60°)에서 온 탄은 피해 60% 감소. 근접·폭발·장판은 그대로
+  if(t.fa!=null&&ET[t.type].shield&&Math.cos(Math.atan2(b.y-t.y,b.x-t.x)-t.fa)>.5){dmg*=.4;if(Math.random()<.3){ftext(t.x,t.y-t.r-6,'막힘','#cfd6e0',12);burst(t.x+Math.cos(t.fa)*t.r,t.y+Math.sin(t.fa)*t.r,'#e4ecf6',3);}}
   if(!b.child&&has('chainlt')){S.p.hitN=(S.p.hitN||0)+1;if(S.p.hitN%J()===0)lightning(t,has('f_storm')?10:3+2*L('chainlt'));}
   if(b.roll===1&&has('snake'))dmg=Math.max(dmg,has('f_dicemaster')?Math.min(t.maxHp*.25,pDmg()*15):Math.min(t.maxHp*lv3('snake',.1,.15,.2),pDmg()*(3+2*L('snake'))));
   if(b.x7){dmg*=7;col='#ff4fd8';}
@@ -4874,7 +4874,7 @@ const MOBINFO={
   boar:['예고선 후 빠른 돌진','주황 예고선이 보이면 옆으로 피하기'],
   tank:['느린 몸통 박치기 (강함)','체력이 매우 높음. 길을 막으니 돌아가기'],
   goblin:['공격 안 함. 도망침','보물 고블린 이벤트. 잡으면 골드 폭탄'],
-  shield:['몸통 박치기','정면에서 맞는 투사체 피해 75% 감소. 방패가 천천히 돌아가니 옆·뒤를 노리기. 근접·폭발·장판은 그대로 들어감'],
+  shield:['몸통 박치기','정면에서 맞는 투사체 피해 60% 감소. 방패가 천천히 돌아가니 옆·뒤를 노리기. 근접·폭발·장판은 그대로 들어감'],
   spider:['거미줄 발사 → 4초간 거미줄 (밟으면 이동 속도 −40%)','거미줄이 깔린 곳을 피해서 이동'],
   jelly:['몸통 박치기','죽으면 중간 젤리 2마리 → 다시 꼬마 젤리 2마리씩 (총 7마리). 광역 공격이 유리'],
   jellym:['몸통 박치기','분열 젤리가 죽으면 나옴. 한 번 더 갈라짐'],jellys:['몸통 박치기','젤리의 마지막 분열. 빠르지만 약함'],
@@ -4938,7 +4938,7 @@ const BPAT={
   bossA:[['그림자 돌진','내 뒤쪽으로 순간이동 후 관통 돌진 2~3번','blink'],['단검 고리','사방 단검. 한 군데 빈틈으로 빠져나가기','ring'],['표식 폭발','내 위치를 따라오는 폭발 4~5번','target'],['단검 투척','빠른 단검 3발씩','fan']],
   bossH:[['화염 숨결','좌우로 흔들리며 불 줄기를 뿜음','spiral'],['황금 비','내 주변에 금덩이 10~14개 낙하','rain'],['급강하','예고선 후 2~3번 돌진, 끝마다 불꽃 고리','charge'],['날갯바람','사방 바람 탄 3겹','ring']],
   bossW:[['돌진 연타','짧은 예고선 후 3~4번 연속 돌진','charge'],['울부짖기','늑대 2~4마리 소환 + 원형 탄','summon'],['할퀴기','내 위치를 따라오는 발톱 공격 3~4번','target'],['발톱 투척','거리를 재며 발톱 3발씩','fan']],
-  bossT:[['뿌리 솟구침','나를 향해 직선 뿌리 3~5줄 (예고선)','line'],['가시 고리','사방 가시 2~3겹','ring'],['묘목 소환','가시를 쏘는 묘목 3~5마리','summon'],['덩굴','내 주변에 덩굴 장판 (둔화)','pool']],
+  bossT:[['뿌리 솟구침','나를 향해 직선 뿌리 3~5줄 (예고선)','line'],['가시 고리','사방 가시 2~3겹','ring'],['묘목 소환','가시를 쏘는 묘목 2~4마리','summon'],['덩굴','내 주변에 덩굴 장판 (둔화)','pool']],
   bossV:[['박쥐 떼','흡혈 박쥐 4~6마리. 나를 물면 백작 회복','summon'],['안개 이동','내 근처로 2~3번 순간이동하며 핏빛 고리','blink'],['흡혈','나를 끌어당기며 원형 탄. 대시로 끊기','pull'],['핏덩이','느리고 큰 핏덩이 부채꼴','fan']],
   bossM:[['포자 구름','내 위치·주변에 독 장판 5~7개','rain'],['점프','내 위치로 2~3번 점프, 착지마다 포자 고리','jump'],['버섯 소환','죽으면 독 구름을 남기는 버섯 4~6마리','summon'],['포자 고리','사방 포자 2~3겹','ring']],
   bossD:[['땅속 기습','땅속에 숨어 무적 → 내 발밑에서 솟구침 2~3번','burrow'],['꼬리 휩쓸기','3방향 직선 동시 공격','line'],['바위 부채꼴','바위 5발씩','fan'],['딱정벌레 소환','딱정벌레 4~6마리','summon']],
