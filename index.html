@@ -3402,7 +3402,18 @@ function draw(){
     ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='24px sans-serif';ctx.fillText(M.icon,0,-9);
     ctx.fillStyle='#f1e7cf';ctx.font='13px "Do Hyeon",sans-serif';ctx.fillText(M.n,0,13);
     ctx.fillStyle='rgba(214,169,74,.9)';ctx.fillRect(-34,22,68*tb.life/tb.max,4);ctx.restore();}
-  for(const c of S.dr){if(c.x<camX-20||c.x>camX+W+20||c.y<camY-20||c.y>camY+H+20)continue;if(c.xp){const z=c.v>=8?6:c.v>=3?5:4;ctx.fillStyle='rgba(95,220,255,.3)';ctx.beginPath();ctx.arc(c.x,c.y,z+3,0,TAU);ctx.fill();ctx.fillStyle='#2fa8d8';ctx.beginPath();ctx.moveTo(c.x,c.y-z-1);ctx.lineTo(c.x+z,c.y);ctx.lineTo(c.x,c.y+z+1);ctx.lineTo(c.x-z,c.y);ctx.closePath();ctx.fill();ctx.fillStyle='#bff3ff';ctx.fillRect(c.x-1.5,c.y-z+1,2,3);continue;}ctx.fillStyle='#9c6f1f';ctx.beginPath();ctx.arc(c.x,c.y+1,5,0,TAU);ctx.fill();ctx.fillStyle='#e8bb4f';ctx.beginPath();ctx.arc(c.x,c.y,5,0,TAU);ctx.fill();ctx.fillStyle='#fff1b8';ctx.beginPath();ctx.arc(c.x-1.5,c.y-1.5,1.6,0,TAU);ctx.fill();}
+  // 떨어진 보상: 경험치는 빛나는 보석(양에 따라 초록→파랑→보라→주황, 크기도 커짐), 골드는 반짝이는 금화(많으면 금화 더미). 어두운 외곽선으로 바닥에서 잘 보이게
+  {const tw=S.t*6;for(const c of S.dr){if(c.x<camX-30||c.x>camX+W+30||c.y<camY-30||c.y>camY+H+30)continue;const bob=Math.sin(tw*.5+c.x*.05)*1.5,x=c.x,y=c.y+bob;
+    if(c.xp){const t=c.v>=20?3:c.v>=8?2:c.v>=3?1:0,z=[5,6,7.5,9][t],col=[['#2a8a3a','#5ae070','#c8ffd0'],['#1a6ab0','#4ab0f0','#d0f0ff'],['#6a2ab0','#b070ff','#f0d8ff'],['#b0501a','#ffa040','#fff0c8']][t];
+      ctx.globalAlpha=.35+Math.sin(tw+c.y)*.12;ctx.fillStyle=col[1];ctx.beginPath();ctx.arc(x,y,z+5,0,TAU);ctx.fill();ctx.globalAlpha=1;
+      ctx.fillStyle='#10141c';ctx.beginPath();ctx.moveTo(x,y-z-2.5);ctx.lineTo(x+z+1.5,y);ctx.lineTo(x,y+z+2.5);ctx.lineTo(x-z-1.5,y);ctx.closePath();ctx.fill();
+      ctx.fillStyle=col[0];ctx.beginPath();ctx.moveTo(x,y-z-1);ctx.lineTo(x+z,y);ctx.lineTo(x,y+z+1);ctx.lineTo(x-z,y);ctx.closePath();ctx.fill();
+      ctx.fillStyle=col[1];ctx.beginPath();ctx.moveTo(x,y-z-1);ctx.lineTo(x+z,y);ctx.lineTo(x,y);ctx.lineTo(x-z,y);ctx.closePath();ctx.fill();
+      ctx.fillStyle=col[2];ctx.fillRect(x-z*.45,y-z*.55,2,3);if(((tw+c.x)|0)%7===0){ctx.fillRect(x+z*.3,y-z-4,1.5,4);ctx.fillRect(x+z*.3-1.5,y-z-2.5,4.5,1.5);}continue;}
+    const n=c.v>=20?3:c.v>=6?2:1;for(let k=n-1;k>=0;k--){const cx=x+(k===1?-4:k===2?4:0),cy=y-k*3.5;
+      ctx.fillStyle='#2a1a06';ctx.beginPath();ctx.ellipse(cx,cy+1,7,6,0,0,TAU);ctx.fill();ctx.fillStyle='#a8741a';ctx.beginPath();ctx.ellipse(cx,cy+.8,6,5,0,0,TAU);ctx.fill();
+      ctx.fillStyle='#ffcf3a';ctx.beginPath();ctx.ellipse(cx,cy-.5,6,4.6,0,0,TAU);ctx.fill();ctx.fillStyle='#b8861f';ctx.fillRect(cx-1,cy-2.5,2,4);ctx.fillStyle='#fff6c8';ctx.fillRect(cx-3.5,cy-2.5,2,1.5);}
+    if(((tw*.7+c.y)|0)%9===0){ctx.fillStyle='#ffffff';ctx.fillRect(x+4,y-8-n*3,1.5,5);ctx.fillRect(x+2.25,y-6.25-n*3,5,1.5);}}}
   if(evOn('shrine')){const ev=S.ev,k=ev.ch/2.5;ctx.save();ctx.globalAlpha=.18+Math.sin(S.t*4)*.06;ctx.fillStyle='#9fd3ff';ctx.beginPath();ctx.arc(ev.x,ev.y,ev.r,0,TAU);ctx.fill();ctx.globalAlpha=1;
     ctx.strokeStyle='#9fd3ff';ctx.lineWidth=2;ctx.setLineDash([6,6]);ctx.beginPath();ctx.arc(ev.x,ev.y,ev.r,S.t,S.t+TAU);ctx.stroke();ctx.setLineDash([]);
     if(k>0){ctx.strokeStyle='#ffffff';ctx.lineWidth=5;ctx.beginPath();ctx.arc(ev.x,ev.y,ev.r-6,-Math.PI/2,-Math.PI/2+TAU*k);ctx.stroke();}
