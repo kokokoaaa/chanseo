@@ -2192,7 +2192,8 @@ function eShot(x,y,a,spd,dmg,r=6,col,life=4){S.pr.push({x,y,vx:Math.cos(a)*spd,v
 function eRing(e,n,spd,dmg,off=0,r=6,col){for(let i=0;i<n;i++)eShot(e.x,e.y,off+i*TAU/n,spd,dmg,r,col);}
 function eFan(e,n,spread,spd,dmg,r=6,col){const a=Math.atan2(S.p.y-e.y,S.p.x-e.x);for(let i=0;i<n;i++)eShot(e.x,e.y,a+(n>1?(i/(n-1)-.5)*spread:0),spd,dmg,r,col);}
 function stepTo(e,tx,ty,spd,dt){const dx=tx-e.x,dy=ty-e.y,d=Math.hypot(dx,dy)||1,s=Math.min(d,spd*dt);e.x+=dx/d*s;e.y+=dy/d*s;return d;}
-function keepDist(e,o,dt,lo,hi){const {p,d,sp}=o;if(d<lo)stepTo(e,e.x*2-p.x,e.y*2-p.y,sp,dt);else if(d>hi)stepTo(e,p.x,p.y,sp,dt);else{const a=Math.atan2(e.y-p.y,e.x-p.x)+(e.dir||1)*.9*dt*sp/Math.max(d,1);e.x=p.x+Math.cos(a)*d;e.y=p.y+Math.sin(a)*d;}}
+// 거리 유지형 보스: 근접 직업 상대로는 유지 거리를 절반 가까이로 줄임 (안 그러면 근접은 칼이 닿을 일이 없음)
+function keepDist(e,o,dt,lo,hi){if(meleeOn()){lo*=.45;hi*=.55;}const {p,d,sp}=o;if(d<lo)stepTo(e,e.x*2-p.x,e.y*2-p.y,sp,dt);else if(d>hi)stepTo(e,p.x,p.y,sp,dt);else{const a=Math.atan2(e.y-p.y,e.x-p.x)+(e.dir||1)*.9*dt*sp/Math.max(d,1);e.x=p.x+Math.cos(a)*d;e.y=p.y+Math.sin(a)*d;}}
 const nearP=r=>{const p=S.p,a=Math.random()*TAU,k=Math.random()*r;return [clamp(p.x+Math.cos(a)*k,30,WW-30),clamp(p.y+Math.sin(a)*k,30,WH-30)];};
 // 광폭화: 기준 시간을 넘기면 30초마다 단계 상승 (최대 5단계). 단계당 공격력 +12%(일반)~+30%(신), 이동 속도 +5%, 결계 −5%, 방어력 무시 +12%, 내 회복량 −15%
 // 보스 체력이 높은 난이도일수록 기준 시간도 늘어남 (어려움 ×1.35, 지옥 ×1.7, 신 ×2.2)
@@ -2243,7 +2244,7 @@ const BAI={
     case 'meteor':{const n=ph2?8:5;if(e.f){e.f=0;e.n=0;}
       if(e.n<n&&e.bt>e.n*.16){const [x,y]=e.n?nearP(230):[p.x,p.y];e.n++;tele({k:'c',x,y,r:78,T:1.15,dmg:e.dmg*1.35,col:'#c98af0',fx:t=>{burst(t.x,t.y,'#c98af0',16);S.shake=.12;}});}
       keepDist(e,o,dt,240,360);if(e.bt>n*.16+1.5)go(e,'float');break;}
-    case 'blink':if(e.f){e.f=0;burst(e.x,e.y,'#8a3fc0',20);const a=Math.random()*TAU;e.x=clamp(p.x+Math.cos(a)*270,60,WW-60);e.y=clamp(p.y+Math.sin(a)*270,60,WH-60);burst(e.x,e.y,'#c98af0',20);e.n=0;}
+    case 'blink':if(e.f){e.f=0;burst(e.x,e.y,'#8a3fc0',20);const a=Math.random()*TAU;const bd=meleeOn()?150:270;e.x=clamp(p.x+Math.cos(a)*bd,60,WW-60);e.y=clamp(p.y+Math.sin(a)*bd,60,WH-60);burst(e.x,e.y,'#c98af0',20);e.n=0;}
       if(e.n<(ph2?3:2)&&e.bt>.45+e.n*.45){e.n++;eFan(e,ph2?7:5,1,260,e.dmg*.5,6,'#e9dcff');}
       if(e.bt>1.6)go(e,'float');break;
     case 'summon':if(e.f){e.f=0;if(S.en.length<150){const k=ph2?6:4;for(let i=0;i<k;i++){const a=i/k*TAU;spawnAt(i%2?'mage':'ranger',e.x+Math.cos(a)*90,e.y+Math.sin(a)*90,true);}S.rings.push({x:e.x,y:e.y,r:20,max:110,life:.4,col:'#c98af0'});}}
