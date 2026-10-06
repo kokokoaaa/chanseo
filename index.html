@@ -4578,6 +4578,8 @@ function fullOptions(){
   return [...fz,...sw];
   return S.augs.filter(a=>AUG_UP&&a.lv<3&&a.t!=='v'&&a.t!=='f'&&a.t!=='d'&&!(a.id==='luckydie'&&critFull())).sort(()=>Math.random()-.5).slice(0,3).map(o=>({up:true,ref:o}));
 }
+// 증강 포기 골드: 첫 다시 뽑기보다 넉넉하게 (슬롯이 찰수록 조금 더)
+const skipG=()=>Math.round(price(100)*(1+.1*slotCount()));
 function openAug(free,why,fixed,fixedTier){
   S.mode='aug';why=why||S.augWhy||'증강';S.augWhy=why;
   const full=slotCount()>=MAXA;
@@ -4588,7 +4590,7 @@ function openAug(free,why,fixed,fixedTier){
   show(`<h2>증강 선택</h2><p class="sub">슬롯 <b style="color:${full?'#ff9ad0':'var(--ivory)'}">${slotCount()}/${MAXA}</b>${full?' · <b style="color:#ff9ad0">가득 참 · 고르면 교체</b>':''}</p>
   <div class="cards">${opts.map((a,i)=>`<div class="cwrap">${augHtml(a,i)}${(S.seals||0)>0&&!a.up?`<button class="sealb" data-seal="${i}" title="이번 판에서 이 증강이 다시 나오지 않음">🔒 봉인 <small>(남은 ${S.seals}회)</small></button>`:''}</div>`).join('')}</div>
   <button class="btn ghost" id="reroll" ${!free&&S.gold<cost?'disabled':''}>다시 뽑기<small>${free?(free===true?(META.sk.reroll?'무료 2회':'무료 1회'):'무료 '+free+'회'):cost+'골드 (보유 '+S.gold+') · 다음 ×1.6'}</small></button>
-  <button class="btn ghost" id="augSkip">포기<small>${price(40)}골드 받고 넘기기</small></button>
+  <button class="btn ghost" id="augSkip">포기<small>${skipG()}골드 받고 넘기기</small></button>
   ${full?`<button class="btn ghost" id="augStop">🚫 이번 판은 증강 그만 받기<small>앞으로 증강 차례에 스탯 카드를 대신 받아요. 스탯 카드 창에서 다시 켤 수 있어요</small></button>`:''}
   <button class="btn ghost" data-stats>내 스탯 보기</button>`);
   {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}bindPeek();if(opts.some(a=>a.t==='p'))augFx('💎 프리즘 등장!','','#d68cff',true);
@@ -4597,7 +4599,7 @@ function openAug(free,why,fixed,fixedTier){
     if(a.swap&&slotCount()>=MAXA){openSwap(a,opts,free,why);return;}
     gainAug(a);
     openNext();});
-  $('augSkip').onclick=()=>{S.arr=0;const g=price(40);S.gold+=g;toast(`증강 포기 · ${g} 골드`);openNext();};
+  $('augSkip').onclick=()=>{S.arr=0;const g=skipG();S.gold+=g;toast(`증강 포기 · ${g} 골드`);openNext();};
   if($('augStop'))$('augStop').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.firstChild.textContent='한 번 더 누르면 증강 그만 받기 ';return;}S.noAug=true;toast('이번 판은 증강을 더 받지 않아요 · 대신 스탯 카드');S.boost=true;openStat();};
   // 봉인: 이번 판에서 이 증강 제외, 그 자리는 새 증강으로 바로 교체
   ov.querySelectorAll('[data-seal]').forEach(b=>b.onclick=()=>{if(!(S.seals>0))return;const i=+b.dataset.seal,a=opts[i];S.seals--;(S.banL=S.banL||[]).push(a.id);toast(`🔒 ${a.n} 봉인 · 이번 판에서 다시 안 나옴 (그 칸만 새로 뽑음, 다시 뽑기 가격은 그대로)`);
