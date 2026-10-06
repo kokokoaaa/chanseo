@@ -1567,7 +1567,7 @@ const CARDS=[
   {req:()=>S.p.luck<LUCK_CAP,n:'네잎클로버',v:[[.8,1.6,1]],t:v=>`행운 +${v[0]}. 높은 등급과 좋은 수치가 잘 나옵니다`,a:(p,v)=>{p.luck=Math.min(LUCK_CAP,Math.round((p.luck+v[0])*10)/10);}},
   {cc:1,n:'급소 노리기',v:[[1.5,3,1]],t:v=>`치명타 확률 +${v[0]}%`,a:(p,v)=>{p.crit+=v[0]/100;}},
   {cm:1,n:'치명상',v:[[8,16,0]],t:v=>`치명타 피해 +${v[0]}%`,a:(p,v)=>{p.critM+=v[0]/100;}},
-  {n:'가속 탄',v:[[6,12,0]],t:v=>`탄속 +${v[0]}%`,a:(p,v)=>{p.bspd*=1+v[0]/100;}},
+  {req:()=>!pureMelee(),n:'가속 탄',v:[[6,12,0]],t:v=>`탄속 +${v[0]}%`,a:(p,v)=>{p.bspd*=1+v[0]/100;}},
   {n:'배움의 서',v:[[3,6,1]],t:v=>`경험치 획득 +${v[0]}%`,a:(p,v)=>{p.xpM=(p.xpM||1)+v[0]/100;}},
   {n:'황금 주머니',v:[[4,9,0]],t:v=>`골드 획득 +${v[0]}%`,a:(p,v)=>{p.goldM+=v[0]/100;}},
   {req:()=>S.p.dodge<DODGE_CAP,n:'날렵한 몸놀림',v:[[1.2,2.5,1]],t:v=>`회피 +${v[0]}%`,a:(p,v)=>{p.dodge+=v[0]/100;}},
@@ -1583,7 +1583,7 @@ const CARDS=[
   {cc:1,n:'사냥꾼의 눈',v:[[.6,1.2,1],[2,3.5,1]],t:v=>`치명타 확률 +${v[0]}%, 사거리 +${v[1]}%`,a:(p,v)=>{p.crit+=v[0]/100;p.range*=1+v[1]/100;}},
   {n:'전투 본능',v:[[1.6,3.4,1],[1.6,3.4,1]],t:v=>`공격력 +${v[0]}%, 공격 속도 +${v[1]}%`,a:(p,v)=>{p.dmgP=(p.dmgP||0)+v[0]/100;p.rateP=(p.rateP||0)+v[1]/100;}},
   {n:'철벽 자세',v:[[1.5,2.5,1],[4,7,0]],t:v=>`방어력 +${v[0]}, 최대 체력 +${v[1]}`,a:(p,v)=>{p.armor+=v[0];p.maxHp+=v[1];p.hp+=v[1];}},
-  {n:'쾌속 장전',v:[[3,6,0],[1.6,3.4,1]],t:v=>`탄속 +${v[0]}%, 공격 속도 +${v[1]}%`,a:(p,v)=>{p.bspd*=1+v[0]/100;p.rateP=(p.rateP||0)+v[1]/100;}},
+  {req:()=>!pureMelee(),n:'쾌속 장전',v:[[3,6,0],[1.6,3.4,1]],t:v=>`탄속 +${v[0]}%, 공격 속도 +${v[1]}%`,a:(p,v)=>{p.bspd*=1+v[0]/100;p.rateP=(p.rateP||0)+v[1]/100;}},
   {n:'질주 본능',v:[[1,2,1],[2,3.5,1]],t:v=>`이동 속도 +${v[0]}%, 대시 재사용 −${v[1]}%`,a:(p,v)=>{p.speed*=1+v[0]/100;p.dashMul*=1-v[1]/100;}},
   {fr:'r',n:'도박꾼의 주사위',d:'공격력 −15% ~ +25%, 굴려봐야 압니다',f:p=>{const m=Math.round(-15+Math.random()*40);p.dmgP=(p.dmgP||0)+m/100;return `공격력 ${m>=0?'+':''}${m}%`;}},
   {fr:'e',n:'관통 탄',d:'관통 +1',f:p=>{p.pierce+=1;}},
@@ -1614,7 +1614,7 @@ function withActual(desc,f){const W=a=>a.map(l=>`<div>${l}</div>`).join(''),L=de
     if(a==null||b==null||Math.abs(b-a)<Math.pow(10,-m[2])/2)return line;const d=b-a;
     return `${line} <small style="opacity:.7">(${d>0?'+':'−'}${Math.abs(d).toFixed(m[2])})</small>`;}));}
 // 증강 미리보기: 이 증강을 얻었을 때(★2) 주요 스탯이 얼마나 바뀌는지. 잠깐 적용해서 계산한 뒤 그대로 되돌림
-const PREV_ST=[['공격력',()=>pDmg(),1],['공격 속도',()=>pRate(),2,'/초'],['최대 체력',()=>(hpSync(),S.p.maxHp),0],['방어력',()=>armorEff(),0],['회피',()=>dodgeC()*100,1,'%'],['치명타 확률',()=>critC()*100,1,'%'],['치명타 피해',()=>critMul()*100,0,'%'],['이동 속도',()=>moveSpd(),0],['사거리',()=>S.p.range,0],['탄속',()=>S.p.bspd,0],['관통',()=>S.p.pierce,0],['탄환',()=>S.p.multi,0,'발'],['흡혈',()=>S.p.lifesteal*100,1,'%'],['초당 재생',()=>S.p.regen,1],['행운',()=>LK(),1],['골드 획득',()=>S.p.goldM*100,0,'%'],['대시 재사용',()=>dashCdVal(),2,'초']];
+const PREV_ST=[['공격력',()=>pDmg(),1],['공격 속도',()=>pRate(),2,'/초'],['최대 체력',()=>(hpSync(),S.p.maxHp),0],['방어력',()=>armorEff(),0],['회피',()=>dodgeC()*100,1,'%'],['치명타 확률',()=>critC()*100,1,'%'],['치명타 피해',()=>critMul()*100,0,'%'],['이동 속도',()=>moveSpd(),0],['사거리',()=>pureMelee()?meleeR():S.p.range,0],['탄속',()=>pureMelee()?null:S.p.bspd,0],['관통',()=>pureMelee()?meleeCap():S.p.pierce,0],['탄환',()=>pureMelee()?meleeArc(S.p.multi):S.p.multi,0,'발'],['흡혈',()=>S.p.lifesteal*100,1,'%'],['초당 재생',()=>S.p.regen,1],['행운',()=>LK(),1],['골드 획득',()=>S.p.goldM*100,0,'%'],['대시 재사용',()=>dashCdVal(),2,'초']];
 function augPreview(a){
   if(!S||!S.p||!a||a.up)return '';
   const snap=()=>PREV_ST.map(x=>{try{return x[1]();}catch(e){return null;}});
@@ -1622,7 +1622,7 @@ function augPreview(a){
   try{b0=snap();const c={...P0};S.p=c;S.augs=[...A0,{...a,tags:a.tags||[],lv:a.t==='v'||a.t==='f'?1:2}];tagCount();if(a.f)for(let i=0;i<(a.t==='v'||a.t==='f'?1:2);i++)applyQ(a.f,c,a.q);b1=snap();}
   catch(e){b1=null;}finally{S.p=P0;S.augs=A0;S.own=o0;S.oq=q0;S.tagc=t0;S.gold=g0;}
   if(!b1)return '';
-  const rows=[];PREV_ST.forEach(([n,,dp,u],i)=>{const x=b0[i],y=b1[i];if(x==null||y==null||Math.abs(y-x)<Math.pow(10,-dp)/2)return;const f=v=>(+v.toFixed(dp)).toLocaleString()+(u||''),pc=x>0&&!u?` (${y>x?'+':''}${Math.round((y/x-1)*100)}%)`:'';rows.push(`<span class="pvr ${(n==='대시 재사용'?y<x:y>x)?'up':'dn'}">${n} ${f(x)} → <b>${f(y)}</b>${pc}</span>`);});
+  const rows=[];PREV_ST.forEach(([n,,dp,u],i)=>{const x=b0[i],y=b1[i];if(x==null||y==null||Math.abs(y-x)<Math.pow(10,-dp)/2)return;const f=v=>(+v.toFixed(dp)).toLocaleString()+(u||''),pc=x>0&&!u?` (${y>x?'+':''}${Math.round((y/x-1)*100)}%)`:'';const pm=pureMelee();if(n==='탄환'&&pm)u='°';n=pm?({사거리:'근접 거리',관통:'동시 타격',탄환:'베기 각도'}[n]||n):n;rows.push(`<span class="pvr ${(n==='대시 재사용'?y<x:y>x)?'up':'dn'}">${n} ${f(x)} → <b>${f(y)}</b>${pc}</span>`);});
   return rows.length?`<span class="apv">${rows.slice(0,5).join('')}</span>`:'';
 }
 // 숫자로 오르는 기본 스탯(공격력·최대 체력·방어력·체력 재생)은 레벨에 비례해 커짐: × (1 + 레벨 × 4%). 퍼센트·초·행운·광란은 그대로
@@ -2233,7 +2233,10 @@ function spawnAt(type,x,y,noElite,forceElite){
   const om=endless()?1:Math.pow(1.3,Math.max(0,(S.gt||0)-600)/60);
   const m=(T.boss?1+.12*(Math.min(d,50)-1):(1+.35*(d-1))*om*nmHp())*(elite?4:1)*(T.boss?dfM().bhp:cm.hp*dfHp()),dm=(T.boss?1+.08*(d-1):(1+.15*(d-1))*om)*nmDm()*(elite?1.5:1)*cm.dm*dfM().dm;
   S.en.push({type,x,y,elite,r:T.r*(elite?1.45:1)*(T.boss?1:cm.sz),hp:T.hp*m,maxHp:T.hp*m,dmg:T.dmg*dm,spd:T.spd*Math.min(1.75,1+.025*(d-1))*(1+.07*Math.max(0,(S.gt||0)-600)/60),cd:rand(.3,1.2),hcd:1,bcd:2.5,hit:0,rot:Math.random()*6,orbCd:0,pt:0,ps:0,pTick:0,alive:true,boss:!!T.boss});
-  const e=S.en[S.en.length-1];if(elite&&effT()>150){const ks=Object.keys(AFFIX);e.aff=ks[Math.floor(Math.random()*ks.length)];if(AFFIX[e.aff].on)AFFIX[e.aff].on(e);}
+  const e=S.en[S.en.length-1];
+  // 몬스터 도감: 처음 만난 몬스터 기록
+  if(!META.mob[type]){META.mob[type]=1;saveMeta();if(!T.boss)toast('📖 새 몬스터 발견: '+T.n);}
+  if(elite&&effT()>150){const ks=Object.keys(AFFIX);e.aff=ks[Math.floor(Math.random()*ks.length)];if(AFFIX[e.aff].on)AFFIX[e.aff].on(e);}
   return e;
 }
 function ringPos(extra=40){const p=S.p,a=(p.moving&&Math.random()<.6)?Math.atan2(p.lmy,p.lmx)+rand(-1.1,1.1):Math.random()*TAU,r=Math.hypot(GW,GH)/2+extra;return [clamp(p.x+Math.cos(a)*r,20,WW-20),clamp(p.y+Math.sin(a)*r,20,WH-20)];}
@@ -2849,6 +2852,10 @@ function rollDie(){const p=S.p;if(p.all6>0)return 6;const mn=tag('dice')>=6?3:1,
 const MELEE_CLS=['berserk','knight','paladin'];
 const meleeOn=()=>MELEE_CLS.includes(S.cls)||(S.cls==='druid'&&S.p.bearT>0);
 // 베기 반경 = 사거리의 65% (기본 약 130). 사거리 스탯이 오르면 같이 넓어짐
+// 근접 전용 직업(기사·성기사·광전사): 탄환을 쏘지 않아 탄속이 쓰이지 않음. 사거리·관통·탄환은 근접 거리·동시 타격 수·베기 각도로 바뀌어 적용
+const pureMelee=()=>MELEE_CLS.includes(S.cls);
+const meleeCap=n=>(S.cls==='berserk'?2:3)+2*Math.max(0,S.p.pierce);
+const meleeArc=n=>Math.round(Math.min(360,2*(55+(n-1)*20)));
 const meleeR=()=>(S.cls==='druid'?Math.min(S.p.range,200):S.p.range)*.65;
 // 근접은 반경이 짧은 대신 피해 ×1.5 (붙어서 싸우는 위험의 대가)
 const MELEE_DM=1.5;
@@ -2883,8 +2890,8 @@ function playerFire(tg){
   if(has('focus'))shock*=n<=1?1+lv3('focus',.35,.5,.65):1.1;
   if(has('giant'))shock*=1+lv3('giant',.15,.25,.35);
   // 탄속 보너스: 직업 기본 탄속보다 빠른 만큼(1%당) 기본 공격 탄환 피해 +0.5% (최대 +100%). 탄속 카드·증강이 딜 선택지가 되게
-  shock*=1+bspdB();
-  if(has('velocity'))shock*=1+Math.min(has('f_accel')?1.5:1,p.bspd/100*lv3('velocity',.035,.05,.065)*(has('f_accel')?2:1));
+  if(!meleeOn())shock*=1+bspdB();
+  if(has('velocity')&&!meleeOn())shock*=1+Math.min(has('f_accel')?1.5:1,p.bspd/100*lv3('velocity',.035,.05,.065)*(has('f_accel')?2:1));
   if(p.ocN>0){shock*=lv3('overcharge',1.8,2.2,2.6);p.ocN--;}
   if(has('goldbullet'))shock*=1+Math.min(lv3('goldbullet',.3,.45,.6)*(has('f_compound')?2:1),Math.floor(S.gold/100)*.03);
   const base=Math.atan2(tg.y-p.y,tg.x-p.x),d=pDmg()*mult*shock;p.aimA=base;p.atkT=CLASSES[S.cls].atk;p.face=Math.cos(base)>=0?1:-1;
@@ -4150,7 +4157,7 @@ function drawPreviews(){
     HERO.draw(k,anim,t,anim==='attack'?cycle/.6:0,false);const x=c.getContext('2d');x.imageSmoothingEnabled=false;const sz=Math.max(40,Math.round(c.clientWidth*(window.devicePixelRatio||1)));if(c.width!==sz){c.width=c.height=sz;}const x2=c.getContext('2d');x2.imageSmoothingEnabled=false;x2.clearRect(0,0,sz,sz);{const k=Math.max(1,Math.floor(sz/40)),o=(sz-40*k)>>1;x2.drawImage(HERO.canvas,o,o+k*2,40*k,40*k);}});
 }
 /* ---------- meta progression ---------- */
-const META=(()=>{try{const m=JSON.parse(localStorage.getItem('chanseo_meta')||'{}');const pc={luck:3,gold:2,xp:3,aug:6,key:5};let rf=0;for(const k in (m.prep||{}))rf+=(m.prep[k]||0)*(pc[k]||0);return {medals:(m.medals||0)+rf,total:m.total||0,lv:m.lv||{},sk:m.sk||{},clears:m.clears||{},cos:m.cos||{own:{},eq:{}},spent:m.spent!=null?m.spent:null,ucls:m.ucls||[],tk:m.tk||0};}catch(e){return {medals:0,total:0,lv:{},sk:{},clears:{},cos:{own:{},eq:{}},ucls:[],tk:0};}})();
+const META=(()=>{try{const m=JSON.parse(localStorage.getItem('chanseo_meta')||'{}');const pc={luck:3,gold:2,xp:3,aug:6,key:5};let rf=0;for(const k in (m.prep||{}))rf+=(m.prep[k]||0)*(pc[k]||0);return {medals:(m.medals||0)+rf,total:m.total||0,lv:m.lv||{},sk:m.sk||{},clears:m.clears||{},cos:m.cos||{own:{},eq:{}},spent:m.spent!=null?m.spent:null,ucls:m.ucls||[],tk:m.tk||0,mob:m.mob||{}};}catch(e){return {medals:0,total:0,lv:{},sk:{},clears:{},cos:{own:{},eq:{}},ucls:[],tk:0,mob:{}};}})();
 // 직업 언록: 지옥·신 난이도를 깰 때마다 언록권 1장, 잠긴 직업 하나를 골라 엶
 function unlockInfo(k){const C=CLASSES[k],t=C.fav[0],T=TAGS[t],aug=AUGS.filter(a=>!a.cls&&a.tags.includes(t)),own=AUGS.filter(a=>a.cls===k),vip=VIPS.filter(v=>v.tags.includes(t)),cd=Object.keys(CARD_TAG).filter(n=>CARD_TAG[n].length&&CARD_TAG[n].every(x=>x===t));
   return `<div class="cp" style="margin-top:8px"><em>🔓 봉인 해제하면 함께 열려요</em>${T.n} 시너지 증강 ${aug.length}개 (${aug.slice(0,6).map(a=>a.n).join(', ')}${aug.length>6?' 등':''})${vip.length?`, ${T.n} VIP ${vip.length}개`:''}${cd.length?`, 전용 스탯 카드 ${cd.length}종`:''}, ${C.n} 전용 증강 ${own.length}개${(MSTAT.find(x=>x.cls===k)||{}).n?`, 영구 강화 '${MSTAT.find(x=>x.cls===k).n}'`:''}<br><small style="color:var(--muted)">잠겨 있는 동안은 다른 직업으로 해도 이 시너지 증강이 나오지 않아요</small></div>`;}
@@ -4356,6 +4363,42 @@ function cosPreview(x,anchor){
   let top=r.top+r.height/2-bh/2;if(left===Math.max(8,(innerWidth-bw)/2))top=r.top-bh-8;box.style.left=left+'px';box.style.top=Math.max(8,Math.min(innerHeight-bh-8,top))+'px';
 }
 function cosPreviewHide(){cancelAnimationFrame(cosPrevRAF);const b=document.getElementById('cosPrev');if(b)b.style.display='none';}
+// 몬스터 도감 설명: 공격 방식 / 대처법. 보스는 패턴
+const MOBINFO={
+  grunt:['몸통 박치기','가장 흔한 적. 무리로 몰려옴'],
+  runner:['빠르게 날아와 박치기','빠르지만 약함. 다른 몹과 겹치지 않고 파고듦'],
+  slime:['몸통 박치기','죽으면 꼬마 슬라임 2마리로 갈라짐'],slimelet:['몸통 박치기','슬라임이 죽으면 나옴. 빠름'],
+  ranger:['거리를 두고 화살','가까이 가면 뒤로 물러남. 원거리 공격으로 먼저 처리'],
+  mage:['마법구 (맞은 자리 범위 피해)','범위 피해라 몰려 있을 때 위험. 우선 처리'],
+  support:['공격 안 함. 주변 적 체력 15% 회복','다른 적을 계속 살려냄. 보이면 먼저 처치'],
+  bomber:['달려와서 자폭 (큰 피해)','닿기 전에 처리하거나 대시로 피하기'],
+  ghost:['몸통 박치기','주기적으로 반투명해져 공격이 통과함. 다시 보일 때 공격'],
+  boar:['예고선 후 빠른 돌진','주황 예고선이 보이면 옆으로 피하기'],
+  tank:['느린 몸통 박치기 (강함)','체력이 매우 높음. 길을 막으니 돌아가기'],
+  goblin:['공격 안 함. 도망침','보물 고블린 이벤트. 잡으면 골드 폭탄'],
+  shield:['몸통 박치기','정면에서 맞는 투사체 피해 75% 감소. 방패가 천천히 돌아가니 옆·뒤를 노리기. 근접·폭발·장판은 그대로 들어감'],
+  spider:['거미줄 발사 → 4초간 거미줄 (밟으면 이동 속도 −40%)','거미줄이 깔린 곳을 피해서 이동'],
+  jelly:['몸통 박치기','죽으면 중간 젤리 2마리 → 다시 꼬마 젤리 2마리씩 (총 7마리). 광역 공격이 유리'],
+  jellym:['몸통 박치기','분열 젤리가 죽으면 나옴. 한 번 더 갈라짐'],jellys:['몸통 박치기','젤리의 마지막 분열. 빠르지만 약함'],
+  sniper:['1초 조준선 후 빠르고 강한 한 발','빨간 조준선이 보이면 선 밖으로 비켜서기. 조준 중엔 멈춰 있음'],
+  lancer:['예고선 후 돌진 3연속 (매번 다시 조준)','돌진 사이 0.4초에 방향을 꺾어 피하기'],
+  wraith:['내 근처로 순간이동 (도착 지점 보라색 예고) → 탄 6발','예고 원에서 벗어나기. 이동 중엔 무적'],
+  boss:['돌진, 내려찍기 (큰 원형), 바위 던지기','예고 범위가 크니 미리 바깥으로'],
+  boss2:['나선 탄막, 메테오, 순간이동, 졸개 소환','거리를 유지하며 탄막 사이 틈으로'],
+  boss3:['점프 내려찍기, 독 웅덩이, 산성 침, 분열','독 웅덩이 위에서 싸우지 않기'],
+  boss4:['카드 난사, 룰렛 레이저, 주사위 폭격, 칩 폭풍','레이저 예고선을 보고 회전 방향 반대로'],
+  bossK:['짧은 돌진 연타, 회전 베기, 뼈 부채꼴','계속 따라붙는 근접형. 회전 베기 원 밖으로'],
+  bossF:['고드름 부채꼴, 얼음 장판 (둔화), 눈보라, 플레이어 자리 대폭발','얼음 장판 밟지 않기. 대폭발 예고는 바로 이탈'],
+  bossS:['덮치기 (예고 후 착지), 거미줄 장판, 박쥐 소환, 독 부채꼴','착지 예고 원에서 벗어나기'],
+  bossG:['지나간 자리 불길, 불기둥 연속, 지진, 용암 낙하','느리니 거리를 벌리고 불길 피하기'],
+  bossA:['단검, 뒤로 순간이동 후 관통 돌진, 단검 고리 (틈 있음), 표식 폭발','단검 고리의 빈틈으로 빠져나가기'],
+  bossL:['빠른 번개탄, 회전 번개 광선, 연쇄 낙뢰, 무작위 낙뢰','광선 회전 방향을 따라 돌기']
+};
+// 일반 몹 첫 등장 시점 (pickType의 위험도 기준을 실제 시간으로 환산)
+const MOB_THR={runner:0,slime:1.5,ranger:2,ghost:3,bomber:3,mage:4,tank:3,support:5,boar:2.5,spider:2,jelly:2.5,shield:3,sniper:4,wraith:4,lancer:5,grunt:0};
+function mobWhen(k){const th=MOB_THR[k];if(th==null)return null;if(th<=1)return '처음부터';let t=0;while(diffAt(t)<th&&t<2000)t+=1;const r=t/TS;return `약 ${Math.floor(r/60)}분 ${String(Math.round(r%60)).padStart(2,'0')}초부터`;}
+const MOB_IMG={};
+function mobImg(k,dark){const key=k+(dark?'d':'');if(MOB_IMG[key])return MOB_IMG[key];const c=ESPR.get(k,0,false,false),q=document.createElement('canvas');q.width=c.width;q.height=c.height;const g=q.getContext('2d');if(dark)g.filter='brightness(0) opacity(.55)';g.drawImage(c,0,0);return MOB_IMG[key]=q.toDataURL();}
 // 도감: 처음 화면에서 증강·합체·VIP·시너지·직업을 검색하고 필터로 훑어보기
 let CX={tab:'aug',q:'',cls:'',tag:[],tier:''},cxGame=false;
 const cxRoot=()=>cxGame?stEl:ov;
@@ -4363,18 +4406,20 @@ function cxShow(h){if(cxGame){stEl.innerHTML=`<div class="panel">${h}</div>`;stE
 function cxClose(){if(cxGame){cxGame=false;statsOpen=false;stEl.classList.remove('on');stEl.innerHTML='';}else startScreen();}
 function openCodexGame(){if(!S||S.mode==='start')return;if(statsOpen&&!cxGame)toggleStats();cxGame=true;statsOpen=true;joy=null;openCodex();}
 function openCodex(o){Object.assign(CX,o||{});
-  const tabs=[['aug','증강'],['fuse','합체'],['vip','VIP'],['syn','시너지'],['cls','직업']];
+  const tabs=[['aug','증강'],['fuse','합체'],['vip','VIP'],['syn','시너지'],['cls','직업'],['mob','몬스터']];
   const clsOpt=`<option value="">전체 직업</option><option value="-">공용</option>`+Object.keys(CLASSES).map(k=>`<option value="${k}" ${CX.cls===k?'selected':''}>${CLASSES[k].n}</option>`).join('');
   const tierOpt=`<option value="">전체 등급</option>`+['s','g','p'].map(k=>`<option value="${k}" ${CX.tier===k?'selected':''}>${TIER[k].n}</option>`).join('')+`<option value="uc" ${CX.tier==='uc'?'selected':''}>♾ 고점 돌파</option>`;
   cxShow(`<div class="shophead"><h2>📖 도감</h2><button class="btn" id="cxBack">${cxGame?'닫기 (게임으로)':'돌아가기'}</button></div>
   <div class="cxbar">${tabs.map(([k,n])=>`<button class="cxtab ${CX.tab===k?'on':''}" data-cxt="${k}">${n}</button>`).join('')}</div>
   <div class="cxbar"><input id="cxQ" placeholder="이름·내용 검색 (예: 보호막 / 해골 공격력)" value="${CX.q.replace(/"/g,'&quot;')}">
   ${CX.tab==='aug'||CX.tab==='fuse'?`<select id="cxCls">${clsOpt}</select>`:''}${CX.tab==='aug'?`<select id="cxTier">${tierOpt}</select>`:''}</div>
+  ${CX.tab==='mob'?`<div class="cxbar">${[['','전체'],['n','일반'],['b','보스'],['e','정예 특성']].map(([t,n])=>`<button class="cxchip ${(CX.mk||'')===t?'on':''}" data-cxm="${t}">${n}</button>`).join('')}</div>`:''}
   ${CX.tab==='aug'||CX.tab==='vip'?`<div class="cxbar">${[['','전체'],...Object.keys(TAGS).map(t=>[t,(TAG_ICO[t]||'')+' '+TAGS[t].n])].map(([t,n])=>`<button class="cxchip ${(t?CX.tag.includes(t):!CX.tag.length)?'on':''}" data-cxg="${t}">${n}</button>`).join('')}<span class="cxcnt" style="margin:0 0 0 4px;align-self:center">최대 2개 선택 (둘 다 가진 증강)</span></div>`:''}
   <div class="cxcnt" id="cxN"></div><div id="cxL"></div>`);
   const R=cxRoot();R.querySelectorAll('[data-cxt]').forEach(b=>b.onclick=()=>openCodex({tab:b.dataset.cxt,tag:[],tier:''}));
   R.querySelectorAll('[data-cxg]').forEach(b=>b.onclick=()=>{const t=b.dataset.cxg;if(!t)CX.tag=[];else if(CX.tag.includes(t))CX.tag=CX.tag.filter(x=>x!==t);else CX.tag=[...CX.tag,t].slice(-2);
     R.querySelectorAll('[data-cxg]').forEach(x=>{const k=x.dataset.cxg;x.classList.toggle('on',k?CX.tag.includes(k):!CX.tag.length);});cxList();});
+  R.querySelectorAll('[data-cxm]').forEach(b=>b.onclick=()=>{CX.mk=b.dataset.cxm;R.querySelectorAll('[data-cxm]').forEach(x=>x.classList.toggle('on',x.dataset.cxm===CX.mk));cxList();});
   $('cxQ').oninput=e=>{CX.q=e.target.value;cxList();};
   if($('cxCls'))$('cxCls').onchange=e=>{CX.cls=e.target.value;cxList();};
   if($('cxTier'))$('cxTier').onchange=e=>{CX.tier=e.target.value;cxList();};
@@ -4403,11 +4448,24 @@ function cxList(){
   }else if(CX.tab==='syn'){
     rows=Object.keys(TAGS).filter(t=>{const T=TAGS[t];return hit(T.n,T.t1,T.t2,T.t4,T.t6,T.ex);}).map(t=>{const T=TAGS[t],n=AUGS.filter(a=>(a.tags||[]).includes(t)).length,cl=Object.keys(CLASSES).filter(k=>CLASSES[k].fav.includes(t)).map(k=>CLASSES[k].n);
       return `<div class="cxrow" style="--rc:var(--brass)"><div class="h"><b>${TAG_ICO[t]||''} ${T.n}</b><span class="tg">증강 ${n}개</span>${cl.length?`<span class="tg">주력 직업: ${cl.join(', ')}</span>`:''}<button class="cxchip" data-cxj="${t}">증강 보기 →</button></div>${[[1,T.t1],[2,T.t2],[4,T.t4],[6,T.t6]].filter(x=>x[1]).map(([k,d])=>`<div class="d"><b style="font-size:14px;color:var(--brass)">${k}개</b> ${d}</div>`).join('')}<div class="s">5개부터 1개마다: ${T.ex}</div></div>`;});
+  }else if(CX.tab==='mob'){
+    const mk=CX.mk||'',BW={};BIO_MOB.forEach((m,i)=>{for(const k in m)if(m[k]>=1.5)(BW[k]=BW[k]||[]).push(BIOMES[i].n);});
+    const bossCh={};BOSS_POOL.forEach((L,i)=>L.forEach(k=>bossCh[k]=['1장','2장','3장','마지막 장'][i]));
+    const keys=Object.keys(ET).filter(k=>MOBINFO[k]&&(mk===''||(mk==='b')===!!ET[k].boss)&&mk!=='e');
+    const seenN=keys.filter(k=>META.mob[k]).length;
+    rows=keys.filter(k=>{const T=ET[k],I=MOBINFO[k];return META.mob[k]?hit(T.n,I[0],I[1],BTITLE[k]||'',(BW[k]||[]).join(' ')):!qs.length;}).map(k=>{const T=ET[k],I=MOBINFO[k],seen=META.mob[k],sz=T.boss?72:MDEF[k].sz,w=Math.round(sz*(T.boss?1.3:2.2));
+      const img=`<img src="${mobImg(k,!seen)}" style="width:${w}px;height:${w}px;image-rendering:pixelated;flex:none">`;
+      if(!seen)return `<div class="cxrow" style="--rc:#555;display:flex;gap:10px;align-items:center">${img}<div><div class="h"><b>❓ ???</b>${T.boss?'<span class="tg">보스</span>':''}</div><div class="s">아직 만나지 못한 몬스터${T.boss?` · ${bossCh[k]||''} 보스 후보`:''}</div></div></div>`;
+      const where=T.boss?`${bossCh[k]} 보스 후보 (2.5분 보스전 때 무작위 등장)`:[mobWhen(k),BW[k]?`자주 나오는 곳: ${BW[k].join(', ')}`:''].filter(Boolean).join(' · ')||'특수 (분열·이벤트)';
+      return `<div class="cxrow" style="--rc:${T.col};display:flex;gap:10px;align-items:center">${img}<div style="min-width:0"><div class="h"><b>${T.n}</b>${T.boss?`<span class="tg" style="background:#7a1f2a;color:#fff">보스 · ${BTITLE[k]||''}</span>`:''}<span class="tg">❤ ${T.hp}</span><span class="tg">⚔ ${T.dmg}</span><span class="tg">👟 ${T.spd}</span>${T.range?`<span class="tg">🎯 사거리 ${T.range}</span>`:''}</div>
+        <div class="d"><b>공격:</b> ${I[0]}</div><div class="s">${I[1]}</div><div class="s" style="opacity:.8">📍 ${where}</div></div></div>`;});
+    if(mk==='e')rows=Object.keys(AFFIX).map(k=>{const A=AFFIX[k],d={swift:'이동 속도 1.5배',giant:'크기 1.25배, 체력 1.6배, 조금 느림',split:'죽으면 작은 적 3마리로 분열',volatile:'죽으면 0.85초 뒤 주변 폭발 (예고 원)',gunner:'2.6초마다 사방으로 탄 8발'}[k]||'';return hit(A.n,d)?`<div class="cxrow" style="--rc:${A.col}"><div class="h"><b style="color:${A.col}">${A.n}</b><span class="tg">정예 특성</span></div><div class="d">${d}</div><div class="s">정예(금색 테두리, 체력 4배·공격력 1.5배)에 하나씩 붙음. 약 2분부터</div></div>`:'';}).filter(Boolean);
+    CX.mobHdr=mk!=='e'?`발견 ${seenN} / ${keys.length} · 체력·공격력은 일반 난이도 초반 기준 (시간·난이도에 따라 강해짐)`:'';
   }else{
     rows=Object.keys(CLASSES).filter(k=>{const C=CLASSES[k];return hit(C.n,C.role,C.d,C.passive);}).map(k=>{const C=CLASSES[k],ex=AUGS.filter(a=>a.cls===k);
       return `<div class="cxrow" style="--rc:var(--brass)"><div class="h"><b>${C.n}</b><span class="tg">${C.role}</span>${clsOpen(k)?'':'<span class="tg">🔒 봉인</span>'}</div><div class="d">${C.d}</div><div class="s">특성: ${C.passive}</div><div class="s">잘 맞는 시너지: ${tg(C.fav)}${C.dis&&C.dis.length?` · 안 맞는 시너지: ${tg(C.dis)}`:''}</div><div class="s">레벨업: ${C.lvd||''}</div><div class="s">전용 증강: ${ex.map(a=>a.uc?`♾${a.n}`:a.n).join(', ')} <button class="cxchip" data-cxc="${k}">전용 증강 보기 →</button></div></div>`;});
   }
-  $('cxN').textContent=`${rows.length}개`;$('cxL').innerHTML=rows.join('')||'<p class="sub">찾는 항목이 없어요</p>';
+  $('cxN').textContent=CX.tab==='mob'&&CX.mobHdr?CX.mobHdr:`${rows.length}개`;$('cxL').innerHTML=rows.join('')||'<p class="sub">찾는 항목이 없어요</p>';
   $('cxL').querySelectorAll('[data-cxj]').forEach(b=>b.onclick=()=>openCodex({tab:'aug',tag:[b.dataset.cxj],cls:'',tier:'',q:''}));
   $('cxL').querySelectorAll('[data-cxc]').forEach(b=>b.onclick=()=>openCodex({tab:'aug',cls:b.dataset.cxc,tag:[],tier:'',q:''}));
 }
@@ -4938,12 +4996,17 @@ function renderStats(){
     row('공격 속도',rate.toFixed(2)+`회/초 <small>/ ${RATE_CAP()}</small>`,raw>RATE_CAP()?`상한 초과 ${Math.round((raw/RATE_CAP()-1)*100)}% → 공격력 ×${(1+(raw/RATE_CAP()-1)*.5).toFixed(2)}`:''),
     row('치명타 확률',pct(critC())+' <small>/ 100%</small>',critRaw()>CRIT_CAP?`초과 ${Math.round((critRaw()-CRIT_CAP)*100)}% → 치명타 피해 +${Math.round((critRaw()-CRIT_CAP)*50)}%`:critFull()?'최대치. 치명타 확률 카드가 더 안 나와요':''),
     row('치명타 피해',pct(critMul())+' <small>/ 500%</small>',critMFull()?'최대치 500%. 치명타 피해 카드가 더 안 나와요':''),
+    ...(pureMelee()?[
+    row('베기 각도',meleeArc(n)+'°','탄환 +1마다 +40° (최대 360°)','근접 직업은 탄환을 쏘지 않고 휘둘러 벰. 탄환 수가 늘면 한 번에 베는 각도가 넓어짐'),
+    row('동시 타격',meleeCap()+'마리','관통 +1마다 +2마리','한 번 휘두를 때 맞히는 최대 적 수 (가까운 순). 관통 스탯이 여기에 적용'),
+    row('근접 거리',Math.round(meleeR()),`사거리 ${Math.round(p.range)}의 65%`,'칼이 닿는 거리. 사거리를 올리면 같이 늘어남'),
+    row('탄속','—','근접 직업은 적용 안 됨','근접 공격은 탄환이 없어 탄속이 쓰이지 않음. 탄속 카드는 나오지 않음')]:[
     row('탄환 수',n+'발'),
     row('관통',p.pierce),
     row('사거리',Math.round(p.range),'',`적이 다가오기 전에 먼저 공격하는 안전 거리. 딜을 직접 올리지는 않고, 원거리 시너지(원거리 숙련: 사거리 100당 공격력, 먼 적 추가 피해)와 소환물의 탐지 범위에 쓰임`),
-    row('탄속',Math.round(p.bspd),bspdB()>0?`기본보다 빠른 만큼 탄환 피해 +${Math.round(bspdB()*100)}%`:'기본 탄속보다 빠르면 1%당 탄환 피해 +0.5%'),
+    row('탄속',Math.round(p.bspd),bspdB()>0?`기본보다 빠른 만큼 탄환 피해 +${Math.round(bspdB()*100)}%`:'기본 탄속보다 빠르면 1%당 탄환 피해 +0.5%')]),
     ...clsRows(row),
-    row('기대 초당 피해',Math.round(dps),'탄환 기본 피해 기준. 회전 칩, 폭발, 독 제외')
+    row('기대 초당 피해',Math.round(pureMelee()?pDmg()*rate*MELEE_DM*(1+critC()*(critMul()-1)):dps),pureMelee()?'적 1마리 기준 근접 피해 (×1.5 근접 보정 포함). 회전 베기, 폭발, 독 제외':'탄환 기본 피해 기준. 회전 칩, 폭발, 독 제외')
   ].join('');
   const def=[
     ...(mlv('seal')>0?[row('🔒 봉인',`남은 ${S.seals||0}회`,(S.banL||[]).length?'봉인한 증강: '+S.banL.map(id=>{const x=AUGS.find(q=>q.id===id)||VIPS.find(q=>q.id===id);return x?x.n:id;}).join(', '):'증강 선택 창에서 카드 아래 🔒 봉인 버튼')]:[]),
