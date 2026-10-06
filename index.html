@@ -1102,8 +1102,8 @@ const ET={
   bossA:  {n:'그림자 암살자',r:28,hp:5400,spd:120,dmg:24,col:'#8a4ac8',xp:0,coin:300,boss:true},
   bossL:  {n:'번개 정령',r:32,hp:5800,spd:90,dmg:24,col:'#ffe040',xp:0,coin:300,boss:true},
   bossW:  {n:'늑대 우두머리',r:30,hp:3300,spd:130,dmg:24,col:'#8a8a9a',xp:60,coin:100,boss:true},
-  bossT:  {n:'고목 정령',r:38,hp:4000,spd:55,dmg:24,col:'#6a8a3a',xp:60,coin:100,boss:true},
-  bossV:  {n:'흡혈귀 백작',r:30,hp:3200,spd:100,dmg:22,col:'#c8202a',xp:90,coin:150,boss:true},
+  bossT:  {n:'고목 정령',r:38,hp:3400,spd:55,dmg:24,col:'#6a8a3a',xp:60,coin:100,boss:true},
+  bossV:  {n:'흡혈귀 백작',r:30,hp:3000,spd:100,dmg:22,col:'#c8202a',xp:90,coin:150,boss:true},
   bossM:  {n:'버섯 군주',r:34,hp:3400,spd:70,dmg:20,col:'#b04aa0',xp:90,coin:150,boss:true},
   bossD:  {n:'모래 웜',r:36,hp:4800,spd:120,dmg:22,col:'#c8a060',xp:120,coin:200,boss:true},
   bossR:  {n:'심연의 군주',r:34,hp:5600,spd:85,dmg:25,col:'#7a4ac8',xp:0,coin:300,boss:true},
@@ -2910,7 +2910,7 @@ const BAI={
     case 'intro':if(e.bt>1.4)go(e,'glide');break;
     case 'glide':keepDist(e,o,dt,180,280);e.sh=(e.sh||0)-dt;if(e.sh<=0){e.sh=ph2?.9:1.3;eFan(e,3,.45,240,e.dmg*.45,7,'#c8202a');}
       if(e.bt>(ph2?1.6:2.3))go(e,['bats','mist','drain','orbs'][e.bk++%4]);break;
-    case 'bats':if(e.f){e.f=0;if(S.en.length<150){const k=ph2?7:5;for(let i=0;i<k;i++){const a=i/k*TAU;spawnAt('vbat',e.x+Math.cos(a)*60,e.y+Math.sin(a)*60,true);}}S.rings.push({x:e.x,y:e.y,r:20,max:110,life:.4,col:'#c8202a'});}
+    case 'bats':if(e.f){e.f=0;if(S.en.length<150){const k=ph2?6:4;for(let i=0;i<k;i++){const a=i/k*TAU;spawnAt('vbat',e.x+Math.cos(a)*60,e.y+Math.sin(a)*60,true);}}S.rings.push({x:e.x,y:e.y,r:20,max:110,life:.4,col:'#c8202a'});}
       if(e.bt>.8)go(e,'glide');break;
     case 'mist':{const n=ph2?3:2;if(e.f){e.f=0;e.n=0;}
       if(e.n<n&&e.bt>e.n*.9){e.n++;burst(e.x,e.y,'#5a0a14',18);const a=Math.random()*TAU,bd=meleeOn()?140:230;e.x=clamp(p.x+Math.cos(a)*bd,60,WW-60);e.y=clamp(p.y+Math.sin(a)*bd,60,WH-60);burst(e.x,e.y,'#c8202a',18);eRing(e,ph2?14:10,190,e.dmg*.42,Math.random(),6,'#c8202a');}
@@ -3774,7 +3774,7 @@ function update(dt){
       if(T.thief&&!e.stole&&S.gold>0){const g=Math.min(S.gold,Math.max(5,Math.round(S.gold*.08)));S.gold-=g;e.stole=g;ftext(p.x,p.y-26,'-'+g+' 골드 도둑맞음!','#ffd76a',16);}
       if(e.affs){if(hasAf(e,'vamp'))e.hp=Math.min(e.maxHp,e.hp+e.maxHp*.12*e.ak);if(hasAf(e,'frost'))S.buffT.slow=Math.max(S.buffT.slow||0,1.5);}
       // 흡혈 박쥐: 나를 물면 보스 체력 0.4% 회복
-      if(e.type==='vbat'&&S.boss&&S.boss.alive){const B=S.boss;B.hp=Math.min(B.maxHp,B.hp+B.maxHp*.004);ftext(B.x,B.y-B.r-10,'흡혈','#ff6070',13);}}
+      if(e.type==='vbat'&&S.boss&&S.boss.alive){const B=S.boss;B.hp=Math.min(B.maxHp,B.hp+B.maxHp*.002);ftext(B.x,B.y-B.r-10,'흡혈','#ff6070',13);}}
     if(e.type==='ghost'){e.phT=(e.phT??rand(0,4))-dt;if(e.phT<0)e.phT+=4;e.phase=e.phT<1.1;}
   }
   S.en=S.en.filter(e=>e.alive);
@@ -4904,7 +4904,7 @@ const MOBINFO={
   bossH:['화염 숨결, 황금 비, 급강하, 날갯바람','히든 보스. 6분 이후 드물게 출현 (히든 몹을 잡을수록 잘 나옴). 60초 안에 처치하면 증강 2개·열쇠 2개·골드·메달 3'],
   wolf:['빠른 몸통 박치기','늑대 우두머리의 무리. 빠르니 뭉쳐 있을 때 광역으로'],
   sapling:['초록 가시 발사','고목 정령의 졸개. 느리지만 멀리서 쏨'],
-  vbat:['빠르게 날아와 물기','흡혈귀 백작의 박쥐. 나를 물 때마다 보스 체력 0.4% 회복 → 먼저 정리'],
+  vbat:['빠르게 날아와 물기','흡혈귀 백작의 박쥐. 나를 물 때마다 보스 체력 0.2% 회복 → 먼저 정리'],
   shroom:['몸통 박치기','죽으면 그 자리에 독 포자 구름 (3.5초). 근접은 잡고 바로 비켜서기'],
   scarab:['몸통 박치기','단단하고 빠른 딱정벌레. 모래 웜의 졸개'],
   imp:['보라 마법구 발사','심연의 군주의 졸개. 원거리라 먼저 처리'],
@@ -4939,7 +4939,7 @@ const BPAT={
   bossH:[['화염 숨결','좌우로 흔들리며 불 줄기를 뿜음','spiral'],['황금 비','내 주변에 금덩이 10~14개 낙하','rain'],['급강하','예고선 후 2~3번 돌진, 끝마다 불꽃 고리','charge'],['날갯바람','사방 바람 탄 3겹','ring']],
   bossW:[['돌진 연타','짧은 예고선 후 3~4번 연속 돌진','charge'],['울부짖기','늑대 2~4마리 소환 + 원형 탄','summon'],['할퀴기','내 위치를 따라오는 발톱 공격 3~4번','target'],['발톱 투척','거리를 재며 발톱 3발씩','fan']],
   bossT:[['뿌리 솟구침','나를 향해 직선 뿌리 3~5줄 (예고선)','line'],['가시 고리','사방 가시 2~3겹','ring'],['묘목 소환','가시를 쏘는 묘목 3~5마리','summon'],['덩굴','내 주변에 덩굴 장판 (둔화)','pool']],
-  bossV:[['박쥐 떼','흡혈 박쥐 5~7마리. 나를 물면 백작 회복','summon'],['안개 이동','내 근처로 2~3번 순간이동하며 핏빛 고리','blink'],['흡혈','나를 끌어당기며 원형 탄. 대시로 끊기','pull'],['핏덩이','느리고 큰 핏덩이 부채꼴','fan']],
+  bossV:[['박쥐 떼','흡혈 박쥐 4~6마리. 나를 물면 백작 회복','summon'],['안개 이동','내 근처로 2~3번 순간이동하며 핏빛 고리','blink'],['흡혈','나를 끌어당기며 원형 탄. 대시로 끊기','pull'],['핏덩이','느리고 큰 핏덩이 부채꼴','fan']],
   bossM:[['포자 구름','내 위치·주변에 독 장판 5~7개','rain'],['점프','내 위치로 2~3번 점프, 착지마다 포자 고리','jump'],['버섯 소환','죽으면 독 구름을 남기는 버섯 4~6마리','summon'],['포자 고리','사방 포자 2~3겹','ring']],
   bossD:[['땅속 기습','땅속에 숨어 무적 → 내 발밑에서 솟구침 2~3번','burrow'],['꼬리 휩쓸기','3방향 직선 동시 공격','line'],['바위 부채꼴','바위 5발씩','fan'],['딱정벌레 소환','딱정벌레 4~6마리','summon']],
   bossR:[['심연','나를 끌어당긴 뒤 주변 대폭발 (반경 150)','pull'],['어둠의 비','내 주변에 어둠 낙하 10~14번','rain'],['임프 소환','마법구를 쏘는 임프 4~6마리','summon'],['쌍나선','반대로 도는 두 나선 탄막','spiral']],
