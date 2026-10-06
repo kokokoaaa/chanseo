@@ -308,6 +308,7 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 .tile .parts{color:var(--ivory);margin-bottom:3px}.tile .parts .own{color:var(--brass)}
 .stats{display:grid;grid-template-columns:1fr auto;gap:6px 16px;margin:6px 0 4px;font-size:16px}
 .stats span:nth-child(even){font-family:'Do Hyeon',sans-serif;font-size:19px;color:var(--ivory);text-align:right}
+#cxBtn{position:absolute;right:118px;top:10px;z-index:2;background:rgba(4,18,12,.65);color:var(--ivory);border:1px solid var(--brass);border-radius:8px;padding:6px 10px;font-family:'Do Hyeon',sans-serif;font-size:16px;cursor:pointer}
 #statBtn{position:absolute;right:12px;top:10px;z-index:2;background:rgba(4,18,12,.65);color:var(--ivory);border:1px solid var(--brass);border-radius:8px;padding:6px 12px;font-family:'Do Hyeon',sans-serif;font-size:16px;cursor:pointer}
 #hud{padding-right:100px}
 .hbrk{flex-basis:100%;height:0}
@@ -347,7 +348,7 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
   <div id="toast"></div>
   <div id="ov"></div>
   <div id="st"></div>
-  <button id="statBtn">스탯 (Tab)</button>
+  <button id="statBtn">스탯 (Tab)</button><button id="cxBtn">📖 도감</button>
   <div id="autoBar"><button id="autoPickBtn">자동 선택 OFF</button><button id="autoMoveBtn">자동 이동 OFF</button><button id="speedBtn">x1</button><button id="bgmBtn">🎵</button></div>
 </div>
 <script>
@@ -640,7 +641,7 @@ function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);
 
 /* ---------- input ---------- */
 const keys={};
-addEventListener('keydown',e=>{if(e.target&&(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'))return;const k=e.key.toLowerCase();if(k==='tab'||k==='i'){e.preventDefault();if(S&&S.mode!=='start')toggleStats();return;}if(k==='escape'&&statsOpen){toggleStats();return;}if(k==='x'&&S&&S.mode!=='start'){cycleSpeed();return;}if(k==='p'&&S&&S.mode!=='start'){$('autoPickBtn').click();return;}if(k==='m'&&S&&S.mode!=='start'){$('autoMoveBtn').click();return;}if(k==='b'&&S&&S.mode==='shop'&&S.shopBack){S.shopBack();return;}if(k==='escape'&&S&&S.mode==='shop'&&S.shopBack){S.shopBack();return;}keys[k]=true;if((k===' '||k==='shift')&&S&&S.mode==='play'){e.preventDefault();dash();}});
+addEventListener('keydown',e=>{if(e.target&&(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'))return;const k=e.key.toLowerCase();if(k==='tab'||k==='i'){e.preventDefault();if(S&&S.mode!=='start'){if(cxGame)cxClose();toggleStats();}return;}if(k==='escape'&&cxGame){cxClose();return;}if(k==='escape'&&statsOpen){toggleStats();return;}if(k==='x'&&S&&S.mode!=='start'){cycleSpeed();return;}if(k==='p'&&S&&S.mode!=='start'){$('autoPickBtn').click();return;}if(k==='m'&&S&&S.mode!=='start'){$('autoMoveBtn').click();return;}if(k==='b'&&S&&S.mode==='shop'&&S.shopBack){S.shopBack();return;}if(k==='escape'&&S&&S.mode==='shop'&&S.shopBack){S.shopBack();return;}keys[k]=true;if((k===' '||k==='shift')&&S&&S.mode==='play'){e.preventDefault();dash();}});
 addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false;});
 let joy=null;
@@ -3342,7 +3343,7 @@ function hud(){
   mini.style.display=S.mode==='start'?'none':'block';
   if(S.mode!=='start'&&++miniT%4===0)drawMini();
   dashBtn.style.display=play?'block':'none';
-  $('statBtn').style.display=S.mode==='start'?'none':'block';
+  $('statBtn').style.display=S.mode==='start'?'none':'block';$('cxBtn').style.display=S.mode==='start'?'none':'block';
   $('autoBar').style.display=S.mode==='start'?'none':'flex';
 
   const lv=$('live');
@@ -3928,24 +3929,28 @@ function cosPreview(x,anchor){
 }
 function cosPreviewHide(){cancelAnimationFrame(cosPrevRAF);const b=document.getElementById('cosPrev');if(b)b.style.display='none';}
 // 도감: 처음 화면에서 증강·합체·VIP·시너지·직업을 검색하고 필터로 훑어보기
-let CX={tab:'aug',q:'',cls:'',tag:[],tier:''};
+let CX={tab:'aug',q:'',cls:'',tag:[],tier:''},cxGame=false;
+const cxRoot=()=>cxGame?stEl:ov;
+function cxShow(h){if(cxGame){stEl.innerHTML=`<div class="panel">${h}</div>`;stEl.classList.add('on');stEl.scrollTop=0;}else show(h);}
+function cxClose(){if(cxGame){cxGame=false;statsOpen=false;stEl.classList.remove('on');stEl.innerHTML='';}else startScreen();}
+function openCodexGame(){if(!S||S.mode==='start')return;if(statsOpen&&!cxGame)toggleStats();cxGame=true;statsOpen=true;joy=null;openCodex();}
 function openCodex(o){Object.assign(CX,o||{});
   const tabs=[['aug','증강'],['fuse','합체'],['vip','VIP'],['syn','시너지'],['cls','직업']];
   const clsOpt=`<option value="">전체 직업</option><option value="-">공용</option>`+Object.keys(CLASSES).map(k=>`<option value="${k}" ${CX.cls===k?'selected':''}>${CLASSES[k].n}</option>`).join('');
   const tierOpt=`<option value="">전체 등급</option>`+['s','g','p'].map(k=>`<option value="${k}" ${CX.tier===k?'selected':''}>${TIER[k].n}</option>`).join('')+`<option value="uc" ${CX.tier==='uc'?'selected':''}>♾ 고점 돌파</option>`;
-  show(`<div class="shophead"><h2>📖 도감</h2><button class="btn" id="cxBack">돌아가기</button></div>
+  cxShow(`<div class="shophead"><h2>📖 도감</h2><button class="btn" id="cxBack">${cxGame?'닫기 (게임으로)':'돌아가기'}</button></div>
   <div class="cxbar">${tabs.map(([k,n])=>`<button class="cxtab ${CX.tab===k?'on':''}" data-cxt="${k}">${n}</button>`).join('')}</div>
   <div class="cxbar"><input id="cxQ" placeholder="이름·설명 검색 (예: 보호막, 치명타, 해골)" value="${CX.q.replace(/"/g,'&quot;')}">
   ${CX.tab==='aug'||CX.tab==='fuse'?`<select id="cxCls">${clsOpt}</select>`:''}${CX.tab==='aug'?`<select id="cxTier">${tierOpt}</select>`:''}</div>
   ${CX.tab==='aug'||CX.tab==='vip'?`<div class="cxbar">${[['','전체'],...Object.keys(TAGS).map(t=>[t,(TAG_ICO[t]||'')+' '+TAGS[t].n])].map(([t,n])=>`<button class="cxchip ${(t?CX.tag.includes(t):!CX.tag.length)?'on':''}" data-cxg="${t}">${n}</button>`).join('')}<span class="cxcnt" style="margin:0 0 0 4px;align-self:center">최대 2개 선택 (둘 다 가진 증강)</span></div>`:''}
   <div class="cxcnt" id="cxN"></div><div id="cxL"></div>`);
-  ov.querySelectorAll('[data-cxt]').forEach(b=>b.onclick=()=>openCodex({tab:b.dataset.cxt,tag:[],tier:''}));
-  ov.querySelectorAll('[data-cxg]').forEach(b=>b.onclick=()=>{const t=b.dataset.cxg;if(!t)CX.tag=[];else if(CX.tag.includes(t))CX.tag=CX.tag.filter(x=>x!==t);else CX.tag=[...CX.tag,t].slice(-2);
-    ov.querySelectorAll('[data-cxg]').forEach(x=>{const k=x.dataset.cxg;x.classList.toggle('on',k?CX.tag.includes(k):!CX.tag.length);});cxList();});
+  const R=cxRoot();R.querySelectorAll('[data-cxt]').forEach(b=>b.onclick=()=>openCodex({tab:b.dataset.cxt,tag:[],tier:''}));
+  R.querySelectorAll('[data-cxg]').forEach(b=>b.onclick=()=>{const t=b.dataset.cxg;if(!t)CX.tag=[];else if(CX.tag.includes(t))CX.tag=CX.tag.filter(x=>x!==t);else CX.tag=[...CX.tag,t].slice(-2);
+    R.querySelectorAll('[data-cxg]').forEach(x=>{const k=x.dataset.cxg;x.classList.toggle('on',k?CX.tag.includes(k):!CX.tag.length);});cxList();});
   $('cxQ').oninput=e=>{CX.q=e.target.value;cxList();};
   if($('cxCls'))$('cxCls').onchange=e=>{CX.cls=e.target.value;cxList();};
   if($('cxTier'))$('cxTier').onchange=e=>{CX.tier=e.target.value;cxList();};
-  $('cxBack').onclick=()=>startScreen();
+  $('cxBack').onclick=cxClose;
   cxList();
 }
 function cxList(){
@@ -3957,7 +3962,8 @@ function cxList(){
   if(CX.tab==='aug'){
     rows=AUGS.filter(a=>(!CX.cls||(CX.cls==='-'?!a.cls:a.cls===CX.cls))&&CX.tag.every(t=>(a.tags||[]).includes(t))&&(!CX.tier||(CX.tier==='uc'?a.uc:a.t===CX.tier&&!a.uc))&&hit(a.n,a.d))
       .map(a=>{const fz=[...FUSIONS.filter(f=>f.a===a.id||f.b===a.id).map(f=>`${f.n} (+${nm(f.a===a.id?f.b:f.a)})`),...VFUSIONS.filter(f=>f.b===a.id||f.a===a.id).map(f=>`${f.n} (+VIP ${nm(f.a===a.id?f.b:f.a)})`)];
-        return `<div class="cxrow ${a.uc?'uc':''}" style="--rc:${TIER[a.t].col}"><div class="h"><b>${a.n}</b><span class="tg" style="background:${TIER[a.t].col};color:#fff">${TIER[a.t].n}</span>${a.uc?`<span class="tg" style="background:#c4122f;color:#fff">♾ 고점 돌파${ucOn?'':' · 🔒 한계 돌파 해금 필요'}</span>`:''}${clsN(a.cls)}${tg(a.tags)}</div><div class="d">${a.d}</div>${fz.length?`<div class="s">합체: ${fz.join(' · ')}</div>`:a.uc?'<div class="s">합체·교체 불가</div>':''}</div>`;});
+        const own=cxGame&&has(a.id),ban=cxGame&&isBanned(a.id);
+        return `<div class="cxrow ${a.uc?'uc':''}" style="--rc:${TIER[a.t].col}${ban?';opacity:.5':''}"><div class="h"><b>${a.n}</b>${own?'<span class="tg" style="background:#2f8f4e;color:#fff">✔ 보유</span>':''}${ban?'<span class="tg" style="background:#7a1f2a;color:#fff">🔒 봉인됨</span>':''}<span class="tg" style="background:${TIER[a.t].col};color:#fff">${TIER[a.t].n}</span>${a.uc?`<span class="tg" style="background:#c4122f;color:#fff">♾ 고점 돌파${ucOn?'':' · 🔒 한계 돌파 해금 필요'}</span>`:''}${clsN(a.cls)}${tg(a.tags)}</div><div class="d">${a.d}</div>${fz.length?`<div class="s">합체: ${fz.join(' · ')}</div>`:a.uc?'<div class="s">합체·교체 불가</div>':''}</div>`;});
   }else if(CX.tab==='fuse'){
     const L=[...FUSIONS.map(f=>({...f,v:0})),...VFUSIONS.map(f=>({...f,v:1}))];
     rows=L.filter(f=>{const A=AUGS.find(x=>x.id===f.a)||VIPS.find(x=>x.id===f.a),B=AUGS.find(x=>x.id===f.b)||VIPS.find(x=>x.id===f.b);const c=(A&&A.cls)||(B&&B.cls)||'';return (!CX.cls||(CX.cls==='-'?!c:c===CX.cls))&&hit(f.n,f.d,nm(f.a),nm(f.b));})
@@ -4447,7 +4453,8 @@ function openShop(back,m){
 let statsOpen=false;
 const stEl=$('st');
 function toggleStats(){statsOpen=!statsOpen;joy=null;{const pp=document.getElementById('stipPop');if(pp)pp.style.display='none';}if(statsOpen){renderStats();stEl.classList.add('on');}else{stEl.classList.remove('on');stEl.innerHTML='';}}
-$('statBtn').addEventListener('click',()=>{if(S&&S.mode!=='start')toggleStats();});
+$('statBtn').addEventListener('click',()=>{if(S&&S.mode!=='start'){if(cxGame)cxClose();toggleStats();}});
+$('cxBtn').addEventListener('click',()=>{if(cxGame)cxClose();else openCodexGame();});
 // 스탯 설명 (PC는 마우스를 올리면, 모바일은 누르면 표시)
 const STAT_TIP={
   '공격력':'탄환 한 발의 기본 피해. 카드·상점·레벨업으로 얻은 공격력 %는 모두 더해서 한 번에 곱합니다 (합연산). 거의 모든 피해(폭발, 독, 회전 칩, 반격 등)가 이 값에 비례합니다.',
