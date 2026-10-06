@@ -563,6 +563,26 @@ M.boss4={sz:72,draw(g,f){const su=T3(R.suit);
   B(g,T3(R.skin),36,27,14,13);P(g,K,29,26,3,4);P(g,K,41,26,3,4);P(g,'#c8323a',30,27,1,1);P(g,'#c8323a',42,27,1,1);P(g,K,30,34,12,2);for(let i=0;i<4;i++)P(g,W,31+i*3,34,2,1);
   P(g,su[0],20,14,32,3);C(g,su,26,2,20,13);P(g,'#c8323a',26,10,20,2);
   for(let k=0;k<2;k++){const cx=55+k*5,cy=46+f*2-k*3;P(g,'#fffaf0',cx,cy,7,10);P(g,'#c8c0b0',cx+6,cy,1,10);P(g,k?'#1a1a22':'#c8323a',cx+2,cy+3,3,4);}}};
+// 해골 기사: 뿔 투구, 붉은 눈 해골, 갑옷, 방패와 큰 검
+M.bossK={sz:72,draw(g,f){const bn=T3(R.bone),st=T3(R.stone);
+  C(g,[R.bone[1],R.bone[2]],28,56+(f?0:1),5,13-(f?0:1));C(g,[R.bone[1],R.bone[2]],39,56+(f?1:0),5,13-(f?1:0));P(g,'#1e1a14',26,69,9,1);P(g,'#1e1a14',37,69,9,1);
+  B(g,st,36,48,13,10);P(g,st[0],27,47,18,2);P(g,'#7a1e24',34,43,4,13);
+  B(g,st,21,48+(f?1:0),5,6);B(g,st,51,48+(f?0:1),5,6);
+  B(g,['#3a2a1a','#5e4428','#8a6a3a'],15,53,7,10);P(g,R.gold[2],13,50,4,7);P(g,'#7a1e24',14,56,2,2);
+  L(g,'#c4c8cc',55,52,67,12+f*2);L(g,'#eef2f6',56,52,68,12+f*2);L(g,'#8c9096',54,52,66,12+f*2);P(g,R.gold[2],51,50,9,3);
+  B(g,bn,36,27,13,12);P(g,K,29,24,4,5);P(g,K,40,24,4,5);P(g,'#ff3030',30,26,2,2);P(g,'#ff3030',41,26,2,2);P(g,K,35,31,2,2);for(let i=0;i<5;i++)P(g,i%2?K:W,31+i*2,35,2,2);
+  P(g,st[1],22,15,28,4);P(g,st[2],22,15,28,1);for(let i=0;i<7;i++){P(g,bn[2],20-i,14-i,3,2);P(g,bn[2],49+i,14-i,3,2);}}};
+// 서리 마녀: 얼음빛 로브와 고깔모자, 흰 머리, 얼음 수정 지팡이
+M.bossF={sz:72,draw(g,f){const ic=['#2e6a96','#5aa8d8','#a8dcf8'],dk=['#14304a','#1f4a70','#2e6a96'];
+  P(g,'#10202e',28,69,7,1);P(g,'#10202e',37,69,7,1);
+  for(let y=0;y<22;y++){const w=8+(y>>2);for(let x=-w;x<w;x++)P(g,dk[x<-w+4?2:x<w-4?1:0],36+x,47+y,1,1);}P(g,'#eaf8ff',35,47,2,22);
+  B(g,dk,22,52,4,6);B(g,dk,50,52,4,6);B(g,['#a8c0d4','#d4e4f0','#f4faff'],22,59,3,2.5);B(g,['#a8c0d4','#d4e4f0','#f4faff'],50,59,3,2.5);
+  B(g,['#a8c0d4','#d4e4f0','#f4faff'],36,35,13,12);
+  P(g,'#2a7ad0',30,33,3,3);P(g,'#2a7ad0',40,33,3,3);P(g,'#eaf8ff',31,33,1,1);P(g,'#eaf8ff',41,33,1,1);P(g,'#5a6a8a',33,41,6,1);
+  for(let i=0;i<13;i++){P(g,'#e4f6ff',22+(i%3),29+i,2,2);P(g,'#e4f6ff',48-(i%3),29+i,2,2);}
+  for(let y=0;y<20;y++){const w=Math.floor(y*0.8)+1;for(let x=-w;x<w;x++)P(g,dk[x<-2?2:x<2?1:0],36+x-Math.floor((19-y)/4),2+y,1,1);}
+  P(g,dk[0],18,22,36,3);P(g,ic[2],18,22,36,1);P(g,'#eaf8ff',31,10,3,3);
+  L(g,R.wood[2],62,30,62,68);L(g,R.wood[1],63,30,63,68);for(let i=0;i<4;i++)P(g,ic[i%3],61-i,18+i*2,3+i*2,2);P(g,'#ffffff',62,15,2,4);if(f){P(g,'#eaf8ff',55,14,1,1);P(g,'#eaf8ff',69,20,1,1);}}};
 return M;})();
 // 배경 도트: 나무(72×96), 소품(작게), 바닥 타일(64×64). 캐릭터와 같은 도트 배율로 그림
 const BART=(()=>{const {P,L,B,C,R}=ART;let sd=1;const rnd=()=>{sd=(sd*16807)%2147483647;return sd/2147483647;};
@@ -677,7 +697,9 @@ const ET={
   boss:   {n:'오우거 왕',r:34,hp:3500,spd:70,dmg:26,col:'#8a9a4a',xp:60,coin:100,boss:true},
   boss2:  {n:'고블린 대주술사',r:30,hp:3000,spd:95,dmg:22,col:'#8a3fc0',xp:90,coin:150,boss:true},
   boss3:  {n:'슬라임 킹',r:38,hp:4500,spd:78,dmg:26,col:'#5ec44a',xp:120,coin:200,boss:true},
-  boss4:  {n:'하우스 딜러',r:32,hp:6000,spd:100,dmg:28,col:'#c8323a',xp:0,coin:300,boss:true}
+  boss4:  {n:'하우스 딜러',r:32,hp:6000,spd:100,dmg:28,col:'#c8323a',xp:0,coin:300,boss:true},
+  bossK:  {n:'해골 기사',r:32,hp:3600,spd:82,dmg:26,col:'#c2b9a2',xp:60,coin:100,boss:true},
+  bossF:  {n:'서리 마녀',r:30,hp:3100,spd:92,dmg:22,col:'#5aa8d8',xp:90,coin:150,boss:true}
 };
 const ESPR=(()=>{
   const cache={};
@@ -2150,6 +2172,12 @@ const BOSSES=[
 ];
 // 2·3장 보스는 성장한 화력에 몇 초 만에 녹아서 체력 보정
 const BOSS_HPM=[1,1.8,2.2,1];
+// 보스 후보: 장마다 비슷한 난이도의 보스 중 판마다 랜덤. 악몽 5단계부터는 전체에서 랜덤 (같은 보스 연속 없음)
+const BOSS_POOL=[['boss','bossK'],['boss2','bossF'],['boss3'],['boss4']];
+const BTITLE={boss:'숲의 문지기',bossK:'뼈의 검사',boss2:'저주의 인도자',bossF:'얼어붙은 숨결',boss3:'늪의 군주',boss4:'카지노의 주인'};
+function bossTypeOf(i){S.bossT=S.bossT||[];if(S.bossT[i])return S.bossT[i];let t;
+  if(i<4){const P=BOSS_POOL[i];t=P[Math.floor(Math.random()*P.length)];}else{const all=BOSS_POOL.flat().filter(x=>x!==S.bossT[i-1]);t=all[Math.floor(Math.random()*all.length)];}
+  S.bossT[i]=t;return t;}
 function spawnBoss(i){
   if(S.ev)endEvent(false);S.evBanner=null;
   // 기존 몹은 유지하되 너무 많으면 화면 밖 먼 몹만 정리 (화면에 보이는 몹은 절대 지우지 않음). 보스 등장 시 체력 30% 회복
@@ -2157,7 +2185,7 @@ function spawnBoss(i){
     const far=S.en.filter(e=>!vis(e)&&!e.elite).sort((a,b)=>d2(b,p0)-d2(a,p0)),drop=new Set(far.slice(0,Math.max(0,S.en.length-kN)));S.en=S.en.filter(e=>!drop.has(e));}
   S.p.hp=Math.min(S.p.maxHp,S.p.hp+S.p.maxHp*.3);
   S.bossI=i;S.tele=[];S.hz=[];S.bStart=S.bt||0;
-  const j=i%4,lp=Math.max(0,i-3);const a=Math.random()*TAU;spawnAt(BOSSES[j].type,clamp(S.p.x+Math.cos(a)*300,60,WW-60),clamp(S.p.y+Math.sin(a)*300,60,WH-60));
+  const j=i%4,lp=Math.max(0,i-3);const a=Math.random()*TAU;spawnAt(bossTypeOf(i),clamp(S.p.x+Math.cos(a)*300,60,WW-60),clamp(S.p.y+Math.sin(a)*300,60,WH-60));
   const b=S.en[S.en.length-1];b.dmg*=(BOSS_DM[j]||1)*Math.pow(1.15,lp);b.maxHp*=(BOSS_HPM[j]||1)*Math.pow(2.2,lp)*(endless()?nmBossHp():1);b.hp=b.maxHp;b.bk=0;go(b,'intro');S.boss=b;
   // 보스 결계: 전체 맵의 약 1/4 넓이(3000×3000) 사각 구역. 분노(체력 50%) 시 85%로, 광폭화마다 5%씩 좁아짐. r = 한 변의 절반
   {const tr=1500,cx=clamp(S.p.x,tr,WW-tr),cy=clamp(S.p.y,tr,WH-tr);S.arena={x:cx,y:cy,r:tr*1.3,tr};
@@ -2269,6 +2297,36 @@ const BAI={
       if(e.bt>1)go(e,'crawl');break;
     }},
   // 하우스 딜러: 카드 난사, 룰렛 레이저, 주사위 폭격, 칩 폭풍
+  // 해골 기사: 짧은 돌진 연타, 회전 베기(주변 원형), 뼈 부채꼴. 계속 따라붙는 근접형
+  bossK(e,dt,o){const {p,ph2,sp}=o;
+    switch(e.bst){
+    case 'intro':if(e.bt>1.4)go(e,'walk');break;
+    case 'walk':stepTo(e,p.x,p.y,sp*1.1,dt);if(e.bt>(ph2?1.3:2))go(e,['lunge','spin','bones','lunge','spin'][e.bk++%5]);break;
+    case 'lunge':{const W=ph2?.45:.6;if(e.f){e.f=0;e.n=ph2?3:2;e.aim=null;}
+      if(e.aim==null){e.aim=Math.atan2(p.y-e.y,p.x-e.x);e.ht=0;e.hitP=0;tele({k:'l',x:e.x,y:e.y,a:e.aim,len:380,w:e.r*1.6,T:W,dmg:0});}
+      e.ht+=dt;if(e.ht>W){const v=900*dt;e.x+=Math.cos(e.aim)*v;e.y+=Math.sin(e.aim)*v;
+        if(p.alive&&!e.hitP&&d2(e,p)<(e.r+p.r+6)**2){e.hitP=1;hurtP(e.dmg*1.4,e);}
+        if(e.ht>W+.42){eFan(e,3,.6,260,e.dmg*.4,6,'#e6dfcc');e.n--;e.aim=null;if(e.n<=0)go(e,'walk');}}break;}
+    case 'spin':if(e.f){e.f=0;tele({k:'c',x:e.x,y:e.y,r:150,T:ph2?.7:.95,dmg:e.dmg*1.6,col:'#e6dfcc',fx:t=>{S.shake=.3;S.rings.push({x:t.x,y:t.y,r:20,max:170,life:.35,col:'#ffffff'});eRing(e,ph2?16:12,190,e.dmg*.4,Math.random(),6,'#e6dfcc');}});}
+      if(e.bt>(ph2?1.1:1.4))go(e,'walk');break;
+    case 'bones':{const n=ph2?4:3;if(e.f){e.f=0;e.n=0;}if(e.n<n&&e.bt>e.n*.4){e.n++;eFan(e,ph2?7:5,.9,240,e.dmg*.42,6,'#e6dfcc');}
+      stepTo(e,p.x,p.y,sp*.5,dt);if(e.bt>n*.4+.6)go(e,'walk');break;}
+    }},
+  // 서리 마녀: 거리 유지하며 고드름 부채꼴, 얼음 장판(밟으면 둔화), 눈보라 소용돌이, 플레이어 자리 대폭발
+  bossF(e,dt,o){const {p,ph2}=o;
+    switch(e.bst){
+    case 'intro':if(e.bt>1.4)go(e,'float');break;
+    case 'float':keepDist(e,o,dt,220,330);e.sh=(e.sh||0)-dt;if(e.sh<=0){e.sh=ph2?.9:1.3;eFan(e,4,.55,250,e.dmg*.45,6,'#a8dcf8');}
+      if(e.bt>(ph2?1.8:2.5))go(e,['frost','blizzard','nova','frost'][e.bk++%4]);break;
+    case 'frost':{const n=ph2?6:4;if(e.f){e.f=0;e.n=0;}
+      if(e.n<n&&e.bt>e.n*.3){const [x,y]=e.n?nearP(200):[p.x,p.y];e.n++;tele({k:'c',x,y,r:70,T:1,dmg:e.dmg*1.2,col:'#a8dcf8',fx:t=>{burst(t.x,t.y,'#eaf8ff',12);S.hz.push({x:t.x,y:t.y,r:55,life:4,dmg:e.dmg*.3,col:'#7cc8f0',slow:1});}});}
+      keepDist(e,o,dt,220,330);if(e.bt>n*.3+1.2)go(e,'float');break;}
+    case 'blizzard':if(e.f){e.f=0;e.sa=Math.random()*TAU;e.sh=0;}
+      e.sh-=dt;if(e.sh<=0){e.sh=.18;e.sa+=.5;for(let i=0;i<2;i++)eShot(e.x,e.y,e.sa+i*Math.PI,170,e.dmg*.4,6,'#d8f0ff');if(ph2)eShot(e.x,e.y,-e.sa,170,e.dmg*.4,6,'#d8f0ff');}
+      keepDist(e,o,dt,220,330);if(e.bt>3)go(e,'float');break;
+    case 'nova':if(e.f){e.f=0;tele({k:'c',x:p.x,y:p.y,r:130,T:ph2?1:1.25,dmg:e.dmg*1.5,col:'#a8dcf8',fx:t=>{S.shake=.25;burst(t.x,t.y,'#eaf8ff',22);}});}
+      if(e.bt>1.6)go(e,'float');break;
+    }},
   boss4(e,dt,o){const {p,ph2}=o;
     switch(e.bst){
     case 'intro':if(e.bt>1.4)go(e,'deal');break;
@@ -2299,11 +2357,11 @@ function updBoss(dt){
     if(t.fx)t.fx(t);}
   S.tele=S.tele.filter(t=>t.t>0);
   S.hzT=Math.max(0,(S.hzT||0)-dt);
-  for(const h of S.hz){h.life-=dt;if(p.alive&&S.hzT<=0&&d2(h,p)<(h.r+p.r*.4)**2){hurtP(h.dmg,null);S.hzT=.6;}}
+  for(const h of S.hz){h.life-=dt;const inH=p.alive&&d2(h,p)<(h.r+p.r*.4)**2;if(inH&&h.slow)S.buffT.slow=Math.max(S.buffT.slow||0,.3);if(inH&&S.hzT<=0){hurtP(h.dmg,null);S.hzT=.6;}}
   S.hz=S.hz.filter(h=>h.life>0);if(S.hz.length>80)S.hz.splice(0,S.hz.length-80);
 }
 function drawBossGround(){
-  for(const h of S.hz){ctx.globalAlpha=Math.min(1,h.life)*.5;ctx.fillStyle='#5aa83a';ctx.beginPath();ctx.arc(h.x,h.y,h.r,0,TAU);ctx.fill();ctx.globalAlpha=Math.min(1,h.life)*.7;ctx.strokeStyle='#9be86a';ctx.lineWidth=2;ctx.stroke();}ctx.globalAlpha=1;
+  for(const h of S.hz){ctx.globalAlpha=Math.min(1,h.life)*.5;ctx.fillStyle=h.col||'#5aa83a';ctx.beginPath();ctx.arc(h.x,h.y,h.r,0,TAU);ctx.fill();ctx.globalAlpha=Math.min(1,h.life)*.7;ctx.strokeStyle=h.col?'#eaf8ff':'#9be86a';ctx.lineWidth=2;ctx.stroke();}ctx.globalAlpha=1;
   for(const t of S.tele){const k=1-t.t/t.T,c=t.col||'#ff4040';ctx.save();
     if(t.k==='c'){ctx.globalAlpha=.16;ctx.fillStyle=c;ctx.beginPath();ctx.arc(t.x,t.y,t.r,0,TAU);ctx.fill();ctx.globalAlpha=.38;ctx.beginPath();ctx.arc(t.x,t.y,t.r*k,0,TAU);ctx.fill();ctx.globalAlpha=.9;ctx.strokeStyle=c;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(t.x,t.y,t.r,0,TAU);ctx.stroke();}
     else{ctx.translate(t.x,t.y);ctx.rotate(t.a);ctx.globalAlpha=.16;ctx.fillStyle=c;ctx.fillRect(0,-t.w/2,t.len,t.w);ctx.globalAlpha=.38;ctx.fillRect(0,-t.w/2,t.len*k,t.w);ctx.globalAlpha=.9;ctx.strokeStyle=c;ctx.lineWidth=2.5;ctx.strokeRect(0,-t.w/2,t.len,t.w);}
@@ -2322,7 +2380,7 @@ function drawBossUI(){
     ctx.fillStyle='rgba(0,0,0,.65)';ctx.fillRect(bx-3,by-3,bw+6,20);ctx.fillStyle=e.ph2?'#ff4040':'#c8323a';ctx.fillRect(bx,by,bw*Math.max(0,e.hp/e.maxHp),14);
     ctx.strokeStyle='#d6a94a';ctx.lineWidth=2;ctx.strokeRect(bx-3,by-3,bw+6,20);
     ctx.font='17px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.8)';const el=(S.bt||0)-(S.bStart||0),par=bossPar(),s=`${ET[e.type].n}${e.ph2?' (분노)':''}${e.rage>=6?` 💀최종 광폭 ${e.rage-5}`:e.rage?` 🔥광폭화 ${e.rage} · 최종 광폭까지 ${Math.max(0,Math.ceil(par+150-el))}초`:` · 광폭화까지 ${Math.max(0,Math.ceil(par-el))}초`}`;ctx.strokeText(s,W/2,by-6);ctx.fillStyle='#f1e7cf';ctx.fillText(s,W/2,by-6);}
-  if(S.bannerT>0&&S.bossI>=0){const B0=BOSSES[S.bossI%4],B=S.bossI>=4?{...B0,ch:'악몽 '+(S.bossI+1)+'단계'}:B0,a=Math.max(0,Math.min(1,S.bannerT*1.5,(3.2-S.bannerT)*4));ctx.globalAlpha=a;
+  if(S.bannerT>0&&S.bossI>=0){const B0={...BOSSES[S.bossI%4],t:BTITLE[bossTypeOf(S.bossI)]||BOSSES[S.bossI%4].t},B=S.bossI>=4?{...B0,ch:'악몽 '+(S.bossI+1)+'단계'}:B0,a=Math.max(0,Math.min(1,S.bannerT*1.5,(3.2-S.bannerT)*4));ctx.globalAlpha=a;
     ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,H*.26,W,96);ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillStyle='#d6a94a';ctx.font='18px "Do Hyeon",sans-serif';ctx.fillText(`${B.ch} 보스 · ${B.t}`,W/2,H*.26+20);
     ctx.fillStyle='#ff6060';ctx.font=`${W<500?32:40}px "Do Hyeon",sans-serif`;ctx.fillText(ET[B.type].n,W/2,H*.26+52);
@@ -3689,7 +3747,7 @@ function gameOver(win){
   const sec=Math.floor(S.gt),score=runScore(),medals=runMedals(score);META.medals+=medals;META.total+=medals;saveMeta();
   if(sec>best){best=sec;try{localStorage.setItem('chipdungeon_best_v5',String(best));}catch(e){}}
   const fmt=x=>`${Math.floor(x/60)}분 ${x%60}초`;
-  show(`${unlocked?`<div class="medal" style="justify-content:center"><span>🔓 <b>${unlocked}</b>${unlocked.includes('봉인 해제권')?'':' 난이도가 열렸습니다!'}</span></div>`:''}${win?`<h2>🏆 클리어!</h2><p class="sub">10분을 버티고 하우스 딜러를 쓰러뜨렸습니다. 보스전에 ${fmt(Math.floor(S.bt))} 걸렸어요.</p>`:`<h2>${endless()?'악몽 '+(S.chap+1)+'단계 도달':S.quitEnd?'여기서 정산했습니다':'쓰러졌습니다'}</h2><p class="sub">${endless()?`보스 ${S.st.bosses||0}마리를 잡고`:Math.min(4,S.chap+1)+'장에서'} ${fmt(sec)} 버텼습니다.${S.bossI>=0?` (${ET[BOSSES[S.bossI%4].type].n}에게 패배)`:''}</p>`}
+  show(`${unlocked?`<div class="medal" style="justify-content:center"><span>🔓 <b>${unlocked}</b>${unlocked.includes('봉인 해제권')?'':' 난이도가 열렸습니다!'}</span></div>`:''}${win?`<h2>🏆 클리어!</h2><p class="sub">10분을 버티고 하우스 딜러를 쓰러뜨렸습니다. 보스전에 ${fmt(Math.floor(S.bt))} 걸렸어요.</p>`:`<h2>${endless()?'악몽 '+(S.chap+1)+'단계 도달':S.quitEnd?'여기서 정산했습니다':'쓰러졌습니다'}</h2><p class="sub">${endless()?`보스 ${S.st.bosses||0}마리를 잡고`:Math.min(4,S.chap+1)+'장에서'} ${fmt(sec)} 버텼습니다.${S.bossI>=0?` (${ET[bossTypeOf(S.bossI)].n}에게 패배)`:''}</p>`}
   <div class="medal"><span>최종 점수 <b>${score.toLocaleString()}</b></span><span>🏅 메달 <b>+${medals}</b> <small>${medalClear()?`(클리어 보너스 +${medalClear()} 포함) `:''}(보유 ${META.medals})</small></span></div>
   <div class="stats">
     <span>난이도</span><span>${dfM().n}${dfM().sc>1?` (점수 ×${dfM().sc})`:''}</span>
@@ -4270,7 +4328,7 @@ refreshAutoBtns();
 /* ---------- save ---------- */
 const SAVE_KEY='chipdungeon_save_v1';
 const PKEYS=['dmgP','rateP','xpM','block','token','hp','maxHp','speed','dmg','rate','bspd','range','multi','pierce','crit','critM','luck','goldM','vuln','orbR','orbM','dashMul','armor','dodge','lifesteal','regen','magnet','shots','pkills','lastCd','soulN','fyO','skN','hpP','hpB','hpLM'];
-const SKEYS=['nmB','gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','takeAll','keys','vipStock','vipRoll','buys','cbuys','fused','potN','vineN','seals','banL','noAug'];
+const SKEYS=['nmB','gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','takeAll','keys','vipStock','vipRoll','buys','cbuys','fused','potN','vineN','seals','banL','noAug','bossT'];
 function saveGame(silent){
   if(!S||!S.started||!S.p.alive||S.mode==='over'||S.mode==='dying'||S.mode==='revive')return false;
   const d={v:1,at:Date.now(),p:{},s:{},augs:S.augs.map(a=>[a.id,a.lv,a.q||1]),st:S.st};
