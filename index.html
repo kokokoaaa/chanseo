@@ -91,7 +91,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 @media (max-width:520px){#autoBar{flex-direction:column;align-items:flex-end;top:54px}#autoBar button{padding:3px 7px;font-size:12px}#autoBar #speedBtn{font-size:14px}#buffs{top:186px}}
 .shophead{position:sticky;top:-22px;z-index:3;display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--felt);margin:-22px -20px 6px;padding:16px 20px 10px;border-bottom:1px solid rgba(214,169,74,.3);border-radius:16px 16px 0 0}
 .shophead h2{margin:0}
-.sealrow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:6px 0 2px}
+.cwrap{display:flex;flex-direction:column;gap:6px;min-width:0}.cwrap>.card{flex:1}
 .sealb{font:inherit;font-size:13px;padding:5px 6px;border-radius:8px;border:1px dashed rgba(255,154,154,.7);background:rgba(60,10,16,.55);color:#ffc4c4;cursor:pointer}
 .sealb:hover{background:rgba(120,20,30,.7);color:#fff}
 .sealb small{opacity:.75}
@@ -257,6 +257,15 @@ h3{font-family:'Do Hyeon',sans-serif;font-weight:400;font-size:19px;margin:18px 
 .card.aug.tier-p.canfuse{animation:prz 2.4s linear infinite,fzp 1.4s ease-in-out infinite}
 .card.aug.canfuse{border-color:#ff4fd8;box-shadow:0 0 0 2px #ff4fd8,0 0 18px rgba(255,79,216,.55);animation:fzp 1.4s ease-in-out infinite}
 @keyframes fzp{50%{box-shadow:0 0 0 2px #ff4fd8,0 0 30px rgba(255,79,216,.9)}}
+.panel.wide{max-width:1060px}
+.panel.wide .card.aug{justify-content:flex-start;padding:14px 12px;gap:7px}
+.card.aug .ad{display:block;width:100%;font-size:15.5px;line-height:1.55;text-align:left;color:var(--ink);word-break:keep-all}
+.card.aug .al{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left}
+.card.aug .al .ta{font-size:13.5px;line-height:1.45;color:#7a4f00;word-break:keep-all}
+.card.aug.ucard .ad,.card.aug.tier-p .ad{color:#2a1530}
+.panel.wide .fzbox{font-size:14px;line-height:1.5;word-break:keep-all}
+.panel.wide .fzbox .fzh{font-size:16.5px}
+.panel.wide .apv{font-size:14px}
 .fzbox{display:flex;flex-direction:column;gap:2px;width:100%;margin-top:4px;padding:7px 8px;border-radius:8px;background:linear-gradient(180deg,#3a0f33,#25091f);border:1px solid #ff4fd8;color:#ffe6f8;font-size:13px;line-height:1.35}
 .fzbox .fzh{font-size:16px;color:#ff8be6;letter-spacing:.5px}
 .apv{display:flex;flex-direction:column;gap:1px;width:100%;margin-top:4px;padding:5px 7px;border-radius:7px;background:#1f2a22;font-size:13px;line-height:1.35;text-align:left}
@@ -3466,7 +3475,7 @@ function augHtml(a,i){
   const cut=x=>x.replace(/[.\s]+$/,''),bon=f=>cut(f.d).split(/,\s*(?=새 능력)/).map(x=>`<span class="fzd" style="color:#ffd76a">★ ${x}</span>`).join('');
   const fz=pfs.length>1?`<span class="fzbox"><span class="fzh">💥 합체 가능 · 짝을 골라 누르세요</span>${pfs.map(f=>`<span class="fzopt" data-fz="${f.id}"><span class="fzn2"><b>${pOf(f).n}</b>${wa(pOf(f).n)} 합체 → <b class="fzn">${f.n}</b></span>${bon(f)}</span>`).join('')}<span class="fzd" style="opacity:.6">고르지 않은 짝은 그대로 남아요</span></span>`
     :pf?`<span class="fzbox"><span class="fzh">💥 <b>${pOf(pf).n}</b>${wa(pOf(pf).n)} 합체 → <b class="fzn">${pf.n}</b></span>${bon(pf)}</span>`:'';
-  return `<button class="card aug tier-${a.t} ${pf?'canfuse':''} ${a.uc?'ucard':''}" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}${a.swap?' · <span style="color:#ff9ad0">교체</span>':''}</span><b>${a.n}</b><span class="chips">${chips}</span>${augPreview(a)}${fz}${a.up?'':VFUSIONS.filter(f=>f.b===a.id&&has(f.a)).map(f=>`<span class="fzbox" style="border-color:#ffd76a"><span class="fzh" style="color:#ffd76a">👑 보유 VIP ${augDef(f.a).n}와 합체 가능 → <b class="fzn">${f.n}</b></span><span class="fzd">${f.d} (다음 증강을 얻을 때 합체)</span></span>`).join('')}<span class="tip">${a.d}${hpLoss(a.f,a.d,a.t==='v'||a.t==='f'?1:2)}${lines?'<br>':''}${lines}</span></button>`;
+  return `<button class="card aug tier-${a.t} ${pf?'canfuse':''} ${a.uc?'ucard':''}" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}${a.swap?' · <span style="color:#ff9ad0">교체</span>':''}</span><b>${a.n}</b><span class="ad">${a.d}${hpLoss(a.f,a.d,a.t==='v'||a.t==='f'?1:2)}</span><span class="chips">${chips}</span>${lines?`<span class="al">${lines}</span>`:''}${augPreview(a)}${fz}${a.up?'':VFUSIONS.filter(f=>f.b===a.id&&has(f.a)).map(f=>`<span class="fzbox" style="border-color:#ffd76a"><span class="fzh" style="color:#ffd76a">👑 보유 VIP ${augDef(f.a).n}와 합체 가능 → <b class="fzn">${f.n}</b></span><span class="fzd">${f.d} (다음 증강을 얻을 때 합체)</span></span>`).join('')}</button>`;
 }
 function bindPeek(){
   ov.querySelectorAll('.card').forEach(c=>{let t=null;
@@ -3494,12 +3503,11 @@ function openAug(free,why,fixed,fixedTier){
   if(!opts.length){const g=price(120);S.gold+=g;toast(`슬롯 가득, 강화할 것도 없음. ${g} 골드 지급`);openNext();return;}
   const cost=price(18);
   show(`<h2>증강 선택</h2><p class="sub">슬롯 <b style="color:${full?'#ff9ad0':'var(--ivory)'}">${slotCount()}/${MAXA}</b>${full?' · <b style="color:#ff9ad0">가득 참 · 고르면 교체</b>':''}</p>
-  <div class="cards">${opts.map(augHtml).join('')}</div>
-  ${(S.seals||0)>0?`<div class="sealrow">${opts.map((a,i)=>a.up?'<span></span>':`<button class="sealb" data-seal="${i}" title="이번 판에서 이 증강이 다시 나오지 않음">🔒 봉인 <small>(남은 ${S.seals}회)</small></button>`).join('')}</div>`:''}
+  <div class="cards">${opts.map((a,i)=>`<div class="cwrap">${augHtml(a,i)}${(S.seals||0)>0&&!a.up?`<button class="sealb" data-seal="${i}" title="이번 판에서 이 증강이 다시 나오지 않음">🔒 봉인 <small>(남은 ${S.seals}회)</small></button>`:''}</div>`).join('')}</div>
   <button class="btn ghost" id="reroll" ${!free&&S.gold<cost?'disabled':''}>다시 뽑기<small>${free?(free===true?(META.sk.reroll?'무료 2회':'무료 1회'):'무료 '+free+'회'):cost+'골드 (보유 '+S.gold+')'}</small></button>
   <button class="btn ghost" id="augSkip">포기<small>${price(40)}골드 받고 넘기기</small></button>
   <button class="btn ghost" data-stats>내 스탯 보기</button>`);
-  bindPeek();if(opts.some(a=>a.t==='p'))augFx('💎 프리즘 등장!','','#d68cff',true);
+  {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}bindPeek();if(opts.some(a=>a.t==='p'))augFx('💎 프리즘 등장!','','#d68cff',true);
   ov.querySelectorAll('.card').forEach(b=>b.onclick=ev=>{const a=opts[+b.dataset.i];{const o=ev.target.closest('[data-fz]');S.fuseChoice=o?o.dataset.fz:null;}
     if(a.up){const o=a.ref;o.lv++;if(o.f)applyQ(o.f,S.p,o.q);tagCount();toast(`${o.n} ★${o.lv}`);tryFuse();openNext();return;}
     if(a.swap&&slotCount()>=MAXA){openSwap(a,opts,free,why);return;}
