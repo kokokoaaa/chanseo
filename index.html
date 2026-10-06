@@ -686,6 +686,29 @@ M.bossR={sz:72,draw(g,f){const dk=['#0a0612','#1a1028','#2c1c44','#4a2a7a'],T=T3
   P(g,'#e040ff',30,19,4,2);P(g,'#e040ff',39,19,4,2);P(g,'#ffffff',31,19,1,1);P(g,'#ffffff',40,19,1,1);P(g,'#e040ff',33,26,7,1);
   B(g,T,18,40+(f?1:0),5,6);B(g,T,54,40+(f?0:1),5,6);P(g,'#a040e0',33,34,7,7);P(g,'#f0c0ff',35,36,3,3);
   for(let i=0;i<4;i++){const a=i/4*TAU+(f?.4:0);B(g,['#4a1a7a','#a040e0','#f0c0ff'],36+Math.cos(a)*28,36+Math.sin(a)*12,3.2);}}};
+// 골치 아픈 몹 / 히든 몹
+M.thief={sz:30,draw(g,f){g.save();g.translate(2,4);M.grunt.draw(g,f);g.restore();P(g,'#1a1a1a',9,13,13,2);P(g,'#c8323a',8,11,15,2);B(g,['#6a5030','#8a6a40','#b08a58'],6,23,4,4);P(g,'#ffd76a',6,21,1,1);}};
+M.totem={sz:34,draw(g,f){const wd=T3(R.wood);C(g,wd,12,10,10,22);for(let y=12;y<30;y+=5)P(g,R.wood[0],12,y,10,1);
+  P(g,'#c870ff',14,14,2,2);P(g,'#c870ff',18,14,2,2);P(g,K,15,18,4,2);P(g,'#c870ff',16,23,2,4);
+  B(g,T3(R.bone),17,7,5,4.5);P(g,K,14,6,2,2);P(g,K,18,6,2,2);P(g,f?'#e0a0ff':'#c870ff',15,6,1,1);P(g,f?'#e0a0ff':'#c870ff',19,6,1,1);
+  for(let i=0;i<3;i++){P(g,'#e04a4a',9-i,10+i*2,3,1);P(g,'#4ae0e0',22+i,11+i*2,3,1);}P(g,R.wood[0],10,31,14,1);}};
+M.leech={sz:22,draw(g,f){const lc=['#2a0a14','#4a1424','#6a2a3a','#9a4a5a'];for(let i=0;i<5;i++)B(g,T3(lc),5+i*3,16-(i===2&&f?1:0),3.2,3);B(g,T3(lc),18,14,3.5,3.5);P(g,'#ff4060',19,12,1,1);P(g,K,20,15,2,2);P(g,lc[3],6,14,8,1);}};
+M.mortar={sz:30,draw(g,f){g.save();g.translate(2,4);M.grunt.draw(g,f);g.restore();L(g,'#3a3a44',8,16,22,5);L(g,'#5a5a66',9,17,23,6);P(g,'#2a2a30',21,3,4,4);if(f)P(g,'#ffb030',23,2,2,2);}};
+M.mimic={sz:32,draw(g,f){const wd=T3(R.wood),o=f?2:0;P(g,R.wood[0],5,18,22,12);for(let x=6;x<26;x++)P(g,wd[x<10?2:x<22?1:0],x,19,1,10);P(g,R.gold[2],5,22,22,2);
+  P(g,R.wood[0],5,4-o,22,8);for(let x=6;x<26;x++)P(g,wd[1],x,5-o,1,6);P(g,R.gold[2],5,10-o,22,2);
+  P(g,'#3a0a0a',6,12-o,20,6+o);for(let i=0;i<6;i++){P(g,W,7+i*3,12-o,2,2);P(g,W,8+i*3,16,2,2);}P(g,'#e04060',12,15,8,3);P(g,'#ffe040',9,7-o,2,2);P(g,'#ffe040',21,7-o,2,2);}};
+M.mimicc={sz:32,draw(g,f){const wd=T3(R.wood);P(g,R.wood[0],5,12,22,18);for(let x=6;x<26;x++)P(g,wd[x<10?2:x<22?1:0],x,13,1,16);P(g,R.gold[2],5,18,22,2);P(g,R.gold[3],14,17,4,5);P(g,K,15,19,2,2);B(g,['#8a5a20','#c8a038','#ffe07a'],16,11,10,4,(x,y)=>y>12);if(f)P(g,'#fff8c0',22,9,1,1);}};
+M.gemslime={sz:28,draw(g,f){const ry=f?6:7,rx=f?11:10,cy=25-ry;B(g,['#1a6a8a','#3ab0d8','#7ae8ff','#d8faff'],14,cy,rx,ry,(x,y)=>y>25);for(const [x,y,c] of [[9,cy-2,'#ff5ad8'],[17,cy-4,'#ffd76a'],[13,cy+2,'#7be08f']]){P(g,c,x,y,2,2);P(g,'#fff',x,y,1,1);}dot(g,11,cy);dot(g,16,cy);}};
+M.luckycat={sz:26,draw(g,f){const gc=T3(R.gold);B(g,gc,13,18,7,6);B(g,gc,13,10,6,5);P(g,gc[1],7,4,3,4);P(g,gc[1],16,4,3,4);P(g,'#ff9090',8,5,1,2);P(g,'#ff9090',17,5,1,2);dot(g,11,10,K,1);dot(g,15,10,K,1);P(g,'#ff6060',13,12,1,1);P(g,W,4,9,3,1);P(g,W,19,9,3,1);B(g,gc,20,f?11:14,2.2);P(g,'#c8323a',9,15,9,2);P(g,R.gold[3],13,16,2,2);for(let i=0;i<4;i++)P(g,gc[1],4-i,20-i*2,2,2);}};
+// 히든 보스 황금 용
+M.bossH={sz:72,draw(g,f){const gd=['#7a4a08','#b8800f','#e8b830','#ffe070','#fff8c0'],T=T3(gd);
+  for(let i=0;i<14;i++){const y=(f?16:22)+i;P(g,gd[1],6+i,Math.round(y-i*.6),2,Math.max(2,14-i));P(g,gd[1],64-i,Math.round(y-i*.6),2,Math.max(2,14-i));}
+  L(g,gd[0],6,f?14:20,24,34);L(g,gd[0],66,f?14:20,48,34);
+  for(let i=0;i<8;i++)B(g,T,22-i*2,60+i*.6,4-i*.3);
+  C(g,T,28,58,5,10);C(g,T,40,58,5,10);P(g,gd[0],27,68,7,1);P(g,gd[0],39,68,7,1);
+  B(g,T,36,48,13,12);P(g,'#fff0b0',32,42,8,14);for(let y=44;y<56;y+=3)P(g,gd[2],32,y,8,1);
+  B(g,T,36,26,11,9);B(g,T,45,30,7,5);P(g,K,50,29,2,1);P(g,'#ff4020',39,23,3,2);P(g,'#ffff80',39,23,1,1);
+  for(let i=0;i<5;i++){P(g,gd[4],27-i,18-i,2,2);P(g,gd[4],44+i,18-i,2,2);}crown(g,28,16,16);P(g,W,45,34,1,2);P(g,W,48,34,1,2);}};
 M.bossK={sz:72,draw(g,f){const bn=T3(R.bone),st=T3(R.stone);
   C(g,[R.bone[1],R.bone[2]],28,56+(f?0:1),5,13-(f?0:1));C(g,[R.bone[1],R.bone[2]],39,56+(f?1:0),5,13-(f?1:0));P(g,'#1e1a14',26,69,9,1);P(g,'#1e1a14',37,69,9,1);
   B(g,st,36,48,13,10);P(g,st[0],27,47,18,2);P(g,'#7a1e24',34,43,4,13);
@@ -888,6 +911,13 @@ const ET={
   shroom: {n:'포자 버섯',r:10,hp:30, spd:85, dmg:8, col:'#b04aa0',xp:2,coin:2,spore:true},
   scarab: {n:'모래 딱정벌레',r:10,hp:55, spd:120,dmg:10,col:'#2a8a7a',xp:2,coin:3},
   imp:    {n:'심연 임프',r:9, hp:26, spd:110,dmg:11,col:'#7a4ac8',xp:2,coin:3,range:200},
+  thief:  {n:'소매치기 고블린',r:10,hp:34,spd:150,dmg:4,col:'#5a7a3a',xp:2,coin:2,thief:true},
+  totem:  {n:'저주 토템',r:14,hp:180,spd:0,dmg:0,col:'#7a4a8a',xp:4,coin:5,totem:true},
+  leech:  {n:'거머리',r:9, hp:40, spd:125,dmg:3, col:'#6a3a4a',xp:2,coin:2,leech:true},
+  mortar: {n:'박격포 고블린',r:11,hp:38,spd:70,dmg:20,col:'#7a6a3a',xp:3,coin:4,range:420,mortar:true},
+  gemslime:{n:'보석 슬라임',r:12,hp:160,spd:175,dmg:0,col:'#5fe8ff',xp:0,coin:0,flee:true,hid:true},
+  mimic:  {n:'미믹',r:15,hp:420,spd:150,dmg:22,col:'#a0703a',xp:6,coin:0,hid:true,mimic:true},
+  luckycat:{n:'행운 고양이',r:10,hp:120,spd:150,dmg:0,col:'#ffd76a',xp:0,coin:0,flee:true,hid:true},
   goblin: {n:'보물 고블린',r:11,hp:140,spd:150,dmg:0,col:'#e8bb4f',xp:3,coin:0,flee:true},
   boss:   {n:'오우거 왕',r:34,hp:3500,spd:70,dmg:26,col:'#8a9a4a',xp:60,coin:100,boss:true},
   boss2:  {n:'고블린 대주술사',r:30,hp:3000,spd:95,dmg:22,col:'#8a3fc0',xp:90,coin:150,boss:true},
@@ -904,7 +934,8 @@ const ET={
   bossV:  {n:'흡혈귀 백작',r:30,hp:3200,spd:100,dmg:22,col:'#c8202a',xp:90,coin:150,boss:true},
   bossM:  {n:'버섯 군주',r:34,hp:3400,spd:70,dmg:20,col:'#b04aa0',xp:90,coin:150,boss:true},
   bossD:  {n:'모래 웜',r:36,hp:4800,spd:120,dmg:22,col:'#c8a060',xp:120,coin:200,boss:true},
-  bossR:  {n:'심연의 군주',r:34,hp:5600,spd:85,dmg:25,col:'#7a4ac8',xp:0,coin:300,boss:true}
+  bossR:  {n:'심연의 군주',r:34,hp:5600,spd:85,dmg:25,col:'#7a4ac8',xp:0,coin:300,boss:true},
+  bossH:  {n:'황금 용',r:36,hp:6000,spd:105,dmg:24,col:'#ffd040',xp:150,coin:0,boss:true,hidb:true}
 };
 const ESPR=(()=>{
   const cache={};
@@ -2255,7 +2286,8 @@ function pickType(){
   const r=S.round;
   const pool=[['grunt',10],['runner',r>=2?6:2],['slime',r>=1.5?5:0],['ranger',r>=2?4:0],['ghost',r>=3?3:0],['bomber',r>=3?3:0],['mage',r>=4?3:0],['tank',r>=3?2+r*.2:0],['support',r>=5?1.5:0],['boar',r>=2.5?3:0],
     ['spider',r>=2?3:0],['jelly',r>=2.5?3:0],['shield',r>=3?2.5:0],['sniper',r>=4?2:0],['wraith',r>=4?2.5:0],['lancer',r>=5?2:0],
-    ['wolf',r>=2.5?2:0],['sapling',r>=3?1.5:0],['shroom',r>=3?1.5:0],['vbat',r>=3.5?1.5:0],['scarab',r>=4?1.5:0],['imp',r>=4.5?1.5:0]];
+    ['wolf',r>=2.5?2:0],['sapling',r>=3?1.5:0],['shroom',r>=3?1.5:0],['vbat',r>=3.5?1.5:0],['scarab',r>=4?1.5:0],['imp',r>=4.5?1.5:0],
+    ['thief',r>=2.5?1.5:0],['leech',r>=3?2:0],['totem',r>=3.5?1:0],['mortar',r>=4?1.5:0]];
   if(S.chap>=3){const W={grunt:.5,runner:.3,slime:.6,tank:2.2,boar:1.8,mage:1.6,ranger:1.3,ghost:1.2,bomber:1,support:1.2,shield:1.6,sniper:1.5,lancer:1.8,wraith:1.4,jelly:1.2,spider:1};for(const q of pool)q[1]*=W[q[0]]||1;}
   {const B=BIO_MOB[S.biome??0];if(B)for(const q of pool)q[1]*=B[q[0]]||1;}
   if(S.boss&&S.boss.alive&&BMIN[S.boss.type]&&Math.random()<.7){const B=BMIN[S.boss.type];return B[Math.floor(Math.random()*B.length)];}
@@ -2263,8 +2295,8 @@ function pickType(){
   let t=pool.reduce((a,b)=>a+b[1],0),x=Math.random()*t;for(const [k,w] of pool){if((x-=w)<0)return k;}return 'grunt';
 }
 // 배경마다 자주 나오는 몬스터 (가중치 배율)
-const BIO_MOB=[{grunt:1.3,boar:1.3,wolf:2},{spider:2.5,runner:1.3,sapling:2,shroom:1.5},{boar:2,lancer:1.5,wolf:1.8},{wraith:2.5,ghost:2,vbat:2},{bomber:2,lancer:1.5,imp:1.5},
-  {sniper:2.5,ranger:1.8,shield:1.5,scarab:2.5},{shield:2,tank:1.5,sniper:1.3,wolf:1.5},{jelly:2.5,slime:2,spider:1.5,shroom:2},{jelly:1.8,wraith:1.5,tank:1.5,imp:1.5},
+const BIO_MOB=[{grunt:1.3,boar:1.3,wolf:2},{spider:2.5,runner:1.3,sapling:2,shroom:1.5},{boar:2,lancer:1.5,wolf:1.8,thief:2},{wraith:2.5,ghost:2,vbat:2,totem:2},{bomber:2,lancer:1.5,imp:1.5,mortar:1.8},
+  {sniper:2.5,ranger:1.8,shield:1.5,scarab:2.5,mortar:1.8},{shield:2,tank:1.5,sniper:1.3,wolf:1.5},{jelly:2.5,slime:2,spider:1.5,shroom:2,leech:2.5},{jelly:1.8,wraith:1.5,tank:1.5,imp:1.5},
   {ranger:2,wraith:2,ghost:1.8,shield:1.5,vbat:1.8},{lancer:2,bomber:2,tank:1.5,imp:2.2}];
 function diffAt(t){return 1+t/80+Math.pow(t/110,2.2);}
 // 정예 특성: 정예마다 하나씩 붙어서 같은 정예라도 대처법이 달라짐
@@ -2320,7 +2352,7 @@ const chapM=()=>CHAP_MUL[Math.min(3,S.chap||0)];
 const dfHp=()=>{const h=dfM().hp;return h<=1?h:1+(h-1)*Math.min(1,.45+.55*effT()/240);};
 function spawnAt(type,x,y,noElite,forceElite){
   const T=ET[type],d=S.round,cm=chapM();
-  const elite=!T.boss&&!T.flee&&(forceElite||(!noElite&&effT()>120&&Math.random()<Math.min(.35+cm.el+dfM().el,(effT()-120)/700+cm.el+dfM().el)));
+  const elite=!T.boss&&!T.flee&&!T.hid&&!T.totem&&(forceElite||(!noElite&&effT()>120&&Math.random()<Math.min(.35+cm.el+dfM().el,(effT()-120)/700+cm.el+dfM().el)));
   // 시간 초과 강화: 실제 10분(타이머 10:00)이 지난 뒤부터만 1분마다 1.3배. 내부 시간(1.2배속) 기준이면 8분 20초부터 켜져 4단계 후반 잡몹이 급격히 세짐
   const om=endless()?1:Math.pow(1.3,Math.max(0,(S.gt||0)-600)/60);
   const m=(T.boss?1+.12*(Math.min(d,50)-1):(1+.35*(d-1))*om*nmHp())*(elite?4:1)*(T.boss?dfM().bhp:cm.hp*dfHp()),dm=(T.boss?1+.08*(d-1):(1+.15*(d-1))*om)*nmDm()*(elite?1.5:1)*cm.dm*dfM().dm;
@@ -2338,7 +2370,20 @@ function spawnBurst(){
   const side=Math.floor(Math.random()*4);
   const [cx,cy]=ringPos();
   for(let i=0;i<n;i++)spawnAt(pickType(),cx+rand(-40,40),cy+rand(-40,40));
+  hidRoll();
 }
+// 히든 몹: 보스전이 아닐 때 아주 드물게 (행운이 높을수록 자주). 한 번에 하나만
+const HID_MOB=['gemslime','mimic','luckycat'];
+function hidRoll(){if(S.bossI>=0||effT()<60||S.en.some(e=>ET[e.type].hid))return;if(Math.random()>.008*(1+LK()/LUCK_CAP))return;
+  const t=HID_MOB[Math.floor(Math.random()*HID_MOB.length)],p=S.p,a=Math.random()*TAU,r=t==='mimic'?260:330;spawnAt(t,clamp(p.x+Math.cos(a)*r,30,WW-30),clamp(p.y+Math.sin(a)*r,30,WH-30),true);
+  toast(t==='gemslime'?'💎 보석 슬라임 출현! 도망가기 전에 잡으세요':t==='luckycat'?'🐱 행운 고양이 출현! 잡으면 행운 +2':'🎁 근처에 수상한 상자가 보인다…');}
+// 히든 보스: 6분 이후 보스전이 아닐 때 30초마다 3% (히든 몹을 잡을 때마다 +6%). 한 판에 한 번
+function hbTick(dt){if(S.hbDone||S.bossI>=0||S.win||(S.gt||0)<360)return;S.hbT=(S.hbT??30)-dt;if(S.hbT>0)return;S.hbT=30;if(Math.random()<.03+.06*(S.hidK||0))spawnHB();}
+function spawnHB(){S.hbDone=1;const p=S.p,a=Math.random()*TAU,e=spawnAt('bossH',clamp(p.x+Math.cos(a)*320,60,WW-60),clamp(p.y+Math.sin(a)*320,60,WH-60),true),j=Math.min(3,S.chap||0);
+  e.maxHp*=(BOSS_HPM[j]||1)*1.3*(endless()?nmBossHp():1);e.hp=e.maxHp;e.dmg*=(BOSS_DM[j]||1);e.bk=0;e.hid2=1;e.hl=60;go(e,'intro');S.hb=e;S.shake=.6;S.flash=.3;
+  toast('👑 히든 보스 황금 용 출현! 60초 안에 쓰러뜨리면 큰 보상');}
+function hbDown(e){S.hb=null;const p=S.p,g=price(500);for(let i=0;i<20;i++)S.dr.push({x:e.x+rand(-60,60),y:e.y+rand(-60,60),v:g/20/TS});S.bonusAug+=2;S.keys=(S.keys||0)+2;p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.5);
+  META.medals+=3;saveMeta();bossFx(e,false);toast('👑 황금 용 격파! 증강 2개 + 🔑 열쇠 2개 + 골드 + 🏅 메달 3');}
 /* ---------- events ---------- */
 // 보스전이 아닐 때 50~70초마다 무작위 이벤트. 같은 이벤트는 연속으로 안 나옴
 const EVENTS={
@@ -2482,7 +2527,8 @@ const bossPar=()=>Math.round((BOSS_PAR[S.bossI%4]||120)*(1+(dfM().bhp-1)*.5));
 function bossRage(e){const el=(S.bt||0)-(S.bStart||0),par=bossPar();return el<par?0:Math.min(20,1+Math.floor((el-par)/30));}
 function bossAI(e,dt){
   const p=S.p,T=ET[e.type],dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1,ph2=e.hp<e.maxHp*.5;
-  {const rg=bossRage(e);if(e.baseDmg==null)e.baseDmg=e.dmg;if(rg!==(e.rage||0)){e.rage=rg;e.dmg=e.baseDmg*(1+(dfM().rg||.25)*Math.min(5,rg))*(rg>5?Math.pow(1.5,rg-5):1);if(rg===6)toast('최종 광폭! 이제 보스 공격이 줄어들지 않고 30초마다 1.5배씩 강해집니다');if(S.arena)S.arena.tr=Math.max(900,S.arena.tr*.95);S.shake=.4;S.flash=.15;
+  if(e.hid2){e.hl-=dt;if(e.hl<=0){e.alive=false;S.hb=null;burst(e.x,e.y,'#ffd040',30);toast('황금 용이 날아가 버렸다…');return;}}
+  {const rg=e.hid2?0:bossRage(e);if(e.baseDmg==null)e.baseDmg=e.dmg;if(rg!==(e.rage||0)){e.rage=rg;e.dmg=e.baseDmg*(1+(dfM().rg||.25)*Math.min(5,rg))*(rg>5?Math.pow(1.5,rg-5):1);if(rg===6)toast('최종 광폭! 이제 보스 공격이 줄어들지 않고 30초마다 1.5배씩 강해집니다');if(S.arena)S.arena.tr=Math.max(900,S.arena.tr*.95);S.shake=.4;S.flash=.15;
     S.rings.push({x:e.x,y:e.y,r:e.r,max:e.r+180,life:.6,col:'#ff2020'});toast(rg===1?`시간을 너무 끌었다! ${T.n} 광폭화`:`${T.n} 광폭화 ${rg}단계. 더 강해집니다`);}}
   if(ph2&&!e.ph2){e.ph2=true;if(S.arena)S.arena.tr*=.85;S.shake=.4;toast(`${T.n} 분노! 패턴이 빨라집니다`);S.rings.push({x:e.x,y:e.y,r:e.r,max:e.r+140,life:.5,col:'#ff6060'});}
   if(e.slowT>0)e.slowT-=dt;
@@ -2755,6 +2801,25 @@ const BAI={
       e.sh-=dt;if(e.sh<=0){e.sh=.12;e.sa+=.3;const arms=ph2?3:2;for(let i=0;i<arms;i++){eShot(e.x,e.y,e.sa+i*TAU/arms,150,e.dmg*.42,6,'#b47aff');eShot(e.x,e.y,-e.sa+i*TAU/arms+.5,150,e.dmg*.42,6,'#7a4ac8');}}
       if(e.bt>3)go(e,'hover');break;
     }},
+  // 히든 보스 황금 용: 화염 숨결(흔들리는 부채꼴), 황금 비(예고 원), 급강하 돌진, 날갯바람(원형 3겹)
+  bossH(e,dt,o){const {p,ph2,sp}=o;
+    switch(e.bst){
+    case 'intro':if(e.bt>1.2)go(e,'fly');break;
+    case 'fly':keepDist(e,o,dt,200,300);e.sh=(e.sh||0)-dt;if(e.sh<=0){e.sh=ph2?.8:1.1;eFan(e,3,.4,280,e.dmg*.45,7,'#ffb030');}
+      if(e.bt>(ph2?1.5:2.1))go(e,['breath','coins','dive','gust'][e.bk++%4]);break;
+    case 'breath':if(e.f){e.f=0;e.sa=Math.atan2(p.y-e.y,p.x-e.x);e.sh=0;}e.sh-=dt;if(e.sh<=0){e.sh=.07;eShot(e.x,e.y,e.sa+Math.sin(e.bt*3)*.6+rand(-.1,.1),300,e.dmg*.4,7,'#ffb030');}
+      if(e.bt>2.2)go(e,'fly');break;
+    case 'coins':{const n=ph2?14:10;if(e.f){e.f=0;e.n=0;}
+      if(e.n<n&&e.bt>e.n*.14){e.n++;const [x,y]=e.n%3?nearP(240):[p.x,p.y];tele({k:'c',x,y,r:55,T:.85,dmg:e.dmg*1.2,col:'#ffd76a',fx:t=>burst(t.x,t.y,'#ffd76a',12)});}
+      keepDist(e,o,dt,200,300);if(e.bt>n*.14+1)go(e,'fly');break;}
+    case 'dive':{const W=ph2?.5:.65;if(e.f){e.f=0;e.n=ph2?3:2;e.aim=null;}
+      if(e.aim==null){e.aim=Math.atan2(p.y-e.y,p.x-e.x);e.ht=0;e.hitP=0;tele({k:'l',x:e.x,y:e.y,a:e.aim,len:520,w:e.r*2,T:W,dmg:0,col:'#ffd040'});}
+      e.ht+=dt;if(e.ht>W){const v=1100*dt;e.x+=Math.cos(e.aim)*v;e.y+=Math.sin(e.aim)*v;
+        if(p.alive&&!e.hitP&&d2(e,p)<(e.r+p.r+6)**2){e.hitP=1;hurtP(e.dmg*1.5,e);}
+        if(e.ht>W+.47){eRing(e,10,170,e.dmg*.42,Math.random(),7,'#ffb030');e.n--;e.aim=null;if(e.n<=0)go(e,'fly');}}break;}
+    case 'gust':{const n=3;if(e.f){e.f=0;e.n=0;}if(e.n<n&&e.bt>e.n*.5){eRing(e,ph2?22:18,160,e.dmg*.42,e.n*.15,7,'#fff3c4');e.n++;}
+      if(e.bt>n*.5+.5)go(e,'fly');break;}
+    }},
   boss4(e,dt,o){const {p,ph2}=o;
     switch(e.bst){
     case 'intro':if(e.bt>1.4)go(e,'deal');break;
@@ -2807,6 +2872,8 @@ function drawBeams(){
   ctx.restore();
 }
 function drawBossUI(){
+  {const h=S.hb;if(h&&h.alive){const bw=Math.min(W-40,360),bx=(W-bw)/2,by=W<640?96:70;ctx.fillStyle='rgba(0,0,0,.65)';ctx.fillRect(bx-3,by-3,bw+6,16);ctx.fillStyle='#ffd040';ctx.fillRect(bx,by,bw*Math.max(0,h.hp/h.maxHp),10);ctx.strokeStyle='#fff3c4';ctx.lineWidth=1.5;ctx.strokeRect(bx-3,by-3,bw+6,16);
+    ctx.font='14px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.8)';const tt=`👑 히든 보스 황금 용 · ${Math.ceil(h.hl)}초 안에 처치`;ctx.strokeText(tt,W/2,by-5);ctx.fillStyle='#ffe070';ctx.fillText(tt,W/2,by-5);}}
   const e=S.boss;
   if(e&&e.alive){const bw=Math.min(W-40,460),bx=(W-bw)/2,by=H-(W<640?150:44);
     ctx.fillStyle='rgba(0,0,0,.65)';ctx.fillRect(bx-3,by-3,bw+6,20);ctx.fillStyle=e.ph2?'#ff4040':'#c8323a';ctx.fillRect(bx,by,bw*Math.max(0,e.hp/e.maxHp),14);
@@ -3032,6 +3099,7 @@ function addRage(){const p=S.p;if(!has('k_berserk'))return;p.rage=Math.min(lv3('
 function dmgEs(k,...a){const o=S.dsub;S.dsub=o||k;try{dmgE(...a);}finally{S.dsub=o;}}
 function dmgE(e,amt,col,label,quiet){
   if(!e.alive)return;
+  if(e.tbT>S.t)amt*=.7;
   e.lh=S.t;if(e.esh>0){const a=Math.min(e.esh,amt);e.esh-=a;amt-=a;if(amt<=0){e.hit=.06;return;}}
   if(tag('alchemy')>=4&&e.potT>S.t)amt*=1.15;
   if(tag('grav')>=4&&e.gvT>S.t)amt*=1.2;
@@ -3264,7 +3332,13 @@ function onKill(e){
    else{if(Math.random()<(e.elite?.0012:.00007)*lk)S.items.push({k:'heal',x:e.x+rand(-10,10),y:e.y+rand(-10,10),life:150});
    else if(Math.random()<(e.elite?.0004:.000015)*lk)S.items.push({k:'mag',x:e.x+rand(-10,10),y:e.y+rand(-10,10),life:150});}
    if(S.items.length>40)S.items.shift();}
-  if(e.boss)bossDown(e);
+  if(e.boss&&!e.hid2)bossDown(e);
+  if(e.hid2)hbDown(e);
+  if(T.hid){S.hidK=(S.hidK||0)+1;
+    if(e.type==='gemslime'){const v=S.next*1.5/(TS*(p.xpM||1))/14;for(let i=0;i<14;i++)S.dr.push({x:e.x+rand(-40,40),y:e.y+rand(-40,40),v,xp:1});toast('💎 보석 슬라임 처치! 경험치 폭탄');}
+    if(e.type==='mimic'){S.bonusAug++;const g=price(80);for(let i=0;i<10;i++)S.dr.push({x:e.x+rand(-30,30),y:e.y+rand(-30,30),v:g/10/TS});toast('🎁 미믹 처치! 증강 1개 + 골드');}
+    if(e.type==='luckycat'){p.luck+=2;const g=price(60);for(let i=0;i<8;i++)S.dr.push({x:e.x+rand(-30,30),y:e.y+rand(-30,30),v:g/8/TS});toast('🐱 행운 고양이! 행운 +2 + 골드');}}
+  if(e.stole){const g=Math.round(e.stole*1.5);S.gold+=g;ftext(e.x,e.y-e.r-14,'+'+g+' 골드 되찾음','#ffd76a',16);}
   if(hasAf(e,'split'))for(let i=0;i<(e.ak<1?2:3);i++)spawnAt(e.type==='slime'?'slimelet':'runner',e.x+rand(-12,12),e.y+rand(-12,12),true);
   if(hasAf(e,'volatile'))tele({k:'c',vol:1,x:e.x,y:e.y,r:90,T:.85,dmg:e.dmg*1.2*e.ak,col:'#ff7a3a',fx:t=>burst(t.x,t.y,'#ff7a3a',16)});
   if(e.type==='goblin'){const g=price(30);for(let i=0;i<12;i++)S.dr.push({x:e.x+rand(-40,40),y:e.y+rand(-40,40),v:g/12});if(Math.random()<.1)S.items.push({k:Math.random()<.5?'mag':'heal',x:e.x,y:e.y,life:150});S.flash=.2;toast('보물 고블린 처치!');}
@@ -3458,12 +3532,23 @@ function update(dt){
     if(e.pt>0){e.pt-=dt;const dps=effDmg(S.p)*.35*(1+ex('poison')*.2)*homeM('poison')*(1+(S.p.psD||0))*e.ps*(1+.5*Math.max(0,L('toxic')-1)+.5*Math.max(0,L('r_venom')-1))*(has('plague')?1.2:1)*(tag('poison')>=6?2:1)+(has('plaguelord')?Math.min(e.maxHp*.006,pDmg()*(has('f_blackdeath')?3:1.5)):0);e.pTick+=dt;S.dsrc='poison';dmgE(e,dps*dt,null,null,true);S.dsrc=null;if(e.pTick>.5){e.pTick=0;if(e.alive)ftext(e.x,e.y-e.r-4,Math.round(dps*.5),'#8ee06a',12);}if(e.pt<=0)e.ps=0;if(!e.alive)continue;}
     if(S.freezeT>0)continue;
     if(e.boss){bossAI(e,dt);continue;}
+    // 히든 몹: 시간이 지나면 사라짐
+    if(T.hid&&!(T.mimic&&!e.awake)){e.hl=(e.hl??22)-dt;if(e.hl<=0){e.alive=false;burst(e.x,e.y,T.col,18);toast(T.n+'이(가) 사라졌다…');continue;}}
+    // 거머리: 달라붙으면 이동 속도 −40%, 1초마다 흡혈. 대시하면 떨어짐
+    if(e.latch){if(p.dashT>0||!p.alive){e.latch=0;e.cd=2;e.x+=Math.cos(e.la)*70;e.y+=Math.sin(e.la)*70;}else{e.x=p.x+Math.cos(e.la)*(p.r+5);e.y=p.y+Math.sin(e.la)*(p.r+5);S.buffT.slow=Math.max(S.buffT.slow||0,.2);if(e.cd<=0){hurtP(e.dmg,e);e.cd=1;}continue;}}
+    // 저주 토템: 0.5초마다 주변(170) 적에게 이동 속도 +30%, 받는 피해 −30%
+    if(T.totem){e.ttT=(e.ttT||0)-dt;if(e.ttT<=0){e.ttT=.5;for(const o of S.en)if(o.alive&&o!==e&&!o.boss&&d2(o,e)<170*170)o.tbT=S.t+.6;}continue;}
+    // 행운 고양이: 맞을 때마다(체력 20%) 멀리 순간이동 (3번까지)
+    if(e.type==='luckycat'&&(e.bkn??3)>0&&e.hp<(e.lhp??e.maxHp)-e.maxHp*.2){e.bkn=(e.bkn??3)-1;e.lhp=e.hp;burst(e.x,e.y,'#ffd76a',14);const a=Math.random()*TAU;e.x=clamp(p.x+Math.cos(a)*240,20,WW-20);e.y=clamp(p.y+Math.sin(a)*240,20,WH-20);burst(e.x,e.y,'#ffd76a',14);}
+    // 소매치기: 훔친 뒤 8초 안에 못 잡으면 도망
+    if(e.stole){e.flT=(e.flT??8)-dt;if(e.flT<=0){e.alive=false;burst(e.x,e.y,'#ffd76a',14);toast(`소매치기가 ${e.stole} 골드를 들고 도망쳤다!`);continue;}}
     // 해골 병사 어그로: 반경 90 안의 근접 잡몹은 해골을 노림 (원거리·돌진·자폭·보스 제외), 한 번 붙으면 160까지 따라감
     // 해골 어그로: 해골 1기당 최대 4마리까지만 끌어당김 (떼로 몰려 순식간에 녹는 것 방지)
     let sk=null;if(S.skel&&S.skel.length&&!T.range&&!T.flee&&!T.bomb&&!T.charge){if(e.tk&&e.tk.life>0&&d2(e.tk,e)<160*160){sk=e.tk;sk.ag=(sk.ag||0)+1;}else{e.tk=null;for(const k of S.skel)if(k.life>0&&(k.ag||0)<4&&d2(k,e)<90*90){sk=k;e.tk=k;k.ag=(k.ag||0)+1;break;}}}
     const tg_=sk||p,dx=tg_.x-e.x,dy=tg_.y-e.y,d=Math.hypot(dx,dy)||1;
+    if(T.mimic&&!e.awake){e.cd=1;if(d<130||e.hp<e.maxHp){e.awake=1;S.shake=.2;ftext(e.x,e.y-e.r-8,'미믹이다!','#ff6060',18);}else continue;}
     if(e.slowT>0){e.slowT-=dt;if(e.frozen&&e.slowT>0)continue;}else e.frozen=false;
-    let spd=e.spd*(e.ps>0&&has('neuro')?lv3('neuro',.6,.45,.3):1)*(e.slowT>0?.4:1)*(has('gravity')&&d<150?1-lv3('gravity',.2,.3,.4):1)*(evOn('moon')?1.2:1),vx=dx/d,vy=dy/d;
+    let spd=e.spd*(e.ps>0&&has('neuro')?lv3('neuro',.6,.45,.3):1)*(e.slowT>0?.4:1)*(has('gravity')&&d<150?1-lv3('gravity',.2,.3,.4):1)*(evOn('moon')?1.2:1)*(e.tbT>S.t?1.3:1)*(e.stole?1.15:1),vx=dx/d,vy=dy/d;
     if(T.charge){e.ccd=(e.ccd??rand(1,3))-dt;
       if(e.chT>0){e.chT-=dt;vx=e.cx;vy=e.cy;spd=(T.lance?620:560)*(e.slowT>0?.4:1);
         // 돌격 기사: 3연속 돌진 (돌진이 끝날 때마다 0.4초 다시 조준)
@@ -3478,7 +3563,7 @@ function update(dt){
       else if(e.bT<=0&&d<520){e.bT=rand(3.5,5);const a=Math.random()*TAU,r=rand(90,140);e.bx=clamp(p.x+Math.cos(a)*r,20,WW-20);e.by=clamp(p.y+Math.sin(a)*r,20,WH-20);e.bl=.6;e.phase=true;burst(e.x,e.y,'#7a5ac8',10);tele({k:'c',x:e.bx,y:e.by,r:30,T:.6,dmg:0,col:'#a87af0'});}}
     // 저격수: 조준선(1초) 동안 멈췄다가 빠른 탄 한 발
     if(T.snipe&&e.aim>0){e.aim-=dt;spd=0;vx=0;vy=0;if(e.aim<=0)eShot(e.x,e.y,e.aa,760,e.dmg,5,'#ff5050',.8,'tracer');}
-    if(T.flee){vx=-vx;vy=-vy;const wob=Math.sin(S.t*3+e.rot)*.6;const ox=vx,oy=vy;vx=ox-oy*wob;vy=oy+ox*wob;if(Math.random()<dt*3)burst(e.x,e.y+6,'#e8bb4f',1);}
+    if(T.flee||e.stole){vx=-vx;vy=-vy;const wob=Math.sin(S.t*3+e.rot)*.6;const ox=vx,oy=vy;vx=ox-oy*wob;vy=oy+ox*wob;if(Math.random()<dt*3)burst(e.x,e.y+6,'#e8bb4f',1);}
     if(e.affs){const k=e.ak;
       if(hasAf(e,'regen')&&e.hp<e.maxHp)e.hp=Math.min(e.maxHp,e.hp+e.maxHp*.025*k*dt);
       if(hasAf(e,'shield')&&S.t-(e.lh||0)>4)e.esh=Math.min(e.eshM,(e.esh||0)+e.eshM*.5*dt);
@@ -3492,18 +3577,21 @@ function update(dt){
     e.x+=vx*spd*dt;e.y+=vy*spd*dt;
     if(!p.alive)continue;
     if(T.bomb&&d<e.r+p.r+4){e.alive=false;e.bombed=true;S.rings.push({x:e.x,y:e.y,r:6,max:55,life:.3,col:'#f0c419'});burst(e.x,e.y,'#f0c419',16);if(d<55+p.r)hurtP(e.dmg,null);onKill(e);continue;}
-    if(T.snipe&&!(e.aim>0)&&d<T.range&&e.cd<=0&&S.ebN<EB_CAP){e.aim=1;e.aa=Math.atan2(dy,dx);e.cd=rand(3,4);tele({k:'l',x:e.x,y:e.y,a:e.aa,len:560,w:6,T:1,dmg:0,col:'#ff4040'});}
+    if(T.mortar&&d<T.range&&e.cd<=0&&S.tele.length<60){e.cd=rand(3,4);tele({k:'c',x:p.x+(p.moving?(p.lmx||0)*45:0),y:p.y+(p.moving?(p.lmy||0)*45:0),r:70,T:1.2,dmg:e.dmg,col:'#ffb030',fx:t=>{burst(t.x,t.y,'#ffb030',14);S.shake=Math.max(S.shake,.08);}});}
+    else if(T.snipe&&!(e.aim>0)&&d<T.range&&e.cd<=0&&S.ebN<EB_CAP){e.aim=1;e.aa=Math.atan2(dy,dx);e.cd=rand(3,4);tele({k:'l',x:e.x,y:e.y,a:e.aa,len:560,w:6,T:1,dmg:0,col:'#ff4040'});}
     else if(T.web&&d<T.range&&e.cd<=0&&S.ebN<EB_CAP){S.ebN++;S.pr.push({x:e.x,y:e.y,vx:dx/d*260,vy:dy/d*260,mine:false,dmg:e.dmg,life:Math.min(1.1,d/260+.1),r:6,sh:'web',bc:'#e8e8f0',web:1});e.cd=rand(2.2,3);}
-    else if(T.range&&!T.snipe&&!T.web&&e.type!=='support'&&d<T.range&&e.cd<=0&&S.ebN<EB_CAP){S.ebN++;const a=Math.atan2(dy,dx);S.pr.push({x:e.x,y:e.y,vx:Math.cos(a)*300,vy:Math.sin(a)*300,mine:false,dmg:e.dmg,aoe:T.aoe||0,life:1.4,r:T.aoe?5:4,sh:T.aoe?'orb':(ESHM[e.type]||['orb'])[0],bc:T.aoe?'#c98af0':(ESHM[e.type]||[])[1]||null});e.cd=rand(1.2,1.9);}
+    else if(T.range&&!T.snipe&&!T.web&&!T.mortar&&e.type!=='support'&&d<T.range&&e.cd<=0&&S.ebN<EB_CAP){S.ebN++;const a=Math.atan2(dy,dx);S.pr.push({x:e.x,y:e.y,vx:Math.cos(a)*300,vy:Math.sin(a)*300,mine:false,dmg:e.dmg,aoe:T.aoe||0,life:1.4,r:T.aoe?5:4,sh:T.aoe?'orb':(ESHM[e.type]||['orb'])[0],bc:T.aoe?'#c98af0':(ESHM[e.type]||[])[1]||null});e.cd=rand(1.2,1.9);}
     else if(sk){if(d<e.r+11&&e.cd<=0){skHit(sk,e.dmg);e.cd=.9;}}
     else if(!T.range&&!T.flee&&d<e.r+p.r+3&&e.cd<=0){hurtP(e.dmg,e);e.cd=.9;
+      if(T.leech&&!e.latch){e.latch=1;e.la=Math.atan2(e.y-p.y,e.x-p.x);ftext(p.x,p.y-26,'거머리! 대시로 떼기','#ff6080',14);}
+      if(T.thief&&!e.stole&&S.gold>0){const g=Math.min(S.gold,Math.max(5,Math.round(S.gold*.08)));S.gold-=g;e.stole=g;ftext(p.x,p.y-26,'-'+g+' 골드 도둑맞음!','#ffd76a',16);}
       if(e.affs){if(hasAf(e,'vamp'))e.hp=Math.min(e.maxHp,e.hp+e.maxHp*.12*e.ak);if(hasAf(e,'frost'))S.buffT.slow=Math.max(S.buffT.slow||0,1.5);}
       // 흡혈 박쥐: 나를 물면 보스 체력 0.4% 회복
       if(e.type==='vbat'&&S.boss&&S.boss.alive){const B=S.boss;B.hp=Math.min(B.maxHp,B.hp+B.maxHp*.004);ftext(B.x,B.y-B.r-10,'흡혈','#ff6070',13);}}
     if(e.type==='ghost'){e.phT=(e.phT??rand(0,4))-dt;if(e.phT<0)e.phT+=4;e.phase=e.phT<1.1;}
   }
   S.en=S.en.filter(e=>e.alive);
-  updBoss(dt);
+  updBoss(dt);hbTick(dt);
   {const far=Math.max(Math.hypot(GW,GH)*.85,Math.max(W,H)/2+200);for(const e of S.en){if(e.boss)continue;if(Math.abs(e.x-p.x)>far||Math.abs(e.y-p.y)>far){const [x,y]=ringPos();e.x=x;e.y=y;}}}
   // separation
   const E=S.en;
@@ -3618,7 +3706,10 @@ function drawChip(e){
   const R=e.r,x=e.x,y=e.y,big=e.boss,air=(e.air||0)*28;
   if(e.rage){ctx.fillStyle=`rgba(255,40,40,${.18+Math.sin(S.t*10)*.08})`;ctx.beginPath();ctx.arc(x,y,R+18,0,TAU);ctx.fill();}
   if(e.elite){ctx.fillStyle='rgba(255,215,106,.18)';ctx.beginPath();ctx.arc(x,y,R+10,0,TAU);ctx.fill();}
-  const spr=ESPR.get(e.type,Math.floor(S.t*(e.type==='runner'?10:5)+e.rot*3)%2,e.hit>0,S.p.x<e.x);
+  if(e.type==='totem'){ctx.globalAlpha=.1+.05*Math.sin(S.t*4);ctx.fillStyle='#b04aff';ctx.beginPath();ctx.arc(x,y,170,0,TAU);ctx.fill();ctx.globalAlpha=.4;ctx.strokeStyle='#c870ff';ctx.lineWidth=2;ctx.setLineDash([8,8]);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;}
+  if(e.tbT>S.t){ctx.strokeStyle='rgba(200,112,255,.8)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,R+3,0,TAU);ctx.stroke();}
+  if(ET[e.type].hid){ctx.globalAlpha=.25+.15*Math.sin(S.t*6);ctx.fillStyle=ET[e.type].col;ctx.beginPath();ctx.arc(x,y,R+14,0,TAU);ctx.fill();ctx.globalAlpha=1;}
+  const spr=ESPR.get(e.type==='mimic'&&!e.awake?'mimicc':e.type,Math.floor(S.t*(e.type==='runner'?10:5)+e.rot*3)%2,e.hit>0,S.p.x<e.x);
   const sz=spr.width,DS=sz*PXW,top=y-air+R*.9-(sz-2)*PXW;
   if(e.type==='ghost')ctx.globalAlpha=e.phase?.22:.85;else if(e.type==='wraith')ctx.globalAlpha=e.bl>0?Math.max(.1,e.bl/.6*.8):.9;else if(e.under)ctx.globalAlpha=.12;
   ctx.imageSmoothingEnabled=false;pxDraw(spr,x,y-air+R*.9,sz>>1,sz-2);ctx.globalAlpha=1;
@@ -4598,6 +4689,14 @@ const MOBINFO={
   sniper:['1초 조준선 후 빠르고 강한 한 발','빨간 조준선이 보이면 선 밖으로 비켜서기. 조준 중엔 멈춰 있음'],
   lancer:['예고선 후 돌진 3연속 (매번 다시 조준)','돌진 사이 0.4초에 방향을 꺾어 피하기'],
   wraith:['내 근처로 순간이동 (도착 지점 보라색 예고) → 탄 6발','예고 원에서 벗어나기. 이동 중엔 무적'],
+  thief:['닿으면 골드 8% 훔침','훔치면 8초 동안 빠르게 도망. 그 안에 잡으면 1.5배로 돌려받음'],
+  totem:['공격 안 함. 주변(보라 원) 적 이동 속도 +30%, 받는 피해 −30%','움직이지 않으니 먼저 부수기'],
+  leech:['달라붙어 1초마다 흡혈, 이동 속도 −40%','대시하면 떨어짐'],
+  mortar:['멀리서 내 위치(움직이면 앞쪽)에 포탄 (1.2초 예고)','주황 예고 원 밖으로. 사거리가 길어 원거리로 처리'],
+  gemslime:['공격 안 함. 빠르게 도망침','히든 몹. 22초 안에 잡으면 경험치 폭탄 (레벨 1.5개 분량)'],
+  mimic:['가까이 가면 깨어나 물어뜯음 (강함)','히든 몹. 상자인 척 가만히 있음. 잡으면 증강 1개 + 골드'],
+  luckycat:['공격 안 함. 맞으면 멀리 순간이동 (3번)','히든 몹. 잡으면 행운 +2 + 골드'],
+  bossH:['화염 숨결, 황금 비, 급강하, 날갯바람','히든 보스. 6분 이후 드물게 출현 (히든 몹을 잡을수록 잘 나옴). 60초 안에 처치하면 증강 2개·열쇠 2개·골드·메달 3'],
   wolf:['빠른 몸통 박치기','늑대 우두머리의 무리. 빠르니 뭉쳐 있을 때 광역으로'],
   sapling:['초록 가시 발사','고목 정령의 졸개. 느리지만 멀리서 쏨'],
   vbat:['빠르게 날아와 물기','흡혈귀 백작의 박쥐. 나를 물 때마다 보스 체력 0.4% 회복 → 먼저 정리'],
@@ -4632,6 +4731,7 @@ const BPAT={
   bossS:[['덮치기','내 위치로 2~3번 뛰어듦. 착지마다 독 고리','jump'],['거미줄','거미줄 장판 4~6개 (둔화)','pool'],['독 부채꼴','독 부채꼴 3~4번','fan'],['새끼 소환','박쥐 4~5마리','summon']],
   bossG:[['불길 자국','지나간 자리에 계속 불길','pool'],['불기둥','내 주변에 불기둥 5~7개 연속','rain'],['지진','자기 주변 큰 원 (반경 200) + 불꽃 고리','slam'],['용암 낙하','용암 덩어리 → 불 장판','target']],
   bossA:[['그림자 돌진','내 뒤쪽으로 순간이동 후 관통 돌진 2~3번','blink'],['단검 고리','사방 단검. 한 군데 빈틈으로 빠져나가기','ring'],['표식 폭발','내 위치를 따라오는 폭발 4~5번','target'],['단검 투척','빠른 단검 3발씩','fan']],
+  bossH:[['화염 숨결','좌우로 흔들리며 불 줄기를 뿜음','spiral'],['황금 비','내 주변에 금덩이 10~14개 낙하','rain'],['급강하','예고선 후 2~3번 돌진, 끝마다 불꽃 고리','charge'],['날갯바람','사방 바람 탄 3겹','ring']],
   bossW:[['돌진 연타','짧은 예고선 후 3~4번 연속 돌진','charge'],['울부짖기','늑대 3~5마리 소환 + 원형 탄','summon'],['할퀴기','내 위치를 따라오는 발톱 공격 3~4번','target'],['발톱 투척','거리를 재며 발톱 3발씩','fan']],
   bossT:[['뿌리 솟구침','나를 향해 직선 뿌리 3~5줄 (예고선)','line'],['가시 고리','사방 가시 2~3겹','ring'],['묘목 소환','가시를 쏘는 묘목 3~5마리','summon'],['덩굴','내 주변에 덩굴 장판 (둔화)','pool']],
   bossV:[['박쥐 떼','흡혈 박쥐 5~7마리. 나를 물면 백작 회복','summon'],['안개 이동','내 근처로 2~3번 순간이동하며 핏빛 고리','blink'],['흡혈','나를 끌어당기며 원형 탄. 대시로 끊기','pull'],['핏덩이','느리고 큰 핏덩이 부채꼴','fan']],
@@ -4672,7 +4772,7 @@ function patShow(type,i,anchor){const P=(BPAT[type]||[])[i];if(!P)return;let box
   const r=anchor.getBoundingClientRect();let left=r.left,top=r.bottom+6;if(left+256>innerWidth)left=innerWidth-260;if(top+box.offsetHeight>innerHeight-8)top=r.top-box.offsetHeight-6;box.style.left=Math.max(4,left)+'px';box.style.top=Math.max(4,top)+'px';}
 function patHide(){cancelAnimationFrame(patRAF);const b=document.getElementById('patPrev');if(b)b.style.display='none';}
 // 일반 몹 첫 등장 시점 (pickType의 위험도 기준을 실제 시간으로 환산)
-const MOB_THR={runner:0,slime:1.5,ranger:2,ghost:3,bomber:3,mage:4,tank:3,support:5,boar:2.5,spider:2,jelly:2.5,shield:3,sniper:4,wraith:4,lancer:5,grunt:0,wolf:2.5,sapling:3,shroom:3,vbat:3.5,scarab:4,imp:4.5};
+const MOB_THR={runner:0,slime:1.5,ranger:2,ghost:3,bomber:3,mage:4,tank:3,support:5,boar:2.5,spider:2,jelly:2.5,shield:3,sniper:4,wraith:4,lancer:5,grunt:0,wolf:2.5,sapling:3,shroom:3,vbat:3.5,scarab:4,imp:4.5,thief:2.5,leech:3,totem:3.5,mortar:4};
 function mobWhen(k){const th=MOB_THR[k];if(th==null)return null;if(th<=1)return '처음부터';let t=0;while(diffAt(t)<th&&t<2000)t+=1;const r=t/TS;return `약 ${Math.floor(r/60)}분 ${String(Math.round(r%60)).padStart(2,'0')}초부터`;}
 const MOB_IMG={};
 function mobImg(k,dark){const key=k+(dark?'d':'');if(MOB_IMG[key])return MOB_IMG[key];const c=ESPR.get(k,0,false,false),q=document.createElement('canvas');q.width=c.width;q.height=c.height;const g=q.getContext('2d');if(dark)g.filter='brightness(0) opacity(.55)';g.drawImage(c,0,0);return MOB_IMG[key]=q.toDataURL();}
@@ -4732,9 +4832,9 @@ function cxList(){
     const seenN=keys.filter(k=>META.mob[k]).length;
     rows=keys.filter(k=>{const T=ET[k],I=MOBINFO[k];return META.mob[k]?hit(T.n,I[0],I[1],BTITLE[k]||'',(BW[k]||[]).join(' ')):!qs.length;}).map(k=>{const T=ET[k],I=MOBINFO[k],seen=META.mob[k],sz=T.boss?72:MDEF[k].sz,w=Math.round(sz*(T.boss?1.3:2.2));
       const img=`<img src="${mobImg(k,!seen)}" style="width:${w}px;height:${w}px;image-rendering:pixelated;flex:none">`;
-      if(!seen)return `<div class="cxrow" style="--rc:#555;display:flex;gap:10px;align-items:center">${img}<div><div class="h"><b>❓ ???</b>${T.boss?'<span class="tg">보스</span>':''}</div><div class="s">아직 만나지 못한 몬스터${T.boss?` · ${bossCh[k]||''} 보스 후보`:''}</div></div></div>`;
-      const where=T.boss?`${bossCh[k]} 보스 후보 (2.5분 보스전 때 무작위 등장)`:[mobWhen(k),BW[k]?`자주 나오는 곳: ${BW[k].join(', ')}`:''].filter(Boolean).join(' · ')||'특수 (분열·이벤트)';
-      return `<div class="cxrow" style="--rc:${T.col};display:flex;gap:10px;align-items:center">${img}<div style="min-width:0"><div class="h"><b>${T.n}</b>${T.boss?`<span class="tg" style="background:#7a1f2a;color:#fff">보스 · ${BTITLE[k]||''}</span>`:''}<span class="tg">❤ 체력 ${T.hp}</span><span class="tg">⚔ 공격력 ${T.dmg}</span><span class="tg">👟 이동 속도 ${T.spd}</span>${T.range?`<span class="tg">🎯 사거리 ${T.range}</span>`:''}</div>
+      if(!seen)return `<div class="cxrow" style="--rc:#555;display:flex;gap:10px;align-items:center">${img}<div><div class="h"><b>❓ ???</b>${T.boss?'<span class="tg">보스</span>':''}</div><div class="s">아직 만나지 못한 몬스터${T.hidb?' · 👑 히든 보스':T.hid?' · ✨ 히든 몹':T.boss?` · ${bossCh[k]||''} 보스 후보`:''}</div></div></div>`;
+      const where=T.hidb?'히든 보스 · 6분 이후 드물게 출현':T.hid?'히든 몹 · 어디서나 아주 드물게 (행운이 높을수록 자주)':T.boss?`${bossCh[k]} 보스 후보 (2.5분 보스전 때 무작위 등장)`:[mobWhen(k),BW[k]?`자주 나오는 곳: ${BW[k].join(', ')}`:''].filter(Boolean).join(' · ')||'특수 (분열·이벤트)';
+      return `<div class="cxrow" style="--rc:${T.col};display:flex;gap:10px;align-items:center">${img}<div style="min-width:0"><div class="h"><b>${T.n}</b>${T.hidb?'<span class="tg" style="background:#b8800f;color:#fff">👑 히든 보스</span>':T.boss?`<span class="tg" style="background:#7a1f2a;color:#fff">보스 · ${BTITLE[k]||''}</span>`:''}${T.hid?'<span class="tg" style="background:#1a6a8a;color:#fff">✨ 히든</span>':''}<span class="tg">❤ 체력 ${T.hp}</span><span class="tg">⚔ 공격력 ${T.dmg}</span><span class="tg">👟 이동 속도 ${T.spd}</span>${T.range?`<span class="tg">🎯 사거리 ${T.range}</span>`:''}</div>
         ${BPAT[k]?`<div class="d"><b>공격 패턴</b> <small style="opacity:.7">(마우스를 올리거나 누르면 미리보기)</small></div><div class="h" style="margin:3px 0">${BPAT[k].map((q,i)=>`<span class="tg patc" data-pt="${k}" data-pi="${i}" style="cursor:help;background:rgba(255,215,106,.18);border:1px solid rgba(255,215,106,.5)">▶ ${q[0]}</span>`).join('')}</div>`:`<div class="d"><b>공격:</b> ${I[0]}</div>`}<div class="s">💡 팁: ${I[1]}</div><div class="s" style="opacity:.8">📍 ${where}</div></div></div>`;});
     if(mk==='e')rows=[`<div class="sub" style="margin:4px 0">정예(금색 테두리, 체력 4배·공격력 1.5배)에 붙는 특성. 약 2분부터.<br>여러 개 붙을 확률: 어려움 2개 15% · 지옥 2개 35% · 신 2개 55%, 3개 12% · 악몽 2개 60%, 3개 20%+ (1분마다 +1%)<br>2개면 각 특성 효과 70%, 3개면 55%만 적용</div>`].concat(Object.keys(AFFIX).map(k=>{const A=AFFIX[k],d=A.d||'';return hit(A.n,d)?`<div class="cxrow" style="--rc:${A.col}"><div class="h"><b style="color:${A.col}">${A.n}</b><span class="tg">정예 특성</span></div><div class="d">${d}</div></div>`:'';}).filter(Boolean));
     CX.mobHdr=mk!=='e'?`발견 ${seenN} / ${keys.length} · 체력·공격력은 일반 난이도 초반 기준 (시간·난이도에 따라 강해짐)`:'';
