@@ -1331,6 +1331,7 @@ const AUGS=[
   {id:'interest',u:'보유 골드에 비례한 공격 속도 보너스가 커져요. 골드 100당 +2% → +3% → +4%, 최대 +40% → +60% → +80%.',t:'p',n:'복리',tags:['house','house'],d:'보유 골드 100당 공격 속도 +3% (최대 +60%). 하우스 2개로 계산'},
   {id:'luckycoin',u:'강화할 때마다 행운 +1, 골드 획득 +10%가 한 번 더 붙어요.',t:'s',n:'행운의 동전',tags:['dice'],d:'행운 +2, 골드 획득 +20%. 골드를 주우면 4% 확률로 행운 폭발 (공격력 250%)',f:p=>{p.luck+=1;p.goldM+=.1;}},
   // poison
+  {id:'agony',u:'중독+화상이 함께 걸린 적이 받는 피해가 커져요. ★1은 +25%, ★2는 +35%, ★3은 +45%.',t:'s',n:'고통의 낙인',tags:['poison','fire'],d:'중독과 화상이 함께 걸린 적은 모든 피해를 35% 더 받고, 그 적의 독·화상 피해는 치명타 확률만큼 2배로 터짐'},
   {id:'toxic',u:'독 피해 자체가 세져요. ★1은 기본, ★2는 +50%, ★3은 +100%.',t:'s',n:'독 묻은 탄',tags:['poison'],d:'탄환이 적을 중독시킵니다 (독 피해 +50%)'},
   {id:'neuro',u:'중독된 적이 느려지는 정도가 커져요. ★1은 이동 속도 −40%, ★2는 −55%, ★3은 −70%.',t:'s',n:'마비 독',tags:['poison'],d:'중독된 적 이동 속도 −55%'},
   {id:'spill',u:'중독된 적이 죽으면서 남기는 독 웅덩이가 커지고 오래가요. 반경 50 → 65 → 80, 지속 3초 → 4초 → 5초.',t:'g',n:'독 웅덩이',tags:['poison'],d:'중독된 적이 죽으면 4초간 독 웅덩이 (반경 65)'},
@@ -1683,7 +1684,7 @@ const FUSIONS=[
   {id:'f_x38',a:'neuro',b:'spill',n:'마비 늪',pb:1.15,fx:'k:.12:poison:.6:70',d:'마비 독 수치 +15%, 새 능력: 처치 시 12% 확률로 독 폭발 (범위 70, 공격력 60%, 중독 2중첩)'},
   {id:'f_x39',a:'fog',b:'venomcloud',n:'독무',pb:1.15,fx:'d:poison:.8:100',d:'새 능력: 대시가 끝나면 독 폭발 (범위 100, 공격력 80%, 중독 2중첩)'},
   {id:'f_x40',a:'ricoshot',b:'g_hollow',n:'도탄 할로우',pb:1.15,fx:'c:.2:fan:3:.6',d:'튕김 사격 수치 +15%, 할로우 포인트 수치 +15%, 새 능력: 치명타 시 20% 확률로 탄환 3발 (공격력 60%)'},
-  {id:'f_x41',a:'artillery',b:'overwatch',n:'포격 관측',pb:1.15,fx:'n:6:boom:2:90',d:'감시탑 수치 +15%, 새 능력: 6번째 공격마다 폭발 (범위 90, 공격력 200%)'},
+  {id:'f_x41',a:'artillery',b:'overwatch',n:'포격 관측',pb:1.15,fx:'n:6:boom:1.3:90',d:'감시탑 수치 +15%, 새 능력: 6번째 공격마다 폭발 (범위 90, 공격력 130%)'},
   {id:'f_x42',a:'turret2',b:'turret',n:'포탑 공장',pb:1.15,fx:'t:5:boom:2:100',d:'포탑 증설 수치 +15%, 마법 포탑 수치 +15%, 새 능력: 5초마다 폭발 (범위 100, 공격력 200%)'},
   {id:'f_x43',a:'tesla',b:'thunder',n:'뇌신의 토템',pb:1.15,fx:'t:3:bolt:3',d:'번개 토템 수치 +15%, 천둥 수치 +15%, 새 능력: 3초마다 번개 연쇄 3명'},
   {id:'f_x44',a:'resonance',b:'static',n:'공명 전류',pb:1.15,fx:'d:bolt:4',d:'새 능력: 대시가 끝나면 번개 연쇄 4명'},
@@ -1694,7 +1695,7 @@ const FUSIONS=[
   {id:'f_x49',a:'highroll',b:'luckycoin',n:'황금 주사위',pb:1.15,fx:'k:.05:gold:4',d:'새 능력: 처치 시 5% 확률로 골드 +4, 황금 폭발 (공격력 80%)'},
   {id:'f_x50',a:'fortune',b:'triple7',n:'여신의 777',pb:1.15,fx:'c:.1:boom:2:80',d:'행운의 여신 수치 +15%, 777 수치 +15%, 새 능력: 치명타 시 10% 확률로 폭발 (범위 80, 공격력 200%)'},
   {id:'f_x51',a:'overload',b:'dicethrow',n:'번개 주사위',pb:1.15,fx:'d:bolt:3',d:'과부하 수치 +15%, 새 능력: 대시가 끝나면 번개 연쇄 3명'},
-  {id:'f_x52',a:'marksman',b:'rifling',n:'정밀 사격',pb:1.15,fx:'n:5:fan:1:2',d:'명중 표식 수치 +15%, 새 능력: 5번째 공격마다 탄환 1발 (공격력 200%)'},
+  {id:'f_x52',a:'marksman',b:'rifling',n:'정밀 사격',pb:1.15,fx:'n:5:fan:1:1.3',d:'명중 표식 수치 +15%, 새 능력: 5번째 공격마다 탄환 1발 (공격력 130%)'},
   {id:'f_x53',a:'shieldbash',b:'thorns',n:'가시 방패',pb:1.15,fx:'h:2:boom:1.5:90',d:'보호막 충격 수치 +15%, 새 능력: 맞으면 (2초에 한 번) 폭발 (범위 90, 공격력 150%)'},
   {id:'f_x54',a:'regenarmor',b:'thick',n:'강철 재생',pb:1.15,fx:'h:4:heal:.05',d:'재생 장갑 수치 +15%, 새 능력: 맞으면 (4초에 한 번) 체력 5% 회복'},
   {id:'f_x55',a:'bastion',b:'boltturret',n:'철벽 포대',pb:1.15,fx:'t:4:fan:4:.7',d:'보루 수치 +15%, 관통 포탑탄 수치 +15%, 새 능력: 4초마다 탄환 4발 (공격력 70%)'},
@@ -1724,7 +1725,7 @@ const FUSIONS=[
   {id:'f_y017',a:'ghost',b:'ricochet',n:'관통 도탄',pb:1.15,fx:'n:6:fan:1:1.5',d:'도탄 수치 +15%, 새 능력: 6번째 공격마다 탄환 1발 (공격력 150%)'},
   {id:'f_y018',a:'ghost',b:'giant',n:'거인의 관통탄',pb:1.15,fx:'k:.1:boom:1:70',d:'거인의 탄 수치 +15%, 새 능력: 처치 시 10% 확률로 폭발 (범위 70, 공격력 100%)'},
   {id:'f_y019',a:'ricochet',b:'crossfire',n:'난반사',pb:1.15,fx:'n:8:ring:6:.5',d:'도탄 수치 +15%, 십자포화 수치 +15%, 새 능력: 8번째 공격마다 탄환 6발을 원형으로 (공격력 50%)'},
-  {id:'f_y020',a:'giant',b:'deck',n:'거대한 덱',pb:1.15,fx:'n:9:boom:2:100',d:'거인의 탄 수치 +15%, 새 능력: 9번째 공격마다 폭발 (범위 100, 공격력 200%)'},
+  {id:'f_y020',a:'giant',b:'deck',n:'거대한 덱',pb:1.15,fx:'n:9:boom:1.2:100',d:'거인의 탄 수치 +15%, 새 능력: 9번째 공격마다 폭발 (범위 100, 공격력 120%)'},
   {id:'f_y021',a:'deck',b:'a_multi',n:'화살 덱',pb:1.15,fx:'n:6:fan:4:.5',d:'새 능력: 6번째 공격마다 탄환 4발 (공격력 50%)'},
   {id:'f_y022',a:'a_multi',b:'crossfire',n:'화살비',pb:1.15,fx:'t:3:ring:8:.5',d:'십자포화 수치 +15%, 새 능력: 3초마다 탄환 8발을 원형으로 (공격력 50%)'},
   {id:'f_y023',a:'shower',b:'spiral',n:'카드 회오리',pb:1.15,fx:'n:10:ring:10:.5',d:'새 능력: 10번째 공격마다 탄환 10발을 원형으로 (공격력 50%)'},
@@ -1804,11 +1805,11 @@ const FUSIONS=[
   {id:'f_y098',a:'vault',b:'spinner',n:'금고 회전',pb:1.15,fx:'k:.05:gold:3',d:'금고 칩 수치 +15%, 새 능력: 처치 시 5% 확률로 골드 +3, 황금 폭발 (공격력 80%)'},
   {id:'f_y099',a:'shadowmark',b:'doppel',n:'그림자 낙인',pb:1.15,fx:'h:4:clone',d:'새 능력: 맞으면 (4초에 한 번) 그림자 분신 소환'},
   {id:'f_y100',a:'shadowmark',b:'huntmark',n:'그림자 사냥꾼',pb:1.15,fx:'n:6:mark:0:100',d:'새 능력: 6번째 공격마다 주변 100 안의 적에게 표식'},
-  {id:'f_y101',a:'a_snipe',b:'a_still',n:'저격 자세',pb:1.15,fx:'n:6:fan:1:2.5',d:'저격수 수치 +15%, 정조준 수치 +15%, 새 능력: 6번째 공격마다 탄환 1발 (공격력 250%)'},
+  {id:'f_y101',a:'a_snipe',b:'a_still',n:'저격 자세',pb:1.15,fx:'n:6:fan:1:1.5',d:'저격수 수치 +15%, 정조준 수치 +15%, 새 능력: 6번째 공격마다 탄환 1발 (공격력 150%)'},
   {id:'f_y102',a:'a_snipe',b:'longshot',n:'초장거리',pb:1.15,fx:'c:.2:boom:1:60',d:'저격수 수치 +15%, 원거리 숙련 수치 +15%, 새 능력: 치명타 시 20% 확률로 폭발 (범위 60, 공격력 100%)'},
-  {id:'f_y103',a:'a_still',b:'focus',n:'명경지수',pb:1.15,fx:'n:5:fan:1:2',d:'정조준 수치 +15%, 집중 사격 수치 +15%, 새 능력: 5번째 공격마다 탄환 1발 (공격력 200%)'},
+  {id:'f_y103',a:'a_still',b:'focus',n:'명경지수',pb:1.15,fx:'n:5:fan:1:1.5',d:'정조준 수치 +15%, 집중 사격 수치 +15%, 새 능력: 5번째 공격마다 탄환 1발 (공격력 150%)'},
   {id:'f_y104',a:'focus',b:'railgun',n:'일격 관통',pb:1.15,fx:'c:.2:boom:1.2:70',d:'집중 사격 수치 +15%, 새 능력: 치명타 시 20% 확률로 폭발 (범위 70, 공격력 120%)'},
-  {id:'f_y105',a:'longshot',b:'scope',n:'먼 시야',pb:1.15,fx:'n:8:boom:1.5:80',d:'원거리 숙련 수치 +15%, 조준경 수치 +15%, 새 능력: 8번째 공격마다 폭발 (범위 80, 공격력 150%)'},
+  {id:'f_y105',a:'longshot',b:'scope',n:'먼 시야',pb:1.15,fx:'n:8:boom:1:80',d:'원거리 숙련 수치 +15%, 조준경 수치 +15%, 새 능력: 8번째 공격마다 폭발 (범위 80, 공격력 100%)'},
   {id:'f_y106',a:'piercer',b:'railgun',n:'관통 레일',pb:1.15,fx:'n:7:fan:3:1',d:'새 능력: 7번째 공격마다 탄환 3발 (공격력 100%)'},
   {id:'f_y107',a:'piercer',b:'artillery',n:'관통 포격',pb:1.15,fx:'k:.1:boom:1.2:80',d:'새 능력: 처치 시 10% 확률로 폭발 (범위 80, 공격력 120%)'},
   {id:'f_y108',a:'selfdestruct',b:'legion',n:'자폭 군단',pb:1.15,fx:'k:.06:boom:2:100',d:'새 능력: 처치 시 6% 확률로 폭발 (범위 100, 공격력 200%)'},
@@ -1820,7 +1821,7 @@ const FUSIONS=[
   {id:'f_y114',a:'n_lich',b:'soulburst',n:'원혼의 리치',pb:1.15,fx:'n:5:soul:2',d:'원혼 폭발 수치 +15%, 새 능력: 5번째 공격마다 원혼 2발'},
   {id:'f_y115',a:'n_legion',b:'raise',n:'무덤 군단',pb:1.15,fx:'h:4:skel',d:'해골 군단 수치 +15%, 시체 일으키기 수치 +15%, 새 능력: 맞으면 (4초에 한 번) 해골 병사 소환'},
   {id:'f_y116',a:'gravebloom',b:'deathnova',n:'무덤 파동',pb:1.15,fx:'t:4:wave',d:'새 능력: 4초마다 망자의 충격파 발동'},
-  {id:'f_y117',a:'frostwave',b:'quake',n:'얼음 지진',pb:1.15,fx:'n:7:frost:1:100',d:'지진 수치 +15%, 새 능력: 7번째 공격마다 냉기 폭발 (범위 100, 공격력 100%, 1.5초 둔화)'}
+  {id:'f_y117',a:'frostwave',b:'quake',n:'얼음 지진',pb:1.15,fx:'n:7:frost:.7:100',d:'지진 수치 +15%, 새 능력: 7번째 공격마다 냉기 폭발 (범위 100, 공격력 70%, 1.5초 둔화)'}
 ];
 // VIP 합체: VIP 증강 + 일반 증강. 둘 다 가지면 다음에 증강을 얻을 때 합체
 const VFUSIONS=[
@@ -1961,8 +1962,8 @@ const CARDS=[
   {req:()=>tag('sniper')>0||S.cls==='archer'||has('longshot'),n:'조준경',v:[[4,8,0]],t:v=>`사거리 +${v[0]}%`,a:(p,v)=>{p.range*=1+v[0]/100;}},
   {n:'자석',v:[[10,20,0]],t:v=>`경험치·골드 흡수 범위 +${v[0]}%`,a:(p,v)=>{p.magnet*=1+v[0]/100;}},
   {req:()=>S.p.luck<LUCK_CAP,n:'네잎클로버',v:[[.8,1.6,1]],t:v=>`행운 +${v[0]}. 높은 등급과 좋은 수치가 잘 나옵니다`,a:(p,v)=>{p.luck=Math.min(LUCK_CAP,Math.round((p.luck+v[0])*10)/10);}},
-  {cc:1,n:'급소 노리기',v:[[1.5,3,1]],t:v=>`치명타 확률 +${v[0]}%`,a:(p,v)=>{p.crit+=v[0]/100;}},
-  {cm:1,n:'치명상',v:[[8,16,0]],t:v=>`치명타 피해 +${v[0]}%`,a:(p,v)=>{p.critM+=v[0]/100;}},
+  {cc:1,n:'급소 노리기',v:[[2.5,4.5,1]],t:v=>`치명타 확률 +${v[0]}%`,a:(p,v)=>{p.crit+=v[0]/100;}},
+  {cm:1,n:'치명상',v:[[14,26,0]],t:v=>`치명타 피해 +${v[0]}%`,a:(p,v)=>{p.critM+=v[0]/100;}},
   {req:()=>!pureMelee(),n:'가속 탄',v:[[6,12,0]],t:v=>`탄속 +${v[0]}%`,a:(p,v)=>{p.bspd*=1+v[0]/100;}},
   {n:'배움의 서',v:[[3,6,1]],t:v=>`경험치 획득 +${v[0]}%`,a:(p,v)=>{p.xpM=(p.xpM||1)+v[0]/100;}},
   {n:'황금 주머니',v:[[4,9,0]],t:v=>`골드 획득 +${v[0]}%`,a:(p,v)=>{p.goldM+=v[0]/100;}},
@@ -1981,7 +1982,11 @@ const CARDS=[
   {n:'철벽 자세',v:[[1.5,2.5,1],[4,7,0]],t:v=>`방어력 +${v[0]}, 최대 체력 +${v[1]}`,a:(p,v)=>{p.armor+=v[0];p.maxHp+=v[1];p.hp+=v[1];}},
   {req:()=>!pureMelee(),n:'쾌속 장전',v:[[3,6,0],[1.6,3.4,1]],t:v=>`탄속 +${v[0]}%, 공격 속도 +${v[1]}%`,a:(p,v)=>{p.bspd*=1+v[0]/100;p.rateP=(p.rateP||0)+v[1]/100;}},
   {n:'질주 본능',v:[[1,2,1],[2,3.5,1]],t:v=>`이동 속도 +${v[0]}%, 대시 재사용 −${v[1]}%`,a:(p,v)=>{p.speed*=1+v[0]/100;p.dashMul*=1-v[1]/100;}},
-  {fr:'r',n:'도박꾼의 주사위',d:'공격력 −15% ~ +25%, 굴려봐야 압니다',f:p=>{const m=Math.round(-15+Math.random()*40);p.dmgP=(p.dmgP||0)+m/100;return `공격력 ${m>=0?'+':''}${m}%`;}},
+  {fr:'r',n:'도박꾼의 주사위',d:'공격력 −15% ~ +25% (5분 이후 레벨에 따라 커짐), 굴려봐야 압니다',f:p=>{const m=Math.round((-15+Math.random()*40)*(pctOpen()?pctK():1));p.dmgP=(p.dmgP||0)+m/100;return `공격력 ${m>=0?'+':''}${m}%`;}},
+  // 도박 카드: 후반에도 의미 있게 레벨·시간에 따라 커짐
+  {fr:'r',n:'운명의 숫돌',d:'공격력 −1 ~ +3 (레벨이 오를수록 커짐), 굴려봐야 압니다',f:p=>{const m=Math.round((-1+Math.random()*4)*lvScale()*10)/10;p.dmg=Math.max(1,p.dmg+m);return `공격력 ${m>=0?'+':''}${m}`;}},
+  {fr:'r',n:'운명의 저울',d:'공격력·공격 속도 중 하나 +8~14%, 다른 하나 −5% (5분 이후 둘 다 레벨에 따라 커짐)',f:p=>{const k=pctOpen()?pctK():1,m=Math.round((8+Math.random()*6)*k),n=Math.round(5*k),A=Math.random()<.5;if(A){p.dmgP=(p.dmgP||0)+m/100;p.rateP=(p.rateP||0)-n/100;}else{p.rateP=(p.rateP||0)+m/100;p.dmgP=(p.dmgP||0)-n/100;}return A?`공격력 +${m}%, 공격 속도 −${n}%`:`공격 속도 +${m}%, 공격력 −${n}%`;}},
+  {fr:'e',n:'잭팟 카드',d:'20% 확률로 공격력 +30%·공격 속도 +12% (5분 이후 레벨에 따라 커짐), 아니면 공격력 +5%',f:p=>{const k=pctOpen()?pctK():1;if(Math.random()<.2){p.dmgP=(p.dmgP||0)+.3*k;p.rateP=(p.rateP||0)+.12*k;return `🎰 잭팟! 공격력 +${Math.round(30*k)}%, 공격 속도 +${Math.round(12*k)}%`;}p.dmgP=(p.dmgP||0)+.05;return '꽝… 공격력 +5%';}},
   {fr:'e',n:'관통 탄',d:'관통 +1',f:p=>{p.pierce+=1;}},
   {fr:'e',cls:'necro',n:'해골 증원',d:'해골 최대 수 +1 (30기를 넘으면 넘는 만큼 해골 피해로)',f:p=>{p.skN=(p.skN||0)+1;}},
   {n:'불사의 맹세',v:[[.15,.3,2],[.12,.25,2]],t:v=>`흡혈 +${v[0]}%, 초당 체력 재생 +${v[1]}`,a:(p,v)=>{p.lifesteal+=v[0]/100;p.regen+=v[1];}},
@@ -2026,10 +2031,12 @@ const LVS_KEYS=['공격력 +','최대 체력 +','방어력 +','초당 체력 재
 // 퍼센트 카드(공격력·공격 속도·최대 체력 % 합계에 더해져 이후에도 계속 적용): 5분 전엔 안 나오고, 이후엔 드물게(×0.35) 대신 수치 ×1.6
 const PCT_CARDS=new Set(['힘의 물약','날랜 손놀림','강철 심장','유리 대포','광기','전투 본능','쾌속 장전','올인']);
 const pctOpen=()=>(S.gt||0)>=300;
+// 퍼센트 카드 배율: 기본 ×1.6에 레벨당 +2% (Lv50 ≈ ×3.2). 합연산 풀이 커질수록 묽어지는 걸 보정해서 후반에도 절대값 카드와 비슷한 가치
+const pctK=()=>1.6*(1+.02*Math.max(0,((S&&S.lvl)||1)-1));
 function lvScaleIdx(T){if(T._ls)return T._ls;const sen=T.v.map((_,i)=>'§'+i+'§'),t=T.t(sen);
   return T._ls=T.v.map((_,i)=>{const at=t.indexOf(sen[i]);if(at<0||t[at+sen[i].length]==='%')return false;const pre=t.slice(0,at);return LVS_KEYS.some(k=>pre.endsWith(k));});}
 const lvScale=()=>1+.04*Math.max(0,(S&&S.lvl||1)-1);
-function rollCard(T,r,bonus){if(!T.v)return {...T,r:T.fr||r,u:null};const k=(T.fr?1:RMUL[r])*(PCT_CARDS.has(T.n)?1.6:1),u=luckU(bonus),ls=lvScaleIdx(T),lm=lvScale();
+function rollCard(T,r,bonus){if(!T.v)return {...T,r:T.fr||r,u:null};const k=(T.fr?1:RMUL[r])*(PCT_CARDS.has(T.n)?pctK():1),u=luckU(bonus),ls=lvScaleIdx(T),lm=lvScale();
   const rng=T.v.map(([lo,hi,dp],i)=>{const q=Math.pow(10,dp),m=k*(ls[i]?lm:1);return [Math.round(lo*m*q)/q,Math.round(hi*m*q)/q,q];});
   const v=rng.map(([lo,hi,q])=>Math.round((lo+(hi-lo)*u)*q)/q);
   const gp=T.g?`[${T.g} 전용] `:'';
@@ -2636,10 +2643,12 @@ function affN(){const r=Math.random(),dk=S.diff;let p2=0,p3=0;
 const DIFF={normal:{oc:.35,md:1,cb:5,rg:.12,pen:.2,n:'일반',col:'#cfe3c4',hp:1.1,bhp:1,dm:1,sp:1,el:0,sc:1,bc:22},
   hard:{oc:.45,md:1.6,cb:15,rg:.18,pen:.3,n:'어려움',col:'#ffb347',xp:2.5,hp:2.5,bhp:1.7,dm:1.6,sp:.8,el:.12,sc:1.5},
   hell:{oc:.55,md:2.2,cb:35,rg:.25,pen:.4,n:'지옥',col:'#ff5a3a',xp:3.4,hp:3.9,bhp:2.4,dm:2.1,sp:.7,el:.2,sc:2.2},
-  god:{oc:.65,md:2.8,cb:60,rg:.3,pen:.45,n:'신',col:'#e9c4ff',xp:4.5,hp:6,bhp:3.4,dm:2.8,sp:.6,el:.3,sc:3.2},
+  god:{oc:.65,md:2.8,cb:60,rg:.3,pen:.45,n:'신',col:'#e9c4ff',xp:4.5,hp:6,bhp:3.4,dm:2.8,sp:.6,el:.3,sc:3.2,lt:1.6},
   // 악몽: 시간 제한 없는 무한 모드. 2.5분마다 보스가 계속 나오고(1~4장 보스 반복), 단계가 오를수록 보스·몹이 강해짐. 죽을 때까지 점수 경쟁
   nightmare:{oc:.7,md:3,cb:0,rg:.33,pen:.5,n:'악몽',col:'#ff4f6a',xp:5,hp:7,bhp:3.8,dm:3.1,sp:.55,el:.35,sc:4,endless:true}};
 const dfM=()=>DIFF[S.diff]||DIFF.normal;
+// 체력 재생은 최대 체력이 300을 넘으면 넘는 비율만큼 커짐 (체력 1200이면 ×4). 피통이 커져도 재생이 의미 있게
+const rgHpM=()=>Math.max(1,(S&&S.p?S.p.maxHp:0)/300);
 // 난이도 해금: 바로 앞 난이도를 클리어해야 다음 난이도가 열림
 const DKEYS=['normal','hard','hell','god','nightmare'];
 const endless=()=>!!dfM().endless;
@@ -2655,6 +2664,7 @@ const ocOf=()=>{const b=dfM().oc||.35,m=nmMin();if(!endless())return b;return m<
 // 악몽 단계 배율: 5단계(4장 이후)부터 단계마다 보스 체력 ×2.2, 피해 ×1.15
 const diffOpen=k=>{const i=DKEYS.indexOf(k);return i<=0||!!(META.clears||{})[DKEYS[i-1]];};
 let pickDiff=(()=>{try{return localStorage.getItem('chanseo_diff')||'normal';}catch(e){return 'normal';}})();
+// lt: 3장부터 몹·보스 체력 추가 배율 (신 난이도 후반이 성장한 빌드에 너무 쉽게 뚫려서)
 // 장별 추가 난이도. 3장부터 일반 몹 체력·피해·스폰량, 정예 확률이 더 오름 (보스 체력은 제외)
 // 4장(마지막)은 수를 줄이고 개체를 크게 강화: 체력 ×3.5, 피해 ×1.25, 크기 ×1.2, 정예 +30%p. 대신 경험치·골드도 많이 줌
 const CHAP_MUL=[{hp:1,dm:1,sp:1,n:22,el:0,xp:1,sz:1},{hp:1,dm:1,sp:1,n:22,el:0,xp:1.2,sz:1},{hp:1.5,dm:1.3,sp:.85,n:26,el:.06,xp:1.4,sz:1},{hp:3.5,dm:1.25,sp:1.1,n:12,el:.3,xp:2.2,sz:1.2,cap:110}];
@@ -2669,7 +2679,7 @@ function spawnAt(type,x,y,noElite,forceElite){
   const elite=!T.boss&&!T.flee&&!T.hid&&!T.totem&&(forceElite||(!noElite&&effT()>120&&eliteN()<eliteCap()&&Math.random()<Math.min(.08+(cm.el+dfM().el)*.35,(effT()-120)/1500+(cm.el+dfM().el)*.25)));
   // 시간 초과 강화: 실제 10분(타이머 10:00)이 지난 뒤부터만 1분마다 1.3배. 내부 시간(1.2배속) 기준이면 8분 20초부터 켜져 4단계 후반 잡몹이 급격히 세짐
   const om=endless()?1:Math.pow(1.3,Math.max(0,(S.gt||0)-600)/60);
-  const m=(T.boss?1+.12*(Math.min(d,50)-1):(1+.35*(d-1))*om*nmHp())*(elite?4:1)*(T.boss?dfM().bhp:cm.hp*dfHp()),dm=(T.boss?1+.08*(d-1):(1+.15*(d-1))*om)*nmDm()*(elite?1.5:1)*cm.dm*dfM().dm;
+  const m=(T.boss?1+.12*(Math.min(d,50)-1):(1+.35*(d-1))*om*nmHp())*(elite?4:1)*(T.boss?dfM().bhp:cm.hp*dfHp())*((S.chap||0)>=2?dfM().lt||1:1),dm=(T.boss?1+.08*(d-1):(1+.15*(d-1))*om)*nmDm()*(elite?1.5:1)*cm.dm*dfM().dm;
   S.en.push({type,x,y,elite,r:T.r*(elite?1.45:1)*(T.boss?1:cm.sz),hp:T.hp*m,maxHp:T.hp*m,dmg:T.dmg*dm,spd:T.spd*Math.min(1.75,1+.025*(d-1))*(1+.07*Math.max(0,(S.gt||0)-600)/60),cd:rand(.3,1.2),hcd:1,bcd:2.5,hit:0,rot:Math.random()*6,orbCd:0,pt:0,ps:0,pTick:0,alive:true,boss:!!T.boss});
   const e=S.en[S.en.length-1];
   // 몬스터 도감: 처음 만난 몬스터 기록
@@ -2692,7 +2702,7 @@ function hidRoll(){if(S.bossI>=0||effT()<60||(S.hidN||0)>=6||S.en.some(e=>ET[e.t
   S.hidN=(S.hidN||0)+1;const t=HID_MOB[Math.floor(Math.random()*HID_MOB.length)],p=S.p,a=Math.random()*TAU,r=t==='mimic'?260:330;spawnAt(t,clamp(p.x+Math.cos(a)*r,30,WW-30),clamp(p.y+Math.sin(a)*r,30,WH-30),true);
   toast(t==='gemslime'?'💎 보석 슬라임 출현! 도망가기 전에 잡으세요':t==='luckycat'?'🐱 행운 고양이 출현! 잡으면 행운 +4 · 프리즘 증강':'🎁 근처에 수상한 상자가 보인다…');}
 // 히든 보스: 6분 이후 보스전이 아닐 때 30초마다 3% (히든 몹을 잡을 때마다 +6%). 한 판에 한 번
-function hbTick(dt){if(S.hbDone||S.bossI>=0||S.win||(S.gt||0)<360)return;S.hbT=(S.hbT??30)-dt;if(S.hbT>0)return;S.hbT=30;if(Math.random()<.03+.06*(S.hidK||0))spawnHB();}
+function hbTick(dt){if(S.hbDone||S.bossI>=0||S.win||(S.gt||0)<360)return;S.hbT=(S.hbT??30)-dt;if(S.hbT>0)return;S.hbT=30;if(Math.random()<.005+.01*Math.min(4,S.hidK||0))spawnHB();}
 function spawnHB(){S.hbDone=1;const p=S.p,a=Math.random()*TAU,e=spawnAt('bossH',clamp(p.x+Math.cos(a)*320,60,WW-60),clamp(p.y+Math.sin(a)*320,60,WH-60),true),j=Math.min(3,S.chap||0);
   e.maxHp*=(BOSS_HPM[j]||1)*1.3*(endless()?nmBossHp():1);e.hp=e.maxHp;e.dmg*=(BOSS_DM[j]||1);e.bk=0;e.hid2=1;e.hl=60;go(e,'intro');S.hb=e;S.shake=.6;S.flash=.3;
   toast('👑 히든 보스 황금 용 출현! 60초 안에 쓰러뜨리면 큰 보상');}
@@ -2708,7 +2718,7 @@ const EVENTS={
   moon:{n:'붉은 달',icon:'🌕',col:'#ff5050',d:'25초간 적이 빠르고 세지만 경험치·골드 2배. 끝까지 버티면 🔑 열쇠'},
   chest:{n:'저주받은 상자',icon:'🎁',col:'#c86aff',d:'상자 위에 1.5초 서 있으면 열림 → 수호자가 나타남. 35초 안에 쓰러뜨리면 💎 프리즘 증강 선택'},
   rift:{n:'시간의 균열',icon:'🌀',col:'#7a8aff',d:'균열 안에서 12초 버티기 (적이 몰려옴). 성공하면 영구 능력치 +'},
-  relic:{n:'유물 수집',icon:'🗿',col:'#e0c070',d:'흩어진 유물 3개를 45초 안에 모으면 행운 +2와 골드'}
+  relic:{n:'유물 수집',icon:'🗿',col:'#e0c070',d:'세 방향으로 멀리 흩어진 유물 3개를 45초 안에 모으면 행운 +1과 골드'}
 };
 const BLESS=[
   {k:'atk',n:'전투의 축복',d:'공격력 +40%'},
@@ -2731,7 +2741,8 @@ function startEvent(){
   if(k==='shrine'){const [x,y]=farPos(380);ev.x=x;ev.y=y;ev.r=70;ev.ch=0;pushOut(ev,ev.r*.5);}
   if(k==='chest'){const [x,y]=farPos(360);ev.x=x;ev.y=y;ev.r=45;ev.ch=0;ev.open=false;pushOut(ev,30);}
   if(k==='rift'){const [x,y]=farPos(320);ev.x=x;ev.y=y;ev.r=140;ev.ch=0;pushOut(ev,40);}
-  if(k==='relic'){ev.rel=[];for(let i=0;i<3;i++){const [x,y]=farPos(450+i*170);const o={x,y,got:false};pushOut(o,20);ev.rel.push(o);}}
+  // 유물은 서로 다른 방향(약 120° 간격)에 멀리 흩어짐 → 한 바퀴 돌아야 다 모음
+  if(k==='relic'){ev.rel=[];const a0=Math.random()*TAU;for(let i=0;i<3;i++){const a=a0+i*TAU/3+rand(-.35,.35),r=800+i*250,p0=S.p;const x=clamp(p0.x+Math.cos(a)*r,80,WW-80),y=clamp(p0.y+Math.sin(a)*r,80,WH-80);const o={x,y,got:false};pushOut(o,20);ev.rel.push(o);}}
   S.evBanner={s:`${E.icon} ${E.n}`,d:E.d,col:E.col,t:2.6};
 }
 function endEvent(win){
@@ -2744,7 +2755,7 @@ function endEvent(win){
   if(ev.k==='chest'){for(const e of S.en)if(e.chestB){if(!win){e.alive=false;burst(e.x,e.y,'#c86aff',16);}e.chestB=false;}
     if(win){toast('수호자 격파! 💎 프리즘 증강 선택');S.mode='aug';openAug(true,'저주받은 상자 보상',null,'p');}else toast(ev.open?'수호자가 상자와 함께 사라졌다':'상자가 사라졌다');}
   if(ev.k==='rift'){if(win){const R=[['공격력 +8%',p=>{p.dmgP=(p.dmgP||0)+.08;}],['공격 속도 +7%',p=>{p.rateP=(p.rateP||0)+.07;}],['최대 체력 +10%',p=>{p.hpP=(p.hpP||0)+.1;}],['치명타 확률 +4%',p=>{p.crit+=.04;}],['이동 속도 +6%',p=>{p.speed*=1.06;}]],r=R[Math.floor(Math.random()*R.length)];r[1](S.p);S.flash=.3;toast(`균열을 버텼다! 영구 ${r[0]}`);}else toast('균열이 닫혔다');}
-  if(ev.k==='relic'){if(win){const g=price(80);S.p.luck=Math.round((S.p.luck+2)*10)/10;S.gold+=g;toast(`유물을 모두 모았다! 행운 +2, ${g} 골드`);}else toast(`유물 ${ev.rel.filter(o=>o.got).length}/3개만 모았다`);}
+  if(ev.k==='relic'){if(win){const g=price(45);S.p.luck=Math.min(LUCK_CAP,Math.round((S.p.luck+1)*10)/10);S.gold+=g;toast(`유물을 모두 모았다! 행운 +1, ${g} 골드`);}else toast(`유물 ${ev.rel.filter(o=>o.got).length}/3개만 모았다`);}
 }
 function updEvent(dt){
   if(S.bossI>=0||S.win)return;
@@ -2786,15 +2797,17 @@ const BTITLE={boss:'숲의 문지기',bossK:'뼈의 검사',boss2:'저주의 인
 function bossTypeOf(i){S.bossT=S.bossT||[];if(S.bossT[i])return S.bossT[i];let t;
   if(i<4){const P=BOSS_POOL[i];t=P[Math.floor(Math.random()*P.length)];}else{const all=BOSS_POOL.flat().filter(x=>x!==S.bossT[i-1]);t=all[Math.floor(Math.random()*all.length)];}
   S.bossT[i]=t;return t;}
-function spawnBoss(i){
+// 무한 모드에선 보스가 전체에서 랜덤이라, 체력·피해·광폭 기준은 슬롯이 아니라 그 보스의 원래 장 기준
+const bossHome=i=>{if(i<4)return i;const k=BOSS_POOL.findIndex(r=>r.includes(bossTypeOf(i)));return k<0?i%4:k;};
+function spawnBoss(i,cont){
   if(S.ev)endEvent(false);S.evBanner=null;
   // 기존 몹은 유지하되 너무 많으면 화면 밖 먼 몹만 정리 (화면에 보이는 몹은 절대 지우지 않음). 보스 등장 시 체력 30% 회복
   const kN=(dfM().bc||35)+5;if(S.en.length>kN){const p0=S.p,vis=e=>Math.abs(e.x-p0.x)<W/2+60&&Math.abs(e.y-p0.y)<H/2+60;
     const far=S.en.filter(e=>!vis(e)&&!e.elite).sort((a,b)=>d2(b,p0)-d2(a,p0)),drop=new Set(far.slice(0,Math.max(0,S.en.length-kN)));S.en=S.en.filter(e=>!drop.has(e));}
-  S.p.hp=Math.min(S.p.maxHp,S.p.hp+S.p.maxHp*.3);
-  S.bossI=i;S.tele=[];S.hz=[];S.bStart=S.bt||0;S.bHit=0;
-  const j=i%4,lp=Math.max(0,i-3);const a=Math.random()*TAU;spawnAt(bossTypeOf(i),clamp(S.p.x+Math.cos(a)*300,60,WW-60),clamp(S.p.y+Math.sin(a)*300,60,WH-60));
-  const b=S.en[S.en.length-1];b.dmg*=(BOSS_DM[j]||1)*Math.pow(1.15,lp);b.maxHp*=(BOSS_HPM[j]||1)*Math.pow(2.2,lp)*(endless()?nmBossHp():1);b.hp=b.maxHp;b.bk=0;go(b,'intro');S.boss=b;
+  if(!cont)S.p.hp=Math.min(S.p.maxHp,S.p.hp+S.p.maxHp*.3);
+  S.bossI=i;S.tele=[];S.hz=[];if(!cont){S.bStart=S.bt||0;S.bHit=0;}
+  const j=bossHome(i),lp=Math.max(0,i-3);const a=Math.random()*TAU;spawnAt(bossTypeOf(i),clamp(S.p.x+Math.cos(a)*300,60,WW-60),clamp(S.p.y+Math.sin(a)*300,60,WH-60));
+  const b=S.en[S.en.length-1];b.dmg*=(BOSS_DM[j]||1)*Math.pow(1.15,lp);b.maxHp*=(BOSS_HPM[j]||1)*Math.pow(2.2,lp)*(endless()?nmBossHp():1);b.hp=b.maxHp*(cont&&S.bHpF>0?S.bHpF:1);b.bk=0;go(b,'intro');S.boss=b;
   // 보스 결계: 전체 맵의 약 1/4 넓이(3000×3000) 사각 구역. 분노(체력 50%) 시 85%로, 광폭화마다 5%씩 좁아짐. r = 한 변의 절반
   {const tr=1500,cx=clamp(S.p.x,tr,WW-tr),cy=clamp(S.p.y,tr,WH-tr);S.arena={x:cx,y:cy,r:tr*1.3,tr};
    const d=Math.hypot(b.x-cx,b.y-cy);if(d>tr*.7){b.x=cx+(b.x-cx)/d*tr*.7;b.y=cy+(b.y-cy)/d*tr*.7;}}
@@ -2838,7 +2851,7 @@ function keepDist(e,o,dt,lo,hi){if(meleeOn()){lo*=.45;hi*=.55;}const {p,d,sp}=o;
 const nearP=r=>{const p=S.p,a=Math.random()*TAU,k=Math.random()*r;return [clamp(p.x+Math.cos(a)*k,30,WW-30),clamp(p.y+Math.sin(a)*k,30,WH-30)];};
 // 광폭화: 기준 시간을 넘기면 30초마다 단계 상승 (최대 5단계). 단계당 공격력 +12%(일반)~+30%(신), 이동 속도 +5%, 결계 −5%, 방어력 무시 +12%, 내 회복량 −15%
 // 보스 체력이 높은 난이도일수록 기준 시간도 늘어남 (어려움 ×1.35, 지옥 ×1.7, 신 ×2.2)
-const bossPar=()=>Math.round((BOSS_PAR[S.bossI%4]||120)*(1+(dfM().bhp-1)*.5));
+const bossPar=()=>Math.round((BOSS_PAR[bossHome(S.bossI)]||120)*(1+(dfM().bhp-1)*.5));
 function bossRage(e){const el=(S.bt||0)-(S.bStart||0),par=bossPar();return el<par?0:Math.min(20,1+Math.floor((el-par)/30));}
 function bossAI(e,dt){
   const p=S.p,T=ET[e.type],dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1,ph2=e.hp<e.maxHp*.5;
@@ -3266,8 +3279,8 @@ function fxAct(F,x,y){const p=S.p,[m,r]=F.g,o0=S.dsrc;S.dsrc='fusion';S.fxD=(S.f
   case 'gold':addGold(m);explode(x,y,60,pDmg()*.8,'#ffd76a');break;
   case 'heal':if(p.alive)p.hp=Math.min(p.maxHp,p.hp+p.maxHp*m*healM());S.rings.push({x:p.x,y:p.y,r:6,max:50,life:.3,col:'#7be08f'});break;
   case 'shield':p.barrier=Math.min(Math.max(barrierMax(),p.maxHp*m*2),(p.barrier||0)+p.maxHp*m);break;
-  case 'haste':p.fxRT=2;p.fxR=Math.max(p.fxRT>0?p.fxR||0:0,m);break;
-  case 'rage':p.fxDT=3;p.fxDm=Math.max(p.fxDm||0,m);break;}}
+  case 'haste':p.fxR=Math.max(p.fxRT>0?p.fxR||0:0,m);p.fxRT=2;break;
+  case 'rage':p.fxDm=Math.max(p.fxDT>0?p.fxDm||0:0,m);p.fxDT=3;break;}}
   finally{S.dsrc=o0;S.fxD--;}}
 function fxRun(tr,t,dt){const L_=S.fxL;if(!L_||!L_.length||(S.fxD||0)>1)return;const p=S.p,cd=S.fxCd||(S.fxCd={});
   for(const F of L_){if(F.tr!==tr)continue;
@@ -3426,6 +3439,7 @@ function dmgE(e,amt,col,label,quiet){
   if(e.tbT>S.t)amt*=.7;
   if(e.tauT>S.t)amt*=1+lv3('k_taunt',.15,.2,.25);
   e.lh=S.t;if(e.esh>0){const a=Math.min(e.esh,amt);e.esh-=a;amt-=a;if(amt<=0){e.hit=.06;return;}}
+  if(has('agony')&&e.burnT>0&&e.pt>0){amt*=1+lv3('agony',.25,.35,.45);if(quiet&&(S.dsrc==='poison'||S.dsrc==='fire')&&Math.random()<critC())amt*=2;}
   if(tag('alchemy')>=4&&e.potT>S.t)amt*=1.15;
   if(tag('grav')>=4&&e.gvT>S.t)amt*=1.2;
   if(e.mkT>S.t)amt*=1+markAmp(e)+(has('stigma')?.2*(tag('holy')>0?1:0):0);
@@ -3676,7 +3690,7 @@ function onKill(e){
   if(T.split&&S.en.length<260)for(let i=0;i<2;i++)spawnAt(T.split,e.x+(i?e.r*.7:-e.r*.7),e.y+rand(-4,4),true);
   // 드롭: 경험치 ±15%, 골드 ±30% 랜덤. 행운(최대 30)이 골드 드롭 확률(18→20%)과 2배 확률(경험치 0→5%, 골드 5→12%)을 올림
   const lr=LK()/LUCK_CAP,xLucky=!e.boss&&Math.random()<lr*.05,gDrop=e.boss||e.elite||Math.random()<.18+lr*.02,gLucky=gDrop&&!e.boss&&Math.random()<.05+lr*.07;if(xLucky||gLucky)ftext(e.x,e.y-e.r-14,'행운!','#7be08f',14);
-  {const xv=T.xp*(e.elite?4:1)*chapM().xp*(e.boss?1:rand(.85,1.15))*(xLucky?2:1),n=e.boss?14:1;if(xv>0)for(let i=0;i<n;i++)S.dr.push({x:e.x+rand(-14,14)*(e.boss?3:1),y:e.y+rand(-14,14)*(e.boss?3:1),v:xv/n,xp:1});}
+  {const xv=(T.xp||(e.boss&&endless()?ET.boss3.xp:0))*(e.elite?4:1)*chapM().xp*(e.boss?1:rand(.85,1.15))*(xLucky?2:1),n=e.boss?14:1;if(xv>0)for(let i=0;i<n;i++)S.dr.push({x:e.x+rand(-14,14)*(e.boss?3:1),y:e.y+rand(-14,14)*(e.boss?3:1),v:xv/n,xp:1});}
   if(gDrop){const v=(e.boss?1:rand(.7,1.3))*(gLucky?2:1)*T.coin*(e.elite||e.boss?1:2.5)*(e.elite?2:1)*(1+.05*(Math.min(15,S.round)-1))*(e.boss&&has('king')?3:1)*(e.boss?1:Math.sqrt(chapM().xp)*dfM().sp);
     const n=e.boss?8:1;for(let i=0;i<n;i++)S.dr.push({x:e.x+rand(-14,14)*(e.boss?3:1),y:e.y+rand(-14,14)*(e.boss?3:1),v:v/n});}
   while(S.dr.length>250){const a=S.dr.shift(),b=S.dr.find(c=>!c.xp===!a.xp);if(b)b.v+=a.v;}
@@ -3754,6 +3768,8 @@ function fmtN(v){v=Math.round(v);return v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e4?(v/
 // 실시간 DPS: 최근 5초 동안 입힌 피해 평균
 function trackDps(dt){S.dpsT=(S.dpsT||0)+dt;if(S.dpsT<.5)return;const now=S.st.dmg,q=S.dpsQ||(S.dpsQ=[]);q.push(now-(S.dpsLast??now));S.dpsLast=now;S.dpsT=0;if(q.length>10)q.shift();S.dps=q.reduce((a,b)=>a+b,0)/(q.length*.5);if(q.length>=4)S.dpsMax=Math.max(S.dpsMax||0,S.dps);if(S.dcat)for(const k in S.dcat)S.dcat[k]*=.97;}
 function update(dt){
+  // 중독 초당 피해는 최종 공격력(조건부 증강 배율 포함)을 따라감. 프레임마다 한 번만 계산
+  if(S&&S.p&&S.mode==='play'){try{S.pdC=pDmg();}catch(e){S.pdC=0;}}
   // 보스 격파 연출: 잠깐 슬로 모션
   if(S.smT>0){S.smT-=dt;dt*=.3;}
   hpSync();const p=S.p;S.t+=dt;if(S.bossI<0&&!S.win)S.gt+=dt;else if(!S.win)S.bt+=dt;S.round=diffAt(effT());trackDps(dt);
@@ -3863,7 +3879,7 @@ function update(dt){
     }else{const sp=Math.min(SPEED_CAP,moveSpd())*(S.buffT.slow>0?.6:1);p.x+=mx*sp*dt;p.y+=my*sp*dt;}
     p.x=clamp(p.x,p.r+10,WW-p.r-10);p.y=clamp(p.y,p.r+10,WH-p.r-10);pushOut(p,p.r);
     if(S.arena){const A=S.arena;A.r+=(A.tr-A.r)*Math.min(1,dt*.8);const m=A.r-p.r-4;p.x=clamp(p.x,A.x-m,A.x+m);p.y=clamp(p.y,A.y-m,A.y+m);}
-    {const bR=(tag('nature')>=2?1.5:0)+(has('yggdrasil')&&inVine(p)?p.maxHp*.02:0)+(has('warpaint')?(p.fy||0)*lv3('warpaint',.08,.1,.15):0)+(has('worldtree')?3:0)+(has('f_ancient')&&inVine(p)?p.maxHp*.02:0)+(has('bastion')&&nearTurret()?3*(has('f_citadel')?2:1):0)+(has('sanctuary')&&!p.moving?lv3('sanctuary',1.5,2,3):0);const rgM=has('f_hydra')?3:(has('thick')&&hitRec()?3:1)*(has('troll')&&p.noHitT>3?3:1);if(p.regen||bR||has('f_immortal'))p.hp=Math.min(p.maxHp,p.hp+(p.regen*rgM+bR+(has('f_immortal')?p.maxHp*.01:0))*dt*healM());}
+    {const bR=(tag('nature')>=2?1.5:0)+(has('yggdrasil')&&inVine(p)?p.maxHp*.02:0)+(has('warpaint')?(p.fy||0)*lv3('warpaint',.08,.1,.15):0)+(has('worldtree')?3:0)+(has('f_ancient')&&inVine(p)?p.maxHp*.02:0)+(has('bastion')&&nearTurret()?3*(has('f_citadel')?2:1):0)+(has('sanctuary')&&!p.moving?lv3('sanctuary',1.5,2,3):0);const rgM=has('f_hydra')?3:(has('thick')&&hitRec()?3:1)*(has('troll')&&p.noHitT>3?3:1);if(p.regen||bR||has('f_immortal'))p.hp=Math.min(p.maxHp,p.hp+(p.regen*rgM*rgHpM()+bR+(has('f_immortal')?p.maxHp*.01:0))*dt*healM());}
     p.noHitT+=dt;{const bm=barrierMax();if(p.barrier>bm)p.barrier=bm;if(p.noHitT>(has('f_insure')?1.5:3)&&p.barrier<bm)p.barrier=Math.min(bm,p.barrier+bm*.35*dt);}
     if(S.buffT.jack>0)p.inv=Math.max(p.inv,.05);
     p.hurtT=Math.max(0,(p.hurtT||0)-dt);p.atkT=Math.max(0,(p.atkT||0)-dt);p.shadowT=Math.max(0,(p.shadowT||0)-dt);p.swingT=Math.max(0,(p.swingT||0)-dt);if(p.rageT>0){p.rageT-=dt;if(p.rageT<=0)p.rage=0;}
@@ -3888,7 +3904,7 @@ function update(dt){
     e.hit=Math.max(0,e.hit-dt);e.cd-=dt;e.rot+=dt*(e.boss?.6:1.8);if(e.orbCd>0)e.orbCd-=dt;
     if(e.burnT>0){e.burnT-=dt;S.dsrc='fire';dmgE(e,e.burnD*fireM()*(has('f_frostfire')&&chilled(e)?2:1)*dt,null,null,true);S.dsrc=null;if(!e.alive)continue;
       if(tag('fire')>=6){e.bsT=(e.bsT||0)+dt;if(e.bsT>=1){e.bsT=0;const o=S.en.find(q=>q.alive&&!(q.burnT>0)&&d2(q,e)<90*90);if(o)burnE(o,e.burnD,3);}}}
-    if(e.pt>0){e.pt-=dt;const dps=effDmg(S.p)*.35*(1+ex('poison')*.2)*homeM('poison')*(1+(S.p.psD||0))*e.ps*(1+.5*Math.max(0,L('toxic')-1)+.5*Math.max(0,L('r_venom')-1))*(has('plague')?1.2:1)*(tag('poison')>=6?2:1)+(has('plaguelord')?Math.min(e.maxHp*.006,pDmg()*(has('f_blackdeath')?3:1.5)):0);e.pTick+=dt;S.dsrc='poison';dmgE(e,dps*dt,null,null,true);S.dsrc=null;if(e.pTick>.5){e.pTick=0;if(e.alive)ftext(e.x,e.y-e.r-4,Math.round(dps*.5),'#8ee06a',12);}if(e.pt<=0)e.ps=0;if(!e.alive)continue;}
+    if(e.pt>0){e.pt-=dt;const dps=(S.pdC||effDmg(S.p))*.3*(1+ex('poison')*.2)*homeM('poison')*(1+(S.p.psD||0))*e.ps*(1+.5*Math.max(0,L('toxic')-1)+.5*Math.max(0,L('r_venom')-1))*(has('plague')?1.2:1)*(tag('poison')>=6?2:1)+(has('plaguelord')?Math.min(e.maxHp*.006,pDmg()*(has('f_blackdeath')?3:1.5)):0);e.pTick+=dt;S.dsrc='poison';dmgE(e,dps*dt,null,null,true);S.dsrc=null;if(e.pTick>.5){e.pTick=0;if(e.alive)ftext(e.x,e.y-e.r-4,Math.round(dps*.5),'#8ee06a',12);}if(e.pt<=0)e.ps=0;if(!e.alive)continue;}
     if(S.freezeT>0)continue;
     if(e.boss){bossAI(e,dt);continue;}
     // 히든 몹: 시간이 지나면 사라짐
@@ -3954,7 +3970,7 @@ function update(dt){
       if(T.thief&&!e.stole&&S.gold>0){const g=Math.min(S.gold,Math.max(5,Math.round(S.gold*.08)));S.gold-=g;e.stole=g;ftext(p.x,p.y-26,'-'+g+' 골드 도둑맞음!','#ffd76a',16);}
       if(e.affs){if(hasAf(e,'vamp'))e.hp=Math.min(e.maxHp,e.hp+e.maxHp*.12*e.ak);if(hasAf(e,'frost'))S.buffT.slow=Math.max(S.buffT.slow||0,1.5);}
       // 흡혈 박쥐: 나를 물면 보스 체력 0.4% 회복
-      if(e.type==='vbat'&&S.boss&&S.boss.alive){const B=S.boss;B.hp=Math.min(B.maxHp,B.hp+B.maxHp*.002);ftext(B.x,B.y-B.r-10,'흡혈','#ff6070',13);}}
+      if(e.type==='vbat'&&S.boss&&S.boss.alive&&S.boss.type==='bossV'){const B=S.boss;B.hp=Math.min(B.maxHp,B.hp+B.maxHp*.002);ftext(B.x,B.y-B.r-10,'흡혈','#ff6070',13);}}
     if(e.type==='ghost'){e.phT=(e.phT??rand(0,4))-dt;if(e.phT<0)e.phT+=4;e.phase=e.phT<1.1;}
   }
   S.en=S.en.filter(e=>e.alive);
@@ -4535,7 +4551,7 @@ const DEF_AUGS=new Set(['regenarmor','gravity','luckycoin','frost','piggy','tip'
 const isOff=a=>!a.up&&!DEF_AUGS.has(a.id);
 // 선행 조건: 효과가 다른 무언가를 강화만 하는 증강은 그 대상이 있을 때만 등장 (회전 칩 없는데 회전 칩 강화 등 방지)
 const poisonSrc=()=>canPoison()||['wheel','m_inferno','fog','venomcloud','f_napalm','f_gas','f_plaguebullet'].some(has);
-const AUG_REQ={n_spearstorm:()=>has('n_bone'),m_shower:()=>has('m_meteor'),p_hret:()=>has('p_hammer'),p_hstorm:()=>has('p_hammer'),b_whirl:()=>has('b_cleave'),
+const AUG_REQ={agony:()=>canPoison()&&(tag('fire')>0||S.cls==='mage'),n_spearstorm:()=>has('n_bone'),m_shower:()=>has('m_meteor'),p_hret:()=>has('p_hammer'),p_hstorm:()=>has('p_hammer'),b_whirl:()=>has('b_cleave'),
   turret2:()=>has('turret'),boltturret:()=>has('turret'),overwatch:()=>has('turret'),bastion:()=>has('turret'),selfdestruct:()=>has('turret'),
   clover:()=>S.p.luck<LUCK_CAP-1,fortune:()=>!critFull(),trigger:()=>rawRate()<RATE_CAP(),
   evade:()=>S.p.dodge<DODGE_CAP,luckydie:()=>!critFull(),
@@ -4801,7 +4817,7 @@ function gameOver(win){
   const sec=Math.floor(S.gt),score=runScore(),medals=runMedals(score);META.medals+=medals;META.total+=medals;saveMeta();
   if(sec>best){best=sec;try{localStorage.setItem('chipdungeon_best_v5',String(best));}catch(e){}}
   const fmt=x=>`${Math.floor(x/60)}분 ${x%60}초`;
-  show(`${unlocked?`<div class="medal" style="justify-content:center"><span>🔓 <b>${unlocked}</b>${unlocked.includes('봉인 해제권')?'':' 난이도가 열렸습니다!'}</span></div>`:''}${win?`<h2>🏆 클리어!</h2><p class="sub">10분을 버티고 하우스 딜러를 쓰러뜨렸습니다. 보스전에 ${fmt(Math.floor(S.bt))} 걸렸어요.</p>`:`<h2>${endless()?'악몽 '+(S.chap+1)+'단계 도달':S.quitEnd?'여기서 정산했습니다':'쓰러졌습니다'}</h2><p class="sub">${endless()?`보스 ${S.st.bosses||0}마리를 잡고`:Math.min(4,S.chap+1)+'장에서'} ${fmt(sec)} 버텼습니다.${S.bossI>=0?` (${ET[bossTypeOf(S.bossI)].n}에게 패배)`:''}</p>`}
+  show(`${unlocked?`<div class="medal" style="justify-content:center"><span>🔓 <b>${unlocked}</b>${unlocked.includes('봉인 해제권')?'':' 난이도가 열렸습니다!'}</span></div>`:''}${win?`<h2>🏆 클리어!</h2><p class="sub">10분을 버티고 ${(ET[(S.bossT||[])[3]]||ET.boss4).n}을(를) 쓰러뜨렸습니다. 보스전에 ${fmt(Math.floor(S.bt))} 걸렸어요.</p>`:`<h2>${endless()?'악몽 '+(S.chap+1)+'단계 도달':S.quitEnd?'여기서 정산했습니다':'쓰러졌습니다'}</h2><p class="sub">${endless()?`보스 ${S.st.bosses||0}마리를 잡고`:Math.min(4,S.chap+1)+'장에서'} ${fmt(sec)} 버텼습니다.${S.bossI>=0?` (${ET[bossTypeOf(S.bossI)].n}에게 패배)`:''}</p>`}
   <div class="medal"><span>최종 점수 <b>${score.toLocaleString()}</b></span><span>🏅 메달 <b>+${medals}</b> <small>${medalClear()?`(클리어 보너스 +${medalClear()} 포함) `:''}(보유 ${META.medals})</small></span></div>
   <div class="stats">
     <span>난이도</span><span>${dfM().n}${dfM().sc>1?` (점수 ×${dfM().sc})`:''}</span>
@@ -5023,7 +5039,7 @@ function applyMeta(){const p=S.p;p.dmgP=(p.dmgP||0)+.02*mlv('atk');p.rateP=(p.ra
   p.xpM=1+.03*mlv('xp');p.goldM+=.05*mlv('gold');S.gold+=25*mlv('sgold');p.luck+=mlv('luck');if(META.sk.token)p.token=true;if(META.sk.key)S.keys=1;if(META.sk.startCard){S.pendingLv++;S.boost=true;}}
 // 보스 처치 속도 보너스: 보스마다 기준 시간보다 빨리 잡은 1초당 10점. 보스전 중엔 생존 시간이 멈추므로 실제 걸린 시간은 여기서만 반영
 const BOSS_PAR=[90,90,110,140],BOSS_DM=[.55,.75,1,1];
-const bossSpeedPts=()=>(S.st.btimes||[]).reduce((q,t,i)=>q+Math.round(Math.max(0,BOSS_PAR[i%4]-t)*10),0);
+const bossSpeedPts=()=>(S.st.btimes||[]).reduce((q,t,i)=>q+Math.round(Math.max(0,(BOSS_PAR[bossHome(i)]||120)-t)*10),0);
 // 점수: 명예의 전당에 저장되는 값(생존 시간·처치·레벨·보스·난이도)만으로 계산 → 예전 기록도 같은 식으로 다시 매김
 // 골드·보스 처치 속도는 빼고(골드 증강 빌드가 점수로 튀지 않게), 처치는 2000마리(4000점)부터 로그로 완만하게. 보스 4마리(클리어)면 +3000
 const softC=(x,c)=>x<=c?x:c*(1+Math.log(x/c));
@@ -5198,7 +5214,7 @@ const MOBINFO={
   gemslime:['공격 안 함. 빠르게 도망침','히든 몹. 22초 안에 잡으면 경험치 폭탄 (레벨 1.5개 분량)'],
   mimic:['가까이 가면 깨어나 물어뜯음 (강함)','히든 몹. 상자인 척 가만히 있음. 잡으면 증강 1개 + 골드'],
   luckycat:['공격 안 함. 맞으면 멀리 순간이동 (3번)','히든 몹. 잡으면 행운 +4 + 골드 + 다음 증강 선택은 💎 프리즘 확정'],
-  bossH:['화염 숨결, 황금 비, 급강하, 날갯바람','히든 보스. 6분 이후 드물게 출현 (히든 몹을 잡을수록 잘 나옴). 60초 안에 처치하면 🐉 황금 용 전용 증강(초강력, 슬롯 차지 안 함) + 증강 2개·골드·메달 3'],
+  bossH:['화염 숨결, 황금 비, 급강하, 날갯바람','히든 보스. 6분 이후 아주 드물게 출현 (30초마다 0.5% + 히든 몹 처치당 1%, 최대 4.5%). 60초 안에 처치하면 🐉 황금 용 전용 증강(초강력, 슬롯 차지 안 함) + 증강 2개·골드·메달 3'],
   wolf:['빠른 몸통 박치기','늑대 우두머리의 무리. 빠르니 뭉쳐 있을 때 광역으로'],
   sapling:['초록 가시 발사','고목 정령의 졸개. 느리지만 멀리서 쏨'],
   vbat:['빠르게 날아와 물기','흡혈귀 백작의 박쥐. 나를 물 때마다 보스 체력 0.2% 회복 → 먼저 정리'],
@@ -5342,7 +5358,7 @@ function cxList(){
       return `<div class="cxrow" style="--rc:var(--brass)"><div class="h"><b>${TAG_ICO[t]||''} ${T.n}</b><span class="tg">증강 ${n}개</span>${cl.length?`<span class="tg">주력 직업: ${cl.join(', ')}</span>`:''}<button class="cxchip" data-cxj="${t}">증강 보기 →</button></div>${[[1,T.t1],[2,T.t2],[4,T.t4],[6,T.t6]].filter(x=>x[1]).map(([k,d])=>`<div class="d"><b style="font-size:14px;color:var(--brass)">${k}개</b> ${d}</div>`).join('')}<div class="s">5개부터 1개마다: ${T.ex}</div></div>`;});
   }else if(CX.tab==='ev'){
     const DUR={horde:20,hunt:40,goblin:30,shrine:25,moon:25,chest:45,rift:40,relic:45};
-    const TIP={horde:'그 배경에 나오는 몹 중 한 종류가 몰려옴. 광역 공격이 유리',hunt:'금색 테두리 표적 3마리가 한 방향에 모여 나옴',goblin:'빠르게 도망치니 대시·원거리로 쫓기',shrine:'제단 원 안에서 2.5초 버티면 축복 (공격·속도 등 무작위)',moon:'적이 20% 빠르고 세짐. 대신 경험치·골드 2배',chest:'상자를 열면 수호자(강한 정예)가 나옴',rift:'균열 원 안에 계속 머물러야 함. 적이 몰려오니 주의',relic:'흩어진 유물 3개를 화살표 따라 모으기'};
+    const TIP={horde:'그 배경에 나오는 몹 중 한 종류가 몰려옴. 광역 공격이 유리',hunt:'금색 테두리 표적 3마리가 한 방향에 모여 나옴',goblin:'빠르게 도망치니 대시·원거리로 쫓기',shrine:'제단 원 안에서 2.5초 버티면 축복 (공격·속도 등 무작위)',moon:'적이 20% 빠르고 세짐. 대신 경험치·골드 2배',chest:'상자를 열면 수호자(강한 정예)가 나옴',rift:'균열 원 안에 계속 머물러야 함. 적이 몰려오니 주의',relic:'유물 3개가 세 방향으로 멀리 흩어짐. 가장 가까운 것부터 원을 그리듯 돌기'};
     rows=[`<div class="sub" style="margin:4px 0">보스전이 아닐 때 50~70초마다 무작위로 하나 발생 (같은 이벤트는 연속으로 안 나옴, 보스 직전 45초엔 안 나옴)</div>`].concat(Object.keys(EVENTS).filter(k=>hit(EVENTS[k].n,EVENTS[k].d,TIP[k])).map(k=>{const E=EVENTS[k];return `<div class="cxrow" style="--rc:${E.col}"><div class="h"><b>${E.icon} ${E.n}</b><span class="tg">⏱ ${DUR[k]}초</span></div><div class="d">${E.d}</div><div class="s">💡 팁: ${TIP[k]}</div></div>`;}));
   }else if(CX.tab==='mob'){
     const mk=CX.mk||'',BW={};BIO_MOB.forEach((m,i)=>{for(const k in m)if(m[k]>=1.5)(BW[k]=BW[k]||[]).push(BIOMES[i].n);});
@@ -5629,11 +5645,14 @@ refreshAutoBtns();
 
 /* ---------- save ---------- */
 const SAVE_KEY='chipdungeon_save_v1';
-const PKEYS=['dmgP','rateP','xpM','block','token','hp','maxHp','speed','dmg','rate','bspd','range','multi','pierce','crit','critM','luck','goldM','vuln','orbR','orbM','dashMul','armor','dodge','lifesteal','regen','magnet','shots','pkills','lastCd','soulN','fyO','skN','hpP','hpB','hpLM'];
-const SKEYS=['dragonPend','prismN','hidN','hidK','hbDone','arr','nmB','gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','takeAll','keys','vipStock','vipRoll','buys','cbuys','fused','potN','vineN','seals','banL','noAug','bossT','bioO','dlog'];
+const PKEYS=['dmgP','rateP','xpM','block','token','hp','maxHp','speed','dmg','rate','bspd','range','multi','pierce','crit','critM','luck','goldM','vuln','orbR','orbM','dashMul','armor','dodge','lifesteal','regen','magnet','shots','pkills','lastCd','soulN','fyO','skN','hpP','hpB','hpLM',
+  // 스탯 카드·증강이 쌓는 계열별 보너스 (이어하기 때 사라지던 것들)
+  'cdR','sumD','tuL','psD','fiD','thD','slD','hoD','shD','gvR','mkD','wvD','auraM','auraD','skD','skL','lbD','rlM','elD','fyC','fyD','vnR','vnD','ptR','ptD','hdP','hdD','rfN','snR','vpN'];
+const SKEYS=['dragonPend','prismN','hidN','hidK','hbDone','arr','nmB','gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','takeAll','keys','vipStock','vipRoll','buys','cbuys','fused','potN','vineN','seals','banL','noAug','bossT','bioO','dlog','bStart','bHit','bHpF'];
 function saveGame(silent){
   if(!S||!S.started||!S.p.alive||S.mode==='over'||S.mode==='dying'||S.mode==='revive')return false;
-  const d={v:1,at:Date.now(),p:{},s:{},augs:S.augs.map(a=>[a.id,a.lv,a.q||1]),st:S.st};
+  S.bHpF=S.boss&&S.boss.alive?S.boss.hp/S.boss.maxHp:0;
+  const d={v:1,at:Date.now(),p:{},s:{},augs:S.augs.map(a=>[a.id,a.lv,a.q||1,a.pq||0]),st:S.st};
   for(const k of PKEYS)d.p[k]=S.p[k];for(const k of SKEYS)d.s[k]=S[k];
   try{localStorage.setItem(SAVE_KEY,JSON.stringify(d));if(!silent)toast('저장했습니다');return true;}catch(e){if(!silent)toast('저장 실패');return false;}
 }
@@ -5644,11 +5663,11 @@ function continueGame(d){
   for(const k of PKEYS)if(d.p[k]!==undefined)S.p[k]=d.p[k];
   for(const k of SKEYS)if(d.s[k]!==undefined)S[k]=d.s[k];
   S.st=d.st||S.st;
-  S.augs=d.augs.map(([id,lv,q])=>{const f=[...FUSIONS,...VFUSIONS].find(x=>x.id===id);if(f)return fusionObj(f);const a=AUGS.find(x=>x.id===id)||VIPS.find(x=>x.id===id)||DRAGON.find(x=>x.id===id);return a?{...a,lv,q:1}:null;}).filter(Boolean);
+  S.augs=d.augs.map(([id,lv,q,pq])=>{const f=[...FUSIONS,...VFUSIONS].find(x=>x.id===id);if(f){const o=fusionObj(f);if(pq)o.pq=pq;return o;}const a=AUGS.find(x=>x.id===id)||VIPS.find(x=>x.id===id)||DRAGON.find(x=>x.id===id);return a?{...a,lv,q:q||1}:null;}).filter(Boolean);
   tagCount();S.round=diffAt(effT());
   S.started=true;const p=S.p;p.x=WW/2;p.y=WH/2;p.inv=2;p.alive=true;p.barrier=barrierMax();
   S.mode='play';hide();toast('이어하기');
-  if(S.bossI>=0)spawnBoss(S.bossI);
+  if(S.bossI>=0)spawnBoss(S.bossI,true);
   if(S.pendingLv>0||S.bonusAug>0)openNext();
 }
 let autoT=0;
@@ -5866,7 +5885,7 @@ const STAT_TIP={
   '막기':'기사 고유. 이 확률로 받는 피해를 완전히 무효로 합니다. 회피와 별개로 굴립니다.',
   '회피':'이 확률로 공격을 완전히 피합니다. 60%가 상한이고, 넘는 1%마다 방어력 +2로 바뀝니다.',
   '보호막':'체력보다 먼저 깎이는 추가 체력. 3초 동안 안 맞으면 다시 차오릅니다.',
-  '체력 재생':'초당 자동으로 회복하는 체력.',
+  '체력 재생':'초당 자동으로 회복하는 체력. 최대 체력이 300을 넘으면 넘는 비율만큼 커짐 (최대 체력 1200이면 ×4).',
   '흡혈':'입힌 피해의 이 비율만큼 체력을 회복합니다.',
   '받는 피해 배율':'받는 피해에 곱해지는 값. 1보다 크면 더 아프게 맞습니다 (올인, 광기 카드 등).',
   '이동 속도':'230이 상한. 넘는 10마다 공격 속도 +3%로 바뀝니다.',
@@ -5916,7 +5935,7 @@ function renderStats(){
     row('회피',pct(dodgeC())+' <small>/ 60%</small>',p.dodge>DODGE_CAP?`초과 ${Math.round((p.dodge-DODGE_CAP)*100)}% → 방어력 +${Math.round((p.dodge-DODGE_CAP)*200)}`:''),
     ...(p.block?[row('막기',pct(p.block+(has('k_wall')?lv3('k_wall',.15,.2,.25):0)),'막으면 피해 무효')]:[]),
     row('보호막',Math.round(barrierMax())),
-    row('체력 재생',p.regen.toFixed(1)+'/초'),
+    row('체력 재생',(p.regen*rgHpM()).toFixed(1)+'/초'+(rgHpM()>1?` (기본 ${p.regen.toFixed(1)} ×${rgHpM().toFixed(1)})`:'')),
     row('흡혈',pct(p.lifesteal)),
     row('받는 피해 배율','×'+p.vuln.toFixed(2))
   ].join('');
