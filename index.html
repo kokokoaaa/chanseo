@@ -1415,6 +1415,11 @@ const AUGS=[
   {id:'allin',u:'',t:'p',n:'올인',tags:['coin','coin'],d:'앞면 피해 +1배, 뒷면 피해 0.5배 → 0.25배. 동전 2개로 계산'},
   {id:'gb_lucky',cls:'gambler',u:'강화할 때마다 행운 +4가 한 번 더 붙어요.',t:'s',n:'타짜의 동전',tags:['coin','dice'],d:'[도박사 전용] 행운 +8. 동전 앞면 확률 +5%',f:p=>{p.luck+=4;p.hdP=(p.hdP||0)+.025;}},
   {id:'gb_streak',cls:'gambler',u:'연속 앞면 보너스가 커져요. ★1은 +10%, ★2는 +15%, ★3은 +20%.',t:'g',n:'연승',tags:['coin','jackpot'],d:'[도박사 전용] 앞면이 이어질 때마다 피해 +15% 누적 (최대 10회, 뒷면에 초기화)'},
+  {id:'gb_martin',cls:'gambler',u:'뒷면 1번당 다음 앞면 배율이 커져요. ★1은 ×1.5, ★2는 ×1.65, ★3은 ×1.8.',t:'g',n:'마틴게일',tags:['coin','jackpot'],d:'[도박사 전용] 뒷면이 나올 때마다 다음 앞면 피해 ×1.65씩 누적 (최대 3번 → 약 ×4.5). 앞면이 나오면 초기화'},
+  {id:'gb_wheel',cls:'gambler',u:'룰렛 효과가 커져요. ★1은 ×0.8, ★2는 ×1, ★3은 ×1.25.',t:'g',n:'룰렛 휠',tags:['roulette','jackpot'],d:'[도박사 전용] 8초마다 룰렛이 돌아 4초간 하나: 🔴공격력 +40% · ⚫공격 속도 +30% · 🟢치명타 +20% · 🟡공격마다 폭발(공격력 60%) · 💰골드'},
+  {id:'gb_chips',cls:'gambler',u:'칩 폭포 탄환 피해가 커져요. ★1은 80%, ★2는 100%, ★3은 120%.',t:'s',n:'칩 쌓기',tags:['coin','house'],d:'[도박사 전용] 앞면마다 칩 +1. 칩 20개가 모이면 칩 폭포: 사방으로 탄환 30발 (공격력 100%) + 체력 4% 회복'},
+  {id:'gb_count',cls:'gambler',u:'',t:'s',n:'카드 카운팅',tags:['coin','card'],d:'[도박사 전용] 동전 앞면 확률 +5%p, 앞면 확률 상한 80% → 90%'},
+  {id:'gb_double',cls:'gambler',u:'',t:'p',n:'이중 동전',tags:['coin','coin'],d:'[도박사 전용] 동전을 하나 더 던짐. 둘 다 앞면이면 피해 1.75배 추가 (앞면 ×2 → ×3.5). 동전 2개로 계산'},
   {id:'gb_jackpot',cls:'gambler',u:'',t:'p',n:'대박',tags:['coin','jackpot'],d:'[도박사 전용] 앞면 5연속마다 화면 안 모든 적에게 공격력 500% 피해'},
   {id:'catalyst',u:'폭발 범위가 더 커져요. ★1은 +15%, ★2는 +20%, ★3은 +25%.',t:'s',n:'촉매',tags:['alchemy','fire'],d:'모든 폭발 범위 +20%'},
   {id:'elixir',u:'강화할 때마다 최대 체력 +5%가 한 번 더 붙어요.',t:'s',n:'엘릭서',tags:['alchemy','guard'],d:'최대 체력 +10%, 물약을 던질 때마다 체력 +2',f:p=>{p.hpP=(p.hpP||0)+.05;}},
@@ -2497,7 +2502,7 @@ const cb=k=>S.cbuys[k]||0;
 const J=()=>has('chain')?5:tag('jackpot')>=6?5:7;
 const red=()=>has('redblack')&&Math.floor(S.t/3)%2===0;
 // 공격력·공격 속도 %는 합연산: 모든 % 보너스를 더한 뒤 한 번만 곱함 (dmgP, rateP)
-const effDmg=p=>p.dmg*Math.max(.2,1+(p.dmgP||0)),effRate=p=>p.rate*Math.max(.2,1+(p.rateP||0)+(p.rushT>0&&S&&has('rush')?.3:0)+(p.cascT>0?.35:0)+(p.qkT>0&&S&&has('quick')?lv3('quick',.2,.3,.4):0)+(p.deT>0&&S&&has('deadeye')?.25:0)+(p.fxRT>0?p.fxR||0:0));
+const effDmg=p=>p.dmg*Math.max(.2,1+(p.dmgP||0)),effRate=p=>p.rate*Math.max(.2,1+(p.rateP||0)+(S&&whOn(1)?.3*whK():0)+(p.rushT>0&&S&&has('rush')?.3:0)+(p.cascT>0?.35:0)+(p.qkT>0&&S&&has('quick')?lv3('quick',.2,.3,.4):0)+(p.deT>0&&S&&has('deadeye')?.25:0)+(p.fxRT>0?p.fxR||0:0));
 function pDmg(){const p=S.p;let d=effDmg(p);
   if(tag('house')>=4)d*=1+Math.min(1.2,S.gold/1250);
   if(has('bankrupt')&&(S.gold===0||has('f_bankrich')))d*=lv3('bankrupt',2,2.5,3);
@@ -2536,6 +2541,7 @@ function pDmg(){const p=S.p;let d=effDmg(p);
   if(p.rage>0)d*=1+.08*p.rage;
   if(p.fy>0)d*=1+p.fy*(.02+ex('fury')*.003)*homeM('fury');
   if(p.bearT>0)d*=1+lv3('d_bear',.4,.6,.8);
+  if(whOn(0))d*=1+.4*whK();
   if(has('shieldbash')&&S.t-(p.sbT??-99)<3)d*=1+lv3('shieldbash',.2,.3,.4);
   if(p.adrT>0)d*=1+lv3('adrenaline',.2,.3,.4);
   if(has('edge'))d*=1+Math.min(.6,Math.floor(S.gold/1000)*.06);
@@ -2563,8 +2569,10 @@ const RATE_CAP=()=>(has('overflow')?13:10)+(has('gatling')?2:0)+(has('f_minigun'
 const SPEED_CAP=230;
 function moveSpd(){const p=S.p;return p.speed*(has('rampage')&&p.fy>0?1+.01*p.fy:1)*(has('quicksilver')?1.35:1)*(has('ironclad')?.9:1)*(1+ex('blitz')*.04)*(p.adrT>0?1.2:1)*(p.spT>0&&has('sprint')?1+lv3('sprint',.2,.3,.4):1)*(p.rushT>0?1+lv3('rush',.35,.5,.65)*(has('f_overdrive')?2:1):1);}
 function pRate(){return Math.min(RATE_CAP(),rawRate());}
+// 룰렛 휠: 6초마다 4초간 0 공격력 / 1 공속 / 2 치명타 / 3 공격마다 폭발 / 4 골드
+const whK=()=>lv3('gb_wheel',.8,1,1.25),whOn=k=>has('gb_wheel')&&S.whR===k&&S.whE>S.t;
 const season=()=>has('d_seasons')?Math.floor((S.t||0)/8)%4:-1;
-const critRaw=()=>(season()===2?.12:0)+S.p.crit+ex('dice')*.04+(has('a_still')&&!S.p.moving?.1:0)+(has('fortune')?LK()*lv3('fortune',.006,.008,.01):0);
+const critRaw=()=>(season()===2?.12:0)+(whOn(2)?.2*whK():0)+S.p.crit+ex('dice')*.04+(has('a_still')&&!S.p.moving?.1:0)+(has('fortune')?LK()*lv3('fortune',.006,.008,.01):0);
 const critC=()=>Math.min(CRIT_CAP,critRaw());
 const CRIT_DMG_CAP_F=()=>has('sharpshot')?8:5;
 const critMul=()=>(has('sharpshot')?1:0)+(has('f_luckstar')?LK()*.02:0)+(has('r_vital')?critRaw()*100*lv3('r_vital',.01,.015,.02):0)+(has('gb_dice')?Math.max(0,S.p.luck)*lv3('gb_dice',.02,.03,.04):0)+Math.min(CRIT_DMG_CAP_F(),S.p.critM+ex('dice')*.15+Math.max(0,critRaw()-CRIT_CAP)*.5);
@@ -3279,7 +3287,7 @@ const rpM=()=>1;
 const elM=()=>(1+ex('elem')*.12)*(1+(S.p.elD||0))*homeM('elem')*(1+.04*mlv('m_elem'))*(has('primordial')?1.3:1);
 const natM=()=>(1+ex('nature')*.15)*homeM('nature');
 const coinOn=()=>S.cls==='gambler'||tag('coin')>=1;
-const headP=()=>Math.min(((S.p.hdP||0)>0?.8:.75)+.01*mlv('m_coin')+(has('goldenhand')?.15:0),.5+(S.p.hdP||0)+.01*mlv('m_coin')+(has('goldenhand')?.15:0)+LK()*.004+ex('coin')*.03+(has('doublehead')?lv3('doublehead',.05,.08,.1):0));
+const headP=()=>Math.min(((S.p.hdP||0)>0?.8:.75)+(has('gb_count')?.1:0)+.01*mlv('m_coin')+(has('goldenhand')?.15:0),.5+(S.p.hdP||0)+.01*mlv('m_coin')+(has('goldenhand')?.15:0)+LK()*.004+ex('coin')*.03+(has('doublehead')?lv3('doublehead',.05,.08,.1):0)+(has('gb_count')?.05:0));
 const shadowOn=()=>tag('shadow')>=1||has('shadowstep')||has('doppel')||has('nightlord');
 const shM=()=>(1+ex('shadow')*.15)*(1+(S.p.shD||0));
 const shMax=()=>2+(tag('shadow')>=2?1:0)+(tag('shadow')>=6?2:0)+(has('f_shadowarmy')?3:0);
@@ -3559,7 +3567,12 @@ function playerFire(tg){
       else{S.dsub='원소 정렬';lightning(tg,Math.round(8*k));S.dsub=null;}}}
     if(has('e_prism')){p.elU=p.elU||[0,0,0];p.elU[el]=S.t;if(p.elU.every(v=>S.t-v<5)&&S.t-(p.prT||-9)>4){p.prT=S.t;p.elU=[0,0,0];exL('프리즘 폭발',null,tg.x,tg.y,140,pDmg()*4,'#e8dcff');S.shake=Math.max(S.shake,.2);for(const o of S.en)if(o.alive&&d2(o,tg)<140*140){burnE(o,pDmg()*.4,3);if(!o.boss){o.slowT=Math.max(o.slowT||0,1.2);o.frozen=true;}}}}}
   let lastB=false;if(S.cls==='gunner'){shock*=1.7*(1+(p.lbD||0));p.mag=(p.mag??magN())-1;if(p.mag<=0){lastB=true;if(has('f_deadshot'))S.deadShot=1;if(has('g_last'))shock*=lv3('g_last',2.5,3,4);}}
-  let coin=0;if(coinOn()){const hd=p.cfF||Math.random()<headP()||(has('f_goddess')&&Math.random()<.25);p.cfF=false;coin=hd?1:-1;
+  let coin=0;if(coinOn()){const hp0=headP(),r1=Math.random()<hp0,r2=has('gb_double')&&Math.random()<hp0;
+    const hd=p.cfF||r1||(has('f_goddess')&&Math.random()<.25);p.cfF=false;coin=hd?1:-1;if(has('gb_double')&&r1&&r2){shock*=1.75;ftext(p.x+10,p.y-30,'더블!','#ffd76a',13);}
+    p.cfH=[...(p.cfH||[]),hd].slice(-10);
+    if(hd&&has('gb_martin')&&(p.cfT||0)>0){shock*=Math.pow(lv3('gb_martin',1.5,1.65,1.8),p.cfT);ftext(p.x,p.y-40,'마틴게일 ×'+Math.pow(lv3('gb_martin',1.5,1.65,1.8),p.cfT).toFixed(1),'#ff4fd8',14);}
+    if(hd){p.cfT=0;if(has('gb_chips')){S.chip=(S.chip||0)+1;if(S.chip>=20){S.chip=0;for(let i=0;i<30;i++)pBullet(p.x,p.y,i*TAU/30,pDmg()*lv3('gb_chips',.8,1,1.2),{sub:'칩 폭포',child:true,r:4});if(p.alive)p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.04*healM());S.rings.push({x:p.x,y:p.y,r:10,max:160,life:.4,col:'#ffd76a'});}}}
+    else p.cfT=Math.min(3,(p.cfT||0)+1);
     if(hd){p.cfS=(p.cfS||0)+1;shock*=((tag('coin')>=6?3:2)+(has('allin')?1:0))*(1+(p.hdD||0)+(has('gb_allin')?Math.max(0,S.p.luck)*lv3('gb_allin',.02,.03,.04):0))*homeM('coin');if(has('gb_streak'))shock*=1+Math.min(has('f_streakrun')?20:10,p.cfS-1)*lv3('gb_streak',.1,.15,.2);
       if(tag('coin')>=2&&p.cfS%3===0)S.coinB=1;if(has('gb_jackpot')&&p.cfS%5===0)S.coinJ=1;if(has('coinshower')&&Math.random()<(has('f_goldrush')?.4:.15))S.coinS=1;}
     else{p.cfS=0;shock*=has('f_twoface')?1:has('allin')?.25:.5;if(tag('coin')>=4)p.cfF=true;if(has('coinguard')){p.barrier=Math.min(Math.max(barrierMax(),20),(p.barrier||0)+lv3('coinguard',3,4,5));}}}
@@ -3604,6 +3617,7 @@ function playerFire(tg){
   if(S.cls==='druid'&&p.shots%(has('d_wrath')?2:3)===0)vineAt(tg.x,tg.y,.7);
   if(has('doppel')&&S.clones)for(const c of S.clones)pBullet(c.x,c.y,Math.atan2(tg.y-c.y,tg.x-c.x),d*.5*shM(),{child:true,r:3,shd:true,src:'shadow',mk:has('shadowmark')});
   if(has('judge'))markE(tg);else if(tag('mark')>=1&&p.shots%(has('deathsent')?3:5)===0)markE(tg);
+  if(whOn(3)&&tg)exL('룰렛 폭발',null,tg.x,tg.y,60,pDmg()*.6*whK(),'#ffd76a');
   if(S.coinB){S.coinB=0;explode(tg.x,tg.y,90,pDmg()*3*(has('goldenhand')?2:1),'#ffd76a');ftext(p.x,p.y-34,'앞면 ×3!','#ffd76a',16);}
   if(S.coinJ){S.coinJ=0;ftext(p.x,p.y-48,'대박!','#ff4fd8',22);S.shake=Math.max(S.shake,.2);for(const e of S.en)if(e.alive&&!e.phase&&Math.abs(e.x-p.x)<GW/2&&Math.abs(e.y-p.y)<GH/2)dmgEs('동전 대박',e,pDmg()*5,'#ff4fd8');}
   if(S.coinS){S.coinS=0;for(let i=0;i<3;i++)pBullet(p.x,p.y,base+(i-1)*.2,pDmg()*lv3('coinshower',.5,.7,.9),{sub:'동전 소나기',child:true,r:4,gcoin:true});}
@@ -3882,6 +3896,7 @@ function update(dt){
     if(waveOn()){S.wvT=(S.wvT??4)-dt;if(S.wvT<=0){S.wvT=Math.max(1,(tag('wave')>=2?4:5)-(has('quake')?lv3('quake',.5,1,1.5):0)-(has('f_epicenter')?1:0)-(has('tectonic')?2:0))*cdM();doWave();if(tag('wave')>=6)S.wv2=.3;}
       if(S.wv2>0){S.wv2-=dt;if(S.wv2<=0)doWave();}}
     if(has('thornseed')||tag('nature')>=1){const ts=has('thornseed');S.tsT=(S.tsT??5)-dt;if(S.tsT<=0){S.tsT=(ts?(has('f_overgrow')?3:5):6)*cdM();const c=S.en.filter(e=>e.alive&&!e.phase&&d2(e,p)<300*300);for(let i=0;i<(ts?(has('f_overgrow')?3:2):1)+(has('f_worldroot')?3:0)&&c.length;i++){const e=c.splice(Math.floor(Math.random()*c.length),1)[0];vineAt(e.x,e.y,ts?lv3('thornseed',.6,.8,1):.6);}}}
+    if(has('gb_wheel')){S.whT=(S.whT??2)-dt;if(S.whT<=0){S.whT=8;S.whR=Math.floor(Math.random()*5);S.whE=S.t+4;const N=['🔴 공격력 +'+Math.round(40*whK())+'%','⚫ 공격 속도 +'+Math.round(30*whK())+'%','🟢 치명타 +'+Math.round(20*whK())+'%','🟡 공격마다 폭발','💰 골드'][S.whR];ftext(p.x,p.y-44,'룰렛: '+N,'#ffd76a',16);if(S.whR===4){const g=price(14*whK());S.gold+=g;}}}
     if(has('d_photo')&&p.alive){if(!p.moving){S.phoT=(S.phoT||0)+dt;if(S.phoT>=3){S.phoT=0;vineAt(p.x,p.y,lv3('d_photo',.4,.5,.6));}}else S.phoT=0;}
     if(has('d_seasons')){const sn=season();if(sn!==S.lastSn){S.lastSn=sn;ftext(p.x,p.y-40,['🌸 봄','☀️ 여름','🍂 가을','❄️ 겨울'][sn],['#ffb0d0','#ffd76a','#e09a4a','#bfe8ff'][sn],16);}}
     if(has('d_bear')){if(p.bearT>0)p.bearT-=dt;S.brT=(S.brT??10)-dt;if(S.brT<=0){S.brT=10*cdM();p.bearT=4;S.bearX=0;ftext(p.x,p.y-34,'곰 변신!','#c98a52',16);S.rings.push({x:p.x,y:p.y,r:10,max:70,life:.35,col:'#c98a52'});}}
@@ -4584,6 +4599,7 @@ function hud(){
   if(S.bless&&S.bless.t>0)bf.push(`<span style="color:#9fd3ff">${S.bless.n} ${S.bless.t.toFixed(0)}</span>`);
   if(skelMax()>0)bf.push(`<span data-tip="skel" style="color:#8cff9a">💀 해골 ${(S.skel||[]).length}/${skelMax()}${skelRaw()>SKEL_CAP?` · 초과 ${skelRaw()-SKEL_CAP} → 해골 피해 ×${(skelRaw()/SKEL_CAP).toFixed(2)}`:''}</span>`);if(has('turret'))bf.push(`<span data-tip="turret" style="color:#9fd3ff">🗼 포탑 ${(S.turrets||[]).length}기 · 다음 ${Math.max(0,S.tuT||0).toFixed(0)}초</span>`);if(shadowOn())bf.push(`<span data-tip="clone" style="color:#c9a0ff">👥 분신 ${(S.clones||[]).length}/${shMax()}</span>`);if(droneN()>0)bf.push(`<span data-tip="drone" style="color:#9fe8ff">🛸 드론 ${droneN()}기</span>`);{const vn=S.zones.filter(z=>z.kind==='vine').length;if(vn||S.cls==='druid'||tag('nature')>=1||has('thornseed'))bf.push(`<span style="color:#d8ff6a">🌿 덩굴 ${vn}/14</span>`);}
   if(p.cfS>=2)bf.push(`<span style="color:#ffd76a">앞면 ${p.cfS}연속</span>`);
+  if(has('gb_chips'))bf.push(`<span style="color:#ffd76a">🪙 칩 ${S.chip||0}/20</span>`);if(has('gb_wheel')&&S.whE>S.t)bf.push(`<span style="color:#ffd76a">🎡 ${['공격력','공격 속도','치명타','폭발','골드'][S.whR]} ${Math.ceil(S.whE-S.t)}초</span>`);if(has('gb_martin')&&p.cfT)bf.push(`<span style="color:#ff4fd8">마틴게일 ×${Math.pow(lv3('gb_martin',1.5,1.65,1.8),p.cfT).toFixed(1)}</span>`);
   if(p.bearT>0)bf.push(`<span style="color:#c98a52">곰 변신 ${p.bearT.toFixed(1)}초</span>`);if(has('d_seasons')){const sn=season();bf.push(`<span style="color:${['#ffb0d0','#ffd76a','#e09a4a','#bfe8ff'][sn]}">${['🌸 봄','☀️ 여름','🍂 가을','❄️ 겨울'][sn]} ${Math.ceil(8-(S.t%8))}초</span>`);}
   if(p.fy>0)bf.push(`<span style="color:#ff6a4a">광란 ${p.fy}</span>`);
   if(p.rage>0)bf.push(`<span style="color:#ff6a4a">분노 ${p.rage}</span>`);
