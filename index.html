@@ -3706,12 +3706,13 @@ function gameOver(win){
     <span>슬롯 돌린 횟수</span><span>${S.st.spins}</span>
     <span>최고 기록</span><span>${fmt(best)}</span>
   </div>
-  <h3>🏆 명예의 전당 등록</h3>${(RDB&&RMYID)||SHEET?`<div class="nick col"><input id="nickIn" maxlength="12" placeholder="이름 (12자까지)" value="${esc(myNick())}"><div class="row"><input id="cmtIn" maxlength="40" placeholder="한마디 남기기 (40자까지, 비워도 돼요)"><button class="btn" id="rsub">등록</button></div></div><p class="sub" id="rmsg" style="margin-top:6px">이름과 한마디를 쓰고 등록을 누르면 메인 화면 명예의 전당에 올라가요. 이름마다 가장 높은 점수만 남고, 점수가 더 낮으면 한마디만 바뀌어요.</p>`:`<p class="sub">${RSTATE==='off'?'온라인 랭킹은 claude.ai 게임 링크에서 로그인한 상태로 플레이할 때만 등록할 수 있어요. 다운로드한 파일에서는 안 돼요.':'랭킹 서버에 연결하지 못해서 지금은 등록할 수 없어요.'}</p>`}
+  <h3>🏆 명예의 전당 등록</h3><div id="rreg">${regForm()}</div>
   <h3>이번 빌드 (증강 ${S.augs.length}개)</h3><p class="sub">${S.augs.map(a=>a.n).join(', ')||'없음'}</p>
   ${synTable()}
   <div class="btnrow"><button class="btn primary" id="again">${CLASSES[S.cls].n}(으)로 다시</button><button class="btn primary" id="tosel" style="background:transparent;color:var(--ivory)">캐릭터 선택</button></div>`);
   const run={diff:S.diff||'normal',sec,score,cls:S.cls,lvl:S.lvl,kills:S.st.kills,bosses:S.st.bosses||0,gold:S.win?S.gold:0};
-  if($('rsub')){const go=()=>submitScore($('nickIn').value,$('cmtIn').value,run);$('rsub').onclick=go;['nickIn','cmtIn'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter')go();}));}
+  const bindReg=()=>{if($('rRetry'))$('rRetry').onclick=async()=>{$('rRetry').textContent='연결 중…';await loadSheet();if(SHEET){toast('랭킹 서버 연결됨');$('rreg').innerHTML=regForm();bindReg();}else{$('rRetry').textContent='↻ 다시 연결 (실패)';}};
+    if($('rsub')){const go=()=>submitScore($('nickIn').value,$('cmtIn').value,run);$('rsub').onclick=go;['nickIn','cmtIn'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter')go();}));}};bindReg();
   const pc=S.cls;$('again').onclick=()=>beginRun(pc);$('tosel').onclick=()=>{newRun();startScreen();};
 }
 let pickCls=(()=>{try{return localStorage.getItem('chipdungeon_cls')||'knight';}catch(e){return 'knight';}})();
@@ -4064,6 +4065,7 @@ function normBoard(list){return list.map(b=>({...b,diff:dOf(b),fx:String(b.cls||
 const myRecs=()=>{try{return JSON.parse(localStorage.getItem('chanseo_myrec')||'{}');}catch(e){return {};}};
 const saveMyRec=r=>{try{const m=myRecs();const old=m[r.diff];if(!old||scoreOf({...r})>=scoreOf({...old}))m[r.diff]=r;localStorage.setItem('chanseo_myrec',JSON.stringify(m));}catch(e){}};
 function mergeMine(list){const m=myRecs();for(const k in m){const r=m[k];const sv=list.find(b=>b.name===r.name&&b.diff===k);if(!sv||sv.score<scoreOf({...r,diff:k}))list=[...list.filter(b=>b!==sv),...normBoard([r]).map(b=>({...b,id:'s_'+b.name+'_'+b.diff,local:true}))];}return normBoard(list).map(b=>({...b,id:b.id||'s_'+b.name+'_'+b.diff}));}
+const regForm=()=>(RDB&&RMYID)||SHEET?`<div class="nick col"><input id="nickIn" maxlength="12" placeholder="이름 (12자까지)" value="${esc(myNick())}"><div class="row"><input id="cmtIn" maxlength="40" placeholder="한마디 남기기 (40자까지, 비워도 돼요)"><button class="btn" id="rsub">등록</button></div></div><p class="sub" id="rmsg" style="margin-top:6px">이름과 한마디를 쓰고 등록을 누르면 메인 화면 명예의 전당에 올라가요. 이름마다 가장 높은 점수만 남고, 점수가 더 낮으면 한마디만 바뀌어요.</p>`:`<p class="sub">${RSTATE==='loading'?'랭킹 서버에 연결하는 중이에요…':'랭킹 서버(구글 시트)에 연결하지 못했어요. 인터넷 연결을 확인하거나 잠시 뒤 다시 시도해 주세요.'}</p><button class="btn ghost" id="rRetry">↻ 랭킹 서버 다시 연결</button>`;
 async function loadSheet(){try{const r=await fetch(SHEET_URL,{cache:'no-store'});const j=await r.json();if(!Array.isArray(j))throw 0;
   BOARD=mergeMine(normBoard(j).map(b=>({...b,id:'s_'+b.name+'_'+b.diff})));SHEET=true;RSTATE='on';refreshBoard();}
   catch(e){if(!SHEET){RSTATE='off';refreshBoard();}}}
