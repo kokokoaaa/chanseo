@@ -368,7 +368,8 @@ window.addEventListener('error',function(e){var d=document.getElementById('errbo
 const cv=document.getElementById('c');let ctx=cv.getContext('2d');
 const ov=document.getElementById('ov'),toastEl=document.getElementById('toast'),dashBtn=document.getElementById('dash');
 const $=id=>document.getElementById(id);
-let W=0,H=0,SC=1,DPR=1,bg=null,ZOOM_N=3,ZOOM=(()=>{try{return +localStorage.getItem('chanseo_zoom')||0;}catch(e){return 0;}})();
+// GW·GH: 시야 단계와 상관없는 기본(1단계) 화면 크기. 적 생성 거리, '화면 안 적' 효과 등 게임 규칙은 이 값을 씀
+let GW=0,GH=0,W=0,H=0,SC=1,DPR=1,bg=null,ZOOM_N=3,ZOOM=(()=>{try{return +localStorage.getItem('chanseo_zoom')||0;}catch(e){return 0;}})();
 const PXW=1.6; // 도트 1칸 = 월드 1.6
 const WW=6000,WH=6000;
 let camX=0,camY=0;
@@ -388,7 +389,7 @@ function resize(){
   const n0=Math.max(1,Math.round(s*DPR)),lv=[...new Set([n0,Math.max(1,Math.round(n0*.75)),Math.max(1,Math.round(n0*.5))])];ZOOM_N=lv.length;const n=lv[Math.min(lv.length-1,ZOOM)];SC=n/(DPR*PXW);
   cv.width=Math.floor(r.width*DPR);cv.height=Math.floor(r.height*DPR);
   cv.style.width=(cv.width/DPR)+'px';cv.style.height=(cv.height/DPR)+'px';
-  W=cv.width/DPR/SC;H=cv.height/DPR/SC;
+  W=cv.width/DPR/SC;H=cv.height/DPR/SC;{const sc0=n0/(DPR*PXW);GW=cv.width/DPR/sc0;GH=cv.height/DPR/sc0;}
   buildBg();SPR.clear();
 }
 function buildBg(){
@@ -2167,7 +2168,7 @@ function spawnAt(type,x,y,noElite,forceElite){
   const e=S.en[S.en.length-1];if(elite&&effT()>150){const ks=Object.keys(AFFIX);e.aff=ks[Math.floor(Math.random()*ks.length)];if(AFFIX[e.aff].on)AFFIX[e.aff].on(e);}
   return e;
 }
-function ringPos(extra=40){const p=S.p,a=(p.moving&&Math.random()<.6)?Math.atan2(p.lmy,p.lmx)+rand(-1.1,1.1):Math.random()*TAU,r=Math.hypot(W,H)/2+extra;return [clamp(p.x+Math.cos(a)*r,20,WW-20),clamp(p.y+Math.sin(a)*r,20,WH-20)];}
+function ringPos(extra=40){const p=S.p,a=(p.moving&&Math.random()<.6)?Math.atan2(p.lmy,p.lmx)+rand(-1.1,1.1):Math.random()*TAU,r=Math.hypot(GW,GH)/2+extra;return [clamp(p.x+Math.cos(a)*r,20,WW-20),clamp(p.y+Math.sin(a)*r,20,WH-20)];}
 function spawnBurst(){
   if(S.en.length>(S.bossI>=0?(dfM().bc||35):(chapM().cap||190)))return;
   let n=Math.min(chapM().n,2+Math.floor(S.round*.7));if(S.bossI>=0)n=Math.ceil(n*.35);
@@ -2806,7 +2807,7 @@ function playerFire(tg){
   for(let i=0;i<n;i++){const an=base+(i-(n-1)/2)*.13;pBullet(p.x,p.y,an,d*(big?3:1),{roll,big,x7,el:el??(coin>0&&has('elemcoin')?Math.floor(Math.random()*3):null),coin,hollow:S.cls==='gunner'&&has('g_hollow'),life:blife,pierce:p.pierce+(big?3:0)+(S.cls==='gunner'?1:0)+(coin>0&&has('luckyshot')?2:0),r:(big||(shock>1.5&&S.cls!=='gambler')||x7?6:(S.cls==='gambler'?4:S.cls==='knight'||S.cls==='berserk'?7:S.cls==='mage'||S.cls==='alch'?5:3))*(has('giant')?1+lv3('giant',.6,.9,1.2):1)});
     if(has('clone')&&Math.random()<lv3('clone',.2,.3,.4))pBullet(p.x,p.y,an+rand(-.08,.08),d,{roll,pierce:p.pierce});}
   if(has('blackjack')&&p.shots%21===0){const rf=has('f_royal'),nb=rf?6:3;for(let i=0;i<nb;i++)pBullet(p.x,p.y,base+(i-(nb-1)/2)*.12,pDmg()*(rf?8:5),{pierce:999,r:9,life:1.6,child:true,card:true});ftext(p.x,p.y-30,'21','#ffd76a',20);}
-  if(has('shower')&&p.shots%7===0){const vis=S.en.filter(e=>e.alive&&!e.phase&&Math.abs(e.x-p.x)<W/2&&Math.abs(e.y-p.y)<H/2);for(let i=0;i<4&&vis.length;i++){const e=vis.splice(Math.floor(Math.random()*vis.length),1)[0];S.bolts.push({x1:e.x,y1:e.y-200,x2:e.x,y2:e.y,life:.15});explode(e.x,e.y,40,pDmg()*1.2,'#f1e7cf');}}
+  if(has('shower')&&p.shots%7===0){const vis=S.en.filter(e=>e.alive&&!e.phase&&Math.abs(e.x-p.x)<GW/2&&Math.abs(e.y-p.y)<GH/2);for(let i=0;i<4&&vis.length;i++){const e=vis.splice(Math.floor(Math.random()*vis.length),1)[0];S.bolts.push({x1:e.x,y1:e.y-200,x2:e.x,y2:e.y,life:.15});explode(e.x,e.y,40,pDmg()*1.2,'#f1e7cf');}}
   if(has('gold7')&&p.shots%J()===0)pBullet(p.x,p.y,base,pDmg()*5,{pierce:7,r:8,child:true,big:true});
   fxRun('n',tg);
   if(has('quick')&&p.shots%(has('f_rapidfire')?5:10)===0)p.qkT=2;
@@ -2825,7 +2826,7 @@ function playerFire(tg){
   if(has('doppel')&&S.clones)for(const c of S.clones)pBullet(c.x,c.y,Math.atan2(tg.y-c.y,tg.x-c.x),d*.5*shM(),{child:true,r:3,shd:true,src:'shadow',mk:has('shadowmark')});
   if(has('judge'))markE(tg);else if(tag('mark')>=1&&p.shots%(has('deathsent')?3:5)===0)markE(tg);
   if(S.coinB){S.coinB=0;explode(tg.x,tg.y,90,pDmg()*3*(has('goldenhand')?2:1),'#ffd76a');ftext(p.x,p.y-34,'앞면 ×3!','#ffd76a',16);}
-  if(S.coinJ){S.coinJ=0;ftext(p.x,p.y-48,'대박!','#ff4fd8',22);S.shake=Math.max(S.shake,.2);for(const e of S.en)if(e.alive&&!e.phase&&Math.abs(e.x-p.x)<W/2&&Math.abs(e.y-p.y)<H/2)dmgE(e,pDmg()*5,'#ff4fd8');}
+  if(S.coinJ){S.coinJ=0;ftext(p.x,p.y-48,'대박!','#ff4fd8',22);S.shake=Math.max(S.shake,.2);for(const e of S.en)if(e.alive&&!e.phase&&Math.abs(e.x-p.x)<GW/2&&Math.abs(e.y-p.y)<GH/2)dmgE(e,pDmg()*5,'#ff4fd8');}
   if(S.coinS){S.coinS=0;for(let i=0;i<3;i++)pBullet(p.x,p.y,base+(i-1)*.2,pDmg()*lv3('coinshower',.5,.7,.9),{child:true,r:4,gcoin:true});}
   if(has('b_cleave')&&p.shots%3===0)spinHit(has('f_whirlwind')?140:100,pDmg()*lv3('b_cleave',.8,1,1.2),'#ff8a6a');
   if(tag('fury')>=6&&p.fy>=furyCap())spinHit(90,pDmg()*.6,'#ff6a4a');
@@ -2974,7 +2975,7 @@ const droneN=()=>L('drone')+(has('f_fleet')?2:0)+(tag('summon')>=2?1:0)+(has('le
 function dronePos(){const p=S.p,n=droneN(),a=-S.t*1.6;return Array.from({length:n},(_,i)=>({x:p.x+Math.cos(a+i*TAU/n)*78,y:p.y+Math.sin(a+i*TAU/n)*78}));}
 // N초마다 발동하는 효과의 주기 배율: 공격 속도 보너스가 오를수록 더 자주 (최대 2.5배 빠르게). 후반에 타이머 증강이 뒤처지지 않게
 const tmul=()=>1/Math.min(2.5,1+Math.max(0,S.p.rateP||0)*.6);
-function thunderStrike(n){const p=S.p,vis=S.en.filter(e=>e.alive&&!e.phase&&Math.abs(e.x-p.x)<W/2&&Math.abs(e.y-p.y)<H/2);for(let i=0;i<n&&vis.length;i++){const e=vis.splice(Math.floor(Math.random()*vis.length),1)[0];S.bolts.push({x1:e.x+rand(-30,30),y1:e.y-260,x2:e.x,y2:e.y,life:.22});explode(e.x,e.y,55,pDmg()*3.5,'#bff3ff');}}
+function thunderStrike(n){const p=S.p,vis=S.en.filter(e=>e.alive&&!e.phase&&Math.abs(e.x-p.x)<GW/2&&Math.abs(e.y-p.y)<GH/2);for(let i=0;i<n&&vis.length;i++){const e=vis.splice(Math.floor(Math.random()*vis.length),1)[0];S.bolts.push({x1:e.x+rand(-30,30),y1:e.y-260,x2:e.x,y2:e.y,life:.22});explode(e.x,e.y,55,pDmg()*3.5,'#bff3ff');}}
 function dealerPos(){const p=S.p,a=S.t*1.2;return [0,1].map(i=>({x:p.x+Math.cos(a+i*Math.PI)*62,y:p.y+Math.sin(a+i*Math.PI)*62}));}
 function dash(){
   const p=S.p;if(!p.alive||p.dashCd>0||p.dashT>0)return;
@@ -3160,7 +3161,7 @@ function update(dt){
   }
   S.en=S.en.filter(e=>e.alive);
   updBoss(dt);
-  {const far=Math.hypot(W,H)*.85;for(const e of S.en){if(e.boss)continue;if(Math.abs(e.x-p.x)>far||Math.abs(e.y-p.y)>far){const [x,y]=ringPos();e.x=x;e.y=y;}}}
+  {const far=Math.max(Math.hypot(GW,GH)*.85,Math.max(W,H)/2+200);for(const e of S.en){if(e.boss)continue;if(Math.abs(e.x-p.x)>far||Math.abs(e.y-p.y)>far){const [x,y]=ringPos();e.x=x;e.y=y;}}}
   // separation
   const E=S.en;
   for(let i=0;i<E.length;i++)for(let j=i+1;j<E.length;j++){const a=E[i],b=E[j];if(a.type==='ghost'||b.type==='ghost')continue;const dx=b.x-a.x,dy=b.y-a.y,dd=dx*dx+dy*dy,m=a.r+b.r;if(dd<m*m){const d=Math.sqrt(dd)||1,o=(m-d)/2;a.x-=dx/d*o;a.y-=dy/d*o;b.x+=dx/d*o;b.y+=dy/d*o;}}
@@ -3193,7 +3194,7 @@ function update(dt){
       hurtP(b.dmg,null);b.life=0;
     }
   }
-  {const mx=W/2+140,my=H/2+140;S.pr=S.pr.filter(b=>b.life>0&&Math.abs(b.x-p.x)<mx&&Math.abs(b.y-p.y)<my);let n=0;for(const b of S.pr)if(b.mine&&b.child)n++;S.chN2=n;}
+  {const mx=Math.max(W,GW)/2+140,my=Math.max(H,GH)/2+140;S.pr=S.pr.filter(b=>b.life>0&&Math.abs(b.x-p.x)<mx&&Math.abs(b.y-p.y)<my);let n=0;for(const b of S.pr)if(b.mine&&b.child)n++;S.chN2=n;}
   // coins
   for(const c of S.dr){const dx=p.x-c.x,dy=p.y-c.y,d=Math.hypot(dx,dy)||1;const sp=c.pull?Math.max(700,d*3):d<p.magnet*(c.xp?1.35:1)?620:0;c.x+=dx/d*sp*dt;c.y+=dy/d*sp*dt;if(d<p.r+8){c.taken=true;if(c.xp){gainXp(c.v);if(has('magnet2')&&p.alive)p.hp=Math.min(p.maxHp,p.hp+lv3('magnet2',.2,.3,.4)*(has('f_goldmag')?2:1)*healM());}else{if(has('rush'))p.rushT=1;if(has('luckycoin')&&Math.random()<(has('f_goldclover')?.1:.04))explode(p.x,p.y,90,pDmg()*2.5,'#7be08f');addGold(c.v);if(tag('house')>=2&&Math.random()<.25)explode(p.x,p.y,70,pDmg()*.8,'#ffd76a');}}}
   S.dr=S.dr.filter(c=>!c.taken);
