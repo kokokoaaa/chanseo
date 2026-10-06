@@ -2913,7 +2913,7 @@ function update(dt){
     p.inv=Math.max(0,p.inv-dt);p.all6=Math.max(0,p.all6-dt);p.dashCd=Math.max(0,p.dashCd-dt);p.blitzT=Math.max(0,p.blitzT-dt);p.shockT=Math.max(0,p.shockT-dt);
     if(p.comboT>0){p.comboT-=dt;if(p.comboT<=0)p.combo=0;}
     p.cd-=dt;
-    if(p.cd<=0){const bo=S.boss&&S.boss.alive&&!S.boss.air&&d2(S.boss,p)<(p.range+S.boss.r)**2?S.boss:null,tg=bo||evTarget(p.range)||nearestE(p,p.range);if(tg){playerFire(tg);if(S.cls==='gunner'&&p.mag<=0){p.mag=magN();p.cd=reloadT();p.rlT=p.cd;p.rlMax=p.cd;p.rlM=p.cd;}else p.cd=1/pRate();}}
+    if(p.cd<=0){const fr=meleeOn()?meleeR():p.range,bo=S.boss&&S.boss.alive&&!S.boss.air&&d2(S.boss,p)<(fr+S.boss.r)**2?S.boss:null,tg=bo||evTarget(fr)||nearestE(p,fr);if(tg){playerFire(tg);if(S.cls==='gunner'&&p.mag<=0){p.mag=magN();p.cd=reloadT();p.rlT=p.cd;p.rlMax=p.cd;p.rlM=p.cd;}else p.cd=1/pRate();}}
     const n=orbitN();
     if(n){const sp=2.8*(has('spinner')?1.5:1),rad=ORB_R*p.orbR,big=tag('roulette')>=6,orr=big?13:9;
       for(let i=0;i<n;i++){const a=S.t*sp+i*TAU/n,ox=p.x+Math.cos(a)*rad,oy=p.y+Math.sin(a)*rad;
@@ -4165,7 +4165,7 @@ function autoMoveVec(){
   const low=p.hp/p.maxHp<.45,bossOn=S.boss&&S.boss.alive;
   // 오라형(성기사 신성 오라·후광): 오라 범위 안쪽에 적이 들어오도록 바짝 붙음. 체력이 낮을 때만 평소처럼 거리 유지
   const auR=S.cls==='paladin'?110*(1+(p.auraM||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1):has('halo')?(has('f_seraph')?210:140):0;
-  const desired=auR&&!low?clamp(auR*.6,55,200):clamp(p.range*(low?.85:.72),95,290),reach=auR&&!low?Math.max(p.range*.88,auR*.9):p.range*.88;
+  const pr=meleeOn()?meleeR():p.range,desired=auR&&!low?clamp(auR*.6,55,200):clamp(pr*(low?.85:.72),95,290),reach=auR&&!low?Math.max(pr*.88,auR*.9):pr*.88;
   const shots=S.pr.filter(b=>!b.mine&&d2(b,p)<260*260);
   let goal=null;
   {let bd=600*600;for(const i of S.items){const d=d2(i,p);if(d<bd&&inA(i)){bd=d;goal=i;}}}
