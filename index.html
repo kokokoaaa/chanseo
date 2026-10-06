@@ -82,6 +82,21 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 @media (max-width:520px){#autoBar{flex-direction:column;align-items:flex-end;top:54px}#autoBar button{padding:3px 7px;font-size:12px}#autoBar #speedBtn{font-size:14px}#buffs{top:186px}}
 .shophead{position:sticky;top:-22px;z-index:3;display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--felt);margin:-22px -20px 6px;padding:16px 20px 10px;border-bottom:1px solid rgba(214,169,74,.3);border-radius:16px 16px 0 0}
 .shophead h2{margin:0}
+.cxbar{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.cxbar input,.cxbar select{font:inherit;font-size:15px;padding:7px 10px;border-radius:8px;border:1px solid rgba(214,169,74,.6);background:rgba(0,0,0,.35);color:var(--ivory)}
+.cxbar input{flex:1;min-width:160px}
+.cxtab{font:inherit;font-size:14px;padding:6px 12px;border-radius:999px;border:1px solid rgba(214,169,74,.55);background:rgba(0,0,0,.25);color:var(--ivory);cursor:pointer}
+.cxtab.on{background:var(--brass);color:#1b1206;font-weight:700}
+.cxchip{font:inherit;font-size:13px;padding:3px 9px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.25);color:var(--ivory);cursor:pointer}
+.cxchip.on{border-color:var(--brass);background:rgba(214,169,74,.3)}
+.cxcnt{color:var(--muted);font-size:13px;margin:4px 0}
+.cxrow{border:1px solid rgba(214,169,74,.35);border-left:4px solid var(--rc,#999);border-radius:8px;padding:8px 10px;margin:6px 0;background:rgba(0,0,0,.25);text-align:left}
+.cxrow .h{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.cxrow .h b{font-size:16px;color:var(--ivory)}
+.cxrow .tg{font-size:12px;padding:1px 7px;border-radius:999px;background:rgba(255,255,255,.1);color:var(--ivory)}
+.cxrow .d{font-size:14px;color:#e8dcc0;margin-top:3px;line-height:1.45}
+.cxrow .s{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.45}
+.cxrow.uc{border-left-color:#ff6a00;box-shadow:inset 0 0 0 1px rgba(255,120,40,.35)}
 .clsgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .clscard{display:flex;flex-direction:column;align-items:center;gap:2px;background:rgba(0,0,0,.25);border:2px solid rgba(214,169,74,.3);border-radius:10px;padding:6px 4px 9px;color:var(--ivory);font:inherit;cursor:pointer;text-align:center;opacity:.75;transition:opacity .15s,transform .15s}
 .clscard:hover{opacity:1}
@@ -3628,6 +3643,7 @@ function startScreen(){
   ${diffOpen(DKEYS[DKEYS.length-1])?'':`<p class="sub" style="margin-top:4px">${DIFF[DKEYS.find(k=>!diffOpen(k))].n} 난이도는 ${DIFF[DKEYS[DKEYS.indexOf(DKEYS.find(k=>!diffOpen(k)))-1]].n} 난이도를 클리어하면 열려요.</p>`}
   <button class="btn primary" id="go">${CLASSES[pickCls].n}(으)로 시작${sv?' (저장 삭제)':''}</button>
   <button class="btn ghost" id="meta">🏅 영구 강화 <small>보유 메달 ${META.medals}개</small></button>
+  <button class="btn ghost" id="codex">📖 도감 <small>증강 · 합체 · 시너지 · 직업 검색</small></button>
   <button class="btn ghost" id="sync">💾 데이터 옮기기 <small>다른 기기로 내보내기 · 가져오기</small></button>`);
   ov.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{const k=b.dataset.cls;
     if(!clsOpen(k)){const C=CLASSES[k];$('cdet').innerHTML=clsDetail(k)+unlockInfo(k)+(META.tk>0?`<button class="btn primary" id="ulk" style="margin-top:10px;width:100%;font-size:17px;padding:12px">🔓 ${C.n} 직업 봉인 해제하기</button><p style="margin:6px 0 0;font-size:15px;font-weight:700;color:#ffd76a;text-align:center">🎟 봉인 해제권 <b style="font-size:18px">${META.tk}장</b> 소유</p>`:`<p style="color:#ffb0b0;margin:10px 0 0;font-size:15px;font-weight:700;text-align:center">🔒 봉인된 직업 · 지옥·신 난이도를 클리어하면 봉인 해제권을 받아요<br><span style="color:#ffd76a">🎟 봉인 해제권 0장 소유</span></p>`);
@@ -3637,7 +3653,7 @@ function startScreen(){
   ov.querySelectorAll('[data-diff]').forEach(b=>b.onclick=()=>{pickDiff=b.dataset.diff;try{localStorage.setItem('chanseo_diff',pickDiff);}catch(e){}ov.querySelectorAll('[data-diff]').forEach(x=>x.classList.toggle('primary',x===b));HOF_DIFF=null;refreshBoard();});
   if(sv)$('cont').onclick=()=>continueGame(sv);
   $('go').onclick=()=>beginRun(pickCls);
-  $('meta').onclick=openMeta;$('sync').onclick=openSync;
+  $('meta').onclick=openMeta;$('sync').onclick=openSync;$('codex').onclick=()=>openCodex();
   refreshBoard();
 }
 function drawPreviews(){
@@ -3845,6 +3861,53 @@ function cosPreview(x,anchor){
   let top=r.top+r.height/2-bh/2;if(left===Math.max(8,(innerWidth-bw)/2))top=r.top-bh-8;box.style.left=left+'px';box.style.top=Math.max(8,Math.min(innerHeight-bh-8,top))+'px';
 }
 function cosPreviewHide(){cancelAnimationFrame(cosPrevRAF);const b=document.getElementById('cosPrev');if(b)b.style.display='none';}
+// 도감: 처음 화면에서 증강·합체·VIP·시너지·직업을 검색하고 필터로 훑어보기
+let CX={tab:'aug',q:'',cls:'',tag:'',tier:''};
+function openCodex(o){Object.assign(CX,o||{});
+  const tabs=[['aug','증강'],['fuse','합체'],['vip','VIP'],['syn','시너지'],['cls','직업']];
+  const clsOpt=`<option value="">전체 직업</option><option value="-">공용</option>`+Object.keys(CLASSES).map(k=>`<option value="${k}" ${CX.cls===k?'selected':''}>${CLASSES[k].n}</option>`).join('');
+  const tierOpt=`<option value="">전체 등급</option>`+['s','g','p'].map(k=>`<option value="${k}" ${CX.tier===k?'selected':''}>${TIER[k].n}</option>`).join('')+`<option value="uc" ${CX.tier==='uc'?'selected':''}>♾ 고점 돌파</option>`;
+  show(`<div class="shophead"><h2>📖 도감</h2><button class="btn" id="cxBack">돌아가기</button></div>
+  <div class="cxbar">${tabs.map(([k,n])=>`<button class="cxtab ${CX.tab===k?'on':''}" data-cxt="${k}">${n}</button>`).join('')}</div>
+  <div class="cxbar"><input id="cxQ" placeholder="이름·설명 검색 (예: 보호막, 치명타, 해골)" value="${CX.q.replace(/"/g,'&quot;')}">
+  ${CX.tab==='aug'||CX.tab==='fuse'?`<select id="cxCls">${clsOpt}</select>`:''}${CX.tab==='aug'?`<select id="cxTier">${tierOpt}</select>`:''}</div>
+  ${CX.tab==='aug'||CX.tab==='vip'?`<div class="cxbar">${[['','전체'],...Object.keys(TAGS).map(t=>[t,(TAG_ICO[t]||'')+' '+TAGS[t].n])].map(([t,n])=>`<button class="cxchip ${CX.tag===t?'on':''}" data-cxg="${t}">${n}</button>`).join('')}</div>`:''}
+  <div class="cxcnt" id="cxN"></div><div id="cxL"></div>`);
+  ov.querySelectorAll('[data-cxt]').forEach(b=>b.onclick=()=>openCodex({tab:b.dataset.cxt,tag:'',tier:''}));
+  ov.querySelectorAll('[data-cxg]').forEach(b=>b.onclick=()=>{CX.tag=b.dataset.cxg;ov.querySelectorAll('[data-cxg]').forEach(x=>x.classList.toggle('on',x===b));cxList();});
+  $('cxQ').oninput=e=>{CX.q=e.target.value;cxList();};
+  if($('cxCls'))$('cxCls').onchange=e=>{CX.cls=e.target.value;cxList();};
+  if($('cxTier'))$('cxTier').onchange=e=>{CX.tier=e.target.value;cxList();};
+  $('cxBack').onclick=()=>startScreen();
+  cxList();
+}
+function cxList(){
+  const q=CX.q.trim().toLowerCase(),hit=(...t)=>!q||t.some(x=>String(x||'').toLowerCase().includes(q));
+  const nm=id=>{const a=AUGS.find(x=>x.id===id)||VIPS.find(x=>x.id===id);return a?a.n:id;};
+  const tg=t=>(t||[]).map(x=>TAGS[x]?`<span class="tg">${TAG_ICO[x]||''} ${TAGS[x].n}</span>`:'').join('');
+  const clsN=c=>c?`<span class="tg" style="background:rgba(214,169,74,.3)">${CLASSES[c].n} 전용</span>`:'';
+  const ucOn=META.sk&&META.sk.uncap;let rows=[];
+  if(CX.tab==='aug'){
+    rows=AUGS.filter(a=>(!CX.cls||(CX.cls==='-'?!a.cls:a.cls===CX.cls))&&(!CX.tag||(a.tags||[]).includes(CX.tag))&&(!CX.tier||(CX.tier==='uc'?a.uc:a.t===CX.tier&&!a.uc))&&hit(a.n,a.d,a.u))
+      .map(a=>{const fz=[...FUSIONS.filter(f=>f.a===a.id||f.b===a.id).map(f=>`${f.n} (+${nm(f.a===a.id?f.b:f.a)})`),...VFUSIONS.filter(f=>f.b===a.id||f.a===a.id).map(f=>`${f.n} (+VIP ${nm(f.a===a.id?f.b:f.a)})`)];
+        return `<div class="cxrow ${a.uc?'uc':''}" style="--rc:${TIER[a.t].col}"><div class="h"><b>${a.n}</b><span class="tg" style="background:${TIER[a.t].col};color:#fff">${TIER[a.t].n}</span>${a.uc?`<span class="tg" style="background:#c4122f;color:#fff">♾ 고점 돌파${ucOn?'':' · 🔒 한계 돌파 해금 필요'}</span>`:''}${clsN(a.cls)}${tg(a.tags)}</div><div class="d">${a.d}</div>${a.u?`<div class="s">★ 강화: ${a.u}</div>`:''}${fz.length?`<div class="s">합체: ${fz.join(' · ')}</div>`:a.uc?'<div class="s">합체·교체 불가</div>':''}</div>`;});
+  }else if(CX.tab==='fuse'){
+    const L=[...FUSIONS.map(f=>({...f,v:0})),...VFUSIONS.map(f=>({...f,v:1}))];
+    rows=L.filter(f=>{const A=AUGS.find(x=>x.id===f.a)||VIPS.find(x=>x.id===f.a),B=AUGS.find(x=>x.id===f.b)||VIPS.find(x=>x.id===f.b);const c=(A&&A.cls)||(B&&B.cls)||'';return (!CX.cls||(CX.cls==='-'?!c:c===CX.cls))&&hit(f.n,f.d,nm(f.a),nm(f.b));})
+      .map(f=>`<div class="cxrow" style="--rc:${f.v?TIER.v.col:TIER.f.col}"><div class="h"><b>${f.n}</b><span class="tg" style="background:${f.v?TIER.v.col:TIER.f.col};color:#fff">${f.v?'VIP 합체':'합체'}</span></div><div class="s">${nm(f.a)} + ${nm(f.b)}</div><div class="d">${f.d}</div></div>`);
+  }else if(CX.tab==='vip'){
+    rows=VIPS.filter(v=>(!CX.tag||(v.tags||[]).includes(CX.tag))&&hit(v.n,v.d)).map(v=>`<div class="cxrow" style="--rc:${TIER.v.col}"><div class="h"><b>${v.n}</b><span class="tg" style="background:${TIER.v.col};color:#fff">VIP</span>${tg(v.tags)}</div><div class="d">${v.d}</div></div>`);
+  }else if(CX.tab==='syn'){
+    rows=Object.keys(TAGS).filter(t=>{const T=TAGS[t];return hit(T.n,T.t1,T.t2,T.t4,T.t6,T.ex);}).map(t=>{const T=TAGS[t],n=AUGS.filter(a=>(a.tags||[]).includes(t)).length,cl=Object.keys(CLASSES).filter(k=>CLASSES[k].fav.includes(t)).map(k=>CLASSES[k].n);
+      return `<div class="cxrow" style="--rc:var(--brass)"><div class="h"><b>${TAG_ICO[t]||''} ${T.n}</b><span class="tg">증강 ${n}개</span>${cl.length?`<span class="tg">주력 직업: ${cl.join(', ')}</span>`:''}<button class="cxchip" data-cxj="${t}">증강 보기 →</button></div>${[[1,T.t1],[2,T.t2],[4,T.t4],[6,T.t6]].filter(x=>x[1]).map(([k,d])=>`<div class="d"><b style="font-size:14px;color:var(--brass)">${k}개</b> ${d}</div>`).join('')}<div class="s">5개부터 1개마다: ${T.ex}</div></div>`;});
+  }else{
+    rows=Object.keys(CLASSES).filter(k=>{const C=CLASSES[k];return hit(C.n,C.role,C.d,C.passive);}).map(k=>{const C=CLASSES[k],ex=AUGS.filter(a=>a.cls===k);
+      return `<div class="cxrow" style="--rc:var(--brass)"><div class="h"><b>${C.n}</b><span class="tg">${C.role}</span>${clsOpen(k)?'':'<span class="tg">🔒 봉인</span>'}</div><div class="d">${C.d}</div><div class="s">특성: ${C.passive}</div><div class="s">잘 맞는 시너지: ${tg(C.fav)}${C.dis&&C.dis.length?` · 안 맞는 시너지: ${tg(C.dis)}`:''}</div><div class="s">레벨업: ${C.lvd||''}</div><div class="s">전용 증강: ${ex.map(a=>a.uc?`♾${a.n}`:a.n).join(', ')} <button class="cxchip" data-cxc="${k}">전용 증강 보기 →</button></div></div>`;});
+  }
+  $('cxN').textContent=`${rows.length}개`;$('cxL').innerHTML=rows.join('')||'<p class="sub">찾는 항목이 없어요</p>';
+  $('cxL').querySelectorAll('[data-cxj]').forEach(b=>b.onclick=()=>openCodex({tab:'aug',tag:b.dataset.cxj,cls:'',tier:'',q:''}));
+  $('cxL').querySelectorAll('[data-cxc]').forEach(b=>b.onclick=()=>openCodex({tab:'aug',cls:b.dataset.cxc,tag:'',tier:'',q:''}));
+}
 function openMeta(){cosPreviewHide();
   const now=x=>{const l=mlv(x.k);return l?x.d.replace(/[\d.]+/,m=>+(parseFloat(m)*l).toFixed(1)):'없음';};
   const tile=x=>{const l=mlv(x.k),c=mcost(x),mx=l>=x.max,lk=x.cls&&!clsOpen(x.cls),can=!lk&&!mx&&META.medals>=c;
