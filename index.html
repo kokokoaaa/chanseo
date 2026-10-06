@@ -2756,7 +2756,7 @@ const EVENTS={
   altar:{g:'B',T:35,n:'도박 제단',icon:'🎲',col:'#ffb347',d:'제단 위에 2초 서서 주사위 굴리기. 55%: 바로 골드 + 고급 스탯 카드 / 45%: 정예 3마리 소환, 30초 안에 잡으면 고급 스탯 카드 2장',tip:'꽝이 나와도 이기면 보상이 더 큼'},
   hunt:{g:'A',T:40,n:'정예 사냥',icon:'🎯',col:'#ffd76a',d:'🎯 정예 3마리를 40초 안에 처치하면 증강 1개 선택',tip:'금색 테두리 표적 3마리가 한 방향에 모여 나옴'},
   totem:{g:'A',T:35,n:'저주 토템',icon:'🪬',col:'#b06ad0',d:'주변에 단단한 저주 토템 4개가 솟음 (근처 적 강화). 35초 안에 모두 부수면 증강 1개 선택',tip:'토템 근처 적은 빠르고 단단해짐. 토템부터 빠르게 부수기'},
-  moon:{g:'B',T:25,n:'붉은 달',icon:'🌕',col:'#ff5050',d:'25초간 적이 빠르고 세고 훨씬 많이 몰려오지만 경험치·골드 2배. 끝까지 버티면 고급 스탯 카드 + 🔑 열쇠',tip:'적이 20% 빠르고 세지고 1.7배 많이 나옴. 대신 경험치·골드 2배'},
+  moon:{g:'B',T:25,n:'붉은 달',icon:'🌕',col:'#ff5050',d:'25초간 적이 빠르고 세고 훨씬 많이 몰려오지만 경험치·골드 2배. 체력이 30% 아래로 떨어지지 않고 버티면 고급 스탯 카드 + 🔑 열쇠',tip:'적이 20% 빠르고 받는 피해 35% 증가, 1.7배 많이 나옴. 체력 30% 밑으로 떨어지면 즉시 실패'},
   chest:{g:'S',T:45,n:'저주받은 상자',icon:'🎁',col:'#c86aff',d:'상자 위에 1.5초 서 있으면 열림 → 수호자가 나타남. 35초 안에 쓰러뜨리면 💎 프리즘 증강 선택',tip:'상자를 열면 수호자(강한 정예)가 나옴'},
   bounty:{g:'S',T:40,n:'현상수배',icon:'💀',col:'#ffd76a',d:'거대한 현상수배범이 나타남. 40초 안에 쓰러뜨리면 💎 프리즘 증강 + 큰 골드 + 🏅 메달 1',tip:'체력 9배·피해 1.6배의 거대 정예. 회복을 챙기며 싸우기'}
 };
@@ -2834,6 +2834,7 @@ function updEvent(dt){
   if(ev.k==='relic'){for(const o of ev.rel)if(!o.got&&p.alive&&d2(o,p)<(30+p.r)**2){o.got=true;burst(o.x,o.y,'#e0c070',16);ftext(o.x,o.y-20,'유물 '+ev.rel.filter(q=>q.got).length+'/3','#e0c070',16);}
     if(ev.rel.every(o=>o.got)){endEvent(true);return;}}
   if(ev.k==='horde'&&ev.kc>=ev.need){endEvent(true);return;}
+  if(ev.k==='moon'&&p.alive&&p.hp<p.maxHp*.3){toast('붉은 달빛에 삼켜졌다');endEvent(false);return;}
   if(ev.k==='fountain'&&p.alive){if(d2(ev,p)<ev.r*ev.r){ev.ch+=dt;for(const e of S.en)if(e.alive&&!e.boss&&d2(e,ev)<ev.r*ev.r*2.2)e.slowT=Math.max(e.slowT||0,.3);if(ev.ch>=4){p.hp=p.maxHp;p.hpP=(p.hpP||0)+.04;S.flash=.25;S.rings.push({x:ev.x,y:ev.y,r:10,max:200,life:.5,col:'#6ae0d0'});toast('샘의 축복! 체력 완전 회복 + 최대 체력 +4%');endEvent(true);return;}}else ev.ch=Math.max(0,ev.ch-dt*.5);}
   if(ev.k==='meteor'){ev.mT-=dt;if(ev.mT<=0&&ev.t<ev.T-1.2){ev.mT=rand(.45,.7);const a=Math.random()*TAU,r=Math.random()<.6?rand(0,60):rand(60,200);ev.mt.push({x:p.x+Math.cos(a)*r+p.lmx*(p.moving?70:0),y:p.y+Math.sin(a)*r+p.lmy*(p.moving?70:0),r:75,f:1.15,t:0});}
     for(const m of ev.mt){m.t+=dt;if(m.t>=m.f&&!m.done){m.done=true;explode(m.x,m.y,m.r,pDmg()*2.5,'#ff8a4a');S.shake=Math.max(S.shake,.25);if(p.alive&&d2(m,p)<(m.r+p.r)**2&&p.inv<=0&&!(p.dashT>0)){ev.hits++;hurtP(p.maxHp*.12);ftext(p.x,p.y-30,'유성 '+ev.hits+'/3','#ff8a4a',15);}}}
@@ -3473,7 +3474,7 @@ function hurtP(amt,src){
   if(has('redblack')&&!red())amt*=1-lv3('redblack',.35,.45,.55);
   if(S.buffT.vuln>0)amt*=1.5;
   if(S.debtT>0)amt*=1.3;
-  if(evOn('moon'))amt*=1.2;
+  if(evOn('moon'))amt*=1.35;
   if(p.wcT>0)amt*=.7;
   const raw=amt;
   // 보스전: 보스 공격은 방어력 일부를 무시 (일반 20%, 어려움 30%, 지옥 40%, 신 45%), 광폭화 단계마다 12%씩 더 무시
