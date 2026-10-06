@@ -4222,25 +4222,26 @@ function openAug(free,why,fixed,fixedTier){
   const full=slotCount()>=MAXA;
   const tier=fixedTier||rollTier(),opts=fixed||(full?fullOptions():augOptions(tier));
   if(!opts.length){const g=price(120);S.gold+=g;toast(`슬롯 가득, 강화할 것도 없음. ${g} 골드 지급`);openNext();return;}
-  const cost=price(18);
+  // 다시뽑기: 같은 창에서 연속으로 돌릴수록 1.6배씩, 증강 슬롯 1칸마다 기본 가격 +25%. 증강을 고르면 처음 가격으로
+  S.arr=S.arr||0;const cost=Math.round(price(18)*(1+.25*slotCount())*Math.pow(1.6,S.arr));
   show(`<h2>증강 선택</h2><p class="sub">슬롯 <b style="color:${full?'#ff9ad0':'var(--ivory)'}">${slotCount()}/${MAXA}</b>${full?' · <b style="color:#ff9ad0">가득 참 · 고르면 교체</b>':''}</p>
   <div class="cards">${opts.map((a,i)=>`<div class="cwrap">${augHtml(a,i)}${(S.seals||0)>0&&!a.up?`<button class="sealb" data-seal="${i}" title="이번 판에서 이 증강이 다시 나오지 않음">🔒 봉인 <small>(남은 ${S.seals}회)</small></button>`:''}</div>`).join('')}</div>
-  <button class="btn ghost" id="reroll" ${!free&&S.gold<cost?'disabled':''}>다시 뽑기<small>${free?(free===true?(META.sk.reroll?'무료 2회':'무료 1회'):'무료 '+free+'회'):cost+'골드 (보유 '+S.gold+')'}</small></button>
+  <button class="btn ghost" id="reroll" ${!free&&S.gold<cost?'disabled':''}>다시 뽑기<small>${free?(free===true?(META.sk.reroll?'무료 2회':'무료 1회'):'무료 '+free+'회'):cost+'골드 (보유 '+S.gold+') · 다음 ×1.6'}</small></button>
   <button class="btn ghost" id="augSkip">포기<small>${price(40)}골드 받고 넘기기</small></button>
   ${full?`<button class="btn ghost" id="augStop">🚫 이번 판은 증강 그만 받기<small>앞으로 증강 차례에 스탯 카드를 대신 받아요. 스탯 카드 창에서 다시 켤 수 있어요</small></button>`:''}
   <button class="btn ghost" data-stats>내 스탯 보기</button>`);
   {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}bindPeek();if(opts.some(a=>a.t==='p'))augFx('💎 프리즘 등장!','','#d68cff',true);
-  ov.querySelectorAll('.card').forEach(b=>b.onclick=ev=>{const a=opts[+b.dataset.i];{const o=ev.target.closest('[data-fz]');S.fuseChoice=o?o.dataset.fz:null;}
+  ov.querySelectorAll('.card').forEach(b=>b.onclick=ev=>{const a=opts[+b.dataset.i];S.arr=0;{const o=ev.target.closest('[data-fz]');S.fuseChoice=o?o.dataset.fz:null;}
     if(a.up){const o=a.ref;o.lv++;if(o.f)applyQ(o.f,S.p,o.q);tagCount();toast(`${o.n} ★${o.lv}`);tryFuse();openNext();return;}
     if(a.swap&&slotCount()>=MAXA){openSwap(a,opts,free,why);return;}
     gainAug(a);
     openNext();});
-  $('augSkip').onclick=()=>{const g=price(40);S.gold+=g;toast(`증강 포기 · ${g} 골드`);openNext();};
+  $('augSkip').onclick=()=>{S.arr=0;const g=price(40);S.gold+=g;toast(`증강 포기 · ${g} 골드`);openNext();};
   if($('augStop'))$('augStop').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.firstChild.textContent='한 번 더 누르면 증강 그만 받기 ';return;}S.noAug=true;toast('이번 판은 증강을 더 받지 않아요 · 대신 스탯 카드');S.boost=true;openStat();};
   // 봉인: 이번 판에서 이 증강 제외, 그 자리는 새 증강으로 바로 교체
   ov.querySelectorAll('[data-seal]').forEach(b=>b.onclick=()=>{if(!(S.seals>0))return;const i=+b.dataset.seal,a=opts[i];S.seals--;(S.banL=S.banL||[]).push(a.id);toast(`🔒 ${a.n} 봉인 · 이번 판에서 다시 안 나옴`);
     const pool=(slotCount()>=MAXA?fullOptions():augOptions(tier)).filter(x=>!opts.some(o=>o.id===x.id));const nx=[...opts];if(pool.length)nx[i]=pool[0];else nx.splice(i,1);openAug(free,why,nx,tier);});
-  $('reroll').onclick=()=>{if(!free)S.gold-=cost;const left=free===true?(META.sk.reroll?1:0):(typeof free==='number'?free-1:0);openAug(left>0?left:false,why);};
+  $('reroll').onclick=()=>{if(!free){S.gold-=cost;S.arr++;}const left=free===true?(META.sk.reroll?1:0):(typeof free==='number'?free-1:0);openAug(left>0?left:false,why);};
 }
 function openSwap(a,opts,free,why){
   const list=swappable();
@@ -4261,12 +4262,13 @@ function openStat(keep){
   S.mode='stat';saveGame(true);S.srr=S.srr||0;
   let cards=keep;
   if(!cards){cards=[];let tries=0;const bonus=S.boost?6:0;while(cards.length<3&&tries<60){tries++;const c=cardOf(rollRarity(bonus),bonus);if(!cards.some(x=>x.n===c.n))cards.push(c);}S.boost=false;}
-  const cost=price(15+S.srr*10),boostC=price(90+S.lvl*12),next=AUG_EVERY-(S.picks%AUG_EVERY);
+  // 스탯 다시뽑기: 연속으로 돌릴수록 1.5배씩 (고르면 처음 가격으로)
+  const cost=Math.round(price(15)*Math.pow(1.5,S.srr)),boostC=price(90+S.lvl*12),next=AUG_EVERY-(S.picks%AUG_EVERY);
   const bossSt=S.bossStat;S.bossStat=false;
   show(`<h2>${bossSt?'보스 보상':'레벨 '+(S.lvl-S.pendingLv)}</h2>${augReady()?`<p class="sub">다음 증강까지 ${next}레벨</p>`:''}
   <div class="cards">${cards.map((c,i)=>{const R=RAR[c.r];return `<button class="card rar-${c.r}" data-i="${i}" style="--rc:${R.col}"><span class="rr">${c.r==='l'?'✨ ':''}${R.n}${c.u!=null?` · <span style="color:${GRADE(c.u).col}">${GRADE(c.u).n}</span>`:''}</span><b>${c.n}</b>${withActual(c.d,c.u!=null?c.f:null)}</button>`;}).join('')}</div>
   <div class="btnrow">
-    <button class="btn" id="reroll" ${S.gold<cost?'disabled':''}>다시 뽑기<small>${cost}골드</small></button>
+    <button class="btn" id="reroll" ${S.gold<cost?'disabled':''}>다시 뽑기<small>${cost}골드 · 다음 ×1.5</small></button>
     <button class="btn" id="boost" ${S.gold<boostC?'disabled':''}>고급 카드로 다시 뽑기<small>${boostC}골드, 높은 등급 확률 크게 증가</small></button>
   </div>
   ${S.noAug?'<button class="btn ghost" id="augResume">↩ 증강 다시 받기<small>다음 증강 차례부터 다시 증강이 나와요</small></button>':''}
@@ -5107,7 +5109,7 @@ refreshAutoBtns();
 /* ---------- save ---------- */
 const SAVE_KEY='chipdungeon_save_v1';
 const PKEYS=['dmgP','rateP','xpM','block','token','hp','maxHp','speed','dmg','rate','bspd','range','multi','pierce','crit','critM','luck','goldM','vuln','orbR','orbM','dashMul','armor','dodge','lifesteal','regen','magnet','shots','pkills','lastCd','soulN','fyO','skN','hpP','hpB','hpLM'];
-const SKEYS=['nmB','gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','takeAll','keys','vipStock','vipRoll','buys','cbuys','fused','potN','vineN','seals','banL','noAug','bossT','bioO','dlog'];
+const SKEYS=['arr','nmB','gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','takeAll','keys','vipStock','vipRoll','buys','cbuys','fused','potN','vineN','seals','banL','noAug','bossT','bioO','dlog'];
 function saveGame(silent){
   if(!S||!S.started||!S.p.alive||S.mode==='over'||S.mode==='dying'||S.mode==='revive')return false;
   const d={v:1,at:Date.now(),p:{},s:{},augs:S.augs.map(a=>[a.id,a.lv,a.q||1]),st:S.st};
