@@ -36,6 +36,10 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 .aico{width:38px;height:40px;border-radius:7px;border:2px solid var(--ac);background:rgba(4,18,12,.78);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Do Hyeon',sans-serif;cursor:help;box-shadow:0 0 6px color-mix(in srgb,var(--ac) 45%,transparent);user-select:none;-webkit-user-select:none}
 .aico i{font-style:normal;font-size:17px;line-height:1}
 .aico span{font-size:10px;color:#f1e7cf;line-height:1.1;margin-top:2px;white-space:nowrap;overflow:hidden;max-width:34px}
+.aico.uc{border:2px solid transparent;background:linear-gradient(160deg,#3a0d12,#3a1f06) padding-box,linear-gradient(90deg,#ff2e4d,#ffb000,#fff2a8,#ff7a00,#ff2e4d) border-box;background-size:100% 100%,300% 100%;animation:prz 1.8s linear infinite,ucs 1.1s ease-in-out infinite alternate}
+.aico.uc i{color:#ffd76a;text-shadow:0 0 6px #ff8a00;font-weight:700}
+.aico.uc span{color:#ffe3a8}
+@keyframes ucs{from{box-shadow:0 0 4px 1px rgba(255,90,30,.55)}to{box-shadow:0 0 12px 4px rgba(255,180,40,.85)}}
 .aico.empty{border-style:dashed;border-color:rgba(241,231,207,.22);box-shadow:none;cursor:default}
 .aico.empty.vip{border-color:rgba(255,215,106,.45)}.aico.empty.vip i{opacity:.35;font-size:14px}
 .vipgap{width:8px;flex:none}
@@ -3263,14 +3267,14 @@ function drawMini(){
 const TAG_ICO={card:'🃏',dice:'🎲',roulette:'🎡',house:'🏦',curse:'💀',jackpot:'🎰',blitz:'💨',guard:'🛡',poison:'☠',holy:'✝',frost:'❄',summon:'🤖',sniper:'🎯',thunder:'⚡',fire:'🔥',undead:'🦴',rapid:'🔫',elem:'🌀',fury:'💢',nature:'🌿',alchemy:'⚗',coin:'🪙',mark:'📍',wave:'🌊',shadow:'👤',grav:'🕳'};
 let augBarKey='',synKey='';
 function renderAugBar(){const el=$('augBar');const k=!S||S.mode==='start'?'':S.augs.map(a=>a.id).join(',')+'|'+MAXA;if(k===augBarKey)return;augBarKey=k;synKey='';if(!k){el.innerHTML='';return;}
-  const cell=(a,i)=>{const col=(TIER[a.t]||{}).col||'#d6a94a',ic=a.vf?'💥':a.t==='f'?'💥':a.t==='v'?'👑':(TAG_ICO[a.tags[0]]||'✦');
-    return `<div class="aico${a.t==='v'?' vip':''}" data-ai="${i}" style="--ac:${col}"><i>${ic}</i><span>${a.n.replace(/\s/g,'').slice(0,3)}</span></div>`;};
+  const cell=(a,i)=>{const col=(TIER[a.t]||{}).col||'#d6a94a',ic=a.uc?'♾':a.vf?'💥':a.t==='f'?'💥':a.t==='v'?'👑':(TAG_ICO[a.tags[0]]||'✦');
+    return `<div class="aico${a.t==='v'?' vip':''}${a.uc?' uc':''}" data-ai="${i}" style="--ac:${col}"><i>${ic}</i><span>${a.n.replace(/\s/g,'').slice(0,3)}</span></div>`;};
   const L=S.augs.map((a,i)=>[a,i]),nor=L.filter(([a])=>a.t!=='v'),vip=L.filter(([a])=>a.t==='v');
   // 일반 증강 10칸, 그 오른쪽에 VIP 전용 2칸
   el.innerHTML=nor.map(([a,i])=>cell(a,i)).join('')+'<div class="aico empty"></div>'.repeat(Math.max(0,MAXA-nor.length))+'<div class="vipgap"></div>'+vip.map(([a,i])=>cell(a,i)).join('')+'<div class="aico empty vip"><i>👑</i></div>'.repeat(Math.max(0,VIP_MAX-vip.length));}
 {const bar=document.getElementById('augBar'),tip=document.getElementById('augTip');
   const show=(t)=>{const a=S&&S.augs[+t.dataset.ai];if(!a)return;const T=TIER[a.t]||{n:'',col:'#d6a94a'};tip.style.setProperty('--ac',T.col);
-    tip.innerHTML=`<b>${a.n}</b><small>${T.n}${a.tags.length?' · '+[...new Set(a.tags)].map(t=>TAGS[t].n+(a.tags.filter(x=>x===t).length>1?'×2':'')).join(', '):''}</small>${a.d}${a.t==='v'?(()=>{const v=VFUSIONS.find(f=>f.a===a.id);return v?`<small style="color:#ffd76a;margin-top:4px">👑 ${augDef(v.b).n}와 VIP 합체 가능 (함께 가지면 다음 증강 때 합체) → ${v.n}</small>`:'';})():''}`;
+    tip.innerHTML=`<b>${a.uc?"♾ ":""}${a.n}</b><small>${a.uc?"<span style=\"color:#ff9a3c\">고점 돌파</span> · ":""}${T.n}${a.tags.length?' · '+[...new Set(a.tags)].map(t=>TAGS[t].n+(a.tags.filter(x=>x===t).length>1?'×2':'')).join(', '):''}</small>${a.d}${a.t==='v'?(()=>{const v=VFUSIONS.find(f=>f.a===a.id);return v?`<small style="color:#ffd76a;margin-top:4px">👑 ${augDef(v.b).n}와 VIP 합체 가능 (함께 가지면 다음 증강 때 합체) → ${v.n}</small>`:'';})():''}`;
     tip.style.display='block';const r=t.getBoundingClientRect();tip.style.left=Math.min(innerWidth-tip.offsetWidth-8,Math.max(8,r.left))+'px';tip.style.top=Math.max(8,r.top-tip.offsetHeight-8)+'px';};
   const hideT=()=>{tip.style.display='none';};
   // 시너지 알약: 단계별 효과, 현재 단계는 ✔ 표시
