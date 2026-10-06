@@ -3383,7 +3383,10 @@ function draw(){
   for(const it of S.items){if(it.life<10&&Math.floor(S.t*8)%2)continue;const bob=Math.sin(S.t*4+it.x)*3;
     const pr=17+Math.sin(S.t*5)*3;ctx.fillStyle=it.k==='heal'?'rgba(123,224,143,.35)':'rgba(95,168,232,.4)';ctx.beginPath();ctx.arc(it.x,it.y+bob,pr,0,TAU);ctx.fill();
     ctx.strokeStyle=it.k==='heal'?'#7be08f':'#7fc4f2';ctx.lineWidth=2;ctx.beginPath();ctx.arc(it.x,it.y+bob,pr+4,0,TAU);ctx.stroke();
-    ctx.fillStyle='#f6f0de';ctx.beginPath();ctx.arc(it.x,it.y+bob,13,0,TAU);ctx.fill();ctx.font='19px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(it.k==='heal'?'🍒':'🧲',it.x,it.y+bob+1);}
+    ctx.fillStyle='#f6f0de';ctx.beginPath();ctx.arc(it.x,it.y+bob,13,0,TAU);ctx.fill();
+    // 회복: 흰 원 위 빨간 십자 (구급 표시)
+    if(it.k==='heal'){const y0=it.y+bob;ctx.fillStyle='#e0303a';ctx.fillRect(it.x-3.5,y0-9,7,18);ctx.fillRect(it.x-9,y0-3.5,18,7);ctx.fillStyle='rgba(255,255,255,.55)';ctx.fillRect(it.x-3.5,y0-9,2,7);}
+    else{ctx.font='19px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🧲',it.x,it.y+bob+1);}}
   drawBossGround();
   {const vis=S.en.filter(e=>!(e.x<camX-60||e.x>camX+W+60||e.y<camY-80||e.y>camY+H+60));
    ctx.fillStyle='rgba(0,0,0,.33)';ctx.beginPath();for(const e of vis){ctx.moveTo(e.x+2+e.r,e.y+e.r*.85);ctx.ellipse(e.x+2,e.y+e.r*.85,e.r,e.r*.38,0,0,TAU);}ctx.fill();
