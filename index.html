@@ -91,6 +91,10 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 @media (max-width:520px){#autoBar{flex-direction:column;align-items:flex-end;top:54px}#autoBar button{padding:3px 7px;font-size:12px}#autoBar #speedBtn{font-size:14px}#buffs{top:186px}}
 .shophead{position:sticky;top:-22px;z-index:3;display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--felt);margin:-22px -20px 6px;padding:16px 20px 10px;border-bottom:1px solid rgba(214,169,74,.3);border-radius:16px 16px 0 0}
 .shophead h2{margin:0}
+.sealrow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:6px 0 2px}
+.sealb{font:inherit;font-size:13px;padding:5px 6px;border-radius:8px;border:1px dashed rgba(255,154,154,.7);background:rgba(60,10,16,.55);color:#ffc4c4;cursor:pointer}
+.sealb:hover{background:rgba(120,20,30,.7);color:#fff}
+.sealb small{opacity:.75}
 .cxbar{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
 .cxbar input,.cxbar select{font:inherit;font-size:15px;padding:7px 10px;border-radius:8px;border:1px solid rgba(214,169,74,.6);background:rgba(0,0,0,.35);color:var(--ivory)}
 .cxbar input{flex:1;min-width:160px}
@@ -1365,7 +1369,7 @@ const RAR={c:{n:'일반',col:'#8f8873'},r:{n:'희귀',col:'#2f74c9'},e:{n:'영�
 const RMUL={c:.6,r:.9,e:1.7,l:3};
 const CARDS=[
   {req:()=>(S.p.cdR||0)<.4&&(gravOn()||waveOn()||shadowOn()||has('thornseed')||tag('nature')>=1||has('stormcall')||has('battlecry')||S.cls==='necro'||tag('undead')>=4||has('d_bear')),g:'주기형 효과',n:'시계 태엽',v:[[4,8,0]],t:v=>`${cdNames()} 쿨타임 −${v[0]}% (최대 40%)`,a:(p,v)=>{p.cdR=Math.min(.4,(p.cdR||0)+v[0]/100);}},
-  {req:()=>tag('summon')>0||has('turret')||has('wisp')||has('dealers'),n:'정비 키트',g:'소환물',v:[[8,15,0]],t:v=>`${sumNames()} 피해 +${v[0]}%`,a:(p,v)=>{p.sumD=(p.sumD||0)+v[0]/100;}},
+  {req:()=>droneN()>0||has('turret')||has('wisp')||has('dealers')||has('mine'),n:'정비 키트',g:'소환물',v:[[8,15,0]],t:v=>`${sumNames()} 피해 +${v[0]}%`,a:(p,v)=>{p.sumD=(p.sumD||0)+v[0]/100;}},
   {req:()=>has('turret'),n:'포탑 개조',g:'포탑',v:[[.5,1,1]],t:v=>`포탑 지속 +${v[0]}초`,a:(p,v)=>{p.tuL=(p.tuL||0)+v[0];}},
   {req:()=>canPoison(),n:'독샘',g:'독',v:[[8,15,0]],t:v=>`중독 피해 +${v[0]}%`,a:(p,v)=>{p.psD=(p.psD||0)+v[0]/100;}},
   {req:()=>tag('fire')>0,n:'연료',g:'화상',v:[[8,15,0]],t:v=>`화상 피해 +${v[0]}%`,a:(p,v)=>{p.fiD=(p.fiD||0)+v[0]/100;}},
@@ -2156,6 +2160,7 @@ function bossFx(e,final){const x=e.x||S.p.x,y=e.y||S.p.y;S.smT=final?1.1:.7;S.fl
     const n=AC.createBuffer(1,AC.sampleRate*.7,AC.sampleRate),d=n.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2.2);const src=AC.createBufferSource(),lp=AC.createBiquadFilter(),g2=AC.createGain();src.buffer=n;lp.type='lowpass';lp.frequency.value=900;g2.gain.value=.5;src.connect(lp).connect(g2).connect(AC.destination);src.start(t0);
     setTimeout(()=>chime(final?[392,523,659,784,1047,1319]:[523,659,784,1047],'triangle'),450);}catch(err){}}
 function bossDown(e){
+  if(mlv('seal')>0){S.seals=(S.seals||0)+1;toast('🔒 봉인 +1회');}
   bossFx(e,S.chap+1>=CHAPTERS&&!endless());
   S.shake=Math.max(S.shake,.5);S.st.bosses=(S.st.bosses||0)+1;(S.st.btimes=S.st.btimes||[]).push(Math.round(((S.bt||0)-(S.bStart||0))*10)/10);for(const c of S.dr){if(c.xp)gainXp(c.v);else addGold(c.v);}S.dr=[];S.bossI=-1;S.boss=null;S.arena=null;S.tele=[];S.hz=[];S.pr=S.pr.filter(b=>b.mine);S.chap++;
   const p=S.p;p.hp=Math.min(p.maxHp,p.hp+p.maxHp*(META.sk.bossHeal?.6:.3));
@@ -2432,7 +2437,7 @@ function ricoShot(t,dm,n){const o=nearestE(t,220,new Set([t]));if(o)pBullet(t.x,
 // 해골 최대 수: 실제로 나오는 해골은 30기까지, 넘는 만큼은 해골 피해 배율로 바뀜 (skelRaw/30)
 const SKEL_CAP=30,skelMax=()=>Math.min(SKEL_CAP,skelRaw()),skelRaw=()=>(S.cls==='necro'?5:0)+(S.p.skN||0)+(has('n_horde')?Math.max(0,tag('undead')+tag('summon')-5):0)+(tag('undead')>=1?1:0)+(tag('undead')>=4?2:0)+(has('raise')?2:0)+(has('n_legion')?lv3('n_legion',1,2,3):0)+(has('n_lich')?2:0)+(has('f_bonelord')?2:0);
 const skelC=()=>(has('f_deathlord')?.1:0)+(S.cls==='necro'?.25:tag('undead')>=1?.08:0)+(tag('undead')>=4?.1:0)+(has('raise')?lv3('raise',.06,.08,.1):0)+(has('n_legion')?.1:0);
-const skelD=()=>Math.max(1,skelRaw()/SKEL_CAP)*pDmg()*(S.cls==='necro'?1:.6)*(1+(S.p.skD||0))*(1+.05*mlv('m_undead'))*sumM()*undM()*(tag('undead')>=6?2:1)*(has('f_bonelord')?1+.03*(S.skel?S.skel.length:0):1);
+const skelD=()=>Math.max(1,skelRaw()/SKEL_CAP)*pDmg()*(S.cls==='necro'?1:.6)*(1+(S.p.skD||0))*(1+.05*mlv('m_undead'))*sumM()/(1+(S.p.sumD||0))*undM()*(tag('undead')>=6?2:1)*(has('f_bonelord')?1+.03*(S.skel?S.skel.length:0):1);
 // 해골이 맞음: 받는 피해 절반 + 내 방어력 적용, 체력 0이면 사라짐 (사라질 때 효과 발동)
 // 해골이 받는 피해: 절반 + 내 방어력 적용. 후반엔 적 피해가 커지므로 시간이 지날수록 더 줄어듦(10분이면 1/3)
 function skHit(k,dmg){k.hp-=dmg*.5*100/(100+armorEff())/(1+effT()/300);k.hit=.12;if(k.hp<=0){k.hp=0;k.life=0;}}
@@ -2534,11 +2539,11 @@ function explode(x,y,rad,dmg,col='#ffb347'){if(has('catalyst'))rad*=1+lv3('catal
 }
 function rollDie(){const p=S.p;if(p.all6>0)return 6;const mn=tag('dice')>=6?3:1,mx=has('fate')?8:7;let r=mn+Math.floor(Math.random()*(mx-mn));const lt=L('loaded'),lo=has('f_dicemaster')?2:1;for(let k=0;k<(lt>=3?2:lt?1:0);k++)if(r>=lo&&r<=(lt>=2?3:2))r=mn+Math.floor(Math.random()*(mx-mn));return r;}
 // 근접 직업: 탄환 대신 바라보는 방향 부채꼴을 한 번에 벰. 적중 효과(치명타·흡혈 등)는 탄환과 같은 onPHit 사용
-// 사거리 = 베기 반경, 탄환 수 1발당 베기 각도 +20°, 관통 1당 벨 수 있는 적 +2 (기본 3명)
+// 사거리 = 베기 반경, 탄환 수 1발당 베기 각도 +20°, 관통 1당 벨 수 있는 적 +2 (기본 2명)
 const MELEE_CLS=['berserk'];
 const meleeOn=()=>MELEE_CLS.includes(S.cls)||(S.cls==='druid'&&S.p.bearT>0);
 const meleeR=()=>S.cls==='druid'?Math.min(S.p.range,200):S.p.range;
-function meleeSwing(base,dmg,n,o){const p=S.p,R=meleeR(),half=Math.min(Math.PI,(55+(n-1)*20)*Math.PI/180),cap=3+2*Math.max(0,p.pierce+(o.big?3:0));
+function meleeSwing(base,dmg,n,o){const p=S.p,R=meleeR(),half=Math.min(Math.PI,(55+(n-1)*20)*Math.PI/180),cap=2+2*Math.max(0,p.pierce+(o.big?3:0));
   const hits=S.en.filter(e=>{if(!e.alive||e.phase)return false;const dx=e.x-p.x,dy=e.y-p.y,dd=Math.hypot(dx,dy);if(dd>R+e.r)return false;let da=Math.abs(Math.atan2(dy,dx)-base)%TAU;if(da>Math.PI)da=TAU-da;return da<=half+Math.atan2(e.r,Math.max(1,dd));}).sort((a,b)=>d2(a,p)-d2(b,p)).slice(0,cap);
   const bear=S.cls==='druid';(S.slashes=S.slashes||[]).push({x:p.x,y:p.y,a:base,half,R,life:.2,col:bear?'#e0a060':o.big?'#ffd76a':S.cls==='berserk'?'#ff8a6a':'#dfeaff',bear});
   for(const t of hits){const sp=p.bspd,b=Object.assign({x:t.x,y:t.y,vx:Math.cos(base)*sp,vy:Math.sin(base)*sp,mine:true,dmg,life:.5,pierce:0,hit:new Set(),r:4,roll:0,melee:true},o);
@@ -3312,7 +3317,7 @@ function renderAugBar(){const el=$('augBar');const k=!S||S.mode==='start'?'':S.a
   addEventListener('touchstart',e=>{if(!bar.contains(e.target)&&!syn.contains(e.target))hideT();},{passive:true});}
 // 오른쪽 위 소환물 배지에 마우스를 올리거나(터치는 탭) 적용되는/안 되는 스탯 설명
 const BF_TIP={
-  skel:()=>`<b>💀 해골 병사</b><br>적용: 최종 공격력 (사령술사 100%, 그 외 60%), 해골 피해 %, 소환·망자 시너지, 표식, 흡혈<br>체력: 내 최대 체력 50%, 내 방어력으로 피해 감소<br><b>적용 안 됨</b>: 공격 속도 (0.7초마다 1대 고정), 치명타, 탄속·동전·거인의 힘 등 탄환 전용 효과`,
+  skel:()=>`<b>💀 해골 병사</b><br>적용: 최종 공격력 (사령술사 100%, 그 외 60%), 뼈 가루(해골 피해 %), 소환·망자 시너지, 표식, 흡혈<br>체력: 내 최대 체력 50%, 내 방어력으로 피해 감소<br><b>적용 안 됨</b>: 공격 속도 (0.7초마다 1대 고정), 치명타, 정비 키트, 탄속·동전·거인의 힘 등 탄환 전용 효과`,
   turret:()=>`<b>🗼 포탑</b><br>적용: 최종 공격력의 50%, 소환 시너지, 치명타, 대부분의 탄환 적중 효과, 사거리·탄속, 공격 속도 %의 60% (최대 2.5배 빠르게)<br><b>적용 안 됨</b>: 탄환 수·관통, 연타, 연쇄 번개, 분열, 화염 2개 화상, 직업 기본 폭발(마법사·연금술사)`,
   drone:()=>`<b>🛸 드론</b><br>적용: 최종 공격력의 60%, 소환 시너지, 치명타, 대부분의 탄환 적중 효과, 공격 속도 %의 60% (최대 2.5배 빠르게)<br><b>적용 안 됨</b>: 탄환 수·관통, 연타, 연쇄 번개, 분열, 화염 2개 화상, 직업 기본 폭발`,
   clone:()=>`<b>👥 분신</b><br>적용: 최종 공격력의 40%, 그림자 시너지·분신 피해 %, 치명타, 대부분의 탄환 적중 효과, 사거리<br><b>적용 안 됨</b>: 공격 속도 (0.5초마다 고정, 소환 6개·밤의 군주로만 빨라짐), 탄환 수·관통, 연타, 연쇄 번개, 분열`};
@@ -3409,7 +3414,8 @@ const AUG_REQ={
 // 아직 언록 안 한 직업의 주력 시너지(신성·망자·속사·원소·분노·자연·연금·동전)는 증강·VIP·스탯 카드가 나오지 않음
 const lockedTags=()=>{const t=new Set();for(const k in CLASSES){const C=CLASSES[k];if(C.lock&&!clsOpen(k))t.add(C.fav[0]);}return t;};
 const tagLocked=a=>{const L=lockedTags();return !!(a.tags&&a.tags.some(t=>L.has(t)));};
-const augReq=a=>!(MELEE_CLS.includes(S.cls)&&['rifling','railgun','velocity','f_accel'].includes(a.id))&&!tagLocked(a)&&(!AUG_REQ[a.id]||AUG_REQ[a.id]());
+const isBanned=id=>!!(S&&S.banL&&S.banL.includes(id));
+const augReq=a=>!isBanned(a.id)&&!(MELEE_CLS.includes(S.cls)&&['rifling','railgun','velocity','f_accel'].includes(a.id))&&!tagLocked(a)&&(!AUG_REQ[a.id]||AUG_REQ[a.id]());
 // 태그 중복(가드 2개 등)으로 선호 가중치가 겹쳐 쌓이지 않게: 선호 태그가 하나라도 있으면 ×2.5, 비선호는 ×0.3
 // 이미 가진 증강의 합체 짝은 행운에 비례해 더 잘 나옴 (행운 0: ×1.3, 행운 30: ×3)
 // 합체 짝은 뜨면 무조건 상위호환이라 등장 확률을 낮춤 (기본 ×0.4, 행운 최대치면 ×0.7)
@@ -3481,6 +3487,7 @@ function openAug(free,why,fixed,fixedTier){
   const cost=price(18);
   show(`<h2>증강 선택</h2><p class="sub">슬롯 <b style="color:${full?'#ff9ad0':'var(--ivory)'}">${slotCount()}/${MAXA}</b>${full?' · <b style="color:#ff9ad0">가득 참 · 고르면 교체</b>':''}</p>
   <div class="cards">${opts.map(augHtml).join('')}</div>
+  ${(S.seals||0)>0?`<div class="sealrow">${opts.map((a,i)=>a.up?'<span></span>':`<button class="sealb" data-seal="${i}" title="이번 판에서 이 증강이 다시 나오지 않음">🔒 봉인 <small>(남은 ${S.seals}회)</small></button>`).join('')}</div>`:''}
   <button class="btn ghost" id="reroll" ${!free&&S.gold<cost?'disabled':''}>다시 뽑기<small>${free?(free===true?(META.sk.reroll?'무료 2회':'무료 1회'):'무료 '+free+'회'):cost+'골드 (보유 '+S.gold+')'}</small></button>
   <button class="btn ghost" id="augSkip">포기<small>${price(40)}골드 받고 넘기기</small></button>
   <button class="btn ghost" data-stats>내 스탯 보기</button>`);
@@ -3491,6 +3498,9 @@ function openAug(free,why,fixed,fixedTier){
     gainAug(a);
     openNext();});
   $('augSkip').onclick=()=>{const g=price(40);S.gold+=g;toast(`증강 포기 · ${g} 골드`);openNext();};
+  // 봉인: 이번 판에서 이 증강 제외, 그 자리는 새 증강으로 바로 교체
+  ov.querySelectorAll('[data-seal]').forEach(b=>b.onclick=()=>{if(!(S.seals>0))return;const i=+b.dataset.seal,a=opts[i];S.seals--;(S.banL=S.banL||[]).push(a.id);toast(`🔒 ${a.n} 봉인 · 이번 판에서 다시 안 나옴`);
+    const pool=(slotCount()>=MAXA?fullOptions():augOptions(tier)).filter(x=>!opts.some(o=>o.id===x.id));const nx=[...opts];if(pool.length)nx[i]=pool[0];else nx.splice(i,1);openAug(free,why,nx,tier);});
   $('reroll').onclick=()=>{if(!free)S.gold-=cost;const left=free===true?(META.sk.reroll?1:0):(typeof free==='number'?free-1:0);openAug(left>0?left:false,why);};
 }
 function openSwap(a,opts,free,why){
@@ -3567,7 +3577,7 @@ const cardOk=c=>!(MELEE_CLS.includes(S.cls)&&c.n==='가속 탄')&&!(c.cc&&critFu
 // 직업 선호 카드는 ×1.6, 최근 9장 안에 나온 카드는 ×0.3 (같은 카드 반복 방지)
 // 루트 스탯 카드: 열렸다고 계속 뜨지 않고, 그 루트가 최근 내 피해에서 차지하는 비중만큼 자주 뜸 (비중 0이면 드물게)
 const CARD_SRC={'정비 키트':['summon'],'포탑 개조':['summon'],'뼈 가루':['summon','undead'],'영혼 사슬':['summon','undead'],'독샘':['poison'],'연료':['fire'],'축전지':['thunder','elem'],'원소 결정':['elem','fire','thunder'],'정령 공명':['elem'],'씨앗 주머니':['nature'],'가시 독':['nature'],'큰 병':['alchemy'],'농축액':['alchemy'],'진동판':['wave'],'그림자 정수':['shadow'],'중력자':['grav'],'성수':['holy'],'성유':['holy'],'성가':['holy'],'시계 태엽':['grav','nature','wave','shadow','summon','elem']};
-function sumNames(){const S_=S;const a=[];if(droneN()>0)a.push('드론');if(has('turret'))a.push('포탑');if(has('wisp'))a.push('도깨비불');if(has('dealers'))a.push('딜러 칩');if(has('mine'))a.push('지뢰');if(skelMax()>0)a.push('해골');return a.length?a.join('·'):'소환물';}
+function sumNames(){const S_=S;const a=[];if(droneN()>0)a.push('드론');if(has('turret'))a.push('포탑');if(has('wisp'))a.push('도깨비불');if(has('dealers'))a.push('딜러 칩');if(has('mine'))a.push('지뢰');return a.length?a.join('·'):'소환물';}
 function cdNames(){const a=[];if(gravOn())a.push('중력장');if(has('thornseed')||tag('nature')>=1)a.push('덩굴');if(waveOn())a.push('충격파');if(has('stormcall'))a.push('원소 폭풍');if(has('battlecry'))a.push('전쟁 함성');if(shadowOn())a.push('분신');if(S.cls==='necro'||tag('undead')>=4)a.push('해골 소환');if(has('d_bear'))a.push('곰 변신');return a.length?a.join('·'):'주기형 효과';}
 function cardShareW(n){const ks=CARD_SRC[n];if(!ks)return 1;const sh=ks.reduce((q,k)=>q+dShare(k),0);return .35+3*Math.min(.6,sh);}
 function cardOf(r,bonus=0){const LT=lockedTags(),pool=CARDS.filter(c=>(c.fr?c.fr===r:true)&&!((CARD_TAG[c.n]||[]).length&&(CARD_TAG[c.n]||[]).every(t=>LT.has(t)))&&(!c.cls||c.cls===S.cls||(c.src&&c.src()))&&cardOk(c)),fav=CLASSES[S.cls||'knight'].cards,rec=S.recentC||[],w=c=>(fav.includes(c.n)||c.cls?1.6:1)*cardShareW(c.n)*(rec.includes(c.n)?.3:1)*routeW(CARD_TAG[c.n]||[]);
@@ -3749,6 +3759,7 @@ const MSTAT=[
   {k:'spd',n:'이동 속도',d:'+1%',max:5,c:6},{k:'dash',n:'대시 재사용',d:'-2%',max:5,c:9},{k:'magnet',n:'흡수 범위',d:'+8%',max:5,c:3},
   {k:'xp',n:'경험치 획득',d:'+3%',max:10,c:9},{k:'gold',n:'골드 획득',d:'+5%',max:8,c:6},{k:'sgold',n:'시작 골드',d:'+25',max:6,c:3},
   {k:'luck',n:'행운',d:'+1',max:5,c:12},
+  {k:'seal',n:'🔒 봉인 부적',d:'판마다 증강 봉인 +1회. 1단계부터 보스 처치마다 +1회',max:3,c:40},
   // 직업 숙련: 그 직업을 언록해야 살 수 있음. 효과는 그 메커니즘을 쓰는 모든 판(다른 직업 포함)에 적용
   {k:'m_holy',cls:'paladin',n:'신성 숙련',d:'빛 피해 +4%',max:5,c:9},
   {k:'m_undead',cls:'necro',n:'사령 숙련',d:'해골 병사 피해 +5%',max:5,c:9},
@@ -3994,7 +4005,7 @@ function openMeta(){cosPreviewHide();
   $('mReset').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.innerHTML='한 번 더 누르면 외형까지 초기화 <small>🏅 '+allSpent()+' 환불</small>';return;}META.medals+=allSpent();META.spent=0;META.lv={};META.sk={};META.cos={own:{},eq:{}};saveMeta();keepY();};
   $('mBack').onclick=()=>{cosPreviewHide();startScreen();};$('mBack2').onclick=()=>{cosPreviewHide();startScreen();};
 }
-function beginRun(cls){clearSave();newRun();S.diff=pickDiff;applyClass(cls);applyMeta();S.bonusAug=1+(META.sk.extraAug?1:0);openNext();}
+function beginRun(cls){clearSave();newRun();S.diff=pickDiff;applyClass(cls);applyMeta();S.seals=mlv('seal');S.banL=[];S.bonusAug=1+(META.sk.extraAug?1:0);openNext();}
 
 /* ---------- online ranking ---------- */
 let RDB=null,RMYID=null,BOARD=null,RSTATE='loading',SHEET=false;
@@ -4212,7 +4223,7 @@ refreshAutoBtns();
 /* ---------- save ---------- */
 const SAVE_KEY='chipdungeon_save_v1';
 const PKEYS=['dmgP','rateP','xpM','block','token','hp','maxHp','speed','dmg','rate','bspd','range','multi','pierce','crit','critM','luck','goldM','vuln','orbR','orbM','dashMul','armor','dodge','lifesteal','regen','magnet','shots','pkills','lastCd','soulN','fyO','skN','hpP','hpB','hpLM'];
-const SKEYS=['nmB','gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','takeAll','keys','vipStock','vipRoll','buys','cbuys','fused','potN','vineN'];
+const SKEYS=['nmB','gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','takeAll','keys','vipStock','vipRoll','buys','cbuys','fused','potN','vineN','seals','banL'];
 function saveGame(silent){
   if(!S||!S.started||!S.p.alive||S.mode==='over'||S.mode==='dying'||S.mode==='revive')return false;
   const d={v:1,at:Date.now(),p:{},s:{},augs:S.augs.map(a=>[a.id,a.lv,a.q||1]),st:S.st};
@@ -4485,6 +4496,7 @@ function renderStats(){
     row('기대 초당 피해',Math.round(dps),'탄환 기본 피해 기준. 회전 칩, 폭발, 독 제외')
   ].join('');
   const def=[
+    ...(mlv('seal')>0?[row('🔒 봉인',`남은 ${S.seals||0}회`,(S.banL||[]).length?'봉인한 증강: '+S.banL.map(id=>{const x=AUGS.find(q=>q.id===id)||VIPS.find(q=>q.id===id);return x?x.n:id;}).join(', '):'증강 선택 창에서 카드 아래 🔒 봉인 버튼')]:[]),
     row('최대 체력',Math.round(p.maxHp),`기본 ${Math.round(p.hpB||p.maxHp)} × (1 + 체력 보너스 합계 ${Math.round(hpPct()*100)}%)`),
     row('방어력',Math.round(ar),`받는 피해 −${pct(red_)}`+(p.dodge>DODGE_CAP?`, 회피 초과분 +${Math.round((p.dodge-DODGE_CAP)*200)} 포함`:'')+(has('iron')?', 철의 의지 적용':'')),
     row('회피',pct(dodgeC())+' <small>/ 60%</small>',p.dodge>DODGE_CAP?`초과 ${Math.round((p.dodge-DODGE_CAP)*100)}% → 방어력 +${Math.round((p.dodge-DODGE_CAP)*200)}`:''),
