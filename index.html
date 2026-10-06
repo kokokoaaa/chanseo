@@ -1391,7 +1391,7 @@ const CARDS=[
   {req:()=>tag('mark')>=1||has('judge'),n:'표적 지정',g:'표식',v:[[3,6,0]],t:v=>`표식된 적이 받는 추가 피해 +${v[0]}%`,a:(p,v)=>{p.mkD=(p.mkD||0)+v[0]/100;}},
   {req:()=>waveOn(),n:'진동판',g:'충격파',v:[[8,15,0]],t:v=>`충격파 피해 +${v[0]}%`,a:(p,v)=>{p.wvD=(p.wvD||0)+v[0]/100;}},
   {cls:'paladin',n:'성유',g:'성기사 오라',v:[[5,10,0]],t:v=>`신성 오라 범위 +${v[0]}%`,a:(p,v)=>{p.auraM=(p.auraM||0)+v[0]/100;}},
-  {cls:'paladin',n:'성가',g:'성기사 오라',v:[[8,15,0]],t:v=>`신성 오라 피해 +${v[0]}%`,a:(p,v)=>{p.auraD=(p.auraD||0)+v[0]/100;}},
+  {cls:'paladin',n:'성가',g:'성기사 오라',v:[[15,26,0]],t:v=>`신성 오라 피해 +${v[0]}%`,a:(p,v)=>{p.auraD=(p.auraD||0)+v[0]/100;}},
   {src:()=>skelMax()>0,cls:'necro',n:'뼈 가루',g:'해골 병사',v:[[8,15,0]],t:v=>`해골 병사 피해 +${v[0]}%`,a:(p,v)=>{p.skD=(p.skD||0)+v[0]/100;}},
   {src:()=>skelMax()>0,cls:'necro',n:'영혼 사슬',g:'해골 병사',v:[[.5,1,1]],t:v=>`해골 병사 지속 +${v[0]}초`,a:(p,v)=>{p.skL=(p.skL||0)+v[0];}},
   {cls:'gunner',n:'탄두 가공',g:'총잡이 리볼버',v:[[8,15,0]],t:v=>`매그넘 탄 피해 +${v[0]}%`,a:(p,v)=>{p.lbD=(p.lbD||0)+v[0]/100;}},
@@ -4178,7 +4178,7 @@ function autoMoveVec(){
   const low=p.hp/p.maxHp<.45,bossOn=S.boss&&S.boss.alive;
   // 오라형(성기사 신성 오라·후광): 오라 범위 안쪽에 적이 들어오도록 바짝 붙음. 체력이 낮을 때만 평소처럼 거리 유지
   const auR=S.cls==='paladin'?110*(1+(p.auraM||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1):has('halo')?(has('f_seraph')?210:140):0;
-  const pr=meleeOn()?meleeR():p.range,desired=auR&&!low?clamp(auR*.6,55,200):clamp(pr*(low?.85:.72),95,290),reach=auR&&!low?Math.max(pr*.88,auR*.9):pr*.88;
+  const mel=meleeOn(),pr=mel?meleeR():p.range,desired=auR&&!low?clamp(auR*.6,55,200):clamp(pr*(low?.85:.72),95,290),reach=auR&&!low?Math.max(pr*.88,auR*.9):pr*.88;
   const shots=S.pr.filter(b=>!b.mine&&d2(b,p)<260*260);
   let goal=null;
   {let bd=600*600;for(const i of S.items){const d=d2(i,p);if(d<bd&&inA(i)){bd=d;goal=i;}}}
@@ -4194,13 +4194,13 @@ function autoMoveVec(){
     let mn=420;
     for(const e of near){const w=e.elite?1.6:e.boss?1.2:1;const d=Math.hypot(e.x-tx,e.y-ty)/w;if(d<mn)mn=d;
       const dot=((e.x-p.x)*cx+(e.y-p.y)*cy)/(Math.hypot(e.x-p.x,e.y-p.y)||1);if(dot>.6)sc-=40*dot*(1-Math.min(1,Math.hypot(e.x-p.x,e.y-p.y)/300));}
-    sc+=Math.min(mn,bossOn?Math.max(desired,160):desired)*(bossOn?2.9:2.2);
+    sc+=Math.min(mn,bossOn&&!mel?Math.max(desired,160):desired)*(bossOn?2.9:2.2);
     if(wide.length){let dn=1e9;for(const e of wide){const d=Math.hypot(e.x-tx,e.y-ty);if(d<dn)dn=d;}if(!bossOn){if(dn>reach)sc-=(dn-reach)*(danger>=3||low?1.2:2.6);else sc+=25;}}
     // 탄환은 현재 위치가 아니라 앞으로 0.6초간 날아갈 경로 기준으로 회피
     for(const b of shots){const ex=b.vx*.6,ey=b.vy*.6,L2=ex*ex+ey*ey||1,u=clamp(((tx-b.x)*ex+(ty-b.y)*ey)/L2,0,1),d=Math.hypot(b.x+ex*u-tx,b.y+ey*u-ty),R0=(b.r||5)+p.r+22;if(d<R0)sc-=(R0-d)*6;}
     // 보스전: 보스를 사거리의 50~95% 안에 두면 됨 (사거리가 길수록 움직일 여유가 커짐). 체력이 낮으면 70% 이상 거리 유지
     // 주변에 잡몹이 붙어 있으면 보스 거리보다 잡몹 회피를 우선. 보스 몸통 가까이는 언제나 크게 감점
-    if(bossOn){const e=S.boss,minW=e.r+p.r+(auR&&!low?40:90),lo=auR&&!low?minW:Math.max(minW,p.range*(low?.7:.5)),hi=auR&&!low?Math.max(minW+20,auR+e.r*.8):p.range*.95,db=Math.hypot(e.x-tx,e.y-ty),k=danger>=3?.45:danger>=1?.7:1;
+    if(bossOn){const e=S.boss,cl=(auR||mel)&&!low,minW=e.r+p.r+(cl?(mel?20:40):90),lo=cl?minW:Math.max(minW,p.range*(low?.7:.5)),hi=mel&&!low?Math.max(minW+15,e.r+pr*.8):auR&&!low?Math.max(minW+20,auR+e.r*.8):p.range*.95,db=Math.hypot(e.x-tx,e.y-ty),k=danger>=3?.45:danger>=1?.7:1;
       sc-=k*(db<lo?(lo-db)*2.4:db>hi?(db-hi)*3:0);if(db<minW)sc-=(minW-db)*4;}
     // 보스 예고 공격·장판 회피
     for(const t of S.tele){if(!t.dmg&&t.k==='c')continue;
