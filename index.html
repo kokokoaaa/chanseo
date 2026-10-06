@@ -4394,6 +4394,50 @@ const MOBINFO={
   bossA:['단검, 뒤로 순간이동 후 관통 돌진, 단검 고리 (틈 있음), 표식 폭발','단검 고리의 빈틈으로 빠져나가기'],
   bossL:['빠른 번개탄, 회전 번개 광선, 연쇄 낙뢰, 무작위 낙뢰','광선 회전 방향을 따라 돌기']
 };
+// 보스 패턴: [이름, 설명, 미리보기 종류]. 도감에서 마우스를 올리면 움직이는 그림으로 보여줌
+const BPAT={
+  boss:[['돌진','예고선 후 2번 돌진 (분노 시 3번). 멈출 때마다 바위 고리','charge'],['내려찍기','자기 주변 큰 원 (반경 170) + 바위 고리','slam'],['바위 던지기','내 위치(움직이면 앞쪽)에 바위 3~5개 낙하','target']],
+  boss2:[['나선 탄막','3~4갈래 나선으로 탄을 뿜음. 틈 사이로 돌기','spiral'],['메테오','내 위치와 주변에 운석 5~8개','rain'],['순간이동','내 근처로 순간이동 후 부채꼴 2~3번','blink'],['소환','주술사·궁수 4~6마리 소환','summon']],
+  boss3:[['점프 내려찍기','내 위치로 3~4번 점프. 착지마다 독 고리 + 웅덩이','jump'],['산성 침','넓은 부채꼴 9발을 3~4번','fan'],['분열','슬라임 4~6마리 + 주변 독 웅덩이 6개','summon'],['독 자국','기어다닌 자리에 독 웅덩이','pool']],
+  boss4:[['카드 난사','넓은 부채꼴 7발을 4~5번','fan'],['룰렛 레이저','4~6줄 레이저가 회전','beam'],['주사위 폭격','내 주변에 주사위 7~10개 → 터지면 4방향 탄','rain'],['칩 폭풍','사방 원형 탄 3겹','ring']],
+  bossK:[['돌진 연타','짧은 예고 후 2~3번 돌진, 끝마다 뼈 3발','charge'],['회전 베기','자기 주변 원 (반경 150) + 뼈 고리','slam'],['뼈 부채꼴','따라오면서 뼈 부채꼴 3~4번','fan']],
+  bossF:[['고드름','내 위치·주변에 얼음 낙하 → 둔화 장판','target'],['눈보라','양쪽으로 도는 얼음 소용돌이','spiral'],['대폭발','내 자리에 큰 얼음 폭발 (반경 130)','target'],['얼음 부채꼴','거리를 두고 고드름 4발씩','fan']],
+  bossS:[['덮치기','내 위치로 2~3번 뛰어듦. 착지마다 독 고리','jump'],['거미줄','거미줄 장판 4~6개 (둔화)','pool'],['독 부채꼴','독 부채꼴 3~4번','fan'],['새끼 소환','박쥐 4~5마리','summon']],
+  bossG:[['불길 자국','지나간 자리에 계속 불길','pool'],['불기둥','내 주변에 불기둥 5~7개 연속','rain'],['지진','자기 주변 큰 원 (반경 200) + 불꽃 고리','slam'],['용암 낙하','용암 덩어리 → 불 장판','target']],
+  bossA:[['그림자 돌진','내 뒤쪽으로 순간이동 후 관통 돌진 2~3번','blink'],['단검 고리','사방 단검. 한 군데 빈틈으로 빠져나가기','ring'],['표식 폭발','내 위치를 따라오는 폭발 4~5번','target'],['단검 투척','빠른 단검 3발씩','fan']],
+  bossL:[['번개 광선','3~4줄 번개 광선이 회전','beam'],['연쇄 낙뢰','직선 번개 3~4번 (예고선)','line'],['폭풍','내 주변 무작위 낙뢰 9~12번','rain'],['번개탄','빠른 번개탄 연사','fan']]
+};
+// 미리보기 그림: 왼쪽 보스, 오른쪽 나. 2.2초 반복
+function patDemo(g,kind,T,col){const W=240,H=140,bx=62,by=72,px=182,py=72,k=(T%2.2)/2.2,R=(x,y,r,c,a)=>{g.globalAlpha=a??1;g.fillStyle=c;g.beginPath();g.arc(x,y,r,0,TAU);g.fill();g.globalAlpha=1;};
+  g.fillStyle='#0b2a20';g.fillRect(0,0,W,H);g.strokeStyle='rgba(255,255,255,.06)';for(let x=0;x<W;x+=20){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();}for(let y=0;y<H;y+=20){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();}
+  const tele=(x,y,r,f,c)=>{R(x,y,r,c||'#ff4040',.15);R(x,y,r*f,c||'#ff4040',.35);g.strokeStyle=c||'#ff4040';g.lineWidth=1.5;g.beginPath();g.arc(x,y,r,0,TAU);g.stroke();};
+  const shot=(x,y,c)=>{R(x,y,4.5,'#14080a');R(x,y,3.2,c||col);};
+  let ex=bx,ey=by,me=[px,py],eA=1;
+  switch(kind){
+  case 'charge':{if(k<.45){const f=k/.45;g.globalAlpha=.18;g.fillStyle='#ff4040';g.fillRect(bx,by-13,150,26);g.globalAlpha=.4;g.fillRect(bx,by-13,150*f,26);g.globalAlpha=1;}else{const f=Math.min(1,(k-.45)/.25);ex=bx+150*f;if(f>=1&&k<.85)for(let i=0;i<8;i++){const a=i/8*TAU,d=(k-.7)*200;shot(ex+Math.cos(a)*d,ey+Math.sin(a)*d);}}me=[px,py+(k>.3?Math.min(30,(k-.3)*120):0)];break;}
+  case 'slam':{if(k<.5)tele(bx,by,55,k/.5);else{const d=(k-.5)*220;for(let i=0;i<12;i++){const a=i/12*TAU;shot(bx+Math.cos(a)*d,by+Math.sin(a)*d);}g.globalAlpha=Math.max(0,1-(k-.5)*4);g.strokeStyle='#fff';g.lineWidth=3;g.beginPath();g.arc(bx,by,55,0,TAU);g.stroke();g.globalAlpha=1;}break;}
+  case 'target':{for(let i=0;i<3;i++){const t0=i*.18,f=(k-t0)/.4;const tx=px-20+i*18,ty=py+(i-1)*14;if(f>0&&f<1)tele(tx,ty,24,f);else if(f>=1&&f<1.3)R(tx,ty,24*(1+(f-1)),'#ffffff',.6-(f-1)*2);}me=[px+Math.sin(T*3)*26,py+Math.cos(T*2)*16];break;}
+  case 'rain':{for(let i=0;i<7;i++){const t0=i*.09,f=(k-t0)/.4,tx=110+((i*53)%110),ty=25+((i*37)%95);if(f>0&&f<1)tele(tx,ty,16,f);else if(f>=1&&f<1.25)R(tx,ty,18,'#ffffff',.5);}break;}
+  case 'ring':{for(let w=0;w<3;w++){const d=(k*2.2-w*.35)*90;if(d<0)continue;for(let i=0;i<16;i++){const a=i/16*TAU+w*.12;if(kind==='ring'&&i===3&&w===0)continue;shot(bx+Math.cos(a)*d,by+Math.sin(a)*d);}}break;}
+  case 'fan':{for(let w=0;w<3;w++){const d=(k*2.2-w*.4)*120;if(d<0)continue;const a0=Math.atan2(py-by,px-bx);for(let i=0;i<5;i++){const a=a0+(i/4-.5)*.9;shot(bx+Math.cos(a)*d,by+Math.sin(a)*d);}}me=[px,py+Math.sin(T*4)*30];break;}
+  case 'spiral':{for(let j=0;j<22;j++){const age=j*.1,d=age*60;const a=(T-age)*3.3;for(let m=0;m<3;m++)shot(bx+Math.cos(a+m*TAU/3)*d,by+Math.sin(a+m*TAU/3)*d);}break;}
+  case 'beam':{const a0=T*.8;for(let i=0;i<3;i++){const a=a0+i*TAU/3;g.strokeStyle=col;g.globalAlpha=.4;g.lineWidth=12;g.beginPath();g.moveTo(bx,by);g.lineTo(bx+Math.cos(a)*220,by+Math.sin(a)*220);g.stroke();g.globalAlpha=1;g.strokeStyle='#fff';g.lineWidth=3;g.stroke();}me=[bx+Math.cos(a0+1)*110,by+Math.sin(a0+1)*110];break;}
+  case 'line':{for(let i=0;i<2;i++){const f=(k-i*.3)/.4,a=(i-.5)*.35;g.save();g.translate(bx,by);g.rotate(a);if(f>0&&f<1){g.globalAlpha=.18;g.fillStyle=col;g.fillRect(0,-9,200,18);g.globalAlpha=.4;g.fillRect(0,-9,200*f,18);}else if(f>=1&&f<1.2){g.globalAlpha=1;g.strokeStyle='#fff';g.lineWidth=4;g.beginPath();g.moveTo(0,0);g.lineTo(200,0);g.stroke();}g.restore();g.globalAlpha=1;}me=[px,py+40];break;}
+  case 'blink':{if(k<.25)eA=1-k/.25;else if(k<.45){eA=(k-.25)/.2;ex=px+40;ey=py-10;tele(ex,ey,14,(k-.25)/.2,col);}else{ex=px+40;ey=py-10;const d=(k-.45)*170;const a0=Math.atan2(py-ey,px-ex);for(let i=0;i<5;i++){const a=a0+(i/4-.5)*1;shot(ex+Math.cos(a)*d,ey+Math.sin(a)*d);}}break;}
+  case 'jump':{const f=k<.6?k/.6:1;tele(px,py,30,f,col);ex=bx+(px-bx)*f;ey=by+(py-by)*f-Math.sin(f*Math.PI)*40;if(k>=.6){const d=(k-.6)*200;for(let i=0;i<10;i++){const a=i/10*TAU;shot(px+Math.cos(a)*d,py+Math.sin(a)*d);}}me=[px,py+(k>.2?Math.min(45,(k-.2)*120):0)];break;}
+  case 'summon':{for(let i=0;i<5;i++){const a=i/5*TAU,d=26+Math.min(1,k*2)*12,f=Math.max(0,k-.3)/.7;const x=bx+Math.cos(a)*d+(px-bx)*f*.6,y=by+Math.sin(a)*d+(py-by)*f*.6;R(x,y,6,'#14080a');R(x,y,4.5,col);}g.globalAlpha=Math.max(0,1-k*3);g.strokeStyle=col;g.lineWidth=2;g.beginPath();g.arc(bx,by,20+k*120,0,TAU);g.stroke();g.globalAlpha=1;break;}
+  case 'pool':{for(let i=0;i<5;i++){const x=bx+i*26,y=by+Math.sin(i*1.3)*16;R(x,y,15,col,.35);g.strokeStyle=col;g.lineWidth=1.5;g.beginPath();g.arc(x,y,15,0,TAU);g.stroke();}ex=bx+k*110;break;}
+  case 'pull':{for(let i=0;i<10;i++){const a=i/10*TAU+T*2,d=80-((T*60+i*8)%70);R(bx+Math.cos(a)*d,by+Math.sin(a)*d,2,col,.8);}g.strokeStyle=col;g.globalAlpha=.4;g.lineWidth=2;g.beginPath();g.arc(bx,by,80,0,TAU);g.stroke();g.globalAlpha=1;me=[px-k*40,py];break;}
+  case 'burrow':{if(k<.25)eA=1-k/.25;else if(k<.65){eA=0;tele(px,py,30,(k-.25)/.4,col);}else{ex=px;ey=py;eA=1;const d=(k-.65)*200;for(let i=0;i<8;i++){const a=i/8*TAU;shot(px+Math.cos(a)*d,py+Math.sin(a)*d);}}me=[px+(k>.3?Math.min(45,(k-.3)*120):0),py];break;}
+  }
+  R(me[0],me[1],8,'#14080a');R(me[0],me[1],6.5,'#5fa8e8');g.fillStyle='#fff';g.font='10px sans-serif';g.textAlign='center';g.fillText('나',me[0],me[1]-11);
+  R(ex,ey,15,'#14080a',eA);R(ex,ey,13,col,eA);}
+let patRAF=0;
+function patShow(type,i,anchor){const P=(BPAT[type]||[])[i];if(!P)return;let box=document.getElementById('patPrev');if(!box){box=document.createElement('div');box.id='patPrev';box.style.cssText='position:fixed;z-index:60;background:#08201a;border:1px solid #d6a94a;border-radius:8px;padding:6px;max-width:252px;pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.6)';document.body.appendChild(box);}
+  cancelAnimationFrame(patRAF);box.style.display='block';box.innerHTML=`<canvas width="240" height="140" style="display:block;border-radius:4px"></canvas><div style="font-size:13px;margin-top:4px;color:#f1e7cf"><b style="color:#ffd76a">${P[0]}</b> · ${P[1]}</div>`;
+  const g=box.firstChild.getContext('2d'),t0=performance.now(),col=ET[type].col;const loop=()=>{patDemo(g,P[2],(performance.now()-t0)/1000,col);patRAF=requestAnimationFrame(loop);};loop();
+  const r=anchor.getBoundingClientRect();let left=r.left,top=r.bottom+6;if(left+256>innerWidth)left=innerWidth-260;if(top+box.offsetHeight>innerHeight-8)top=r.top-box.offsetHeight-6;box.style.left=Math.max(4,left)+'px';box.style.top=Math.max(4,top)+'px';}
+function patHide(){cancelAnimationFrame(patRAF);const b=document.getElementById('patPrev');if(b)b.style.display='none';}
 // 일반 몹 첫 등장 시점 (pickType의 위험도 기준을 실제 시간으로 환산)
 const MOB_THR={runner:0,slime:1.5,ranger:2,ghost:3,bomber:3,mage:4,tank:3,support:5,boar:2.5,spider:2,jelly:2.5,shield:3,sniper:4,wraith:4,lancer:5,grunt:0};
 function mobWhen(k){const th=MOB_THR[k];if(th==null)return null;if(th<=1)return '처음부터';let t=0;while(diffAt(t)<th&&t<2000)t+=1;const r=t/TS;return `약 ${Math.floor(r/60)}분 ${String(Math.round(r%60)).padStart(2,'0')}초부터`;}
@@ -4403,7 +4447,7 @@ function mobImg(k,dark){const key=k+(dark?'d':'');if(MOB_IMG[key])return MOB_IMG
 let CX={tab:'aug',q:'',cls:'',tag:[],tier:''},cxGame=false;
 const cxRoot=()=>cxGame?stEl:ov;
 function cxShow(h){if(cxGame){stEl.innerHTML=`<div class="panel">${h}</div>`;stEl.classList.add('on');stEl.scrollTop=0;}else show(h);}
-function cxClose(){if(cxGame){cxGame=false;statsOpen=false;stEl.classList.remove('on');stEl.innerHTML='';}else startScreen();}
+function cxClose(){patHide();if(cxGame){cxGame=false;statsOpen=false;stEl.classList.remove('on');stEl.innerHTML='';}else startScreen();}
 function openCodexGame(){if(!S||S.mode==='start')return;if(statsOpen&&!cxGame)toggleStats();cxGame=true;statsOpen=true;joy=null;openCodex();}
 function openCodex(o){Object.assign(CX,o||{});
   const tabs=[['aug','증강'],['fuse','합체'],['vip','VIP'],['syn','시너지'],['cls','직업'],['mob','몬스터']];
@@ -4457,8 +4501,8 @@ function cxList(){
       const img=`<img src="${mobImg(k,!seen)}" style="width:${w}px;height:${w}px;image-rendering:pixelated;flex:none">`;
       if(!seen)return `<div class="cxrow" style="--rc:#555;display:flex;gap:10px;align-items:center">${img}<div><div class="h"><b>❓ ???</b>${T.boss?'<span class="tg">보스</span>':''}</div><div class="s">아직 만나지 못한 몬스터${T.boss?` · ${bossCh[k]||''} 보스 후보`:''}</div></div></div>`;
       const where=T.boss?`${bossCh[k]} 보스 후보 (2.5분 보스전 때 무작위 등장)`:[mobWhen(k),BW[k]?`자주 나오는 곳: ${BW[k].join(', ')}`:''].filter(Boolean).join(' · ')||'특수 (분열·이벤트)';
-      return `<div class="cxrow" style="--rc:${T.col};display:flex;gap:10px;align-items:center">${img}<div style="min-width:0"><div class="h"><b>${T.n}</b>${T.boss?`<span class="tg" style="background:#7a1f2a;color:#fff">보스 · ${BTITLE[k]||''}</span>`:''}<span class="tg">❤ ${T.hp}</span><span class="tg">⚔ ${T.dmg}</span><span class="tg">👟 ${T.spd}</span>${T.range?`<span class="tg">🎯 사거리 ${T.range}</span>`:''}</div>
-        <div class="d"><b>공격:</b> ${I[0]}</div><div class="s">${I[1]}</div><div class="s" style="opacity:.8">📍 ${where}</div></div></div>`;});
+      return `<div class="cxrow" style="--rc:${T.col};display:flex;gap:10px;align-items:center">${img}<div style="min-width:0"><div class="h"><b>${T.n}</b>${T.boss?`<span class="tg" style="background:#7a1f2a;color:#fff">보스 · ${BTITLE[k]||''}</span>`:''}<span class="tg">❤ 체력 ${T.hp}</span><span class="tg">⚔ 공격력 ${T.dmg}</span><span class="tg">👟 이동 속도 ${T.spd}</span>${T.range?`<span class="tg">🎯 사거리 ${T.range}</span>`:''}</div>
+        ${BPAT[k]?`<div class="d"><b>공격 패턴</b> <small style="opacity:.7">(마우스를 올리거나 누르면 미리보기)</small></div><div class="h" style="margin:3px 0">${BPAT[k].map((q,i)=>`<span class="tg patc" data-pt="${k}" data-pi="${i}" style="cursor:help;background:rgba(255,215,106,.18);border:1px solid rgba(255,215,106,.5)">▶ ${q[0]}</span>`).join('')}</div>`:`<div class="d"><b>공격:</b> ${I[0]}</div>`}<div class="s">${I[1]}</div><div class="s" style="opacity:.8">📍 ${where}</div></div></div>`;});
     if(mk==='e')rows=Object.keys(AFFIX).map(k=>{const A=AFFIX[k],d={swift:'이동 속도 1.5배',giant:'크기 1.25배, 체력 1.6배, 조금 느림',split:'죽으면 작은 적 3마리로 분열',volatile:'죽으면 0.85초 뒤 주변 폭발 (예고 원)',gunner:'2.6초마다 사방으로 탄 8발'}[k]||'';return hit(A.n,d)?`<div class="cxrow" style="--rc:${A.col}"><div class="h"><b style="color:${A.col}">${A.n}</b><span class="tg">정예 특성</span></div><div class="d">${d}</div><div class="s">정예(금색 테두리, 체력 4배·공격력 1.5배)에 하나씩 붙음. 약 2분부터</div></div>`:'';}).filter(Boolean);
     CX.mobHdr=mk!=='e'?`발견 ${seenN} / ${keys.length} · 체력·공격력은 일반 난이도 초반 기준 (시간·난이도에 따라 강해짐)`:'';
   }else{
@@ -4466,6 +4510,7 @@ function cxList(){
       return `<div class="cxrow" style="--rc:var(--brass)"><div class="h"><b>${C.n}</b><span class="tg">${C.role}</span>${clsOpen(k)?'':'<span class="tg">🔒 봉인</span>'}</div><div class="d">${C.d}</div><div class="s">특성: ${C.passive}</div><div class="s">잘 맞는 시너지: ${tg(C.fav)}${C.dis&&C.dis.length?` · 안 맞는 시너지: ${tg(C.dis)}`:''}</div><div class="s">레벨업: ${C.lvd||''}</div><div class="s">전용 증강: ${ex.map(a=>a.uc?`♾${a.n}`:a.n).join(', ')} <button class="cxchip" data-cxc="${k}">전용 증강 보기 →</button></div></div>`;});
   }
   $('cxN').textContent=CX.tab==='mob'&&CX.mobHdr?CX.mobHdr:`${rows.length}개`;$('cxL').innerHTML=rows.join('')||'<p class="sub">찾는 항목이 없어요</p>';
+  $('cxL').querySelectorAll('[data-pt]').forEach(b=>{const sh=()=>patShow(b.dataset.pt,+b.dataset.pi,b);b.onmouseenter=sh;b.onclick=sh;b.onmouseleave=patHide;});
   $('cxL').querySelectorAll('[data-cxj]').forEach(b=>b.onclick=()=>openCodex({tab:'aug',tag:[b.dataset.cxj],cls:'',tier:'',q:''}));
   $('cxL').querySelectorAll('[data-cxc]').forEach(b=>b.onclick=()=>openCodex({tab:'aug',cls:b.dataset.cxc,tag:[],tier:'',q:''}));
 }
