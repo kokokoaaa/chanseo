@@ -2545,11 +2545,11 @@ function explode(x,y,rad,dmg,col='#ffb347'){if(has('catalyst'))rad*=1+lv3('catal
 }
 function rollDie(){const p=S.p;if(p.all6>0)return 6;const mn=tag('dice')>=6?3:1,mx=has('fate')?8:7;let r=mn+Math.floor(Math.random()*(mx-mn));const lt=L('loaded'),lo=has('f_dicemaster')?2:1;for(let k=0;k<(lt>=3?2:lt?1:0);k++)if(r>=lo&&r<=(lt>=2?3:2))r=mn+Math.floor(Math.random()*(mx-mn));return r;}
 // 근접 직업: 탄환 대신 바라보는 방향 부채꼴을 한 번에 벰. 적중 효과(치명타·흡혈 등)는 탄환과 같은 onPHit 사용
-// 사거리 = 베기 반경, 탄환 수 1발당 베기 각도 +20°, 관통 1당 벨 수 있는 적 +2 (기본 2명)
+// 사거리 = 베기 반경, 탄환 수 1발당 베기 각도 +20°, 관통 1당 벨 수 있는 적 +2 (기본 광전사 2명, 그 외 3명)
 const MELEE_CLS=['berserk','knight'];
 const meleeOn=()=>MELEE_CLS.includes(S.cls)||(S.cls==='druid'&&S.p.bearT>0);
 const meleeR=()=>S.cls==='druid'?Math.min(S.p.range,200):S.p.range;
-function meleeSwing(base,dmg,n,o){const p=S.p,R=meleeR(),half=Math.min(Math.PI,(55+(n-1)*20)*Math.PI/180),cap=2+2*Math.max(0,p.pierce+(o.big?3:0));
+function meleeSwing(base,dmg,n,o){const p=S.p,R=meleeR(),half=Math.min(Math.PI,(55+(n-1)*20)*Math.PI/180),cap=(S.cls==='berserk'?2:3)+2*Math.max(0,p.pierce+(o.big?3:0));
   const hits=S.en.filter(e=>{if(!e.alive||e.phase)return false;const dx=e.x-p.x,dy=e.y-p.y,dd=Math.hypot(dx,dy);if(dd>R+e.r)return false;let da=Math.abs(Math.atan2(dy,dx)-base)%TAU;if(da>Math.PI)da=TAU-da;return da<=half+Math.atan2(e.r,Math.max(1,dd));}).sort((a,b)=>d2(a,p)-d2(b,p)).slice(0,cap);
   const bear=S.cls==='druid';(S.slashes=S.slashes||[]).push({x:p.x,y:p.y,a:base,half,R,life:.2,col:bear?'#e0a060':o.big?'#ffd76a':S.cls==='berserk'?'#ff8a6a':S.cls==='knight'?'#8fd0ff':'#fff0a0',bear});
   for(const t of hits){const sp=p.bspd,b=Object.assign({x:t.x,y:t.y,vx:Math.cos(base)*sp,vy:Math.sin(base)*sp,mine:true,dmg,life:.5,pierce:0,hit:new Set(),r:4,roll:0,melee:true},o);
