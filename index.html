@@ -2529,7 +2529,7 @@ const CLASSES={
     stats:{hp:155,maxHp:155,speed:188,dmg:14,rate:2.2,range:290,bspd:480,armor:6},fav:['alchemy','poison','fire'],dis:['sniper'],
     cards:['힘의 물약','숫돌','조준경','전투 본능','튼튼한 체력','다연발'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
   gambler:{lock:true,n:'도박사',role:'동전 도박',d:'동전 앞뒤에 모든 걸 거는 도박사',passive:'동전 던지기: 공격마다 앞면이면 피해 2배, 뒷면이면 0.5배. 행운이 높을수록 앞면이 잘 나옴',atk:.25,
-    stats:{hp:145,maxHp:145,speed:200,dmg:12,rate:2.6,range:300,bspd:600,crit:.08,luck:5},fav:['coin','dice','jackpot'],dis:['guard'],
+    stats:{hp:175,maxHp:175,speed:200,dmg:12,rate:2.6,range:300,bspd:600,armor:6,crit:.08,luck:5},fav:['coin','dice','jackpot'],dis:['guard'],
     cards:['럭키 세븐','날랜 손놀림','조준경','힘의 물약','급소 노리기','가벼운 장화'],lvd:'공격력 +0.7%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.007;p.maxHp+=1;p.hp+=1;}}
 };
 function applyClass(cls){S.cls=cls;Object.assign(S.p,CLASSES[cls].stats);S.p.face=1;}
