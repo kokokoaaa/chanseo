@@ -83,7 +83,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 #live span{width:46px;height:46px;background:var(--ivory);border:2px solid var(--brass);border-radius:8px;display:grid;place-items:center;font-size:26px}
 #mini{position:absolute;right:12px;bottom:118px;width:130px;height:130px;border:2px solid rgba(214,169,74,.7);border-radius:10px;background:rgba(4,20,14,.75);pointer-events:none;display:none}
 @media (max-width:520px){#mini{width:104px;height:104px;bottom:112px}}
-#autoBar{position:absolute;right:12px;top:48px;z-index:2;display:none;gap:6px}
+#autoBar{position:absolute;right:12px;top:48px;z-index:46;display:none;gap:6px}
 #autoBar button{background:rgba(4,18,12,.65);color:var(--muted);border:1px solid rgba(241,231,207,.3);border-radius:8px;padding:5px 10px;font-family:'Do Hyeon',sans-serif;font-size:14px;cursor:pointer}
 #autoBar #speedBtn{min-width:44px;font-size:16px}
 #autoBar button.on{color:#04120c;background:#7be08f;border-color:#7be08f}
@@ -218,6 +218,9 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 #toast.on{opacity:1}
 #ov{position:absolute;inset:0;display:none;align-items:flex-start;justify-content:center;background:rgba(3,14,10,.84);padding:16px;overflow-y:auto;touch-action:auto}
 #ov.on{display:flex}
+/* 레벨업·증강·상점 화면에서도 왼쪽 위 정보창은 어두운 막 위에 진하게 표시 */
+#hud{z-index:45}
+#hud.ovon{background:linear-gradient(rgba(3,14,10,.97),rgba(3,14,10,.92));border-bottom:1px solid rgba(214,169,74,.35)}
 .panel{width:100%;max-width:680px;margin:auto;background:var(--felt);border:2px solid var(--brass);border-radius:16px;padding:22px 20px;box-shadow:0 0 0 6px rgba(214,169,74,.12),0 24px 60px rgba(0,0,0,.6)}
 h1,h2{font-family:'Do Hyeon',sans-serif;font-weight:400;color:var(--brass);margin:0 0 6px}
 h1{font-size:54px;line-height:1}
@@ -331,11 +334,11 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 .tile .parts{color:var(--ivory);margin-bottom:3px}.tile .parts .own{color:var(--brass)}
 .stats{display:grid;grid-template-columns:1fr auto;gap:6px 16px;margin:6px 0 4px;font-size:16px}
 .stats span:nth-child(even){font-family:'Do Hyeon',sans-serif;font-size:19px;color:var(--ivory);text-align:right}
-#cxBtn{position:absolute;right:118px;top:10px;z-index:2;background:rgba(4,18,12,.65);color:var(--ivory);border:1px solid var(--brass);border-radius:8px;padding:6px 10px;font-family:'Do Hyeon',sans-serif;font-size:16px;cursor:pointer}
-#statBtn{position:absolute;right:12px;top:10px;z-index:2;background:rgba(4,18,12,.65);color:var(--ivory);border:1px solid var(--brass);border-radius:8px;padding:6px 12px;font-family:'Do Hyeon',sans-serif;font-size:16px;cursor:pointer}
+#cxBtn{position:absolute;right:118px;top:10px;z-index:46;background:rgba(4,18,12,.65);color:var(--ivory);border:1px solid var(--brass);border-radius:8px;padding:6px 10px;font-family:'Do Hyeon',sans-serif;font-size:16px;cursor:pointer}
+#statBtn{position:absolute;right:12px;top:10px;z-index:46;background:rgba(4,18,12,.65);color:var(--ivory);border:1px solid var(--brass);border-radius:8px;padding:6px 12px;font-family:'Do Hyeon',sans-serif;font-size:16px;cursor:pointer}
 #hud{padding-right:100px}
 .hbrk{flex-basis:100%;height:0}
-#shopBtn{position:absolute;right:110px;top:10px;z-index:2;background:rgba(60,8,12,.65);color:var(--ivory);border:1px solid var(--chip-red);border-radius:8px;padding:6px 12px;font-family:'Do Hyeon',sans-serif;font-size:16px;cursor:pointer}
+#shopBtn{position:absolute;right:110px;top:10px;z-index:46;background:rgba(60,8,12,.65);color:var(--ivory);border:1px solid var(--chip-red);border-radius:8px;padding:6px 12px;font-family:'Do Hyeon',sans-serif;font-size:16px;cursor:pointer}
 .bar .bf{background:#7fc4f2;opacity:.85}
 #st{position:absolute;inset:0;display:none;align-items:flex-start;justify-content:center;background:rgba(3,14,10,.88);padding:16px;overflow-y:auto;touch-action:auto;z-index:5}
 #st.on{display:flex}
@@ -4625,7 +4628,7 @@ function hud(){
   const mm=Math.floor(S.gt/60),ss=String(Math.floor(S.gt%60)).padStart(2,'0'),nx=AUG_EVERY-(S.picks+S.pendingLv)%AUG_EVERY;
   const key=[S.bossI,S.chap,Math.ceil(p.barrier),Math.ceil(p.hp),Math.round(p.maxHp),S.round,S.gold,S.lvl,Math.floor(S.xp),mm,ss,S.biome,slotCount(),S.round.toFixed(1),S.st.kills,S.augs.length,S.mode==='start',S.st.bosses].join('|');
   if(key===hudCache)return;hudCache=key;
-  $('hud').style.visibility=S.mode==='start'?'hidden':'visible';
+  $('hud').style.visibility=S.mode==='start'?'hidden':'visible';ovPad();
   $('hpf').style.width=(p.hp/p.maxHp*100)+'%';
   $('bpf').style.width=Math.min(100,p.barrier/p.maxHp*100)+'%';
   $('hpt').textContent=`${Math.ceil(p.hp)} / ${Math.round(p.maxHp)}${p.barrier>=1?' +'+Math.ceil(p.barrier):''}`;
@@ -4639,7 +4642,9 @@ function hud(){
 }
 
 /* ---------- overlays ---------- */
-function show(html){ov.innerHTML=`<div class="panel">${html}</div>`;ov.classList.add('on');ov.scrollTop=0;ov.querySelectorAll('[data-stats]').forEach(b=>b.onclick=()=>toggleStats());if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();}
+// 게임 중 오버레이(레벨업·증강·상점 등)는 왼쪽 위 정보창 높이만큼 아래에서 시작 → 정보창이 가려지거나 겹치지 않음
+function ovPad(){const h=$('hud'),bl=$('botLeft'),on=ov.classList.contains('on')&&S&&S.started&&S.mode!=='start',v=on?(h.offsetHeight+10)+'px':'',w=on&&bl?(bl.offsetHeight+16)+'px':'';if(ov.style.paddingTop!==v)ov.style.paddingTop=v;h.classList.toggle('ovon',!!on);if(ov.style.paddingBottom!==w)ov.style.paddingBottom=w;}
+function show(html){ov.innerHTML=`<div class="panel">${html}</div>`;ov.classList.add('on');ovPad();ov.scrollTop=0;ov.querySelectorAll('[data-stats]').forEach(b=>b.onclick=()=>toggleStats());if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();}
 ['keydown','keyup','keypress'].forEach(t=>{const h=e=>{const tg=e.target;if(tg&&tg.tagName==='BUTTON'&&(e.key===' '||e.key==='Enter'||e.code==='Space')){e.preventDefault();e.stopPropagation();}};ov.addEventListener(t,h,true);document.getElementById('st').addEventListener(t,h,true);});
 ov.addEventListener('mousedown',e=>{if(e.target.closest('button'))e.preventDefault();});
 function hide(){ov.classList.remove('on');ov.innerHTML='';}
