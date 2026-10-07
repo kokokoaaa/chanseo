@@ -2721,9 +2721,9 @@ const hpPct=()=>{const p=S.p;return (p.hpP||0)+awakeN()*AWAKE_HP+(has('k_bulwark
 function hpSync(){const p=S.p;if(!p)return;const m=Math.max(.2,1+hpPct());if(p.hpB==null){p.hpB=p.maxHp;p.hpLM=p.maxHp;}
   if(p.maxHp!==p.hpLM)p.hpB=Math.max(1,p.hpB+(p.maxHp-p.hpLM));
   const nm=Math.max(1,Math.round(p.hpB*m));if(nm!==p.maxHp){if(nm>p.maxHp)p.hp+=nm-p.maxHp;p.maxHp=nm;}p.hp=Math.min(p.hp,p.maxHp);p.hpLM=p.maxHp;}
-// 한 방 상한 (최대 체력 대비). 악몽은 10분부터 1분마다 +3% (15분에 85%), 15분부터 1분마다 ×1.07로 점점 빠르게 풀림
-// (18분 104%, 20분 119%, 25분 167%, 30분 235%). 보호막·막기·회피로 조금 더 버틸 수 있지만 결국 끝나게
-const ocOf=()=>{const b=dfM().oc||.35,m=nmMin();if(!endless())return b;return m<=5?Math.min(.85,b+.03*m):.85*Math.pow(1.07,m-5);};
+// 한 방 상한 (최대 체력 대비). 악몽은 10분부터 1분마다 +3% (14분에 82%), 14분부터 1분마다 ×1.05로 점점 빠르게 풀림
+// (16분 90%, 18분 100%, 20분 110%, 22분 121%, 25분 140%). 기울기를 완만하게 해서 방어 빌드 차이로 16~21분 사이에 퍼지게. 보호막·막기·회피로 조금 더 버틸 수 있지만 결국 끝나게
+const ocOf=()=>{const b=dfM().oc||.35,m=nmMin();if(!endless())return b;return m<=4?b+.03*m:.82*Math.pow(1.05,m-4);};
 // 악몽 단계 배율: 5단계(4장 이후)부터 단계마다 보스 체력 ×2.2, 피해 ×1.15
 const diffOpen=k=>{const i=DKEYS.indexOf(k);return i<=0||!!(META.clears||{})[DKEYS[i-1]];};
 let pickDiff=(()=>{try{return localStorage.getItem('chanseo_diff')||'normal';}catch(e){return 'normal';}})();
@@ -5031,7 +5031,7 @@ const PATCH_NOTES=[
   {v:8,t:'악몽 각성 · 직업 상향',items:[
     ['new','🔥 <b>악몽 각성</b>: 악몽은 각성 1단계로 시작해요. 보스를 잡거나 2분 30초를 버틸 때마다(둘 중 많은 쪽) 단계가 올라요'],
     ['new','각성 1단계마다 <b>최종 공격 배율 최소 ×1.5</b>(단계마다 곱해짐), <b>최대 체력 +12%</b>. 조합이 덜 맞아도 뒤로 갈수록 폭발적으로 강해져요'],
-    ['enemy','악몽 <b>15분부터</b> 적의 한 방이 점점 세져요 (18분쯤부터 한 대도 위험). 원래는 20분부터'],
+    ['enemy','악몽 <b>14~15분부터</b> 적의 한 방이 점점 세져요 (18분쯤부터 한 대도 위험). 원래는 20분부터'],
     ['buff','궁수: 공격력 11→13, 체력 155→170'],
     ['buff','총잡이: 공격력 10→12, 체력 140→160'],
     ['buff','도적: 공격력 11→13, 체력 140→155'],
