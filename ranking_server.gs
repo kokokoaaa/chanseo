@@ -1,6 +1,12 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v4.2
+// 찬서 명예의 전당 서버 (Google Apps Script) v4.3
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
+//
+// v4.2 → v4.3 바뀐 점
+// - 이름 주인 확인: 게임이 기기마다 만든 비밀 열쇠(k)를 같이 보냄. 서버는 열쇠를 바꾼 값(kh 칸)만 저장
+//   그 이름으로 처음 열쇠와 함께 올린 기기가 주인이 되고, 다른 열쇠로 오는 기록·결투 전적은 받지 않음
+//   (기기를 잃어버렸으면 시트에서 그 이름 줄들의 kh 칸을 지우면 다시 주인을 정할 수 있음. '익명'은 주인 없음)
+// - ?own=이름&k=열쇠 : 그 이름을 이 열쇠로 쓸 수 있는지 미리 확인 (게임이 등록 전에 물어봄)
 //
 // v4.1 → v4.2 바뀐 점
 // - 직업 칸 40자 → 120자 (칭호·오라·장비 정보가 뒤에 붙으면서 잘리던 문제)
@@ -25,9 +31,9 @@
 
 const SHEET_NAME = 'ranking_v3';
 const OLD_SHEET = 'ranking_v2';
-const HEAD = ['name', 'diff', 'cls', 'time', 'lvl', 'kills', 'bosses', 'score', 'comment', 'at', 'hero', 'hh', 'dw'];
+const HEAD = ['name', 'diff', 'cls', 'time', 'lvl', 'kills', 'bosses', 'score', 'comment', 'at', 'hero', 'hh', 'dw', 'kh'];
 const LIST_COLS = 10; // 목록에 필요한 칸 (name ~ at)
-const CACHE_KEY = 'list_v42';
+const CACHE_KEY = 'list_v43';
 const DIFFS = { normal: 1, hard: 1.5, hell: 2.2, god: 3.2, nightmare: 4, bossrush: 4 };
 
 function book_() {
@@ -101,6 +107,7 @@ function clean_(d, at) {
   };
   r.hh = r.hero ? 1 : '';
   r.dw = dw_(d.dw);
+  r.kh = String(d.kh || '');
   r.diff = diffOf_(d.diff, r.cls);
   // 점수는 서버에서 다시 계산 (조작 방지). 게임과 같은 식
   r.score = r.diff === 'bossrush'
@@ -136,8 +143,24 @@ function listJson_() {
   return JSON.stringify(all.filter(r => (per[r.diff] = (per[r.diff] || 0) + 1) <= 50));
 }
 
+// 열쇠 → 저장용 값 (열쇠 그대로는 저장하지 않음)
+const kh_ = k => { k = String(k || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 64); return k.length >= 16 ? Utilities.base64Encode(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, 'chanseo|' + k)).slice(0, 24) : ''; };
+// 그 이름의 줄 번호들과 주인 열쇠값
+function owner_(s, nm) {
+  const last = s.getLastRow(), rows = [];let kh = '';
+  if (last < 2) return { rows, kh };
+  const names = s.getRange(2, 1, last - 1, 1).getValues(), kc = HEAD.indexOf('kh') + 1;
+  const ks = s.getLastColumn() >= kc ? s.getRange(2, kc, last - 1, 1).getValues() : [];
+  names.forEach((x, i) => { if (String(x[0]) === nm) { rows.push(i + 2); if (!kh && ks[i] && ks[i][0]) kh = String(ks[i][0]); } });
+  return { rows, kh };
+}
+
 function doGet(e) {
   const q = (e && e.parameter) || {};
+  if (q.own) {
+    const nm = str_(q.own, 12), o = owner_(sheet_(), nm);
+    return out_({ owned: !!(nm !== '익명' && o.kh && o.kh !== kh_(q.k)) });
+  }
   if (q.hero) {
     // 이름·난이도로 줄만 찾고, 그 한 줄의 hero 칸만 읽음
     const s = sheet_(), last = s.getLastRow();
@@ -159,6 +182,12 @@ function doPost(e) {
     const d = JSON.parse(e.postData.contents);
     const s = sheet_();
     try { CacheService.getScriptCache().remove(CACHE_KEY); } catch (err) {}
+    // 이름 주인 확인: 주인이 있는 이름은 같은 열쇠로만. 주인이 없으면 열쇠와 함께 처음 올린 기기가 주인
+    const nm0 = str_(d.name, 12) || '익명', my = kh_(d.k), own = nm0 === '익명' ? { rows: [], kh: '' } : owner_(s, nm0);
+    if (own.kh && own.kh !== my) return out_({ ok: false, result: 'owned' });
+    const claim = !own.kh && my && nm0 !== '익명';
+    if (claim) own.rows.forEach(rw => s.getRange(rw, HEAD.indexOf('kh') + 1).setValue(my));
+    d.kh = nm0 === '익명' ? '' : (own.kh || my);
     // 결투 전적만 갱신 (그 이름의 기록이 있을 때만, 새 줄은 만들지 않음)
     if (d.dwOnly) {
       const dw = dw_(d.dw), nm = str_(d.name, 12), last = s.getLastRow();
