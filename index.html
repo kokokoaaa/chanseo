@@ -2740,7 +2740,8 @@ const eliteCap=()=>Math.round((4+2*Math.min(4,S.chap||0))*({normal:1,hard:1.2,he
 function spawnAt(type,x,y,noElite,forceElite){
   const T=ET[type],d=S.round,cm=chapM();
   // 정예: 확률은 시간에 따라 천천히 (상한 신 약 17%, 악몽 약 19%), 동시에 살아 있는 정예 수도 장마다 상한
-  const elite=!T.boss&&!T.flee&&!T.hid&&!T.totem&&(forceElite||(!noElite&&effT()>120&&eliteN()<eliteCap()&&Math.random()<Math.min(.08+(cm.el+dfM().el)*.35,(effT()-120)/1500+(cm.el+dfM().el)*.25)));
+  // 악몽은 정예가 첫 보스(2분 30초) 이후부터 나옴: 시작 직후 정예 러너에게 몰려 1~2분 만에 끝나는 판 방지
+  const elite=!T.boss&&!T.flee&&!T.hid&&!T.totem&&(forceElite||(!noElite&&effT()>(endless()?180:120)&&eliteN()<eliteCap()&&Math.random()<Math.min(.08+(cm.el+dfM().el)*.35,(effT()-120)/1500+(cm.el+dfM().el)*.25)));
   // 시간 초과 강화: 실제 10분(타이머 10:00)이 지난 뒤부터만 1분마다 1.3배. 내부 시간(1.2배속) 기준이면 8분 20초부터 켜져 4단계 후반 잡몹이 급격히 세짐
   const om=endless()?1:Math.pow(1.3,Math.max(0,(S.gt||0)-600)/60);
   const m=(T.boss?1+.12*(Math.min(d,50)-1):(1+.35*(d-1))*om*nmHp())*(elite?4:1)*(T.boss?dfM().bhp:cm.hp*dfHp())*((S.chap||0)>=2?dfM().lt||1:1),dm=(T.boss?1+.08*(d-1):(1+.15*(d-1))*om)*nmDm()*(elite?1.5:1)*cm.dm*dfM().dm;
@@ -5035,7 +5036,8 @@ const PATCH_NOTES=[
   {v:8,t:'악몽 각성 · 직업 상향',items:[
     ['new','🔥 <b>악몽 각성</b>: 악몽은 각성 1단계로 시작해요. 보스를 잡거나 2분 30초를 버틸 때마다(둘 중 많은 쪽) 단계가 올라요'],
     ['new','각성 1단계마다 <b>최종 공격 배율 최소 ×1.5</b>(단계마다 곱해짐), <b>최대 체력 +12%</b>. 조합이 덜 맞아도 뒤로 갈수록 폭발적으로 강해져요'],
-    ['enemy','악몽 <b>14~15분부터</b> 적의 한 방이 점점 세져요 (18분쯤부터 한 대도 위험). 원래는 20분부터'],
+    ['change','악몽 정예 몬스터는 첫 보스(2분 30초) 이후부터 나와요. 시작하자마자 정예에게 몰려 끝나는 판 방지'],
+    ['enemy','악몽 <b>13~15분부터</b> 적의 한 방이 점점 세져요 (16분쯤부터 한 대도 위험, 방어력이 높으면 조금 더 버팀). 원래는 20분부터'],
     ['buff','궁수: 공격력 11→13, 체력 155→170'],
     ['buff','총잡이: 공격력 10→12, 체력 140→160'],
     ['buff','도적: 공격력 11→13, 체력 140→155'],
