@@ -2046,13 +2046,14 @@ const CARDS=[
   {req:()=>moveSpd()<SPEED_CAP,n:'가벼운 장화',v:[[2,5,1]],t:v=>`이동 속도 +${v[0]}%`,a:(p,v)=>{p.speed*=1+v[0]/100;}},
   // 사거리는 딜을 직접 올리지 않음(안전 거리용) → 원거리 시너지·궁수일 때만 등장
   {req:()=>tag('sniper')>0||S.cls==='archer'||has('longshot'),n:'조준경',v:[[4,8,0]],t:v=>`사거리 +${v[0]}%`,a:(p,v)=>{p.range*=1+v[0]/100;}},
-  {n:'자석',v:[[10,20,0]],t:v=>`경험치·골드 흡수 범위 +${v[0]}%`,a:(p,v)=>{p.magnet*=1+v[0]/100;}},
+  // 보스 러시·레이드엔 잡몹이 없어서 흡수 범위·경험치·골드 획득 카드는 안 나옴
+  {req:()=>!rushOn(),n:'자석',v:[[10,20,0]],t:v=>`경험치·골드 흡수 범위 +${v[0]}%`,a:(p,v)=>{p.magnet*=1+v[0]/100;}},
   {req:()=>S.p.luck<LUCK_CAP,n:'네잎클로버',v:[[.8,1.6,1]],t:v=>`행운 +${v[0]}. 높은 등급과 좋은 수치가 잘 나옵니다`,a:(p,v)=>{p.luck=Math.min(LUCK_CAP,Math.round((p.luck+v[0])*10)/10);}},
   {cc:1,n:'급소 노리기',v:[[2.5,4.5,1]],t:v=>`치명타 확률 +${v[0]}%`,a:(p,v)=>{p.crit+=v[0]/100;}},
   {cm:1,n:'치명상',v:[[14,26,0]],t:v=>`치명타 피해 +${v[0]}%`,a:(p,v)=>{p.critM+=v[0]/100;}},
   {req:()=>!pureMelee(),n:'가속 탄',v:[[6,12,0]],t:v=>`탄속 +${v[0]}%`,a:(p,v)=>{p.bspd*=1+v[0]/100;}},
-  {n:'배움의 서',v:[[3,6,1]],t:v=>`경험치 획득 +${v[0]}%`,a:(p,v)=>{p.xpM=(p.xpM||1)+v[0]/100;}},
-  {n:'황금 주머니',v:[[4,9,0]],t:v=>`골드 획득 +${v[0]}%`,a:(p,v)=>{p.goldM+=v[0]/100;}},
+  {req:()=>!rushOn(),n:'배움의 서',v:[[3,6,1]],t:v=>`경험치 획득 +${v[0]}%`,a:(p,v)=>{p.xpM=(p.xpM||1)+v[0]/100;}},
+  {req:()=>!rushOn(),n:'황금 주머니',v:[[4,9,0]],t:v=>`골드 획득 +${v[0]}%`,a:(p,v)=>{p.goldM+=v[0]/100;}},
   {req:()=>S.p.dodge<DODGE_CAP,n:'날렵한 몸놀림',v:[[1.2,2.5,1]],t:v=>`회피 +${v[0]}%`,a:(p,v)=>{p.dodge+=v[0]/100;}},
   {n:'강철 심장',v:[[3,6,0]],t:v=>`최대 체력 +${v[0]}%`,a:(p,v)=>{p.hpP=(p.hpP||0)+v[0]/100;}},
   {n:'붕대',v:[[.3,.7,2]],t:v=>`초당 체력 재생 +${v[0]}`,a:(p,v)=>{p.regen+=v[0];}},
@@ -2141,7 +2142,8 @@ let devTap=[];function devTapVer(){const t=Date.now();devTap=devTap.filter(x=>t-
   const pw=prompt('개발자 암호');if(pw==null)return;if(devHash(String(pw).trim())===DEV_H){DEV=true;try{localStorage.setItem('chanseo_dev',String(DEV_H));}catch(e){}refreshAutoBtns();toast('🛠 개발자 모드 ON · 자동 선택·자동 이동 버튼이 생겼어요');}else toast('암호가 틀렸어요');}
 function saveAuto(){try{localStorage.setItem('chipdungeon_auto',JSON.stringify(AUTO));}catch(e){}}
 try{best=+localStorage.getItem('chipdungeon_best_v5')||0;}catch(e){}
-function newPlayer(){return {x:0,y:0,r:13,hp:140,maxHp:140,alive:true,speed:195,dmg:10,rate:2.4,bspd:560,range:300,multi:1,pierce:0,crit:.05,critM:2,luck:0,goldM:1,vuln:1,orbR:1,orbM:1,dashMul:1,armor:0,dodge:0,lifesteal:0,regen:0,barrier:0,noHitT:9,hits:0,magnet:140,lastCd:0,
+// 시작 위치는 맵 가운데 (첫 증강을 고르는 동안 뒤에 보이는 화면도 가운데)
+function newPlayer(){return {x:WW/2,y:WH/2,r:13,hp:140,maxHp:140,alive:true,speed:195,dmg:10,rate:2.4,bspd:560,range:300,multi:1,pierce:0,crit:.05,critM:2,luck:0,goldM:1,vuln:1,orbR:1,orbM:1,dashMul:1,armor:0,dodge:0,lifesteal:0,regen:0,barrier:0,noHitT:9,hits:0,magnet:140,lastCd:0,
   inv:0,cd:0,shots:0,pkills:0,rolls:[],all6:0,lastUsed:false,dashCd:0,dashT:0,dx:1,dy:0,lmx:1,lmy:0,blitzT:0,shockT:0,combo:0,comboT:0,shield:0,moving:false,trailT:0};}
 function newRun(){
   S={p:newPlayer(),en:[],pr:[],dr:[],zones:[],tx:[],pa:[],rings:[],augs:[],tagc:{},
@@ -3922,8 +3924,9 @@ function onKill(e){
   if(T.spore&&S.hz.length<70)S.hz.push({x:e.x,y:e.y,r:42,life:3.5,dmg:e.dmg*.6,col:'#b04aa0'});
   if(T.split&&S.en.length<260)for(let i=0;i<2;i++)spawnAt(T.split,e.x+(i?e.r*.7:-e.r*.7),e.y+rand(-4,4),true);
   // 드롭: 경험치 ±15%, 골드 ±30% 랜덤. 행운(최대 30)이 골드 드롭 확률(18→20%)과 2배 확률(경험치 0→5%, 골드 5→12%)을 올림
-  const lr=LK()/LUCK_CAP,xLucky=!e.boss&&Math.random()<lr*.05,gDrop=e.boss||e.elite||Math.random()<.18+lr*.02,gLucky=gDrop&&!e.boss&&Math.random()<.05+lr*.07;if(xLucky||gLucky)ftext(e.x,e.y-e.r-14,'행운!','#7be08f',14);
-  {const xv=(T.xp||(e.boss&&endless()?ET.boss3.xp:0))*(e.elite?4:1)*chapM().xp*(e.boss?1:rand(.85,1.15))*(xLucky?2:1),n=e.boss?14:1;if(xv>0)for(let i=0;i<n;i++)S.dr.push({x:e.x+rand(-14,14)*(e.boss?3:1),y:e.y+rand(-14,14)*(e.boss?3:1),v:xv/n,xp:1});}
+  const lr=LK()/LUCK_CAP,xLucky=!e.boss&&Math.random()<lr*.05,gDrop=e.boss||(!rushOn()&&(e.elite||Math.random()<.18+lr*.02)),gLucky=gDrop&&!e.boss&&Math.random()<.05+lr*.07;if(xLucky||gLucky)ftext(e.x,e.y-e.r-14,'행운!','#7be08f',14);
+  // 보스 러시·레이드: 경험치 보석 없음 (레벨은 보스 보상으로만), 잡몹은 골드도 없음
+  {const xv=rushOn()?0:(T.xp||(e.boss&&endless()?ET.boss3.xp:0))*(e.elite?4:1)*chapM().xp*(e.boss?1:rand(.85,1.15))*(xLucky?2:1),n=e.boss?14:1;if(xv>0)for(let i=0;i<n;i++)S.dr.push({x:e.x+rand(-14,14)*(e.boss?3:1),y:e.y+rand(-14,14)*(e.boss?3:1),v:xv/n,xp:1});}
   if(gDrop){const v=(e.boss?1:rand(.7,1.3))*(gLucky?2:1)*T.coin*(e.elite||e.boss?1:2.5)*(e.elite?2:1)*(1+.05*(Math.min(15,S.round)-1))*(e.boss&&has('king')?3:1)*(e.boss?1:Math.sqrt(chapM().xp)*dfM().sp);
     const n=e.boss?8:1;for(let i=0;i<n;i++)S.dr.push({x:e.x+rand(-14,14)*(e.boss?3:1),y:e.y+rand(-14,14)*(e.boss?3:1),v:v/n});}
   while(S.dr.length>250){const a=S.dr.shift(),b=S.dr.find(c=>!c.xp===!a.xp);if(b)b.v+=a.v;}
@@ -4823,7 +4826,7 @@ function hud(){
   $('bpf').style.width=Math.min(100,p.barrier/p.maxHp*100)+'%';
   $('hpt').textContent=`${Math.ceil(p.hp)} / ${Math.round(p.maxHp)}${p.barrier>=1?' +'+Math.ceil(p.barrier):''}`;
   $('round').innerHTML=`${S.diff&&S.diff!=='normal'?`<span style="color:${dfM().col}">${dfM().n}</span> `:''}${S.bossI>=0?`<span style="color:#ff6060">⏸ ${mm}:${ss} 보스전</span>`:`${mm}:${ss}<span style="color:var(--muted)">${endless()?'':' / 10:00'}</span>`} <span style="color:var(--brass)">${endless()?(S.chap+1)+'단계':S.bossI===3?'마지막 장':Math.min(4,S.chap+1)+'장'}</span> <span style="color:var(--muted)">${BIOMES[S.biome||0].n}</span> <span style="color:${S.round>12?'#ff6060':S.round>6?'#ffb347':'var(--muted)'}">위협 ${S.round.toFixed(1)}</span>`;
-  $('left').innerHTML=`처치 ${S.st.kills} <span style="color:#ff9a6a">· DPS ${fmtN(S.dps||0)} <small style="opacity:.75">(최대 ${fmtN(S.dpsMax||0)})</small></span> <span style="color:var(--brass)">· 종합 점수 : ${clearScore().toLocaleString()}점</span>`;
+  $('left').innerHTML=`처치 ${S.st.kills} <span style="color:#ff9a6a">· DPS ${fmtN(S.dps||0)} <small style="opacity:.75">(최대 ${fmtN(S.dpsMax||0)})</small></span> <span style="color:var(--brass)">· 종합 점수 : ${(endless()?runScore():clearScore()).toLocaleString()}점</span>`;
   // 레이드: 성장 관련 정보(골드·레벨·경험치·증강 칸·시너지)는 숨기고 단계·시간·역할만
   {const rd=raidOn(),d=rd?'none':'';for(const id of ['gold','lv','xp','botLeft']){const el=$(id);if(el&&el.style.display!==d)el.style.display=d;}
    if(rd){const t=S.raidTier||0,R=roleOf(S.cls),el=Math.max(0,Math.floor((S.bt||0)-(S.bStart||0)));$('round').innerHTML=`<span style="color:#d8b0ff">🗿 레이드 ${t+1}단계</span> ${RAID_N[t]} · ${Math.floor(el/60)}:${String(el%60).padStart(2,'0')}`;
@@ -5218,7 +5221,11 @@ const PATCH_NOTES=[
     ['new','<b>부활 기회 3번</b> (팀 공유): 쓰러진 동료 곁에 서 있으면 일으키고, 내가 쓰러져도 1번 써서 다시 일어나요. 4분이 넘으면 거신이 광폭화'],
     ['new','레이드 중에는 성장 정보(증강 칸·시너지·골드·레벨) 대신 단계·역할·부활 기회만 보여요'],
     ['new','1~5단계: 깨면 다음 단계가 열리고, 단계마다 <b>칭호</b>(거신 사냥꾼 → 종말을 막은 영웅)와 <b>메달</b> (150~900, 처음 깨면 2배)'],
-    ['change','🛠 보스 러시에서 커진 보스가 화면에 안 보이던 문제 수정']]},
+    ['change','🛠 보스 러시에서 커진 보스가 화면에 안 보이던 문제 수정'],
+    ['change','🛠 보스 러시·악몽의 종합 점수가 시작부터 크게 보이던 문제 수정 (보스 4마리를 이미 잡은 것처럼 계산되던 것)'],
+    ['change','⚔ 보스 러시: 보스가 부른 잡몹을 잡아도 경험치·골드가 안 나와요. 레벨업·증강은 보스를 잡을 때만! 흡수 범위·경험치·골드 획득 카드도 안 나와요'],
+    ['nerf','⚒ 장비 강화가 더 어려워졌어요: +1 90% · +2 80% · +3 70% · +4 60% · +5 50% · +6 45% · +7 38% · +8 30% · +9 22% · +10 15% (파괴 +6 3% … +10 12%)'],
+    ['change','게임을 시작해 첫 증강을 고를 때 뒤에 맵 가운데가 보여요']]},
   {v:16,t:'🗃 내 캐릭터 보관함',items:[
     ['new','🗃 <b>내 캐릭터</b> (시작 화면): 악몽·보스 러시가 끝나면 결과 화면의 <b>💾 캐릭터 저장</b>으로 그 판의 캐릭터를 증강·능력치 그대로 보관해요'],
     ['new','직업마다 3칸, 모두 12칸. 가득 차면 점수가 가장 낮은 캐릭터와 바꿀 수 있어요. 이름 바꾸기·삭제 가능, 기기 옮기기 코드에도 포함'],
@@ -5320,10 +5327,10 @@ function startScreen(){
   <h1>찬서 <span style="font-size:.5em;color:var(--ivory)">: 찬붕이의 뱀서</span></h1><div id="verLbl" style="margin:-6px 0 8px;font-size:13px;color:var(--muted)">v${BUILD} · ${updLabel()}</div>
   <div class="hof" id="board">${boardHtml()}</div>
   ${sv?`<button class="btn primary" id="cont">이어하기 (${CLASSES[sv.s.cls||'knight'].n})<br><small style="color:var(--ink)">${Math.floor(sv.s.gt/60)}분 ${Math.floor(sv.s.gt%60)}초, 레벨 ${sv.s.lvl}, 증강 ${sv.augs.length}개</small></button><h3>새 게임</h3>`:''}
-  <h3>캐릭터 선택</h3><div class="clsgrid">${cards}</div>
-  <div class="cdet" id="cdet">${clsDetail(pickCls)}</div>
   <h3>난이도</h3><div class="btnrow" id="dsel">${DKEYS.map(k=>{const op=diffOpen(k),cl=(META.clears||{})[k];return `<button class="btn ${k===pickDiff?'primary':''}" data-diff="${k}" ${op?'':'disabled'} title="${op?'':k==='bossrush'?'악몽이 열리면 열림':DIFF[DKEYS[DKEYS.indexOf(k)-1]].n+' 클리어 시 열림'}">${op?'':'🔒 '}${k==='bossrush'?'⚔ ':''}${DIFF[k].n}${cl?' ✔':''}<small>${DIFF[k].rush?'잡몹 없이 보스만 · 패턴 실력':DIFF[k].endless?'시간 제한 없음 · 메달 ×'+Math.round((DIFF[k].sc||1)*(DIFF[k].md||1)*10)/10:`메달 ×${Math.round((DIFF[k].sc||1)*(DIFF[k].md||1)*10)/10} · 클리어 +${DIFF[k].cb||0}`}</small></button>`;}).join('')}</div><div class="sub" style="margin:4px 0 0;font-size:13px">증강 해금: <b style="color:${TIER.s.col}">실버 ✅</b> · ${['g','p','v'].map(t=>`<b style="color:${TIER[t].col}">${TIER[t].n} ${tierOpen(t)?'✅':'🔒'}</b>${tierOpen(t)?'':`<small>(${DIFF[TIER_UNLOCK[t]].n} 클리어)</small>`}`).join(' · ')}</div>
   ${diffOpen('nightmare')?'':`<p class="sub" style="margin-top:4px">${DIFF[DKEYS.find(k=>!diffOpen(k))].n} 난이도는 ${DIFF[DKEYS[DKEYS.indexOf(DKEYS.find(k=>!diffOpen(k)))-1]].n} 난이도를 클리어하면 열려요.</p>`}
+  <h3>캐릭터 선택</h3><div class="clsgrid">${cards}</div>
+  <div class="cdet" id="cdet">${clsDetail(pickCls)}</div>
   <button class="btn primary" id="go">${CLASSES[pickCls].n}(으)로 시작${sv?' (저장 삭제)':''}</button>
   <button class="btn ghost" id="meta">🏅 영구 강화 <small>보유 메달 ${META.medals}개</small></button>
   <button class="btn ghost" id="forgeBtn">⚒ 장비 대장간 <small>검·투구·갑옷·반지 강화 ${Object.keys(GEAR).filter(gearOwn).map(k=>GEAR[k].ico+"+"+gearLv(k)).join(" ")||"(메달로 구입)"}</small></button>
@@ -5361,8 +5368,8 @@ const GEAR={sword:{ico:'🗡',n:'모험가의 검',e:'최종 피해',per:.04,fmt
 const GEAR_MAX=10,GEAR_BUY=200,PROT_COST=150;
 const gearLv=k=>{const g=META.gear&&META.gear[k];return g&&g.own?(g.lv||0):0;};
 const gearOwn=k=>!!(META.gear&&META.gear[k]&&META.gear[k].own);
-const gearRate=t=>[1,.95,.9,.85,.8,.7,.6,.5,.4,.3,.2][t]||0;       // t = 목표 단계
-const gearBreak=t=>[0,0,0,0,0,0,.03,.06,.1,.15,.2][t]||0;   // 실패 시 파괴 확률
+const gearRate=t=>[1,.9,.8,.7,.6,.5,.45,.38,.3,.22,.15][t]||0;       // t = 목표 단계
+const gearBreak=t=>[0,0,0,0,0,0,.03,.05,.07,.09,.12][t]||0;   // 실패 시 파괴 확률
 const gearCost=l=>20*(l+1);
 const gearM={dmg:()=>1+GEAR.sword.per*gearLv('sword'),hp:()=>1+GEAR.helm.per*gearLv('helm'),taken:()=>1-GEAR.armor.per*gearLv('armor'),rate:()=>1+GEAR.acc.per*gearLv('acc'),skcd:()=>1-GEAR.acc.per*gearLv('acc')};
 function gearEnhance(k,useProt){const g=META.gear[k]||(META.gear[k]={own:false,lv:0});if(!g.own||g.lv>=GEAR_MAX)return null;const c=gearCost(g.lv);if(META.medals<c)return null;
@@ -5554,7 +5561,7 @@ function openForge(){cosPreviewHide();const card=k=>{const G=GEAR[k],g=META.gear
   ${gearMsg?`<div class="gmsg">${gearMsg}</div>`:''}
   <div class="ggrid">${Object.keys(GEAR).map(card).join('')}</div>
   <div class="btnrow"><button class="btn" id="gProt" ${META.medals<PROT_COST?'disabled':''}>🛡 강화 보호권 사기 · 🏅 ${PROT_COST}<small>실패해도 단계가 내려가거나 부서지지 않음 (+5 이상에서 사용)</small></button></div>
-  <p class="sub">강화 성공률: +1 95% · +2 90% · +3 85% · +4 80% · +5 70% · +6 60% · +7 50% · +8 40% · +9 30% · +10 20%. +5부터 실패하면 한 단계 내려가고, +6부터는 부서져서 +0이 될 수도 있어요 (+6 3% … +10 20%). 지금까지 강화 ${META.gearLog.tries||0}번 · 최고 +${META.gearLog.best||0} · 부서진 장비 ${META.gearLog.broke||0}개</p>`);
+  <p class="sub">강화 성공률: +1 90% · +2 80% · +3 70% · +4 60% · +5 50% · +6 45% · +7 38% · +8 30% · +9 22% · +10 15%. +5부터 실패하면 한 단계 내려가고, +6부터는 부서져서 +0이 될 수도 있어요 (+6 3% … +10 12%). 지금까지 강화 ${META.gearLog.tries||0}번 · 최고 +${META.gearLog.best||0} · 부서진 장비 ${META.gearLog.broke||0}개</p>`);
   {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}gearMsg='';
   $('gBack').onclick=startScreen;$('gProt').onclick=()=>{if(META.medals<PROT_COST)return;META.medals-=PROT_COST;META.prot=(META.prot||0)+1;saveMeta();gearMsg='🛡 강화 보호권 1장 구입';openForge();};
   ov.querySelectorAll('[data-gbuy]').forEach(b=>b.onclick=()=>{const k=b.dataset.gbuy;if(META.medals<GEAR_BUY)return;META.medals-=GEAR_BUY;META.gear[k]={own:true,lv:0};saveMeta();gearMsg=`${GEAR[k].ico} ${GEAR[k].n} 구입!`;openForge();});
