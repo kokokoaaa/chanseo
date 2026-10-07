@@ -1007,6 +1007,8 @@ const LC=900;
 function lmAt(cx,cy){const h=hash(cx*13+5,cy*17+3);if(h>.35)return null;const x=cx*LC+150+hash(cx+31,cy-7)*(LC-300),y=cy*LC+150+hash(cx-19,cy+23)*(LC-300);
   if(x<120||y<120||x>WW-120||y>WH-120)return null;const B=BIOMES[S&&S.biome!=null?S.biome:0];if(!B.lm)return null;const k=B.lm[Math.floor(hash(cx+3,cy+9)*B.lm.length)],L=BART.LM[k];return {x,y,k,r:L[2]};}
 // 이스터에그: 건축물 앞에 5초 서 있으면 주인이 나와 한마디 하고 밀어냄 (게임에는 영향 없음). 발견한 종류는 도감·칭호용으로 기록
+// 도감용 건축물 이름
+const LM_N={cottage:'오두막',well:'우물',hut:'나무꾼 오두막',stones:'고인돌',barn:'헛간',haystack:'건초 더미',ruin:'폐허',witch:'마녀의 집',burnt:'불탄 집',pyramid:'피라미드',obelisk:'오벨리스크',igloo:'이글루',icespire:'얼음 첨탑',stilt:'수상 가옥',bigcrystal:'거대 수정',mine:'광산 입구',mausoleum:'납골당',chapel:'예배당',altar:'제단',obsidian:'흑요석 탑',windmill:'풍차',tent:'천막',shrine:'사당',camp:'야영지',scarecrow:'허수아비',tower:'망루',oasis:'오아시스',snowfort:'눈 요새',statue:'석상',wreck:'난파선',gate:'묘지 문',forge:'대장간',cursed:'저주받은 눈',minecart:'광차'};
 const EGG={cottage:['👵',['이 녀석아! 남의 집 앞에서 뭘 기웃거려?','우리 집 감자 훔쳐가려고 그러지?!','썩 꺼져! 빗자루 맛 좀 볼래?']],
  well:['🐸',['우물 안 개구리라고 무시하지 마라 개굴!','동전 던질 거 아니면 비켜!']],
  hut:['🧔',['도끼 들고 있는 거 안 보이냐? 저리 가!','장작 패는 중이다. 다치기 싫으면 비켜.']],
@@ -2955,6 +2957,17 @@ function bossDown(e){
 }
 function go(e,st){e.bst=st;e.bt=0;e.f=1;}
 function tele(o){o.t=o.T;S.tele.push(o);}
+// 악몽 징조: 13분부터 내 위치를 노리는 예고 공격(운석·돌진선). 대시나 이동으로 피할 수 있고, 맞으면 한 방 상한만큼 크게 아픔.
+// 대신 잡몹 몸통 접촉 피해는 상한을 낮춰서, 후반 생존은 '얼마나 잘 피하느냐'로 갈리게
+const OMEN_COL='#c05cff';
+function omenTick(dt){if(!endless()||!S.p.alive||S.win)return;const m=nmMin();if(m<3)return;
+  S.omT=(S.omT??2)-dt;if(S.omT>0)return;const p=S.p,lv=m-3;S.omT=Math.max(1.3,4.2-.22*lv)*(bossOn()?1.4:1)*rand(.85,1.15);
+  const dm=p.maxHp*3,lead=(p.moving?1:0)*Math.min(110,moveSpd()*.55);
+  if(Math.random()<.6){const n=Math.min(7,2+Math.floor(lv/2));for(let i=0;i<n;i++){const T=1.15+i*.22,a=Math.random()*TAU,rr=i?rand(60,190):0;
+      tele({k:'c',omen:1,x:p.x+(p.lmx||0)*lead*(i?0:1)+Math.cos(a)*rr,y:p.y+(p.lmy||0)*lead*(i?0:1)+Math.sin(a)*rr,r:72,T,dmg:dm,col:OMEN_COL,fx:t=>{burst(t.x,t.y,OMEN_COL,12);S.shake=Math.max(S.shake,.06);}});}}
+  else{const n=Math.min(3,1+Math.floor(lv/4));for(let i=0;i<n;i++){const a=Math.random()*TAU,len=760;
+      tele({k:'l',omen:1,x:p.x-Math.cos(a)*len/2+(i?rand(-90,90):0),y:p.y-Math.sin(a)*len/2+(i?rand(-90,90):0),a,len,w:58,T:1.05+i*.3,dmg:dm,col:OMEN_COL});}}
+  if(!S.omTold){S.omTold=1;toast('☠ 악몽의 징조! 보라색 예고 공격은 피하세요 (대시로 피하면 완벽한 회피)');}}
 // 일반 몹 탄환 상한 (렉 방지). 상한에 걸리면 그 몹은 이번엔 안 쏨. 보스 탄은 제외
 const EB_CAP=80;
 // 원거리 몹 탄 모양
@@ -3498,8 +3511,11 @@ const nmDm=()=>Math.pow(1.45,nmMin()),nmHp=()=>Math.pow(1.2,Math.max(0,nmMin()-5
 // 악몽 회복 감소는 쓰지 않음 (플레이어 스탯을 깎는 디버프 대신 적이 세지는 쪽으로 난이도를 올림)
 const nmHeal=()=>1;
 const healM=()=>(bossOn()?Math.max(.25,1-((S.diff||'normal')==='normal'?.08:.15)*(S.boss.rage||0)):1)*nmHeal();
+// 완벽한 회피: 큰 공격(최대 체력 15% 이상)이 대시 무적 중에 닿으면 → 슬로 모션 + 0.6초 무적 + 대시 재사용 절반 환급 + 보너스 점수 (대시 1번에 1회)
+function perfectDodge(){const p=S.p;if(p.pdDone)return;p.pdDone=1;S.smT=Math.max(S.smT||0,.45);p.inv=Math.max(p.inv||0,.6);p.dashCd=(p.dashCd||0)*.5;
+  S.st.pd=(S.st.pd||0)+1;if(S.st.pd<=40)addBonus('dodge',BONUS_PTS.dodge);ftext(p.x,p.y-30,'완벽한 회피!','#e8c8ff',20);S.rings.push({x:p.x,y:p.y,r:10,max:120,life:.4,col:'#e8c8ff'});S.flash=Math.max(S.flash||0,.15);}
 function hurtP(amt,src){
-  const p=S.p;if(!p.alive||p.inv>0||p.dashT>0)return;
+  const p=S.p;if(!p.alive||p.inv>0)return;if(p.dashT>0){if(amt>=p.maxHp*.15)perfectDodge();return;}
   if(src&&src.ps>0&&has('corrode'))amt*=.65;
   if(has('barkskin')&&inVine(p))amt*=.8;
   if(has('nightveil')&&S.clones&&S.clones.length)amt*=1-Math.min(.2,S.clones.length*lv3('nightveil',.03,.04,.05));
@@ -3531,7 +3547,7 @@ function hurtP(amt,src){
   // 최종 광폭(6단계, 제한 시간 + 2분 30초) 이후에는 즉사 방지 해제 → 최소 딜 스펙이 있어야 클리어
   if((src!==S.boss||!src)&&!(bossOn()&&(S.boss.rage||0)>=6)){const oc=ocOf();let cap=p.maxHp*oc;
     // 악몽 후반엔 거의 모든 공격이 상한에 걸려 방어력이 무의미해짐 → 상한에 걸린 공격도 방어력이 약하게(0.25제곱) 줄여줌. 방어 빌드가 조금 더 오래 버팀
-    if(endless()&&amt>cap)cap*=Math.pow(100/(100+Math.max(0,armorEff())),.25);amt=Math.min(amt,cap);}
+    if(endless()&&amt>cap)cap*=Math.pow(100/(100+Math.max(0,armorEff())),.25);if(endless()&&src&&!src.boss)cap*=.75;amt=Math.min(amt,cap);}
   p.noHitT=0;
   // 가드 6: 맞을 때마다 방어 전 피해의 30% × (1 + 방어력/100) 반사, 보호막이 있으면 2배. 보스전에서는 보스에게
   if(tag('guard')>=6){const t=src&&src.alive?src:bossOn()&&!S.boss.air&&!S.boss.phase?S.boss:nearestE(p,150);if(t)dmgEs('반사 피해',t,raw*.3*(p.barrier>0?2:1)*(1+armorEff()/100),'#9fd3ff');}
@@ -3883,7 +3899,7 @@ const DASH_MAX=60,dashDist=()=>120+Math.min(DASH_MAX,S.p.dashD||0);
 function dash(){
   const p=S.p;if(!p.alive||p.dashCd>0||p.dashT>0)return;
   let dx=p.lmx,dy=p.lmy;const l=Math.hypot(dx,dy)||1;dx/=l;dy/=l;
-  p.dx=dx;p.dy=dy;p.dashT=.14;if(has('f_lightspeed'))p.lsT=2;if(has('r_smoke')&&S.zones.length<70)S.zones.push({x:p.x,y:p.y,r:90,life:3,kind:'smoke'});if(has('r_clone')){spawnClone();}if(has('sprint'))p.spT=2.14;p.chargeHit=new Set();if(has('phantom'))p.phT=3;if(tag('shadow')>=2||has('shadowstep')){spawnClone();if(has('f_eclipse'))spawnClone();}
+  p.dx=dx;p.dy=dy;p.dashT=.14;p.pdDone=0;if(has('f_lightspeed'))p.lsT=2;if(has('r_smoke')&&S.zones.length<70)S.zones.push({x:p.x,y:p.y,r:90,life:3,kind:'smoke'});if(has('r_clone')){spawnClone();}if(has('sprint'))p.spT=2.14;p.chargeHit=new Set();if(has('phantom'))p.phT=3;if(tag('shadow')>=2||has('shadowstep')){spawnClone();if(has('f_eclipse'))spawnClone();}
   if(has('vaultbomb'))explode(p.x,p.y,140,Math.min(S.gold*.05,pDmg()*4)+pDmg()*1.5,'#ffd76a');
   if(has('warcry')){p.wcT=2;for(const e of S.en)if(e.alive&&!e.boss&&d2(e,p)<160*160)e.slowT=Math.max(e.slowT||0,lv3('warcry',.8,1.2,1.6));S.rings.push({x:p.x,y:p.y,r:10,max:160,life:.3,col:'#ffe08a'});}
   const cd=dashCdVal();p.dashCd=cd;p.dashMax=cd;
@@ -4119,7 +4135,7 @@ function update(dt){
     if(e.type==='ghost'){e.phT=(e.phT??rand(0,4))-dt;if(e.phT<0)e.phT+=4;e.phase=e.phT<1.1;}
   }
   S.en=S.en.filter(e=>e.alive);
-  updBoss(dt);hbTick(dt);if(p.rdm)p.rdm*=Math.exp(-dt/3);eggTick(dt);if(S.gold>(S.maxGold||0))S.maxGold=S.gold;if(S.npc){S.npc.t+=dt;if(S.npc.t>3.6)S.npc=null;}
+  omenTick(dt);updBoss(dt);hbTick(dt);if(p.rdm)p.rdm*=Math.exp(-dt/3);eggTick(dt);if(S.gold>(S.maxGold||0))S.maxGold=S.gold;if(S.npc){S.npc.t+=dt;if(S.npc.t>3.6)S.npc=null;}
   // 사령술사 해골 궁수대: 해골 3기 중 1기가 1초마다 뼈 화살
   if(has('n_archers')&&S.skel&&p.alive){S.naT=(S.naT??1)-dt;if(S.naT<=0){S.naT=1;S.skel.forEach((k,i)=>{if(i%3!==0||k.life<=0)return;const e=nearestE(k,p.range);if(e)pBullet(k.x,k.y,Math.atan2(e.y-k.y,e.x-k.x),pDmg()*lv3('n_archers',.5,.6,.8)*undM(),{child:true,sub:'해골 궁수대',pierce:1,r:3,life:.9,bone:true,src:'undead'});});}}
   // 궁수 화살비: 6초마다 적이 가장 몰린 곳
@@ -5055,6 +5071,11 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:12,t:'악몽의 징조 · 완벽한 회피 · 이스터에그 도감',items:[
+    ['enemy','☠ <b>악몽의 징조</b>: 악몽 13분부터 보라색 예고 공격(운석·돌진선)이 나를 노려요. 맞으면 크게 아프지만 <b>피할 수 있어요</b>'],
+    ['buff','대신 악몽에서 잡몹에게 닿아서 받는 피해는 줄었어요 (한 방 상한 ×0.75). 잘 피할수록 오래 버텨요'],
+    ['new','💨 <b>완벽한 회피</b>: 큰 공격이 닿는 순간 대시로 피하면 슬로 모션 + 0.6초 무적 + 대시 재사용 절반 + 보너스 점수'],
+    ['new','🥚 도감에 <b>이스터에그</b> 칸이 생겼어요. 찾은 곳은 대사까지 보이고, 못 찾은 곳은 어느 배경인지 힌트']]},
   {v:10,t:'플레이 보너스 점수 · 자동 기능 정리 · 왕실 합체 표시',items:[
     ['new','✨ <b>플레이 보너스 점수</b>: 황금 용 +5,000 · 숨겨진 몬스터 +600 · 이스터에그 +800 (처음 찾은 곳 +1,500 더) · 돌발 이벤트 성공 +400~4,000 (등급별) · 보스 노히트 +1,500 · 최고 DPS 보너스. 난이도 배율도 곱해져요'],
     ['change','주기형 효과 쿨타임이 40%에 다 찼는데도 시계 태엽 카드가 나오던 문제 수정'],
@@ -5294,8 +5315,8 @@ const bossSpeedPts=()=>(S.st.btimes||[]).reduce((q,t,i)=>q+Math.round(Math.max(0
 const softC=(x,c)=>x<=c?x:c*(1+Math.log(x/c));
 const scoreOf=r=>{const b=+r.bosses||0,d=DIFF[r.diff]||DIFF.normal;return Math.round(((+r.time||0)*12+softC((+r.kills||0)*2,4000)+(+r.lvl||0)*30+b*400+(b>=4?3000:0)+(+r.bonus||0))*(d.sc||1));};
 // 플레이 보너스: 직접 찾아내고 해내는 것(황금 용·숨겨진 몬스터·이스터에그·이벤트 성공·보스 노히트)과 최고 DPS에 주는 추가 점수 (난이도 배율 전 점수)
-const BONUS_PTS={dragon:5000,hidden:600,egg:800,eggNew:1500,evC:400,evB:1000,evA:2000,evS:4000,nohit:1500};
-const BONUS_N={dragon:'🐉 황금 용 처치',hidden:'👀 숨겨진 몬스터',egg:'🥚 이스터에그',eggNew:'🥚 새 이스터에그 발견',ev:'⚡ 돌발 이벤트 성공',nohit:'🛡 보스 노히트',dps:'💥 최고 DPS'};
+const BONUS_PTS={dragon:5000,hidden:600,egg:800,eggNew:1500,evC:400,evB:1000,evA:2000,evS:4000,nohit:1500,dodge:250};
+const BONUS_N={dragon:'🐉 황금 용 처치',hidden:'👀 숨겨진 몬스터',egg:'🥚 이스터에그',eggNew:'🥚 새 이스터에그 발견',ev:'⚡ 돌발 이벤트 성공',nohit:'🛡 보스 노히트',dodge:'💨 완벽한 회피',dps:'💥 최고 DPS'};
 function addBonus(k,pts,g){if(!S||!S.st||!pts)return;S.st.bonus=(S.st.bonus||0)+pts;const bl=S.st.bl||(S.st.bl={});const key=g||k;bl[key]=(bl[key]||0)+pts;const v=Math.round(pts*(dfM().sc||1));if(S.p)ftext(S.p.x,S.p.y-46,'✨ 보너스 +'+v.toLocaleString(),'#ffe27a',16);}
 // 최고 DPS 보너스: DPS 1천 넘는 10배마다 +1,500 (1만 1,500 · 100만 4,500 · 1억 7,500)
 const dpsBonus=()=>Math.round(1500*Math.max(0,Math.log10(Math.max(1,(S&&S.dpsMax)||0)/1000)));
@@ -5570,7 +5591,7 @@ function openAch(){const done=k=>!!(META.ach&&META.ach[k]);
     b.addEventListener('click',ev=>{ev.stopPropagation();if(b.dataset.pv==='1'){b.dataset.pv='';cosPreviewHide();}else{ov.querySelectorAll('[data-cs]').forEach(o=>o.dataset.pv='');b.dataset.pv='1';cosPreview(x,b);}});});}
 function openCodexGame(){if(!S||S.mode==='start')return;if(statsOpen&&!cxGame)toggleStats();cxGame=true;statsOpen=true;joy=null;openCodex();}
 function openCodex(o){Object.assign(CX,o||{});
-  const tabs=[['aug','증강'],['fuse','합체'],['vip','왕실'],['syn','시너지'],['cls','직업'],['mob','몬스터'],['ev','돌발 이벤트']];
+  const tabs=[['aug','증강'],['fuse','합체'],['vip','왕실'],['syn','시너지'],['cls','직업'],['mob','몬스터'],['ev','돌발 이벤트'],['egg','🥚 이스터에그']];
   const clsOpt=`<option value="">전체 직업</option><option value="-">공용</option>`+Object.keys(CLASSES).map(k=>`<option value="${k}" ${CX.cls===k?'selected':''}>${CLASSES[k].n}</option>`).join('');
   const tierOpt=`<option value="">전체 등급</option>`+['s','g','p'].map(k=>`<option value="${k}" ${CX.tier===k?'selected':''}>${TIER[k].n}</option>`).join('')+`<option value="uc" ${CX.tier==='uc'?'selected':''}>♾ 고점 돌파</option><option value="d" ${CX.tier==='d'?'selected':''}>🐉 용의 보물</option>`;
   cxShow(`<div class="shophead"><h2>📖 도감</h2><button class="btn" id="cxBack">${cxGame?'닫기 (게임으로)':'돌아가기'}</button></div>
@@ -5624,6 +5645,12 @@ function cxList(){
   }else if(CX.tab==='ev'){
     const DUR={},TIP={};for(const k in EVENTS){DUR[k]=EVENTS[k].T;TIP[k]=EVENTS[k].tip;}
     rows=[`<div class="sub" style="margin:4px 0">보스전이 아닐 때 85~110초마다 무작위로 하나 발생 (같은 이벤트는 연속으로 안 나옴, 보스 직전 45초엔 안 나옴). 등급이 높을수록 어렵고 보상이 큼: <b style="color:#cfe3c4">일반</b>(쉬어가기) · <b style="color:#7fc4f2">희귀</b>(골드·고급 카드) · <b style="color:#c86aff">영웅</b>(증강, 2분 30초부터) · <b style="color:#ffd76a">전설</b>(프리즘 증강, 5분부터)</div>`].concat(Object.keys(EVENTS).sort((a,b)=>'CBAS'.indexOf(EVENTS[a].g)-'CBAS'.indexOf(EVENTS[b].g)).filter(k=>hit(EVENTS[k].n,EVENTS[k].d,TIP[k])).map(k=>{const E=EVENTS[k],TR=evTier(k);return `<div class="cxrow" style="--rc:${TR.col}"><div class="h"><b>${E.icon} ${E.n}</b><span class="tg" style="color:${TR.col}">${TR.n}</span><span class="tg">⏱ ${DUR[k]}초</span></div><div class="d">${E.d}</div><div class="s">💡 팁: ${TIP[k]}</div></div>`;}));
+  }else if(CX.tab==='egg'){
+    // 이스터에그: 발견한 것만 내용 공개 (개발자 모드는 전부). 못 찾은 건 어느 배경인지만 힌트
+    const bOf=k=>BIOMES.filter(B=>(B.lm||[]).includes(k)).map(B=>B.n).join(' · '),ks=Object.keys(EGG),fnd=ks.filter(k=>(META.egg||{})[k]).length;
+    rows=[`<div class="sub" style="margin:4px 0">배경 곳곳의 건축물 앞에 <b>5초</b> 서 있으면 주인이 나와 한마디 해요. 발견 ${fnd} / ${ks.length} · 한 판에 5곳까지 ✨ 플레이 보너스, 처음 찾은 곳은 보너스 더!</div>`].concat(ks.filter(k=>{const sn=DEV||(META.egg||{})[k];return sn?hit(LM_N[k]||k,bOf(k),EGG[k][1].join(' ')):!qs.length;}).map(k=>{const E=EGG[k],sn=DEV||(META.egg||{})[k],me=(META.egg||{})[k];
+      return sn?`<div class="cxrow" style="--rc:#ffd76a"><div class="h"><b>${E[0]} ${LM_N[k]||k}</b><span class="tg">${bOf(k)}</span>${me?'<span class="tg" style="background:#2f8f4e;color:#fff">✔ 발견</span>':'<span class="tg">🛠 개발자 보기</span>'}</div><div class="d">${E[1].map(x=>`“${x}”`).join('<br>')}</div></div>`
+        :`<div class="cxrow" style="--rc:#555"><div class="h"><b>❓ ???</b><span class="tg">${bOf(k)}</span></div><div class="s">${bOf(k)} 어딘가의 건축물 앞에서 기다려 보세요</div></div>`;}));
   }else if(CX.tab==='mob'){
     const mk=CX.mk||'',BW={};BIO_MOB.forEach((m,i)=>{for(const k in m)if(m[k]>=1.5)(BW[k]=BW[k]||[]).push(BIOMES[i].n);});
     const bossCh={};BOSS_POOL.forEach((L,i)=>L.forEach(k=>bossCh[k]=['1장','2장','3장','마지막 장'][i]));
@@ -5631,7 +5658,7 @@ function cxList(){
     const keys=Object.keys(ET).filter(k=>MOBINFO[k]&&(mk===''||(mk==='b')===!!ET[k].boss)&&mk!=='e').sort((a,b)=>gOrd(a)-gOrd(b)||iOrd(a)-iOrd(b));
     let lastG='';
     const seenN=keys.filter(k=>META.mob[k]).length;
-    rows=keys.filter(k=>{const T=ET[k],I=MOBINFO[k];return META.mob[k]?hit(T.n,I[0],I[1],BTITLE[k]||'',(BW[k]||[]).join(' '),gOf(k)):!qs.length;}).map(k=>{const T=ET[k],I=MOBINFO[k],seen=META.mob[k],sz=T.boss?72:MDEF[k].sz,w=Math.round(sz*(T.boss?1.3:2.2));
+    rows=keys.filter(k=>{const T=ET[k],I=MOBINFO[k];return (DEV||META.mob[k])?hit(T.n,I[0],I[1],BTITLE[k]||'',(BW[k]||[]).join(' '),gOf(k)):!qs.length;}).map(k=>{const T=ET[k],I=MOBINFO[k],seen=(DEV||META.mob[k]),sz=T.boss?72:MDEF[k].sz,w=Math.round(sz*(T.boss?1.3:2.2));
       const g=gOf(k),hd=g!==lastG?`<div style="margin:14px 0 2px;padding:3px 10px;border-left:4px solid var(--brass);font-size:16px;color:#ffd76a;background:rgba(214,169,74,.12);border-radius:4px">${g}</div>`:'';lastG=g;
       const img=`<img src="${mobImg(k,!seen)}" style="width:${w}px;height:${w}px;image-rendering:pixelated;flex:none">`;
       if(!seen)return hd+`<div class="cxrow" style="--rc:#555;display:flex;gap:10px;align-items:center">${img}<div><div class="h"><b>❓ ???</b>${T.boss?'<span class="tg">보스</span>':''}</div><div class="s">아직 만나지 못한 몬스터${T.hidb?' · 👑 히든 보스':T.hid?' · ✨ 히든 몹':T.boss?` · ${bossCh[k]||''} 보스 후보`:''}</div></div></div>`;
@@ -5644,7 +5671,7 @@ function cxList(){
     rows=Object.keys(CLASSES).filter(k=>{const C=CLASSES[k];return hit(C.n,C.role,C.d,C.passive);}).map(k=>{const C=CLASSES[k],ex=AUGS.filter(a=>a.cls===k);
       return `<div class="cxrow" style="--rc:var(--brass)"><div class="h"><b>${C.n}</b><span class="tg">${C.role}</span>${clsOpen(k)?'':'<span class="tg">🔒 봉인</span>'}</div><div class="d">${C.d}</div><div class="s">특성: ${C.passive}</div><div class="s">잘 맞는 시너지: ${tg(C.fav)}${C.dis&&C.dis.length?` · 안 맞는 시너지: ${tg(C.dis)}`:''}</div><div class="s">레벨업: ${C.lvd||''}</div><div class="s">전용 증강: ${ex.map(a=>a.uc?`♾${a.n}`:a.n).join(', ')} <button class="cxchip" data-cxc="${k}">전용 증강 보기 →</button></div></div>`;});
   }
-  $('cxN').textContent=CX.tab==='mob'&&CX.mobHdr?CX.mobHdr:(CX.tab==='ev'||CX.tab==='vip')?`${rows.length-1}개`:`${rows.length}개`;$('cxL').innerHTML=rows.join('')||'<p class="sub">찾는 항목이 없어요</p>';
+  $('cxN').textContent=CX.tab==='mob'&&CX.mobHdr?CX.mobHdr:(CX.tab==='ev'||CX.tab==='vip'||CX.tab==='egg')?`${rows.length-1}개`:`${rows.length}개`;$('cxL').innerHTML=rows.join('')||'<p class="sub">찾는 항목이 없어요</p>';
   $('cxL').querySelectorAll('[data-pt]').forEach(b=>{const sh=()=>patShow(b.dataset.pt,+b.dataset.pi,b);b.onmouseenter=sh;b.onclick=sh;b.onmouseleave=patHide;});
   $('cxL').querySelectorAll('[data-cxj]').forEach(b=>b.onclick=()=>openCodex({tab:'aug',tag:[b.dataset.cxj],cls:'',tier:'',q:''}));
   $('cxL').querySelectorAll('[data-cxc]').forEach(b=>b.onclick=()=>openCodex({tab:'aug',cls:b.dataset.cxc,tag:[],tier:'',q:''}));
@@ -6266,7 +6293,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=11,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=12,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
