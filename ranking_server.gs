@@ -1,6 +1,10 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v4.5
+// 찬서 명예의 전당 서버 (Google Apps Script) v4.6
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
+//
+// v4.5 → v4.6 바뀐 점
+// - 채팅·이름 확인이 빨라짐: 이름 주인 정보를 캐시에 10분 기억해서 메시지마다 시트를 읽지 않음
+// - 같은 기기가 같은 말을 30초 안에 또 보내면 한 번만 남김 (한글 입력 Enter가 두 번 들어가는 문제)
 //
 // v4.4 → v4.5 바뀐 점
 // - 전체 채팅: ?chat=1 최근 메시지 받기, ?say=내용&id=&n=이름&k=열쇠 보내기
@@ -206,12 +210,14 @@ function chat_(q) {
     const msg = String(q.say || '').replace(/\s+/g, ' ').trim().slice(0, 80), id = String(q.id || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 16);
     const nm = str_(q.n, 12) || '모험가';
     if (!msg || !id) return out_({ ok: false, err: 'empty' });
-    if (nm !== '모험가' && nm !== '익명') { const o = owner_(sheet_(), nm); if (o.kh && o.kh !== kh_(q.k)) return out_({ ok: false, err: 'owned' }); }
+    if (nm !== '모험가' && nm !== '익명') { const kh = ownerKh_(nm); if (kh && kh !== kh_(q.k)) return out_({ ok: false, err: 'owned' }); }
     const lock = LockService.getScriptLock();
     lock.waitLock(5000);
     try {
       const L = chatGet_(), now = Date.now();
       const last = L.filter(x => x.id === id).pop();
+      // 같은 기기가 같은 말을 30초 안에 또 보내면 (한글 입력 Enter 두 번 등) 한 번만 남김
+      if (last && last.m === msg && now - last.t < 30000) return out_({ ok: true, dup: 1, msgs: L.map(chatOut_) });
       if (last && now - last.t < 3000) return out_({ ok: false, err: 'fast', msgs: L.map(chatOut_) });
       L.push({ t: now, id, n: nm, m: msg });
       while (L.length > CHAT_MAX) L.shift();
@@ -225,13 +231,23 @@ function chat_(q) {
 const chatOut_ = x => ({ t: x.t, n: x.n, m: x.m, u: x.id.slice(0, 6) });
 function clearChat() { chatSet_([]); CacheService.getScriptCache().remove('chat_t'); }
 
+// 이름 주인 열쇠값 (캐시 10분, 주인 없으면 '-')
+function ownerKh_(nm) {
+  const c = CacheService.getScriptCache(), k = 'own_' + Utilities.base64EncodeWebSafe(nm);
+  let v = null;
+  try { v = c.get(k); } catch (err) {}
+  if (v == null) { v = owner_(sheet_(), nm).kh || '-'; try { c.put(k, v, 600); } catch (err) {} }
+  return v === '-' ? '' : v;
+}
+function ownerSet_(nm, kh) { try { CacheService.getScriptCache().put('own_' + Utilities.base64EncodeWebSafe(nm), kh || '-', 600); } catch (err) {} }
+
 function doGet(e) {
   const q = (e && e.parameter) || {};
   if (q.chat) return chat_(q);
   if (q.ping) return ping_(q);
   if (q.own) {
-    const nm = str_(q.own, 12), o = owner_(sheet_(), nm);
-    return out_({ owned: !!(nm !== '익명' && o.kh && o.kh !== kh_(q.k)) });
+    const nm = str_(q.own, 12), kh = ownerKh_(nm);
+    return out_({ owned: !!(nm !== '익명' && kh && kh !== kh_(q.k)) });
   }
   if (q.hero) {
     // 이름·난이도로 줄만 찾고, 그 한 줄의 hero 칸만 읽음
@@ -259,6 +275,7 @@ function doPost(e) {
     if (own.kh && own.kh !== my) return out_({ ok: false, result: 'owned' });
     const claim = !own.kh && my && nm0 !== '익명';
     if (claim) own.rows.forEach(rw => s.getRange(rw, HEAD.indexOf('kh') + 1).setValue(my));
+    if (nm0 !== '익명' && (own.kh || my)) ownerSet_(nm0, own.kh || my);
     d.kh = nm0 === '익명' ? '' : (own.kh || my);
     // 결투 전적만 갱신 (그 이름의 기록이 있을 때만, 새 줄은 만들지 않음)
     if (d.dwOnly) {
