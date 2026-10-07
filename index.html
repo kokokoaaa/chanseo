@@ -1045,9 +1045,11 @@ const EGG={cottage:['👵',['이 녀석아! 남의 집 앞에서 뭘 기웃거�
  minecart:['🐀',['찍찍! 내 수레야!','타고 싶으면 표 끊어.']]};
 function eggTick(dt){const p=S.p;if(!p.alive||S.npc)return;let best=null,bd=1e9;
   for(let cx=Math.floor((p.x-300)/LC);cx<=Math.floor((p.x+300)/LC);cx++)for(let cy=Math.floor((p.y-300)/LC);cy<=Math.floor((p.y+300)/LC);cy++){const m=lmAt(cx,cy);if(!m)continue;const d=Math.hypot(m.x-p.x,m.y-12-p.y);if(d<m.r+90&&d<bd){bd=d;best=m;}}
-  const id=best?best.x+','+best.y:null;if(!id||id!==S.eggId){S.eggId=id;S.eggT=0;return;}
+  const id=best?best.x+','+best.y:null;
+  if(id&&!p.moving){S.stoneT=(S.stoneT||0)+dt;if(S.stoneT>=60)achUnlock('h_stone');}else S.stoneT=0;
+  if(!id||id!==S.eggId){S.eggId=id;S.eggT=0;return;}
   S.eggDone=S.eggDone||{};if(S.eggDone[id])return;S.eggT+=dt;if(S.eggT<5)return;
-  S.eggDone[id]=1;const E=EGG[best.k];if(!E)return;S.st.eggN=(S.st.eggN||0)+1;if(S.st.eggN<=5)addBonus('egg',BONUS_PTS.egg);if(!(META.egg||{})[best.k])addBonus('eggNew',BONUS_PTS.eggNew);const line=E[1][Math.floor(Math.random()*E[1].length)];S.npc={x:best.x,y:best.y+34,em:E[0],txt:line,t:0,nm:LM_N[best.k]||''};toast(`🥚 이스터에그! ${LM_N[best.k]||'건물'} 주인이 나타났다`);for(let i=0;i<3;i++)burst(best.x+rand(-30,30),best.y-20+rand(-30,10),'#ffe27a',14);
+  S.eggDone[id]=1;const E=EGG[best.k];if(!E)return;S.st.eggN=(S.st.eggN||0)+1;if(S.st.eggN>=5)achUnlock('h_egg5');if(S.st.eggN<=5)addBonus('egg',BONUS_PTS.egg);if(!(META.egg||{})[best.k])addBonus('eggNew',BONUS_PTS.eggNew);const line=E[1][Math.floor(Math.random()*E[1].length)];S.npc={x:best.x,y:best.y+34,em:E[0],txt:line,t:0,nm:LM_N[best.k]||''};toast(`🥚 이스터에그! ${LM_N[best.k]||'건물'} 주인이 나타났다`);for(let i=0;i<3;i++)burst(best.x+rand(-30,30),best.y-20+rand(-30,10),'#ffe27a',14);
   META.egg=META.egg||{};if(!META.egg[best.k]){META.egg[best.k]=1;saveMeta();toast(`🥚 이스터에그 발견! (${Object.keys(META.egg).length}/${Object.keys(EGG).length})`);achCheck(null);}}
 function drawNpc(){const n=S.npc;if(!n)return;const k=Math.min(1,n.t/.25),out=n.t>4.2?Math.max(0,1-(n.t-4.2)/.4):1;if(out<=0)return;
   ctx.save();ctx.globalAlpha=out;
@@ -2853,7 +2855,7 @@ function endEvent(win){
   if(win){const g=(EVENTS[ev.k]||{}).g||'C';addBonus('ev',BONUS_PTS['ev'+g]||BONUS_PTS.evC);}
   if(ev.k==='horde'){if(win){const g=price(70);S.gold+=g;bonusStat(1);toast(`대군 격파! ${g} 골드 + 고급 스탯 카드`);openNext();}else toast(`대군 처치 ${ev.kc}/${ev.need} — 실패`);}
   if(ev.k==='hunt'){for(const e of S.en)e.hunt=false;if(win){S.bonusAug++;toast('정예 사냥 성공! 증강 1개 선택');openNext();}else toast('정예 사냥 실패');}
-  if(ev.k==='goblin'&&!win){for(const e of S.en)if(e.type==='goblin'){e.alive=false;burst(e.x,e.y,'#e8bb4f',14);}toast('보물 고블린이 도망쳤다');}
+  if(ev.k==='goblin'&&!win){META.hm=META.hm||{};META.hm.goblin=(META.hm.goblin||0)+1;saveMeta();achCheck(null);for(const e of S.en)if(e.type==='goblin'){e.alive=false;burst(e.x,e.y,'#e8bb4f',14);}toast('보물 고블린이 도망쳤다');}
   if(ev.k==='shrine'&&!win)toast('제단이 사라졌다');
   if(ev.k==='moon'){if(win&&S.p.alive){S.keys=(S.keys||0)+1;bonusStat(1);toast('붉은 달을 버텼다! 고급 스탯 카드 + 🔑 열쇠 +1');openNext();}else toast('붉은 달이 졌다');}
   if(ev.k==='chest'){for(const e of S.en)if(e.chestB){if(!win){e.alive=false;burst(e.x,e.y,'#c86aff',16);}e.chestB=false;}
@@ -2993,7 +2995,7 @@ const bossPar=()=>Math.round((BOSS_PAR[bossHome(S.bossI)]||120)*(1+(dfM().bhp-1)
 function bossRage(e){const el=(S.bt||0)-(S.bStart||0),par=bossPar();return el<par?0:Math.min(20,1+Math.floor((el-par)/30));}
 function bossAI(e,dt){
   const p=S.p,T=ET[e.type],dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1,ph2=e.hp<e.maxHp*.5;
-  if(e.hid2){e.hl-=dt;if(e.hl<=0){e.alive=false;S.hb=null;burst(e.x,e.y,'#ffd040',30);toast('황금 용이 날아가 버렸다…');return;}}
+  if(e.hid2){e.hl-=dt;if(e.hl<=0){if(e.hp<e.maxHp*.1)achUnlock('h_drg');e.alive=false;S.hb=null;burst(e.x,e.y,'#ffd040',30);toast('황금 용이 날아가 버렸다…');return;}}
   {const rg=e.hid2?0:bossRage(e);if(e.baseDmg==null)e.baseDmg=e.dmg;if(rg!==(e.rage||0)){e.rage=rg;e.dmg=e.baseDmg*(1+(dfM().rg||.25)*Math.min(5,rg))*(rg>5?Math.pow(1.5,rg-5):1);if(rg===6)toast('최종 광폭! 이제 보스 공격이 줄어들지 않고 30초마다 1.5배씩 강해집니다');if(S.arena)S.arena.tr=Math.max(900,S.arena.tr*.95);S.shake=.4;S.flash=.15;
     S.rings.push({x:e.x,y:e.y,r:e.r,max:e.r+180,life:.6,col:'#ff2020'});toast(rg===1?`시간을 너무 끌었다! ${T.n} 광폭화`:`${T.n} 광폭화 ${rg}단계. 더 강해집니다`);}}
   if(ph2&&!e.ph2){e.ph2=true;if(S.arena)S.arena.tr*=.85;S.shake=.4;toast(`${T.n} 분노! 패턴이 빨라집니다`);S.rings.push({x:e.x,y:e.y,r:e.r,max:e.r+140,life:.5,col:'#ff6060'});}
@@ -3519,7 +3521,7 @@ const nmHeal=()=>1;
 const healM=()=>(bossOn()?Math.max(.25,1-((S.diff||'normal')==='normal'?.08:.15)*(S.boss.rage||0)):1)*nmHeal();
 // 완벽한 회피: 예고 공격·보스 공격처럼 큰 공격(최대 체력 15% 이상)이 대시 무적 중에 닿으면 (잡몹 몸통은 제외) → 슬로 모션 + 0.6초 무적 + 대시 재사용 절반 환급 + 보너스 점수 (대시 1번에 1회)
 function perfectDodge(){const p=S.p;if(p.pdDone)return;p.pdDone=1;S.smT=Math.max(S.smT||0,.45);p.inv=Math.max(p.inv||0,.6);p.dashCd=(p.dashCd||0)*.5;
-  S.st.pd=(S.st.pd||0)+1;if(S.st.pd<=20)addBonus('dodge',BONUS_PTS.dodge);ftext(p.x,p.y-30,'완벽한 회피!','#e8c8ff',20);S.rings.push({x:p.x,y:p.y,r:10,max:120,life:.4,col:'#e8c8ff'});S.flash=Math.max(S.flash||0,.15);}
+  S.st.pd=(S.st.pd||0)+1;if(S.st.pd>=10)achUnlock('h_dance');if(S.st.pd<=20)addBonus('dodge',BONUS_PTS.dodge);ftext(p.x,p.y-30,'완벽한 회피!','#e8c8ff',20);S.rings.push({x:p.x,y:p.y,r:10,max:120,life:.4,col:'#e8c8ff'});S.flash=Math.max(S.flash||0,.15);}
 function hurtP(amt,src){
   const p=S.p;if(!p.alive||p.inv>0)return;if(p.dashT>0){if(amt>=p.maxHp*.15&&(!src||src.boss))perfectDodge();return;}
   if(src&&src.ps>0&&has('corrode'))amt*=.65;
@@ -3905,7 +3907,7 @@ const DASH_MAX=60,dashDist=()=>120+Math.min(DASH_MAX,S.p.dashD||0);
 function dash(){
   const p=S.p;if(!p.alive||p.dashCd>0||p.dashT>0)return;
   let dx=p.lmx,dy=p.lmy;const l=Math.hypot(dx,dy)||1;dx/=l;dy/=l;
-  p.dx=dx;p.dy=dy;p.dashT=.14;p.pdDone=0;if(has('f_lightspeed'))p.lsT=2;if(has('r_smoke')&&S.zones.length<70)S.zones.push({x:p.x,y:p.y,r:90,life:3,kind:'smoke'});if(has('r_clone')){spawnClone();}if(has('sprint'))p.spT=2.14;p.chargeHit=new Set();if(has('phantom'))p.phT=3;if(tag('shadow')>=2||has('shadowstep')){spawnClone();if(has('f_eclipse'))spawnClone();}
+  p.dx=dx;p.dy=dy;p.dashT=.14;p.pdDone=0;S.st.dash=(S.st.dash||0)+1;if(has('f_lightspeed'))p.lsT=2;if(has('r_smoke')&&S.zones.length<70)S.zones.push({x:p.x,y:p.y,r:90,life:3,kind:'smoke'});if(has('r_clone')){spawnClone();}if(has('sprint'))p.spT=2.14;p.chargeHit=new Set();if(has('phantom'))p.phT=3;if(tag('shadow')>=2||has('shadowstep')){spawnClone();if(has('f_eclipse'))spawnClone();}
   if(has('vaultbomb'))explode(p.x,p.y,140,Math.min(S.gold*.05,pDmg()*4)+pDmg()*1.5,'#ffd76a');
   if(has('warcry')){p.wcT=2;for(const e of S.en)if(e.alive&&!e.boss&&d2(e,p)<160*160)e.slowT=Math.max(e.slowT||0,lv3('warcry',.8,1.2,1.6));S.rings.push({x:p.x,y:p.y,r:10,max:160,life:.3,col:'#ffe08a'});}
   const cd=dashCdVal();p.dashCd=cd;p.dashMax=cd;
@@ -4075,7 +4077,7 @@ function update(dt){
     if(S.freezeT>0)continue;
     if(e.boss){bossAI(e,dt);continue;}
     // 히든 몹: 시간이 지나면 사라짐
-    if(T.hid&&!(T.mimic&&!e.awake)){e.hl=(e.hl??22)-dt;if(e.hl<=0){e.alive=false;burst(e.x,e.y,T.col,18);toast(T.n+'이(가) 사라졌다…');continue;}}
+    if(T.hid&&!(T.mimic&&!e.awake)){e.hl=(e.hl??22)-dt;if(e.hl<=0){e.alive=false;META.hm=META.hm||{};META.hm[e.type]=(META.hm[e.type]||0)+1;S.st.hidMiss=(S.st.hidMiss||0)+1;if(S.st.hidMiss>=3)achUnlock('h_blind');saveMeta();achCheck(null);burst(e.x,e.y,T.col,18);toast(T.n+'이(가) 사라졌다…');continue;}}
     // 거머리: 달라붙으면 이동 속도 −40%, 1초마다 흡혈. 대시하면 떨어짐
     if(e.latch){if(p.dashT>0||!p.alive){e.latch=0;e.cd=2;e.x+=Math.cos(e.la)*70;e.y+=Math.sin(e.la)*70;}else{e.x=p.x+Math.cos(e.la)*(p.r+5);e.y=p.y+Math.sin(e.la)*(p.r+5);S.buffT.slow=Math.max(S.buffT.slow||0,.2);if(e.cd<=0){hurtP(e.dmg,e);e.cd=1;}continue;}}
     // 저주 토템: 0.5초마다 주변(170) 적에게 이동 속도 +30%, 받는 피해 −30%
@@ -4141,6 +4143,7 @@ function update(dt){
     if(e.type==='ghost'){e.phT=(e.phT??rand(0,4))-dt;if(e.phT<0)e.phT+=4;e.phase=e.phT<1.1;}
   }
   S.en=S.en.filter(e=>e.alive);
+  if(p.alive&&p.hp>0&&p.hp<=p.maxHp*.02&&S.lowAt==null)S.lowAt=S.t;if(S.lowAt!=null&&p.alive&&S.t-S.lowAt>=10)achUnlock('h_1hp');
   omenTick(dt);updBoss(dt);hbTick(dt);if(p.rdm)p.rdm*=Math.exp(-dt/3);eggTick(dt);if(S.gold>(S.maxGold||0))S.maxGold=S.gold;if(S.npc){S.npc.t+=dt;if(S.npc.t>4.6)S.npc=null;}
   // 사령술사 해골 궁수대: 해골 3기 중 1기가 1초마다 뼈 화살
   if(has('n_archers')&&S.skel&&p.alive){S.naT=(S.naT??1)-dt;if(S.naT<=0){S.naT=1;S.skel.forEach((k,i)=>{if(i%3!==0||k.life<=0)return;const e=nearestE(k,p.range);if(e)pBullet(k.x,k.y,Math.atan2(e.y-k.y,e.x-k.x),pDmg()*lv3('n_archers',.5,.6,.8)*undM(),{child:true,sub:'해골 궁수대',pierce:1,r:3,life:.9,bone:true,src:'undead'});});}}
@@ -5019,7 +5022,7 @@ function gameOver(win){
   let unlocked='';
   // 악몽: 10분 이상 버티면 봉인 해제권 2장
   if(endless()&&S.gt>=600&&tkNeed()>0){const g=Math.min(2,tkNeed());META.tk=(META.tk||0)+g;unlocked='🎟 직업 봉인 해제권 +'+g;}
-  {if(win){META.ccls=META.ccls||{};META.ccls[S.cls]=1;}achCheck({win,diff:S.diff||'normal',t:S.gt+(S.bt||0),kills:S.st.kills||0,lvl:S.lvl,maxGold:Math.max(S.maxGold||0,S.gold),uc:S.augs.some(a=>a.uc),augN:S.augs.filter(a=>a.t!=='v').length});}
+  {if(win){META.ccls=META.ccls||{};META.ccls[S.cls]=1;}achCheck({win,dash:S.st.dash||0,diff:S.diff||'normal',t:S.gt+(S.bt||0),kills:S.st.kills||0,lvl:S.lvl,maxGold:Math.max(S.maxGold||0,S.gold),uc:S.augs.some(a=>a.uc),augN:S.augs.filter(a=>a.t!=='v').length});}
   const unl=[];if(unlocked)unl.push(unlocked);
   if(win){META.clears=META.clears||{};const d=S.diff||'normal',first=!META.clears[d],spB=speedMax(),tB={g:tierOpen('g'),p:tierOpen('p'),v:tierOpen('v')};META.clears[d]=(META.clears[d]||0)+1;const nx=DKEYS[DKEYS.indexOf(d)+1];
     if(first){if(nx)unl.push(`🗺 ${DIFF[nx].n} 난이도`);for(const t of ['g','p','v'])if(!tB[t]&&tierOpen(t))unl.push(t==='v'?'💎 왕실 상점':`✨ ${TIER[t].n} 증강`);if(speedMax()>spB)unl.push(`⏩ ${speedMax()}배속`);}
@@ -5084,7 +5087,9 @@ const PATCH_NOTES=[
     ['change','✨ 플레이 보너스 점수를 절반 정도로 조정 (보너스가 기본 점수를 너무 압도해서): 돌발 이벤트 200~1,500 · 황금 용 3,000 · 숨겨진 몬스터 400 · 이스터에그 500 (+1,000) · 보스 노히트 1,000 · 최고 DPS 10배마다 800'],
     ['new','🥚 도감에 <b>이스터에그</b> 칸이 생겼어요. 찾은 곳은 대사까지 보이고, 못 찾은 곳은 어느 배경인지 힌트'],
     ['change','이스터에그 주인이 금빛 원·반짝임·"🥚 이스터에그" 표시와 함께 건물 앞에 크게 나타나요'],
-    ['change','나무·건물 뒤로 지나갈 때 반투명해지던 효과를 없앴어요']]},
+    ['change','나무·건물 뒤로 지나갈 때 반투명해지던 효과를 없앴어요'],
+    ['change','이스터에그 주인이 나올 때 캐릭터를 밀쳐내지 않아요'],
+    ['new','❓ <b>히든 도전과제</b> 11개 추가. 달성하기 전에는 무엇인지 안 보여요. 이상한 짓을 해 보세요… (달성하면 칭호)']]},
   {v:10,t:'플레이 보너스 점수 · 자동 기능 정리 · 왕실 합체 표시',items:[
     ['new','✨ <b>플레이 보너스 점수</b>: 황금 용 +3,000 · 숨겨진 몬스터 +400 · 이스터에그 +500 (처음 찾은 곳 +1,000 더) · 돌발 이벤트 성공 +200~1,500 (등급별) · 보스 노히트 +1,000 · 최고 DPS 보너스. 난이도 배율도 곱해져요'],
     ['change','주기형 효과 쿨타임이 40%에 다 찼는데도 시계 태엽 카드가 나오던 문제 수정'],
@@ -5255,7 +5260,19 @@ const ACH=[
   {k:'a_egg20',n:'참견쟁이',d:'이스터에그 20종 발견',p:()=>[Object.keys(META.egg||{}).length,20],c:()=>Object.keys(META.egg||{}).length>=20},
   {k:'a_eggall',n:'전국 민폐왕',d:'이스터에그 전부 발견',p:()=>[Object.keys(META.egg||{}).length,Object.keys(EGG).length],c:()=>Object.keys(META.egg||{}).length>=Object.keys(EGG).length},
   {k:'a_uc',n:'한계 돌파',d:'고점 돌파 증강을 가진 채로 클리어',c:R=>R&&R.win&&R.uc},
-  {k:'a_naked',n:'맨몸의 전설',d:'증강 3개 이하로 클리어',c:R=>R&&R.win&&R.augN<=3}
+  {k:'a_naked',n:'맨몸의 전설',d:'증강 3개 이하로 클리어',c:R=>R&&R.win&&R.augN<=3},
+  // 히든 도전과제: 달성 전에는 이름·조건이 ???로 보임 (개발자 모드는 공개)
+  {k:'h_cat',hid:1,n:'고양이 알레르기',d:'행운 고양이를 10번 놓치기',p:()=>[(META.hm||{}).luckycat||0,10],c:()=>((META.hm||{}).luckycat||0)>=10},
+  {k:'h_gob',hid:1,n:'고블린의 단골',d:'보물 고블린을 5번 놓치기',p:()=>[(META.hm||{}).goblin||0,5],c:()=>((META.hm||{}).goblin||0)>=5},
+  {k:'h_drg',hid:1,n:'아깝다!',d:'황금 용 체력을 10% 미만으로 깎고도 놓치기'},
+  {k:'h_blind',hid:1,n:'눈 뜬 장님',d:'한 판에 숨겨진 몬스터 3마리 놓치기'},
+  {k:'h_egg5',hid:1,n:'동네 단골손님',d:'한 판에 이스터에그 주인 5명 만나기'},
+  {k:'h_eggall',hid:1,n:'동네 마당발',d:'이스터에그 34곳 모두 발견',p:()=>[Object.keys(META.egg||{}).length,Object.keys(EGG).length],c:()=>Object.keys(META.egg||{}).length>=Object.keys(EGG).length},
+  {k:'h_stone',hid:1,n:'망부석',d:'건물 앞에서 1분 동안 꼼짝 않고 서 있기'},
+  {k:'h_nodash',hid:1,n:'꿋꿋한 두 발',d:'대시를 한 번도 쓰지 않고 클리어',c:R=>R&&R.win&&!R.dash},
+  {k:'h_1hp',hid:1,n:'구사일생',d:'체력 2% 이하로 떨어졌다가 10초 더 버티기'},
+  {k:'h_dance',hid:1,n:'그림자 무희',d:'한 판에 완벽한 회피 10번'},
+  {k:'h_fast',hid:1,n:'너무 성급했다',d:'시작하고 1분 안에 쓰러지기',c:R=>R&&!R.win&&R.t<60}
 ];
 function achUnlock(k){META.ach=META.ach||{};if(META.ach[k])return;const A=ACH.find(a=>a.k===k);if(!A)return;META.ach[k]=1;if(A.rw){META.cos=META.cos||{own:{},eq:{}};META.cos.own[A.rw]=1;}saveMeta();
   if(S)(S.newAch=S.newAch||[]).push(k);const rw=A.rw&&COS.find(x=>x.k===A.rw);augFx(`🏆 도전과제 달성: ${A.n}`,`칭호 「${A.n}」${rw?' · 외형 「'+rw.n+'」':''} 획득`,'#ffd76a',true);}
@@ -5592,7 +5609,8 @@ function cxClose(){patHide();if(cxGame){cxGame=false;statsOpen=false;stEl.classL
 function openAch(){const done=k=>!!(META.ach&&META.ach[k]);
   show(`<div class="shophead"><h2>🏆 도전과제 · 칭호</h2><button class="btn" id="achBack">돌아가기</button></div><p class="sub">달성 ${ACH.filter(a=>done(a.k)).length} / ${ACH.length} · 달성한 칭호를 누르면 장착 (머리 위에 표시) · 능력치 보상은 없음</p>
   <div>${ACH.map(a=>{const d=done(a.k),eq=META.title===a.k,rw=a.rw&&COS.find(x=>x.k===a.rw),pr=a.p&&!d?a.p():null;
-    return `<div class="cxrow" data-tt="${d?a.k:''}" style="--rc:${d?'#ffd76a':'#555'};cursor:${d?'pointer':'default'};${d?'':'opacity:.65'}"><div class="h"><b>${d?'🏆':'🔒'} 「${a.n}」</b>${eq?'<span class="tg" style="background:#2f8f4e;color:#fff">✔ 장착 중</span>':''}${rw?`<span class="tg" data-cs="${rw.k}" style="background:#b552d6;color:#fff;cursor:help">🎁 외형: ${rw.n} 👁</span>`:''}</div><div class="d">${a.d}${pr?` <small style="color:#ffd76a">(${pr[0]} / ${pr[1]})</small>`:''}</div></div>`;}).join('')}</div>`);
+    if(a.hid&&!d&&!DEV)return `<div class="cxrow" style="--rc:#555;opacity:.6"><div class="h"><b>❓ 「???」</b><span class="tg" style="background:#5a3d7a;color:#fff">히든</span></div><div class="d">숨겨진 도전과제예요. 이상한 짓을 해 보세요…</div></div>`;
+    return `<div class="cxrow" data-tt="${d?a.k:''}" style="--rc:${d?'#ffd76a':'#555'};cursor:${d?'pointer':'default'};${d?'':'opacity:.65'}"><div class="h"><b>${d?'🏆':'🔒'} 「${a.n}」</b>${a.hid?'<span class="tg" style="background:#5a3d7a;color:#fff">히든</span>':''}${eq?'<span class="tg" style="background:#2f8f4e;color:#fff">✔ 장착 중</span>':''}${rw?`<span class="tg" data-cs="${rw.k}" style="background:#b552d6;color:#fff;cursor:help">🎁 외형: ${rw.n} 👁</span>`:''}</div><div class="d">${a.d}${pr?` <small style="color:#ffd76a">(${pr[0]} / ${pr[1]})</small>`:''}</div></div>`;}).join('')}</div>`);
   {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}
   $('achBack').onclick=()=>{cosPreviewHide();startScreen();};ov.querySelectorAll('[data-tt]').forEach(b=>b.onclick=()=>{const k=b.dataset.tt;if(!k)return;cosPreviewHide();META.title=META.title===k?'':k;saveMeta();openAch();});
   // 보상 외형 미리보기: 마우스를 올리거나 (모바일) 눌러서 확인. 누를 땐 칭호 장착이 같이 눌리지 않게 막음
