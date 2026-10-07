@@ -227,6 +227,9 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 #xp i{display:block;height:100%;width:0;background:#5fc9d9}
 #toast{position:absolute;top:58px;left:50%;transform:translateX(-50%);background:var(--brass);color:var(--ink);font-family:'Do Hyeon',sans-serif;font-size:20px;padding:6px 14px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
 #toast.on{opacity:1}
+#patchPop{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;background:rgba(3,14,10,.72);padding:16px}
+#patchPop .pbox{width:100%;max-width:520px;max-height:82vh;overflow-y:auto;background:var(--felt);border:2px solid var(--brass);border-radius:16px;padding:18px 18px 14px;box-shadow:0 24px 60px rgba(0,0,0,.6)}
+#patchPop h2{margin:0 0 4px;font-size:22px;color:var(--brass)}#patchPop h3{margin:14px 0 4px;font-size:16px;color:#ffd76a}#patchPop ul{margin:0;padding-left:20px;line-height:1.55;font-size:15px}#patchPop li{margin:3px 0}#patchPop .btn{width:100%;margin-top:14px}
 #ov{position:absolute;inset:0;display:none;align-items:flex-start;justify-content:center;background:rgba(3,14,10,.84);padding:16px;overflow-y:auto;touch-action:auto}
 #ov.on{display:flex}
 /* 레벨업·증강·상점 화면에서도 왼쪽 위 정보창은 어두운 막 위에 진하게 표시 */
@@ -5023,6 +5026,30 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   <div class="gdoc">${(guideTab==='a'?GUIDE_A:GUIDE_B).replace(/v7 기준/g,'v'+BUILD+' 기준')}</div>`);
   {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
+// 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
+const PATCH_NOTES=[
+  {v:8,t:'악몽 각성 · 직업 상향',items:[
+    '🔥 <b>악몽 각성</b> 신설: 악몽은 각성 1단계로 시작해요. 보스를 잡거나 2분 30초를 버틸 때마다(둘 중 많은 쪽) 단계가 올라요',
+    '각성 1단계마다 <b>최종 공격 배율 최소 ×1.5</b>(단계마다 곱해짐), <b>최대 체력 +12%</b>. 조합이 덜 맞아도 뒤로 갈수록 폭발적으로 강해져요',
+    '☠ 악몽 <b>15분부터</b> 적의 한 방이 점점 세져요 (18분쯤부터 한 대도 위험)',
+    '궁수: 공격력 11→13, 체력 155→170',
+    '총잡이: 공격력 10→12, 체력 140→160',
+    '도적: 공격력 11→13, 체력 140→155',
+    '도박사: 체력 145→175, 방어력 +6',
+    '📜 패치 노트 창 추가 (새 버전을 처음 켤 때 한 번 떠요)']},
+  {v:7,t:'해금 · 설명서 · 자동 업데이트',items:[
+    '증강 등급이 난이도 클리어로 열려요: 처음 실버 → 일반 클리어 골드 → 어려움 클리어 프리즘 → 지옥 클리어 왕실',
+    '배속도 난이도를 깰 때마다 하나씩 열려요. 판이 끝나면 새로 열린 것을 알려줘요',
+    '판타지 모험 분위기에 맞게 명칭 정리',
+    '📘 게임 설명서 (기본 안내 · 자세한 기전) 추가',
+    '🔄 자동 업데이트 · 버전 표시']}
+];
+function patchHtml(all){const L=all?PATCH_NOTES:PATCH_NOTES.filter(p=>p.v>(+(localStorage.getItem('chanseo_seenv')||0)||BUILD-1)).slice(0,3);
+  return `<h2>📜 패치 노트</h2><div style="font-size:13px;color:var(--muted)">지금 버전 v${BUILD}</div>`+(L.length?L:PATCH_NOTES.slice(0,1)).map(p=>`<h3>v${p.v} · ${p.t}</h3><ul>${p.items.map(x=>`<li>${x}</li>`).join('')}</ul>`).join('');}
+function openPatch(all){closePatch();const d=document.createElement('div');d.id='patchPop';d.innerHTML=`<div class="pbox">${patchHtml(all)}<button class="btn primary" id="patchOk">확인하고 시작</button></div>`;document.body.appendChild(d);
+  const done=()=>{try{localStorage.setItem('chanseo_seenv',String(BUILD));}catch(e){}closePatch();};$('patchOk').onclick=done;d.onclick=e=>{if(e.target===d)done();};}
+function closePatch(){const d=document.getElementById('patchPop');if(d)d.remove();}
+function bootPatch(){let seen=0;try{seen=+(localStorage.getItem('chanseo_seenv')||0);}catch(e){}if(seen<BUILD&&PATCH_NOTES.some(p=>p.v>seen))openPatch(false);}
 function startScreen(){
   if(typeof UPD!=='undefined'&&UPD.ver>BUILD&&applyUpd())return;
   if(!diffOpen(pickDiff))pickDiff=[...DKEYS].reverse().find(diffOpen)||'normal';
@@ -5044,6 +5071,7 @@ function startScreen(){
   <button class="btn ghost" id="codex">📖 도감 <small>증강 · 합체 · 시너지 · 직업 검색</small></button>
   <button class="btn ghost" id="achBtn">🏆 도전과제 · 칭호 <small>${Object.keys(META.ach||{}).length} / ${ACH.length} 달성${META.title?' · 「'+(ACH.find(a=>a.k===META.title)||{}).n+'」 장착 중':''}</small></button>
   <button class="btn ghost" id="guideBtn">📘 게임 설명서 <small>처음이면 꼭 읽어보세요</small></button>
+  <button class="btn ghost" id="patchBtn">📜 패치 노트 <small>v${BUILD} 바뀐 점</small></button>
   <button class="btn ghost" id="sync">💾 데이터 옮기기 <small>다른 기기로 내보내기 · 가져오기</small></button>`);
   ov.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{const k=b.dataset.cls;
     if(!clsOpen(k)){const C=CLASSES[k];$('cdet').innerHTML=clsDetail(k)+unlockInfo(k)+(META.tk>0?`<button class="btn primary" id="ulk" style="margin-top:10px;width:100%;font-size:17px;padding:12px">🔓 ${C.n} 직업 봉인 해제하기</button><p style="margin:6px 0 0;font-size:15px;font-weight:700;color:#ffd76a;text-align:center">🎟 봉인 해제권 <b style="font-size:18px">${META.tk}장</b> 소유</p>`:`<p style="color:#ffb0b0;margin:10px 0 0;font-size:15px;font-weight:700;text-align:center">🔒 봉인된 직업 · 지옥·신 난이도를 클리어하면 봉인 해제권을 받아요<br><span style="color:#ffd76a">🎟 봉인 해제권 0장 소유</span></p>`);
@@ -5053,7 +5081,7 @@ function startScreen(){
   ov.querySelectorAll('[data-diff]').forEach(b=>b.onclick=()=>{pickDiff=b.dataset.diff;try{localStorage.setItem('chanseo_diff',pickDiff);}catch(e){}ov.querySelectorAll('[data-diff]').forEach(x=>x.classList.toggle('primary',x===b));HOF_DIFF=null;refreshBoard();});
   if(sv)$('cont').onclick=()=>continueGame(sv);
   $('go').onclick=()=>beginRun(pickCls);
-  $('meta').onclick=openMeta;$('sync').onclick=openSync;if($('guideBtn'))$('guideBtn').onclick=()=>openGuide('a');$('codex').onclick=()=>openCodex();$('achBtn').onclick=openAch;
+  $('meta').onclick=openMeta;$('sync').onclick=openSync;if($('guideBtn'))$('guideBtn').onclick=()=>openGuide('a');if($('patchBtn'))$('patchBtn').onclick=()=>openPatch(true);$('codex').onclick=()=>openCodex();$('achBtn').onclick=openAch;
   refreshBoard();
 }
 function drawPreviews(){
@@ -6197,7 +6225,7 @@ function checkUpd(){if(UPD.ver>BUILD)return;const web=/^https?:$/.test(location.
       if(!S||S.mode==='start'){updPaint();setTimeout(applyUpd,600);return;}
       if(!UPD.told){UPD.told=true;toast(`🔄 새 패치(v${UPD.ver})가 나왔어요! 이번 판이 끝나면 자동 적용 (껐다 켜도 바로 적용)`);}}
     updPaint();}).catch(()=>{UPD.st='fail';updPaint();});}
-resize();newRun();startScreen();requestAnimationFrame(loop);
+resize();newRun();startScreen();bootPatch();requestAnimationFrame(loop);
 checkUpd();setInterval(()=>{if(!STOPPED)checkUpd();},180000);
 
 // 피해 출처 이름 붙이기: 이 함수들로 들어간 피해는 아래 이름으로 기록 (더 구체적인 이름이 이미 있으면 그대로)
