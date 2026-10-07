@@ -1,6 +1,10 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v4.3
+// 찬서 명예의 전당 서버 (Google Apps Script) v4.4
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
+//
+// v4.3 → v4.4 바뀐 점
+// - 지금 접속 중인 사람: 게임이 1분마다 ?ping=1&id=&n=이름&a=하는것 을 보냄 → 최근 2분 안에 보낸 사람 목록을 돌려줌
+//   (시트는 건드리지 않고 캐시에만 둠. id는 기기 열쇠를 바꾼 값이라 열쇠가 드러나지 않음)
 //
 // v4.2 → v4.3 바뀐 점
 // - 이름 주인 확인: 게임이 기기마다 만든 비밀 열쇠(k)를 같이 보냄. 서버는 열쇠를 바꾼 값(kh 칸)만 저장
@@ -155,8 +159,28 @@ function owner_(s, nm) {
   return { rows, kh };
 }
 
+// 접속 중인 사람 (캐시에만 저장, 2분 지나면 빠짐)
+const ONLINE_KEY = 'online_v44', ONLINE_SEC = 130;
+function ping_(q) {
+  const c = CacheService.getScriptCache(), now = Date.now(), id = String(q.id || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 16);
+  const lock = LockService.getScriptLock();
+  let got = false;
+  try { got = lock.tryLock(3000); } catch (err) {}
+  let m = {};
+  try { m = JSON.parse(c.get(ONLINE_KEY) || '{}') || {}; } catch (err) { m = {}; }
+  for (const k in m) if (now - m[k].t > ONLINE_SEC * 1000) delete m[k];
+  if (id && q.bye) delete m[id];
+  else if (id) m[id] = { n: str_(q.n, 12) || '모험가', a: str_(q.a, 24), t: now };
+  const ks = Object.keys(m);
+  if (ks.length > 200) ks.sort((a, b) => m[a].t - m[b].t).slice(0, ks.length - 200).forEach(k => delete m[k]);
+  try { c.put(ONLINE_KEY, JSON.stringify(m), 600); } catch (err) {}
+  if (got) lock.releaseLock();
+  return out_({ on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
+}
+
 function doGet(e) {
   const q = (e && e.parameter) || {};
+  if (q.ping) return ping_(q);
   if (q.own) {
     const nm = str_(q.own, 12), o = owner_(sheet_(), nm);
     return out_({ owned: !!(nm !== '익명' && o.kh && o.kh !== kh_(q.k)) });
