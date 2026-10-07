@@ -2675,7 +2675,7 @@ function affN(){const r=Math.random(),dk=S.diff;let p2=0,p3=0;
 const DIFF={normal:{oc:.35,md:1,cb:5,rg:.12,pen:.2,n:'일반',col:'#cfe3c4',hp:1.1,bhp:1,dm:1,sp:1,el:0,sc:1,bc:22},
   hard:{oc:.45,md:1.6,cb:15,rg:.18,pen:.3,n:'어려움',col:'#ffb347',xp:2.5,hp:2.5,bhp:1.7,dm:1.6,sp:.8,el:.12,sc:1.5},
   hell:{oc:.55,md:2.2,cb:35,rg:.25,pen:.4,n:'지옥',col:'#ff5a3a',xp:3.4,hp:3.9,bhp:2.4,dm:2.1,sp:.7,el:.2,sc:2.2},
-  god:{oc:.65,md:2.8,cb:60,rg:.3,pen:.45,n:'신',col:'#e9c4ff',xp:4.5,hp:6,bhp:3.4,dm:2.8,sp:.6,el:.3,sc:3.2,lt:1.6},
+  god:{oc:.65,md:2.8,cb:60,rg:.3,pen:.45,n:'신',col:'#e9c4ff',xp:4.5,hp:6,bhp:3.4,dm:2.8,sp:.6,el:.3,sc:3.2,lt:1.75},
   // 악몽: 시간 제한 없는 무한 모드. 2.5분마다 보스가 계속 나오고(1~4장 보스 반복), 단계가 오를수록 보스·몹이 강해짐. 죽을 때까지 점수 경쟁
   nightmare:{oc:.7,md:3,cb:0,rg:.33,pen:.5,n:'악몽',col:'#ff4f6a',xp:5,hp:7,bhp:3.8,dm:3.1,sp:.55,el:.35,sc:4,endless:true}};
 const dfM=()=>DIFF[S.diff]||DIFF.normal;
@@ -3814,11 +3814,13 @@ function onKill(e){
     if(has('spill'))S.zones.push({x:e.x,y:e.y,r:35+15*L('spill'),life:2+L('spill'),kind:'pool',tick:0});
   }
   if(has('boom')&&(S.boomD||0)<2){const fw=has('f_fireworks')?1.4:1,br=(50+10*L('boom'))*fw;S.boomD=(S.boomD||0)+1;explode(e.x,e.y,br,pDmg()*(.25+.15*L('boom'))*fw);S.boomD--;if(has('f_gas')){S.zones.push({x:e.x,y:e.y,r:60,life:3,kind:'pool',tick:0});for(const o of S.en)if(o.alive&&d2(o,e)<br*br)poisonE(o);}}
-  if(tag('card')>=2)for(let i=0;i<2;i++){const o=nearestE(e);const a=o?Math.atan2(o.y-e.y,o.x-e.x)+(i?.25:-.25):Math.random()*TAU;pBullet(e.x,e.y,a,pDmg()*.6,{sub:'카드 시너지',child:true});}
+  // 시너지 탄환으로 잡은 적에게서는 시너지 탄환이 다시 나오지 않음 (처치 → 탄환 → 처치 연쇄가 후반 피해를 독식하던 문제)
+  const synK=/시너지/.test(S.dsub||'');
+  if(tag('card')>=2&&!synK)for(let i=0;i<2;i++){const o=nearestE(e);const a=o?Math.atan2(o.y-e.y,o.x-e.x)+(i?.25:-.25):Math.random()*TAU;pBullet(e.x,e.y,a,pDmg()*.6,{sub:'카드 시너지',child:true});}
   if(tag('frost')>=6&&e.slowT>0)for(let i=0;i<8;i++)pBullet(e.x,e.y,i*TAU/8,pDmg()*.6,{sub:'냉기 시너지',child:true,ice:true,r:3,life:.5});
   if(tag('fire')>=4&&e.burnT>0)explode(e.x,e.y,70,pDmg()*1.2,'#ff7a3a');
   if(tag('curse')>=6&&!e.boss)explode(e.x,e.y,75,e.maxHp*.25,'#b06aff');
-  if(tag('curse')>=4&&p.alive){p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.03);for(let i=0;i<6;i++)pBullet(e.x,e.y,i*TAU/6,pDmg()*.5,{sub:'저주 시너지',child:true,r:4,skull:true});}
+  if(tag('curse')>=4&&p.alive){p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.03);if(!synK)for(let i=0;i<6;i++)pBullet(e.x,e.y,i*TAU/6,pDmg()*.5,{sub:'저주 시너지',child:true,r:4,skull:true});}
   if(tag('jackpot')>=4&&p.pkills%J()===0){S.flash=.25;for(const o of S.en)if(o.alive)dmgEs('잭팟',o,pDmg()*1.5,'#ffd76a');}
 }
 const wispPos=()=>{const p=S.p,a=S.t*2.2;return {x:p.x+Math.cos(a)*44,y:p.y-30+Math.sin(a)*10};};
