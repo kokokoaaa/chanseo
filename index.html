@@ -4771,10 +4771,9 @@ function openAug(free,why,fixed,fixedTier){
   S.arr=S.arr||0;const cost=Math.round(price(18)*(1+.25*slotCount())*Math.pow(1.6,S.arr));
   show(`<h2>증강 선택</h2><p class="sub">슬롯 <b style="color:${full?'#ff9ad0':'var(--ivory)'}">${slotCount()}/${MAXA}</b>${full?' · <b style="color:#ff9ad0">가득 참 · 고르면 교체</b>':''}</p>
   <div class="cards">${opts.map((a,i)=>`<div class="cwrap">${augHtml(a,i)}${(S.seals||0)>0&&!a.up?`<button class="sealb" data-seal="${i}" title="이번 판에서 이 증강이 다시 나오지 않음">🔒 봉인 <small>(남은 ${S.seals}회)</small></button>`:''}</div>`).join('')}</div>
-  <button class="btn ghost" id="reroll" ${!free&&S.gold<cost?'disabled':''}>다시 뽑기<small>${free?(free===true?(META.sk.reroll?'무료 2회':'무료 1회'):'무료 '+free+'회'):cost+'골드 (보유 '+S.gold+') · 다음 ×1.6'}</small></button>
-  <button class="btn ghost" id="augSkip">포기<small>${skipG()}골드 받고 넘기기</small></button>
-  ${full?`<button class="btn ghost" id="augAltC">🎁 증강 대신 고급 스탯 카드 2장<small>슬롯이 가득 차서 고를 게 없으면</small></button><button class="btn ghost" id="augAltG">💰 증강 대신 ${altG()} 골드<small>바로 상점 자금으로</small></button>`:''}
-  ${full?`<button class="btn ghost" id="augStop">🚫 이번 판은 증강 그만 받기<small>앞으로 증강 차례에 스탯 카드를 대신 받아요. 스탯 카드 창에서 다시 켤 수 있어요</small></button>`:''}
+  <div class="btnrow"><button class="btn ghost" id="reroll" ${!free&&S.gold<cost?'disabled':''}>다시 뽑기<small>${free?(free===true?(META.sk.reroll?'무료 2회':'무료 1회'):'무료 '+free+'회'):cost+'골드 (보유 '+S.gold+') · 다음 ×1.6'}</small></button>
+  ${full?`<button class="btn ghost" id="augAltG">💰 증강 대신 ${altG()} 골드<small>포기하고 골드 받기</small></button>
+  <button class="btn ghost" id="augAltC">🎁 고급 스탯 카드 2장<small>증강 대신 받기</small></button><button class="btn ghost" id="augStop">🚫 증강 그만 받기<small>이번 판은 스탯 카드로 대신</small></button>`:`<button class="btn ghost" id="augSkip">포기<small>${skipG()}골드 받고 넘기기</small></button>`}</div>
   <button class="btn ghost" data-stats>내 스탯 보기</button>`);
   {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}bindPeek();if(opts.some(a=>a.t==='p'))augFx('💎 프리즘 등장!','','#d68cff',true);
   ov.querySelectorAll('.card').forEach(b=>b.onclick=ev=>{const a=opts[+b.dataset.i];S.arr=0;{const o=ev.target.closest('[data-fz]');S.fuseChoice=o?o.dataset.fz:null;}
@@ -4784,7 +4783,7 @@ function openAug(free,why,fixed,fixedTier){
     openNext();});
   if($('augAltC'))$('augAltC').onclick=()=>{S.arr=0;S.pendingLv+=2;S.boost=true;toast('증강 대신 고급 스탯 카드 2장');openNext();};
   if($('augAltG'))$('augAltG').onclick=()=>{S.arr=0;const g=altG();S.gold+=g;toast(`증강 대신 ${g} 골드`);openNext();};
-  $('augSkip').onclick=()=>{S.arr=0;const g=skipG();S.gold+=g;toast(`증강 포기 · ${g} 골드`);openNext();};
+  if($('augSkip'))$('augSkip').onclick=()=>{S.arr=0;const g=skipG();S.gold+=g;toast(`증강 포기 · ${g} 골드`);openNext();};
   if($('augStop'))$('augStop').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.firstChild.textContent='한 번 더 누르면 증강 그만 받기 ';return;}S.noAug=true;toast('이번 판은 증강을 더 받지 않아요 · 대신 스탯 카드');S.boost=true;openStat();};
   // 봉인: 이번 판에서 이 증강 제외, 그 자리는 새 증강으로 바로 교체
   ov.querySelectorAll('[data-seal]').forEach(b=>b.onclick=()=>{if(!(S.seals>0))return;const i=+b.dataset.seal,a=opts[i];S.seals--;(S.banL=S.banL||[]).push(a.id);toast(`🔒 ${a.n} 봉인 · 이번 판에서 다시 안 나옴 (그 칸만 새로 뽑음, 다시 뽑기 가격은 그대로)`);
@@ -6132,7 +6131,7 @@ addEventListener('resize',resize);
 resize();newRun();startScreen();requestAnimationFrame(loop);
 // 파일 자동 업데이트: 파일로 연 경우 게임 주소에 더 새 버전(BUILD 번호가 큰 것)이 있으면 시작 화면에서 바로 새 버전으로 교체.
 // 같은 파일에서 실행되므로 저장된 기록은 그대로. 인터넷이 없거나 실패하면 지금 버전 그대로 실행. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=2,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=3,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 (function autoUpdate(){
   if(/^https?:$/.test(location.protocol))return;
   let ctl=null;try{ctl=new AbortController();setTimeout(()=>ctl.abort(),8000);}catch(e){}
