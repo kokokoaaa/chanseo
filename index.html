@@ -1618,7 +1618,7 @@ const FUSIONS=[
   {id:'f_lucky777',a:'triple7',b:'seventh',n:'럭키 777',d:'7번째 공격은 항상 7배 피해'},
   {id:'f_feast',a:'vamp',b:'blood',n:'피의 축제',d:'흡혈 +6%. 처치 시 체력 +2',f:p=>{p.lifesteal+=.06;}},
   {id:'f_insure',a:'insure',b:'gen',n:'종합 보험',d:'보호막 재충전 대기 3초 → 1.5초, 보험 횟수 +3'},
-  {id:'f_frenzy',a:'fever',b:'runngun',n:'광란',d:'피버 최대치 +100%, 피버 유지 시간 2배'},
+  {id:'f_frenzy',a:'fever',b:'runngun',n:'광란',d:'피버 최대치 +100%. 처치가 끊겨도 피버가 한 번에 사라지지 않고 2초마다 절반씩 줄어듦'},
   {id:'f_shadow',a:'evade',b:'counter',n:'그림자 춤',d:'회피 +15%. 반격 탄환 2배, 회피하면 0.5초 무적',f:p=>{p.dodge+=.15;}},
   {id:'f_napalm',a:'molotov',b:'neuro',n:'네이팜',d:'불길 크기 2배, 불길이 적을 중독시킴'},
   {id:'f_luckyshot',a:'luckydie',b:'quick',n:'행운의 연사',d:'치명타 확률 +10%, 공격 속도 +12%',f:p=>{p.crit+=.1;p.rateP=(p.rateP||0)+.12;}},
@@ -2636,6 +2636,8 @@ function pDmg(){const p=S.p;let d=effDmg(p);
   return d;}
 const AWAKE_HP=.12;
 const awakeN=()=>S&&(dfM().raid||dfM().duel)?(S.raidAw||0):S&&endless()&&!rushOn()?1+mlv('n_awkst')+Math.max((S.st&&S.st.bosses)||0,rushOn()?0:Math.floor(((S.gt||0)+(S.bt||0))/150)):0,awakeF=()=>Math.pow(1.35+.04*mlv('n_awk'),awakeN()),awHp=()=>AWAKE_HP+.02*mlv('n_awkhp');
+// 피버: 최대치와 그 최대치에 필요한 처치 수 (중첩은 여기까지만 쌓임)
+const feverMax=()=>lv3('fever',1.2,1.6,2)+(has('f_frenzy')?1:0),feverCapN=()=>Math.ceil(feverMax()/lv3('fever',.06,.08,.1));
 function rawRate(){const p=S.p;let r=(1+.015*mlv('rate'))*gearM.rate()*effRate(p)*(1+ex('jackpot')*.03)*(1+Math.max(0,moveSpd()-SPEED_CAP)/10*.03);if(has('a_still')&&!p.moving)r*=1+lv3('a_still',.35,.5,.65);
   if(tag('curse')>=2&&p.curT>0)r*=1.35;
   if(p.rage>0)r*=1+.06*p.rage;
@@ -2650,7 +2652,7 @@ function rawRate(){const p=S.p;let r=(1+.015*mlv('rate'))*gearM.rate()*effRate(p
   if(has('tailwind'))r*=1+moveSpd()/10*lv3('tailwind',.015,.02,.025)*(has('f_jetstream')?2:1);
   if(has('interest'))r*=1+Math.min(lv3('interest',.4,.6,.8)+(has('f_empire')?.2:0),Math.floor(S.gold/100)*lv3('interest',.02,.03,.04));
   if(p.blitzT>0)r*=2;
-  if(has('fever'))r*=1+Math.min(lv3('fever',1.2,1.6,2)+(has('f_frenzy')?1:0),p.combo*lv3('fever',.06,.08,.1));
+  if(has('fever'))r*=1+Math.min(feverMax(),p.combo*lv3('fever',.06,.08,.1));
   if(has('runngun')&&p.moving)r*=1+lv3('runngun',.45,.7,.95);
   if(S.buffT.jack>0)r*=2;
   if(blessOn('rate'))r*=1.35;
@@ -3926,7 +3928,7 @@ function bossKillProc(e){const p=S.p;
   {const c=skelC();if(c>0&&Math.random()<c)raiseSkel(e.x+rand(-e.r,e.r),e.y+rand(-e.r,e.r));const gc=(tag('undead')>=2?.15:0)+(has('soulburst')?.1:0)+(has('n_lich')?.2:0);if(gc>0&&Math.random()<gc)soulShot(e.x,e.y,has('f_wraith')?2:1);}
   if(has('d_maul')&&p.bearT>0){S.bearX=(S.bearX||0);if(S.bearX<4){p.bearT+=.5;S.bearX+=.5;}}
   p.pkills++;
-  if(has('fever')){p.combo++;p.comboT=has('f_frenzy')?4:2;}
+  if(has('fever')){p.combo=Math.min(p.combo+1,feverCapN());p.comboT=2;}
   if(has('engine'))p.dashCd=Math.max(0,p.dashCd-lv3('engine',.12,.18,.25)-(has('f_overdrive')?.15:0));
   if(has('r_assassin'))p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.02);
   if(has('cascade')&&p.pkills%J()===0)p.cascT=4;
@@ -3992,7 +3994,7 @@ function onKill(e){
   if(e.type==='goblin'){const g=price(30);for(let i=0;i<12;i++)S.dr.push({x:e.x+rand(-40,40),y:e.y+rand(-40,40),v:g/12});if(Math.random()<.1)S.items.push({k:Math.random()<.5?'mag':'heal',x:e.x,y:e.y,life:150});S.flash=.2;toast('보물 고블린 처치!');}
   if(e.bombed)return;
   p.pkills++;
-  if(has('fever')){p.combo++;p.comboT=has('f_frenzy')?4:2;}
+  if(has('fever')){p.combo=Math.min(p.combo+1,feverCapN());p.comboT=2;}
   if(has('r_assassin')&&p.alive)p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.02);
   if(has('engine'))p.dashCd=Math.max(0,p.dashCd-lv3('engine',.12,.18,.25)-(has('f_overdrive')?.15:0));
   if(has('midas')&&Math.random()<(has('f_goldrain')?.08:.03)){S.gold+=10;explode(e.x,e.y,has('f_goldrain')?176:110,pDmg()*3+e.maxHp*.15,'#ffd76a');}
@@ -4186,7 +4188,7 @@ function update(dt){
     p.hurtT=Math.max(0,(p.hurtT||0)-dt);p.atkT=Math.max(0,(p.atkT||0)-dt);p.shadowT=Math.max(0,(p.shadowT||0)-dt);p.swingT=Math.max(0,(p.swingT||0)-dt);if(p.rageT>0){p.rageT-=dt;if(p.rageT<=0)p.rage=0;}
     if(has('m_ring')){S.ringT=(S.ringT||0)-dt;if(S.ringT<=0){S.ringT=.25;for(const e of S.en)if(e.alive&&d2(e,p)<110*110)dmgEs('불꽃 장막',e,pDmg()*.25*(1.2+.3*(L('m_ring')-1)),null,null,true);}}
     p.inv=Math.max(0,p.inv-dt);p.all6=Math.max(0,p.all6-dt);p.dashCd=Math.max(0,p.dashCd-dt);p.blitzT=Math.max(0,p.blitzT-dt);p.shockT=Math.max(0,p.shockT-dt);
-    if(p.comboT>0){p.comboT-=dt;if(p.comboT<=0)p.combo=0;}
+    if(p.comboT>0){p.comboT-=dt;if(p.comboT<=0){if(has('f_frenzy')&&p.combo>1){p.combo=Math.floor(p.combo/2);p.comboT=2;}else p.combo=0;}}
     p.cd-=dt;
     if(p.cd<=0){const fr=meleeOn()?meleeR():p.range,bo=S.boss&&S.boss.alive&&!S.boss.air&&d2(S.boss,p)<(fr+S.boss.r)**2?S.boss:null,tg=bo||evTarget(fr)||nearestE(p,fr);if(tg){playerFire(tg);if(S.cls==='gunner'&&p.mag<=0){p.mag=magN();p.cd=reloadT();p.rlT=p.cd;p.rlMax=p.cd;if(has('g_rshot'))for(let i=0;i<8;i++)pBullet(p.x,p.y,i*TAU/8,pDmg()*lv3('g_rshot',.6,.8,1),{child:true,sub:'장전 사격',pierce:1});}else p.cd=1/pRate();}}
     const n=orbitN();
