@@ -5293,6 +5293,8 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:30,t:'🟢 접속자 목록 고정',items:[
+    ['change','🟢 접속자 목록은 한 번 열면 <b>다시 누를 때까지 열려 있어요</b> (다음에 게임을 켜도 그대로)']]},
   {v:29,t:'🟢 버튼 자리 정리',items:[
     ['change','게임 중 🟢 접속 중 · 💬 채팅 버튼을 <b>왼쪽 위 정보 바로 아래</b>로 옮겼어요. 화면이 좁아도 다른 글자나 버튼을 가리지 않고, 접속자 목록도 다른 버튼 뒤로 숨지 않아요']]},
   {v:28,t:'💬 채팅 더 빠르게',items:[
@@ -6502,14 +6504,16 @@ const regForm=()=>(RDB&&RMYID)||SHEET?`<div class="nick col">${myNick()?`<input 
 const BOARD_KEY='chanseo_board';
 function setBoardFrom(j){BOARD_DW=!!(j.length&&'dw' in j[0]);BOARD=mergeMine(normBoard(j).map(b=>({...b,id:'s_'+b.name+'_'+b.diff})));SHEET=true;RSTATE='on';refreshBoard();}
 // 지금 접속 중인 사람: 1분마다 서버에 신호(이름·하는 것)를 보내고, 최근 2분 안에 신호를 보낸 사람 목록을 받음
-let ONLINE=null,ONL_OPEN=false;
+// 접속자 목록은 🟢 버튼으로만 열고 닫음 (열어 둔 상태는 다음에 켜도 유지)
+let ONLINE=null,ONL_OPEN=(()=>{try{return localStorage.getItem('chanseo_onl_open')==='1';}catch(e){return false;}})();
+const onlToggle=()=>{ONL_OPEN=!ONL_OPEN;try{localStorage.setItem('chanseo_onl_open',ONL_OPEN?'1':'0');}catch(e){}onlPaint();};
 const onlId=()=>{let h=2166136261;for(const c of 'on|'+MYKEY){h^=c.charCodeAt(0);h=Math.imul(h,16777619)>>>0;}return h.toString(36)+MYKEY.length.toString(36);};
 function onlAct(){try{if(!S||S.mode==='start'||!S.started)return '시작 화면';if(duelOn())return '⚔ 결투 중';if(raidOn())return '🗿 레이드 중';
   const D=DIFF[S.diff]||{};if(D.rush)return '⚔ 보스 러시 '+((S.bossI>=0?S.bossI:0)+1)+'단계';return (D.n||'모험')+' '+Math.floor((S.gt||0)/60)+'분째';}catch(e){return '';}}
 function onlHtml(sm){if(!SHEET_URL)return '';if(!ONLINE)return `<span class="onlb" style="opacity:.7;cursor:default">🟢 ${sm?'…':'접속 확인 중…'}</span> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}</button>`;const L=ONLINE;
   return `<button class="onlb" id="onlBtn" title="지금 접속 중">🟢 ${sm?`<b>${L.length}</b>`:`지금 <b>${L.length}</b>명 접속 중`} ${ONL_OPEN?'▲':'▼'}</button> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}${chatUnread()?'<i class="cdot"></i>':''}</button>${ONL_OPEN?`<div class="onll">${L.map(x=>`<span${x.me?' class="me"':''}><b>${esc(x.n)}</b>${x.me?' (나)':''} · ${esc(x.a||'')}</span>`).join('')}</div>`:''}`;}
-function onlPaint(){const el=document.getElementById('onl');if(el){el.innerHTML=onlHtml();const b=document.getElementById('onlBtn');if(b)b.onclick=()=>{ONL_OPEN=!ONL_OPEN;onlPaint();};}
-  const h=document.getElementById('onlHud');if(h){h.innerHTML=onlHtml(1).replace('id="onlBtn"','id="onlHudBtn"');const hb=document.getElementById('onlHudBtn');if(hb)hb.onclick=e=>{e.stopPropagation();ONL_OPEN=!ONL_OPEN;onlPaint();};}
+function onlPaint(){const el=document.getElementById('onl');if(el){el.innerHTML=onlHtml();const b=document.getElementById('onlBtn');if(b)b.onclick=onlToggle;}
+  const h=document.getElementById('onlHud');if(h){h.innerHTML=onlHtml(1).replace('id="onlBtn"','id="onlHudBtn"');const hb=document.getElementById('onlHudBtn');if(hb)hb.onclick=e=>{e.stopPropagation();onlToggle();};}
   document.querySelectorAll('[data-chat]').forEach(b=>b.onclick=e=>{e.stopPropagation();chatToggle();});}
 // 전체 채팅: 서버에 최근 60개만 남음. 창을 열어 두면 2초마다 새 메시지를 받음 (앞 요청이 안 끝났으면 건너뜀)
 let CHAT=[],CHAT_OPEN=false,CHAT_CT=0,CHAT_T=null,CHAT_PEND=[],CHAT_BUSY=0,CHAT_SEQ=0,CHAT_APPLIED=0;
@@ -6550,8 +6554,6 @@ async function onlPing(bye){if(!SHEET_URL||!MYKEY)return;const u=SHEET_URL+'?pin
   try{const r=await fetch(u,{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();if(j&&Array.isArray(j.on)){ONLINE=j.on;if(j.ct)CHAT_CT=Math.max(CHAT_CT,+j.ct||0);onlPaint();}}catch(e){}finally{clearTimeout(to);}}
 setTimeout(()=>{onlPaint();onlPing();},300);setInterval(()=>{if(!document.hidden)onlPing();},60000);
 addEventListener('pagehide',()=>onlPing(true));
-// 게임 중 오른쪽 위 접속 중 목록: 다른 곳을 누르면 닫힘
-document.addEventListener('click',e=>{if(ONL_OPEN&&S&&S.mode!=='start'&&!e.target.closest('#onlHud')){ONL_OPEN=false;onlPaint();}});
 async function loadSheet(tries){tries=tries||0;
   if(!tries&&!SHEET){try{const c=JSON.parse(localStorage.getItem(BOARD_KEY)||'null');if(Array.isArray(c)&&c.length)setBoardFrom(c);}catch(e){}}
   const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),15000):0;
@@ -7180,7 +7182,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=29,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=30,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
