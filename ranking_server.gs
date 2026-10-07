@@ -1,6 +1,10 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v4
+// 찬서 명예의 전당 서버 (Google Apps Script) v4.1
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
+//
+// v4 → v4.1 바뀐 점
+// - 목록을 1분 동안 저장해 두고 바로 돌려줌 (기록이 올라오면 바로 새로 만듦) → 랭킹 불러오기가 빨라짐
+// - 목록을 만들 때 무거운 캐릭터(hero) 칸은 읽지 않고, 캐릭터가 있는지는 따로 적어 둔 표시(hh 칸)로 판단
 //
 // v3 → v4 바뀐 점
 // - 기록마다 '캐릭터' 칸(hero) 추가: 그 판의 증강·능력치를 압축한 문자열 → 게임의 ⚔ 결투에서 실제 캐릭터와 싸울 수 있음
@@ -17,7 +21,9 @@
 
 const SHEET_NAME = 'ranking_v3';
 const OLD_SHEET = 'ranking_v2';
-const HEAD = ['name', 'diff', 'cls', 'time', 'lvl', 'kills', 'bosses', 'score', 'comment', 'at', 'hero'];
+const HEAD = ['name', 'diff', 'cls', 'time', 'lvl', 'kills', 'bosses', 'score', 'comment', 'at', 'hero', 'hh'];
+const LIST_COLS = 10; // 목록에 필요한 칸 (name ~ at)
+const CACHE_KEY = 'list_v41';
 const DIFFS = { normal: 1, hard: 1.5, hell: 2.2, god: 3.2, nightmare: 4, bossrush: 4 };
 
 function book_() {
@@ -60,7 +66,12 @@ function sheet_() {
     }
   }
   // v3 시트에 hero 칸이 없으면 머리글만 추가 (기존 기록은 그대로)
-  if (s.getLastColumn() < HEAD.length) s.getRange(1, 1, 1, HEAD.length).setValues([HEAD]);
+  if (s.getLastColumn() < HEAD.length) {
+    s.getRange(1, 1, 1, HEAD.length).setValues([HEAD]);
+    // v4 기록 중 캐릭터가 있는 줄에 hh 표시 한 번만 채움
+    const last = s.getLastRow(), hc = HEAD.indexOf('hero') + 1;
+    if (last > 1) s.getRange(2, hc + 1, last - 1, 1).setValues(s.getRange(2, hc, last - 1, 1).getValues().map(r => [r[0] ? 1 : '']));
+  }
   return s;
 }
 
@@ -81,6 +92,7 @@ function clean_(d, at) {
     // 캐릭터: 압축 문자열 (base64 글자만, 한 칸 최대 45000자)
     hero: String(d.hero || '').replace(/[^A-Za-z0-9+\/=:]/g, '').slice(0, 45000),
   };
+  r.hh = r.hero ? 1 : '';
   r.diff = diffOf_(d.diff, r.cls);
   // 점수는 서버에서 다시 계산 (조작 방지). 게임과 같은 식
   r.score = r.diff === 'bossrush'
@@ -102,18 +114,34 @@ function out_(o) {
 // 예전에 일반(normal)으로 잘못 저장된 보스 러시 기록 바로잡기
 const fixDiff_ = r => (String(r.diff) === 'normal' && String(r.cls).indexOf(':bossrush') >= 0) ? 'bossrush' : String(r.diff || 'normal');
 
+function listJson_() {
+  const s = sheet_();
+  const last = s.getLastRow();
+  if (last < 2) return '[]';
+  // 목록 칸(name~at)과 캐릭터 표시(hh)만 읽음. 무거운 hero 칸은 안 읽음
+  const v = s.getRange(2, 1, last - 1, LIST_COLS).getValues();
+  const hc = HEAD.indexOf('hh') + 1, hh = s.getLastColumn() >= hc ? s.getRange(2, hc, last - 1, 1).getValues() : [];
+  const all = v.map((r, i) => { const o = Object.fromEntries(HEAD.slice(0, LIST_COLS).map((h, j) => [h, r[j]]));
+      return { name: String(o.name), diff: fixDiff_(o), cls: String(o.cls), time: +o.time, lvl: +o.lvl, kills: +o.kills, bosses: +o.bosses, score: +o.score, comment: String(o.comment || ''), h: hh[i] && hh[i][0] ? 1 : 0 }; })
+    .sort((a, b) => b.score - a.score);
+  const per = {};
+  return JSON.stringify(all.filter(r => (per[r.diff] = (per[r.diff] || 0) + 1) <= 50));
+}
+
 function doGet(e) {
   const q = (e && e.parameter) || {};
   if (q.hero) {
-    const row = rows_(sheet_()).find(r => String(r.name) === String(q.hero) && fixDiff_(r) === String(q.diff || 'nightmare'));
-    return out_({ hero: row ? String(row.hero || '') : '' });
+    // 이름·난이도로 줄만 찾고, 그 한 줄의 hero 칸만 읽음
+    const s = sheet_(), last = s.getLastRow();
+    if (last < 2) return out_({ hero: '' });
+    const v = s.getRange(2, 1, last - 1, LIST_COLS).getValues();
+    const i = v.findIndex(r => { const o = Object.fromEntries(HEAD.slice(0, LIST_COLS).map((h, j) => [h, r[j]])); return String(o.name) === String(q.hero) && fixDiff_(o) === String(q.diff || 'nightmare'); });
+    return out_({ hero: i < 0 ? '' : String(s.getRange(i + 2, HEAD.indexOf('hero') + 1).getValue() || '') });
   }
-  const all = rows_(sheet_())
-    .map(r => ({ name: String(r.name), diff: fixDiff_(r), cls: String(r.cls), time: +r.time, lvl: +r.lvl, kills: +r.kills, bosses: +r.bosses, score: +r.score, comment: String(r.comment || ''), h: r.hero ? 1 : 0 }))
-    .sort((a, b) => b.score - a.score);
-  const per = {};
-  const list = all.filter(r => (per[r.diff] = (per[r.diff] || 0) + 1) <= 50);
-  return out_(list);
+  const c = CacheService.getScriptCache();
+  let j = c.get(CACHE_KEY);
+  if (!j) { j = listJson_(); try { c.put(CACHE_KEY, j, 60); } catch (err) {} }
+  return ContentService.createTextOutput(j).setMimeType(ContentService.MimeType.JSON);
 }
 
 function doPost(e) {
@@ -122,6 +150,7 @@ function doPost(e) {
   try {
     const r = clean_(JSON.parse(e.postData.contents));
     const s = sheet_();
+    try { CacheService.getScriptCache().remove(CACHE_KEY); } catch (err) {}
     const last = s.getLastRow();
     const keys = last > 1 ? s.getRange(2, 1, last - 1, 2).getValues().map(x => String(x[0]) + '\u0001' + String(x[1])) : [];
     const i = keys.indexOf(r.name + '\u0001' + r.diff);
@@ -136,7 +165,7 @@ function doPost(e) {
       return out_({ ok: true, result: 'best' });
     }
     // 점수는 그대로여도 캐릭터 정보가 비어 있으면 채워 둠
-    if (r.hero && !String(s.getRange(row, HEAD.indexOf('hero') + 1).getValue() || '')) s.getRange(row, HEAD.indexOf('hero') + 1).setValue(r.hero);
+    if (r.hero && !String(s.getRange(row, HEAD.indexOf('hero') + 1).getValue() || '')) { s.getRange(row, HEAD.indexOf('hero') + 1).setValue(r.hero); s.getRange(row, HEAD.indexOf('hh') + 1).setValue(1); }
     if (r.comment) {
       s.getRange(row, HEAD.indexOf('comment') + 1).setValue(r.comment);
       return out_({ ok: true, result: 'comment' });
