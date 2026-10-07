@@ -2780,7 +2780,11 @@ function hpSync(){const p=S.p;if(!p)return;const m=Math.max(.2,1+hpPct())*(1+.02
 const ocOf=()=>{const b=dfM().oc||.35,m=nmMin();if(!endless())return b;return m<=2?b+.03*m:.76*Math.pow(1.1,m-2);};
 // 악몽 단계 배율: 5단계(4장 이후)부터 단계마다 보스 체력 ×2.2, 피해 ×1.15
 const diffOpen=k=>{if(k==='bossrush')return diffOpen('nightmare');const i=DKEYS.indexOf(k);return i<=0||!!(META.clears||{})[DKEYS[i-1]];};
-let pickDiff=(()=>{try{return localStorage.getItem('chanseo_diff')||'normal';}catch(e){return 'normal';}})();
+// 난이도 선택 저장: 'chanseo_diff'에는 예전 버전도 아는 기본 난이도만 넣음 (예전 파일이 '보스 러시'를 몰라 시작 화면에서 멈추던 문제).
+// 보스 러시 같은 엔드 컨텐츠 선택은 'chanseo_diff2'에 따로 저장. 시작할 때 잘못 저장된 값도 바로 고쳐 둠
+const CLASSIC_DIFF=['normal','hard','hell','god','nightmare'];
+function savePickDiff(k){try{localStorage.setItem('chanseo_diff',CLASSIC_DIFF.includes(k)?k:'nightmare');localStorage.setItem('chanseo_diff2',k);}catch(e){}}
+let pickDiff=(()=>{try{const d=localStorage.getItem('chanseo_diff')||'normal',d2=localStorage.getItem('chanseo_diff2');if(!CLASSIC_DIFF.includes(d))localStorage.setItem('chanseo_diff','nightmare');return d2&&DIFF[d2]&&!DIFF[d2].raid&&!DIFF[d2].duel?d2:CLASSIC_DIFF.includes(d)?d:(DIFF[d]?d:'normal');}catch(e){return 'normal';}})();
 // lt: 3장부터 몹·보스 체력 추가 배율 (신 난이도 후반이 성장한 빌드에 너무 쉽게 뚫려서)
 // 장별 추가 난이도. 3장부터 일반 몹 체력·피해·스폰량, 정예 확률이 더 오름 (보스 체력은 제외)
 // 4장(마지막)은 수를 줄이고 개체를 크게 강화: 체력 ×3.5, 피해 ×1.25, 크기 ×1.2, 정예 +30%p. 대신 경험치·골드도 많이 줌
@@ -5285,6 +5289,8 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:19,t:'🛠 긴급 수정',items:[
+    ['change','🛠 보스 러시를 고른 뒤 예전 버전 파일을 열면 시작 화면에서 멈추던 문제 수정 (이 버전을 한 번 열면 예전 파일도 다시 열리고 자동 업데이트돼요)']]},
   {v:18,t:'🏆 명예의 전당 꾸미기',items:[
     ['new','🏆 명예의 전당에 내 <b>칭호</b>(이름 아래), <b>오라</b>, <b>장비</b>(강화 단계 빛깔 그대로)가 아바타와 함께 보여요. 새로 올리는 기록부터 적용'],
     ['new','🛡 <b>불굴의 의지</b> (골드 증강): 생존기(E) 재사용 −25%, 생존기를 쓰면 3초간 받는 피해 −30%'],
@@ -5433,7 +5439,7 @@ function startScreen(){
       if(META.tk>0)$('ulk').onclick=()=>{META.tk--;(META.ucls=META.ucls||[]).push(k);saveMeta();pickCls=k;try{localStorage.setItem('chipdungeon_cls',k);}catch(e){}toast(C.n+' 봉인 해제! '+TAGS[C.fav[0]].n+' 시너지 증강도 이제 나와요');startScreen();};return;}
     pickCls=k;try{localStorage.setItem('chipdungeon_cls',pickCls);}catch(e){}
     ov.querySelectorAll('[data-cls]').forEach(x=>x.classList.toggle('on',x===b));$('cdet').innerHTML=clsDetail(pickCls);$('go').firstChild.textContent=`${CLASSES[pickCls].n}(으)로 시작${sv?' (저장 삭제)':''}`;});
-  ov.querySelectorAll('[data-diff]').forEach(b=>b.onclick=()=>{pickDiff=b.dataset.diff;try{localStorage.setItem('chanseo_diff',pickDiff);}catch(e){}ov.querySelectorAll('[data-diff]').forEach(x=>x.classList.toggle('primary',x===b));HOF_DIFF=null;refreshBoard();});
+  ov.querySelectorAll('[data-diff]').forEach(b=>b.onclick=()=>{pickDiff=b.dataset.diff;savePickDiff(pickDiff);ov.querySelectorAll('[data-diff]').forEach(x=>x.classList.toggle('primary',x===b));HOF_DIFF=null;refreshBoard();});
   if(sv)$('cont').onclick=()=>continueGame(sv);
   $('go').onclick=()=>beginRun(pickCls);
   $('meta').onclick=openMeta;$('forgeBtn').onclick=openForge;$('heroBtn').onclick=openHeroes;if($('raidBtn'))$('raidBtn').onclick=openRaid;$('sync').onclick=openSync;if($('guideBtn'))$('guideBtn').onclick=()=>openGuide('a');if($('patchBtn'))$('patchBtn').onclick=()=>openPatch(true);if($('verLbl')){$('verLbl').onclick=devTapVer;$('verLbl').style.userSelect='none';}$('codex').onclick=()=>openCodex();$('achBtn').onclick=openAch;
@@ -6878,7 +6884,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=18,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=19,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
