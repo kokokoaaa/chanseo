@@ -352,6 +352,7 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 .tile .tr{display:flex;gap:6px;align-items:flex-start;margin-top:2px}.tile .tr i{font-style:normal;flex:none;min-width:20px;text-align:center;border-radius:4px;background:rgba(241,231,207,.1);font-size:11px;padding:0 3px}
 .tile .tr.a{color:var(--brass)}.tile .tr.a i{background:var(--brass);color:#1a1410}
 .tile .parts{color:var(--ivory);margin-bottom:3px}.tile .parts .own{color:var(--brass)}
+.hav{width:52px;height:52px;image-rendering:pixelated;display:block;margin:0 auto 2px}.hav.s{width:30px;height:30px;display:inline-block;vertical-align:middle;margin:-6px 4px -4px 0}
 .stats{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 16px;margin:6px 0 4px;font-size:16px}
 .stats span:nth-child(odd){white-space:nowrap}
 .stats span:nth-child(even){font-family:'Do Hyeon',sans-serif;font-size:19px;color:var(--ivory);text-align:right}
@@ -5144,6 +5145,7 @@ const PATCH_NOTES=[
     ['change','레벨업 증강 간격이 점점 늘어나요 (4·4·5·5·6·6·7·7·8·8레벨). 빌드가 중후반에 완성돼요'],
     ['enemy','악몽: 각성 기본 배율 ×1.5 → ×1.35 (악몽 강화로 최대 ×1.55), 12분부터 징조·한 방 상한·잡몹 체력이 더 빨리 강해져요'],
     ['change','🏆 명예의 전당은 <b>악몽</b>만 남겼어요. 낮은 난이도는 악몽으로 가는 길이에요'],
+    ['new','🏆 명예의 전당에 각자의 직업과 장착한 캐릭터 색이 보여요 (이번 버전부터 등록한 기록)'],
     ['enemy','☠ <b>악몽의 징조</b>: 악몽 12분부터 보라색 예고 공격(운석·돌진선)이 나를 노려요. 맞으면 크게 아프지만 <b>피할 수 있어요</b>'],
     ['buff','대신 악몽에서 잡몹에게 닿아서 받는 피해는 줄었어요 (한 방 상한 ×0.75). 잘 피할수록 오래 버텨요'],
     ['new','💨 <b>완벽한 회피</b>: 큰 공격이 닿는 순간 대시로 피하면 슬로 모션 + 0.6초 무적 + 대시 재사용 절반 + 보너스 점수 (+150, 한 판 20번까지). 예고 공격·보스 공격만 해당'],
@@ -5823,10 +5825,10 @@ let RDB=null,RMYID=null,BOARD=null,RSTATE='loading',SHEET=false;
 const SHEET_URL='https://script.google.com/macros/s/AKfycbzn75dnRK3s6yixe30pL2Dvc7aQSGCirLQDyYxYFh-FJB8F-ZrNQY42pOdi1CeDga5S/exec';
 const myNick=()=>{try{return localStorage.getItem('chipdungeon_nick')||'';}catch(e){return '';}};
 // 난이도: diff 칸 우선, 없으면 직업 칸의 ':' 뒤. 예전 서버가 12자로 잘라 저장한 것('knight:night' 등)도 앞글자로 알아봄
-const clsS=b=>String(b.cls||'').split('~')[0],bonusOf=b=>+b.bonus||+String(b.cls||'').split('~')[1]||0;
+const clsS=b=>String(b.cls||'').split('~')[0].split('@')[0],skinOf=b=>(String(b.cls||'').split('~')[0].split('@')[1])||b.skin||'',bonusOf=b=>+b.bonus||+String(b.cls||'').split('~')[1]||0;
 const dOf=b=>{const c=clsS(b).split('#')[0];let k=String(b.diff||(c.includes(':')?c.split(':')[1]:'normal'));if(DIFF[k])return k;return Object.keys(DIFF).find(x=>k&&x.startsWith(k))||'normal';};
 const calcScore=b=>scoreOf({...b,diff:dOf(b),bonus:bonusOf(b)});
-function normBoard(list){return list.map(b=>({...b,diff:dOf(b),fx:clsS(b).split('#')[1]||b.fx||'',bonus:bonusOf(b),cls:clsS(b).split('#')[0].split(':')[0],name:String(b.name||''),time:+b.time||0,lvl:+b.lvl||0,kills:+b.kills||0,bosses:+b.bosses||0,comment:String(b.comment||''),score:calcScore(b)})).sort((a,b)=>b.score-a.score);}
+function normBoard(list){return list.map(b=>({...b,diff:dOf(b),fx:clsS(b).split('#')[1]||b.fx||'',bonus:bonusOf(b),skin:skinOf(b),cls:clsS(b).split('#')[0].split(':')[0],name:String(b.name||''),time:+b.time||0,lvl:+b.lvl||0,kills:+b.kills||0,bosses:+b.bosses||0,comment:String(b.comment||''),score:calcScore(b)})).sort((a,b)=>b.score-a.score);}
 // 내 등록 기록 백업: 서버가 어떤 기록(예: 새 난이도)을 반영하지 못해도 내 화면에서는 사라지지 않게. 서버에 더 높은 기록이 있으면 서버 것을 씀
 const myRecs=()=>{try{return JSON.parse(localStorage.getItem('chanseo_myrec')||'{}');}catch(e){return {};}};
 const saveMyRec=r=>{try{const m=myRecs();const old=m[r.diff];if(!old||scoreOf({...r})>=scoreOf({...old}))m[r.diff]=r;localStorage.setItem('chanseo_myrec',JSON.stringify(m));}catch(e){}};
@@ -5845,6 +5847,14 @@ const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 }catch(e){loadSheet();}})();
 let HOF_ALL=false,HOF_DIFF=null;
 const HOF_KEYS=['nightmare'];
+// 명예의 전당 아바타: 그 기록의 직업 + 장착한 캐릭터 색(외형)
+const HOF_AV={};
+function hofAv(cls,skin){const key=cls+'|'+skin;if(HOF_AV[key])return HOF_AV[key];if(!CLASSES[cls]||typeof HERO==='undefined'||!HERO.canvas)return '';
+  try{const c=document.createElement('canvas');c.width=c.height=56;const g=c.getContext('2d');g.imageSmoothingEnabled=false;const x=skin?COS.find(q=>q.k===skin):null;
+    HERO.draw(cls,'idle',0,0,false);g.imageSmoothingEnabled=HERO.hires;if(x&&x.cat==='skin'){try{skinPre(g,28,38,x,0,()=>{});}catch(e){}}
+    g.save();if(x&&x.cat==='skin'){g.filter=x.f||'none';if(x.a)g.globalAlpha=x.a;}g.translate(28,62);g.scale(1.9,1.9);g.drawImage(HERO.canvas,...HERO.box);g.restore();
+    if(x&&x.cat==='skin'){try{skinPost(g,28,38,x,0);}catch(e){}}
+    return HOF_AV[key]=c.toDataURL();}catch(e){return '';}}
 function boardHtml(){
   // 명예의 전당은 악몽(최종 컨텐츠)만. 낮은 난이도는 거쳐 가는 단계라 순위를 따로 두지 않음
   const hd=HOF_KEYS.includes(HOF_DIFF)?HOF_DIFF:HOF_KEYS[0];
@@ -5859,8 +5869,8 @@ function boardHtml(){
   const me=b=>SHEET?(b.name&&b.name===myNick()):!!RMYID&&String(b.id).startsWith(RMYID);
   const cn=b=>CLASSES[b.cls]?CLASSES[b.cls].n:'?';
   const nm=b=>`<span class="hn ${b.fx?'hx-'+b.fx:''}">${b.fx==='hf_crown'?'👑 ':''}${esc(b.name.slice(0,12)||'이름 없음')}</span>${b.local?'<small title="서버에 아직 반영되지 않은 이 기기의 기록" style="opacity:.7"> 📱</small>':''}`;
-  const top=B.slice(0,3).map((b,i)=>`<div class="pcard p${i+1} ${me(b)?'me':''} ${b.fx?'hc-'+b.fx:''}"><span class="pm">${['🥇','🥈','🥉'][i]}</span><span class="pn">${nm(b)}</span><span class="pc">${DIFF[b.diff]&&DIFF[b.diff].endless?'☠ '+((+b.bosses||0)+1)+'단계 · ':b.bosses>=4?'👑 클리어 · ':''}${cn(b)} · Lv ${b.lvl} · ${f(b.time)}</span><span class="ps">${b.score.toLocaleString()}점</span><span class="pq ${b.comment?'':'empty'}">${b.comment?'“'+esc(b.comment.slice(0,40))+'”':'한마디 없음'}</span></div>`).join('');
-  const rest=B.slice(3,HOF_ALL?30:7).map((b,i)=>`<div class="rrow ${me(b)?'me':''} ${b.fx?'hc-'+b.fx:''}"><span class="rn">${i+4}</span><span class="rnm"><b>${nm(b)}${me(b)?' (나)':''}</b>${b.comment?`<i>“${esc(b.comment.slice(0,40))}”</i>`:''}</span><span class="rc">${DIFF[b.diff]&&DIFF[b.diff].endless?'☠'+((+b.bosses||0)+1)+'단계 ':b.bosses>=4?'👑 ':''}${cn(b)}<br>Lv ${b.lvl} · ${f(b.time)}</span><span class="rt">${b.score.toLocaleString()}</span></div>`).join('');
+  const top=B.slice(0,3).map((b,i)=>`<div class="pcard p${i+1} ${me(b)?'me':''} ${b.fx?'hc-'+b.fx:''}"><span class="pm">${['🥇','🥈','🥉'][i]}</span>${(()=>{const a=hofAv(b.cls,b.skin);return a?`<img class="hav" src="${a}" alt="">`:'';})()}<span class="pn">${nm(b)}</span><span class="pc">${DIFF[b.diff]&&DIFF[b.diff].endless?'☠ '+((+b.bosses||0)+1)+'단계 · ':b.bosses>=4?'👑 클리어 · ':''}${cn(b)} · Lv ${b.lvl} · ${f(b.time)}</span><span class="ps">${b.score.toLocaleString()}점</span><span class="pq ${b.comment?'':'empty'}">${b.comment?'“'+esc(b.comment.slice(0,40))+'”':'한마디 없음'}</span></div>`).join('');
+  const rest=B.slice(3,HOF_ALL?30:7).map((b,i)=>`<div class="rrow ${me(b)?'me':''} ${b.fx?'hc-'+b.fx:''}"><span class="rn">${i+4}</span><span class="rnm"><b>${(()=>{const a=hofAv(b.cls,b.skin);return a?`<img class="hav s" src="${a}" alt="">`:'';})()}${nm(b)}${me(b)?' (나)':''}</b>${b.comment?`<i>“${esc(b.comment.slice(0,40))}”</i>`:''}</span><span class="rc">${DIFF[b.diff]&&DIFF[b.diff].endless?'☠'+((+b.bosses||0)+1)+'단계 ':b.bosses>=4?'👑 ':''}${cn(b)}<br>Lv ${b.lvl} · ${f(b.time)}</span><span class="rt">${b.score.toLocaleString()}</span></div>`).join('');
   const more=B.length>7?`<button class="btn more" id="hofMore">${HOF_ALL?'접기':`전체 순위 보기 (${Math.min(B.length,30)}위까지)`}</button>`:'';
   return head+`<div class="podium">${top}</div>${rest?`<div class="rank">${rest}</div>`:''}${more}`;
 }
@@ -5875,7 +5885,7 @@ async function submitScore(nick,comment,run){
   const cur=(BOARD||[]).find(b=>b.diff===dk&&(sheet?b.name===nick:b.id===docId));
   const better=!cur||run.score>cur.score;
   if(!better&&!comment){say(`'${nick}'의 이전 최고 점수(${cur.score.toLocaleString()}점)가 더 높아서 그대로 둘게요. 한마디를 쓰면 한마디만 바꿀 수 있어요.`);return;}
-  const hf=cosEq('hof');const rec={name:nick,cls:run.cls+(dk==='normal'?'':':'+dk)+(hf?'#'+hf.k:'')+(run.bonus?'~'+run.bonus:''),bonus:run.bonus||0,diff:dk,time:run.sec,lvl:run.lvl,kills:run.kills,bosses:run.bosses,gold:run.gold||0,score:run.score,comment};
+  const hf=cosEq('hof');const rec={name:nick,cls:run.cls+(dk==='normal'?'':':'+dk)+(hf?'#'+hf.k:'')+(cosEq('skin')?'@'+cosEq('skin').k:'')+(run.bonus?'~'+run.bonus:''),bonus:run.bonus||0,diff:dk,time:run.sec,lvl:run.lvl,kills:run.kills,bosses:run.bosses,gold:run.gold||0,score:run.score,comment};
   const done=better?`명예의 전당에 ${run.score.toLocaleString()}점으로 등록했어요!`:`이전 최고 점수(${cur.score.toLocaleString()}점)가 더 높아서 점수는 그대로 두고 한마디만 바꿨어요.`;
   say('등록 중…');if(btn)btn.disabled=true;
   try{
