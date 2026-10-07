@@ -4956,11 +4956,15 @@ function gameOver(win){
   // 악몽: 10분 이상 버티면 봉인 해제권 2장
   if(endless()&&S.gt>=600&&tkNeed()>0){const g=Math.min(2,tkNeed());META.tk=(META.tk||0)+g;unlocked='🎟 직업 봉인 해제권 +'+g;}
   {if(win){META.ccls=META.ccls||{};META.ccls[S.cls]=1;}achCheck({win,diff:S.diff||'normal',t:S.gt+(S.bt||0),kills:S.st.kills||0,lvl:S.lvl,maxGold:Math.max(S.maxGold||0,S.gold),uc:S.augs.some(a=>a.uc),augN:S.augs.filter(a=>a.t!=='v').length});}
-  if(win){META.clears=META.clears||{};const d=S.diff||'normal',first=!META.clears[d];META.clears[d]=(META.clears[d]||0)+1;const nx=DKEYS[DKEYS.indexOf(d)+1];if(first&&nx)unlocked=DIFF[nx].n;if((d==='god'||d==='hell')&&tkNeed()>0){META.tk=(META.tk||0)+1;unlocked=(unlocked?unlocked+' 난이도 열림 · ':'')+'🎟 직업 봉인 해제권 +1';}}
+  const unl=[];if(unlocked)unl.push(unlocked);
+  if(win){META.clears=META.clears||{};const d=S.diff||'normal',first=!META.clears[d],spB=speedMax(),tB={g:tierOpen('g'),p:tierOpen('p'),v:tierOpen('v')};META.clears[d]=(META.clears[d]||0)+1;const nx=DKEYS[DKEYS.indexOf(d)+1];
+    if(first){if(nx)unl.push(`🗺 ${DIFF[nx].n} 난이도`);for(const t of ['g','p','v'])if(!tB[t]&&tierOpen(t))unl.push(t==='v'?'💎 VIP 상점':`✨ ${TIER[t].n} 증강`);if(speedMax()>spB)unl.push(`⏩ ${speedMax()}배속`);}
+    if((d==='god'||d==='hell')&&tkNeed()>0){META.tk=(META.tk||0)+1;unl.push('🎟 직업 봉인 해제권 +1');}}
+  unlocked=unl.join(' · ');
   const sec=Math.floor(S.gt),score=runScore(),medals=runMedals(score);META.medals+=medals;META.total+=medals;saveMeta();
   if(sec>best){best=sec;try{localStorage.setItem('chipdungeon_best_v5',String(best));}catch(e){}}
   const fmt=x=>`${Math.floor(x/60)}분 ${x%60}초`;
-  show(`${unlocked?`<div class="medal" style="justify-content:center"><span>🔓 <b>${unlocked}</b>${unlocked.includes('봉인 해제권')?'':' 난이도가 열렸습니다!'}</span></div>`:''}${win?`<h2>🏆 클리어!</h2><p class="sub">10분을 버티고 ${(ET[(S.bossT||[])[3]]||ET.boss4).n}을(를) 쓰러뜨렸습니다. 보스전에 ${fmt(Math.floor(S.bt))} 걸렸어요.</p>`:`<h2>${endless()?'악몽 '+(S.chap+1)+'단계 도달':S.quitEnd?'여기서 정산했습니다':'쓰러졌습니다'}</h2><p class="sub">${endless()?`보스 ${S.st.bosses||0}마리를 잡고`:Math.min(4,S.chap+1)+'장에서'} ${fmt(sec)} 버텼습니다.${S.bossI>=0?` (${ET[bossTypeOf(S.bossI)].n}에게 패배)`:''}</p>`}
+  show(`${unlocked?`<div class="medal" style="justify-content:center"><span>🔓 새로 해금: <b>${unlocked}</b></span></div>`:''}${win?`<h2>🏆 클리어!</h2><p class="sub">10분을 버티고 ${(ET[(S.bossT||[])[3]]||ET.boss4).n}을(를) 쓰러뜨렸습니다. 보스전에 ${fmt(Math.floor(S.bt))} 걸렸어요.</p>`:`<h2>${endless()?'악몽 '+(S.chap+1)+'단계 도달':S.quitEnd?'여기서 정산했습니다':'쓰러졌습니다'}</h2><p class="sub">${endless()?`보스 ${S.st.bosses||0}마리를 잡고`:Math.min(4,S.chap+1)+'장에서'} ${fmt(sec)} 버텼습니다.${S.bossI>=0?` (${ET[bossTypeOf(S.bossI)].n}에게 패배)`:''}</p>`}
   <div class="medal"><span>최종 점수 <b>${score.toLocaleString()}</b></span><span>🏅 메달 <b>+${medals}</b> <small>${medalClear()?`(클리어 보너스 +${medalClear()} 포함) `:''}(보유 ${META.medals})</small></span></div>
   <div class="stats">
     <span>난이도</span><span>${dfM().n}${dfM().sc>1?` (점수 ×${dfM().sc})`:''}</span>
@@ -5766,8 +5770,10 @@ function autoMoveVec0(){
 }
 function cycleZoom(){ZOOM=(ZOOM+1)%ZOOM_N;try{localStorage.setItem('chanseo_zoom',ZOOM);}catch(e){}resize();refreshAutoBtns();toast(`시야 ${ZOOM+1}단계 (${[1,1.25,1.5,1.75,2][ZOOM]}배 넓게)`);}
 $('zoomBtn').addEventListener('click',cycleZoom);
-function cycleSpeed(){AUTO.speed=((AUTO.speed||1)%5)+1;saveAuto();refreshAutoBtns();toast(AUTO.speed===1?'보통 속도':AUTO.speed+'배속');}
-function refreshAutoBtns(){$('zoomBtn').textContent='🔭 '+(ZOOM+1);const sb=$('speedBtn');sb.textContent='x'+(AUTO.speed||1);sb.classList.toggle('on',(AUTO.speed||1)>1);const a=$('autoPickBtn'),m=$('autoMoveBtn');a.textContent='자동 선택 '+(AUTO.pick?'ON':'OFF');m.textContent='자동 이동 '+(AUTO.move?'ON':'OFF');a.classList.toggle('on',AUTO.pick);m.classList.toggle('on',AUTO.move);}
+// 배속 해금: 처음엔 x1만. 일반·어려움·지옥·신을 클리어할 때마다 x2 → x3 → x4 → x5
+const speedMax=()=>1+['normal','hard','hell','god'].filter(k=>(META.clears||{})[k]).length;
+function cycleSpeed(){const mx=speedMax();if(mx<=1){toast('🔒 배속은 일반 난이도를 클리어하면 열려요');return;}AUTO.speed=((Math.min(AUTO.speed||1,mx))%mx)+1;saveAuto();refreshAutoBtns();toast(AUTO.speed===1?'보통 속도':AUTO.speed+'배속');}
+function refreshAutoBtns(){$('zoomBtn').textContent='🔭 '+(ZOOM+1);if((AUTO.speed||1)>speedMax())AUTO.speed=speedMax();const sb=$('speedBtn');sb.textContent='x'+(AUTO.speed||1);sb.classList.toggle('on',(AUTO.speed||1)>1);const a=$('autoPickBtn'),m=$('autoMoveBtn');a.textContent='자동 선택 '+(AUTO.pick?'ON':'OFF');m.textContent='자동 이동 '+(AUTO.move?'ON':'OFF');a.classList.toggle('on',AUTO.pick);m.classList.toggle('on',AUTO.move);}
 $('speedBtn').addEventListener('click',cycleSpeed);
 /* ---------- BGM ---------- */
 // 파일 없이 WebAudio로 만드는 칩튠. 실제 시간 기준으로 스케줄해서 게임 배속과 무관. 필드 곡 / 보스 곡 자동 전환
