@@ -94,6 +94,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 #live span{width:46px;height:46px;background:var(--ivory);border:2px solid var(--brass);border-radius:8px;display:grid;place-items:center;font-size:26px}
 #mini{position:absolute;right:12px;bottom:118px;width:130px;height:130px;border:2px solid rgba(214,169,74,.7);border-radius:10px;background:rgba(4,20,14,.75);pointer-events:none;display:none}
 @media (max-width:520px){#mini{width:104px;height:104px;bottom:112px}}
+.card .vtag{display:block;margin-top:6px;font-size:12.5px;font-weight:700;color:#8a5a00;border-top:1px dashed rgba(138,90,0,.45);padding-top:4px}
 #autoBar{position:absolute;right:12px;top:48px;z-index:46;display:none;gap:6px}
 #autoBar button{background:rgba(4,18,12,.65);color:var(--muted);border:1px solid rgba(241,231,207,.3);border-radius:8px;padding:5px 10px;font-family:'Do Hyeon',sans-serif;font-size:14px;cursor:pointer}
 #autoBar #speedBtn{min-width:44px;font-size:16px}
@@ -4581,7 +4582,7 @@ function renderAugBar(){const el=$('augBar');const k=!S||S.mode==='start'?'':S.a
   el.innerHTML=nor.map(([a,i])=>cell(a,i)).join('')+'<div class="aico empty"></div>'.repeat(Math.max(0,MAXA-nor.length))+'<div class="vipgap"></div>'+vip.map(([a,i])=>cell(a,i)).join('')+'<div class="aico empty vip"><i>👑</i></div>'.repeat(Math.max(0,VIP_MAX-vip.length));}
 {const bar=document.getElementById('augBar'),tip=document.getElementById('augTip');
   const show=(t)=>{const a=S&&S.augs[+t.dataset.ai];if(!a)return;const T=TIER[a.t]||{n:'',col:'#d6a94a'};tip.style.setProperty('--ac',T.col);
-    tip.innerHTML=`<b>${a.uc?"♾ ":""}${a.n}</b><small>${a.uc?"<span style=\"color:#ff9a3c\">고점 돌파</span> · ":""}${T.n}${a.tags.length?' · '+[...new Set(a.tags)].map(t=>TAGS[t].n+(a.tags.filter(x=>x===t).length>1?'×2':'')).join(', '):''}</small>${a.d}${a.t==='v'?(()=>{const v=VFUSIONS.find(f=>f.a===a.id);return v?`<small style="color:#ffd76a;margin-top:4px">👑 ${augDef(v.b).n}와 왕실 합체 가능 (함께 가지면 다음 증강 때 합체) → ${v.n}</small>`:'';})():''}`;
+    tip.innerHTML=`<b>${a.uc?"♾ ":""}${a.n}</b><small>${a.uc?"<span style=\"color:#ff9a3c\">고점 돌파</span> · ":""}${T.n}${a.tags.length?' · '+[...new Set(a.tags)].map(t=>TAGS[t].n+(a.tags.filter(x=>x===t).length>1?'×2':'')).join(', '):''}</small>${a.d}${a.t==='v'?(()=>{const v=VFUSIONS.find(f=>f.a===a.id);return v?`<small style="color:#ffd76a;margin-top:4px">👑 ${augDef(v.b).n}와 왕실 합체 가능 (함께 가지면 다음 증강 때 합체) → ${v.n}</small>`:'';})():''}${a.t!=='v'&&vipOpen()?(()=>{const v=VFUSIONS.find(f=>f.b===a.id);return v?`<small style="color:#ffd76a;margin-top:4px">👑 왕실 ${augDef(v.a).n}와 합체 가능 → ${v.n}${has(v.a)?' (다음 증강 때 합체)':' (상점에서 왕실을 사면)'}</small>`:'';})():''}`;
     tip.style.display='block';const r=t.getBoundingClientRect();tip.style.left=Math.min(innerWidth-tip.offsetWidth-8,Math.max(8,r.left))+'px';tip.style.top=Math.max(8,r.top-tip.offsetHeight-8)+'px';};
   const hideT=()=>{tip.style.display='none';};
   // 시너지 알약: 단계별 효과, 현재 단계는 ✔ 표시
@@ -4781,7 +4782,7 @@ function augHtml(a,i){
   const cut=x=>x.replace(/[.\s]+$/,''),bon=f=>cut(f.d).split(/,\s*(?=새 능력)/).map(x=>`<span class="fzd" style="color:#ffd76a">★ ${x}</span>`).join('');
   const fz=pfs.length>1?`<span class="fzbox"><span class="fzh">💥 합체 가능 · 짝을 골라 누르세요</span>${pfs.map(f=>`<span class="fzopt" data-fz="${f.id}"><span class="fzn2"><b>${pOf(f).n}</b>${wa(pOf(f).n)} 합체 → <b class="fzn">${f.n}</b></span>${bon(f)}</span>`).join('')}<span class="fzd" style="opacity:.6">고르지 않은 짝은 그대로 남아요</span></span>`
     :pf?`<span class="fzbox"><span class="fzh">💥 <b>${pOf(pf).n}</b>${wa(pOf(pf).n)} 합체 → <b class="fzn">${pf.n}</b></span>${bon(pf)}</span>`:'';
-  return `<button class="card aug tier-${a.t} ${pf?'canfuse':''} ${a.uc?'ucard':''}" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}${a.swap?' · <span style="color:#ff9ad0">교체</span>':''}</span><b>${a.n}</b><span class="ad">${a.d}${hpLoss(a.f,a.d,a.t==='v'||a.t==='f'||a.t==='d'?1:2)}</span><span class="chips">${chips}</span>${lines?`<span class="al">${lines}</span>`:''}${augPreview(a)}${fz}${a.up?'':VFUSIONS.filter(f=>f.b===a.id&&has(f.a)).map(f=>`<span class="fzbox" style="border-color:#ffd76a"><span class="fzh" style="color:#ffd76a">👑 보유 왕실 ${augDef(f.a).n}와 합체 가능 → <b class="fzn">${f.n}</b></span><span class="fzd">${f.d} (다음 증강을 얻을 때 합체)</span></span>`).join('')}</button>`;
+  return `<button class="card aug tier-${a.t} ${pf?'canfuse':''} ${a.uc?'ucard':''}" data-i="${i}" style="--rc:${T.col}"><span class="rr">${T.n}${a.swap?' · <span style="color:#ff9ad0">교체</span>':''}</span><b>${a.n}</b><span class="ad">${a.d}${hpLoss(a.f,a.d,a.t==='v'||a.t==='f'||a.t==='d'?1:2)}</span><span class="chips">${chips}</span>${lines?`<span class="al">${lines}</span>`:''}${augPreview(a)}${fz}${a.up?'':VFUSIONS.filter(f=>f.b===a.id&&has(f.a)).map(f=>`<span class="fzbox" style="border-color:#ffd76a"><span class="fzh" style="color:#ffd76a">👑 보유 왕실 ${augDef(f.a).n}와 합체 가능 → <b class="fzn">${f.n}</b></span><span class="fzd">${f.d} (다음 증강을 얻을 때 합체)</span></span>`).join('')}${a.up||!vipOpen()?'':VFUSIONS.filter(f=>f.b===a.id&&!has(f.a)).map(f=>`<span class="vtag">👑 왕실 「${augDef(f.a).n}」${wa(augDef(f.a).n)} 합체 → ${f.n}</span>`).join('')}</button>`;
 }
 function bindPeek(){
   ov.querySelectorAll('.card').forEach(c=>{let t=null;
@@ -5046,8 +5047,9 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
-  {v:10,t:'자동 기능 정리',items:[
-    ['change','자동 선택·자동 이동 버튼이 사라졌어요. 직접 조작하는 게임이에요 (개발자 테스트용으로만 남김)']]},
+  {v:10,t:'자동 기능 정리 · 왕실 합체 표시',items:[
+    ['change','자동 선택·자동 이동 버튼이 사라졌어요. 직접 조작하는 게임이에요 (개발자 테스트용으로만 남김)'],
+    ['new','👑 왕실 증강과 합체할 수 있는 증강은 증강 카드 아래와 슬롯 설명에 작게 표시돼요']]},
   {v:9,t:'고급 스탯 카드 다시 뽑기',items:[
     ['buff','증강 대신 받은 고급·최고급 스탯 카드는 <b>다시 뽑아도 등급이 유지</b>돼요 (예전엔 다시 뽑으면 일반 카드로 돌아갔음)'],
     ['change','다시 뽑아도 남은 고급 카드 장수가 줄지 않아요. 고급 카드 화면에는 🎁 표시가 떠요']]},
