@@ -2582,10 +2582,11 @@ function pDmg(){const p=S.p;let d=effDmg(p);
   if(p.adrT>0)d*=1+lv3('adrenaline',.2,.3,.4);
   if(has('edge'))d*=1+Math.min(has('f_empire')?1:.6,Math.floor(S.gold/1000)*.06);
   d*=1+Math.max(0,rawRate()/RATE_CAP()-1)*.5;
-  // 악몽 각성: 1단계(×1.5)로 시작해 보스를 잡을 때마다 최종 공격 배율의 바닥이 ×1.5씩 오름. 조합이 덜 맞은 직업도 뒤로 갈수록 폭발적으로 강해짐
+  // 악몽 각성: 1단계(×1.5)로 시작해 보스를 잡을 때마다 최종 공격 배율의 바닥이 ×1.5씩, 최대 체력이 +12%씩 오름. 조합이 덜 맞은 직업도 뒤로 갈수록 폭발적으로 강해짐
   const aw=awakeF();if(aw>1){const b=effDmg(p);if(d<b*aw)d=b*aw;}
   return d;}
-const awakeN=()=>endless()?1+(S.st.bosses||0):0,awakeF=()=>Math.pow(1.5,awakeN());
+const AWAKE_HP=.12;
+const awakeN=()=>S&&endless()?1+((S.st&&S.st.bosses)||0):0,awakeF=()=>Math.pow(1.5,awakeN());
 function rawRate(){const p=S.p;let r=effRate(p)*(1+ex('jackpot')*.03)*(1+Math.max(0,moveSpd()-SPEED_CAP)/10*.03);if(has('a_still')&&!p.moving)r*=1+lv3('a_still',.35,.5,.65);
   if(tag('curse')>=2&&p.curT>0)r*=1.35;
   if(p.rage>0)r*=1+.06*p.rage;
@@ -2713,7 +2714,7 @@ const DKEYS=['normal','hard','hell','god','nightmare'];
 const endless=()=>!!dfM().endless;
 // 최대 체력 = 기본 체력(절대 수치 합) × (1 + 체력 % 합계). 공격력 %처럼 합연산이라 나중에 오르는 체력에도 계속 적용됨
 // 코드 곳곳의 p.maxHp+=X(절대 수치)는 그대로 두고, 매 프레임 차이를 기본 체력으로 옮겨 다시 곱함
-const hpPct=()=>{const p=S.p;return (p.hpP||0)+(has('k_bulwark')?armorEff()/10*lv3('k_bulwark',.008,.01,.012):0)+(has('p_aegis')?tag('holy')*lv3('p_aegis',.06,.08,.1):0)+(has('b_hide')?(S.st.kills||0)/100*lv3('b_hide',.008,.01,.012):0);};
+const hpPct=()=>{const p=S.p;return (p.hpP||0)+awakeN()*AWAKE_HP+(has('k_bulwark')?armorEff()/10*lv3('k_bulwark',.008,.01,.012):0)+(has('p_aegis')?tag('holy')*lv3('p_aegis',.06,.08,.1):0)+(has('b_hide')?(S.st.kills||0)/100*lv3('b_hide',.008,.01,.012):0);};
 function hpSync(){const p=S.p;if(!p)return;const m=Math.max(.2,1+hpPct());if(p.hpB==null){p.hpB=p.maxHp;p.hpLM=p.maxHp;}
   if(p.maxHp!==p.hpLM)p.hpB=Math.max(1,p.hpB+(p.maxHp-p.hpLM));
   const nm=Math.max(1,Math.round(p.hpB*m));if(nm!==p.maxHp){if(nm>p.maxHp)p.hp+=nm-p.maxHp;p.maxHp=nm;}p.hp=Math.min(p.hp,p.maxHp);p.hpLM=p.maxHp;}
@@ -2932,7 +2933,7 @@ function bossDown(e){
   S.shake=Math.max(S.shake,.5);S.st.bosses=(S.st.bosses||0)+1;(S.st.btimes=S.st.btimes||[]).push(Math.round(((S.bt||0)-(S.bStart||0))*10)/10);for(const c of S.dr){if(c.xp)gainXp(c.v);else addGold(c.v);}S.dr=[];S.bossI=-1;S.boss=null;S.arena=null;S.tele=[];S.hz=[];S.pr=S.pr.filter(b=>b.mine);S.chap++;
   const p=S.p;p.hp=Math.min(p.maxHp,p.hp+p.maxHp*(META.sk.bossHeal?.6:.3));
   if(S.chap>=CHAPTERS&&!endless()){S.win=true;S.winT=null;S.clT=0;p.inv=99;S.bannerT=0;toast('🏆 보물을 무너뜨렸다! 남은 적을 모두 처치하세요');}
-  else{if(endless()){let m=`🔥 각성 ${awakeN()}단계! 최종 공격 배율 최소 ×${awakeF().toFixed(1)}`;if(S.chap>=4){S.nmB=(S.nmB||0)+1;p.dmgP=(p.dmgP||0)+.15;p.hpP=(p.hpP||0)+.08;m+=` · 악몽 축복 ${S.nmB}중첩`;}toast(m);}
+  else{if(endless()){let m=`🔥 각성 ${awakeN()}단계! 최종 공격 배율 최소 ×${awakeF().toFixed(1)}, 최대 체력 +${Math.round(awakeN()*AWAKE_HP*100)}%`;if(S.chap>=4){S.nmB=(S.nmB||0)+1;p.dmgP=(p.dmgP||0)+.15;p.hpP=(p.hpP||0)+.08;m+=` · 악몽 축복 ${S.nmB}중첩`;}toast(m);}
     S.bonusAug++;S.shopPend=true;S.keys=(S.keys||0)+1;toast('보스 격파! 🔑 열쇠 획득. 보상 후 상점이 열립니다');}
 }
 function go(e,st){e.bst=st;e.bt=0;e.f=1;}
@@ -3401,7 +3402,7 @@ function clsRows(row){const p=S.p,c=S.cls,r=[];
   if(c==='elem'||tag('elem')>=1||has('elemcoin'))r.push(row('원소 효과 피해','+'+Math.round((elM()-1)*100)+'%'));
   {const c=S.dcat||{};let t=0;for(const k in c)t+=c[k];if(t>0){const l=Object.entries(c).filter(([k,v])=>v/t>=.03).sort((a,b)=>b[1]-a[1]).map(([k,v])=>(DSRC_N[k]||k)+' '+Math.round(v/t*100)+'%');r.push(row('최근 피해 비중',`<span class="swrap">${l.join('<br>')}</span>`,'루트 스탯 카드는 이 비중이 클수록 자주 나옴'));}}
   if(p.cdR)r.push(row('주기형 효과 쿨타임','−'+Math.round(p.cdR*100)+'% <small>/ 40%</small>'));
-  if(awakeN())r.push(row('각성',`${awakeN()}단계 · 최종 공격 배율 최소 ×${awakeF().toFixed(1)}`));
+  if(awakeN())r.push(row('각성',`${awakeN()}단계 · 최종 공격 배율 최소 ×${awakeF().toFixed(1)} · 최대 체력 +${Math.round(awakeN()*AWAKE_HP*100)}%`));
   if(furyOn())r.push(row('광란',`${p.fy||0} / ${furyCap()}, 지속 ${4+(p.fyD||0)+(has('bloodlust')?2:0)+(has('b_frenzy')?2:0)}초`));
   if(c==='druid'||has('thornseed')||tag('nature')>=1||has('gravebloom')||has('gravvine'))r.push(row('덩굴 지대',`범위 +${Math.round((p.vnR||0)*100)}%, 피해 +${Math.round((p.vnD||0)*100)}%`));
   if(c==='alch'||tag('alchemy')>=1)r.push(row('물약',`범위 +${Math.round((p.ptR||0)*100)}%, 피해 +${Math.round((potM()-1)*100)}%`));
