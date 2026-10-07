@@ -2619,12 +2619,13 @@ function pDmg(){const p=S.p;let d=effDmg(p);
   if(p.adrT>0)d*=1+lv3('adrenaline',.2,.3,.4);
   if(has('edge'))d*=1+Math.min(has('f_empire')?1:.6,Math.floor(S.gold/1000)*.06);
   d*=1+Math.max(0,rawRate()/RATE_CAP()-1)*.5;
+  d*=1+.02*mlv('atk');
   // 악몽 각성: 1단계(×1.5)로 시작해 보스를 잡거나 2분 30초를 버틸 때마다(둘 중 많은 쪽) 최종 공격 배율의 바닥이 ×1.5씩, 최대 체력이 +12%씩 오름. 조합이 덜 맞은 직업도 뒤로 갈수록 폭발적으로 강해짐
   const aw=awakeF();if(aw>1){const b=effDmg(p);if(d<b*aw)d=b*aw;}
   return d;}
 const AWAKE_HP=.12;
 const awakeN=()=>S&&endless()?1+mlv('n_awkst')+Math.max((S.st&&S.st.bosses)||0,Math.floor(((S.gt||0)+(S.bt||0))/150)):0,awakeF=()=>Math.pow(1.35+.04*mlv('n_awk'),awakeN()),awHp=()=>AWAKE_HP+.02*mlv('n_awkhp');
-function rawRate(){const p=S.p;let r=effRate(p)*(1+ex('jackpot')*.03)*(1+Math.max(0,moveSpd()-SPEED_CAP)/10*.03);if(has('a_still')&&!p.moving)r*=1+lv3('a_still',.35,.5,.65);
+function rawRate(){const p=S.p;let r=(1+.015*mlv('rate'))*effRate(p)*(1+ex('jackpot')*.03)*(1+Math.max(0,moveSpd()-SPEED_CAP)/10*.03);if(has('a_still')&&!p.moving)r*=1+lv3('a_still',.35,.5,.65);
   if(tag('curse')>=2&&p.curT>0)r*=1.35;
   if(p.rage>0)r*=1+.06*p.rage;
   if(tag('rapid')>=4&&p.rpS)r*=1+.01*p.rpS;
@@ -2753,7 +2754,7 @@ const endless=()=>!!dfM().endless;
 // 최대 체력 = 기본 체력(절대 수치 합) × (1 + 체력 % 합계). 공격력 %처럼 합연산이라 나중에 오르는 체력에도 계속 적용됨
 // 코드 곳곳의 p.maxHp+=X(절대 수치)는 그대로 두고, 매 프레임 차이를 기본 체력으로 옮겨 다시 곱함
 const hpPct=()=>{const p=S.p;return (p.hpP||0)+awakeN()*awHp()+(has('k_bulwark')?armorEff()/10*lv3('k_bulwark',.008,.01,.012):0)+(has('p_aegis')?tag('holy')*lv3('p_aegis',.06,.08,.1):0)+(has('b_hide')?(S.st.kills||0)/100*lv3('b_hide',.008,.01,.012):0);};
-function hpSync(){const p=S.p;if(!p)return;const m=Math.max(.2,1+hpPct());if(p.hpB==null){p.hpB=p.maxHp;p.hpLM=p.maxHp;}
+function hpSync(){const p=S.p;if(!p)return;const m=Math.max(.2,1+hpPct())*(1+.02*mlv('hp'));if(p.hpB==null){p.hpB=p.maxHp;p.hpLM=p.maxHp;}
   if(p.maxHp!==p.hpLM)p.hpB=Math.max(1,p.hpB+(p.maxHp-p.hpLM));
   const nm=Math.max(1,Math.round(p.hpB*m));if(nm!==p.maxHp){if(nm>p.maxHp)p.hp+=nm-p.maxHp;p.maxHp=nm;}p.hp=Math.min(p.hp,p.maxHp);p.hpLM=p.maxHp;}
 // 한 방 상한 (최대 체력 대비). 악몽은 10분부터 1분마다 +3% (12분에 76%), 12분부터 1분마다 ×1.1로 점점 빠르게 풀림
@@ -2969,6 +2970,7 @@ function bossFx(e,final){const x=e.x||S.p.x,y=e.y||S.p.y;S.smT=final?1.1:.7;S.fl
 function bossDown(e){
   META.bk=META.bk||{};META.bk[e.type]=1;if(!S.bHit){achUnlock('a_nohit');addBonus('nohit',BONUS_PTS.nohit);}achCheck(null);
   if(mlv('seal')>0){S.seals=(S.seals||0)+1;toast('🔒 봉인 +1회');}
+  if(META.sk.bossMedal)addBonus('bossM',300);
   bossFx(e,S.chap+1>=CHAPTERS&&!endless());
   S.shake=Math.max(S.shake,.5);S.st.bosses=(S.st.bosses||0)+1;(S.st.btimes=S.st.btimes||[]).push(Math.round(((S.bt||0)-(S.bStart||0))*10)/10);for(const c of S.dr){if(c.xp)gainXp(c.v);else addGold(c.v);}S.dr=[];S.bossI=-1;S.boss=null;S.arena=null;S.tele=[];S.hz=[];S.pr=S.pr.filter(b=>b.mine);S.chap++;
   const p=S.p;p.hp=Math.min(p.maxHp,p.hp+p.maxHp*(META.sk.bossHeal?.6:.3));
@@ -3587,7 +3589,7 @@ function hurtP(amt,src){
   if(has('heart')&&!hitRec(1.5))amt*=has('f_colossus')?.4:.6;
   if(tag('guard')>=2&&!(p.g2cd>0)){p.g2cd=1;S.rings.push({x:p.x,y:p.y,r:10,max:95,life:.3,col:'#9fd3ff'});for(const e of S.en){if(!e.alive||e.boss||d2(e,p)>95*95)continue;const a=Math.atan2(e.y-p.y,e.x-p.x);e.x+=Math.cos(a)*40;e.y+=Math.sin(a)*40;e.slowT=Math.max(e.slowT||0,1);}}
   if(has('unbreak')&&p.hits%Math.min(J(),lv3('unbreak',7,6,5))===0){ftext(p.x,p.y-24,'불굴','#9fd3ff',16);explode(p.x,p.y,90,pDmg()*1.5,'#9fd3ff');p.inv=.3;return;}
-  amt*=p.vuln;
+  amt*=p.vuln*(1-.015*mlv('armor'));
   if(p.skDrT>0)amt*=1-(p.skDr||0);
   if(has('drg_scale'))amt*=.75;
   if(has('n_armor')&&S.skel)amt*=1-Math.min(.3,S.skel.filter(k=>k.life>0).length*lv3('n_armor',.015,.02,.025));
@@ -4099,7 +4101,7 @@ function update(dt){
     }else{const sp=Math.min(SPEED_CAP,moveSpd())*(S.buffT.slow>0?.6:1);p.x+=mx*sp*dt;p.y+=my*sp*dt;}
     p.x=clamp(p.x,p.r+10,WW-p.r-10);p.y=clamp(p.y,p.r+10,WH-p.r-10);pushOut(p,p.r);
     if(S.arena){const A=S.arena;A.r+=(A.tr-A.r)*Math.min(1,dt*.8);const m=A.r-p.r-4;p.x=clamp(p.x,A.x-m,A.x+m);p.y=clamp(p.y,A.y-m,A.y+m);}
-    {const bR=(tag('nature')>=2?1.5:0)+(has('yggdrasil')&&inVine(p)?p.maxHp*.02:0)+(has('warpaint')?(p.fy||0)*lv3('warpaint',.08,.1,.15):0)+(has('worldtree')?3:0)+(has('f_ancient')&&inVine(p)?p.maxHp*.02:0)+(has('bastion')&&nearTurret()?3*(has('f_citadel')?2:1):0)+(has('sanctuary')&&!p.moving?lv3('sanctuary',1.5,2,3):0);const rgM=has('f_hydra')?3:(has('thick')&&hitRec()?3:1)*(has('troll')&&p.noHitT>3?3:1);if(p.regen||bR||has('f_immortal'))p.hp=Math.min(p.maxHp,p.hp+(p.regen*rgM*(p.skRgT>0?5:1)*rgHpM()*(has('d_photo')&&!p.moving?2:1)*(season()===0?2:1)+bR+(has('f_immortal')?p.maxHp*.01:0))*dt*healM());}
+    {const bR=p.maxHp*.0005*mlv('regen')+(tag('nature')>=2?1.5:0)+(has('yggdrasil')&&inVine(p)?p.maxHp*.02:0)+(has('warpaint')?(p.fy||0)*lv3('warpaint',.08,.1,.15):0)+(has('worldtree')?3:0)+(has('f_ancient')&&inVine(p)?p.maxHp*.02:0)+(has('bastion')&&nearTurret()?3*(has('f_citadel')?2:1):0)+(has('sanctuary')&&!p.moving?lv3('sanctuary',1.5,2,3):0);const rgM=has('f_hydra')?3:(has('thick')&&hitRec()?3:1)*(has('troll')&&p.noHitT>3?3:1);if(p.regen||bR||has('f_immortal'))p.hp=Math.min(p.maxHp,p.hp+(p.regen*rgM*(p.skRgT>0?5:1)*rgHpM()*(has('d_photo')&&!p.moving?2:1)*(season()===0?2:1)+bR+(has('f_immortal')?p.maxHp*.01:0))*dt*healM());}
     p.noHitT+=dt;{const bm=barrierMax();if(p.barrier>bm)p.barrier=bm;if(p.noHitT>(has('f_insure')?1.5:3)&&p.barrier<bm)p.barrier=Math.min(bm,p.barrier+bm*.35*dt);}
     if(S.buffT.jack>0)p.inv=Math.max(p.inv,.05);
     p.hurtT=Math.max(0,(p.hurtT||0)-dt);p.atkT=Math.max(0,(p.atkT||0)-dt);p.shadowT=Math.max(0,(p.shadowT||0)-dt);p.swingT=Math.max(0,(p.swingT||0)-dt);if(p.rageT>0){p.rageT-=dt;if(p.rageT<=0)p.rage=0;}
@@ -5264,12 +5266,12 @@ function openSync(){const code=syncExport();
 function saveMeta(){try{localStorage.setItem('chanseo_meta',JSON.stringify(META));}catch(e){}}
 // 영구 강화: 단계당 효과는 작게, 항목과 단계는 많게 (오래 모으는 성장)
 const MSTAT=[
-  {k:'atk',n:'공격력',d:'+2%',max:10,c:6},{k:'rate',n:'공격 속도',d:'+1.5%',max:8,c:9},{k:'hp',n:'최대 체력',d:'+6',max:10,c:6},
-  {k:'armor',n:'방어력',d:'+1',max:10,c:6},{k:'regen',n:'체력 재생',d:'+0.1',max:5,c:9},{k:'ls',n:'흡혈',d:'+0.1%',max:5,c:12},
-  {k:'crit',n:'치명타 확률',d:'+0.5%',max:6,c:9},{k:'critm',n:'치명타 피해',d:'+4%',max:6,c:9},{k:'range',n:'사거리',d:'+2%',max:5,c:6},
-  {k:'spd',n:'이동 속도',d:'+1%',max:5,c:6},{k:'dash',n:'대시 재사용',d:'-2%',max:5,c:9},{k:'magnet',n:'흡수 범위',d:'+8%',max:5,c:3},
-  {k:'xp',n:'경험치 획득',d:'+3%',max:10,c:9},{k:'gold',n:'골드 획득',d:'+5%',max:8,c:6},{k:'sgold',n:'시작 골드',d:'+25',max:6,c:3},
-  {k:'luck',n:'행운',d:'+1',max:5,c:12},
+  {k:'atk',n:'공격력',d:'최종 피해 +2% (곱하기)',max:10,c:15},{k:'rate',n:'공격 속도',d:'최종 공격 속도 +1.5% (곱하기)',max:8,c:22},{k:'hp',n:'최대 체력',d:'최종 최대 체력 +2% (곱하기)',max:10,c:15},
+  {k:'armor',n:'단단함',d:'최종 받는 피해 −1.5%',max:10,c:15},{k:'regen',n:'체력 재생',d:'초당 최대 체력의 0.05% 회복',max:5,c:22},{k:'ls',n:'흡혈',d:'+0.1%',max:5,c:30},
+  {k:'crit',n:'치명타 확률',d:'+0.5%',max:6,c:22},{k:'critm',n:'치명타 피해',d:'+4%',max:6,c:22},{k:'range',n:'사거리',d:'+2%',max:5,c:15},
+  {k:'spd',n:'이동 속도',d:'+1%',max:5,c:15},{k:'dash',n:'대시 재사용',d:'-2%',max:5,c:22},{k:'magnet',n:'흡수 범위',d:'+8%',max:5,c:8},
+  {k:'xp',n:'경험치 획득',d:'+3%',max:10,c:22},{k:'gold',n:'골드 획득',d:'+5%',max:8,c:15},{k:'sgold',n:'시작 골드',d:'+25',max:6,c:8},
+  {k:'luck',n:'행운',d:'+1',max:5,c:30},
   // 악몽 강화: 악몽이 열리면 살 수 있음. 각성(악몽 전용 성장)을 키우는 영구 강화 → 오래 한 사람이 악몽에서 확실히 강함
   {k:'n_awk',nm:1,n:'🔥 각성 효율',d:'각성 1단계 배율 +0.04 (×1.35 → 최대 ×1.55)',max:5,c:90},
   {k:'n_awkhp',nm:1,n:'❤ 각성 체력',d:'각성 1단계 최대 체력 +2% (+12% → 최대 +20%)',max:4,c:75},
@@ -5288,15 +5290,15 @@ const MSTAT=[
   {k:'m_coin',cls:'gambler',n:'동전 숙련',d:'동전 앞면 확률 +1%',max:5,c:9}
 ];
 const MSKILL=[
-  {k:'extraAug',n:'준비된 모험가',d:'시작할 때 증강을 하나 더 고르고 시작',c:36},
-  {k:'wave',n:'폭발하는 성장',d:'레벨업 충격파 범위 +40%, 피해 +50%',c:24},
-  {k:'token',n:'수호의 부적',d:'매 판 부활 보험 1개를 들고 시작',c:30},
-  {k:'bossMedal',n:'보스 사냥꾼',d:'보스를 잡을 때마다 메달 +1 추가',c:30},
-  {k:'reroll',n:'여분의 주사위',d:'증강 선택 때 무료 다시 뽑기 +1',c:24},
-  {k:'startCard',n:'준비 운동',d:'시작할 때 고급 스탯 카드 한 장',c:30},
-  {k:'bossHeal',n:'전리품 정리',d:'보스를 잡으면 체력 30% 대신 60% 회복',c:36},
-  {k:'discount',n:'단골 손님',d:'보스 상점 골드 가격 −10%',c:45},
-  {k:'key',n:'여분의 열쇠',d:'시작할 때 🔑 1개 (첫 보스 상점에서 왕실 2개 가능)',c:75},
+  {k:'extraAug',n:'준비된 모험가',d:'시작할 때 증강을 하나 더 고르고 시작',c:72},
+  {k:'wave',n:'폭발하는 성장',d:'레벨업 충격파 범위 +40%, 피해 +50%',c:48},
+  {k:'token',n:'수호의 부적',d:'매 판 부활 보험 1개를 들고 시작',c:60},
+  {k:'bossMedal',n:'보스 사냥꾼',d:'보스를 잡을 때마다 ✨ 플레이 보너스 +300',c:60},
+  {k:'reroll',n:'여분의 주사위',d:'증강 선택 때 무료 다시 뽑기 +1',c:48},
+  {k:'startCard',n:'준비 운동',d:'시작할 때 최고급 스탯 카드 2장',c:60},
+  {k:'bossHeal',n:'전리품 정리',d:'보스를 잡으면 체력 30% 대신 60% 회복',c:72},
+  {k:'discount',n:'단골 손님',d:'보스 상점 골드 가격 −10%',c:90},
+  {k:'key',n:'여분의 열쇠',d:'시작할 때 🔑 1개 (첫 보스 상점에서 왕실 2개 가능)',c:150},
   {k:'uncap',n:'♾ 한계 돌파',d:'고점 돌파 증강이 등장하기 시작 (직업별 상한 없는 성장 증강. 드물게 나옴)',c:600}
 ];
 // 외형: 메달로 사는 꾸미기. 능력치 영향 없음. 종류별로 하나씩 장착. 목표가 되도록 비싸게
@@ -5394,9 +5396,10 @@ const mlv=k=>META.lv[k]||0;
 const mcost=x=>x.c*(mlv(x.k)+1);
 // 영구 강화 가격은 3배로 올림. 환불은 실제로 쓴 메달만 (META.spent). 가격 인상 전 구매분은 예전 가격(1/3)으로 계산
 const metaSpent=()=>META.spent!=null?META.spent:Math.round((MSTAT.reduce((q,x)=>{const l=mlv(x.k);return q+x.c*l*(l+1)/2;},0)+MSKILL.reduce((q,x)=>q+(META.sk[x.k]?x.c:0),0))/3);
-function applyMeta(){const p=S.p;p.dmgP=(p.dmgP||0)+.02*mlv('atk');p.rateP=(p.rateP||0)+.015*mlv('rate');p.maxHp+=6*mlv('hp');p.hp=p.maxHp;p.armor+=mlv('armor');p.regen+=.1*mlv('regen');p.lifesteal+=.001*mlv('ls');
+// 영구 공격력·공격 속도·최대 체력·방어·재생은 판 안 합계에 묻히지 않게 '최종값에 곱하기'로 따로 적용 (pDmg·rawRate·hpSync·hurtP·재생)
+function applyMeta(){const p=S.p;p.hp=p.maxHp;p.lifesteal+=.001*mlv('ls');
   p.crit+=.005*mlv('crit');p.critM+=.04*mlv('critm');p.range*=1+.02*mlv('range');p.speed*=1+.01*mlv('spd');p.dashMul*=1-.02*mlv('dash');p.magnet*=1+.08*mlv('magnet');
-  p.xpM=1+.03*mlv('xp');p.goldM+=.05*mlv('gold');S.gold+=25*mlv('sgold');p.luck+=mlv('luck');if(META.sk.token)p.token=true;if(META.sk.key)S.keys=1;if(META.sk.startCard){bonusStat(1);}}
+  p.xpM=1+.03*mlv('xp');p.goldM+=.05*mlv('gold');S.gold+=25*mlv('sgold');p.luck+=mlv('luck');if(META.sk.token)p.token=true;if(META.sk.key)S.keys=1;if(META.sk.startCard){bonusStat(2,14);}}
 // 보스 처치 속도 보너스: 보스마다 기준 시간보다 빨리 잡은 1초당 10점. 보스전 중엔 생존 시간이 멈추므로 실제 걸린 시간은 여기서만 반영
 const BOSS_PAR=[90,90,110,140],BOSS_DM=[.55,.75,1,1];
 const bossSpeedPts=()=>(S.st.btimes||[]).reduce((q,t,i)=>q+Math.round(Math.max(0,(BOSS_PAR[bossHome(i)]||120)-t)*10),0);
@@ -5406,7 +5409,7 @@ const softC=(x,c)=>x<=c?x:c*(1+Math.log(x/c));
 const scoreOf=r=>{const b=+r.bosses||0,d=DIFF[r.diff]||DIFF.normal;return Math.round(((+r.time||0)*12+softC((+r.kills||0)*2,4000)+(+r.lvl||0)*30+b*400+(b>=4?3000:0)+(+r.bonus||0))*(d.sc||1));};
 // 플레이 보너스: 직접 찾아내고 해내는 것(황금 용·숨겨진 몬스터·이스터에그·이벤트 성공·보스 노히트)과 최고 DPS에 주는 추가 점수 (난이도 배율 전 점수)
 const BONUS_PTS={dragon:3000,hidden:400,egg:500,eggNew:1000,evC:200,evB:400,evA:800,evS:1500,nohit:1000,dodge:150};
-const BONUS_N={dragon:'🐉 황금 용 처치',hidden:'👀 숨겨진 몬스터',egg:'🥚 이스터에그',eggNew:'🥚 새 이스터에그 발견',ev:'⚡ 돌발 이벤트 성공',nohit:'🛡 보스 노히트',dodge:'💨 완벽한 회피',dps:'💥 최고 DPS'};
+const BONUS_N={dragon:'🐉 황금 용 처치',hidden:'👀 숨겨진 몬스터',egg:'🥚 이스터에그',eggNew:'🥚 새 이스터에그 발견',ev:'⚡ 돌발 이벤트 성공',nohit:'🛡 보스 노히트',bossM:'🏅 보스 사냥꾼',dodge:'💨 완벽한 회피',dps:'💥 최고 DPS'};
 function addBonus(k,pts,g){if(!S||!S.st||!pts)return;S.st.bonus=(S.st.bonus||0)+pts;const bl=S.st.bl||(S.st.bl={});const key=g||k;bl[key]=(bl[key]||0)+pts;const v=Math.round(pts*(dfM().sc||1));if(S.p)ftext(S.p.x,S.p.y-46,'✨ 보너스 +'+v.toLocaleString(),'#ffe27a',16);}
 // 최고 DPS 보너스: DPS 1천 넘는 10배마다 +800 (1만 800 · 100만 2,400 · 1억 4,000)
 const dpsBonus=()=>Math.round(800*Math.max(0,Math.log10(Math.max(1,(S&&S.dpsMax)||0)/1000)));
@@ -5418,7 +5421,7 @@ function clearScore(){return scoreOf(curRun(true));}
 function runScore(){return scoreOf(curRun(false));}
 // 메달: 점수 2000점당 1개 × 난이도 메달 배율(md) + 클리어 보너스(cb). 랭킹 점수와 별개로 높은 난이도 보상을 키움
 const medalClear=()=>S.win?(dfM().cb||0):0;
-function runMedals(sc){return Math.floor(sc/2000*(dfM().md||1))+medalClear()+(META.sk.bossMedal?(S.st.bosses||0):0);}
+function runMedals(sc){return Math.floor(sc/2000*(dfM().md||1))+medalClear()+0;}
 
 /* ---------- 외형 이펙트: 가격 단계(tier)가 오를수록 크고 화려하게. 게임 화면과 미리보기가 같은 함수를 씀 ---------- */
 const COS_TIER={tr_star:5,tr_petal:6,tr_thunder:7,tr_void:8,tr_dragon:9,kl_heart:5,kl_soul:6,kl_firework:7,kl_lightning:8,kl_treasure:9,au_sakura:5,au_galaxy:6,au_flame:7,au_wings:8,au_dragon:9,sk_neon:5,sk_void:6,sk_lava:7,sk_crystal:8,sk_abyss:9,tr_gold:1,tr_ice:2,tr_fire:3,tr_rainbow:4,kl_coin:1,kl_card:2,kl_void:3,kl_prism:4,au_gold:1,au_jade:2,au_blood:3,au_crown:4,sk_shadow:1,sk_ice:2,sk_gold:3,sk_ghost:4};
