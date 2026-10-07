@@ -1,6 +1,10 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v4.1
+// 찬서 명예의 전당 서버 (Google Apps Script) v4.2
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
+//
+// v4.1 → v4.2 바뀐 점
+// - 직업 칸 40자 → 120자 (칭호·오라·장비 정보가 뒤에 붙으면서 잘리던 문제)
+// - 결투 전적 칸(dw, "w승d무l패") 추가: 기록을 올릴 때, 그리고 결투가 끝날 때마다 그 이름의 모든 기록에 갱신
 //
 // v4 → v4.1 바뀐 점
 // - 목록을 1분 동안 저장해 두고 바로 돌려줌 (기록이 올라오면 바로 새로 만듦) → 랭킹 불러오기가 빨라짐
@@ -21,9 +25,9 @@
 
 const SHEET_NAME = 'ranking_v3';
 const OLD_SHEET = 'ranking_v2';
-const HEAD = ['name', 'diff', 'cls', 'time', 'lvl', 'kills', 'bosses', 'score', 'comment', 'at', 'hero', 'hh'];
+const HEAD = ['name', 'diff', 'cls', 'time', 'lvl', 'kills', 'bosses', 'score', 'comment', 'at', 'hero', 'hh', 'dw'];
 const LIST_COLS = 10; // 목록에 필요한 칸 (name ~ at)
-const CACHE_KEY = 'list_v41';
+const CACHE_KEY = 'list_v42';
 const DIFFS = { normal: 1, hard: 1.5, hell: 2.2, god: 3.2, nightmare: 4, bossrush: 4 };
 
 function book_() {
@@ -77,12 +81,15 @@ function sheet_() {
 
 const num_ = (v, max) => Math.max(0, Math.min(max, Math.floor(+v || 0)));
 const str_ = (v, n) => String(v || '').replace(/\s+/g, ' ').trim().replace(/^[=+\-@]+/, '').slice(0, n);
+// 결투 전적 "승-무-패"
+// 시트가 날짜로 바꾸지 않게 "w3d1l2" 꼴로 저장
+const dw_ = v => { const m = String(v || '').match(/^(\d{1,6})-(\d{1,6})-(\d{1,6})$/); return m ? 'w' + m[1] + 'd' + m[2] + 'l' + m[3] : ''; };
 const softC_ = (x, c) => x <= c ? x : c * (1 + Math.log(x / c));
 
 function clean_(d, at) {
   const r = {
     name: str_(d.name, 12) || '익명',
-    cls: str_(d.cls, 40),
+    cls: str_(d.cls, 120),
     time: num_(d.time, 360000),
     lvl: num_(d.lvl, 100000),
     kills: num_(d.kills, 10000000),
@@ -93,6 +100,7 @@ function clean_(d, at) {
     hero: String(d.hero || '').replace(/[^A-Za-z0-9+\/=:]/g, '').slice(0, 45000),
   };
   r.hh = r.hero ? 1 : '';
+  r.dw = dw_(d.dw);
   r.diff = diffOf_(d.diff, r.cls);
   // 점수는 서버에서 다시 계산 (조작 방지). 게임과 같은 식
   r.score = r.diff === 'bossrush'
@@ -120,9 +128,9 @@ function listJson_() {
   if (last < 2) return '[]';
   // 목록 칸(name~at)과 캐릭터 표시(hh)만 읽음. 무거운 hero 칸은 안 읽음
   const v = s.getRange(2, 1, last - 1, LIST_COLS).getValues();
-  const hc = HEAD.indexOf('hh') + 1, hh = s.getLastColumn() >= hc ? s.getRange(2, hc, last - 1, 1).getValues() : [];
+  const hc = HEAD.indexOf('hh') + 1, ex = s.getLastColumn() >= hc + 1 ? s.getRange(2, hc, last - 1, 2).getValues() : [];
   const all = v.map((r, i) => { const o = Object.fromEntries(HEAD.slice(0, LIST_COLS).map((h, j) => [h, r[j]]));
-      return { name: String(o.name), diff: fixDiff_(o), cls: String(o.cls), time: +o.time, lvl: +o.lvl, kills: +o.kills, bosses: +o.bosses, score: +o.score, comment: String(o.comment || ''), h: hh[i] && hh[i][0] ? 1 : 0 }; })
+      return { name: String(o.name), diff: fixDiff_(o), cls: String(o.cls), time: +o.time, lvl: +o.lvl, kills: +o.kills, bosses: +o.bosses, score: +o.score, comment: String(o.comment || ''), h: ex[i] && ex[i][0] ? 1 : 0, dw: ex[i] ? String(ex[i][1] || '') : '' }; })
     .sort((a, b) => b.score - a.score);
   const per = {};
   return JSON.stringify(all.filter(r => (per[r.diff] = (per[r.diff] || 0) + 1) <= 50));
@@ -148,9 +156,19 @@ function doPost(e) {
   const lock = LockService.getScriptLock();
   lock.waitLock(10000);
   try {
-    const r = clean_(JSON.parse(e.postData.contents));
+    const d = JSON.parse(e.postData.contents);
     const s = sheet_();
     try { CacheService.getScriptCache().remove(CACHE_KEY); } catch (err) {}
+    // 결투 전적만 갱신 (그 이름의 기록이 있을 때만, 새 줄은 만들지 않음)
+    if (d.dwOnly) {
+      const dw = dw_(d.dw), nm = str_(d.name, 12), last = s.getLastRow();
+      if (!dw || !nm || last < 2) return out_({ ok: false });
+      const c = HEAD.indexOf('dw') + 1, names = s.getRange(2, 1, last - 1, 1).getValues();
+      let n = 0;
+      names.forEach((x, i) => { if (String(x[0]) === nm) { s.getRange(i + 2, c).setValue(dw); n++; } });
+      return out_({ ok: true, result: 'dw', n });
+    }
+    const r = clean_(d);
     const last = s.getLastRow();
     const keys = last > 1 ? s.getRange(2, 1, last - 1, 2).getValues().map(x => String(x[0]) + '\u0001' + String(x[1])) : [];
     const i = keys.indexOf(r.name + '\u0001' + r.diff);
@@ -164,6 +182,7 @@ function doPost(e) {
       s.getRange(row, 1, 1, HEAD.length).setValues([HEAD.map(h => r[h])]);
       return out_({ ok: true, result: 'best' });
     }
+    if (r.dw) s.getRange(row, HEAD.indexOf('dw') + 1).setValue(r.dw);
     // 점수는 그대로여도 캐릭터 정보가 비어 있으면 채워 둠
     if (r.hero && !String(s.getRange(row, HEAD.indexOf('hero') + 1).getValue() || '')) { s.getRange(row, HEAD.indexOf('hero') + 1).setValue(r.hero); s.getRange(row, HEAD.indexOf('hh') + 1).setValue(1); }
     if (r.comment) {
