@@ -2810,20 +2810,20 @@ function startEvent(){
 }
 function endEvent(win){
   const ev=S.ev;if(!ev)return;S.ev=null;S.evT=rand(85,110);
-  if(ev.k==='horde'){if(win){const g=price(70);S.gold+=g;S.pendingLv++;S.boost=true;toast(`대군 격파! ${g} 골드 + 고급 스탯 카드`);openNext();}else toast(`대군 처치 ${ev.kc}/${ev.need} — 실패`);}
+  if(ev.k==='horde'){if(win){const g=price(70);S.gold+=g;bonusStat(1);toast(`대군 격파! ${g} 골드 + 고급 스탯 카드`);openNext();}else toast(`대군 처치 ${ev.kc}/${ev.need} — 실패`);}
   if(ev.k==='hunt'){for(const e of S.en)e.hunt=false;if(win){S.bonusAug++;toast('정예 사냥 성공! 증강 1개 선택');openNext();}else toast('정예 사냥 실패');}
   if(ev.k==='goblin'&&!win){for(const e of S.en)if(e.type==='goblin'){e.alive=false;burst(e.x,e.y,'#e8bb4f',14);}toast('보물 고블린이 도망쳤다');}
   if(ev.k==='shrine'&&!win)toast('제단이 사라졌다');
-  if(ev.k==='moon'){if(win&&S.p.alive){S.keys=(S.keys||0)+1;S.pendingLv++;S.boost=true;toast('붉은 달을 버텼다! 고급 스탯 카드 + 🔑 열쇠 +1');openNext();}else toast('붉은 달이 졌다');}
+  if(ev.k==='moon'){if(win&&S.p.alive){S.keys=(S.keys||0)+1;bonusStat(1);toast('붉은 달을 버텼다! 고급 스탯 카드 + 🔑 열쇠 +1');openNext();}else toast('붉은 달이 졌다');}
   if(ev.k==='chest'){for(const e of S.en)if(e.chestB){if(!win){e.alive=false;burst(e.x,e.y,'#c86aff',16);}e.chestB=false;}
     if(win){toast('수호자 격파! 💎 프리즘 증강 선택');S.mode='aug';openAug(true,'저주받은 상자 보상',null,'p');}else toast(ev.open?'수호자가 상자와 함께 사라졌다':'상자가 사라졌다');}
   if(ev.k==='rift'){if(win){const R=[['공격력 +8%',p=>{p.dmgP=(p.dmgP||0)+.08;}],['공격 속도 +7%',p=>{p.rateP=(p.rateP||0)+.07;}],['최대 체력 +10%',p=>{p.hpP=(p.hpP||0)+.1;}],['치명타 확률 +4%',p=>{p.crit+=.04;}],['이동 속도 +6%',p=>{p.speed*=1.06;}]],r=R[Math.floor(Math.random()*R.length)];r[1](S.p);S.flash=.3;toast(`균열을 버텼다! 영구 ${r[0]}`);}else toast('균열이 닫혔다');}
   if(ev.k==='fountain'&&!win)toast('샘이 말라버렸다');
-  if(ev.k==='meteor'){if(win){const g=price(70),n=ev.hits===0?2:1;S.gold+=g;S.pendingLv+=n;S.boost=true;toast(`유성우를 버텼다! (${ev.hits}번 맞음) ${g} 골드 + 고급 스탯 카드 ${n}장`);openNext();}else toast(`유성에 ${ev.hits}번 맞았다 — 실패`);}
-  if(ev.k==='bombs'){if(win){const g=price(70);S.gold+=g;S.pendingLv++;S.boost=true;toast(`폭탄 해체 완료! ${g} 골드 + 고급 스탯 카드`);openNext();}
+  if(ev.k==='meteor'){if(win){const g=price(70),n=ev.hits===0?2:1;S.gold+=g;bonusStat(n);toast(`유성우를 버텼다! (${ev.hits}번 맞음) ${g} 골드 + 고급 스탯 카드 ${n}장`);openNext();}else toast(`유성에 ${ev.hits}번 맞았다 — 실패`);}
+  if(ev.k==='bombs'){if(win){const g=price(70);S.gold+=g;bonusStat(1);toast(`폭탄 해체 완료! ${g} 골드 + 고급 스탯 카드`);openNext();}
     else{const p=S.p;for(const o of ev.bombs)if(!o.done){explode(o.x,o.y,200,pDmg()*3,'#ff5a3a');S.shake=Math.max(S.shake,.6);if(d2(o,p)<220*220)hurtP(p.maxHp*.25);}toast('폭탄이 터졌다!');}}
   if(ev.k==='altar'){for(const e of S.en)if(e.altarE){if(!win){e.alive=false;burst(e.x,e.y,'#ffb347',12);}e.altarE=false;e.hunt=false;}
-    if(ev.bad){if(win){S.pendingLv+=2;S.boost=true;toast('제단의 시련 통과! 고급 스탯 카드 2장');openNext();}else toast('제단의 시련 실패');}else if(!win)toast('제단이 사라졌다');}
+    if(ev.bad){if(win){bonusStat(2);toast('제단의 시련 통과! 고급 스탯 카드 2장');openNext();}else toast('제단의 시련 실패');}else if(!win)toast('제단이 사라졌다');}
   if(ev.k==='totem'){for(const e of S.en)if(e.evTot){if(!win){e.alive=false;burst(e.x,e.y,'#b06ad0',12);}e.evTot=false;e.hunt=false;}if(win){S.bonusAug++;toast('저주 토템 파괴! 증강 1개 선택');openNext();}else toast('토템이 땅속으로 사라졌다');}
   if(ev.k==='bounty'){for(const e of S.en)if(e.bounty){if(!win){e.alive=false;burst(e.x,e.y,'#ffd76a',16);}e.bounty=false;e.hunt=false;}
     if(win){const g=price(200);S.gold+=g;META.medals=(META.medals||0)+1;saveMeta();toast(`현상수배범 처치! 💎 프리즘 증강 + ${g} 골드 + 🏅 메달 1`);S.mode='aug';openAug(true,'현상수배 보상',null,'p');}else toast('현상수배범이 달아났다');}
@@ -2854,7 +2854,7 @@ function updEvent(dt){
   if(ev.k==='bombs'&&p.alive){for(const o of ev.bombs){if(o.done)continue;if(d2(o,p)<(34+p.r)**2){o.ch+=dt;if(o.ch>=1.5){o.done=true;burst(o.x,o.y,'#7be08f',14);ftext(o.x,o.y-24,'해체 '+ev.bombs.filter(q=>q.done).length+'/3','#7be08f',16);}}else o.ch=Math.max(0,o.ch-dt);}
     if(ev.bombs.every(o=>o.done)){endEvent(true);return;}}
   if(ev.k==='altar'&&p.alive){if(!ev.rolled){if(d2(ev,p)<ev.r*ev.r){ev.ch+=dt;if(ev.ch>=2){ev.rolled=true;S.rings.push({x:ev.x,y:ev.y,r:10,max:180,life:.5,col:'#ffb347'});
-      if(Math.random()<.55){const g=price(110);S.gold+=g;S.pendingLv++;S.boost=true;toast(`🎲 대박! ${g} 골드 + 고급 스탯 카드`);endEvent(true);openNext();return;}
+      if(Math.random()<.55){const g=price(110);S.gold+=g;bonusStat(1);toast(`🎲 대박! ${g} 골드 + 고급 스탯 카드`);endEvent(true);openNext();return;}
       ev.bad=true;ev.t=Math.max(0,ev.T-30);for(let i=0;i<3;i++){const t=['grunt','tank','boar','ranger'][Math.floor(Math.random()*4)];const e=spawnAt(t,clamp(ev.x+rand(-80,80),20,WW-20),clamp(ev.y+rand(-80,80),20,WH-20),false,true);e.hunt=true;e.altarE=true;}S.shake=.4;toast('🎲 꽝! 제단의 시련 — 정예 3마리를 30초 안에 처치');}}else ev.ch=Math.max(0,ev.ch-dt);}
     else if(!S.en.some(e=>e.alive&&e.altarE)){endEvent(true);return;}}
   if(ev.k==='totem'&&!S.en.some(e=>e.alive&&e.evTot)){endEvent(true);return;}
@@ -4152,7 +4152,7 @@ function update(dt){
   S.items=S.items.filter(it=>it.life>0);for(const it of S.items)if(!it.nud){pushOut(it,18);it.nud=1;}
   S.waveCd=Math.max(0,(S.waveCd||0)-dt);if(S.wavePend&&S.p.alive&&S.waveCd<=0){S.wavePend=false;S.waveCd=4;lvlWave();}
   if(S.dragonPend&&S.mode==='play'){S.dragonPend=0;openDragon();if(S.mode!=='play')return;}
-  if(S.pendingLv>0||S.bonusAug>0||S.shopPend){if(S.mode==='play'){if(AUTO.pick){autoProcess();if(S.shopPend){S.shopPend=false;autoShop();}}else{openNext();return;}}}
+  if(S.pendingLv>0||S.bonusAug>0||S.bonusSt>0||S.shopPend){if(S.mode==='play'){if(AUTO.pick){autoProcess();if(S.shopPend){S.shopPend=false;autoShop();}}else{openNext();return;}}}
   fx(dt);
 }
 
@@ -4655,9 +4655,10 @@ ov.addEventListener('mousedown',e=>{if(e.target.closest('button'))e.preventDefau
 function hide(){ov.classList.remove('on');ov.innerHTML='';}
 function openNext(){
   joy=null;
-  if(S.pendingLv>0){S.pendingLv--;S.picks++;if(S.picks%AUG_EVERY===0&&augReady())openAug(true,`레벨 ${S.lvl-S.pendingLv} 달성. ${AUG_EVERY}레벨마다 증강`);else openStat();return;}
+  if(S.bonusSt>0){S.bonusSt--;openStat();return;}
+  if(S.pendingLv>0){S.pendingLv--;S.picks++;if(S.picks%AUG_EVERY===0&&augReady())openAug(true,`레벨 ${S.lvl-S.pendingLv} 달성. ${AUG_EVERY}레벨마다 증강`);else{if(S.picks%AUG_EVERY===0)toast(giveAltStat(rollTier()));openStat();}return;}
   if(AUTO.pick&&!S.started&&S.bonusAug>0){S.bonusAug=0;autoAug();startGame();return;}
-  if(S.bonusAug>0){S.bonusAug--;if(augReady())openAug(true,'보스 보상');else{S.boost=true;S.bossStat=true;openStat();}return;}
+  if(S.bonusAug>0){S.bonusAug--;if(augReady())openAug(true,'보스 보상');else{let t=rollTier();if(t==='s')t='g';toast(giveAltStat(t));S.bossStat=true;openStat();}return;}
   if(S.backToCasino){S.backToCasino=false;S.mode='casino';renderCasino();return;}
   if(S.shopPend){S.shopPend=false;openHub();return;}
   if(!S.started){startGame();return;}
@@ -4748,6 +4749,14 @@ function bindPeek(){
   });
 }
 function openAugKeep(opts,free,why,tier){openAug(free,why,opts,tier);}
+// 증강 대신 스탯 카드: 증강 등급에 따라 차등. 실버 고급 1장 · 골드 고급 2장 · 프리즘 최고급 3장
+// boostN장 동안 높은 등급 확률 보너스(boostB)를 줌 (예전엔 첫 장에만 붙던 문제 수정)
+// 고급 카드는 희귀 이상, 최고급(보너스 14 이상)은 영웅 이상 보장
+const RANK={c:0,r:1,e:2,l:3},boostRar=b=>{const r=rollRarity(b);if(!b)return r;const fl=b>=14?'e':'r';return RANK[r]<RANK[fl]?fl:r;};
+const ALT_STAT={s:[1,6,'고급 스탯 카드 1장'],g:[2,6,'고급 스탯 카드 2장'],p:[3,14,'최고급 스탯 카드 3장']};
+// 보너스 스탯 카드: 레벨업·증강 차례 수(picks)에 안 들어가고, 장마다 고급(희귀 이상) 보장
+function bonusStat(n,b=6){S.bonusSt=(S.bonusSt||0)+n;S.boostN=(S.boostN||0)+n;S.boostB=Math.max(S.boostB||0,b);}
+function giveAltStat(t,extra){const [n,b,txt]=ALT_STAT[t]||ALT_STAT.g;S.bonusSt=(S.bonusSt||0)+n-(extra?0:1);S.boostN=(S.boostN||0)+n;S.boostB=Math.max(S.boostB||0,b);return `${TIER[t]?TIER[t].n:''} 증강 대신 ${txt}`;}
 // 증강 그만 받기(S.noAug): 이번 판에서 증강 차례가 오면 스탯 카드로 대신 받음
 const augReady=()=>!S.noAug&&(slotCount()<MAXA||fullOptions().length>0);
 // 슬롯이 가득 차면: 합체 짝(최대 2) + 나머지는 '교체' 후보 (고르면 기존 증강 하나를 버리고 바꿈)
@@ -4773,7 +4782,7 @@ function openAug(free,why,fixed,fixedTier){
   <div class="cards">${opts.map((a,i)=>`<div class="cwrap">${augHtml(a,i)}${(S.seals||0)>0&&!a.up?`<button class="sealb" data-seal="${i}" title="이번 판에서 이 증강이 다시 나오지 않음">🔒 봉인 <small>(남은 ${S.seals}회)</small></button>`:''}</div>`).join('')}</div>
   <div class="btnrow"><button class="btn ghost" id="reroll" ${!free&&S.gold<cost?'disabled':''}>다시 뽑기<small>${free?(free===true?(META.sk.reroll?'무료 2회':'무료 1회'):'무료 '+free+'회'):cost+'골드 (보유 '+S.gold+') · 다음 ×1.6'}</small></button>
   ${full?`<button class="btn ghost" id="augAltG">💰 증강 대신 ${altG()} 골드<small>포기하고 골드 받기</small></button>
-  <button class="btn ghost" id="augAltC">🎁 고급 스탯 카드 2장<small>증강 대신 받기</small></button><button class="btn ghost" id="augStop">🚫 증강 그만 받기<small>이번 판은 스탯 카드로 대신</small></button>`:`<button class="btn ghost" id="augSkip">포기<small>${skipG()}골드 받고 넘기기</small></button>`}</div>
+  <button class="btn ghost" id="augAltC">🎁 ${ALT_STAT[tier]?ALT_STAT[tier][2]:'고급 스탯 카드 2장'}<small>${TIER[tier]?TIER[tier].n+' ':''}증강 대신 받기</small></button><button class="btn ghost" id="augStop">🚫 증강 그만 받기<small>이번 판은 스탯 카드로 대신</small></button>`:`<button class="btn ghost" id="augSkip">포기<small>${skipG()}골드 받고 넘기기</small></button>`}</div>
   <button class="btn ghost" data-stats>내 스탯 보기</button>`);
   {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}bindPeek();if(opts.some(a=>a.t==='p'))augFx('💎 프리즘 등장!','','#d68cff',true);
   ov.querySelectorAll('.card').forEach(b=>b.onclick=ev=>{const a=opts[+b.dataset.i];S.arr=0;{const o=ev.target.closest('[data-fz]');S.fuseChoice=o?o.dataset.fz:null;}
@@ -4781,10 +4790,10 @@ function openAug(free,why,fixed,fixedTier){
     if(a.swap&&slotCount()>=MAXA){openSwap(a,opts,free,why);return;}
     gainAug(a);
     openNext();});
-  if($('augAltC'))$('augAltC').onclick=()=>{S.arr=0;S.pendingLv+=2;S.boost=true;toast('증강 대신 고급 스탯 카드 2장');openNext();};
+  if($('augAltC'))$('augAltC').onclick=()=>{S.arr=0;toast(giveAltStat(ALT_STAT[tier]?tier:'g',true));openNext();};
   if($('augAltG'))$('augAltG').onclick=()=>{S.arr=0;const g=altG();S.gold+=g;toast(`증강 대신 ${g} 골드`);openNext();};
   if($('augSkip'))$('augSkip').onclick=()=>{S.arr=0;const g=skipG();S.gold+=g;toast(`증강 포기 · ${g} 골드`);openNext();};
-  if($('augStop'))$('augStop').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.firstChild.textContent='한 번 더 누르면 증강 그만 받기 ';return;}S.noAug=true;toast('이번 판은 증강을 더 받지 않아요 · 대신 스탯 카드');S.boost=true;openStat();};
+  if($('augStop'))$('augStop').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.firstChild.textContent='한 번 더 누르면 증강 그만 받기 ';return;}S.noAug=true;toast('이번 판은 증강을 더 받지 않아요 · '+giveAltStat(ALT_STAT[tier]?tier:'g',true));openNext();};
   // 봉인: 이번 판에서 이 증강 제외, 그 자리는 새 증강으로 바로 교체
   ov.querySelectorAll('[data-seal]').forEach(b=>b.onclick=()=>{if(!(S.seals>0))return;const i=+b.dataset.seal,a=opts[i];S.seals--;(S.banL=S.banL||[]).push(a.id);toast(`🔒 ${a.n} 봉인 · 이번 판에서 다시 안 나옴 (그 칸만 새로 뽑음, 다시 뽑기 가격은 그대로)`);
     const pool=(slotCount()>=MAXA?fullOptions():augOptions(tier)).filter(x=>!opts.some(o=>o.id===x.id));const nx=[...opts];if(pool.length)nx[i]=pool[0];else nx.splice(i,1);openAug(free,why,nx,tier);});
@@ -4808,7 +4817,7 @@ function fusionTable(){
 function openStat(keep){
   S.mode='stat';saveGame(true);S.srr=S.srr||0;
   let cards=keep;
-  if(!cards){cards=[];let tries=0;const bonus=S.boost?6:0;while(cards.length<3&&tries<60){tries++;const c=cardOf(rollRarity(bonus),bonus);if(!cards.some(x=>x.n===c.n))cards.push(c);}S.boost=false;}
+  if(!cards){cards=[];let tries=0;const bonus=S.boostN>0?(S.boostB||6):S.boost?6:0;while(cards.length<3&&tries<60){tries++;const c=cardOf(boostRar(bonus),bonus);if(!cards.some(x=>x.n===c.n))cards.push(c);}S.boost=false;if(S.boostN>0){S.boostN--;if(!S.boostN)S.boostB=0;}}
   // 스탯 다시뽑기: 연속으로 돌릴수록 1.5배씩 (고르면 처음 가격으로)
   const cost=Math.round(price(15)*Math.pow(1.5,S.srr)),boostC=price(90+S.lvl*12),next=AUG_EVERY-(S.picks%AUG_EVERY);
   const bossSt=S.bossStat;S.bossStat=false;
@@ -4816,7 +4825,7 @@ function openStat(keep){
   <div class="cards">${cards.map((c,i)=>{const R=RAR[c.r];return `<button class="card rar-${c.r}" data-i="${i}" style="--rc:${R.col}"><span class="rr">${c.r==='l'?'✨ ':''}${R.n}${c.u!=null?` · <span style="color:${GRADE(c.u).col}">${GRADE(c.u).n}</span>`:''}</span><b>${c.n}</b>${withActual(c.d,c.u!=null?c.f:null)}</button>`;}).join('')}</div>
   <div class="btnrow">
     <button class="btn" id="reroll" ${S.gold<cost?'disabled':''}>다시 뽑기<small>${cost}골드 · 다음 ×1.5</small></button>
-    <button class="btn" id="boost" ${S.gold<boostC?'disabled':''}>고급 카드로 다시 뽑기<small>${boostC}골드, 높은 등급 확률 크게 증가</small></button>
+    <button class="btn" id="boost" ${S.gold<boostC?'disabled':''}>고급 카드로 다시 뽑기<small>${boostC}골드, 3장 모두 희귀 이상</small></button>
   </div>
   ${S.noAug?'<button class="btn ghost" id="augResume">↩ 증강 다시 받기<small>다음 증강 차례부터 다시 증강이 나와요</small></button>':''}
   <button class="btn ghost" data-stats>내 스탯 보기</button>`);
@@ -5161,7 +5170,7 @@ const mcost=x=>x.c*(mlv(x.k)+1);
 const metaSpent=()=>META.spent!=null?META.spent:Math.round((MSTAT.reduce((q,x)=>{const l=mlv(x.k);return q+x.c*l*(l+1)/2;},0)+MSKILL.reduce((q,x)=>q+(META.sk[x.k]?x.c:0),0))/3);
 function applyMeta(){const p=S.p;p.dmgP=(p.dmgP||0)+.02*mlv('atk');p.rateP=(p.rateP||0)+.015*mlv('rate');p.maxHp+=6*mlv('hp');p.hp=p.maxHp;p.armor+=mlv('armor');p.regen+=.1*mlv('regen');p.lifesteal+=.001*mlv('ls');
   p.crit+=.005*mlv('crit');p.critM+=.04*mlv('critm');p.range*=1+.02*mlv('range');p.speed*=1+.01*mlv('spd');p.dashMul*=1-.02*mlv('dash');p.magnet*=1+.08*mlv('magnet');
-  p.xpM=1+.03*mlv('xp');p.goldM+=.05*mlv('gold');S.gold+=25*mlv('sgold');p.luck+=mlv('luck');if(META.sk.token)p.token=true;if(META.sk.key)S.keys=1;if(META.sk.startCard){S.pendingLv++;S.boost=true;}}
+  p.xpM=1+.03*mlv('xp');p.goldM+=.05*mlv('gold');S.gold+=25*mlv('sgold');p.luck+=mlv('luck');if(META.sk.token)p.token=true;if(META.sk.key)S.keys=1;if(META.sk.startCard){bonusStat(1);}}
 // 보스 처치 속도 보너스: 보스마다 기준 시간보다 빨리 잡은 1초당 10점. 보스전 중엔 생존 시간이 멈추므로 실제 걸린 시간은 여기서만 반영
 const BOSS_PAR=[90,90,110,140],BOSS_DM=[.55,.75,1,1];
 const bossSpeedPts=()=>(S.st.btimes||[]).reduce((q,t,i)=>q+Math.round(Math.max(0,(BOSS_PAR[bossHome(i)]||120)-t)*10),0);
@@ -5657,7 +5666,7 @@ function autoAug(){
 const BADCARD=['러시안 룰렛','동전 던지기','도박꾼의 주사위','올인'];
 const OFFCARD=['숫돌','힘의 물약','날랜 손놀림','손목 단련','치명상','급소 노리기','전투 본능','유리 대포','광기','쾌속 장전','사냥꾼의 눈','다연발','관통 탄'];
 function autoStat(){
-  const cards=[];let tries=0;while(cards.length<3&&tries<60){tries++;const c=cardOf(rollRarity());if(!cards.some(x=>x.n===c.n))cards.push(c);}
+  const bonus=S.boostN>0?(S.boostB||6):S.boost?6:0;const cards=[];let tries=0;while(cards.length<3&&tries<60){tries++;const c=cardOf(boostRar(bonus),bonus);if(!cards.some(x=>x.n===c.n))cards.push(c);}S.boost=false;if(S.boostN>0){S.boostN--;if(!S.boostN)S.boostB=0;}
   const sc=c=>({c:1,r:2,e:3.5,l:5}[c.r])-(BADCARD.includes(c.n)?5:0)+(OFFCARD.includes(c.n)?1.2:0)+(c.u!=null?c.u:.4)+Math.random()*.5;
   const c=cards.reduce((b,x)=>sc(x)>sc(b)?x:b,cards[0]);c.f(S.p);tryFuse();
   ftext(S.p.x,S.p.y-28,c.n,'#5fc9d9',14);
@@ -5675,9 +5684,10 @@ function autoShop(){
 }
 function autoProcess(){
   let guard=0;
-  while((S.pendingLv>0||S.bonusAug>0)&&guard++<20){
-    if(S.pendingLv>0){S.pendingLv--;S.picks++;if(S.picks%AUG_EVERY===0&&augReady())autoAug();else autoStat();}
-    else{S.bonusAug--;if(augReady())autoAug();else autoStat();}
+  while((S.pendingLv>0||S.bonusAug>0||S.bonusSt>0)&&guard++<20){
+    if(S.bonusSt>0){S.bonusSt--;autoStat();continue;}
+    if(S.pendingLv>0){S.pendingLv--;S.picks++;if(S.picks%AUG_EVERY===0&&augReady())autoAug();else{if(S.picks%AUG_EVERY===0)giveAltStat(rollTier());autoStat();}}
+    else{S.bonusAug--;if(augReady())autoAug();else{let t=rollTier();if(t==='s')t='g';giveAltStat(t);autoStat();}}
   }
 }
 // 자동 이동: 이벤트 목표(제단·샘·균열·상자·도박 제단·유물·폭탄·표적 몹)가 있으면 그쪽으로 70% + 회피 30%로 섞어서 이동
@@ -5791,7 +5801,7 @@ const SAVE_KEY='chipdungeon_save_v1';
 const PKEYS=['dmgP','rateP','xpM','block','token','hp','maxHp','speed','dmg','rate','bspd','range','multi','pierce','crit','critM','luck','goldM','vuln','orbR','orbM','dashMul','armor','dodge','lifesteal','regen','magnet','shots','pkills','lastCd','soulN','fyO','skN','hpP','hpB','hpLM',
   // 스탯 카드·증강이 쌓는 계열별 보너스 (이어하기 때 사라지던 것들)
   'cdR','sumD','tuL','psD','fiD','thD','slD','hoD','shD','gvR','mkD','wvD','auraM','auraD','skD','skL','lbD','rlM','elD','fyC','fyD','vnR','vnD','ptR','ptD','hdP','hdD','rfN','snR','vpN','dashD'];
-const SKEYS=['dragonPend','prismN','hidN','hidK','hbDone','arr','nmB','gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','takeAll','keys','vipStock','vipRoll','buys','cbuys','fused','potN','vineN','seals','banL','noAug','bossT','bioO','dlog','bStart','bHit','bHpF'];
+const SKEYS=['dragonPend','prismN','hidN','hidK','hbDone','arr','nmB','gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','takeAll','keys','vipStock','vipRoll','buys','cbuys','fused','potN','vineN','seals','banL','noAug','bossT','bioO','dlog','bStart','bHit','bHpF','boostN','boostB','bonusSt'];
 function saveGame(silent){
   if(!S||!S.started||!S.p.alive||S.mode==='over'||S.mode==='dying'||S.mode==='revive')return false;
   S.bHpF=S.boss&&S.boss.alive?S.boss.hp/S.boss.maxHp:0;
@@ -5811,7 +5821,7 @@ function continueGame(d){
   S.started=true;const p=S.p;p.x=WW/2;p.y=WH/2;p.inv=2;p.alive=true;p.barrier=barrierMax();
   S.mode='play';hide();toast('이어하기');
   if(S.bossI>=0)spawnBoss(S.bossI,true);
-  if(S.pendingLv>0||S.bonusAug>0)openNext();
+  if(S.pendingLv>0||S.bonusAug>0||S.bonusSt>0)openNext();
 }
 let autoT=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden)saveGame(true);try{if(AC){if(document.hidden)AC.suspend();else AC.resume();}}catch(e){}});
@@ -6131,7 +6141,7 @@ addEventListener('resize',resize);
 resize();newRun();startScreen();requestAnimationFrame(loop);
 // 파일 자동 업데이트: 파일로 연 경우 게임 주소에 더 새 버전(BUILD 번호가 큰 것)이 있으면 시작 화면에서 바로 새 버전으로 교체.
 // 같은 파일에서 실행되므로 저장된 기록은 그대로. 인터넷이 없거나 실패하면 지금 버전 그대로 실행. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=3,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=4,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 (function autoUpdate(){
   if(/^https?:$/.test(location.protocol))return;
   let ctl=null;try{ctl=new AbortController();setTimeout(()=>ctl.abort(),8000);}catch(e){}
