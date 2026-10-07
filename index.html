@@ -2721,9 +2721,9 @@ const hpPct=()=>{const p=S.p;return (p.hpP||0)+awakeN()*AWAKE_HP+(has('k_bulwark
 function hpSync(){const p=S.p;if(!p)return;const m=Math.max(.2,1+hpPct());if(p.hpB==null){p.hpB=p.maxHp;p.hpLM=p.maxHp;}
   if(p.maxHp!==p.hpLM)p.hpB=Math.max(1,p.hpB+(p.maxHp-p.hpLM));
   const nm=Math.max(1,Math.round(p.hpB*m));if(nm!==p.maxHp){if(nm>p.maxHp)p.hp+=nm-p.maxHp;p.maxHp=nm;}p.hp=Math.min(p.hp,p.maxHp);p.hpLM=p.maxHp;}
-// 한 방 상한 (최대 체력 대비). 악몽은 10분부터 1분마다 +3% (14분에 82%), 14분부터 1분마다 ×1.05로 점점 빠르게 풀림
-// (16분 90%, 18분 100%, 20분 110%, 22분 121%, 25분 140%). 기울기를 완만하게 해서 방어 빌드 차이로 16~21분 사이에 퍼지게. 보호막·막기·회피로 조금 더 버틸 수 있지만 결국 끝나게
-const ocOf=()=>{const b=dfM().oc||.35,m=nmMin();if(!endless())return b;return m<=4?b+.03*m:.82*Math.pow(1.05,m-4);};
+// 한 방 상한 (최대 체력 대비). 악몽은 10분부터 1분마다 +3% (13분에 79%), 13분부터 1분마다 ×1.06으로 점점 빠르게 풀림
+// (15분 89%, 17분 100%, 19분 112%, 21분 126%, 25분 159%). 상한에 걸린 공격도 방어력이 약하게 줄여서, 방어가 낮으면 17분 전후·높으면 21분 전후까지. 보호막·막기·회피로 조금 더 버틸 수 있지만 결국 끝나게
+const ocOf=()=>{const b=dfM().oc||.35,m=nmMin();if(!endless())return b;return m<=3?b+.03*m:.79*Math.pow(1.06,m-3);};
 // 악몽 단계 배율: 5단계(4장 이후)부터 단계마다 보스 체력 ×2.2, 피해 ×1.15
 const diffOpen=k=>{const i=DKEYS.indexOf(k);return i<=0||!!(META.clears||{})[DKEYS[i-1]];};
 let pickDiff=(()=>{try{return localStorage.getItem('chanseo_diff')||'normal';}catch(e){return 'normal';}})();
@@ -3513,7 +3513,9 @@ function hurtP(amt,src){
   {const bR=bossOn()&&(!src||src===S.boss)?(S.boss.rage||0):-1,ar=armorEff()*(bR<0?1:1-Math.min(.8,(dfM().pen||.2)+.12*bR));amt*=100/(100+ar);}
   // 한 방 즉사 방지: 보스 몸통 공격을 뺀 모든 공격은 한 번에 최대 체력의 일정 비율까지만 (일반 35% · 어려움 45% · 지옥 55% · 신 65%)
   // 최종 광폭(6단계, 제한 시간 + 2분 30초) 이후에는 즉사 방지 해제 → 최소 딜 스펙이 있어야 클리어
-  if((src!==S.boss||!src)&&!(bossOn()&&(S.boss.rage||0)>=6)){const oc=ocOf();amt=Math.min(amt,p.maxHp*oc);}
+  if((src!==S.boss||!src)&&!(bossOn()&&(S.boss.rage||0)>=6)){const oc=ocOf();let cap=p.maxHp*oc;
+    // 악몽 후반엔 거의 모든 공격이 상한에 걸려 방어력이 무의미해짐 → 상한에 걸린 공격도 방어력이 약하게(0.25제곱) 줄여줌. 방어 빌드가 조금 더 오래 버팀
+    if(endless()&&amt>cap)cap*=Math.pow(100/(100+Math.max(0,armorEff())),.25);amt=Math.min(amt,cap);}
   p.noHitT=0;
   // 가드 6: 맞을 때마다 방어 전 피해의 30% × (1 + 방어력/100) 반사, 보호막이 있으면 2배. 보스전에서는 보스에게
   if(tag('guard')>=6){const t=src&&src.alive?src:bossOn()&&!S.boss.air&&!S.boss.phase?S.boss:nearestE(p,150);if(t)dmgEs('반사 피해',t,raw*.3*(p.barrier>0?2:1)*(1+armorEff()/100),'#9fd3ff');}
