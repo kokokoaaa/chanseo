@@ -342,6 +342,8 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 #hud{padding-right:100px}
 .hbrk{flex-basis:100%;height:0}
 #shopBtn{position:absolute;right:110px;top:10px;z-index:46;background:rgba(60,8,12,.65);color:var(--ivory);border:1px solid var(--chip-red);border-radius:8px;padding:6px 12px;font-family:'Do Hyeon',sans-serif;font-size:16px;cursor:pointer}
+/* 모바일: 스탯·도감 버튼을 오른쪽에 세로로 쌓고, 정보창은 그 왼쪽 영역에서만 줄바꿈 → 글자와 버튼이 겹치지 않음 */
+@media (max-width:520px){#hud{padding-right:112px;font-size:15px;gap:3px 10px}#statBtn,#cxBtn{right:8px;padding:4px 6px;font-size:14px;width:86px;text-align:center}#statBtn{top:8px}#cxBtn{top:42px}#autoBar{top:78px;right:8px}#buffs{top:236px}#toast{top:150px;font-size:16px;max-width:86vw;text-align:center}}
 .bar .bf{background:#7fc4f2;opacity:.85}
 #st{position:absolute;inset:0;display:none;align-items:flex-start;justify-content:center;background:rgba(3,14,10,.88);padding:16px;overflow-y:auto;touch-action:auto;z-index:5}
 #st.on{display:flex}
