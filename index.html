@@ -5319,6 +5319,8 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:33,t:'⚒ 대장간 미리보기 고침',items:[
+    ['change','⚒ 대장간 「지금 내 모습」에서 장비가 캐릭터보다 너무 크게 보이던 문제를 고쳤어요']]},
   {v:32,t:'🧣 망토 · 장비 외형 세분화',items:[
     ['new','🧣 새 장비 <b>모험가의 망토</b>: 강화 1단계마다 <b>회피 +1.5%</b> (+10이면 +15%). 등 뒤에서 펄럭이는 망토가 보여요'],
     ['new','⚒ 장비 외형이 <b>단계마다</b> 달라져요: +0 쇠 → 서리 → 비취 → 하늘 → 남빛 → 금 → 붉은 금 → 보라 → +10 무지개. 단계가 오를수록 조금씩 커지고 빛이 세지며 +5부터 반짝여요'],
@@ -5892,12 +5894,12 @@ let GLIVE=0;
 function gearLiveStart(cv){if(!cv)return;const id=++GLIVE,g=cv.getContext('2d'),cls=CLASSES[pickCls]?pickCls:'knight',x=cosEq('skin'),sk=x&&x.cat==='skin'?x:null,au=cosEq('aura'),parts=[],t0=performance.now();
   const frame=now=>{if(id!==GLIVE||!document.body.contains(cv))return;const T=(now-t0)/1000,face=Math.floor(T/2.2)%2?-1:1,W=cv.width,H=cv.height,cx=W/2,fy=H-24,oc=ctx;
     g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,W,H);g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(cx,fy+2,34,9,0,0,TAU);g.fill();
-    const emit=q=>{if(parts.length<120)parts.push({...q,x:cx+(q.x)*3.2*face,y:fy+q.y*3.2,vx:(q.vx||0)*3,vy:(q.vy||-25)*2,life:q.life||.5,t:0});};
+    const K=3.2/PXW,emit=q=>{if(parts.length<120)parts.push({...q,x:cx+q.x*K*face,y:fy+q.y*K,vx:(q.vx||0)*K*face,vy:(q.vy||-25)*K,life:q.life||.5,t:0});};
     try{ctx=g;GFIT_CLS=cls;
       if(au){try{auraFx(g,cx,fy-4,au,T,()=>{});}catch(e){}}
-      g.save();g.translate(cx,fy);g.scale(face*3.2/PXW,3.2/PXW);g.scale(PXW,PXW);const P={x:0,y:0,moving:true,lmx:face*.6};drawGearBack(P,0,T,emit);g.restore();
+      g.save();g.translate(cx,fy);g.scale(face*3.2/PXW,3.2/PXW);const P={x:0,y:0,moving:true,lmx:face*.6};drawGearBack(P,0,T,emit);g.restore();
       HERO.draw(cls,'walk',T,0,false);g.save();g.imageSmoothingEnabled=HERO.hires;g.filter=(sk&&sk.f?sk.f+' ':'')+(gearRim(T)||'');if(g.filter==='')g.filter='none';if(sk&&sk.a)g.globalAlpha=sk.a;g.translate(cx,fy);g.scale(face*3.2,3.2);g.drawImage(HERO.canvas,...HERO.box);g.restore();g.filter='none';
-      g.save();g.translate(cx,fy);g.scale(face*3.2/PXW,3.2/PXW);g.scale(PXW,PXW);drawGearFront(P,0,T,emit);g.restore();
+      g.save();g.translate(cx,fy);g.scale(face*3.2/PXW,3.2/PXW);drawGearFront(P,0,T,emit);g.restore();
     }catch(e){}finally{ctx=oc;GFIT_CLS=null;}
     for(let i=parts.length-1;i>=0;i--){const q=parts[i];q.t+=1/60;if(q.t>q.life){parts.splice(i,1);continue;}q.x+=q.vx/60;q.y+=q.vy/60;g.globalAlpha=1-q.t/q.life;g.fillStyle=q.col||'#fff';g.fillRect(q.x-1.5,q.y-1.5,3,3);}g.globalAlpha=1;
     requestAnimationFrame(frame);};
@@ -7238,7 +7240,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=32,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=33,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
