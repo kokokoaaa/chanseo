@@ -5046,9 +5046,9 @@ const PATCH_NOTES=[
 ];
 // 항목 종류: 상향(초록) · 하향(빨강) · 적 강화(주황) · 신규(금색) · 변경(회색)
 const PATCH_TAG={buff:['▲ 상향','#2e9e57'],nerf:['▼ 하향','#c94a4a'],enemy:['☠ 적 강화','#d9822b'],new:['✨ 신규','#b8902f'],change:['🔧 변경','#6f7f78']};
-function patchHtml(all){const L=all?PATCH_NOTES:PATCH_NOTES.filter(p=>p.v>(+(localStorage.getItem('chanseo_seenv')||0)||BUILD-1)).slice(0,3);
+function patchHtml(all){let sv=0;try{sv=+(localStorage.getItem('chanseo_seenv')||0);}catch(e){}const from=sv||BUILD-1,L=all?PATCH_NOTES:PATCH_NOTES.filter(p=>p.v>from).slice(0,5);
   const ord=['new','buff','nerf','enemy','change'];
-  return `<h2>📜 패치 노트</h2><div style="font-size:13px;color:var(--muted)">지금 버전 v${BUILD}</div>`+(L.length?L:PATCH_NOTES.slice(0,1)).map(p=>`<h3>v${p.v} · ${p.t}</h3><ul class="pnl">${[...p.items].sort((x,y)=>ord.indexOf(x[0])-ord.indexOf(y[0])).map(([k,x])=>{const T=PATCH_TAG[k]||PATCH_TAG.change;return `<li><span class="ptag" style="background:${T[1]}">${T[0]}</span>${x}</li>`;}).join('')}</ul>`).join('');}
+  return `<h2>📜 패치 노트</h2><div style="font-size:13px;color:var(--muted)">${all?`지금 버전 v${BUILD}`:`<b style="color:#ffd76a">v${from} → v${BUILD}</b> 마지막으로 하신 버전 이후 바뀐 점`}</div>`+(L.length?L:PATCH_NOTES.slice(0,1)).map(p=>`<h3>v${p.v} · ${p.t}</h3><ul class="pnl">${[...p.items].sort((x,y)=>ord.indexOf(x[0])-ord.indexOf(y[0])).map(([k,x])=>{const T=PATCH_TAG[k]||PATCH_TAG.change;return `<li><span class="ptag" style="background:${T[1]}">${T[0]}</span>${x}</li>`;}).join('')}</ul>`).join('');}
 function openPatch(all){closePatch();const d=document.createElement('div');d.id='patchPop';d.innerHTML=`<div class="pbox">${patchHtml(all)}<button class="btn primary" id="patchOk">확인하고 시작</button></div>`;document.body.appendChild(d);
   const done=()=>{try{localStorage.setItem('chanseo_seenv',String(BUILD));}catch(e){}closePatch();};$('patchOk').onclick=done;d.onclick=e=>{if(e.target===d)done();};}
 function closePatch(){const d=document.getElementById('patchPop');if(d)d.remove();}
