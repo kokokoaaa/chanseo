@@ -229,7 +229,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 #toast.on{opacity:1}
 #patchPop{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;background:rgba(3,14,10,.72);padding:16px}
 #patchPop .pbox{width:100%;max-width:520px;max-height:82vh;overflow-y:auto;background:var(--felt);border:2px solid var(--brass);border-radius:16px;padding:18px 18px 14px;box-shadow:0 24px 60px rgba(0,0,0,.6)}
-#patchPop h2{margin:0 0 4px;font-size:22px;color:var(--brass)}#patchPop h3{margin:14px 0 4px;font-size:16px;color:#ffd76a}#patchPop ul{margin:0;padding-left:20px;line-height:1.55;font-size:15px}#patchPop li{margin:3px 0}#patchPop .btn{width:100%;margin-top:14px}
+#patchPop h2{margin:0 0 4px;font-size:22px;color:var(--brass)}#patchPop h3{margin:14px 0 4px;font-size:16px;color:#ffd76a}#patchPop ul{margin:0;padding-left:20px;line-height:1.55;font-size:15px}#patchPop li{margin:3px 0}#patchPop .btn{width:100%;margin-top:14px}#patchPop ul.pnl{list-style:none;padding-left:0}#patchPop ul.pnl li{padding:4px 0 4px 0;border-bottom:1px dashed rgba(214,169,74,.18)}#patchPop .ptag{display:inline-block;min-width:62px;text-align:center;margin-right:6px;padding:1px 6px;border-radius:8px;font-size:12px;font-weight:700;color:#fff;vertical-align:1px}
 #ov{position:absolute;inset:0;display:none;align-items:flex-start;justify-content:center;background:rgba(3,14,10,.84);padding:16px;overflow-y:auto;touch-action:auto}
 #ov.on{display:flex}
 /* 레벨업·증강·상점 화면에서도 왼쪽 위 정보창은 어두운 막 위에 진하게 표시 */
@@ -5029,23 +5029,26 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
   {v:8,t:'악몽 각성 · 직업 상향',items:[
-    '🔥 <b>악몽 각성</b> 신설: 악몽은 각성 1단계로 시작해요. 보스를 잡거나 2분 30초를 버틸 때마다(둘 중 많은 쪽) 단계가 올라요',
-    '각성 1단계마다 <b>최종 공격 배율 최소 ×1.5</b>(단계마다 곱해짐), <b>최대 체력 +12%</b>. 조합이 덜 맞아도 뒤로 갈수록 폭발적으로 강해져요',
-    '☠ 악몽 <b>15분부터</b> 적의 한 방이 점점 세져요 (18분쯤부터 한 대도 위험)',
-    '궁수: 공격력 11→13, 체력 155→170',
-    '총잡이: 공격력 10→12, 체력 140→160',
-    '도적: 공격력 11→13, 체력 140→155',
-    '도박사: 체력 145→175, 방어력 +6',
-    '📜 패치 노트 창 추가 (새 버전을 처음 켤 때 한 번 떠요)']},
+    ['new','🔥 <b>악몽 각성</b>: 악몽은 각성 1단계로 시작해요. 보스를 잡거나 2분 30초를 버틸 때마다(둘 중 많은 쪽) 단계가 올라요'],
+    ['new','각성 1단계마다 <b>최종 공격 배율 최소 ×1.5</b>(단계마다 곱해짐), <b>최대 체력 +12%</b>. 조합이 덜 맞아도 뒤로 갈수록 폭발적으로 강해져요'],
+    ['enemy','악몽 <b>15분부터</b> 적의 한 방이 점점 세져요 (18분쯤부터 한 대도 위험). 원래는 20분부터'],
+    ['buff','궁수: 공격력 11→13, 체력 155→170'],
+    ['buff','총잡이: 공격력 10→12, 체력 140→160'],
+    ['buff','도적: 공격력 11→13, 체력 140→155'],
+    ['buff','도박사: 체력 145→175, 방어력 +6'],
+    ['new','📜 패치 노트 창 (새 버전을 처음 켤 때 한 번 떠요)']]},
   {v:7,t:'해금 · 설명서 · 자동 업데이트',items:[
-    '증강 등급이 난이도 클리어로 열려요: 처음 실버 → 일반 클리어 골드 → 어려움 클리어 프리즘 → 지옥 클리어 왕실',
-    '배속도 난이도를 깰 때마다 하나씩 열려요. 판이 끝나면 새로 열린 것을 알려줘요',
-    '판타지 모험 분위기에 맞게 명칭 정리',
-    '📘 게임 설명서 (기본 안내 · 자세한 기전) 추가',
-    '🔄 자동 업데이트 · 버전 표시']}
+    ['change','증강 등급이 난이도 클리어로 열려요: 처음 실버 → 일반 클리어 골드 → 어려움 클리어 프리즘 → 지옥 클리어 왕실'],
+    ['change','배속도 난이도를 깰 때마다 하나씩 열려요. 판이 끝나면 새로 열린 것을 알려줘요'],
+    ['change','판타지 모험 분위기에 맞게 명칭 정리'],
+    ['new','📘 게임 설명서 (기본 안내 · 자세한 기전)'],
+    ['new','🔄 자동 업데이트 · 버전 표시']]}
 ];
+// 항목 종류: 상향(초록) · 하향(빨강) · 적 강화(주황) · 신규(금색) · 변경(회색)
+const PATCH_TAG={buff:['▲ 상향','#2e9e57'],nerf:['▼ 하향','#c94a4a'],enemy:['☠ 적 강화','#d9822b'],new:['✨ 신규','#b8902f'],change:['🔧 변경','#6f7f78']};
 function patchHtml(all){const L=all?PATCH_NOTES:PATCH_NOTES.filter(p=>p.v>(+(localStorage.getItem('chanseo_seenv')||0)||BUILD-1)).slice(0,3);
-  return `<h2>📜 패치 노트</h2><div style="font-size:13px;color:var(--muted)">지금 버전 v${BUILD}</div>`+(L.length?L:PATCH_NOTES.slice(0,1)).map(p=>`<h3>v${p.v} · ${p.t}</h3><ul>${p.items.map(x=>`<li>${x}</li>`).join('')}</ul>`).join('');}
+  const ord=['new','buff','nerf','enemy','change'];
+  return `<h2>📜 패치 노트</h2><div style="font-size:13px;color:var(--muted)">지금 버전 v${BUILD}</div>`+(L.length?L:PATCH_NOTES.slice(0,1)).map(p=>`<h3>v${p.v} · ${p.t}</h3><ul class="pnl">${[...p.items].sort((x,y)=>ord.indexOf(x[0])-ord.indexOf(y[0])).map(([k,x])=>{const T=PATCH_TAG[k]||PATCH_TAG.change;return `<li><span class="ptag" style="background:${T[1]}">${T[0]}</span>${x}</li>`;}).join('')}</ul>`).join('');}
 function openPatch(all){closePatch();const d=document.createElement('div');d.id='patchPop';d.innerHTML=`<div class="pbox">${patchHtml(all)}<button class="btn primary" id="patchOk">확인하고 시작</button></div>`;document.body.appendChild(d);
   const done=()=>{try{localStorage.setItem('chanseo_seenv',String(BUILD));}catch(e){}closePatch();};$('patchOk').onclick=done;d.onclick=e=>{if(e.target===d)done();};}
 function closePatch(){const d=document.getElementById('patchPop');if(d)d.remove();}
