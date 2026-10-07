@@ -1,6 +1,13 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v4.4
+// 찬서 명예의 전당 서버 (Google Apps Script) v4.5
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
+//
+// v4.4 → v4.5 바뀐 점
+// - 전체 채팅: ?chat=1 최근 메시지 받기, ?say=내용&id=&n=이름&k=열쇠 보내기
+//   최근 60개만 스크립트 속성(PropertiesService, 15개씩 4칸)에 저장하고 오래된 건 자동으로 지움 (시트 안 씀)
+//   주인이 있는 이름은 그 열쇠로만 말할 수 있음. 한 기기당 3초에 한 번까지
+//   채팅을 모두 지우려면: 편집기에서 clearChat 함수를 골라 실행
+// - 접속 신호(ping) 응답에 마지막 채팅 시간(ct)을 같이 줌 (새 메시지 알림용)
 //
 // v4.3 → v4.4 바뀐 점
 // - 지금 접속 중인 사람: 게임이 1분마다 ?ping=1&id=&n=이름&a=하는것 을 보냄 → 최근 2분 안에 보낸 사람 목록을 돌려줌
@@ -175,11 +182,52 @@ function ping_(q) {
   if (ks.length > 200) ks.sort((a, b) => m[a].t - m[b].t).slice(0, ks.length - 200).forEach(k => delete m[k]);
   try { c.put(ONLINE_KEY, JSON.stringify(m), 600); } catch (err) {}
   if (got) lock.releaseLock();
-  return out_({ on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
+  let ct = 0;
+  try { ct = +(c.get('chat_t') || 0); if (!ct) { const L = chatGet_(); ct = L.length ? L[L.length - 1].t : 0; if (ct) c.put('chat_t', String(ct), 21600); } } catch (err) {}
+  return out_({ ct, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
 }
+
+// 전체 채팅 (최근 CHAT_MAX개만 보관)
+const CHAT_KEY = 'chat_v45', CHAT_MAX = 60;
+// 속성 한 칸은 9KB까지라 15개씩 나눠 4칸에 저장 (한글 80자 메시지 15개도 한 칸에 들어감)
+const CHAT_PAGE = 15, CHAT_PAGES = Math.ceil(CHAT_MAX / CHAT_PAGE);
+function chatGet_() {
+  const P = PropertiesService.getScriptProperties(); let L = [];
+  for (let i = 0; i < CHAT_PAGES; i++) { try { L = L.concat(JSON.parse(P.getProperty(CHAT_KEY + '_' + i) || '[]') || []); } catch (err) {} }
+  return L;
+}
+function chatSet_(L) {
+  const P = PropertiesService.getScriptProperties(), o = {};
+  for (let i = 0; i < CHAT_PAGES; i++) o[CHAT_KEY + '_' + i] = JSON.stringify(L.slice(i * CHAT_PAGE, (i + 1) * CHAT_PAGE));
+  P.setProperties(o);
+}
+function chat_(q) {
+  if (q.say != null) {
+    const msg = String(q.say || '').replace(/\s+/g, ' ').trim().slice(0, 80), id = String(q.id || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 16);
+    const nm = str_(q.n, 12) || '모험가';
+    if (!msg || !id) return out_({ ok: false, err: 'empty' });
+    if (nm !== '모험가' && nm !== '익명') { const o = owner_(sheet_(), nm); if (o.kh && o.kh !== kh_(q.k)) return out_({ ok: false, err: 'owned' }); }
+    const lock = LockService.getScriptLock();
+    lock.waitLock(5000);
+    try {
+      const L = chatGet_(), now = Date.now();
+      const last = L.filter(x => x.id === id).pop();
+      if (last && now - last.t < 3000) return out_({ ok: false, err: 'fast', msgs: L.map(chatOut_) });
+      L.push({ t: now, id, n: nm, m: msg });
+      while (L.length > CHAT_MAX) L.shift();
+      chatSet_(L);
+      CacheService.getScriptCache().put('chat_t', String(now), 21600);
+      return out_({ ok: true, msgs: L.map(chatOut_) });
+    } finally { lock.releaseLock(); }
+  }
+  return out_({ msgs: chatGet_().map(chatOut_) });
+}
+const chatOut_ = x => ({ t: x.t, n: x.n, m: x.m, u: x.id.slice(0, 6) });
+function clearChat() { chatSet_([]); CacheService.getScriptCache().remove('chat_t'); }
 
 function doGet(e) {
   const q = (e && e.parameter) || {};
+  if (q.chat) return chat_(q);
   if (q.ping) return ping_(q);
   if (q.own) {
     const nm = str_(q.own, 12), o = owner_(sheet_(), nm);
