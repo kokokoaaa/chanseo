@@ -6118,7 +6118,10 @@ function renderStats(){
 
 /* ---------- loop ---------- */
 let last=performance.now();
+// 자동 업데이트로 새 버전에 자리를 넘기면 이전 버전은 멈춤
+let STOPPED=false;
 function loop(now){
+  if(STOPPED)return;
   const dt=Math.min(.033,(now-last)/1000);last=now;
   if(statsOpen){}else if(S.mode==='play'||S.mode==='dying'){const n=AUTO.speed||1;for(let i=0;i<n;i++){if(S.mode!=='play'&&S.mode!=='dying')break;update(dt);}}else fx(dt);
   if(S.mode==='start')drawPreviews();
@@ -6127,6 +6130,19 @@ function loop(now){
 }
 addEventListener('resize',resize);
 resize();newRun();startScreen();requestAnimationFrame(loop);
+// 파일 자동 업데이트: 파일로 연 경우 게임 주소에 더 새 버전(BUILD 번호가 큰 것)이 있으면 시작 화면에서 바로 새 버전으로 교체.
+// 같은 파일에서 실행되므로 저장된 기록은 그대로. 인터넷이 없거나 실패하면 지금 버전 그대로 실행. 패치할 때마다 BUILD를 1씩 올림
+const BUILD=2,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+(function autoUpdate(){
+  if(/^https?:$/.test(location.protocol))return;
+  let ctl=null;try{ctl=new AbortController();setTimeout(()=>ctl.abort(),8000);}catch(e){}
+  fetch(UPD_URL+'?b='+Date.now(),{cache:'no-store',signal:ctl?ctl.signal:undefined}).then(r=>r.ok?r.text():null).then(t=>{
+    if(!t)return;const m=t.match(/const BUILD=(\d+)/);if(!m||+m[1]<=BUILD)return;
+    if(!S||S.mode!=='start'){toast('🔄 새 버전이 나왔어요! 게임을 다시 열면 적용돼요');return;}
+    STOPPED=true;try{BGM.on=false;}catch(e){}try{if(AC)AC.close();}catch(e){}try{saveMeta();}catch(e){}
+    document.open();document.write(t);document.close();
+  }).catch(()=>{});
+})();
 // 피해 출처 이름 붙이기: 이 함수들로 들어간 피해는 아래 이름으로 기록 (더 구체적인 이름이 이미 있으면 그대로)
 {const wd=(f,k)=>function(...a){const o=S.dsub;S.dsub=o||k;try{return f.apply(this,a);}finally{S.dsub=o;}};explode=wd(explode,'폭발');spinHit=wd(spinHit,'회전 베기');elemChain=wd(elemChain,'원소 연쇄');lightning=wd(lightning,'번개 연쇄');thunderStrike=wd(thunderStrike,'낙뢰');lvlWave=wd(lvlWave,'레벨업 충격파');}
 
