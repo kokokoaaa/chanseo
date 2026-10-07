@@ -2105,7 +2105,7 @@ function rollCard(T,r,bonus){if(!T.v)return {...T,r:T.fr||r,u:null};const k=(T.f
 let S=null,best=0,AUTO={pick:false,move:false};
 try{Object.assign(AUTO,JSON.parse(localStorage.getItem('chipdungeon_auto')||'{}'));}catch(e){}
 // 개발자 모드: 자동 선택·자동 이동은 개발자만. 시작 화면 버전 글씨를 5번 연달아 누르면 암호 입력 (암호 원문은 코드에 없고 해시만 비교)
-const DEV_H=4098586946312084,devHash=(str,seed=7)=>{let h1=0xdeadbeef^seed,h2=0x41c6ce57^seed;for(let i=0,ch;i<str.length;i++){ch=str.charCodeAt(i);h1=Math.imul(h1^ch,2654435761);h2=Math.imul(h2^ch,1597334677);}h1=Math.imul(h1^(h1>>>16),2246822507);h1^=Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507);h2^=Math.imul(h1^(h1>>>13),3266489909);return 4294967296*(2097151&h2)+(h1>>>0);};
+const DEV_H=7621682056880371,devHash=(str,seed=7)=>{let h1=0xdeadbeef^seed,h2=0x41c6ce57^seed;for(let i=0,ch;i<str.length;i++){ch=str.charCodeAt(i);h1=Math.imul(h1^ch,2654435761);h2=Math.imul(h2^ch,1597334677);}h1=Math.imul(h1^(h1>>>16),2246822507);h1^=Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507);h2^=Math.imul(h1^(h1>>>13),3266489909);return 4294967296*(2097151&h2)+(h1>>>0);};
 let DEV=false;try{DEV=localStorage.getItem('chanseo_dev')===String(DEV_H);}catch(e){}
 if(!DEV){AUTO.pick=false;AUTO.move=false;}
 let devTap=[];function devTapVer(){const t=Date.now();devTap=devTap.filter(x=>t-x<2500);devTap.push(t);if(devTap.length<5)return;devTap=[];
@@ -6266,7 +6266,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=10,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=11,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
