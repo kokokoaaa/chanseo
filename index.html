@@ -347,7 +347,8 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 .tile .tr{display:flex;gap:6px;align-items:flex-start;margin-top:2px}.tile .tr i{font-style:normal;flex:none;min-width:20px;text-align:center;border-radius:4px;background:rgba(241,231,207,.1);font-size:11px;padding:0 3px}
 .tile .tr.a{color:var(--brass)}.tile .tr.a i{background:var(--brass);color:#1a1410}
 .tile .parts{color:var(--ivory);margin-bottom:3px}.tile .parts .own{color:var(--brass)}
-.stats{display:grid;grid-template-columns:1fr auto;gap:6px 16px;margin:6px 0 4px;font-size:16px}
+.stats{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 16px;margin:6px 0 4px;font-size:16px}
+.stats span:nth-child(odd){white-space:nowrap}
 .stats span:nth-child(even){font-family:'Do Hyeon',sans-serif;font-size:19px;color:var(--ivory);text-align:right}
 #cxBtn{position:absolute;right:118px;top:10px;z-index:46;background:rgba(4,18,12,.65);color:var(--ivory);border:1px solid var(--brass);border-radius:8px;padding:6px 10px;font-family:'Do Hyeon',sans-serif;font-size:16px;cursor:pointer}
 #statBtn{position:absolute;right:12px;top:10px;z-index:46;background:rgba(4,18,12,.65);color:var(--ivory);border:1px solid var(--brass);border-radius:8px;padding:6px 12px;font-family:'Do Hyeon',sans-serif;font-size:16px;cursor:pointer}
@@ -5093,6 +5094,7 @@ const PATCH_NOTES=[
     ['change','"증강 그만 받기" 중인데 저주받은 상자·현상수배 보상으로 증강 선택이 뜨던 문제 수정 (최고급 스탯 카드로 대신 받아요)'],
     ['enemy','악몽 후반 큰 공격을 방어력으로 줄이는 효과는 최대 30%까지 (방어력 1,000 넘게 쌓아 사실상 무적이 되던 문제)'],
     ['change','게임 중 창(내 스탯·증강·상점)이 위쪽 정보창 바로 아래에서 시작해요. 스크롤해도 가려지지 않아요'],
+    ['change','결과 화면 왼쪽 항목 이름이 한 글자씩 줄바꿈되던 문제 수정'],
     ['new','❓ <b>히든 도전과제</b> 11개 추가. 달성하기 전에는 무엇인지 안 보여요. 이상한 짓을 해 보세요… (달성하면 칭호)']]},
   {v:10,t:'플레이 보너스 점수 · 자동 기능 정리 · 왕실 합체 표시',items:[
     ['new','✨ <b>플레이 보너스 점수</b>: 황금 용 +3,000 · 숨겨진 몬스터 +400 · 이스터에그 +500 (처음 찾은 곳 +1,000 더) · 돌발 이벤트 성공 +200~1,500 (등급별) · 보스 노히트 +1,000 · 최고 DPS 보너스. 난이도 배율도 곱해져요'],
