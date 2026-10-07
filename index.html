@@ -1471,12 +1471,12 @@ const AUGS=[
   {id:'d_sprout',cls:'druid',u:'새싹이 자랄 확률이 커져요. ★1은 25%, ★2는 35%, ★3은 45%.',t:'g',n:'가시 새싹',tags:['nature','summon'],d:'[드루이드 전용] 덩굴 지대가 생길 때 35% 확률로 가시 새싹이 함께 자람. 새싹은 6초간 0.6초마다 가까운 적에게 가시 발사 (공격력 80%)'},
   {id:'d_seasons',cls:'druid',u:'',t:'p',n:'사계절',tags:['nature','nature'],d:'[드루이드 전용] 8초마다 계절이 바뀜. 🌸봄: 체력 재생 2배 · ☀️여름: 덩굴 피해 1.5배 · 🍂가을: 치명타 확률 +12% · ❄️겨울: 덩굴 위 적 빙결 둔화 + 받는 피해 +20%. 자연 2개로 계산'},
   {id:'d_wrath',cls:'druid',u:'',t:'p',n:'자연의 분노',tags:['nature','poison'],d:'[드루이드 전용] 덩굴 지대가 3번째 → 2번째 공격마다, 덩굴 피해 +30%'},
-  {id:'bloodlust',u:'처치 회복이 커져요. ★1은 +1, ★2는 +1.5, ★3은 +2.',t:'s',n:'피의 갈증',tags:['fury','curse'],d:'광란 지속 +2초, 처치 시 체력 +1.5'},
+  {id:'bloodlust',u:'처치 회복이 커져요. ★1은 +1, ★2는 +1.5, ★3은 +2.',t:'s',n:'피의 갈증',tags:['fury','curse'],d:'광란이 최대일 때 흡혈 +2%, 처치 시 체력 +1.5'},
   {id:'battlecry',u:'함성 광란이 늘어나요. ★1은 +3, ★2는 +5, ★3은 +7.',t:'g',n:'전쟁 함성',tags:['fury'],d:'8초마다 함성: 주변 150 적 1.5초 둔화, 광란 +5'},
   {id:'rampage',u:'강화할 때마다 이동 속도 +5%가 한 번 더 붙어요.',t:'s',n:'폭주',tags:['fury','blitz'],d:'이동 속도 +10%, 광란 중첩당 이동 속도 +1%',f:p=>{p.speed*=1.05;}},
   {id:'bladestorm',u:'',t:'p',n:'칼날 폭풍',tags:['fury','fury'],d:'광란 10 이상이면 1초마다 회전 베기 (범위 110, 공격력 100%). 분노 2개로 계산'},
   {id:'b_cleave',cls:'berserk',u:'회전 베기 피해가 커져요. ★1은 80%, ★2는 100%, ★3은 120%.',t:'s',n:'대회전',tags:['fury'],d:'[광전사 전용] 3번째 공격마다 회전 베기 (범위 100, 공격력 100%)'},
-  {id:'b_frenzy',cls:'berserk',u:'광란 최대치가 늘어나요. ★1은 +5, ★2는 +10, ★3은 +15.',t:'g',n:'광기',tags:['fury','curse'],d:'[광전사 전용] 광란 최대 +10, 광란 지속 +2초'},
+  {id:'b_frenzy',cls:'berserk',u:'광란 최대치가 늘어나요. ★1은 +5, ★2는 +10, ★3은 +15.',t:'g',n:'광기',tags:['fury','curse'],d:'[광전사 전용] 광란 최대 +10. 광란이 최대일 때 받는 피해 −10%'},
   {id:'b_unstop',cls:'berserk',u:'',t:'p',n:'꺾이지 않는 의지',tags:['fury','guard'],d:'[광전사 전용] 광란 중첩당 받는 피해 −1.5% (최대 −30%)'},
   {id:'steam',u:'증기 폭발 피해가 커져요. ★1은 80%, ★2는 100%, ★3은 120%.',t:'g',n:'증기 폭발',tags:['elem','fire'],d:'둔화된 적에게 화상이 붙으면 폭발 (범위 60, 공격력 100%). 적마다 2초에 한 번'},
   {id:'conduct',u:'번개 추가 피해가 커져요. ★1은 +30%, ★2는 +40%, ★3은 +50%.',t:'s',n:'전도',tags:['elem','thunder'],d:'화상·둔화된 적은 번개·연쇄 피해 +40%'},
@@ -2001,7 +2001,7 @@ const CARDS=[
   {src:()=>tag('elem')>=1||has('elemcoin'),cls:'elem',n:'원소 결정',g:'원소 효과',v:[[8,15,0]],t:v=>`화상·둔화·연쇄·원소 구슬 피해 +${v[0]}%`,a:(p,v)=>{p.elD=(p.elD||0)+v[0]/100;}},
   {src:()=>tag('elem')>=1||has('elemcoin'),cls:'elem',n:'정령 공명',g:'원소 효과',v:[[2,4,1],[3,6,0]],t:v=>`공격 속도 +${v[0]}%, 원소 효과 피해 +${v[1]}%`,a:(p,v)=>{p.rateP=(p.rateP||0)+v[0]/100;p.elD=(p.elD||0)+v[1]/100;}},
   {src:()=>furyOn(),cls:'berserk',n:'피의 북',g:'광란',v:[[2,3,0]],t:v=>`광란 최대 중첩 +${v[0]}`,a:(p,v)=>{p.fyC=(p.fyC||0)+v[0];}},
-  {src:()=>furyOn(),cls:'berserk',n:'끝없는 분노',g:'광란',v:[[.3,.6,1]],t:v=>`광란 지속 +${v[0]}초`,a:(p,v)=>{p.fyD=(p.fyD||0)+v[0];}},
+  {src:()=>furyOn(),cls:'berserk',n:'끝없는 분노',g:'광란',v:[[4,8,0]],t:v=>`광란이 최대일 때 공격 속도 +${v[0]}%`,a:(p,v)=>{p.fyR=(p.fyR||0)+v[0]/100;}},
   {src:()=>has('thornseed')||tag('nature')>=1||has('gravebloom')||has('gravvine'),cls:'druid',n:'씨앗 주머니',g:'덩굴 지대',v:[[6,12,0]],t:v=>`덩굴 지대 범위 +${v[0]}%`,a:(p,v)=>{p.vnR=(p.vnR||0)+v[0]/100;}},
   {src:()=>has('thornseed')||tag('nature')>=1||has('gravebloom')||has('gravvine'),cls:'druid',n:'가시 독',g:'덩굴 지대',v:[[8,15,0]],t:v=>`덩굴 지대 피해 +${v[0]}%`,a:(p,v)=>{p.vnD=(p.vnD||0)+v[0]/100;}},
   {src:()=>tag('alchemy')>=1,cls:'alch',n:'큰 병',g:'물약 투척',v:[[6,12,0]],t:v=>`물약 범위 +${v[0]}%`,a:(p,v)=>{p.ptR=(p.ptR||0)+v[0]/100;}},
@@ -2595,6 +2595,7 @@ function rawRate(){const p=S.p;let r=effRate(p)*(1+ex('jackpot')*.03)*(1+Math.ma
   if(p.rage>0)r*=1+.06*p.rage;
   if(tag('rapid')>=4&&p.rpS)r*=1+.01*p.rpS;
   if(tag('fury')>=4&&p.fy>0)r*=1+.015*p.fy;
+  if(p.fyR&&p.fy>=furyCap())r*=1+p.fyR;
   if(has('tracker')&&S.mkN)r*=1+Math.min(has('f_predator')?.4:.2,S.mkN*lv3('tracker',.015,.02,.025));
   if(has('bloodrage'))r*=1+lv3('bloodrage',.3,.4,.5);
   if(has('a_chain')&&p.chS)r*=1+p.chS*lv3('a_chain',.06,.08,.1);
@@ -2721,9 +2722,9 @@ const hpPct=()=>{const p=S.p;return (p.hpP||0)+awakeN()*AWAKE_HP+(has('k_bulwark
 function hpSync(){const p=S.p;if(!p)return;const m=Math.max(.2,1+hpPct());if(p.hpB==null){p.hpB=p.maxHp;p.hpLM=p.maxHp;}
   if(p.maxHp!==p.hpLM)p.hpB=Math.max(1,p.hpB+(p.maxHp-p.hpLM));
   const nm=Math.max(1,Math.round(p.hpB*m));if(nm!==p.maxHp){if(nm>p.maxHp)p.hp+=nm-p.maxHp;p.maxHp=nm;}p.hp=Math.min(p.hp,p.maxHp);p.hpLM=p.maxHp;}
-// 한 방 상한 (최대 체력 대비). 악몽은 10분부터 1분마다 +3% (13분에 79%), 13분부터 1분마다 ×1.06으로 점점 빠르게 풀림
-// (15분 89%, 17분 100%, 19분 112%, 21분 126%, 25분 159%). 상한에 걸린 공격도 방어력이 약하게 줄여서, 방어가 낮으면 17분 전후·높으면 21분 전후까지. 보호막·막기·회피로 조금 더 버틸 수 있지만 결국 끝나게
-const ocOf=()=>{const b=dfM().oc||.35,m=nmMin();if(!endless())return b;return m<=3?b+.03*m:.79*Math.pow(1.06,m-3);};
+// 한 방 상한 (최대 체력 대비). 악몽은 10분부터 1분마다 +3% (13분에 79%), 13분부터 1분마다 ×1.08로 점점 빠르게 풀림
+// (15분 92%, 16분 100%, 18분 116%, 20분 135%, 22분 158%). 상한에 걸린 공격도 방어력이 약하게 줄여서, 방어가 낮으면 17분 전후·높으면 21분 전후까지. 보호막·막기·회피로 조금 더 버틸 수 있지만 결국 끝나게
+const ocOf=()=>{const b=dfM().oc||.35,m=nmMin();if(!endless())return b;return m<=3?b+.03*m:.79*Math.pow(1.08,m-3);};
 // 악몽 단계 배율: 5단계(4장 이후)부터 단계마다 보스 체력 ×2.2, 피해 ×1.15
 const diffOpen=k=>{const i=DKEYS.indexOf(k);return i<=0||!!(META.clears||{})[DKEYS[i-1]];};
 let pickDiff=(()=>{try{return localStorage.getItem('chanseo_diff')||'normal';}catch(e){return 'normal';}})();
@@ -3406,7 +3407,7 @@ function clsRows(row){const p=S.p,c=S.cls,r=[];
   {const c=S.dcat||{};let t=0;for(const k in c)t+=c[k];if(t>0){const l=Object.entries(c).filter(([k,v])=>v/t>=.03).sort((a,b)=>b[1]-a[1]).map(([k,v])=>(DSRC_N[k]||k)+' '+Math.round(v/t*100)+'%');r.push(row('최근 피해 비중',`<span class="swrap">${l.join('<br>')}</span>`,'루트 스탯 카드는 이 비중이 클수록 자주 나옴'));}}
   if(p.cdR)r.push(row('주기형 효과 쿨타임','−'+Math.round(p.cdR*100)+'% <small>/ 40%</small>'));
   if(awakeN())r.push(row('각성',`${awakeN()}단계 · 최종 공격 배율 최소 ×${awakeF().toFixed(1)} · 최대 체력 +${Math.round(awakeN()*AWAKE_HP*100)}%`));
-  if(furyOn())r.push(row('광란',`${p.fy||0} / ${furyCap()}, 지속 ${4+(p.fyD||0)+(has('bloodlust')?2:0)+(has('b_frenzy')?2:0)}초`));
+  if(furyOn())r.push(row('광란',`${p.fy||0} / ${furyCap()}${(p.fy||0)>=furyCap()?' (최대)':''}`));
   if(c==='druid'||has('thornseed')||tag('nature')>=1||has('gravebloom')||has('gravvine'))r.push(row('덩굴 지대',`범위 +${Math.round((p.vnR||0)*100)}%, 피해 +${Math.round((p.vnD||0)*100)}%`));
   if(c==='alch'||tag('alchemy')>=1)r.push(row('물약',`범위 +${Math.round((p.ptR||0)*100)}%, 피해 +${Math.round((potM()-1)*100)}%`));
   if(coinOn())r.push(row('동전 앞면',Math.round(headP()*100)+'%',`앞면 피해 +${Math.round((p.hdD||0)*100)}%, 연속 ${p.cfS||0}회`));
@@ -3433,8 +3434,8 @@ function vineAt(x,y,m){let n=0;for(const z of S.zones)if(z.kind==='vine')n++;if(
   S.zones.push({x,y,r:60*br*(1+(S.p.vnR||0))*(has('worldtree')?1.3:1)*(has('yggdrasil')?1.3:1)*(has('f_thornking')?1.3:1),life:3+(tag('nature')>=2?1:0)+(has('yggdrasil')?2:0),kind:'vine',m:m*br*(1+(S.p.vnD||0))*(1+.05*mlv('m_nature'))*natM()*(has('d_wrath')?1.3:1)});}
 const inVine=o=>S.zones.some(z=>z.kind==='vine'&&d2(o,z)<z.r*z.r);
 const furyOn=()=>S.cls==='berserk'||tag('fury')>=1;
-const furyCap=()=>(S.cls==='berserk'?20:tag('fury')>=2?10:5)+(has('bloodking')?15:0)+(S.p.fyC||0)+(tag('fury')>=6?10:0)+(has('b_frenzy')?lv3('b_frenzy',5,10,15):0);
-function addFury(n){const p=S.p;if(!furyOn())return;if(has('b_carnage')&&(p.fy||0)>=furyCap())p.fyO=(p.fyO||0)+n;p.fy=Math.min(furyCap(),(p.fy||0)+n);p.fyT=4+(p.fyD||0)+.3*mlv('m_fury')+(has('bloodlust')?2:0)+(has('b_frenzy')?2:0);}
+const furyCap=()=>(S.cls==='berserk'?20+mlv('m_fury'):tag('fury')>=2?10:5)+(has('bloodking')?15:0)+(S.p.fyC||0)+(tag('fury')>=6?10:0)+(has('b_frenzy')?lv3('b_frenzy',5,10,15):0);
+function addFury(n){const p=S.p;if(!furyOn())return;if(has('b_carnage')&&(p.fy||0)>=furyCap())p.fyO=(p.fyO||0)+n;p.fy=Math.min(furyCap(),(p.fy||0)+n);p.fyT=4+(p.fyD||0);}
 function spinHit(r,dm,col){const p=S.p;p.swingT=.25;S.rings.push({x:p.x,y:p.y,r:20,max:r,life:.25,col});for(const e of S.en)if(e.alive&&!e.phase&&d2(e,p)<(r+e.r)**2)dmgE(e,dm,col);}
 const chilled=e=>e.slowT>0||(e.boss&&tag('frost')>=2);
 const condM=e=>has('conduct')&&(e.burnT>0||chilled(e))?1+lv3('conduct',.3,.4,.5):1;
@@ -3490,6 +3491,7 @@ function hurtP(amt,src){
   if(has('nightveil')&&S.clones&&S.clones.length)amt*=1-Math.min(.2,S.clones.length*lv3('nightveil',.03,.04,.05));
   if(p.bearT>0)amt*=.6;
   if(has('b_unstop')&&p.fy>0)amt*=1-Math.min(.3,.015*p.fy);
+  if(has('b_frenzy')&&(p.fy||0)>=furyCap())amt*=.9;
   if(p.shield>0){p.shield--;if(has('f_ghoststep'))p.ghT=2;ftext(p.x,p.y-24,'보험','#7be08f',14);p.inv=.25;return;}
   if(Math.random()<dodgeC()){ftext(p.x,p.y-24,'회피','#5fc9d9',15);if(has('evade'))p.evT=2;p.inv=has('f_shadow')?.5:.15;if(has('counter')){const k=Math.round((3+3*L('counter'))*(has('f_shadow')?2:1)*(has('f_counterarmor')?1.5:1));for(let i=0;i<k;i++)pBullet(p.x,p.y,i*TAU/k,pDmg()*.8,{sub:'반격',child:true});}return;}
   if(p.block&&Math.random()<p.block+(has('k_wall')?lv3('k_wall',.15,.2,.25):0)+(has('p_divine')?.2:0)){ftext(p.x,p.y-26,'막기','#cfe3ff',16);p.inv=.2;addRage();if(has('k_wall'))explode(p.x,p.y,75,pDmg()*1.5,'#9fd3ff');if(has('p_divine'))exS('holy',p.x,p.y,90,pDmg()*1.5*holyM(),'#fff3a0');return;}
@@ -3559,7 +3561,7 @@ function dmgE(e,amt,col,label,quiet){
   if(e.mkT>S.t)amt*=1+markAmp(e)+(has('stigma')?.2*(tag('holy')>0?1:0):0);
   {const k=S.dsrc||'base',c=S.dcat||(S.dcat={});c[k]=(c[k]||0)+amt;const k2=S.dsub==='폭발'&&S.dsrc&&DSRC_N[S.dsrc]?DSRC_N[S.dsrc].split('(')[0]+' 폭발':S.dsub||DSRC_N[S.dsrc]||'기본 공격',L2=S.dlog||(S.dlog={});L2[k2]=(L2[k2]||0)+amt;}
   e.hp-=amt;e.hit=.06;S.st.dmg+=amt;
-  {let ls=S.p.lifesteal+(has('f_bloodsport')&&S.p.mbT>0?.05:0)+ex('curse')*.01+(has('vampirelord')?.08:0)+(has('bloodking')?Math.floor((S.p.fy||0)/10)*.01:0);if(tag('curse')>=6)ls*=2;if(ls&&S.p.alive){const P=S.p,nh=P.hp+amt*ls*(has('f_vampknight')&&hitRec()?2:1)*healM();if(nh>P.maxHp&&has('vampirelord'))P.barrier=Math.min(barrierMax(),(P.barrier||0)+nh-P.maxHp);P.hp=Math.min(P.maxHp,nh);}}
+  {let ls=S.p.lifesteal+(has('f_bloodsport')&&S.p.mbT>0?.05:0)+ex('curse')*.01+(has('vampirelord')?.08:0)+(has('bloodking')?Math.floor((S.p.fy||0)/10)*.01:0)+(has('bloodlust')&&(S.p.fy||0)>=furyCap()?.02:0);if(tag('curse')>=6)ls*=2;if(ls&&S.p.alive){const P=S.p,nh=P.hp+amt*ls*(has('f_vampknight')&&hitRec()?2:1)*healM();if(nh>P.maxHp&&has('vampirelord'))P.barrier=Math.min(barrierMax(),(P.barrier||0)+nh-P.maxHp);P.hp=Math.min(P.maxHp,nh);}}
   // quiet=2: 회전 부적처럼 자주 맞는 피해는 작은 하늘색 숫자로
   if(quiet===2)ftext(e.x+rand(-8,8),e.y-e.r-4,Math.round(amt),'#9fe8ff',12);
   else if(!quiet)ftext(e.x+rand(-6,6),e.y-e.r-6,label||Math.round(amt),col||'#f1e7cf',col?19:13);
@@ -5038,6 +5040,10 @@ const PATCH_NOTES=[
     ['buff','총잡이: 공격력 10→12, 체력 140→160'],
     ['buff','도적: 공격력 11→13, 체력 140→155'],
     ['buff','도박사: 체력 145→175, 방어력 +6'],
+    ['buff','광란 지속시간 효과 교체 (계속 처치하면 광란이 안 풀려서 쓸모가 없었음): 끝없는 분노 → 광란이 최대일 때 공격 속도 +4~8%'],
+    ['buff','분노 숙련(영구 강화) → 레벨당 광란 최대 +1'],
+    ['buff','피의 갈증 → 광란이 최대일 때 흡혈 +2% (처치 회복은 그대로)'],
+    ['buff','광기 → 광란이 최대일 때 받는 피해 −10% (광란 최대 증가는 그대로)'],
     ['new','📜 패치 노트 창 (새 버전을 처음 켤 때 한 번 떠요)']]},
   {v:7,t:'해금 · 설명서 · 자동 업데이트',items:[
     ['change','증강 등급이 난이도 클리어로 열려요: 처음 실버 → 일반 클리어 골드 → 어려움 클리어 프리즘 → 지옥 클리어 왕실'],
@@ -5139,7 +5145,7 @@ const MSTAT=[
   {k:'m_undead',cls:'necro',n:'사령 숙련',d:'해골 병사 피해 +5%',max:5,c:9},
   {k:'m_rapid',cls:'gunner',n:'총기 숙련',d:'재장전 시간 −5%',max:5,c:9},
   {k:'m_elem',cls:'elem',n:'원소 숙련',d:'원소 효과 피해 +4%',max:5,c:9},
-  {k:'m_fury',cls:'berserk',n:'분노 숙련',d:'광란 지속 +0.3초',max:5,c:9},
+  {k:'m_fury',cls:'berserk',n:'분노 숙련',d:'광란 최대 +1',max:5,c:9},
   {k:'m_nature',cls:'druid',n:'자연 숙련',d:'덩굴 지대 피해 +5%',max:5,c:9},
   {k:'m_alchemy',cls:'alch',n:'연금 숙련',d:'물약 피해 +5%',max:5,c:9},
   {k:'m_coin',cls:'gambler',n:'동전 숙련',d:'동전 앞면 확률 +1%',max:5,c:9}
@@ -5871,7 +5877,7 @@ refreshAutoBtns();
 
 /* ---------- save ---------- */
 const SAVE_KEY='chipdungeon_save_v1';
-const PKEYS=['dmgP','rateP','xpM','block','token','hp','maxHp','speed','dmg','rate','bspd','range','multi','pierce','crit','critM','luck','goldM','vuln','orbR','orbM','dashMul','armor','dodge','lifesteal','regen','magnet','shots','pkills','lastCd','soulN','fyO','skN','hpP','hpB','hpLM',
+const PKEYS=['fyR','dmgP','rateP','xpM','block','token','hp','maxHp','speed','dmg','rate','bspd','range','multi','pierce','crit','critM','luck','goldM','vuln','orbR','orbM','dashMul','armor','dodge','lifesteal','regen','magnet','shots','pkills','lastCd','soulN','fyO','skN','hpP','hpB','hpLM',
   // 스탯 카드·증강이 쌓는 계열별 보너스 (이어하기 때 사라지던 것들)
   'cdR','sumD','tuL','psD','fiD','thD','slD','hoD','shD','gvR','mkD','wvD','auraM','auraD','skD','skL','lbD','rlM','elD','fyC','fyD','vnR','vnD','ptR','ptD','hdP','hdD','rfN','snR','vpN','dashD'];
 const SKEYS=['dragonPend','prismN','hidN','hidK','hbDone','arr','nmB','gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','takeAll','keys','vipStock','vipRoll','buys','cbuys','fused','potN','vineN','seals','banL','noAug','bossT','bioO','dlog','bStart','bHit','bHpF','boostN','boostB','bonusSt'];
