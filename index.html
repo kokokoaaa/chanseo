@@ -5196,7 +5196,7 @@ const PATCH_NOTES=[
     ['buff','🗡 검: 최종 피해 +3% → <b>+4%</b>/강화 단계'],
     ['buff','⛑ 투구: 최대 체력에 더해 <b>큰 공격(한 방 상한) −1.5%</b>/강화 단계'],
     ['buff','🛡 갑옷·영구 단단함: 이제 한 방 상한을 적용한 <b>뒤에</b> 줄여서, 후반 큰 공격에도 효과가 그대로 남아요'],
-    ['change','🚶 누구나 쓰는 자동 이동이 더 느긋해졌어요 (반응이 느리고 예고 공격·탄환은 안 피함). 위험한 순간은 직접 움직여야 해요']]},
+    ['change','🚶 누구나 쓰는 자동 이동을 다듬었어요: 적이 붙으면 재빨리 빠지고, 탄환·예고 공격도 어느 정도 피해요. 그래도 생존기·이벤트·보스 패턴은 직접 하는 게 훨씬 좋아요']]},
   {v:14,t:'⚒ 장비 대장간',items:[
     ['new','⚒ <b>장비 대장간</b> (시작 화면): 메달로 검·투구·갑옷·반지를 사서 강화해요. 모든 직업·모든 판에 적용'],
     ['new','강화는 높을수록 어려워요 (+1 95% … +10 20%). +5부터 실패하면 한 단계 내려가고, +6부터는 부서질 수도 있어요. 🛡 강화 보호권으로 막을 수 있어요'],
@@ -6078,9 +6078,9 @@ function evGoal(){const ev=S.ev,p=S.p;if(!ev||(S.boss&&S.boss.alive))return null
   return g;}
 // 일반용 '느긋한 자동 이동': 0.5초마다 방향만 정함. 가까운 적에게서 멀어지고, 한가하면 떨어진 보석·골드 쪽으로.
 // 예고 공격(징조·보스 패턴)·이벤트 목표·생존기는 신경 쓰지 않음 → 편하지만 위험한 순간은 직접 조작해야 함
-// 일반용 '느긋한 자동 이동': 개발자용과 같은 판단을 쓰되 0.9초에 한 번만 방향을 바꾸고(반응 느림), 예고 공격·탄환은 안 보고,
-// 이벤트 목표·생존기는 안 챙김 → 손으로 하는 것의 절반 남짓
-function easyMoveVec(dt){S.emT=(S.emT||0)-dt;if(S.emT>0&&S.emV)return S.emV;S.emT=.9;S.easyAI=1;try{S.emV=autoMoveVec0();}finally{S.easyAI=0;}return S.emV;}
+// 일반용 '느긋한 자동 이동': 개발자용과 같은 판단을 쓰되 평소엔 0.9초에 한 번만 방향을 바꾸고(적이 붙으면 0.25초), 탄환·예고 공격은 가까운 것만 절반 정도 신경 쓰고,
+// 이벤트 목표·생존기는 안 챙김 → 잘하는 손 조작의 70~75% 정도
+function easyMoveVec(dt){S.emT=(S.emT||0)-dt;const p=S.p;let near=false;for(const e of S.en)if(e.alive&&d2(e,p)<(e.r+p.r+60)**2){near=true;break;}if(near&&S.emT>.25)S.emT=.25;if(S.emT>0&&S.emV)return S.emV;S.emT=near?.25:.9;S.easyAI=1;try{S.emV=autoMoveVec0();}finally{S.easyAI=0;}return S.emV;}
 function autoMoveVec(){const v=autoMoveVec0(),p=S.p,g=evGoal();if(!g)return v;
   const dx=g.x-p.x,dy=g.y-p.y,d=Math.hypot(dx,dy)||1;if(d<20)return [v[0]*.2,v[1]*.2];
   const w=p.hp/p.maxHp<.45?.35:.7;let x=dx/d*w+v[0]*(1-w),y=dy/d*w+v[1]*(1-w);const l=Math.hypot(x,y)||1;return [x/l,y/l];}
@@ -6094,7 +6094,7 @@ function autoMoveVec0(){
   // 오라형(성기사 신성 오라·후광): 오라 범위 안쪽에 적이 들어오도록 바짝 붙음. 체력이 낮을 때만 평소처럼 거리 유지
   const auR=S.cls==='paladin'?110*(1+(p.auraM||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1):has('halo')?(has('f_seraph')?210:140):0;
   const mel=meleeOn(),pr=mel?meleeR():p.range,desired=auR&&!low?clamp(auR*.6,55,200):clamp(pr*(low?.85:.72),95,290),reach=auR&&!low?Math.max(pr*.88,auR*.9):pr*.88;
-  const shots=S.easyAI?[]:S.pr.filter(b=>!b.mine&&d2(b,p)<260*260);
+  const shots=S.pr.filter(b=>!b.mine&&d2(b,p)<(S.easyAI?140:260)**2);
   let goal=null;
   // 이벤트 목표(상자·균열·유물·제단)로 이동. 체력이 낮거나 보스전이면 무시
   let evG=null;if(S.ev&&!low&&!bossOn&&!S.easyAI){const ev=S.ev;if((ev.k==='chest'&&!ev.open)||ev.k==='rift'||ev.k==='shrine'||ev.k==='fountain'||(ev.k==='altar'&&!ev.rolled))evG=ev;else if(ev.k==='relic'||ev.k==='bombs'){let bd=1e12;for(const o of (ev.rel||ev.bombs))if(!(o.got||o.done)){const d=d2(o,p);if(d<bd){bd=d;evG=o;}}}}
@@ -6114,14 +6114,14 @@ function autoMoveVec0(){
     sc+=Math.min(mn,bossOn&&!mel?Math.max(desired,160):desired)*(bossOn?2.9:2.2);
     if(wide.length){let dn=1e9;for(const e of wide){const d=Math.hypot(e.x-tx,e.y-ty);if(d<dn)dn=d;}if(!bossOn){if(dn>reach)sc-=(dn-reach)*(danger>=3||low?1.2:2.6);else sc+=25;}}
     // 탄환은 현재 위치가 아니라 앞으로 0.6초간 날아갈 경로 기준으로 회피
-    for(const b of shots){const ex=b.vx*.6,ey=b.vy*.6,L2=ex*ex+ey*ey||1,u=clamp(((tx-b.x)*ex+(ty-b.y)*ey)/L2,0,1),d=Math.hypot(b.x+ex*u-tx,b.y+ey*u-ty),R0=(b.r||5)+p.r+22;if(d<R0)sc-=(R0-d)*6;}
+    for(const b of shots){const ex=b.vx*.6,ey=b.vy*.6,L2=ex*ex+ey*ey||1,u=clamp(((tx-b.x)*ex+(ty-b.y)*ey)/L2,0,1),d=Math.hypot(b.x+ex*u-tx,b.y+ey*u-ty),R0=(b.r||5)+p.r+22;if(d<R0)sc-=(R0-d)*(S.easyAI?3:6);}
     // 보스전: 보스를 사거리의 50~95% 안에 두면 됨 (사거리가 길수록 움직일 여유가 커짐). 체력이 낮으면 70% 이상 거리 유지
     // 주변에 잡몹이 붙어 있으면 보스 거리보다 잡몹 회피를 우선. 보스 몸통 가까이는 언제나 크게 감점
     if(bossOn){const e=S.boss,cl=(auR||mel)&&!low,minW=e.r+p.r+(cl?(mel?20:40):90),lo=cl?minW:Math.max(minW,p.range*(low?.7:.5)),hi=mel&&!low?Math.max(minW+15,e.r+pr*.8):auR&&!low?Math.max(minW+20,auR+e.r*.8):p.range*.95,db=Math.hypot(e.x-tx,e.y-ty),k=danger>=3?.45:danger>=1?.7:1;
       sc-=k*(db<lo?(lo-db)*2.4:db>hi?(db-hi)*3:0);if(db<minW)sc-=(minW-db)*4;}
     // 보스 예고 공격·장판 회피
     for(const t of S.tele){if(!t.dmg&&t.k==='c')continue;
-      const tk=S.easyAI?0:1;
+      const tk=S.easyAI?.5:1;
       if(t.k==='c'){const d=Math.hypot(t.x-tx,t.y-ty),m2=Math.hypot(t.x-(p.x+cx*STEP*.5),t.y-(p.y+cy*STEP*.5));if(d<t.r+p.r+10)sc-=(900*(1-d/(t.r+p.r+10))+300)*tk;if(m2<t.r)sc-=200*tk;}
       else{const ux=Math.cos(t.a),uy=Math.sin(t.a),px2=tx-t.x,py2=ty-t.y,u=clamp(px2*ux+py2*uy,0,t.len),dd=Math.hypot(px2-ux*u,py2-uy*u);if(dd<t.w/2+p.r+16)sc-=900*tk;}}
     for(const h of S.hz){const d=Math.hypot(h.x-tx,h.y-ty);if(d<h.r+p.r+6)sc-=500;}
