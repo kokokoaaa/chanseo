@@ -2133,6 +2133,9 @@ function rollQ(){return 1;}
 const QGRADE=q=>GRADE((q-.85)/.4);
 // 스탯형 증강(f)의 이로운 변화에만 q를 곱함. 곱셈/덧셈 여부는 값을 2배로 한 사본과 비교해서 판별
 const LOWER_BETTER=new Set(['dashMul','vuln']),Q_SKIP=new Set(['hp','multi','pierce']);
+// 증강 효과 적용 + 바뀐 스탯 기록(dl). 나중에 상점에서 증강을 지우면 기록한 만큼 되돌림
+function augApply(a){const P=S.p,b={};for(const k in P)if(typeof P[k]==='number')b[k]=P[k];applyQ(a.f,P,a.q);const d=a.dl||(a.dl={});for(const k in P)if(typeof P[k]==='number'&&k in b&&P[k]!==b[k]&&k!=='hp')d[k]=(d[k]||0)+P[k]-b[k];}
+function augUnapply(a){const P=S.p;for(const k in (a.dl||{}))if(typeof P[k]==='number')P[k]-=a.dl[k];a.dl={};if(P.hp>P.maxHp)P.hp=P.maxHp;if(P.vuln!=null&&P.vuln<.05)P.vuln=.05;if(P.dashMul!=null&&P.dashMul<.05)P.dashMul=.05;}
 function applyQ(f,p,q){if(!q||q===1){f(p);return;}
   const A={},B={};for(const k in p)if(typeof p[k]==='number'){A[k]=p[k];B[k]=p[k]*2;}
   const A2={...A},B2={...B};f(A2);f(B2);const mh=p.maxHp;
@@ -4805,7 +4808,7 @@ function giveAltStat(t,extra){const [n,b,txt]=ALT_STAT[t]||ALT_STAT.g;S.bonusSt=
 // 증강 그만 받기(S.noAug): 이번 판에서 증강 차례가 오면 스탯 카드로 대신 받음
 const augReady=()=>!S.noAug&&(slotCount()<MAXA||fullOptions().length>0);
 // 슬롯이 가득 차면: 합체 짝(최대 2) + 나머지는 '교체' 후보 (고르면 기존 증강 하나를 버리고 바꿈)
-const swappable=()=>S.augs.map((a,i)=>[a,i]).filter(([a])=>a.t!=='v'&&a.t!=='f'&&a.t!=='d'&&!a.f&&!a.uc);
+const swappable=()=>S.augs.map((a,i)=>[a,i]).filter(([a])=>a.t!=='v'&&a.t!=='f'&&a.t!=='d'&&(!a.f||a.dl)&&!a.uc);
 function fullOptions(){
   const fz=AUGS.filter(a=>!has(a.id)&&tierOpen(a.t)&&(!a.cls||a.cls===S.cls)&&augReq(a)&&partnerOf(a.id)).sort(()=>Math.random()-.5).slice(0,2).map(a=>({...a,fuseNow:true,q:rollQ()}));
   if(!swappable().length)return fz;
@@ -4819,7 +4822,9 @@ const skipG=()=>Math.round(price(100)*(1+.1*slotCount()));
 function openAug(free,why,fixed,fixedTier){
   S.mode='aug';why=why||S.augWhy||'증강';S.augWhy=why;
   const full=slotCount()>=MAXA;
-  const tier=capTier(fixedTier||rollTier()),opts=fixed||(full?fullOptions():augOptions(tier));
+  let tier=capTier(fixedTier||rollTier());const opts=fixed||(full?fullOptions():augOptions(tier));
+  // 슬롯이 가득 차면 등급과 상관없이 교체 후보가 나오므로, 대신 받는 스탯 카드 등급도 실제로 보이는 카드 중 가장 높은 등급에 맞춤
+  if(full){const rk={s:0,g:1,p:2},ts=opts.map(a=>a.t).filter(t=>t in rk);tier=ts.length?ts.reduce((x,y)=>rk[y]>rk[x]?y:x):'s';}
   if(!opts.length){const g=price(120);S.gold+=g;toast(`슬롯 가득, 강화할 것도 없음. ${g} 골드 지급`);openNext();return;}
   // 다시뽑기: 같은 창에서 연속으로 돌릴수록 1.6배씩, 증강 슬롯 1칸마다 기본 가격 +25%. 증강을 고르면 처음 가격으로
   S.arr=S.arr||0;const cost=Math.round(price(18)*(1+.25*slotCount())*Math.pow(1.6,S.arr));
@@ -4831,7 +4836,7 @@ function openAug(free,why,fixed,fixedTier){
   <button class="btn ghost" data-stats>내 스탯 보기</button>`);
   {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}bindPeek();if(opts.some(a=>a.t==='p'))augFx('💎 프리즘 등장!','','#d68cff',true);
   ov.querySelectorAll('.card').forEach(b=>b.onclick=ev=>{const a=opts[+b.dataset.i];S.arr=0;{const o=ev.target.closest('[data-fz]');S.fuseChoice=o?o.dataset.fz:null;}
-    if(a.up){const o=a.ref;o.lv++;if(o.f)applyQ(o.f,S.p,o.q);tagCount();toast(`${o.n} ★${o.lv}`);tryFuse();openNext();return;}
+    if(a.up){const o=a.ref;o.lv++;if(o.f)augApply(o);tagCount();toast(`${o.n} ★${o.lv}`);tryFuse();openNext();return;}
     if(a.swap&&slotCount()>=MAXA){openSwap(a,opts,free,why);return;}
     gainAug(a);
     openNext();});
@@ -4848,7 +4853,7 @@ function openSwap(a,opts,free,why){
   const list=swappable();
   show(`<h2>교체할 증강</h2><p class="sub"><b>${a.n}</b> 대신 버릴 증강</p><div class="grid">${list.map(([o,i])=>`<button class="btn" data-sw="${i}">${o.n}<small>${o.d}</small></button>`).join('')}</div>
   <button class="btn ghost" id="swBack">돌아가기</button>`);
-  ov.querySelectorAll('[data-sw]').forEach(b=>b.onclick=()=>{const o=S.augs[+b.dataset.sw];S.augs.splice(+b.dataset.sw,1);tagCount();toast(`${o.n} → ${a.n}`);gainAug({...a,swap:undefined});openNext();});
+  ov.querySelectorAll('[data-sw]').forEach(b=>b.onclick=()=>{const o=S.augs[+b.dataset.sw];if(o.f)augUnapply(o);S.augs.splice(+b.dataset.sw,1);tagCount();toast(`${o.n} → ${a.n}`);gainAug({...a,swap:undefined});openNext();});
   $('swBack').onclick=()=>openAug(free,why,opts);
 }
 function fusionTable(){
@@ -4888,7 +4893,7 @@ function chime(notes,type){try{AC=AC||new (window.AudioContext||window.webkitAud
 // 증강 획득: 고정 수치(내부 ★2)로 추가 → 시너지 단계 돌파 확인 → 합체 짝이 있으면 바로 합체. 단계마다 연출
 function gainAug(a){
   const before={...S.tagc};
-  {const lv=a.t==='v'||a.t==='f'||a.t==='d'?1:2;S.augs.push({...a,lv,fuseNow:undefined});if(a.f)for(let i=0;i<lv;i++)applyQ(a.f,S.p,a.q);}tagCount();
+  {const lv=a.t==='v'||a.t==='f'||a.t==='d'?1:2,o={...a,lv,fuseNow:undefined,dl:{}};S.augs.push(o);if(a.f)for(let i=0;i<lv;i++)augApply(o);}tagCount();
   const T=TIER[a.t]||TIER.s;augFx(`✨ ${a.n}`,a.d,T.col,a.t==='p'||a.t==='v');
   const p=S.p;S.rings.push({x:p.x,y:p.y,r:10,max:260,life:.6,col:T.col});S.flash=Math.max(S.flash,.25);
   const ups=[];for(const t in S.tagc){const c0=before[t]||0,c1=S.tagc[t];if(c0<1&&TAGS[t]&&TAGS[t].t1)ups.push([t,1]);for(const n of [6,4,2])if(c0<n&&c1>=n){ups.push([t,n]);break;}}
@@ -4947,7 +4952,7 @@ function renderCasino(){
   <button class="btn primary" data-a="next" ${b?'disabled':''}>${S.hub?'상점으로 돌아가기':'테이블 떠나기'}</button>`);
   ov.querySelectorAll('[data-a]').forEach(el=>el.onclick=()=>casinoAct(el.dataset.a));
 }
-function grantAug(min){if(slotCount()>=MAXA){const o=S.augs.filter(a=>AUG_UP&&a.lv<3&&a.t!=='v'&&a.t!=='f'&&a.t!=='d');if(!o.length)return null;const a=o[Math.floor(Math.random()*o.length)];a.lv++;if(a.f)applyQ(a.f,S.p,a.q);tagCount();tryFuse();return {n:a.n+' ★'+a.lv,d:'슬롯이 가득 차서 강화로 대체'};}const order=['s','g','p'];const ok=AUGS.filter(a=>!has(a.id)&&(!a.cls||a.cls===S.cls)&&augReq(a)&&order.indexOf(a.t)>=order.indexOf(min));if(!ok.length)return null;const a={...ok[Math.floor(Math.random()*ok.length)],q:rollQ()},lv=a.t==='v'||a.t==='f'||a.t==='d'?1:2;S.augs.push({...a,lv});tagCount();tryFuse();if(a.f)for(let i=0;i<lv;i++)applyQ(a.f,S.p,a.q);tagCount();return a;}
+function grantAug(min){if(slotCount()>=MAXA){const o=S.augs.filter(a=>AUG_UP&&a.lv<3&&a.t!=='v'&&a.t!=='f'&&a.t!=='d');if(!o.length)return null;const a=o[Math.floor(Math.random()*o.length)];a.lv++;if(a.f)augApply(a);tagCount();tryFuse();return {n:a.n+' ★'+a.lv,d:'슬롯이 가득 차서 강화로 대체'};}const order=['s','g','p'];const ok=AUGS.filter(a=>!has(a.id)&&(!a.cls||a.cls===S.cls)&&augReq(a)&&order.indexOf(a.t)>=order.indexOf(min));if(!ok.length)return null;const a={...ok[Math.floor(Math.random()*ok.length)],q:rollQ()},lv=a.t==='v'||a.t==='f'||a.t==='d'?1:2;S.augs.push({...a,lv});tagCount();tryFuse();if(a.f)for(let i=0;i<lv;i++)applyQ(a.f,S.p,a.q);tagCount();return a;}
 function casinoAct(a){
   const p=S.p;
   if(a==='next'){if(S.hub){openHub();return;}openNext();return;}
@@ -5053,6 +5058,9 @@ const PATCH_NOTES=[
   {v:10,t:'플레이 보너스 점수 · 자동 기능 정리 · 왕실 합체 표시',items:[
     ['new','✨ <b>플레이 보너스 점수</b>: 황금 용 +5,000 · 숨겨진 몬스터 +600 · 이스터에그 +800 (처음 찾은 곳 +1,500 더) · 돌발 이벤트 성공 +400~4,000 (등급별) · 보스 노히트 +1,500 · 최고 DPS 보너스. 난이도 배율도 곱해져요'],
     ['change','주기형 효과 쿨타임이 40%에 다 찼는데도 시계 태엽 카드가 나오던 문제 수정'],
+    ['change','스탯을 올려주는 증강도 상점에서 지우거나 교체할 수 있어요. 올려줬던 스탯은 함께 되돌아가요'],
+    ['change','슬롯이 가득 찼을 때 "증강 대신 스탯 카드" 등급이 실제로 보이는 증강 등급과 맞게 나와요 (실버만 보이는데 최고급 3장이 뜨던 문제)'],
+    ['change','상점 왕실 칸: 이미 다른 합체에 쓰인 증강을 "보유한 증강과 왕실 합체 가능"으로 잘못 표시하던 문제 수정'],
     ['change','자동 선택·자동 이동 버튼이 사라졌어요. 직접 조작하는 게임이에요 (개발자 테스트용으로만 남김)'],
     ['new','👑 왕실 증강과 합체할 수 있는 증강은 증강 카드 아래와 슬롯 설명에 작게 표시돼요']]},
   {v:9,t:'고급 스탯 카드 다시 뽑기',items:[
@@ -5775,7 +5783,7 @@ function autoAug(){
   const full=slotCount()>=MAXA,opts=full?fullOptions().filter(a=>!a.swap):augOptions(rollTier());
   if(!opts.length){autoStat();return;}
   const a=opts.reduce((b,c)=>scoreAug(c)>scoreAug(b)?c:b,opts[0]);
-  if(a.up){const o=a.ref;o.lv++;if(o.f)applyQ(o.f,S.p,o.q);tagCount();ftext(S.p.x,S.p.y-40,o.n+' ★'+o.lv,'#ffd76a',15);tryFuse();return;}
+  if(a.up){const o=a.ref;o.lv++;if(o.f)augApply(o);tagCount();ftext(S.p.x,S.p.y-40,o.n+' ★'+o.lv,'#ffd76a',15);tryFuse();return;}
   gainAug(a);
 }
 const BADCARD=['러시안 회전','동전 던지기','모험가의 주사위','결사'];
@@ -5792,7 +5800,7 @@ function autoShop(){
   // 보물 빌드는 보유 골드가 곧 화력이라 절반은 남겨둠
   const keep=tag('house')>=4?S.gold*.5:0,reserve=()=>Math.max(reviveCost(),keep);let guard=0,bought=0;
   while(guard++<60){const up=S.augs.filter(a=>AUG_UP&&a.lv<3&&a.t!=='v'&&a.t!=='f'&&a.t!=='d').sort((a,b)=>upCost(a)-upCost(b))[0];
-    if(up&&S.gold-Math.round(upCost(up)*.85)>reserve()){S.gold-=Math.round(upCost(up)*.85);up.lv++;if(up.f)applyQ(up.f,S.p,up.q);tagCount();tryFuse();bought++;continue;}
+    if(up&&S.gold-Math.round(upCost(up)*.85)>reserve()){S.gold-=Math.round(upCost(up)*.85);up.lv++;if(up.f)augApply(up);tagCount();tryFuse();bought++;continue;}
     const pool=STACKS.filter(x=>['atk','rate','hp','arm','crit','critm'].includes(x.k)&&!(x.k==='crit'&&critFull())&&!(x.k==='critm'&&critMFull())&&!(x.k==='rate'&&rawRate()>=RATE_CAP()));
     const x=pool.sort((a,b)=>stackCost(a)-stackCost(b))[0];if(!x||S.gold-stackCost(x)<=reserve())break;S.gold-=stackCost(x);S.buys[x.k]=(S.buys[x.k]||0)+1;x.f(S.p);bought++;}
   toast(`자동 모드: 상점에서 ${bought}개 구매`);
@@ -5922,7 +5930,7 @@ const SKEYS=['dragonPend','prismN','hidN','hidK','hbDone','arr','nmB','gold','xp
 function saveGame(silent){
   if(!S||!S.started||!S.p.alive||S.mode==='over'||S.mode==='dying'||S.mode==='revive')return false;
   S.bHpF=S.boss&&S.boss.alive?S.boss.hp/S.boss.maxHp:0;
-  const d={v:1,at:Date.now(),p:{},s:{},augs:S.augs.map(a=>[a.id,a.lv,a.q||1,a.pq||0]),st:S.st};
+  const d={v:1,at:Date.now(),p:{},s:{},augs:S.augs.map(a=>[a.id,a.lv,a.q||1,a.pq||0,a.dl||null]),st:S.st};
   for(const k of PKEYS)d.p[k]=S.p[k];for(const k of SKEYS)d.s[k]=S[k];
   try{localStorage.setItem(SAVE_KEY,JSON.stringify(d));if(!silent)toast('저장했습니다');return true;}catch(e){if(!silent)toast('저장 실패');return false;}
 }
@@ -5933,7 +5941,7 @@ function continueGame(d){
   for(const k of PKEYS)if(d.p[k]!==undefined)S.p[k]=d.p[k];
   for(const k of SKEYS)if(d.s[k]!==undefined)S[k]=d.s[k];
   S.st=d.st||S.st;
-  S.augs=d.augs.map(([id,lv,q,pq])=>{const f=[...FUSIONS,...VFUSIONS].find(x=>x.id===id);if(f){const o=fusionObj(f);if(pq)o.pq=pq;return o;}const a=AUGS.find(x=>x.id===id)||VIPS.find(x=>x.id===id)||DRAGON.find(x=>x.id===id);return a?{...a,lv,q:q||1}:null;}).filter(Boolean);
+  S.augs=d.augs.map(([id,lv,q,pq,dl])=>{const f=[...FUSIONS,...VFUSIONS].find(x=>x.id===id);if(f){const o=fusionObj(f);if(pq)o.pq=pq;return o;}const a=AUGS.find(x=>x.id===id)||VIPS.find(x=>x.id===id)||DRAGON.find(x=>x.id===id);return a?{...a,lv,q:q||1,dl:dl||undefined}:null;}).filter(Boolean);
   tagCount();S.round=diffAt(effT());
   S.started=true;const p=S.p;p.x=WW/2;p.y=WH/2;p.inv=2;p.alive=true;p.barrier=barrierMax();
   S.mode='play';hide();toast('이어하기');
@@ -6044,7 +6052,7 @@ function openMerch(m){
 function vipShopHtml(m,k){
   const full=vipCount()>=VIP_MAX,vc=vipCost();
   if(m.vsel){const v=VIPS.find(x=>x.id===m.vsel);return `<p class="sub"><b>${v.n}</b>를 무엇 대신 넣을까요? (🔑 ${vc})</p><div class="grid">${S.augs.map((a,i)=>[a,i]).filter(([a])=>a.t==='v').map(([a,i])=>`<button class="btn" data-vx="${i}">${a.n} 버리기<small>${a.d}</small></button>`).join('')}</div><button class="btn ghost" data-vx="-1">취소</button>`;}
-  return `<p class="sub">열쇠 ${vc}개로 왕실 1개. 보스를 잡을 때마다 열쇠 1개, 품목도 새로 바뀌어요. 왕실 칸 <b>${vipCount()}/${VIP_MAX}</b>${full?' · 가득 참, 사면 기존 왕실와 교체':''}</p><div class="grid">${vipStock().map(v=>{const own=has(v.id);return `<button class="btn" data-v="${v.id}" ${own||k<vc?'disabled':''}>${v.n}<small>${v.d}</small>${(()=>{const vf=VFUSIONS.filter(f=>f.a===v.id&&has(f.b));return vf.map(f=>`<small style="color:#ff8be6;display:block;margin-top:3px">💥 보유한 <b>${augDef(f.b).n}</b>와 왕실 합체 가능 → <b>${f.n}</b>: ${f.d} <span style="opacity:.7">(다음 증강을 얻을 때 합체)</span></small>`).join('');})()}<small style="color:var(--brass)">${own?'보유':(full?'교체 · ':'')+'🔑 '+vc}</small></button>`;}).join('')}</div>`;
+  return `<p class="sub">열쇠 ${vc}개로 왕실 1개. 보스를 잡을 때마다 열쇠 1개, 품목도 새로 바뀌어요. 왕실 칸 <b>${vipCount()}/${VIP_MAX}</b>${full?' · 가득 참, 사면 기존 왕실와 교체':''}</p><div class="grid">${vipStock().map(v=>{const own=has(v.id);return `<button class="btn" data-v="${v.id}" ${own||k<vc?'disabled':''}>${v.n}<small>${v.d}</small>${(()=>{const vf=VFUSIONS.filter(f=>f.a===v.id&&S.augs.some(a=>a.id===f.b));return vf.map(f=>`<small style="color:#ff8be6;display:block;margin-top:3px">💥 보유한 <b>${augDef(f.b).n}</b>와 왕실 합체 가능 → <b>${f.n}</b>: ${f.d} <span style="opacity:.7">(다음 증강을 얻을 때 합체)</span></small>`).join('');})()}<small style="color:var(--brass)">${own?'보유':(full?'교체 · ':'')+'🔑 '+vc}</small></button>`;}).join('')}</div>`;
 }
 function hubBody(m,g){
   const tab=m.tab||'stat',k=S.keys||0,p=S.p;
@@ -6057,8 +6065,8 @@ function hubBody(m,g){
   if(tab==='stat')h+=`<p class="sub">지금 스탯이 높을수록 비싸요.</p><div class="grid">${m.stock.map(i=>{const x=STACKS[i],c=stackCost(x);const cap=stackCapped(x);return `<button class="btn" data-k="${i}" ${cap||g<c?'disabled':''}>${cap?x.n:withActual(x.n,x.f)}<small>${cap?'최대':c+'골드'}</small></button>`;}).join('')}</div>`;
   if(tab==='aug'){
     h+=ups.length?`<p class="sub">증강 강화 · 카드에 마우스를 올리면 강화 효과</p><div class="grid">${ups.map(([a,i])=>{const c=Math.round(upCost(a)*.85);return `<button class="btn" data-u="${i}" title="${(a.u||'').replace(/"/g,'')}" ${g<c?'disabled':''}>${a.n} <span class="stars">${'★'.repeat(a.lv)}${'☆'.repeat(3-a.lv)}</span><small>★${a.lv+1}로 · ${c}골드</small></button>`;}).join('')}</div>`:'<p class="sub">강화할 증강이 없어요.</p>';
-    {const dis=S.augs.map((a,i)=>[a,i]).filter(([a])=>a.t!=='f'&&a.t!=='d'&&(a.t==='v'||!a.f));
-     if(dis.length)h+=`<p class="sub" style="margin-top:12px">증강 지우기 · 슬롯 1칸을 비우고 골드를 받아요. 효과와 시너지 태그도 사라져요 (스탯을 직접 올린 증강은 지울 수 없음)</p><div class="grid">${dis.map(([a,i])=>m.disc===i?`<button class="btn" data-dis="${i}" style="border-color:#ff6060;color:#ff9a9a">정말 지울까요?<small>${a.n} 지우고 +${price(40*a.lv)}골드</small></button>`:`<button class="btn" data-disc="${i}" title="${(a.d||'').replace(/"/g,'')}">🗑 ${a.n} <span class="stars">${'★'.repeat(a.lv)}</span><small>지우면 +${price(40*a.lv)}골드</small></button>`).join('')}</div>`;}
+    {const dis=S.augs.map((a,i)=>[a,i]).filter(([a])=>a.t!=='f'&&a.t!=='d'&&(a.t==='v'||!a.f||a.dl));
+     if(dis.length)h+=`<p class="sub" style="margin-top:12px">증강 지우기 · 슬롯 1칸을 비우고 골드를 받아요. 효과와 시너지 태그도 사라져요 (스탯을 올린 증강은 올려준 스탯도 함께 되돌아가요)</p><div class="grid">${dis.map(([a,i])=>m.disc===i?`<button class="btn" data-dis="${i}" style="border-color:#ff6060;color:#ff9a9a">정말 지울까요?<small>${a.n} 지우고 +${price(40*a.lv)}골드</small></button>`:`<button class="btn" data-disc="${i}" title="${(a.d||'').replace(/"/g,'')}">🗑 ${a.n} <span class="stars">${'★'.repeat(a.lv)}</span><small>지우면 +${price(40*a.lv)}골드</small></button>`).join('')}</div>`;}
     if(fz.length)h+=`<p class="sub" style="margin-top:12px">강제 합체 · 두 증강을 하나로 (슬롯 1칸 확보)</p><div class="grid">${fz.map(f=>`<button class="btn" data-fz="${f.id}" title="${f.d}" ${g<fuseCost()?'disabled':''}>${f.n}<small>${AUGS.find(x=>x.id===f.a).n} + ${AUGS.find(x=>x.id===f.b).n} · ${Math.round(fuseCost())}골드</small></button>`).join('')}</div>`;}
   if(tab==='vip')h+=vipShopHtml(m,k);
   if(tab==='etc'){const hc=price(55),dbl=.45+LK()*.005;
@@ -6112,10 +6120,10 @@ function openShop(back,m){
   else show(`<div class="shophead"><h2>${M.icon} ${M.n}</h2><button class="btn" id="upBackTop">${S.hub?'상점으로':'떠나기'}</button></div><p class="sub">${M.d}. 보유 <span class="gold">${g} 골드</span>. 게임은 멈춰 있습니다.</p>${body}<button class="btn primary" id="upBack">${S.hub?'상점으로 돌아가기':'떠나기'}</button>`);
   const re=()=>openShop(back,m);
   ov.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const x=STACKS[+b.dataset.k],c=stackCost(x);if(S.gold<c||stackCapped(x))return;S.gold-=c;S.buys[x.k]=(S.buys[x.k]||0)+1;x.f(S.p);S.p.luck=Math.min(LUCK_CAP,S.p.luck);re();});
-  ov.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>{const a=S.augs[+b.dataset.u],c=Math.round(upCost(a)*.85);if(S.gold<c||a.lv>=3)return;S.gold-=c;a.lv++;if(a.f)applyQ(a.f,S.p,a.q);tagCount();toast(`${a.n} ★${a.lv}`);tryFuse();re();});
+  ov.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>{const a=S.augs[+b.dataset.u],c=Math.round(upCost(a)*.85);if(S.gold<c||a.lv>=3)return;S.gold-=c;a.lv++;if(a.f)augApply(a);tagCount();toast(`${a.n} ★${a.lv}`);tryFuse();re();});
   ov.querySelectorAll('[data-fz]').forEach(b=>b.onclick=()=>{const f=FUSIONS.find(x=>x.id===b.dataset.fz),c=fuseCost();if(S.gold<c||!fusable().includes(f))return;S.gold-=c;doFuse(f);re();});
   ov.querySelectorAll('[data-disc]').forEach(b=>b.onclick=()=>{m.disc=+b.dataset.disc;re();});
-  ov.querySelectorAll('[data-dis]').forEach(b=>b.onclick=()=>{const a=S.augs[+b.dataset.dis];if(!a)return;S.gold+=price(40*a.lv);S.augs.splice(+b.dataset.dis,1);m.disc=null;tagCount();toast(`${a.n} 지움`);re();});
+  ov.querySelectorAll('[data-dis]').forEach(b=>b.onclick=()=>{const a=S.augs[+b.dataset.dis];if(!a)return;S.gold+=price(40*a.lv);if(a.f)augUnapply(a);S.augs.splice(+b.dataset.dis,1);m.disc=null;tagCount();toast(`${a.n} 지움`);re();});
   ov.querySelectorAll('[data-doc]').forEach(b=>b.onclick=()=>{const k=b.dataset.doc,p=S.p;
     if(k==='heal'){const c=price(55);if(S.gold<c)return;S.gold-=c;p.hp=p.maxHp;m.used.heal=1;}
     if(k==='max'){const c=price(70*Math.pow(1.35,S.buys.doc||0));if(S.gold<c)return;S.gold-=c;S.buys.doc=(S.buys.doc||0)+1;p.maxHp+=22;p.hp+=22;}
