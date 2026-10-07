@@ -44,6 +44,13 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 .aico.empty.vip{border-color:rgba(255,215,106,.45)}.aico.empty.vip i{opacity:.35;font-size:14px}
 .vipgap{width:8px;flex:none}
 .mtile.poor{opacity:.5;cursor:help}
+/* 생일 축하 배너 */
+.bday{text-align:center;margin:0 0 10px;font-family:"Do Hyeon",sans-serif;font-size:clamp(17px,4.9vw,36px);white-space:nowrap;line-height:1.2;letter-spacing:1px;animation:bdayBob 1.6s ease-in-out infinite}
+.bday .bt{background:linear-gradient(90deg,#ff4f6a,#ffb347,#ffe66a,#7be08f,#5fc9f8,#b07aff,#ff4fd8,#ff4f6a);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:bdayFlow 3s linear infinite;filter:drop-shadow(0 0 6px rgba(255,215,106,.7)) drop-shadow(0 2px 0 rgba(0,0,0,.6))}
+.bday .em{display:inline-block;animation:bdaySpin 2s ease-in-out infinite}.bday .em:last-child{animation-delay:-1s}
+.bday .sp{display:block;font-size:.42em;color:#ffd76a;letter-spacing:6px;opacity:.9;animation:bdayTw 1.2s ease-in-out infinite}
+@keyframes bdayFlow{to{background-position:300% 0}}@keyframes bdayBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes bdaySpin{0%,100%{transform:rotate(-12deg) scale(1)}50%{transform:rotate(12deg) scale(1.2)}}@keyframes bdayTw{0%,100%{opacity:.35}50%{opacity:1}}
 #cosPrev{position:fixed;z-index:260;display:none;padding:6px;background:#0b1f18;border:1px solid var(--brass);border-radius:10px;box-shadow:0 10px 26px rgba(0,0,0,.6);pointer-events:none}
 #cosPrev canvas{display:block;width:260px;height:160px;image-rendering:pixelated;border-radius:6px}
 #augTip{position:fixed;z-index:250;display:none;max-width:260px;background:rgba(4,18,12,.96);border:1px solid var(--ac,#d6a94a);border-radius:8px;padding:8px 10px;font-family:'Do Hyeon',sans-serif;font-size:14px;color:#f1e7cf;pointer-events:none;line-height:1.35}
@@ -4969,7 +4976,8 @@ function startScreen(){
   if(!clsOpen(pickCls))pickCls='knight';
   const cards=Object.keys(CLASSES).map(k=>{const C=CLASSES[k],op=clsOpen(k);return `<button class="clscard ${k===pickCls?'on':''} ${op?'':'locked'}" data-cls="${k}">
     <canvas class="pv" data-c="${k}" width="96" height="96"></canvas><b>${op?'':'🔒 '}${C.n}</b><span class="role">${C.role}</span></button>`;}).join('');
-  show(`<h1>찬서 <span style="font-size:.5em;color:var(--ivory)">: 찬붕이의 뱀서</span></h1>
+  show(`<div class="bday"><span class="sp">✦ ✧ ✦ ✧ ✦</span><span class="em">🎂</span> <span class="bt">회덕이의 생일을 축하합니다!</span> <span class="em">🎉</span><span class="sp">✧ ✦ ✧ ✦ ✧</span></div>
+  <h1>찬서 <span style="font-size:.5em;color:var(--ivory)">: 찬붕이의 뱀서</span></h1>
   <div class="hof" id="board">${boardHtml()}</div>
   ${sv?`<button class="btn primary" id="cont">이어하기 (${CLASSES[sv.s.cls||'knight'].n})<br><small style="color:var(--ink)">${Math.floor(sv.s.gt/60)}분 ${Math.floor(sv.s.gt%60)}초, 레벨 ${sv.s.lvl}, 증강 ${sv.augs.length}개</small></button><h3>새 게임</h3>`:''}
   <h3>캐릭터 선택</h3><div class="clsgrid">${cards}</div>
