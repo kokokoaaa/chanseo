@@ -4624,6 +4624,7 @@ function hud(){
   if(skelMax()>0)bf.push(`<span data-tip="skel" style="color:#8cff9a">💀 해골 ${(S.skel||[]).length}/${skelMax()}${skelRaw()>SKEL_CAP?` · 초과 ${skelRaw()-SKEL_CAP} → 해골 피해 ×${(skelRaw()/SKEL_CAP).toFixed(2)}`:''}</span>`);if(has('turret'))bf.push(`<span data-tip="turret" style="color:#9fd3ff">🗼 포탑 ${(S.turrets||[]).length}기 · 다음 ${Math.max(0,S.tuT||0).toFixed(0)}초</span>`);if(shadowOn())bf.push(`<span data-tip="clone" style="color:#c9a0ff">👥 분신 ${(S.clones||[]).length}/${shMax()}</span>`);if(droneN()>0)bf.push(`<span data-tip="drone" style="color:#9fe8ff">🛸 드론 ${droneN()}기</span>`);{const vn=S.zones.filter(z=>z.kind==='vine').length;if(vn||S.cls==='druid'||tag('nature')>=1||has('thornseed'))bf.push(`<span style="color:#d8ff6a">🌿 덩굴 ${vn}/14</span>`);}
   if(p.cfS>=2)bf.push(`<span style="color:#ffd76a">앞면 ${p.cfS}연속</span>`);
   if(has('gb_chips'))bf.push(`<span style="color:#ffd76a">🪙 칩 ${S.chip||0}/20</span>`);if(has('gb_wheel')&&S.whE>S.t)bf.push(`<span style="color:#ffd76a">🎡 ${['공격력','공격 속도','치명타','폭발','골드'][S.whR]} ${Math.ceil(S.whE-S.t)}초</span>`);if(has('gb_martin')&&p.cfT)bf.push(`<span style="color:#ff4fd8">마틴게일 ×${Math.pow(lv3('gb_martin',1.5,1.65,1.8),p.cfT).toFixed(1)}</span>`);
+  if(UPD.ver>BUILD)bf.push(`<span style="color:#7be08f">🔄 새 패치 v${UPD.ver} · 판 끝나면 적용</span>`);
   if(p.bearT>0)bf.push(`<span style="color:#c98a52">곰 변신 ${p.bearT.toFixed(1)}초</span>`);if(has('d_seasons')){const sn=season();bf.push(`<span style="color:${['#ffb0d0','#ffd76a','#e09a4a','#bfe8ff'][sn]}">${['🌸 봄','☀️ 여름','🍂 가을','❄️ 겨울'][sn]} ${Math.ceil(8-(S.t%8))}초</span>`);}
   if(p.fy>0)bf.push(`<span style="color:#ff6a4a">광란 ${p.fy}</span>`);
   if(p.rage>0)bf.push(`<span style="color:#ff6a4a">분노 ${p.rage}</span>`);
@@ -4988,6 +4989,7 @@ function clsDetail(k){
   <div class="cmeta"><span>레벨업마다</span><span style="color:#9fe8b0">${C.lvd}</span><span>잘 나오는 시너지</span><span>${C.fav.map(t=>`<span class="tg2">${TAGS[t].n}</span>`).join('')}</span><span>주력 시너지</span><span style="color:#ffd76a">${TAGS[C.fav[0]].n}: 1개 더 있는 것으로 계산${HOME_DMG.includes(C.fav[0])?', 관련 피해 +30%':''}</span></div>`;
 }
 function startScreen(){
+  if(typeof UPD!=='undefined'&&UPD.ver>BUILD&&applyUpd())return;
   if(!diffOpen(pickDiff))pickDiff=[...DKEYS].reverse().find(diffOpen)||'normal';
   if(SHEET)loadSheet();
   const sv=loadSave();
@@ -4995,7 +4997,7 @@ function startScreen(){
   const cards=Object.keys(CLASSES).map(k=>{const C=CLASSES[k],op=clsOpen(k);return `<button class="clscard ${k===pickCls?'on':''} ${op?'':'locked'}" data-cls="${k}">
     <canvas class="pv" data-c="${k}" width="96" height="96"></canvas><b>${op?'':'🔒 '}${C.n}</b><span class="role">${C.role}</span></button>`;}).join('');
   show(`<div class="bday"><span class="sp">✦ ✧ ✦ ✧ ✦</span><span class="em">🎂</span> <span class="ch" style="animation-delay:0.00s,0.00s">회</span><span class="ch" style="animation-delay:-0.15s,-0.09s">덕</span><span class="ch" style="animation-delay:-0.30s,-0.18s">이</span><span class="ch" style="animation-delay:-0.45s,-0.27s">의</span><span class="sp2"></span><span class="ch" style="animation-delay:-0.75s,-0.45s">생</span><span class="ch" style="animation-delay:-0.90s,-0.54s">일</span><span class="ch" style="animation-delay:-1.05s,-0.63s">을</span><span class="sp2"></span><span class="ch" style="animation-delay:-1.35s,-0.81s">축</span><span class="ch" style="animation-delay:-1.50s,-0.90s">하</span><span class="ch" style="animation-delay:-1.65s,-0.99s">합</span><span class="ch" style="animation-delay:-1.80s,-1.08s">니</span><span class="ch" style="animation-delay:-1.95s,-1.17s">다</span><span class="ch" style="animation-delay:-2.10s,-1.26s">!</span> <span class="em r">🎉</span><span class="sp">✧ ✦ ✧ ✦ ✧</span></div>
-  <h1>찬서 <span style="font-size:.5em;color:var(--ivory)">: 찬붕이의 뱀서</span></h1>
+  <h1>찬서 <span style="font-size:.5em;color:var(--ivory)">: 찬붕이의 뱀서</span></h1><div id="verLbl" style="margin:-6px 0 8px;font-size:13px;color:var(--muted)">v${BUILD} · ${updLabel()}</div>
   <div class="hof" id="board">${boardHtml()}</div>
   ${sv?`<button class="btn primary" id="cont">이어하기 (${CLASSES[sv.s.cls||'knight'].n})<br><small style="color:var(--ink)">${Math.floor(sv.s.gt/60)}분 ${Math.floor(sv.s.gt%60)}초, 레벨 ${sv.s.lvl}, 증강 ${sv.augs.length}개</small></button><h3>새 게임</h3>`:''}
   <h3>캐릭터 선택</h3><div class="clsgrid">${cards}</div>
@@ -6138,20 +6140,28 @@ function loop(now){
   draw();hud();requestAnimationFrame(loop);
 }
 addEventListener('resize',resize);
-resize();newRun();startScreen();requestAnimationFrame(loop);
-// 파일 자동 업데이트: 파일로 연 경우 게임 주소에 더 새 버전(BUILD 번호가 큰 것)이 있으면 시작 화면에서 바로 새 버전으로 교체.
-// 같은 파일에서 실행되므로 저장된 기록은 그대로. 인터넷이 없거나 실패하면 지금 버전 그대로 실행. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=4,UPD_URL='https://kokokoaaa.github.io/chanseo/';
-(function autoUpdate(){
-  if(/^https?:$/.test(location.protocol))return;
+// 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
+// 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
+// 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
+const BUILD=5,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const UPD={st:'checking',ver:0,html:null,told:false};
+const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
+function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
+function applyUpd(){if(!(UPD.ver>BUILD))return false;
+  STOPPED=true;try{BGM.on=false;}catch(e){}try{if(AC)AC.close();}catch(e){}try{saveMeta();}catch(e){}
+  if(/^https?:$/.test(location.protocol)){location.reload();return true;}
+  if(!UPD.html)return false;document.open();document.write(UPD.html);document.close();return true;}
+function checkUpd(){if(UPD.ver>BUILD)return;const web=/^https?:$/.test(location.protocol),url=(web?location.href.split(/[?#]/)[0]:UPD_URL)+'?b='+Date.now();
   let ctl=null;try{ctl=new AbortController();setTimeout(()=>ctl.abort(),8000);}catch(e){}
-  fetch(UPD_URL+'?b='+Date.now(),{cache:'no-store',signal:ctl?ctl.signal:undefined}).then(r=>r.ok?r.text():null).then(t=>{
-    if(!t)return;const m=t.match(/const BUILD=(\d+)/);if(!m||+m[1]<=BUILD)return;
-    if(!S||S.mode!=='start'){toast('🔄 새 버전이 나왔어요! 게임을 다시 열면 적용돼요');return;}
-    STOPPED=true;try{BGM.on=false;}catch(e){}try{if(AC)AC.close();}catch(e){}try{saveMeta();}catch(e){}
-    document.open();document.write(t);document.close();
-  }).catch(()=>{});
-})();
+  fetch(url,{cache:'no-store',signal:ctl?ctl.signal:undefined}).then(r=>r.ok?r.text():null).then(t=>{
+    if(!t){UPD.st='fail';updPaint();return;}const m=t.match(/const BUILD=(\d+)/);UPD.st='ok';
+    if(m&&+m[1]>BUILD){UPD.ver=+m[1];UPD.html=web?null:t;
+      if(!S||S.mode==='start'){updPaint();setTimeout(applyUpd,600);return;}
+      if(!UPD.told){UPD.told=true;toast(`🔄 새 패치(v${UPD.ver})가 나왔어요! 이번 판이 끝나면 자동 적용 (껐다 켜도 바로 적용)`);}}
+    updPaint();}).catch(()=>{UPD.st='fail';updPaint();});}
+resize();newRun();startScreen();requestAnimationFrame(loop);
+checkUpd();setInterval(()=>{if(!STOPPED)checkUpd();},180000);
+
 // 피해 출처 이름 붙이기: 이 함수들로 들어간 피해는 아래 이름으로 기록 (더 구체적인 이름이 이미 있으면 그대로)
 {const wd=(f,k)=>function(...a){const o=S.dsub;S.dsub=o||k;try{return f.apply(this,a);}finally{S.dsub=o;}};explode=wd(explode,'폭발');spinHit=wd(spinHit,'회전 베기');elemChain=wd(elemChain,'원소 연쇄');lightning=wd(lightning,'번개 연쇄');thunderStrike=wd(thunderStrike,'낙뢰');lvlWave=wd(lvlWave,'레벨업 충격파');}
 
