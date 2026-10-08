@@ -1403,8 +1403,11 @@ const HD=(()=>{
       rect(x,y,w,h,ramp,o={}){return this.poly([[x,y],[x+w,y],[x+w,y+h],[x,y+h]],ramp,o);},
       px(x,y,col,p){set(x,y,hex(col),p??-2);},
       line(x0,y0,x1,y1,col,w=1,p){const c=hex(col);const n=Math.ceil(Math.hypot(x1-x0,y1-y0))*2+1;for(let i=0;i<=n;i++){const t=i/n,x=x0+(x1-x0)*t,y=y0+(y1-y0)*t;for(let a=0;a<w;a++)for(let b=0;b<w;b++)set(x+a-(w>>1),y+b-(w>>1),c,p??-2);}},
-      // 귀여운 눈: 큰 검은 눈 + 하이라이트 2개
-      eye(x,y,rx,ry,o={}){const p=np++;this.ell2(x,y,rx,ry,o.c||'#1a1020',p);if(o.iris)this.ell2(x,y+ry*.25,rx*.7,ry*.55,o.iris,p);this.ell2(x-rx*.35,y-ry*.35,Math.max(.8,rx*.36),Math.max(.8,ry*.3),'#ffffff',p);if(rx>=2)this.px(Math.round(x+rx*.35),Math.round(y+ry*.4),'#ffffff',p);},
+      // 진지한 눈: 가늘고 날카로운 눈매 + 빛나는 홍채 + 찌푸린 눈썹 (몸 가운데 쪽으로 내려감)
+      eye(x,y,rx,ry,o={}){const p=np++,r2=Math.max(1,ry*.6),d=x<(o.cx??W/2)?1:-1;
+        this.ell2(x,y,rx*1.05,r2,o.c||'#100a0c',p);const ic=o.iris||'#d8a030';this.ell2(x+d*rx*.15,y+.2,Math.max(.7,rx*.6),Math.max(.7,r2*.78),ic,p);
+        this.px(Math.round(x+d*rx*.15),Math.round(y),'#08040a',p);if(rx>=1.8)this.px(Math.round(x-d*rx*.35),Math.round(y-r2*.45),'#fff0c8',p);
+        if(!o.noBrow)this.line(x-d*rx*1.3,y-r2-2.4,x+d*rx*1.2,y-r2-.5,o.brow||'#120808',1);},
       // 마무리: 부위 경계 안쪽 선 + 색 외곽선
       finish(o={}){const out=new Float32Array(d),A=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&a[y*W+x];
         for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;if(!a[i]||pid[i]<0)continue;
@@ -1419,12 +1422,12 @@ const HD=(()=>{
   return {make};
 })();
 const PAL={
- gob:['#1e3a14','#2f5a1e','#46802a','#62a63a','#86c652','#b6e682'],
+ gob:['#16220e','#253818','#364e20','#4a662a','#62803a','#7e9a50'],
  leather:['#2a160c','#45281a','#653c24','#8a5634','#ad7448'],
  wood:['#2a1a0e','#46301c','#64462a','#86623c','#a8804e'],
  bat:['#1a0c26','#2e1a46','#462a68','#64408e','#8a62b4','#b294d8'],
  wing:['#1e0e2c','#36204e','#4e3270','#6a4890'],
- slime:['#123e1a','#1e6428','#2e8c34','#4cb446','#7ed866','#c0f4a0'],
+ slime:['#0c2a12','#164a1c','#22682a','#34883a','#58a84e','#8ac874'],
  fur:['#7e7e96','#a4a4bc','#cacadc','#e8e8f2','#ffffff'],
  horn:['#7a5414','#b0801e','#dcaa34','#f4d060','#fff0a8'],
  pink:['#c06080','#e08aa0','#f8b4c4'],
@@ -1477,63 +1480,65 @@ const PAL={
 
 // 고블린 공용: ox,oy 만큼 옮겨서 그림. o.club 몽둥이, o.noArmR 오른팔 생략(무기 따로), o.cloth 옷 색, o.face 얼굴 위에 덧그리기
 function gob(h,f,ox,oy,o={}){const s=f?1:0,X=x=>x+ox,Y=y=>y+oy;const cl=o.cloth||PAL.leather;
-  h.rect(X(19),Y(40+s),5,7-s,cl,{l:.5});h.rect(X(28),Y(41-s),5,6+s,cl,{l:.5});
-  h.ell(X(21.5),Y(47),4,2,PAL.wood);h.ell(X(30.5),Y(47),4,2,PAL.wood);
-  const body=h.ell(X(26),Y(36),10,8.5,cl,{rim:1});
-  if(!o.noBelt){h.rect(X(17),Y(36),18,2.6,['#3a2010','#5a3418','#7a4a22']);h.rect(X(24),Y(35.5),4,3.6,['#8a6010','#d4a030','#ffe07a'],{l:.9});}
-  h.ell(X(15),Y(35),3,3.5,PAL.gob);
-  if(o.club){h.line(X(38),Y(40),X(44),Y(22+s),'#5a3c22',3);h.ell(X(44.5),Y(19+s),4,5,PAL.wood,{rim:1});h.px(X(43),Y(17+s),'#2a1a0e');h.px(X(46),Y(20+s),'#2a1a0e');}
-  if(!o.noArmR)h.ell(X(37),Y(37),3,3.2,PAL.gob);
-  h.poly([[X(15),Y(19)],[X(2),Y(11)],[X(5),Y(15)],[X(15),Y(25)]],PAL.gob,{l:.85});h.poly([[X(13),Y(20)],[X(6),Y(15)],[X(13),Y(23)]],PAL.pink,{l:.6});
-  h.poly([[X(37),Y(19)],[X(50),Y(11)],[X(47),Y(15)],[X(37),Y(25)]],PAL.gob,{l:.7});h.poly([[X(39),Y(20)],[X(46),Y(15)],[X(39),Y(23)]],PAL.pink,{l:.45});
-  const hd=h.ell(X(26),Y(20),13,11.5,PAL.gob,{rim:1,spec:'#d8f4a8'});
-  h.ell2(X(17),Y(25),2.4,1.4,'#ec9a8a',hd);h.ell2(X(35),Y(25),2.4,1.4,'#ec9a8a',hd);
-  if(o.mean){h.eye(X(20.5),Y(21),2.8,2.6,{iris:o.eyeC||'#3a2a10'});h.eye(X(31.5),Y(21),2.8,2.6,{iris:o.eyeC||'#3a2a10'});h.line(X(17),Y(16),X(23),Y(18),'#1e3a14',1);h.line(X(35),Y(16),X(29),Y(18),'#1e3a14',1);}
-  else{h.eye(X(20.5),Y(20),2.8,3.4,{iris:o.eyeC||'#3a2a10'});h.eye(X(31.5),Y(20),2.8,3.4,{iris:o.eyeC||'#3a2a10'});}
-  h.line(X(23),Y(27),X(29),Y(27),'#2a1a10');h.px(X(24),Y(28),'#fffaf0',hd);h.px(X(28),Y(28),'#fffaf0',hd);
-  if(!o.noHair){h.poly([[X(22),Y(9)],[X(26),Y(4)],[X(27),Y(10)]],PAL.gob,{l:.9});h.poly([[X(27),Y(9)],[X(32),Y(5)],[X(31),Y(10)]],PAL.gob,{l:.8});}
+  // 다리 (구부정, 굵은 발)
+  h.rect(X(18),Y(39+s),6,8-s,PAL.gob,{l:.55});h.rect(X(29),Y(40-s),6,7+s,PAL.gob,{l:.45});
+  h.ell(X(20.5),Y(47),4.5,2,PAL.gob);h.ell(X(32),Y(47),4.5,2,PAL.gob);for(const x of [17,20,23,29,32,35])h.px(X(x),Y(48),'#d8d0b0');
+  // 몸통 (넓은 어깨, 가죽 갑옷 + 징)
+  const body=h.ell(X(26),Y(33),12,10,cl,{rim:1});
+  if(!o.noBelt){h.rect(X(15),Y(36),22,3,['#1e120a','#3a2414','#5a3a20']);h.rect(X(24),Y(35.5),4,4,['#3a3a40','#6a6a74','#9a9aa4'],{l:.9});}
+  for(const [x,y] of [[19,28],[26,27],[33,28]])h.px(X(x),Y(y),'#b4b4bc');
+  // 팔 (길고 근육질)
+  h.ell(X(13),Y(33),3.4,5,PAL.gob,{rim:1});h.ell(X(12),Y(39),3,2.6,PAL.gob);
+  if(o.club){h.line(X(39),Y(40),X(45),Y(20+s),'#3a2614',3);h.ell(X(45.5),Y(17+s),4,5.5,PAL.wood,{rim:1});for(const [x,y] of [[42,14],[49,16],[44,21],[47,12]])h.px(X(x),Y(y+s),'#c8c8d0');}
+  if(!o.noArmR){h.ell(X(39),Y(33),3.4,5,PAL.gob,{rim:1});h.ell(X(40),Y(39),3,2.6,PAL.gob);}
+  // 귀 (뒤로 젖혀진 긴 귀, 찢어진 자국)
+  h.poly([[X(17),Y(16)],[X(4),Y(12)],[X(8),Y(15)],[X(17),Y(21)]],PAL.gob,{l:.75});h.px(X(8),Y(13),'#16220e');
+  h.poly([[X(35),Y(16)],[X(48),Y(12)],[X(44),Y(15)],[X(35),Y(21)]],PAL.gob,{l:.6});
+  // 머리 (작고 각진)
+  const hd=h.ell(X(26),Y(18),10,9,PAL.gob,{rim:1});
+  // 찌푸린 이마 주름 + 매부리코
+  h.line(X(22),Y(12),X(30),Y(12),'#253818');h.poly([[X(25),Y(18)],[X(28),Y(18)],[X(27),Y(24)],[X(24),Y(23)]],PAL.gob,{l:.85});
+  h.eye(X(21.5),Y(17.5),2.2,2.6,{iris:o.eyeC||'#e8c030',cx:X(26)});h.eye(X(30.5),Y(17.5),2.2,2.6,{iris:o.eyeC||'#e8c030',cx:X(26)});
+  // 아래턱 + 위로 솟은 엄니
+  h.line(X(21),Y(25),X(31),Y(25),'#100a06');h.px(X(22),Y(24),'#e8e0c8');h.px(X(22),Y(23),'#e8e0c8');h.px(X(30),Y(24),'#e8e0c8');h.px(X(30),Y(23),'#e8e0c8');
+  // 흉터
+  if(!o.noScar){h.line(X(29),Y(11),X(33),Y(21),'#7a4a3a');}
   return hd;}
 
 // 분열 젤리 공용: 투명한 정육면체 젤리 (sc: 크기 배율)
-function jellyHD(h,S2,f,sc){const sq=f?1.5*sc:0,cx=S2/2,w=40*sc+sq*2,hh=32*sc-sq,y0=S2-4-hh,r=4*sc;
-  const b=h.poly([[cx-w/2+r,y0],[cx+w/2-r,y0],[cx+w/2,y0+r],[cx+w/2,y0+hh],[cx-w/2,y0+hh],[cx-w/2,y0+r]],PAL.jelly,{l:.95});
-  h.rect(cx-w/2+2*sc,y0+2*sc,w*.4,2.5*sc,['#d4f0ff','#ffffff'],{p:b});h.rect(cx-w/2+2*sc,y0+2*sc,2.5*sc,hh*.45,['#d4f0ff','#ffffff'],{p:b});
-  h.ell2(cx+w*.28,y0+hh*.72,3*sc,3*sc,'#1a5c9a',b);h.ell2(cx+w*.25,y0+hh*.66,1*sc+.3,1*sc+.3,'#94d4fa',b);h.ell2(cx-w*.3,y0+hh*.75,1.4*sc,1.4*sc,'#94d4fa',b);
-  if(sc>.5){h.eye(cx-6*sc,y0+hh*.42,2.4*sc,3*sc,{});h.eye(cx+6*sc,y0+hh*.42,2.4*sc,3*sc,{});h.ell2(cx-11*sc,y0+hh*.62,2*sc,1.1*sc,'#f49aa8',b);h.ell2(cx+11*sc,y0+hh*.62,2*sc,1.1*sc,'#f49aa8',b);h.line(cx-1.5*sc,y0+hh*.62,cx+1.5*sc,y0+hh*.62,'#0e3a6a');}
-  else{h.px(cx-3,y0+hh*.45,'#1a1020');h.px(cx+2,y0+hh*.45,'#1a1020');h.px(cx-3,y0+hh*.45+1,'#1a1020');h.px(cx+2,y0+hh*.45+1,'#1a1020');}}
+function jellyHD(h,S2,f,sc){const sq=f?1.5*sc:0,cx=S2/2,w=40*sc+sq*2,hh=32*sc-sq,y0=S2-4-hh,r=4*sc;const J=['#0a2a2a','#123e40','#1c5658','#2a7272','#40908e','#68b0aa'];
+  const b=h.poly([[cx-w/2+r,y0],[cx+w/2-r,y0],[cx+w/2,y0+r],[cx+w/2,y0+hh],[cx-w/2,y0+hh],[cx-w/2,y0+r]],J,{l:.95});
+  h.rect(cx-w/2+2*sc,y0+2*sc,w*.4,2*sc,['#88c8c0','#b8e8e0'],{p:b});h.rect(cx-w/2+2*sc,y0+2*sc,2*sc,hh*.4,['#88c8c0','#b8e8e0'],{p:b});
+  if(sc>.5){// 속에 갇힌 해골·녹슨 칼
+    h.ell2(cx-6*sc,y0+hh*.5,4*sc,3.6*sc,'#a8a488',b);h.ell2(cx-7.5*sc,y0+hh*.48,1.1*sc,1.1*sc,'#1c3030',b);h.ell2(cx-4.5*sc,y0+hh*.48,1.1*sc,1.1*sc,'#1c3030',b);
+    h.line(cx+2*sc,y0+hh*.85,cx+12*sc,y0+hh*.25,'#7a6a5a',Math.max(1,Math.round(sc*1.5)),b);h.line(cx+1*sc,y0+hh*.72,cx+5*sc,y0+hh*.8,'#5a4a3a',1,b);}
+  else{h.ell2(cx,y0+hh*.55,2.4*sc+1,2*sc+1,'#a8a488',b);}
+  h.ell2(cx+w*.3,y0+hh*.75,1.4*sc,1.4*sc,'#68b0aa',b);h.ell2(cx-w*.32,y0+hh*.82,1*sc+.3,1*sc+.3,'#68b0aa',b);}
 // 고해상도(2배 촘촘한) 잡몹 도트: 게임 속 크기는 그대로, 칸만 2배. key = 몬스터 종류
 const MOBS_HD={
 grunt:{sz:26,draw(h,f){gob(h,f,0,0,{club:1});}},
-runner:{sz:22,draw(h,f){const up=!f;
-  // 날개 (펄럭임)
-  const wy=up?-6:4;
-  for(const sd of [-1,1]){const bx=22+sd*6,tx=22+sd*20;
-    h.poly([[bx,18],[tx,14+wy],[22+sd*19,22+wy*.5],[22+sd*15,20+wy*.3],[22+sd*12,25],[22+sd*9,22],[bx,25]],PAL.wing,{l:.7});
-    h.line(bx,19,tx,14+wy,'#2a1640',1);h.line(22+sd*9,20,22+sd*15,20+wy*.3,'#2a1640',1);}
-  // 몸
-  h.ell(22,22,9,8.5,PAL.bat,{rim:1,spec:'#d0b8f0'});
-  // 귀
-  h.poly([[15,16],[13,5],[19,13]],PAL.bat,{l:.85});h.poly([[16,14],[14.5,8],[18,13]],PAL.pink,{l:.55});
-  h.poly([[29,16],[31,5],[25,13]],PAL.bat,{l:.65});h.poly([[28,14],[29.5,8],[26,13]],PAL.pink,{l:.4});
-  // 배 털
-  h.ell(22,26,5,3.5,['#8a62b4','#a888cc','#c6aee0'],{flat:.4});
-  // 눈 (빨강)
-  h.eye(18.5,20.5,2.2,2.6,{iris:'#d02040'});h.eye(25.5,20.5,2.2,2.6,{iris:'#d02040'});
-  h.px(20,25,'#fffaf0');h.px(20,26,'#fffaf0');h.px(24,25,'#fffaf0');h.px(24,26,'#fffaf0');h.line(20,24,24,24,'#2a1430');
-  // 발
-  h.px(19,31,'#2a1640');h.px(25,31,'#2a1640');h.px(19,32,'#2a1640');h.px(25,32,'#2a1640');
-}},
+runner:{sz:22,draw(h,f){const up=!f,wy=up?-7:4;
+  for(const sd of [-1,1]){const bx=22+sd*5,tx=22+sd*21;
+    h.poly([[bx,16],[tx,10+wy],[22+sd*20,20+wy*.5],[22+sd*16,17+wy*.3],[22+sd*13,24],[22+sd*9,20],[bx,24]],['#100818','#1e1030','#2e1a46','#3e2658'],{l:.7});
+    h.line(bx,17,tx,10+wy,'#0a0410',1);h.line(22+sd*9,19,22+sd*16,17+wy*.3,'#0a0410',1);h.px(tx,10+wy,'#c8c0b0');}
+  const b=h.ell(22,22,7,7.5,['#140a1e','#24143a','#382456','#4e3672','#664a8e'],{rim:1});
+  // 길쭉한 귀 + 뾰족한 주둥이
+  h.poly([[17,17],[15,5],[20,14]],['#24143a','#382456','#4e3672'],{l:.8});h.poly([[27,17],[29,5],[24,14]],['#24143a','#382456','#4e3672'],{l:.6});
+  h.poly([[19,24],[22,30],[25,24]],['#382456','#4e3672','#664a8e'],{l:.7});
+  h.eye(19,20,1.6,2,{iris:'#ff3030',cx:22});h.eye(25,20,1.6,2,{iris:'#ff3030',cx:22});
+  h.px(20,27,'#f0e8d8');h.px(24,27,'#f0e8d8');h.px(20,28,'#f0e8d8');h.px(24,28,'#f0e8d8');
+  h.px(19,31,'#c8c0b0');h.px(25,31,'#c8c0b0');}},
 slime:{sz:28,draw(h,f){const sq=f?1.6:0;
-  // 물방울 모양 몸: 아래는 납작, 위는 살짝 뾰족
   const b=h.ell(28,37+sq*.6,17+sq,15-sq,PAL.slime,{rim:1,cut:(x,y,nx,ny)=>y>49||(ny<-.55&&Math.abs(nx)>(-ny-.55)*2.2+.42)});
-  h.ell(28,23.5+sq*1.2,4,4.5,PAL.slime,{p:b});
   h.rect(12-sq,46,32+sq*2,3,PAL.slime,{l:.3,p:b});
-  // 속 거품·광택 (몸과 같은 부위 → 테두리 없이 자연스럽게)
-  h.ell2(37,43,1.6,1.6,'#a8ec8c',b);h.ell2(40,39,1,1,'#a8ec8c',b);h.ell2(18,44,1.2,1.2,'#8ade70',b);
-  h.ell2(19.5,31+sq*.4,3.6,2.3,'#eaffdc',b);h.ell2(24.5,27.5+sq*.6,1.3,1,'#ffffff',b);h.ell2(26,24+sq,1,.8,'#ffffff',b);
-  // 얼굴
-  h.eye(22.5,38,2.5,3.1,{});h.eye(33.5,38,2.5,3.1,{});h.ell2(18.5,42.5,2.1,1.2,'#f49aa8',b);h.ell2(37.5,42.5,2.1,1.2,'#f49aa8',b);
-  h.line(26,43,27,44,'#123e1a');h.line(28,44,30,43,'#123e1a');
+  // 녹고 있는 뼈와 해골
+  h.ell2(33,41,3.4,3,'#c8c0a0',b);h.ell2(32,40.5,1,1,'#3a3420',b);h.ell2(34.6,40.5,1,1,'#3a3420',b);h.line(19,42,26,45,'#b8b090',1,b);h.ell2(19,42,1.2,1.2,'#b8b090',b);
+  // 기포
+  h.ell2(24,35,1.4,1.4,'#8ac874',b);h.ell2(38,33,1,1,'#8ac874',b);h.ell2(29,46,1,1,'#58a84e',b);
+  // 광택 (끈적한)
+  h.ell2(19,30+sq*.4,2.6,1.6,'#c4f0b0',b);h.px(25,26,'#e8ffe0',b);
+  // 깊숙이 빛나는 두 눈
+  h.ell2(22,34,1.6,1,'#ffe060',b);h.ell2(30,34,1.6,1,'#ffe060',b);h.px(22,34,'#fff8c0',b);h.px(30,34,'#fff8c0',b);
 }},
 thief:{sz:30,draw(h,f){const hd=gob(h,f,4,8,{noArmR:1,mean:1,noHair:1,cloth:['#14141a','#22222c','#34343f','#4a4a58','#62627a']});
   // 복면 두건 + 빨간 스카프
@@ -1570,21 +1575,21 @@ goblin:{sz:28,draw(h,f){
   h.poly([[18,13],[18,6],[22,10],[28,4],[34,10],[38,6],[38,13]],PAL.gold,{l:.95});h.px(28,8,'#ff4a5a');h.px(22,11,'#5ad0ff');h.px(34,11,'#5ad0ff');
   if(f){h.px(6,26,'#fff6c8');h.px(7,25,'#fff6c8');h.px(5,25,'#fff6c8');}}},
 slimelet:{sz:18,draw(h,f){const sq=f?1:0;const b=h.ell(18,25+sq*.5,10+sq,8.5-sq,PAL.slime,{rim:1,cut:(x,y)=>y>31});h.rect(9-sq,29,18+sq*2,2,PAL.slime,{l:.3,p:b});
-  h.ell2(13,21,2,1.3,'#eaffdc',b);h.eye(15,25,1.6,2,{});h.eye(21,25,1.6,2,{});h.ell2(12.5,28,1.3,.8,'#f49aa8',b);h.ell2(23.5,28,1.3,.8,'#f49aa8',b);}},
+  h.ell2(13,21,1.6,1,'#c4f0b0',b);h.ell2(20,27,1.4,1.2,'#c8c0a0',b);h.ell2(15,24,1.1,.7,'#ffe060',b);h.ell2(21,24,1.1,.7,'#ffe060',b);}},
 bomber:{sz:26,draw(h,f){const sq=f?1:0;
-  const b=h.ell(26,33+sq*.5,15+sq,13-sq,PAL.bomb,{rim:1,cut:(x,y)=>y>45});h.rect(12-sq,43,28+sq*2,3,PAL.bomb,{l:.3,p:b});
-  h.ell2(19,26,3,2,'#ffe0b0',b);
-  // 심지 + 불꽃
-  h.rect(24,16,4,5,PAL.iron,{l:.7});h.line(26,16,30,9,'#c8a070',1);h.ell2(31,7,2.5,2.5,f?'#ffe060':'#ff8a2a');h.px(31,6,'#ffffff');h.px(33,4,'#ffd040');h.px(29,5,'#ff6a20');
-  // 화난 눈
-  h.eye(20,33,2.6,2.8,{});h.eye(32,33,2.6,2.8,{});h.line(16,28,23,31,'#4a1a06',1);h.line(36,28,29,31,'#4a1a06',1);h.line(22,39,30,39,'#4a1a06');h.px(23,40,'#fffaf0',b);h.px(29,40,'#fffaf0',b);}},
-gemslime:{sz:28,draw(h,f){const sq=f?1.5:0;const G=['#0e2e5a','#164a8a','#2468b8','#3e8ad8','#6cb0f0','#a8d8ff'];
+  // 철 띠를 두른 화약 덩어리 + 갈라진 틈 사이 불빛
+  const b=h.ell(26,33+sq*.5,15+sq,13-sq,['#2a1206','#4a220c','#6e3614','#94501e','#b46c2c'],{rim:1,cut:(x,y)=>y>45});h.rect(12-sq,43,28+sq*2,3,['#2a1206','#4a220c'],{l:.4,p:b});
+  h.rect(11-sq,30,30+sq*2,3,PAL.iron,{l:.75});h.rect(13-sq,38,26+sq*2,2.5,PAL.iron,{l:.5});for(const x of [15,25,35])h.px(x,31,'#c8ccd6');
+  for(const [x0,y0,x1,y1] of [[18,22,22,28],[33,24,30,29],[21,34,25,37],[31,41,35,36]])h.line(x0,y0,x1,y1,f?'#ffd060':'#ff7a20',1);
+  h.rect(23,15,6,6,PAL.iron,{l:.7});h.line(26,15,30,8,'#a07850',1);h.ell2(31,6,2.6,2.6,f?'#fff0a0':'#ff8a2a');h.px(31,5,'#ffffff');h.px(34,3,'#ffd040');h.px(28,4,'#ff6a20');
+  h.eye(20,27,1.8,1.6,{iris:'#ff5a10',c:'#100400',cx:26});h.eye(32,27,1.8,1.6,{iris:'#ff5a10',c:'#100400',cx:26});}},
+gemslime:{sz:28,draw(h,f){const sq=f?1.5:0;const G=['#0a1a3a','#10305e','#1a4a88','#2a68b0','#4a8ed4','#80b8ec'];
   const b=h.ell(28,38+sq*.6,17+sq,14-sq,G,{rim:1,cut:(x,y,nx,ny)=>y>49||(ny<-.55&&Math.abs(nx)>(-ny-.55)*2.2+.42)});h.rect(12-sq,46,32+sq*2,3,G,{l:.3,p:b});
-  // 머리 위 보석
-  h.poly([[28,18+sq],[33,24+sq],[28,30+sq],[23,24+sq]],['#7a0a3a','#c0186a','#f04a9a','#ff9ad0','#ffd0ec'],{l:1});h.line(28,19+sq,28,29+sq,'#ffe0f4');
-  h.ell2(18,33,3.2,2,'#d8f0ff',b);h.ell2(37,43,1.5,1.5,'#8cc8ff',b);h.ell2(40,39,1,1,'#8cc8ff',b);
-  h.eye(22,39,2.4,3,{});h.eye(34,39,2.4,3,{});h.ell2(18.5,43.5,2,1.1,'#f49aa8',b);h.ell2(37.5,43.5,2,1.1,'#f49aa8',b);h.line(27,44,29,44,'#0e2e5a');
-  if(f){h.px(8,22,'#ffffff');h.px(7,23,'#ffffff');h.px(9,23,'#ffffff');h.px(8,24,'#ffffff');}else{h.px(47,26,'#ffffff');h.px(46,27,'#ffffff');h.px(48,27,'#ffffff');h.px(47,28,'#ffffff');}}},
+  // 몸에서 자라난 수정 기둥들
+  for(const [x,y,w,hh] of [[18,20,4,12],[26,14,6,18],[35,19,4,12],[40,28,3,8]])h.poly([[x,y+hh],[x,y+3],[x+w/2,y],[x+w,y+3],[x+w,y+hh]],['#3a0a5a','#6a1a9a','#9a3ad0','#c870f0','#ecc0ff'],{l:1});
+  // 속 코어
+  h.ell2(28,39,3.4,3.4,'#e8b8ff',b);h.ell2(28,39,1.6,1.6,'#ffffff',b);h.ell2(18,34,2.4,1.4,'#a0c8f0',b);
+  if(f){h.px(10,20,'#e8d0ff');h.px(46,24,'#e8d0ff');}else{h.px(12,26,'#e8d0ff');h.px(44,16,'#e8d0ff');}}},
 boar:{sz:32,draw(h,f){const s=f?1:0;
   // 다리
   for(const [x,o] of [[18,s],[26,-s],[40,-s],[48,s]])h.rect(x,48+o,5,10-o,PAL.boar,{l:.75});for(const x of [18,26,40,48])h.rect(x,57,5,3,['#1a0e06','#2a1a0e','#3a2414']);
@@ -1613,27 +1618,30 @@ wolf:{sz:28,draw(h,f){const s=f?1:0;
   h.poly([[38,21],[39,11],[44,19]],PAL.wolf,{l:.85});h.poly([[44,20],[47,11],[49,21]],PAL.wolf,{l:.65});h.poly([[40,19],[40.5,14],[43,19]],PAL.pink,{l:.4});
   // 노란 사나운 눈 + 이빨
   h.eye(46,25,1.8,1.8,{iris:'#ffd040'});h.line(43,22,49,23,'#22222c',1);h.line(49,34,56,34,'#14141a');h.px(51,35,'#fffaf0');h.px(54,35,'#fffaf0');}},
-bee:{sz:18,draw(h,f){
-  // 날개
-  const wy=f?-2:1;h.ell(13,9+wy,5,4,['#a8d8f0','#d0ecfa','#f0faff'],{flat:.6});h.ell(22,8+wy,5,4,['#a8d8f0','#d0ecfa','#f0faff'],{flat:.6});
-  // 몸 (줄무늬)
-  const b=h.ell(18,20,10,8.5,PAL.bee,{rim:1,spec:'#fff6c8'});
-  h.rect(14,13,3,15,['#1a1206','#2a1e0a','#3a2a10'],{p:b+300});h.rect(21,13,3,15,['#1a1206','#2a1e0a','#3a2a10'],{p:b+301});
-  // 침
-  h.poly([[7,21],[3,20],[7,23]],['#2a1e0a','#4a3a20'],{l:.7});
-  // 얼굴 + 더듬이
-  h.eye(25,19,1.6,2,{});h.ell2(27,23,1.2,.8,'#f49aa8',b);h.line(25,13,27,8,'#2a1e0a');h.px(28,7,'#2a1e0a');h.line(22,13,22,8,'#2a1e0a');h.px(22,7,'#2a1e0a');
-  h.px(17,29,'#2a1e0a');h.px(21,29,'#2a1e0a');}},
+bee:{sz:18,draw(h,f){const wy=f?-2:1;
+  // 투명한 날개 (맥)
+  h.ell(14,9+wy,6,3.5,['#7a8a9a','#a8b8c8','#d0dce8'],{flat:.6});h.ell(23,8+wy,6,3.5,['#7a8a9a','#a8b8c8','#d0dce8'],{flat:.6});h.line(9,10+wy,19,8+wy,'#5a6a7a');h.line(18,9+wy,28,7+wy,'#5a6a7a');
+  // 거대 말벌: 길쭉한 배 + 독침
+  const ab=h.ell(13,22,8,5.5,['#2a1a04','#5a3c08','#9a6e10','#d4a01c','#f0c840'],{rim:1});for(const x of [9,13,17])h.rect(x,17,2,11,['#0e0a04','#1e1608'],{p:ab+300+x});
+  h.poly([[5,22],[0,23],[5,24]],['#1e1608','#3a2a10'],{l:.6});
+  const th=h.ell(23,20,4.5,4,['#1e1608','#3a2a10','#5a4418'],{rim:1});
+  const hd=h.ell(29,19,4,4,['#2a1a04','#5a3c08','#9a6e10','#d4a01c'],{rim:1});
+  // 겹눈 + 큰 턱
+  h.ell2(30,17,2,2.2,'#a01818',hd);h.px(29,16,'#ff8080',hd);h.line(31,23,34,25,'#1e1608');h.line(29,23,31,26,'#1e1608');
+  h.line(28,15,31,9,'#1e1608');h.line(26,15,25,9,'#1e1608');
+  for(const [x,o] of [[20,0],[23,1],[26,0]])h.line(x,24,x-1+o,29,'#1e1608');}},
 support:{sz:26,draw(h,f){const b=f?1:0;
-  // 줄기 몸
-  const st=h.ell(26,38,8,10,PAL.cream,{rim:1});h.eye(23,38,1.8,2.2,{});h.eye(30,38,1.8,2.2,{});h.ell2(20.5,41,1.4,.9,'#f49aa8',st);h.ell2(32.5,41,1.4,.9,'#f49aa8',st);h.line(25,43,28,43,'#5a3a20');
-  h.ell(21,48,3.5,2,PAL.cream);h.ell(31,48,3.5,2,PAL.cream);
-  // 빨간 갓 + 흰 점
-  const cp=h.ell(26,24-b,19,12,PAL.cap,{rim:1,cut:(x,y)=>y>28-b,spec:'#ffc8c0'});h.rect(8,26-b,36,3,['#c8b090','#e0cca8','#f4e8cc'],{l:.8});
-  for(const [x,y,r] of [[16,20,2.6],[28,15,3],[37,22,2.2],[23,24,1.8]])h.ell2(x,y-b,r,r*.8,'#fff6ee',cp);
-  // 초록 십자 (치유)
-  h.rect(26,6-b,4,10,['#2a8a3a','#4ac25a','#7ee88a'],{l:.9});h.rect(23,9-b,10,4,['#2a8a3a','#4ac25a','#7ee88a'],{l:.9});
-  if(f){h.px(10,10,'#7ee88a');h.px(43,12,'#7ee88a');}}},
+  // 키 큰 균사 인간 (마이코니드)
+  h.line(21,44,19,50,'#8a7a5a',2);h.line(31,44,33,50,'#8a7a5a',2);
+  const st=h.ell(26,36,7,10,['#5a4c34','#7e6c4c','#a08c68','#c0ac86'],{rim:1});for(let i=0;i<4;i++)h.line(21,30+i*4,31,30+i*4,'#6e5e40');
+  h.line(19,33,12,41,'#a08c68',2);h.line(33,33,40,41,'#a08c68',2);
+  // 갓 (어두운 적색) + 빛나는 주름
+  const cp=h.ell(26,22-b,18,10,['#2a0608','#4a0c10','#6e1418','#922228','#b0383a'],{rim:1,cut:(x,y)=>y>26-b});
+  for(let i=0;i<9;i++)h.line(10+i*4,26-b,12+i*3.4,23-b,'#ffd890');
+  for(const [x,y] of [[16,18],[28,14],[36,20]])h.ell2(x,y-b,2,1.6,'#d8c8a8',cp);
+  h.eye(23,31,1.4,1.4,{iris:'#9aff7a',cx:26,noBrow:1});h.eye(29,31,1.4,1.4,{iris:'#9aff7a',cx:26,noBrow:1});
+  // 치유 포자 (초록 빛)
+  for(const [x,y] of (f?[[8,10],[42,12],[26,4]]:[[12,6],[40,8],[22,8]])){h.px(x,y,'#9aff7a');h.px(x+1,y,'#4ac25a');}}},
 ranger:{sz:28,draw(h,f){const s=f?1:0;
   // 다리뼈
   h.rect(22,42+s,3,10-s,PAL.bone,{l:.8});h.rect(31,42-s,3,10+s,PAL.bone,{l:.7});h.ell(23,52,3,1.5,PAL.bone);h.ell(32,52,3,1.5,PAL.bone);
@@ -1686,14 +1694,14 @@ spider:{sz:30,draw(h,f){const s=f?1:-1;
 jelly:{sz:32,draw(h,f){jellyHD(h,64,f,1);}},
 jellym:{sz:22,draw(h,f){jellyHD(h,44,f,.68);}},
 jellys:{sz:14,draw(h,f){jellyHD(h,28,f,.42);}},
-ghost:{sz:26,draw(h,f){const w=f?1:0;
-  const b=h.ell(26,24,15,15,PAL.ghost,{rim:1,cut:(x,y)=>y>30});h.rect(11,24,30,16,PAL.ghost,{l:.55,p:b});
-  // 물결 꼬리
-  for(let i=0;i<4;i++){const x=11+i*7.5;h.ell(x+3.75,40+((i+w)%2?2:0),3.75,3.5,PAL.ghost,{p:b,cut:(xx,y)=>y<40});}
-  h.ell2(17,15,3.5,2.4,'#ffffff',b);
-  h.eye(20,24,2.4,3.2,{c:'#202848'});h.eye(31,24,2.4,3.2,{c:'#202848'});h.ell2(16.5,29,2,1.1,'#ffb4c8',b);h.ell2(34.5,29,2,1.1,'#ffb4c8',b);
-  h.ell2(26,31,1.6,2,'#202848',b);
-  h.ell(7,30-w,3,2.5,PAL.ghost);h.ell(45,30+w,3,2.5,PAL.ghost);}},
+ghost:{sz:26,draw(h,f){const w=f?1:0;const G=['#2a3450','#46527a','#6a78a0','#94a2c4','#c0cce4','#e4ecfa'];
+  const b=h.ell(26,22,13,13,G,{rim:1,cut:(x,y)=>y>26});h.poly([[13,22],[39,22],[38,36],[34,46+w*2],[30,38],[26,48-w*2],[22,38],[18,45+w*2],[14,36]],G,{l:.55,p:b});
+  // 텅 빈 눈구멍 + 울부짖는 입
+  h.ell2(21,21,2.6,3.4,'#06080e',b);h.ell2(31,21,2.6,3.4,'#06080e',b);h.ell2(21,22,1,1,'#8ab8ff',b);h.ell2(31,22,1,1,'#8ab8ff',b);
+  h.ell2(26,31,2.4,3.6,'#06080e',b);
+  // 흐르는 팔
+  h.poly([[13,26],[5,34-w],[9,34],[15,30]],G,{l:.5});h.poly([[39,26],[47,34+w],[43,34],[37,30]],G,{l:.4});
+  if(f){h.px(8,14,'#c0cce4');h.px(44,18,'#c0cce4');}}},
 lancer:{sz:36,draw(h,f){const s=f?1:0;
   h.rect(28,56+s,6,12-s,PAL.steel,{l:.6});h.rect(39,56-s,6,12+s,PAL.steel,{l:.6});h.ell(31,68,4,2,PAL.iron);h.ell(42,68,4,2,PAL.iron);
   // 은빛 갑옷 몸 + 붉은 띠
@@ -1713,14 +1721,16 @@ wraith:{sz:30,draw(h,f){const w=f?1:0;
   h.line(14,34,7,40+w,'#c8c0a8',1);h.line(15,35,9,42+w,'#c8c0a8',1);h.line(46,34,53,40-w,'#c8c0a8',1);h.line(45,35,51,42-w,'#c8c0a8',1);
   if(f){h.px(10,20,'#b48aff');h.px(50,16,'#b48aff');h.px(46,48,'#b48aff');}else{h.px(12,14,'#b48aff');h.px(48,22,'#b48aff');}}},
 sapling:{sz:24,draw(h,f){const s=f?1:0;
-  h.line(19,42,16,47+s,'#44301c',2);h.line(29,42,32,47-s,'#44301c',2);
-  // 나무 몸통 (얼굴)
-  const bd=h.ell(24,34,9,10,PAL.bark,{rim:1});h.line(20,28,21,40,'#2a1a0e');h.line(28,30,27,42,'#2a1a0e');
-  h.eye(20.5,33,1.8,2.2,{});h.eye(27.5,33,1.8,2.2,{});h.ell2(18,37,1.4,.8,'#f49aa8',bd);h.ell2(30,37,1.4,.8,'#f49aa8',bd);h.line(23,38,25,38,'#2a1a0e');
-  // 팔 가지
-  h.line(15,32,8,26-s,'#62462a',2);h.ell(7,24-s,3,2.5,PAL.leaf);h.line(33,32,40,27+s,'#62462a',2);h.ell(41,25+s,3,2.5,PAL.leaf);
-  // 잎 머리
-  const lf=h.ell(24,18,13,10,PAL.leaf,{rim:1,spec:'#c8f4a0'});h.ell(15,22,5,4,PAL.leaf,{p:lf});h.ell(33,22,5,4,PAL.leaf,{p:lf});h.ell2(30,12,1.6,1.6,'#ff8ab0',lf);h.px(30,12,'#ffe060',lf);}},
+  // 뿌리 다리
+  for(const [x,d] of [[18,-1],[24,0],[30,1]])h.line(x,40,x+d*4,47+(d?s*d:0),'#2a1a0e',2);
+  // 뒤틀린 나무 몸통 + 굳은 얼굴
+  const bd=h.ell(24,32,9,11,['#1e1208','#32200e','#4a3018','#644224','#7e5630'],{rim:1});for(const x of [19,23,27,30])h.line(x,23,x+1,42,'#1e1208');
+  h.eye(20.5,30,1.6,1.6,{iris:'#b0ff60',cx:24});h.eye(27.5,30,1.6,1.6,{iris:'#b0ff60',cx:24});h.line(20,36,28,37,'#100804');h.line(22,37,23,39,'#100804');
+  // 가지 팔 (발톱)
+  h.line(15,28,6,20-s,'#32200e',2);h.line(6,20-s,3,17-s,'#32200e');h.line(6,20-s,4,23-s,'#32200e');
+  h.line(33,28,42,21+s,'#32200e',2);h.line(42,21+s,45,18+s,'#32200e');h.line(42,21+s,45,24+s,'#32200e');
+  // 어두운 잎 관
+  const lf=h.ell(24,15,12,8,['#0e2010','#18341a','#244a24','#326030','#447a3e'],{rim:1});h.ell(14,19,5,4,['#0e2010','#18341a','#244a24'],{p:lf});h.ell(34,19,5,4,['#0e2010','#18341a','#244a24'],{p:lf});}},
 vbat:{sz:22,draw(h,f){const up=!f,wy=up?-7:4;
   for(const sd of [-1,1]){const bx=22+sd*6,tx=22+sd*21;
     h.poly([[bx,17],[tx,12+wy],[22+sd*20,21+wy*.5],[22+sd*16,18+wy*.3],[22+sd*13,25],[22+sd*10,20],[bx,25]],['#1a0408','#36080e','#5a1018','#7a1820'],{l:.7});
@@ -1731,12 +1741,13 @@ vbat:{sz:22,draw(h,f){const up=!f,wy=up?-7:4;
   h.ell2(18.5,21,2,1.6,'#ffe040',b);h.ell2(25.5,21,2,1.6,'#ffe040',b);h.px(19,21,'#1a0408',b);h.px(25,21,'#1a0408',b);h.line(16,18,21,20,'#1a0408',1);h.line(28,18,23,20,'#1a0408',1);
   h.line(19,25,25,25,'#1a0408');h.line(20,26,20,29,'#ffffff');h.line(24,26,24,29,'#ffffff');if(f)h.px(24,30,'#ff3040');}},
 shroom:{sz:24,draw(h,f){const b=f?1:0;
-  const st=h.ell(24,36,7,9,PAL.cream,{rim:1});h.eye(21,36,1.6,2,{});h.eye(27,36,1.6,2,{});h.line(22,41,26,41,'#5a3a20');h.px(23,42,'#5a3a20');
-  h.ell(19,45,3,1.8,PAL.cream);h.ell(29,45,3,1.8,PAL.cream);
-  const cp=h.ell(24,22-b,17,11,PAL.spore,{rim:1,cut:(x,y)=>y>26-b,spec:'#e8c8ff'});h.rect(8,24-b,32,3,['#a090b0','#c8b8d8','#e8dcf4'],{l:.8});
-  for(const [x,y,r] of [[14,19],[24,13],[33,19],[19,22]].map(q=>[...q,2]))h.ell2(x,y-b,r,r*.8,'#f0e0ff',cp);
-  // 포자 가루
-  const sp=f?[[8,10],[40,8],[22,4]]:[[10,6],[38,12],[28,2]];for(const [x,y] of sp){h.px(x,y,'#d8a8ff');h.px(x+1,y+1,'#b07ad8');}}},
+  h.line(19,41,17,46,'#6a5a7a',2);h.line(29,41,31,46,'#6a5a7a',2);
+  const st=h.ell(24,34,6,9,['#3a3048','#56486a','#72628a','#9080a8'],{rim:1});
+  const cp=h.ell(24,21-b,16,10,['#1a0a24','#2e1440','#46205e','#62307e','#80449c'],{rim:1,cut:(x,y)=>y>25-b});
+  for(let i=0;i<8;i++)h.line(9+i*4,25-b,11+i*3.4,22-b,'#d090ff');
+  h.eye(21,31,1.3,1.3,{iris:'#e070ff',cx:24,noBrow:1});h.eye(27,31,1.3,1.3,{iris:'#e070ff',cx:24,noBrow:1});
+  // 독 포자 구름
+  const sp=f?[[8,10],[40,8],[22,4],[34,2]]:[[10,6],[38,12],[28,2],[16,4]];for(const [x,y] of sp){h.ell2(x,y,1.4,1.4,'#9a5ac8');h.px(x,y,'#e0b0ff');}}},
 scarab:{sz:24,draw(h,f){const s=f?1:-1;
   for(const sd of [-1,1])for(let i=0;i<3;i++){const y=26+i*5;h.line(24+sd*8,y,24+sd*15,y+3+(i%2?s:-s),'#08202a',2);}
   // 딱지 날개 (반짝)
@@ -1744,18 +1755,18 @@ scarab:{sz:24,draw(h,f){const s=f?1:-1;
   // 머리 + 뿔
   const hd=h.ell(24,14,7,5,PAL.scarab,{rim:1});h.poly([[22,10],[24,2],[26,10]],PAL.gold,{l:.95});
   h.ell2(20.5,14,1.4,1.2,'#ffd040',hd);h.ell2(27.5,14,1.4,1.2,'#ffd040',hd);}},
-imp:{sz:26,draw(h,f){const s=f?1:0;
-  // 박쥐 날개
-  for(const sd of [-1,1])h.poly([[26+sd*6,26],[26+sd*20,14-s*3],[26+sd*18,24],[26+sd*14,22],[26+sd*11,30]],['#140818','#26102e','#3a1a46'],{l:.7});
-  h.line(26,44,38,48,'#2e1448',1);h.poly([[37,46],[42,47],[38,50]],PAL.imp,{l:.6});
-  h.rect(21,40+s,4,6-s,PAL.imp,{l:.5});h.rect(28,40-s,4,6+s,PAL.imp,{l:.5});
-  const b=h.ell(26,36,8,7,PAL.imp,{rim:1});
-  const hd=h.ell(26,22,11,10,PAL.imp,{rim:1,spec:'#d8b8f4'});
-  h.poly([[17,16],[13,4],[21,13]],['#c8b890','#e8dcb8','#fff6dc'],{l:.9});h.poly([[35,16],[39,4],[31,13]],['#c8b890','#e8dcb8','#fff6dc'],{l:.7});
-  // 장난스러운 노란 눈 + 씩 웃는 입
-  h.ell2(21.5,22,2.4,2.2,'#ffe040',hd);h.ell2(30.5,22,2.4,2.2,'#ffe040',hd);h.px(22,22,'#1a0a2a',hd);h.px(31,22,'#1a0a2a',hd);h.px(22,23,'#1a0a2a',hd);h.px(31,23,'#1a0a2a',hd);
-  h.line(20,27,26,29,'#1a0a2a');h.line(26,29,32,27,'#1a0a2a');h.px(23,29,'#ffffff');h.px(29,29,'#ffffff');
-  if(f){h.ell2(40,12,1.5,1.5,'#b07ed8');}}},
+imp:{sz:26,draw(h,f){const s=f?1:0;const I=['#140818','#26102e','#3c1a48','#562866','#723a84'];
+  for(const sd of [-1,1])h.poly([[26+sd*6,24],[26+sd*21,10-s*3],[26+sd*19,22],[26+sd*15,19],[26+sd*11,29]],['#0a040c','#1a0a20','#2a1232'],{l:.7});
+  h.line(26,42,40,46,'#26102e',1);h.poly([[39,44],[45,45],[40,49]],I,{l:.6});
+  h.line(22,40,20,47+s,'#26102e',2);h.line(30,40,32,47-s,'#26102e',2);h.px(19,48,'#c8c0b0');h.px(33,48,'#c8c0b0');
+  const b=h.ell(26,34,8,8,I,{rim:1});for(let i=0;i<3;i++)h.line(22,30+i*3,30,30+i*3,'#26102e');
+  h.line(18,32,11,38+s,'#3c1a48',2);h.line(34,32,41,38-s,'#3c1a48',2);
+  const hd=h.ell(26,21,8,8,I,{rim:1});
+  h.poly([[20,16],[14,3],[18,4],[23,13]],['#3a3020','#6a5a3a','#9a8458','#c4ae7a'],{l:.9});h.poly([[32,16],[38,3],[34,4],[29,13]],['#3a3020','#6a5a3a','#9a8458','#c4ae7a'],{l:.7});
+  h.eye(22.5,20,1.8,1.6,{iris:'#ffd020',cx:26});h.eye(29.5,20,1.8,1.6,{iris:'#ffd020',cx:26});
+  // 날카로운 이빨 미소
+  h.line(21,26,31,26,'#0a040c');for(const x of [22,24,26,28,30])h.px(x,27,'#f0e8d8');
+  if(f){h.ell2(42,12,1.5,1.5,'#ff5a20');}}},
 crow:{sz:22,draw(h,f){const s=f?1:0;
   h.line(19,36,18,41,'#c8a040');h.line(25,36,26,41,'#c8a040');
   h.poly([[6,27-s*2],[16,22],[14,32]],PAL.crow,{l:.6});
@@ -1786,33 +1797,35 @@ mummy:{sz:28,draw(h,f){const s=f?1:0;
   h.poly([[16,40],[12,48],[18,44]],PAL.wrap,{l:.5});
   // 붕대 틈 사이 빛나는 눈
   h.rect(19,19,16,4,['#100a06','#1a1208'],{p:hd+500});h.ell2(23,21,1.6,1.2,'#7aff6a',hd+500);h.ell2(31,21,1.6,1.2,'#7aff6a',hd+500);}},
-yeti:{sz:28,draw(h,f){const s=f?1:0;
-  h.ell(21,50-s,5,3,PAL.yeti);h.ell(35,50+s-1,5,3,PAL.yeti);
-  const b=h.ell(28,38,13,12,PAL.yeti,{rim:1});
-  h.ell(13,38+s,5,7,PAL.yeti,{rim:1});h.ell(43,38-s,5,7,PAL.yeti,{rim:1});
-  // 털 뭉치
-  const hd=h.ell(28,22,12,11,PAL.yeti,{rim:1,spec:'#ffffff'});for(let i=0;i<5;i++)h.poly([[19+i*4,13],[21+i*4,8+(i%2)*2],[23+i*4,13]],PAL.yeti,{l:.95});
-  // 파란 얼굴
-  const fc=h.ell(28,25,7.5,6,['#3a6aa0','#5a8ac0','#7eaad8','#a8cce8'],{flat:.4});
-  h.eye(25,24,1.8,2.2,{});h.eye(31,24,1.8,2.2,{});h.ell2(22,28,1.4,.8,'#f4a8c0',fc);h.ell2(34,28,1.4,.8,'#f4a8c0',fc);h.line(26,29,30,29,'#1a3a60');
-  h.ell(28,40,6,6,['#a8c0d8','#cadcec','#e8f2fa'],{flat:.5});}},
+yeti:{sz:28,draw(h,f){const s=f?1:0;const Y=['#4a5a70','#6a7e96','#8ea4ba','#b0c4d6','#d0dcea','#eef4fa'];
+  h.ell(20,50-s,6,3,Y);h.ell(36,50+s-1,6,3,Y);
+  const b=h.ell(28,37,14,12,Y,{rim:1});for(let i=0;i<7;i++)h.line(17+i*3,30,16+i*3,44,'#8ea4ba');
+  // 긴 팔 + 검은 손톱
+  h.ell(11,40+s,5,9,Y,{rim:1});h.ell(45,40-s,5,9,Y,{rim:1});for(const x of [8,11,14])h.px(x,49+s,'#14181e');for(const x of [42,45,48])h.px(x,49-s,'#14181e');
+  // 머리 + 숫양 뿔
+  const hd=h.ell(28,21,10,9,Y,{rim:1});
+  h.poly([[19,16],[10,10],[8,18],[12,22],[14,17]],['#3a3428','#5a5040','#7a6e58','#9a8e74'],{l:.8});h.poly([[37,16],[46,10],[48,18],[44,22],[42,17]],['#3a3428','#5a5040','#7a6e58','#9a8e74'],{l:.6});
+  // 검푸른 얼굴 + 송곳니
+  const fc=h.ell(28,24,6.5,5,['#14202e','#22344a','#304a66'],{flat:.3});
+  h.eye(25,22,1.6,1.6,{iris:'#7ae8ff',cx:28});h.eye(31,22,1.6,1.6,{iris:'#7ae8ff',cx:28});h.line(25,27,31,27,'#06080c');h.px(25,28,'#f0f0e8');h.px(31,28,'#f0f0e8');}},
 frostsprite:{sz:24,draw(h,f){const b=f?1:0;
-  // 얼음 결정 몸
-  h.poly([[24,6-b],[33,16-b],[33,32-b],[24,42-b],[15,32-b],[15,16-b]],PAL.ice,{l:.95});h.line(24,6-b,24,42-b,'#ecfaff');h.line(15,16-b,33,32-b,'#b4e0fa');h.line(33,16-b,15,32-b,'#b4e0fa');
-  const hd=h.ell(24,22-b,7,6.5,PAL.ice,{rim:1,spec:'#ffffff'});h.eye(21.5,22-b,1.6,2,{c:'#0e2a4a'});h.eye(26.5,22-b,1.6,2,{c:'#0e2a4a'});h.ell2(19.5,25-b,1.2,.7,'#ffc0d8',hd);h.ell2(28.5,25-b,1.2,.7,'#ffc0d8',hd);
-  // 떠다니는 얼음 조각
-  for(const [x,y] of (f?[[8,14],[40,20],[12,36],[38,40]]:[[10,10],[38,14],[8,32],[40,36]])){h.poly([[x,y-3],[x+2,y],[x,y+3],[x-2,y]],PAL.ice,{l:.9});}
-  h.ell(24,46,6,1.6,['#7ac0ec','#b4e0fa'],{flat:.8});}},
-frog:{sz:24,draw(h,f){const j=f?-2:0;
-  h.ell(13,42,5,3,PAL.frog);h.ell(35,42,5,3,PAL.frog);
-  const b=h.ell(24,34+j,14,10,PAL.frog,{rim:1});
-  // 독 반점
-  for(const [x,y,r] of [[15,32],[33,30],[22,38],[30,37]].map(q=>[...q,1.8]))h.ell2(x,y+j,r,r,'#c03ad0',b);
-  h.ell(24,38+j,8,4,['#a8c870','#c8e090','#e4f4b0'],{flat:.5});
-  // 큰 눈 (위로 튀어나옴)
-  h.ell(16,24+j,5,5,PAL.frog,{rim:1});h.ell(32,24+j,5,5,PAL.frog,{rim:1});h.eye(16,23+j,2.6,3,{iris:'#e8a020'});h.eye(32,23+j,2.6,3,{iris:'#e8a020'});
-  h.line(18,34+j,30,34+j,'#1a3a10');h.px(17,33+j,'#1a3a10');h.px(31,33+j,'#1a3a10');
-  if(f){h.px(24,25,'#c03ad0');h.px(23,26,'#c03ad0');}}},
+  // 얼음 정령: 날카로운 결정 갑주 + 빛나는 핵
+  h.poly([[24,4-b],[31,14-b],[30,34-b],[24,44-b],[18,34-b],[17,14-b]],['#0e2a4a','#1a4470','#2a6698','#4a8cbe','#7ab8e0','#bce0f6'],{l:1});
+  h.poly([[17,18-b],[8,10-b],[12,22-b]],PAL.ice,{l:.9});h.poly([[31,18-b],[40,10-b],[36,22-b]],PAL.ice,{l:.7});
+  h.line(24,4-b,24,44-b,'#d8f0ff');h.ell2(24,28-b,3,3,'#ecfaff');h.ell2(24,28-b,1.4,1.4,'#7ae8ff');
+  h.eye(21,18-b,1.4,1.2,{iris:'#ecfaff',c:'#06142a',cx:24});h.eye(27,18-b,1.4,1.2,{iris:'#ecfaff',c:'#06142a',cx:24});
+  for(const [x,y] of (f?[[8,30],[40,28],[14,40]]:[[10,34],[38,36],[34,42]])){h.poly([[x,y-3],[x+1.6,y],[x,y+3],[x-1.6,y]],PAL.ice,{l:.9});}
+  h.ell(24,47,7,1.4,['#2a6698','#7ab8e0'],{flat:.8});}},
+frog:{sz:24,draw(h,f){const j=f?-2:0;const T=['#141e0a','#22320e','#344a16','#4a6420','#647e2e'];
+  h.ell(12,42,5.5,3,T);h.ell(36,42,5.5,3,T);for(const x of [8,11,14,33,36,39])h.px(x,44,'#0a0e04');
+  const b=h.ell(24,34+j,15,10,T,{rim:1});
+  // 사마귀 혹 + 독샘
+  for(const [x,y] of [[13,30],[19,27],[28,26],[35,30],[16,36],[33,37]]){h.ell2(x,y+j,1.4,1.2,'#7a8e3a',b);h.px(x,y-1+j,'#a0b050',b);}
+  h.ell2(12,33+j,2.4,1.6,'#a03ad0',b);h.ell2(36,33+j,2.4,1.6,'#a03ad0',b);
+  h.ell(24,39+j,9,4,['#6a6a3a','#8a8a50','#a8a868'],{flat:.5});
+  // 튀어나온 눈 (가로 동공)
+  h.ell(17,25+j,4.5,4.5,T,{rim:1});h.ell(31,25+j,4.5,4.5,T,{rim:1});h.ell2(17,24+j,2.6,2.4,'#e0a020');h.ell2(31,24+j,2.6,2.4,'#e0a020');h.line(15,24+j,19,24+j,'#100800');h.line(29,24+j,33,24+j,'#100800');
+  h.line(14,35+j,34,35+j,'#0a0e04');}},
 crystalgolem:{sz:36,draw(h,f){const s=f?1:0;
   h.ell(24,64-s,7,5,PAL.stone,{rim:1});h.ell(48,64+s-1,7,5,PAL.stone,{rim:1});
   const bd=h.ell(36,44,20,17,PAL.stone,{rim:1});h.ell(12,46+s,7,8,PAL.stone,{rim:1});h.ell(60,46-s,7,8,PAL.stone,{rim:1});
@@ -1847,11 +1860,11 @@ cultist:{sz:30,draw(h,f){const w=f?1:0;
   // 바닥 마법진
   h.ell(30,56,15,2.4,['#4a0e1c','#701a2a'],{flat:.9});}},
 firesprite:{sz:24,draw(h,f){const b=f?1:0;
-  // 불꽃 몸 (흔들림)
-  const fl=h.poly([[24,2+b],[30,12],[34,8+b],[36,22],[34,36],[24,42],[14,36],[12,22],[16,10-b],[19,16]],PAL.fire,{l:1.05});
-  h.ell(24,32,8,8,['#ffd660','#fff6c0','#ffffff'],{p:fl,flat:.3});
-  h.eye(21,30,1.8,2.4,{c:'#5a1004'});h.eye(27,30,1.8,2.4,{c:'#5a1004'});h.line(22,35,26,35,'#7a1a04');
-  for(const [x,y] of (f?[[10,8],[38,12],[8,30]]:[[12,4],[36,6],[40,28]])){h.px(x,y,'#ffd660');h.px(x,y+1,'#ff8a20');}}},
+  // 불의 정령: 검게 탄 핵을 감싼 불꽃
+  const fl=h.poly([[24,1+b],[29,10],[34,6+b],[36,20],[34,36],[24,44],[14,36],[12,20],[15,8-b],[19,13]],['#5a0e02','#9a2204','#d6480a','#f8801a','#ffb83a','#ffe890'],{l:1.05});
+  const core=h.ell(24,28,7,8,['#140402','#2a0a04','#4a1406','#6a2008'],{rim:1});for(const [x0,y0,x1,y1] of [[20,24,23,30],[27,23,25,31],[22,33,27,33]])h.line(x0,y0,x1,y1,'#ff9a2a');
+  h.eye(21.5,26,1.5,1.3,{iris:'#fff0a0',c:'#2a0a04',cx:24});h.eye(26.5,26,1.5,1.3,{iris:'#fff0a0',c:'#2a0a04',cx:24});
+  for(const [x,y] of (f?[[10,8],[38,12],[8,30]]:[[12,4],[36,6],[40,28]])){h.px(x,y,'#ffd660');h.px(x,y+1,'#ff6a10');}}},
 salamander:{sz:28,draw(h,f){const s=f?1:-1;
   // 꼬리 (불꽃 끝)
   h.poly([[8,40],[18,34],[20,40],[10,44]],PAL.sala,{l:.6});h.ell2(6,40,2.5,3,'#ffa030');h.px(5,37,'#ffd660');
@@ -1895,33 +1908,29 @@ mimicc:{sz:32,draw(h,f){
   h.rect(12,34,40,3,PAL.gold,{l:.9});h.rect(12,53,40,3,PAL.gold,{l:.5});h.rect(30,24,4,32,PAL.gold,{l:.7});h.ell(32,38,3,3.4,PAL.gold,{spec:'#fff6c8'});h.px(32,39,'#2e1a0c');
   if(f){h.px(18,38,'#ffffff');h.px(19,37,'#ffffff');}}},
 luckycat:{sz:26,draw(h,f){const w=f?-2:0;
-  h.ell(26,40,12,10,PAL.cat,{rim:1,spec:'#ffffff'});
-  // 손 흔들기 (복고양이)
-  h.ell(38,28+w,4,4.5,PAL.cat,{rim:1});h.px(38,25+w,'#f8b4c4');
-  const hd=h.ell(25,24,12,10,PAL.cat,{rim:1,spec:'#ffffff'});
-  h.poly([[15,18],[14,8],[21,15]],PAL.cat,{l:.85});h.poly([[35,18],[36,8],[29,15]],PAL.cat,{l:.65});h.poly([[16,16],[16,11],[19,15]],PAL.pink,{l:.6});h.poly([[34,16],[34,11],[31,15]],PAL.pink,{l:.5});
-  // 웃는 눈 (^ ^)
-  h.line(18,24,20,22,'#3a2208');h.line(20,22,22,24,'#3a2208');h.line(28,24,30,22,'#3a2208');h.line(30,22,32,24,'#3a2208');
-  h.ell2(17,27,2,1.1,'#ff9ab0',hd);h.ell2(33,27,2,1.1,'#ff9ab0',hd);h.px(25,27,'#e07090');h.line(23,29,25,30,'#3a2208');h.line(25,30,27,29,'#3a2208');
-  // 빨간 목걸이 + 금방울 + 동전
-  h.rect(17,32,17,2.5,PAL.red,{l:.85});h.ell(25,36,2.6,2.6,PAL.gold,{spec:'#ffffff'});
-  h.ell(12,42,5,5,PAL.gold,{rim:1,spec:'#fff6c8'});h.rect(11,39,2,6,['#9a6c18','#5e400c']);}},
-hornrabbit:{sz:22,draw(h,f){const j=f?-2:0;
-  // 꼬리
-  h.ell(9,31+j,3.5,3.5,PAL.fur);
-  // 몸
-  h.ell(18,31+j,10,8,PAL.fur,{rim:1});
-  // 뒷발·앞발
-  h.ell(13,39+j*.3,4,2.2,PAL.fur);h.ell(24,39,3,2,PAL.fur);
-  // 귀
-  h.ell(23,11+j,2.6,7,PAL.fur);h.ell(23,12+j,1.2,5,PAL.pink);h.ell(29,12+j,2.6,7,PAL.fur,{cut:(x,y)=>false});h.ell(29,13+j,1.2,5,PAL.pink);
-  // 머리
-  const hh=h.ell(27,23+j,8,7,PAL.fur,{rim:1,spec:'#ffffff'});
-  // 뿔 (나선)
-  h.poly([[30,17+j],[38,6+j],[33,18+j]],PAL.horn,{l:.9});h.line(31,15+j,34,15+j,'#b0801e');h.line(32,12+j,35,12+j,'#b0801e');h.line(34,9+j,36,9+j,'#b0801e');
-  // 눈·코·볼
-  h.eye(29,22+j,1.8,2.4,{iris:'#c02838'});h.px(35,25+j,'#e07090');h.px(34,26+j,'#e07090');h.ell2(31,26+j,1.6,1,'#f8b4c4',hh);
-}},
+  // 황금 고양이 석상 (신전 수호상)
+  h.rect(12,44,28,5,['#3a2a10','#5e4418','#8a6626','#b08a3a'],{l:.85});
+  const b=h.ell(26,36,11,10,PAL.gold,{rim:1});
+  h.ell(36,26+w,3.6,4.5,PAL.gold,{rim:1});
+  const hd=h.ell(25,21,10,9,PAL.gold,{rim:1,spec:'#fff6c8'});
+  h.poly([[16,16],[15,5],[22,13]],PAL.gold,{l:.85});h.poly([[34,16],[35,5],[28,13]],PAL.gold,{l:.65});
+  // 엄숙한 감은 눈 + 이마 보석
+  h.line(18,21,23,22,'#3a2808');h.line(27,22,32,21,'#3a2808');h.poly([[25,12],[27,15],[25,18],[23,15]],['#5a0a1a','#a01830','#e04050','#ff9aa8'],{l:1});
+  h.px(25,25,'#3a2808');h.line(23,27,27,27,'#3a2808');for(const x of [18,32])h.line(x,25,x+(x<25?-5:5),24,'#8a6626');
+  h.rect(18,30,15,2.5,['#3a0a10','#6a1420','#9a2030'],{l:.8});h.ell(25.5,34,2.4,2.4,PAL.gold,{spec:'#ffffff'});
+  h.ell(12,40,5,5,PAL.gold,{rim:1,spec:'#fff6c8'});h.rect(11,37,2,6,['#9a6c18','#5e400c']);}},
+hornrabbit:{sz:22,draw(h,f){const j=f?-2:0;const F=['#4a4440','#6e6660','#948a82','#b8aea4','#d8d0c6'];
+  h.ell(8,31+j,3,3,F);
+  const b=h.ell(18,31+j,10,7.5,F,{rim:1});for(let i=0;i<6;i++)h.line(12+i*3,26+j,13+i*3,29+j,'#6e6660');
+  h.ell(13,39+j*.3,4.5,2.2,F);h.ell(25,39,3,2,F);for(const x of [23,25,27])h.px(x,40,'#e8e0d0');
+  // 뒤로 젖힌 귀 (찢어짐)
+  h.poly([[24,17+j],[14,6+j],[17,6+j],[27,15+j]],F,{l:.8});h.poly([[27,16+j],[22,3+j],[25,3+j],[30,14+j]],F,{l:.65});h.px(16,8+j,'#2a2420');
+  const hh=h.ell(28,22+j,7.5,6.5,F,{rim:1});
+  // 긴 나선 뿔 (뼈색)
+  h.poly([[30,16+j],[42,1+j],[34,17+j]],['#6a5a3a','#9a8458','#c4ae7a','#e4d4a4'],{l:.95});for(let i=0;i<4;i++)h.line(31+i*2.4,14+j-i*3.4,34+i*2.4,14+j-i*3.4,'#6a5a3a');
+  h.eye(30,21+j,1.8,2,{iris:'#ff2a2a',cx:20});
+  // 앞니 + 피
+  h.px(34,26+j,'#f0e8d8');h.px(35,26+j,'#f0e8d8');h.px(34,27+j,'#f0e8d8');h.px(35,27+j,'#a01818');h.px(35,24+j,'#1a1410');}},
 };
 const ESPR=(()=>{
   const cache={};
@@ -6299,8 +6308,8 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
-  {v:73,t:'🎨 몬스터 새 그림',items:[
-    ['new','🎨 <b>일반 몬스터 47종 전부</b>를 2배 촘촘한 도트로 새로 그렸어요. 귀여운 애들은 더 귀엽게, 무서운 애들은 더 무섭게!'],
+  {v:74,t:'🎨 몬스터 새 그림',items:[
+    ['new','🎨 <b>일반 몬스터 47종 전부</b>를 2배 촘촘한 도트로 새로 그렸어요. 진지하고 근엄한 판타지 몬스터로!'],
     ['change','🐉 용의 보물 증강은 증강 칸 맨 오른쪽(왕실 칸 옆)에 따로 보여요. 일반 증강 10칸을 차지하지 않아요']]},
   {v:71,t:'📊 명예의 전당 능력치 · 직업 적용표',items:[
     ['new','🏆 명예의 전당 기록을 <b>누르면</b> 그 캐릭터의 <b>최종 능력치와 증강</b>을 볼 수 있어요 (결투 데이터가 있는 기록)'],
@@ -8627,7 +8636,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=73,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=74,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
