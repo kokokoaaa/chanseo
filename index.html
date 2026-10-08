@@ -5928,7 +5928,9 @@ function update(dt){
       if(p.dashT<=0)dashEnd();
     }else{const sp=Math.min(SPEED_CAP,moveSpd())*(S.buffT.slow>0?.6:1);p.x+=mx*sp*dt;p.y+=my*sp*dt;}
     p.x=clamp(p.x,p.r+10,WW-p.r-10);p.y=clamp(p.y,p.r+10,WH-p.r-10);pushOut(p,p.r);
-    if(S.arena){const A=S.arena;A.r+=(A.tr-A.r)*Math.min(1,dt*.8);const m=A.r-p.r-4;p.x=clamp(p.x,A.x-m,A.x+m);p.y=clamp(p.y,A.y-m,A.y+m);}
+    if(S.arena){const A=S.arena;A.r+=(A.tr-A.r)*Math.min(1,dt*.8);const m=A.r-p.r-4;p.x=clamp(p.x,A.x-m,A.x+m);p.y=clamp(p.y,A.y-m,A.y+m);
+      // 결계는 몹에게도 벽: 밖에 있거나 밖에서 생긴 잡몹은 결계 안쪽 가장자리로 밀려 들어옴 (어두운 바깥에서 돌아다니지 않게)
+      for(const e of S.en){if(!e.alive||e.boss)continue;const me=Math.max(10,A.r-e.r);if(e.x<A.x-me||e.x>A.x+me||e.y<A.y-me||e.y>A.y+me){e.x=clamp(e.x,A.x-me,A.x+me);e.y=clamp(e.y,A.y-me,A.y+me);}}}
     {const bR=p.maxHp*.0005*mlv('regen')+(tag('nature')>=2?1.5:0)+(has('yggdrasil')&&inVine(p)?p.maxHp*.02:0)+(has('warpaint')?(p.fy||0)*lv3('warpaint',.08,.1,.15):0)+(has('worldtree')?3:0)+(has('f_ancient')&&inVine(p)?p.maxHp*.02:0)+(has('bastion')&&nearTurret()?3*(has('f_citadel')?2:1):0)+(has('sanctuary')&&!p.moving?lv3('sanctuary',1.5,2,3):0);const rgM=has('f_hydra')?3:(has('thick')&&hitRec()?3:1)*(has('troll')&&p.noHitT>3?3:1);if(p.regen||bR||has('f_immortal'))p.hp=Math.min(p.maxHp,p.hp+(p.regen*rgM*(p.skRgT>0?5:1)*rgHpM()*(has('d_photo')&&!p.moving?2:1)*(season()===0?2:1)+bR+(has('f_immortal')?p.maxHp*.01:0))*dt*healM());}
     p.noHitT+=dt;{const bm=barrierMax();if(p.barrier>bm)p.barrier=bm;if(p.noHitT>(has('f_insure')?1.5:3)&&p.barrier<bm)p.barrier=Math.min(bm,p.barrier+bm*.35*dt);}
     if(S.buffT.jack>0)p.inv=Math.max(p.inv,.05);
@@ -7121,6 +7123,7 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
 const PATCH_NOTES=[
   {v:100,t:'🏠 건물 충돌 + 증강 대신 스탯 정리',items:[
     ['change','🎁 증강 슬롯이 다 찼을 때 <b>증강 대신 받는 스탯 카드</b>는 한 판에 처음 4번까지 그대로, 그 뒤로는 받을 때마다 1장씩 줄어요 (최소 1장). 증강을 안 받고 스탯만 끝없이 쌓는 쪽이 너무 세지던 문제 수정'],
+    ['change','☠ 악몽 결계·보스전 결계가 줄어들 때 <b>몹도 결계 밖으로 나갈 수 없어요</b>. 바깥 어두운 곳에서 몹이 돌아다니던 문제 수정 (밖에서 생긴 몹은 결계 안쪽 가장자리로 들어와요)'],
     ['change','🏠 커다란 건물(이스터에그 건축물 포함)을 이제 <b>그림 크기만큼</b> 지나갈 수 없어요. 예전엔 가운데 작은 부분만 막혀서 건물을 통과했어요']]},
   {v:99,t:'⚠ 보스 패턴 강화 + 배경별 몬스터 정리',items:[
     ['enemy','⚠ <b>보스 패턴</b>(예고 장판·돌진·레이저 같은 큰 공격)의 피해가 <b>×1.4</b>로 세졌어요 (일반 난이도 ×1.2). 한 방 피해 상한도 같이 올라서, 맞으면 정말 아파요 — <b>꼭 피하세요!</b> 대시로 받아내면 완벽한 회피 보너스'],
