@@ -1133,7 +1133,7 @@ const GF=[
 // 맵 바깥(테두리 너머) 색과 길 색
 const OUT=['#1e3a16','#122614','#3a2a12','#1a1422','#1a0c08','#8a6a38','#9ab0c4','#16241a','#14141e','#1e2218','#120806'];
 const ROAD=[['#8a6a40','#6a5030'],['#5a4a30','#3a3020'],['#8a6a3a','#6a4a24'],['#4a4252','#2e2838'],['#3a2a24','#241a14'],['#e4c88a','#b08a4a'],['#eef4fa','#a8bcd0'],['#6a5a3a','#4a3a24'],['#4a4a6a','#2e2e44'],['#7a7a70','#52524a'],['#2a1e1a','#e0451f']];
-function gfImg(bi,v){const key=bi+'_'+v;GFC[key]=GFC[key]||(()=>{const d=GF[bi][v],c=document.createElement('canvas');c.width=d[0];c.height=d[1];sd=1000+bi*31+v*7;d[2](c.getContext('2d'));return c;})();return GFC[key];}
+function gfImg(bi,v){const key=bi+'_'+v;if(BG_HD_G[bi])return GFC[key]=GFC[key]||BGHD.decal(['soil','peb','fl'][v%3],BG_HD_G[bi],2000+bi*31+v*7);GFC[key]=GFC[key]||(()=>{const d=GF[bi][v],c=document.createElement('canvas');c.width=d[0];c.height=d[1];sd=1000+bi*31+v*7;d[2](c.getContext('2d'));return c;})();return GFC[key];}
 const GFC={};
 Object.assign(LM,{
  windmill:[70,96,22,g=>{wall(g,['#a89878','#c8b898','#e0d4b4','#f0e8d0'],22,42,26,52);roof(g,RF,18,52,30,14);door(g,31,78,16);win(g,32,56,1);
@@ -1171,9 +1171,9 @@ const BIOMES=[
 // 장마다 후보 배경 중 판마다 랜덤 (뒤로 갈수록 어두운 분위기는 유지). 마지막 보스전은 불타는 숲/용암 지대
 const BIO_POOL=[[0,5,6],[1,6,7],[2,7,8],[3,8,9],[4,10]];
 const BIO=(()=>{const pat=[],decoC={};
-  function ground(i){return pat[i]||(pat[i]=BART.ground(BIOMES[i]));}
-  function deco(k,fl){if(fl){const fk=k+'_f';if(decoC[fk])return decoC[fk];const o=deco(k),c=document.createElement('canvas');c.width=o.width;c.height=o.height;const g=c.getContext('2d');g.translate(o.width,0);g.scale(-1,1);g.drawImage(o,0,0);return decoC[fk]=c;}
-    if(decoC[k])return decoC[k];const tree=!!BART.T[k],s=tree?[72,96]:BART.SZ[k],c=document.createElement('canvas');c.width=s[0];c.height=s[1];
+  function ground(i){return pat[i]||(pat[i]=BG_HD_G[i]?BGHD.ground(BG_HD_G[i]):BART.ground(BIOMES[i]));}
+  function deco(k,fl){if(fl){const fk=k+'_f';if(decoC[fk])return decoC[fk];const o=deco(k),c=document.createElement('canvas');c.width=o.width;c.height=o.height;c.hd=o.hd;const g=c.getContext('2d');g.translate(o.width,0);g.scale(-1,1);g.drawImage(o,0,0);return decoC[fk]=c;}
+    if(decoC[k])return decoC[k];{const hd=bgHdImg(k);if(hd)return decoC[k]=hd;}const tree=!!BART.T[k],s=tree?[72,96]:BART.SZ[k],c=document.createElement('canvas');c.width=s[0];c.height=s[1];
     const w=document.createElement('canvas');w.width=s[0];w.height=s[1];const g=w.getContext('2d',{willReadFrequently:true});(tree?BART.T:BART.D)[k](g);ART.outline(w);c.getContext('2d').drawImage(w,0,0);decoC[k]=c;return c;}
   function lm(k){const key='lm_'+k;if(decoC[key])return decoC[key];const L=BART.LM[k],c=document.createElement('canvas');c.width=L[0];c.height=L[1];
     const w=document.createElement('canvas');w.width=L[0];w.height=L[1];const g=w.getContext('2d',{willReadFrequently:true});L[3](g);ART.outline(w);c.getContext('2d').drawImage(w,0,0);decoC[key]=c;return c;}
@@ -1252,7 +1252,7 @@ function inSolid(x,y,rad){for(const o of solidsNear(x,y,rad))if((x-o.x)**2+(y-o.
 const TREEV=[],EGGQ=[];
 // 이스터에그 장소 표시: 건축물 위에 둥실거리는 ❔ (찾은 곳은 사라짐)
 function drawEggQ(){if(!S||!S.p)return;const t=performance.now()/1000;for(const q of EGGQ){const by=q.y+Math.sin(t*2.4+q.x*.01)*4,a=.75+.25*Math.sin(t*3+q.y);ctx.save();ctx.globalAlpha=a;ctx.fillStyle='rgba(20,14,0,.55)';ctx.beginPath();ctx.arc(q.x,by,13,0,TAU);ctx.fill();ctx.strokeStyle='#ffe27a';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#ffe27a';ctx.font='bold 16px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('?',q.x,by+1);ctx.restore();}}
-function drawTree(t){pxDraw(t.img,t.x,t.y,t.img.width>>1,t.img.height-2);}
+function drawTree(t){pxDrawI(t.img,t.x,t.y,t.img.width>>1,t.img.height-2*(t.img.hd||1));}
 // 길: 맵을 가로·세로로 지나는 구불구불한 길 2개씩
 const ROADS_H=[WH*.34,WH*.67],ROADS_V=[WW*.31,WW*.69],RW=64;
 const roadOff=(t,k)=>Math.sin(t/520+k*2.1)*110+Math.sin(t/190+k)*28;
@@ -1262,27 +1262,31 @@ function drawWorldBg(){TREEV.length=0;EGGQ.length=0;
   // 맵 바깥: 배경색으로 채움 (검은 공간 대신)
   if(camX<0||camY<0||camX+W>WW||camY+H>WH){ctx.fillStyle=BART.OUT[bi];ctx.fillRect(camX-10,camY-10,W+20,H+20);}
   {const T=ctx.getTransform(),a=T.a,n=pxN(a),q=a/n;ctx.setTransform(n,0,0,n,Math.round(T.e),Math.round(T.f));
-   ctx.fillStyle=ctx.createPattern(BIO.ground(bi),'repeat');ctx.fillRect(x0*q,y0*q,(x1-x0)*q,(y1-y0)*q);
-   if(tr>0&&pb!==bi){ctx.globalAlpha=tr;ctx.fillStyle=ctx.createPattern(BIO.ground(pb),'repeat');ctx.fillRect(x0*q,y0*q,(x1-x0)*q,(y1-y0)*q);ctx.globalAlpha=1;}
+   const gpat=i=>{const im=BIO.ground(i),pt=ctx.createPattern(im,'repeat');if(im.hd&&pt.setTransform)pt.setTransform(new DOMMatrix([1/im.hd,0,0,1/im.hd,0,0]));return pt;};
+   ctx.fillStyle=gpat(bi);ctx.fillRect(x0*q,y0*q,(x1-x0)*q,(y1-y0)*q);
+   if(tr>0&&pb!==bi){ctx.globalAlpha=tr;ctx.fillStyle=gpat(pb);ctx.fillRect(x0*q,y0*q,(x1-x0)*q,(y1-y0)*q);ctx.globalAlpha=1;}
    ctx.setTransform(T);}
   const B=BIOMES[bi],C=260;ctx.imageSmoothingEnabled=false;
   // 바닥 무늬
   {const G=200;for(let cx=Math.floor((x0-100)/G);cx<=Math.floor((x1+20)/G);cx++)for(let cy=Math.floor((y0-60)/G);cy<=Math.floor((y1+20)/G);cy++){const h=hash(cx*5+1,cy*3+7);if(h>.72)continue;
-    const x=cx*G+hash(cx+3,cy-1)*G,y=cy*G+hash(cx-5,cy+2)*G;if(x<30||y<30||x>WW-30||y>WH-30)continue;const img=BART.gfImg(bi,Math.floor(hash(cx+9,cy+4)*3));pxDraw(img,x,y,img.width>>1,img.height>>1);}}
+    const x=cx*G+hash(cx+3,cy-1)*G,y=cy*G+hash(cx-5,cy+2)*G;if(x<30||y<30||x>WW-30||y>WH-30)continue;const img=BART.gfImg(bi,Math.floor(hash(cx+9,cy+4)*3));pxDrawI(img,x,y,img.width>>1,img.height>>1);}}
   // 길
-  {const [rc,re]=BART.ROAD[bi];for(let k=0;k<2;k++){const ry=ROADS_H[k];for(let x=Math.floor(x0/16)*16;x<x1;x+=16){const y=ry+roadOff(x,k);if(y<y0-RW||y>y1+RW)continue;ctx.fillStyle=re;ctx.fillRect(x,y-RW/2-3,17,RW+6);ctx.fillStyle=rc;ctx.fillRect(x,y-RW/2,17,RW);if(hash(x,k)<.3){ctx.fillStyle=re;ctx.fillRect(x+4,y+(hash(x+1,k)-.5)*RW*.7,4,3);}}
+  const RHD=BG_HD_G[bi]&&BG_HD_G[bi].road;let rpat=null;if(RHD){BIO.rpat=BIO.rpat||{};if(!BIO.rpat[bi])BIO.rpat[bi]=BGHD.ground({ramp:RHD,seed:bi*7+3});rpat=ctx.createPattern(BIO.rpat[bi],'repeat');if(rpat.setTransform)rpat.setTransform(new DOMMatrix([PXW/2,0,0,PXW/2,0,0]));}
+  {const [rc0,re]=BART.ROAD[bi],rc=rpat||rc0;for(let k=0;k<2;k++){const ry=ROADS_H[k];for(let x=Math.floor(x0/16)*16;x<x1;x+=16){const y=ry+roadOff(x,k);if(y<y0-RW||y>y1+RW)continue;ctx.fillStyle=re;ctx.fillRect(x,y-RW/2-3,17,RW+6);ctx.fillStyle=rc;ctx.fillRect(x,y-RW/2,17,RW);if(hash(x,k)<.3){ctx.fillStyle=re;ctx.fillRect(x+4,y+(hash(x+1,k)-.5)*RW*.7,4,3);}}
     const rx=ROADS_V[k];for(let y=Math.floor(y0/16)*16;y<y1;y+=16){const x=rx+roadOff(y,k+2);if(x<x0-RW||x>x1+RW)continue;ctx.fillStyle=re;ctx.fillRect(x-RW/2-3,y,RW+6,17);ctx.fillStyle=rc;ctx.fillRect(x-RW/2,y,RW,17);if(hash(k,y)<.3){ctx.fillStyle=re;ctx.fillRect(x+(hash(k,y+1)-.5)*RW*.7,y+4,3,4);}}}}
+  if(RHD){const E=BG_HD_G[bi].edge;for(let k=0;k<2;k++){const ry=ROADS_H[k];for(let x=Math.floor(x0/10)*10;x<x1;x+=10){const y=ry+roadOff(x,k);if(y<y0-RW||y>y1+RW)continue;for(const sd of [-1,1]){const h=hash(x,k*3+sd);if(h<.35)continue;const yy=y+sd*(RW/2+1);ctx.fillStyle=E[0];ctx.fillRect(x+h*6,yy-3,1.6,4);ctx.fillStyle=E[1];ctx.fillRect(x+h*6+1.6,yy-5,1.6,6);ctx.fillStyle=E[2];ctx.fillRect(x+h*6+3.2,yy-3,1.6,3);}}
+    const rx=ROADS_V[k];for(let y=Math.floor(y0/10)*10;y<y1;y+=10){const x=rx+roadOff(y,k+2);if(x<x0-RW||x>x1+RW)continue;for(const sd of [-1,1]){const h=hash(k*3+sd,y);if(h<.35)continue;const xx=x+sd*(RW/2+1);ctx.fillStyle=E[0];ctx.fillRect(xx-2,y+h*6,1.6,4);ctx.fillStyle=E[1];ctx.fillRect(xx,y+h*6-2,1.6,6);ctx.fillStyle=E[2];ctx.fillRect(xx+1.6,y+h*6,1.6,3);}}}}
   for(let cx=Math.floor((x0-60)/C);cx<=Math.floor((x1+60)/C);cx++)for(let cy=Math.floor((y0-90)/C);cy<=Math.floor((y1+130)/C);cy++){
     for(let q=0;q<2;q++){const dd=decoAt(cx,cy,q);if(!dd)continue;const px2=dd.x,py2=dd.y,tree=dd.tree,k=dd.k,img=BIO.deco(k,dd.fl),by=py2+(tree?40:14);
-      ctx.fillStyle='rgba(0,0,0,.22)';ctx.beginPath();ctx.ellipse(px2,by-2,tree?26:img.width*.5,tree?7:3,0,0,TAU);ctx.fill();
-      if(tree)TREEV.push({x:px2,y:by,img});else pxDraw(img,px2,by,img.width>>1,img.height-2);}}
+      ctx.fillStyle='rgba(0,0,0,.22)';ctx.beginPath();ctx.ellipse(px2,by-2,tree?26:img.width/(img.hd||1)*.5,tree?7:3,0,0,TAU);ctx.fill();
+      if(tree)TREEV.push({x:px2,y:by,img});else pxDrawI(img,px2,by,img.width>>1,img.height-2*(img.hd||1));}}
   for(let cx=Math.floor((x0-100)/LC);cx<=Math.floor((x1+100)/LC);cx++)for(let cy=Math.floor((y0-100)/LC);cy<=Math.floor((y1+160)/LC);cy++){const m=lmAt(cx,cy);if(!m)continue;const img=BIO.lm(m.k);
     if(m.x+img.width<x0-40||m.x-img.width>x1+40||m.y<y0-40||m.y-img.height*1.6>y1+40)continue;
     ctx.fillStyle=BART.ROAD[bi][1];ctx.globalAlpha=.55;ctx.beginPath();ctx.ellipse(m.x,m.y+10,img.width*1.5,46,0,0,TAU);ctx.fill();ctx.fillStyle=BART.ROAD[bi][0];ctx.globalAlpha=.7;ctx.beginPath();ctx.ellipse(m.x,m.y+10,img.width*1.3,38,0,0,TAU);ctx.fill();ctx.globalAlpha=1;
     ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(m.x,m.y-2,img.width*.55,8,0,0,TAU);ctx.fill();TREEV.push({x:m.x,y:m.y,img,big:1});
     if(EGG[m.k]&&!(S.eggDone&&S.eggDone[m.x+','+m.y]))EGGQ.push({x:m.x,y:m.y-img.height*1.6-14,k:m.k});
     // 건축물 주변 소품
-    for(let i=0;i<5;i++){const a=hash(m.x+i,m.y)*TAU,r=img.width*1.6+hash(m.y,i)*60,k=B.deco[i%B.deco.length],di=BIO.deco(k);pxDraw(di,m.x+Math.cos(a)*r,m.y+20+Math.sin(a)*r*.45,di.width>>1,di.height-2);}}
+    for(let i=0;i<5;i++){const a=hash(m.x+i,m.y)*TAU,r=img.width*1.6+hash(m.y,i)*60,k=B.deco[i%B.deco.length],di=BIO.deco(k);pxDrawI(di,m.x+Math.cos(a)*r,m.y+20+Math.sin(a)*r*.45,di.width>>1,di.height-2*(di.hd||1));}}
   // 맵 끝: 테두리 밖으로 빽빽한 나무(배경별 나무)·바위 벽
   {const near=camX<260||camY<260||camX+W>WW-260||camY+H>WH-260;if(near){const TLs=(B.trees||[B.tree]).map(k=>[BIO.deco(k),BIO.deco(k,1)]),ri=BIO.deco(B.deco.includes('rock')?'rock':B.deco[0]),St=46;
     const put=(x,y,img)=>{if(x<camX-80||x>camX+W+80||y<camY-20||y>camY+H+140)return;TREEV.push({x,y,img});};
@@ -1942,6 +1946,84 @@ hornrabbit:{sz:22,draw(h,f){const j=f?-2:0;const F=['#4a4440','#6e6660','#948a82
   // 앞니 + 피
   h.px(34,26+j,'#f0e8d8');h.px(35,26+j,'#f0e8d8');h.px(34,27+j,'#f0e8d8');h.px(35,27+j,'#a01818');h.px(35,24+j,'#1a1410');}},
 };
+// 고해상도 배경: 바닥 타일(이음매 없음) + 나무·소품 (HD 도구 사용, 2배 촘촘)
+const BGHD=(()=>{
+  const hex=c=>{c=c.replace('#','');return [parseInt(c.slice(0,2),16),parseInt(c.slice(2,4),16),parseInt(c.slice(4,6),16)];};
+  const BAY4=[[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
+  let sd=1;const rnd=()=>{sd=(sd*16807)%2147483647;return sd/2147483647;};
+  // 이어지는 값 노이즈 (주기 N)
+  function vnoise(N,per,seed){sd=seed;const g=[];for(let i=0;i<per*per;i++)g.push(rnd());return (x,y)=>{const fx=x/N*per,fy=y/N*per,ix=Math.floor(fx),iy=Math.floor(fy),tx=fx-ix,ty=fy-iy,s=t=>t*t*(3-2*t);
+    const v=(a,b)=>g[((b%per+per)%per)*per+((a%per+per)%per)];const a=v(ix,iy),b=v(ix+1,iy),c=v(ix,iy+1),d=v(ix+1,iy+1);return (a+(b-a)*s(tx))*(1-s(ty))+(c+(d-c)*s(tx))*s(ty);};}
+  // 바닥: ramp(어두운→밝은) 위에 얼룩 노이즈 + 디더링 + 풀잎·돌·흙 자국
+  function ground(o){const N=256,c=document.createElement('canvas');c.width=c.height=N;const g=c.getContext('2d'),im=g.createImageData(N,N),d=im.data,R=o.ramp.map(hex);
+    const n1=vnoise(N,5,o.seed||7),n2=vnoise(N,11,(o.seed||7)+11),n3=vnoise(N,29,(o.seed||7)+23);
+    for(let y=0;y<N;y++)for(let x=0;x<N;x++){let v=n1(x,y)*.55+n2(x,y)*.3+n3(x,y)*.15;v=(v-.5)*1.15+.5;const t=Math.max(0,Math.min(.999,v))*(R.length-1)+(BAY4[y&3][x&3]/16-.5)*.45;const k=Math.max(0,Math.min(R.length-1,Math.round(t)));const i=(y*N+x)*4;d[i]=R[k][0];d[i+1]=R[k][1];d[i+2]=R[k][2];d[i+3]=255;}
+    const put=(x,y,col)=>{x=((x%N)+N)%N;y=((y%N)+N)%N;const i=(y*N+x)*4,c2=hex(col);d[i]=c2[0];d[i+1]=c2[1];d[i+2]=c2[2];};
+    sd=(o.seed||7)+99;
+    // 흙 자국 (soil)
+    if(o.soil)for(let k=0;k<o.soilN;k++){const cx=rnd()*N,cy=rnd()*N,rx=4+rnd()*7,ry=2+rnd()*3;for(let y=-ry;y<=ry;y++)for(let x=-rx;x<=rx;x++){if((x/rx)**2+(y/ry)**2>1)continue;const e=(x/rx)**2+(y/ry)**2>.6;put(Math.round(cx+x),Math.round(cy+y),e?o.soil[0]:o.soil[1+((x+y)&1)]);}}
+    // 풀잎 (아래 진하고 끝 밝게)
+    if(o.blade)for(let k=0;k<o.bladeN;k++){const x=rnd()*N|0,y=rnd()*N|0,h=2+rnd()*3|0,lean=rnd()<.5?-1:1;for(let j=0;j<h;j++)put(x+(j>h/2?lean:0),y-j,j===h-1?o.blade[2]:j?o.blade[1]:o.blade[0]);}
+    // 작은 돌
+    if(o.peb)for(let k=0;k<o.pebN;k++){const x=rnd()*N|0,y=rnd()*N|0;put(x,y,o.peb[1]);put(x+1,y,o.peb[2]);put(x,y+1,o.peb[0]);put(x+1,y+1,o.peb[0]);put(x+2,y+1,'#1a1a14');}
+    // 작은 꽃
+    if(o.fl)for(let k=0;k<o.flN;k++){const x=rnd()*N|0,y=rnd()*N|0,c3=o.fl[k%o.fl.length];put(x,y,c3);put(x-1,y,c3);put(x+1,y,c3);put(x,y-1,c3);put(x,y,'#f4d35e');}
+    g.putImageData(im,0,0);c.hd=2;return c;}
+  // 흩뿌림 장식: 흙 자국, 자갈, 작은 꽃밭 (월드 좌표 해시로 무작위 위치)
+  // 흩뿌림 장식 (월드 위치마다 무작위): soil 흙 자국 · peb 진한 풀숲 · fl 꽃밭. 가장자리는 흩어지게
+  function decal(kind,o,seed){sd=seed;const W2=kind==='soil'?72:kind==='peb'?84:96,H2=kind==='soil'?34:kind==='peb'?40:46,c=document.createElement('canvas');c.width=W2;c.height=H2;const g=c.getContext('2d'),im=g.createImageData(W2,H2),d=im.data,
+      put=(x,y,col)=>{x|=0;y|=0;if(x<0||y<0||x>=W2||y>=H2)return;const i=(y*W2+x)*4,c2=hex(col);d[i]=c2[0];d[i+1]=c2[1];d[i+2]=c2[2];d[i+3]=255;},nz=vnoise(64,6,seed+5),
+      blob=(f)=>{const cx=W2/2,cy=H2/2;for(let y=0;y<H2;y++)for(let x=0;x<W2;x++){const q=((x-cx)/(W2/2-2))**2+((y-cy)/(H2/2-2))**2+(nz(x,y)-.5)*.9;if(q<1)f(x,y,q);}};
+    if(kind==='soil'){blob((x,y,q)=>{if(q>.75&&rnd()<.55)return;put(x,y,q>.6?o.soil[1]:(BAY4[y&3][x&3]>11?o.soil[0]:o.soil[2]));});for(let k=0;k<8;k++){const x=6+rnd()*(W2-12),y=4+rnd()*(H2-8);put(x,y,o.peb[2]);put(x+1,y,o.peb[1]);put(x,y+1,o.peb[0]);}}
+    else if(kind==='peb'){blob((x,y,q)=>{if(q>.8&&rnd()<.5)return;put(x,y,BAY4[y&3][x&3]>(q>.5?9:4)?o.ramp[0]:o.ramp[1]);});for(let k=0;k<70;k++){const x=4+rnd()*(W2-8),y=6+rnd()*(H2-8),h=2+rnd()*3|0;for(let j=0;j<h;j++)put(x,y-j,j===h-1?o.blade[2]:o.blade[1]);}}
+    else{blob((x,y,q)=>{if(q>.8&&rnd()<.5)return;put(x,y,BAY4[y&3][x&3]>(q>.5?10:6)?o.ramp[3]:o.ramp[4]);});for(let k=0;k<26;k++){const x=4+rnd()*(W2-8),y=4+rnd()*(H2-7),c3=o.fl[k%o.fl.length];put(x,y+1,o.blade[1]);put(x,y+2,o.blade[0]);put(x,y,c3);put(x-1,y,c3);put(x+1,y,c3);put(x,y-1,c3);put(x,y,'#f4d35e');}}
+    g.putImageData(im,0,0);c.hd=2;return c;}
+  return {ground,vnoise,decal};
+})();
+// 숲 나무·소품 (HD 도구)
+const LEAF=['#16300e','#22461a','#2f5e22','#3e782c','#55943a','#78b44e'],BARK=['#20140a','#34220f','#4a3218','#614424','#7a5832'];
+function canopyHD(h,blobs,ramp,o={}){let s=o.seed||5;const r=()=>{s=(s*16807)%2147483647;return s/2147483647;};const NR=ramp.length;
+  // 1) 큰 잎 덩어리 (안쪽만, 테두리는 잎 뭉치가 만듦)
+  const ps=blobs.map(([x,y,rx,ry])=>h.ell(x,y,rx*.92,ry*.9,ramp,{rim:1}));
+  // 2) 잎 뭉치: 작은 타원 잎을 빛 방향 색으로. 가장자리 것은 밖으로 삐져나와 울퉁불퉁한 실루엣
+  const n=o.n||200;for(let i=0;i<n;i++){const j=Math.floor(r()*blobs.length),[bx,by,rx,ry]=blobs[j],a=r()*6.28,rr=Math.pow(r(),.6)*1.05,nx=Math.cos(a)*rr,ny=Math.sin(a)*rr,x=bx+nx*rx,y=by+ny*ry;
+    const lt=-(nx*.55+ny*.8)*.8+(r()-.5)*.5;const k=Math.max(0,Math.min(NR-1,Math.round((lt*.5+.5)*(NR-1))));const lw=1.6+r()*1.4;
+    h.ell2(x+.6,y+.8,lw,lw*.7,ramp[Math.max(0,k-2)],ps[j]);h.ell2(x,y,lw,lw*.7,ramp[k],ps[j]);if(k>=NR-2&&r()<.5)h.px(Math.round(x-lw*.4),Math.round(y-.5),ramp[NR-1],ps[j]);}
+  if(o.fruit)for(let i=0;i<o.fruit.n;i++){const j=Math.floor(r()*blobs.length),b=blobs[j],a=r()*6.28,rr=Math.sqrt(r())*.7;h.ell2(b[0]+Math.cos(a)*b[2]*rr,b[1]+Math.sin(a)*b[3]*rr,1.4,1.4,o.fruit.c[i%o.fruit.c.length],ps[j]);}}
+function trunkHD(h,x,y0,y1,w,ramp){const p=h.part();
+  h.poly([[x-w/2,y1],[x-w/2+1,y0],[x+w/2-1,y0],[x+w/2,y1]],ramp,{p,l:.8});
+  for(let y=y0+3;y<y1-2;y+=4)h.line(x-w/2+2+((y*7)%3),y,x-w/2+2+((y*7)%3),y+2,ramp[0],1,p);
+  // 뿌리
+  h.poly([[x-w/2-6,y1+1],[x-w/2,y1-6],[x-w/2+2,y1+1]],ramp,{p,l:.6});h.poly([[x+w/2+6,y1+1],[x+w/2,y1-6],[x+w/2-2,y1+1]],ramp,{p,l:.5});}
+const BGT={
+ oak(h){trunkHD(h,72,100,186,18,BARK);h.line(70,120,46,100,'#34220f',4);h.line(76,116,98,96,'#34220f',4);
+   canopyHD(h,[[72,80,40,26],[44,68,26,22],[100,68,26,22],[58,46,28,22],[88,42,26,20],[72,24,22,16]],LEAF,{n:520,seed:11});
+   },
+ birch(h){const W=['#8a8676','#b8b4a6','#d8d4c8','#eeeae0','#fcfaf4'];trunkHD(h,72,80,186,14,W);for(let y=92;y<182;y+=11)h.line(66+(y%5),y,72+(y%7),y,'#1e1e1a',2);for(let y=100;y<180;y+=17)h.line(74,y,78,y+1,'#3a3a34',1);
+   h.line(72,112,48,92,'#b8b4a6',3);h.line(74,104,96,84,'#b8b4a6',3);
+   canopyHD(h,[[72,66,34,24],[48,56,22,18],[96,56,22,18],[72,38,26,20]],['#2a4a12','#3e6a1c','#55882a','#72a83a','#98c852','#c4e47a'],{n:380,seed:21});},
+ cherry(h){trunkHD(h,72,104,186,16,['#2a140e','#40201a','#582e26','#704034','#8a5446']);h.line(70,124,44,100,'#40201a',4);h.line(76,120,100,98,'#40201a',4);
+   canopyHD(h,[[72,80,42,28],[42,68,26,22],[102,68,26,22],[58,46,28,22],[90,42,26,20]],['#6a2a40','#9a4a62','#c8708a','#e898ae','#f8c0d0','#fff0f4'],{n:560,seed:31});
+   for(let i=0;i<14;i++)h.ell2(20+i*8,184-(i%3)*2,1.6,1,'#f8c0d0');},
+};
+const BGD={
+ flower:[28,24,h=>{for(const [x,y,c] of [[6,14,'#f4d35e'],[14,10,'#e86a8a'],[22,15,'#f0f0ff']]){h.line(x,y+2,x,y+9,'#2f5e22');h.ell2(x+2,y+6,2,1,'#3e782c');for(const [dx,dy] of [[-2,0],[2,0],[0,-2],[0,2]])h.ell2(x+dx,y+dy,1.5,1.5,c);h.ell2(x,y,1,1,'#c89a20');}}],
+ bush:[44,30,h=>{const L2=LEAF;canopyHD(h,[[22,18,16,10],[12,16,9,7],[32,15,9,8]],L2,{n:90,seed:41,fruit:{n:6,c:['#c8203a','#e8405a']}});}],
+ rock:[40,30,h=>{const S=['#2e3036','#46484f','#62656c','#81848a','#a3a6ab','#c6c8cc'];h.ell(20,18,16,10,S,{rim:1,cut:(x,y)=>y>26});h.ell(30,22,8,6,S,{rim:1});h.line(14,14,20,18,'#2e3036');h.ell(12,10,4,2,['#2f5e22','#3e782c','#55943a'],{flat:.6});}],
+ log:[56,26,h=>{h.rect(6,8,42,12,BARK,{l:.8});for(let x=10;x<46;x+=6)h.line(x,9,x+3,19,'#20140a');h.ell(48,14,5,7,['#7a5832','#a07848','#c89a64'],{flat:.3});h.ell2(48,14,2.5,3.5,'#8a6236');h.ell(18,7,5,2,['#2f5e22','#55943a'],{flat:.6});}],
+ stump:[40,32,h=>{h.rect(10,12,20,16,BARK,{l:.8});h.ell(20,12,10,4,['#7a5832','#a07848','#c89a64'],{flat:.4});for(const r of [6,3])h.ell2(20,12,r,r*.4,'#8a6236');h.poly([[8,28],[4,30],[12,26]],BARK,{l:.6});h.poly([[32,28],[36,30],[28,26]],BARK,{l:.5});}],
+ mush:[24,22,h=>{h.rect(9,11,4,8,['#c8b896','#e8dcc0'],{l:.8});h.ell(11,10,7,4,['#5a0e14','#8a1a24','#b82a34','#e05a5a'],{rim:1,cut:(x,y)=>y>11});h.ell2(9,8,1,1,'#fff6ee');h.ell2(13,9,1,1,'#fff6ee');h.rect(17,14,3,5,['#c8b896','#e8dcc0'],{l:.8});h.ell(18,13,4,2.5,['#5a0e14','#8a1a24','#b82a34'],{rim:1,cut:(x,y)=>y>14});}],
+ fence:[56,32,h=>{for(const x of [8,26,44]){h.rect(x,6,5,22,['#3a2614','#5a3e22','#7a5832'],{l:.8});h.poly([[x,6],[x+2.5,2],[x+5,6]],['#3a2614','#5a3e22','#7a5832'],{l:.9});}h.rect(4,11,48,3,['#3a2614','#5a3e22','#7a5832'],{l:.7});h.rect(4,20,48,3,['#3a2614','#5a3e22','#7a5832'],{l:.6});}],
+ sign:[36,40,h=>{h.rect(16,16,4,22,BARK,{l:.7});h.rect(4,6,28,12,['#4a3218','#6a4a26','#8a6236','#a87e48'],{l:.9});h.line(8,10,26,10,'#3a2410');h.line(8,13,22,13,'#3a2410');h.poly([[32,8],[35,12],[32,16]],['#6a4a26','#8a6236'],{l:.8});}],
+};
+
+// 배경별 HD 바닥 설정 (있으면 바닥·흩뿌림 장식이 2배 촘촘한 새 그림)
+// road: 길 흙 질감(ramp), edge: 길 가장자리 풀
+const BG_HD_G={0:{road:['#5a4428','#664e2e','#725834','#7e623a','#8a6c42'],edge:['#2f5e22','#3e782c','#55943a'],ramp:['#3c7028','#46802e','#4f8c34','#58983a','#62a442'],seed:7,soil:['#4a3a22','#5e4a2c','#6e5834'],blade:['#2a5a1c','#4e8a30','#7cb84c'],bladeN:700,peb:['#4a4a44','#7a7a72','#a8a89e'],fl:['#f4d35e','#e86a8a','#f0f0ff']}};
+// HD 나무·소품으로 그릴 이름 (나무 144x192, 소품은 BGD 크기)
+function bgHdImg(k){const T=BGT[k],D=BGD[k];if(!T&&!D)return null;const w=T?144:D[0],hh=T?192:D[1],h=HD.make(w,hh);(T||D[2])(h);const c=document.createElement('canvas');c.width=w;c.height=hh;c.getContext('2d').putImageData(h.finish(),0,0);c.hd=2;return c;}
+// 고해상도 이미지도 같은 자리에 그리기 (hd면 칸을 절반 크기로)
+function pxDrawI(img,x,y,ax,ay){if(img.hd)pxDrawS(img,x,y,ax,ay,1/img.hd);else pxDraw(img,x,y,ax,ay);}
 const ESPR=(()=>{
   const cache={};
   const P=(g,c,x,y,w=1,h=1)=>{g.fillStyle=c;g.fillRect(x|0,y|0,w,h);};
@@ -6332,6 +6414,8 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:77,t:'🌳 배경 새 그림 (견본: 푸른 숲)',items:[
+    ['new','🌳 <b>푸른 숲</b> 배경을 2배 촘촘한 도트로 새로 그렸어요: 부드러운 명암의 풀밭, 꽃밭·풀숲·흙 자국, 흙 질감 길과 가장자리 풀, 잎이 풍성한 참나무·자작나무·벚나무, 바위·덤불·통나무·버섯 등. 다른 배경도 차례로 바뀔 예정이에요']]},
   {v:76,t:'⚔ 결투 상대가 직업 그대로',items:[
     ['change','⚔ 결투 상대가 보스 패턴 대신 <b>그 캐릭터의 직업 그대로</b> 싸워요. 실제 공격 속도·탄환 수로 평타 (기사 베기·4타 회전 베기 / 궁수 화살 / 마법사 화염구 폭발 / 총잡이 6발 + 재장전 / 사령술사 해골 소환 / 성기사 신성 오라 / 연금술사 플라스크 장판 / 드루이드 덩굴 / 정령사 3원소 / 도박사 카드 + 동전 / 광전사는 싸울수록 빨라짐)'],
     ['new','⚔ 상대도 체력이 60% 아래로 떨어지면 <b>생존기(E)</b>를, 35% 아래나 45초가 지나면 크게 예고한 뒤 <b>궁극기(R)</b>를 써요']]},
@@ -8751,7 +8835,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=76,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=77,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
