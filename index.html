@@ -230,6 +230,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 #chatBox .chi{display:flex;gap:6px;padding:8px}#chatBox .chi input{flex:1;min-width:0;padding:6px 8px;border-radius:8px;border:1px solid var(--brass);background:rgba(0,0,0,.35);color:var(--ivory);font:inherit}#chatBox .chi button{padding:6px 10px;border-radius:8px;border:1px solid var(--brass);background:#d6a94a;color:#1a120a;font:inherit;cursor:pointer}#chatBox .chm{color:#ffb070;font-size:12px;padding:0 10px 6px}
 .nickbar{text-align:center;margin:-2px 0 6px}
 .onl{text-align:center;margin:-2px 0 8px}.onlb{background:rgba(0,0,0,.25);border:1px solid rgba(123,224,143,.5);color:var(--ivory);border-radius:999px;padding:3px 12px;font:inherit;font-size:13px;cursor:pointer}.onlb b{color:#7be08f}.onll{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 8px;margin-top:6px;font-size:12.5px}.onll span{background:rgba(0,0,0,.25);border-radius:8px;padding:2px 8px}.onll span.me{border:1px solid rgba(255,215,106,.5)}
+.panel.hasX{position:relative}.panel .xHide{display:none!important}.pX{position:absolute;top:10px;right:10px;z-index:20;width:38px;height:38px;border-radius:50%;border:1px solid var(--brass);background:rgba(0,0,0,.45);color:var(--ivory);font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}.pX:hover{background:rgba(255,215,106,.25);color:#fff}
 .hoftip.selT{max-width:360px}.hoftip.selT div{margin-top:3px}.selWin [data-tk]:not(.clscard){cursor:help}.selWin .cp[data-tk]:hover,.selWin .tg2[data-tk]:hover{filter:brightness(1.15)}
 .hoftip{position:fixed;z-index:9999;display:none;max-width:290px;padding:9px 12px;border-radius:10px;background:rgba(18,26,22,.96);border:1px solid var(--brass);color:var(--ivory);font-size:13px;line-height:1.55;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.5)}
 .hof .more{display:block;width:100%;margin-top:8px;font-size:15px;padding:7px}
@@ -476,7 +477,7 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 /* 명예의 전당 */
 .home .hof{flex:1;position:relative;margin:0!important;padding:12px!important;border-radius:16px!important;border:2px solid rgba(232,196,110,.75)!important;background:linear-gradient(180deg,#22413a,#183029)!important;box-shadow:0 0 0 1px rgba(0,0,0,.4),0 6px 22px rgba(0,0,0,.35)}
 .home .hof h2{text-align:center;font-size:26px;letter-spacing:3px;margin:0 0 6px;background:linear-gradient(180deg,#fffbe0,#ffd76a 50%,#c88a1a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #3a2200)}
-.home .hof .hsub{margin:2px 0 6px}
+.home .hof .hsub{margin:2px 0 6px}.home .hof .dtabs.hof3{grid-template-columns:repeat(6,1fr);gap:4px}.home .hof .dtabs.hof3 .btn{font-size:13px!important;padding:6px 1px!important;white-space:nowrap}
 .home .stagebg{position:relative;margin:4px -2px 8px;padding:34px 0 0;border-radius:12px;overflow:hidden;background:radial-gradient(ellipse at 50% 100%,rgba(255,200,120,.35),transparent 55%),linear-gradient(180deg,#1a0408 0%,#2a0810 45%,#3a1408 100%);box-shadow:inset 0 0 30px rgba(0,0,0,.7)}
 .home .stagebg .valance{position:absolute;left:0;right:0;top:0;height:22px;background:repeating-radial-gradient(circle at 18px -6px,#b01828 0 16px,#7a0a18 16px 18px,transparent 18px 36px),linear-gradient(180deg,#c01c2e,#7a0a18);background-size:36px 22px,100% 100%;box-shadow:0 4px 8px rgba(0,0,0,.6);z-index:3}
 .home .stagebg .valance::after{content:'';position:absolute;left:0;right:0;bottom:-3px;height:4px;background:linear-gradient(90deg,#ffd76a,#fff3c4,#ffd76a)}
@@ -492,19 +493,20 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 .home .pod4 .row{position:relative;display:grid;grid-template-columns:1fr 1.05fr 1fr;align-items:end;gap:0}
 .home .pod4 .row::after{content:'';position:absolute;left:-8px;right:-8px;bottom:-9px;height:10px;z-index:3;border-radius:0 0 5px 5px;background:linear-gradient(180deg,#a8843e,#5a4218);box-shadow:inset 0 2px 0 rgba(255,240,190,.45)}
 .home .pod4 .pc{display:flex;flex-direction:column;align-items:center;min-width:0;cursor:pointer}
-.home .pod4 .crown{font-size:20px;line-height:1;animation:hbob 2.4s ease-in-out infinite}
+.home .pod4 .crown{position:absolute;left:50%;top:calc(27% - 18px);z-index:3;transform:translateX(-50%);font-size:20px;line-height:1;animation:crb 2.4s ease-in-out infinite}@keyframes crb{50%{transform:translate(-50%,-3px)}}.home .pod4 .g .crown{top:calc(27% - 24px)}
 .home .pod4 .crown.c1{filter:grayscale(1) brightness(1.5) drop-shadow(0 0 6px #e8eef6);animation-delay:.4s}.home .pod4 .crown.c0{font-size:26px;filter:drop-shadow(0 0 12px #ffd76a)}.home .pod4 .crown.c2{filter:sepia(1) saturate(2.2) hue-rotate(-18deg) brightness(.85) drop-shadow(0 0 6px #e8a870);animation-delay:.8s}
 .home .pod4 .pnm{font-size:12px;white-space:nowrap;text-shadow:0 1px 2px #000;max-width:120%;overflow:hidden;text-overflow:ellipsis}.home .pod4 .g .pnm{font-size:14px}
 .home .pod4 .pnm small{display:none}
-.home .pod4 .who{position:relative;z-index:2;margin-bottom:-14px;animation:hbob 2.6s ease-in-out infinite}.home .pod4 .s .who{animation-delay:.4s}.home .pod4 .b .who{animation-delay:.8s}
-.home .pod4 .who img.hav{display:block;width:118px;height:auto;image-rendering:pixelated;filter:drop-shadow(0 5px 3px rgba(0,0,0,.6))}.home .pod4 .g .who img.hav{width:140px}
-.home .pod4 .who .hteam img.mate{width:54px}
+.home .pod4 .who{position:relative;z-index:2;margin:0 0 -20px}
+.avs{display:block;aspect-ratio:1;background-repeat:no-repeat;background-size:400% 100%;image-rendering:pixelated}.avs.walk{animation:avsW .48s steps(4) infinite}.avs.idle{animation:avsW 1.8s steps(4) infinite}@keyframes avsW{from{background-position:0 0}to{background-position:133.333% 0}}
+.home .pod4 .who .hav{display:block;height:auto;width:118px;height:auto;image-rendering:pixelated;filter:drop-shadow(0 5px 3px rgba(0,0,0,.6))}.home .pod4 .g .who .hav{width:140px}
+.home .pod4 .who .hteam{position:relative;display:block}.home .pod4 .who .hteam .avs{position:relative;z-index:2}.home .pod4 .who .hteam img.mate{position:absolute;bottom:4px;width:58%;z-index:1;filter:brightness(.92) drop-shadow(0 4px 3px rgba(0,0,0,.5))}.home .pod4 .who .hteam img.mate:nth-of-type(1){left:-14%}.home .pod4 .who .hteam img.mate:nth-of-type(2){right:-14%}
 .home .pod4 .who .sh{position:absolute;left:50%;bottom:8px;width:60%;height:10px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.6),transparent 70%);z-index:-1}
 .home .pod4 .blk{position:relative;width:100%;display:flex;justify-content:center;padding-top:6px;margin-top:12px;background:linear-gradient(180deg,#c9a45a 0%,#8a6a2c 55%,#5a4218 100%);box-shadow:inset 0 2px 0 rgba(255,240,190,.55)}
 .home .pod4 .blk::before{content:'';position:absolute;left:0;right:0;top:-12px;height:12px;background:linear-gradient(180deg,#fff2c0,#e2c47a)}
-.home .pod4 .s .blk{height:44px}.home .pod4 .g .blk{height:66px;z-index:1;box-shadow:inset 0 2px 0 rgba(255,240,190,.6),inset 3px 0 0 rgba(255,240,190,.25),inset -3px 0 0 rgba(0,0,0,.18)}.home .pod4 .b .blk{height:30px}
+.home .pod4 .blk{flex-direction:column;align-items:center;gap:2px;padding-top:8px!important}.home .pod4 .blk .pnm{max-width:94%;padding:1px 8px;border-radius:8px;background:rgba(30,18,0,.6);color:#fff;font-size:12px;line-height:1.3;box-shadow:inset 0 0 0 1px rgba(255,215,106,.35)}.home .pod4 .g .blk .pnm{font-size:13px}.home .pod4 .blk .pnm,.home .pod4 .blk .pnm .hn{font-size:12px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.home .pod4 .blk .pnm{position:relative;z-index:3;display:block}.home .pod4 .blk .pnm .hn:not([class*=hx-]){color:#fff6d8!important}.home .pod4 .g .blk .pnm,.home .pod4 .g .blk .pnm .hn{font-size:13px!important}.home .pod4 .s .blk{height:58px}.home .pod4 .g .blk{height:78px;box-shadow:inset 0 2px 0 rgba(255,240,190,.6),inset 3px 0 0 rgba(255,240,190,.25),inset -3px 0 0 rgba(0,0,0,.18)}.home .pod4 .b .blk{height:46px}
 .home .pod4 .s .blk{border-radius:4px 0 0 0}.home .pod4 .b .blk{border-radius:0 4px 0 0}.home .pod4 .s .blk::before{border-radius:4px 0 0 0}.home .pod4 .b .blk::before{border-radius:0 4px 0 0}
-.home .pod4 .blk span{font-size:20px;font-weight:bold;color:#3a2600;text-shadow:0 1px 0 rgba(255,240,190,.6)}.home .pod4 .g .blk span{font-size:26px}
+.home .pod4 .blk>span:last-child{font-size:20px;font-weight:bold;color:#3a2600;text-shadow:0 1px 0 rgba(255,240,190,.6)}.home .pod4 .g .blk>span:last-child{font-size:26px}
 .home .pod4 .floor{height:14px;margin:8px -10px 0;border-radius:50%;background:radial-gradient(ellipse at 50% 0,rgba(0,0,0,.7),transparent 70%)}
 .home .rlist{display:flex;flex-direction:column;gap:5px}
 .home .rlist .ri{position:relative;display:flex;align-items:center;gap:8px;padding:5px 10px;border-radius:10px;background:linear-gradient(90deg,rgba(255,215,106,.14),rgba(0,0,0,.35));border:1px solid rgba(255,215,106,.22);cursor:pointer}
@@ -512,7 +514,7 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 .home .rlist .ri.me{outline:2px solid #7fe0a0}
 .home .rlist em{font-style:normal;width:34px;text-align:center;font-size:26px;line-height:1;flex:none}
 .home .rlist .ri:not(.r1):not(.r2):not(.r3) em{font-size:20px;font-weight:bold;color:#fff3c4;text-shadow:0 0 6px rgba(255,215,106,.7)}
-.home .rlist img.hav{width:70px;margin:-14px -6px -12px -8px;height:auto;image-rendering:pixelated;flex:none}
+.home .rlist .hav{width:70px;height:auto;flex:none;margin:-14px -6px -12px -8px;height:auto;image-rendering:pixelated;flex:none}
 .home .rlist .mid{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:1px 8px}
 .home .rlist .mid .hn{font-size:15px}.home .rlist .mid .htt{display:inline;font-size:11px}
 .home .rlist .mid i{flex-basis:100%;font-style:normal;font-size:12px;color:#f1e7cf;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -528,7 +530,7 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 .home .selWin .sw{--sc:#d6a94a;width:min(1120px,96vw);max-height:94vh;display:flex;flex-direction:column;border-radius:20px;border:2px solid var(--sc);background:radial-gradient(ellipse at 20% 70%,rgba(255,215,106,.16),transparent 45%),linear-gradient(180deg,#1a1410,#0c0a08);box-shadow:0 0 40px color-mix(in srgb,var(--sc) 55%,transparent);overflow:hidden}
 .home .selWin[data-d=nightmare] .sw{--sc:#ff4f6a;background:radial-gradient(ellipse at 20% 70%,rgba(255,215,106,.16),transparent 45%),linear-gradient(180deg,#1a0a10,#0c0a10)}
 .home .selWin[data-d=normal] .sw{--sc:#7be08f}.home .selWin[data-d=hard] .sw{--sc:#5fa8ff}.home .selWin[data-d=hell] .sw{--sc:#ff8a3a}.home .selWin[data-d=god] .sw{--sc:#c89bff}
-.home .swh{display:flex;align-items:center;gap:12px;padding:10px 16px;background:linear-gradient(90deg,color-mix(in srgb,var(--sc) 40%,#000),#0a0606);border-bottom:1px solid var(--sc)}
+.home .swh{position:relative;display:flex;align-items:center;gap:12px;padding:10px 60px 10px 16px;background:linear-gradient(90deg,color-mix(in srgb,var(--sc) 40%,#000),#0a0606);border-bottom:1px solid var(--sc)}
 .home .swh .btn{margin:0!important;width:auto!important;padding:6px 14px!important}
 .home .swh h2{margin:0;font-size:24px;color:#fff;letter-spacing:2px;text-shadow:0 0 10px var(--sc)}.home .swh small{color:#e8dcc0;font-size:12px}
 .home .swb{flex:1;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr);gap:14px;padding:14px 16px;min-height:0;overflow:auto}
@@ -545,6 +547,7 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 @media (max-width:760px){
  .home .hTop{padding:6px 10px;gap:6px}.home .hTop h1{font-size:24px}.home .hTop h1 span,.home .hTop #verLbl{display:none}
  .home .hMain{display:flex;flex-direction:column;padding:10px}
+ .home .hof .dtabs.hof3 .btn{font-size:11px!important;white-space:normal;line-height:1.15}
  .home .hDon{margin:14px auto 4px}
  .home .hQuick canvas{width:48px;height:48px}
  .home #dsel .btn{width:62px!important;height:62px}
@@ -6912,7 +6915,14 @@ function ovPad(){const h=$('hud'),bl=$('botLeft'),inG=S&&S.started&&S.mode!=='st
   // 창(오버레이) 자체를 위쪽 정보창 아래에서 시작 → 스크롤해도 내용이 정보창 밑으로 들어가 가려지지 않음
   if(ov.style.top!==top){ov.style.top=top;ov.style.paddingTop=on?'10px':'';}h.classList.toggle('ovon',!!on);if(ov.style.paddingBottom!==w)ov.style.paddingBottom=w;
   const st=$('st');if(st){const so=st.classList.contains('on')&&inG,sv=so?h.offsetHeight+'px':'';if(st.style.top!==sv){st.style.top=sv;st.style.paddingTop=so?'10px':'';}}}
-function show(html){hofTipHide();ov.classList.remove('home');{const w=document.getElementById('hofSt');if(w)w.remove();}ov.innerHTML=`<div class="panel">${html}</div>`;ov.classList.add('on');ovPad();ov.scrollTop=0;ov.querySelectorAll('[data-stats]').forEach(b=>b.onclick=()=>toggleStats());if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();}
+// 창 닫기 통일: 「돌아가기·뒤로·닫기」 버튼은 숨기고 오른쪽 위 ✕ 하나로. 창 바깥(어두운 곳)을 눌러도 같은 동작
+const X_RE=/^(◀\s*)?(돌아가기|뒤로|닫기)$/;
+function xUnify(){const P=ov.querySelector('.panel');ov.onclick=null;if(!P)return;
+  const L=[...P.querySelectorAll('button')].filter(b=>X_RE.test(b.textContent.trim())&&/Back\d?$|X$|Close$/.test(b.id||''));if(!L.length)return;
+  L.forEach(b=>b.classList.add('xHide'));const go=()=>{const b=L.find(q=>q.isConnected);if(b)b.click();};
+  const x=document.createElement('button');x.className='pX';x.title='닫기';x.textContent='✕';x.onclick=e=>{e.stopPropagation();go();};P.appendChild(x);P.classList.add('hasX');
+  ov.onclick=e=>{if(e.target===ov)go();};}
+function show(html){hofTipHide();ov.classList.remove('home');{const w=document.getElementById('hofSt');if(w)w.remove();}ov.innerHTML=`<div class="panel">${html}</div>`;ov.classList.add('on');ovPad();xUnify();ov.scrollTop=0;ov.querySelectorAll('[data-stats]').forEach(b=>b.onclick=()=>toggleStats());if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();}
 ['keydown','keyup','keypress'].forEach(t=>{const h=e=>{const tg=e.target;if(tg&&tg.tagName==='BUTTON'&&(e.key===' '||e.key==='Enter'||e.code==='Space')){e.preventDefault();e.stopPropagation();}};ov.addEventListener(t,h,true);document.getElementById('st').addEventListener(t,h,true);});
 ov.addEventListener('mousedown',e=>{if(e.target.closest('button'))e.preventDefault();});
 function hide(){ov.classList.remove('on');ov.innerHTML='';}
@@ -7337,6 +7347,12 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:109,t:'🏆 전당 · 창 정리',items:[
+    ['change','🏆 명예의 전당 1~3등이 단상 위에 서서 <b>제자리 걷기</b>를 하고, 순위 목록 캐릭터도 제자리에서 숨 쉬듯 움직여요. 왕관은 머리 위에 딱 맞게 씌웠어요'],
+    ['change','🎨 명예의 전당 그림에서 코스튬 장식이 게임 안과 다른 위치·크기로 그려지던 문제를 고쳤어요'],
+    ['change','📑 명예의 전당 탭 6개(지옥·신·무한의 악몽·보스 러시·레이드·결투)를 한 줄로 정리했어요'],
+    ['change','✕ 창을 닫는 버튼을 <b>오른쪽 위 ✕</b>로 통일했어요. 창 바깥 어두운 곳을 눌러도 닫혀요 (영웅 선택 창 포함)'],
+  ]},
   {v:108,t:'🖥 큰 화면 · 전당 캐릭터',items:[
     ['change','🏆 명예의 전당 캐릭터의 발이 잘려 보이던 문제를 고쳤어요. 오라·날개·장비 같은 외형도 잘리지 않고 보여요. 순위 목록의 캐릭터도 더 크게 보여요'],
     ['change','🟢 「지금 ○명 접속 중」을 누르면 목록이 위쪽 막대를 늘리지 않고 아래로 펼쳐지는 작은 창으로 떠요'],
@@ -7712,7 +7728,7 @@ function startScreen(){
    </div>
   </div>
   <div class="menugrid hDock">${mBtn('meta','🏅','메달 상점',`보유 메달 ${META.medals}개 · 능력·기술 강화`)}${mBtn('cosBtn','👕','외형',(()=>{const e=Object.keys(COS_CAT).map(c=>cosEq(c)).filter(Boolean);return e.length?e.map(x=>x.n).join(" · ")+" 장착 중":"스킨 · 오라 · 이름 효과";})())}${mBtn('forgeBtn','⚒','대장간','검·투구·갑옷·목걸이·망토 강화 '+(Object.keys(GEAR).filter(gearOwn).map(k=>GEAR[k].ico+"+"+gearLv(k)).join(" ")||"(메달로 구입)"))}${mBtn('heroBtn','🗃','내 캐릭터',(()=>{const n=myHeroes().length;return n?`저장한 캐릭터 ${n}/${HERO_MAX}`:'무한의 악몽·보스 러시 캐릭터 저장';})())}${mBtn('codex','📖','도감','증강 · 합체 · 시너지 · 직업 검색')}${mBtn('achBtn','🏆','도전과제',`${DEV?ACH.filter(a=>!a.sec).length:Object.keys(META.ach||{}).filter(k=>{const A=ACH.find(a=>a.k===k);return A&&!A.sec;}).length} / ${ACH.filter(a=>!a.sec).length} 달성${META.title?' · 「'+(ACH.find(a=>a.k===META.title)||{}).n+'」 장착 중':''}`)}${mBtn('guideBtn','📘','설명서','처음이면 꼭 읽어보세요')}${mBtn('patchBtn','📜','패치 노트',`v${BUILD} 바뀐 점`)}${mBtn('sync','💾','데이터','다른 기기로 내보내기 · 가져오기')}</div>
-  <div class="selWin" id="selWin"><div class="sw"><div class="swh"><button class="btn" id="selBack">◀ 뒤로</button><div><h2 id="selTitle"></h2><small>함께할 영웅을 고르세요 · 카드 위 「새 모습/옛 모습」을 누르면 모습이 바뀌어요</small></div></div>
+  <div class="selWin" id="selWin"><div class="sw"><div class="swh"><button class="pX" id="selBack" title="닫기">✕</button><div><h2 id="selTitle"></h2><small>함께할 영웅을 고르세요 · 카드 위 「새 모습/옛 모습」을 누르면 모습이 바뀌어요</small></div></div>
    <div class="swb"><div class="swHero"><canvas class="pv" data-c="${pickCls}" width="96" height="96" id="selPv"></canvas><div class="cdet" id="cdet">${clsDetail(pickCls)}</div></div><div class="clsgrid">${cards}</div></div>
    <div class="swf"><button class="btn ghost" id="cosBtn2">👕 외형 바꾸기</button><button class="btn primary" id="go">${goLabel()}${sv?' (저장 삭제)':''}</button></div></div></div>`);
   ov.classList.add('home');{const P=ov.querySelector('.panel');if(P)P.classList.add('home');}
@@ -7732,7 +7748,7 @@ function startScreen(){
     ov.querySelectorAll('[data-cls]').forEach(x=>x.classList.toggle('on',x===b));$('cdet').innerHTML=clsDetail(pickCls);$('go').firstChild.textContent=`${goLabel()}${sv?' (저장 삭제)':''}`;
     if($('selPv'))$('selPv').dataset.c=pickCls;if($('qkPv'))$('qkPv').dataset.c=pickCls;if($('qkName'))$('qkName').textContent=CLASSES[pickCls].n;});
   ov.querySelectorAll('[data-diff]').forEach(b=>b.onclick=()=>{pickDiff=b.dataset.diff;savePickDiff(pickDiff);ov.querySelectorAll('[data-diff]').forEach(x=>x.classList.toggle('primary',x===b));const g=$('go');if(g)g.firstChild.textContent=goLabel()+(sv?' (저장 삭제)':'');if($('qkMode'))$('qkMode').textContent=pickDiff==='nightmare'?'☠ 무한의 악몽':DIFF[pickDiff].n;openSel();});
-  $o('selBack').onclick=()=>$('selWin').classList.remove('on');if($('quickGo'))$o('quickGo').onclick=()=>beginRun(pickCls);$o('cosBtn2').onclick=()=>openMeta(1);
+  $o('selBack').onclick=()=>$('selWin').classList.remove('on');$o('selWin').onclick=e=>{if(e.target===$('selWin'))$('selWin').classList.remove('on');};if($('quickGo'))$o('quickGo').onclick=()=>beginRun(pickCls);$o('cosBtn2').onclick=()=>openMeta(1);
   if(sv)$o('cont').onclick=()=>continueGame(sv);
   $o('go').onclick=()=>beginRun(pickCls);
   $o('meta').onclick=()=>openMeta();$o('cosBtn').onclick=()=>openMeta(1);onlPaint();if($('donBtn'))$o('donBtn').onclick=openDonate;if($('donArt'))drawDonArt($('donArt'));if($('supBox'))$o('supBox').onclick=openSupBox;if($('devLog'))$o('devLog').onclick=()=>openDevLog();if($('nickBtn'))$o('nickBtn').onclick=openNick;$o('forgeBtn').onclick=openForge;$o('heroBtn').onclick=openHeroes;if($('raidBtn'))$o('raidBtn').onclick=openRaid;if($('rushBtn'))$o('rushBtn').onclick=openRush;if($('duelBtn'))$o('duelBtn').onclick=openDuel;$o('sync').onclick=openSync;if($('guideBtn'))$o('guideBtn').onclick=()=>openGuide('a');if($('patchBtn'))$o('patchBtn').onclick=()=>openPatch(true);if($('verLbl')){$o('verLbl').onclick=devTapVer;$('verLbl').style.userSelect='none';}$o('codex').onclick=()=>openCodex();$o('achBtn').onclick=openAch;
@@ -9424,16 +9440,24 @@ const HOF_KEYS=['hell','god','nightmare','bossrush','raid','duel'],HOF_TAB={hell
 const HOF_AV={};
 // 명예의 전당 아바타: 코스튬 + 오라 + 장비(그 기록을 올릴 때 끼고 있던 것)
 function hofAv(cls,skin,aura,gear,look){return withLook(look,()=>hofAv0(cls,skin,aura,gear,look));}
+// 전당 아바타 한 칸(92×92) 그리기: 발 위치 (ox+46, 80). 게임 화면과 같은 비율(도트 1칸 = 1.9px, 세계 1 = 1.9/PXW px)로 오라·코스튬·장비를 맞춤
+function hofAvDraw(g,ox,cls,x,au,G,anim,t,T){const k=1.9/PXW,fx=ox+46,fy=80;
+  auraAt(g,fx,fy,1.9,au,T);
+  const gearPass=front=>{if(!G)return;const oc=ctx;GEAR_OVR=G;GFIT_CLS=cls;ctx=g;try{g.save();g.translate(fx,fy);g.scale(1.9/PXW,1.9/PXW);const P={x:0,y:0};if(front)drawGearFront(P,0,T,null);else drawGearBack(P,0,T,null);g.restore();}catch(e){}finally{ctx=oc;GEAR_OVR=null;GFIT_CLS=null;}};
+  const sk=(post)=>{if(!(x&&x.cat==='skin'))return;g.save();g.translate(fx,fy);g.scale(k,k);try{if(post)skinPost(g,0,-16,x,T);else skinPre(g,0,-16,x,T,()=>{});}catch(e){}g.restore();};
+  HERO.draw(cls,anim,t,0,false);g.imageSmoothingEnabled=HERO.hires;sk(false);
+  gearPass(false);
+  g.save();if(x&&x.cat==='skin'){g.filter=x.f||'none';if(x.a)g.globalAlpha=x.a;}g.translate(fx,fy);g.scale(1.9,1.9);g.drawImage(HERO.canvas,...HERO.box);g.restore();
+  sk(true);gearPass(true);}
 function hofAv0(cls,skin,aura,gear,look){const key=cls+'|'+skin+'|'+(aura||'')+'|'+(gear||'')+'|'+(look==null?'':look?'o':'n');if(HOF_AV[key])return HOF_AV[key];if(!CLASSES[cls]||typeof HERO==='undefined'||!HERO.canvas)return '';
-  try{const c=document.createElement('canvas');c.width=c.height=92;const g=c.getContext('2d');g.imageSmoothingEnabled=false;const x=skin?COS.find(q=>q.k===skin):null,au=auraList(aura),G=gearDecode(gear);
-    auraAt(g,46,80,1.9,au,.6);
-    const gearPass=front=>{if(!G)return;const oc=ctx;GEAR_OVR=G;GFIT_CLS=cls;ctx=g;try{g.save();g.translate(46,80);g.scale(1.9/PXW,1.9/PXW);const P={x:0,y:0};if(front)drawGearFront(P,0,0,null);else drawGearBack(P,0,0,null);g.restore();}catch(e){}finally{ctx=oc;GEAR_OVR=null;GFIT_CLS=null;}};
-    HERO.draw(cls,'idle',0,0,false);g.imageSmoothingEnabled=HERO.hires;if(x&&x.cat==='skin'){try{skinPre(g,46,56,x,0,()=>{});}catch(e){}}
-    gearPass(false);
-    g.save();if(x&&x.cat==='skin'){g.filter=x.f||'none';if(x.a)g.globalAlpha=x.a;}g.translate(46,80);g.scale(1.9,1.9);g.drawImage(HERO.canvas,...HERO.box);g.restore();
-    if(x&&x.cat==='skin'){try{skinPost(g,46,56,x,0);}catch(e){}}
-    gearPass(true);
+  try{const c=document.createElement('canvas');c.width=c.height=92;const g=c.getContext('2d');g.imageSmoothingEnabled=false;
+    hofAvDraw(g,0,cls,skin?COS.find(q=>q.k===skin):null,auraList(aura),gearDecode(gear),'idle',0,.6);
     return HOF_AV[key]=c.toDataURL();}catch(e){return '';}}
+// 움직이는 전당 아바타: 4칸 띠 그림 (walk = 제자리 걷기 · idle = 서서 숨쉬기). CSS steps로 넘김
+function hofAvS(cls,skin,aura,gear,look,anim){return withLook(look,()=>{const key='S'+anim+'|'+cls+'|'+skin+'|'+(aura||'')+'|'+(gear||'')+'|'+(look==null?'':look?'o':'n');if(HOF_AV[key])return HOF_AV[key];if(!CLASSES[cls]||typeof HERO==='undefined'||!HERO.canvas)return '';
+  try{const c=document.createElement('canvas');c.width=92*4;c.height=92;const g=c.getContext('2d');g.imageSmoothingEnabled=false;const x=skin?COS.find(q=>q.k===skin):null,au=auraList(aura),G=gearDecode(gear);
+    for(let i=0;i<4;i++)hofAvDraw(g,i*92,cls,x,au,G,anim,anim==='walk'?i/9+.01:i*.45,.6+i*.2);
+    return HOF_AV[key]=c.toDataURL();}catch(e){return '';}});}
 // 명예의 전당: 마우스를 올리면(휴대폰은 누르면) 그 사람의 칭호·꾸미기·장비·결투 전적
 let HOF_B=[];
 function hofTipHtml(b){const A=b.title&&ACH.find(a=>a.k===b.title),cn=k=>{const x=k&&COS.find(q=>q.k===k);return x?x.n:'';},G=gearDecode(b.gear),D=b.dw,f=x=>`${Math.floor(x/60)}분 ${Math.floor(x%60)}초`;
@@ -9483,13 +9507,13 @@ function boardHtml(){
   const rcT=b=>hd==='duel'?`${cn(b)}<br>${b.dw.w}승 ${b.dw.d}무 ${b.dw.l}패`:hd==='raid'?`🗿 ${b.lvl}단계<br>${cn(b)}`:`${DIFF[b.diff]&&DIFF[b.diff].rush?'⚔'+(+b.bosses||0)+'단계 ':DIFF[b.diff]&&DIFF[b.diff].endless?'☠'+((+b.bosses||0)+1)+'단계 ':b.bosses>=4?'👑 ':''}${cn(b)}<br>Lv ${b.lvl} · ${f(b.time)}`;
   const rtT=b=>hd==='duel'?`${b.dw.w}승 · ${Math.round(wr(b.dw)*100)}%`:hd==='raid'?`${Math.floor(b.time/60)}:${String(b.time%60).padStart(2,'0')}`:b.score.toLocaleString();
   const cmT=b=>hd==='raid'?(b.comment?'🤝 '+esc(b.comment.slice(0,40)):''):b.comment?'“'+esc(b.comment.slice(0,40))+'”':'';
-  const avT=(b,c)=>{const a=hofAv(b.cls,b.skin,b.aura,b.gear,recLook(b)),me1=a?`<img class="${c}" src="${a}" alt="">`:'';if(hd!=='raid'||!(b.team||[]).length)return me1;
+  const avT=(b,c,mv)=>{const a=mv?hofAvS(b.cls,b.skin,b.aura,b.gear,recLook(b),mv):hofAv(b.cls,b.skin,b.aura,b.gear,recLook(b)),me1=a?(mv?`<span class="${c} avs ${mv}" style="background-image:url(${a})"></span>`:`<img class="${c}" src="${a}" alt="">`):'';if(hd!=='raid'||!(b.team||[]).length)return me1;
     return `<span class="hteam">${me1}${b.team.map(q=>{const x=hofAv(q.cls,q.skin,'','',q.look);return x?`<img class="${c} mate" src="${x}" alt="" title="${CLASSES[q.cls].n}">`:'';}).join('')}</span>`;};
   HOF_B=B;const del=i=>DEV&&hd!=='duel'?`<button class="hdel" data-del="${i}" title="이 기록 삭제 (개발자)">🗑</button>`:'';// 시상식 무대: 같은 재질의 이어진 단상에 1~3등이 서고(왕관 금·은·동), 점수·칭호·한마디는 아래 순위 목록에
   const pod=[1,0,2].map(i=>{const b=B[i];if(!b)return '<div class="pc"></div>';const k=['g','s','b'][i];
-    return `<div class="pc ${k}" data-hi="${i}"><span class="crown c${i}">👑</span><span class="pnm">${nm(b).replace(/<small class="htt[^]*?<\/small>/,'')}</span><div class="who">${avT(b,'hav')}<span class="sh"></span></div><div class="blk"><span>${i+1}</span></div></div>`;}).join('');
+    return `<div class="pc ${k}" data-hi="${i}"><div class="who"><span class="crown c${i}">👑</span>${avT(b,'hav','walk')}<span class="sh"></span></div><div class="blk"><span class="pnm">${nm(b).replace(/<small class="htt[^]*?<\/small>/,'')}</span><span>${i+1}</span></div></div>`;}).join('');
   const top=`<div class="stagebg"><div class="curtL"></div><div class="curtR"></div><div class="valance"></div><div class="spot s1"></div><div class="spot s2"></div><div class="spot s3"></div><div class="conf"></div><div class="pod4"><div class="row">${pod}</div><div class="floor"></div></div><div class="carpet"></div></div>`;
-  const rest=B.slice(0,HOF_ALL?30:7).map((b,i)=>`<div data-hi="${i}" class="ri r${i+1} ${me(b)?'me':''} ${b.frame?'fr-'+b.frame:''} ${b.fx?'hc-'+b.fx:''}">${del(i)}<em>${i<3?['🥇','🥈','🥉'][i]:i+1}</em>${avT(b,'hav s')}<div class="mid">${nm(b)}${me(b)?' <small>(나)</small>':''}${cmT(b)?`<i>${cmT(b)}</i>`:''}<span class="rsub">${rcT(b).replace(/<br>/g,' · ')}</span></div><small class="rsc">${psT(b)}</small></div>`).join('');
+  const rest=B.slice(0,HOF_ALL?30:7).map((b,i)=>`<div data-hi="${i}" class="ri r${i+1} ${me(b)?'me':''} ${b.frame?'fr-'+b.frame:''} ${b.fx?'hc-'+b.fx:''}">${del(i)}<em>${i<3?['🥇','🥈','🥉'][i]:i+1}</em>${avT(b,'hav s','idle')}<div class="mid">${nm(b)}${me(b)?' <small>(나)</small>':''}${cmT(b)?`<i>${cmT(b)}</i>`:''}<span class="rsub">${rcT(b).replace(/<br>/g,' · ')}</span></div><small class="rsc">${psT(b)}</small></div>`).join('');
   const more=B.length>7?`<button class="btn more" id="hofMore">${HOF_ALL?'접기':`전체 순위 보기 (${Math.min(B.length,30)}위까지)`}</button>`:'';
   const rcB=recentBtn();
   return head+top+`<div class="rlist">${rest}</div>${more}${rcB}`;
@@ -10115,7 +10139,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=108,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=109,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
