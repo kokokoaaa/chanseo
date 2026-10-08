@@ -1213,9 +1213,15 @@ const EGG={
  bigcrystal:['🧚',['수정이 너의 성장에 반짝였어!','반짝이는 거 좋아하지? 만지면 손 잘라.'],'거대 수정 곁에서 레벨업 해 봐','lvl',1],
  statue:['🗿',['……(석상이 고개를 돌린다) 너 꽤 버티는구나.','움직이지 않는 척하는 것도 힘들다고.'],'석상처럼 10초 동안 꼼짝 말아 봐','still',10],
  forge:['⚒️',['오, 그 기술 쓸 만한데? 망치질 좀 배워 볼래?','장비 수리는 줄 서서!'],'대장간 화로 앞에서 생존기(E)를 써 봐','skill',1]};
+// 이스터에그 보너스 배율: 5분까지 ×1, 그 뒤로 5분마다 +1 (10분 ×2 · 15분 ×3 · 20분 ×4). 후반엔 찾아가기 어려운 만큼 크게
+const eggMul=()=>1+Math.max(0,((S.gt||0)+(S.bt||0))-300)/300;
+// 결계 밖 건축물은 갈 수 없으니 이스터에그 대상에서 뺌
+const inArena=(x,y,pad=0)=>{const A=S.arena;return !A||(Math.abs(x-A.x)<A.r-pad&&Math.abs(y-A.y)<A.r-pad);};
+// 아직 안 한 이스터에그 건축물 중 가장 가까운 것 (결계 위치 정할 때)
+function eggNearest(x,y,R){let b=null,bd=R;if(!S)return null;const D=S.eggDone||{};for(let cx=Math.floor((x-R)/LC);cx<=Math.floor((x+R)/LC);cx++)for(let cy=Math.floor((y-R)/LC);cy<=Math.floor((y+R)/LC);cy++){const m=lmAt(cx,cy);if(!m||!EGG[m.k]||D[m.k]||D[m.x+','+m.y])continue;const d=Math.hypot(m.x-x,m.y-y);if(d<bd){bd=d;b=m;}}return b;}
 const eggCnt=()=>Object.keys(EGG).filter(k=>(META.egg||{})[k]).length;
 function eggTick(dt){const p=S.p;if(!p.alive||S.npc)return;let best=null,bd=1e9;
-  for(let cx=Math.floor((p.x-420)/LC);cx<=Math.floor((p.x+420)/LC);cx++)for(let cy=Math.floor((p.y-420)/LC);cy<=Math.floor((p.y+420)/LC);cy++){const m=lmAt(cx,cy);if(!m)continue;const d=Math.hypot(m.x-p.x,m.y-12-p.y);if(d<m.r+220&&d<bd){bd=d;best=m;}}
+  for(let cx=Math.floor((p.x-420)/LC);cx<=Math.floor((p.x+420)/LC);cx++)for(let cy=Math.floor((p.y-420)/LC);cy<=Math.floor((p.y+420)/LC);cy++){const m=lmAt(cx,cy);if(!m||!inArena(m.x,m.y))continue;const d=Math.hypot(m.x-p.x,m.y-12-p.y);if(d<m.r+220&&d<bd){bd=d;best=m;}}
   const near=!!best&&bd<best.r+90;
   if(near&&!p.moving){S.stoneT=(S.stoneT||0)+dt;if(S.stoneT>=60)achUnlock('h_stone');}else S.stoneT=0;
   const E=best&&EGG[best.k],id=E?best.x+','+best.y:null;
@@ -1235,7 +1241,7 @@ function eggTick(dt){const p=S.p;if(!p.alive||S.npc)return;let best=null,bd=1e9;
     case 'lvl':if(!near)st.lv=S.lvl;ok=S.lvl>st.lv;break;
     case 'skill':if(!near)st.sk=S.st.sk||0;ok=(S.st.sk||0)>st.sk;break;}
   if(!ok)return;
-  S.eggDone[id]=1;S.eggDone[best.k]=1;S.st.eggN=(S.st.eggN||0)+1;if(S.st.eggN>=3)achUnlock('h_egg5');if(S.st.eggN>=5)achUnlock('h_eggall');if(S.st.eggN<=5)addBonus('egg',BONUS_PTS.egg);if(!(META.egg||{})[best.k])addBonus('eggNew',BONUS_PTS.eggNew);const line=E[1][Math.floor(Math.random()*E[1].length)];S.npc={x:best.x,y:best.y+34,em:E[0],txt:line,t:0,nm:LM_N[best.k]||''};toast(`🥚 이스터에그! ${LM_N[best.k]||'건물'} 주인이 나타났다`);for(let i=0;i<3;i++)burst(best.x+rand(-30,30),best.y-20+rand(-30,10),'#ffe27a',14);
+  S.eggDone[id]=1;S.eggDone[best.k]=1;S.st.eggN=(S.st.eggN||0)+1;if(S.st.eggN>=3)achUnlock('h_egg5');if(S.st.eggN>=5)achUnlock('h_eggall');if(S.st.eggN<=5)addBonus('egg',Math.round(BONUS_PTS.egg*eggMul()));if(!(META.egg||{})[best.k])addBonus('eggNew',BONUS_PTS.eggNew);const line=E[1][Math.floor(Math.random()*E[1].length)];S.npc={x:best.x,y:best.y+34,em:E[0],txt:line,t:0,nm:LM_N[best.k]||''};toast(`🥚 이스터에그! ${LM_N[best.k]||'건물'} 주인이 나타났다`);for(let i=0;i<3;i++)burst(best.x+rand(-30,30),best.y-20+rand(-30,10),'#ffe27a',14);
   META.egg=META.egg||{};if(!META.egg[best.k]){META.egg[best.k]=1;saveMeta();toast(`🥚 이스터에그 발견! (${eggCnt()}/${Object.keys(EGG).length})`);achCheck(null);}}
 function drawNpc(){const n=S.npc;if(!n)return;const k=Math.min(1,n.t/.25),out=n.t>4.2?Math.max(0,1-(n.t-4.2)/.4):1;if(out<=0)return;
   ctx.save();ctx.globalAlpha=out;
@@ -1301,7 +1307,7 @@ function drawWorldBg(){TREEV.length=0;EGGQ.length=0;
     if(m.x+lw<x0-40||m.x-lw>x1+40||m.y<y0-40||m.y-lh*1.6>y1+40)continue;
     ctx.fillStyle=BART.ROAD[bi][1];ctx.globalAlpha=.55;ctx.beginPath();ctx.ellipse(m.x,m.y+10,lw*1.5,46,0,0,TAU);ctx.fill();ctx.fillStyle=BART.ROAD[bi][0];ctx.globalAlpha=.7;ctx.beginPath();ctx.ellipse(m.x,m.y+10,lw*1.3,38,0,0,TAU);ctx.fill();ctx.globalAlpha=1;
     ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(m.x,m.y-2,lw*.55,8,0,0,TAU);ctx.fill();TREEV.push({x:m.x,y:m.y,img,big:1});
-    if(EGG[m.k]&&!(S.eggDone&&(S.eggDone[m.x+','+m.y]||S.eggDone[m.k])))EGGQ.push({x:m.x,y:m.y-lh*1.6-14,k:m.k});
+    if(EGG[m.k]&&inArena(m.x,m.y)&&!(S.eggDone&&(S.eggDone[m.x+','+m.y]||S.eggDone[m.k])))EGGQ.push({x:m.x,y:m.y-lh*1.6-14,k:m.k});
     // 건축물 주변 소품
     for(let i=0;i<5;i++){const a=hash(m.x+i,m.y)*TAU,r=lw*1.6+hash(m.y,i)*60,k=B.deco[i%B.deco.length],di=BIO.deco(k);pxDrawI(di,m.x+Math.cos(a)*r,m.y+20+Math.sin(a)*r*.45,di.width>>1,di.height-2*(di.hd||1));}}
   // 맵 끝: 테두리 밖으로 빽빽한 나무(배경별 나무)·바위 벽
@@ -4551,7 +4557,9 @@ const NMR0=1700,NMRMIN=600,NMRK=180,nmRingTr=()=>Math.max(NMRMIN,NMR0-NMRK*nmMin
 // 10분 이후 적 수: 1분마다 +10% (최대 2배)
 const nmCrowd=()=>1+.1*Math.min(10,nmMin());
 function nmRingTick(dt){if(!endless()||rushOn()||nmMin()<=0||S.win||S.bossI>=0)return;const tr=nmRingTr(),p=S.p;
-  if(!S.arena||!S.arena.nm){const cx=clamp(p.x,tr,WW-tr),cy=clamp(p.y,tr,WH-tr);S.arena={x:cx,y:cy,r:Math.max(tr*1.15,Math.abs(p.x-cx)+80,Math.abs(p.y-cy)+80),tr,nm:1};
+  if(!S.arena||!S.arena.nm){let ox=p.x,oy=p.y;const eg=eggNearest(p.x,p.y,2200);if(eg){const d=Math.hypot(eg.x-p.x,eg.y-p.y)||1,k=d<=1000?.5:(d-450)/d;ox=p.x+(eg.x-p.x)*k;oy=p.y+(eg.y-p.y)*k;}
+    // 결계 중심: 가까운 이스터에그 건축물이 있으면 그 건물이 마지막 크기까지 안에 남도록 중심을 그쪽으로 옮김
+    const cx=clamp(ox,NMRMIN,WW-NMRMIN),cy=clamp(oy,NMRMIN,WH-NMRMIN);S.arena={x:cx,y:cy,r:Math.max(tr*1.15,Math.abs(p.x-cx)+80,Math.abs(p.y-cy)+80),tr,nm:1};
     if(!S.nmRingMsg){S.nmRingMsg=1;toast('☠ 악몽 결계가 조여 옵니다! 싸울 공간이 점점 좁아져요');}}
   else S.arena.tr=tr;}
 function omenTick(dt){if(!endless()||rushOn()||!S.p.alive||S.win)return;const m=nmMin();if(m<2)return;
@@ -6916,7 +6924,7 @@ function openStat(keep,rr){
     <button class="btn" id="reroll" ${S.gold<cost?'disabled':''}>다시 뽑기<small>${cost}골드 · 다음 ×1.5</small></button>
     ${(S.curB||0)>=14?'':`<button class="btn" id="boost" ${S.gold<boostC?'disabled':''}>고급 카드로 다시 뽑기<small>${boostC}골드, 3장 모두 희귀 이상</small></button>`}
   </div>
-  ${S.noAug?'<button class="btn ghost" id="augResume">↩ 증강 다시 받기<small>다음 증강 차례부터 다시 증강이 나와요</small></button>':''}
+
   <button class="btn ghost" data-stats>내 스탯 보기</button>`);
   rarityFx();if($('augResume'))$('augResume').onclick=()=>{S.noAug=false;toast('다음 증강 차례부터 증강이 다시 나와요');$('augResume').remove();};
   const take=c=>{const res=c.f(S.p);if(res)toast(res);};
@@ -7123,6 +7131,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
 const PATCH_NOTES=[
   {v:100,t:'🏠 건물 충돌 + 증강 대신 스탯 정리',items:[
     ['change','🎁 증강 슬롯이 다 찼을 때 <b>증강 대신 받는 스탯 카드</b>는 한 판에 처음 4번까지 그대로, 그 뒤로는 받을 때마다 1장씩 줄어요 (최소 1장). 증강을 안 받고 스탯만 끝없이 쌓는 쪽이 너무 세지던 문제 수정'],
+    ['change','🃏 레벨업 카드 화면의 「↩ 증강 다시 받기」 버튼을 없앴어요 (증강 그만 받기는 한 판 동안 유지)'],
+    ['buff','🥚 이스터에그 보너스가 <b>늦게 찾을수록 커져요</b>: 5분까지 ×1, 그 뒤로 5분마다 +1배 (10분 ×2 · 15분 ×3 · 20분 ×4). 후반엔 어렵지만 그만큼 크게!'],
+    ['change','🥚 악몽 결계가 생길 때 근처 이스터에그 건축물이 결계 안에 남도록 자리를 잡아요. 결계 밖(갈 수 없는 곳) 건축물엔 ❔가 뜨지 않아요'],
     ['change','☠ 악몽 결계·보스전 결계가 줄어들 때 <b>몹도 결계 밖으로 나갈 수 없어요</b>. 바깥 어두운 곳에서 몹이 돌아다니던 문제 수정 (밖에서 생긴 몹은 결계 안쪽 가장자리로 들어와요)'],
     ['change','🏠 커다란 건물(이스터에그 건축물 포함)을 이제 <b>그림 크기만큼</b> 지나갈 수 없어요. 예전엔 가운데 작은 부분만 막혀서 건물을 통과했어요']]},
   {v:99,t:'⚠ 보스 패턴 강화 + 배경별 몬스터 정리',items:[
