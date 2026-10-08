@@ -49,6 +49,16 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 .capg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;font-size:12.5px}
 .capg div{display:flex;flex-direction:column;gap:2px}.capg span{color:var(--ivory)}.capg span::before{content:'· ';color:var(--muted)}
 .capl small{display:block;margin-top:5px;color:var(--muted);font-size:12px}
+.cosEqp{display:flex;gap:10px;align-items:stretch;margin:6px 0 8px}
+.cosLiveB{flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 60%,rgba(214,169,74,.18),rgba(0,0,0,.35));border:1px solid rgba(214,169,74,.45);border-radius:12px;padding:6px}
+.cosLiveB canvas{width:150px;height:150px;image-rendering:pixelated}.cosLiveB small{color:var(--muted);font-size:11px}
+.cosSlots{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.cslot{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:62px;padding:6px 4px;border-radius:8px;border:2px dashed rgba(214,169,74,.35);background:rgba(0,0,0,.3);cursor:pointer;text-align:center}
+.cslot.on{border-style:solid;border-color:#d6a94a;background:linear-gradient(160deg,rgba(214,169,74,.22),rgba(0,0,0,.35));box-shadow:inset 0 0 10px rgba(255,215,106,.15)}
+.cslot.cur{outline:2px solid #ffd76a;outline-offset:1px}
+.cslot i{font-style:normal;font-size:20px}.cslot b{font-size:13px;color:var(--ivory)}.cslot:not(.on) b{color:var(--muted);font-weight:normal}.cslot small{font-size:10.5px;color:var(--muted)}
+.cslot .cx{position:absolute;top:2px;right:4px;font-size:12px;color:#ff9a9a;padding:0 3px;border-radius:4px}.cslot .cx:hover{background:rgba(255,80,80,.25)}
+@media (max-width:520px){.cosEqp{flex-direction:column}.cosSlots{grid-template-columns:repeat(2,1fr)}}
 .cosTabs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:6px 0 10px}
 .cosTab{display:flex;flex-direction:column;align-items:center;gap:1px;padding:8px 4px;border-radius:10px;border:1px solid rgba(214,169,74,.45);background:rgba(0,0,0,.28);color:var(--ivory);font:inherit;cursor:pointer}
 .cosTab b{font-size:15px}.cosTab small{font-size:11px;color:var(--muted)}.cosTab .ce{color:#ffd76a;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -2787,35 +2797,35 @@ const CARDS=[
   {req:()=>rawRate()<RATE_CAP(),n:'손목 단련',v:[[.04,.09,2]],t:v=>`공격 속도 +${v[0]}회/초`,a:(p,v)=>{p.rate+=v[0];}},
   {req:()=>rawRate()<RATE_CAP(),n:'날랜 손놀림',v:[[4,8,1]],t:v=>`공격 속도 +${v[0]}%`,a:(p,v)=>{p.rateP=(p.rateP||0)+v[0]/100;}},
   {n:'튼튼한 체력',v:[[8,16,0]],t:v=>`최대 체력 +${v[0]}`,a:(p,v)=>{p.maxHp+=v[0];p.hp+=v[0];}},
-  {n:'가죽 갑옷',v:[[3,6,0]],t:v=>`방어력 +${v[0]}`,a:(p,v)=>{p.armor+=v[0];}},
-  {req:()=>moveSpd()<SPEED_CAP,n:'가벼운 장화',v:[[2,5,1]],t:v=>`이동 속도 +${v[0]}%`,a:(p,v)=>{p.speed*=1+v[0]/100;}},
+  {n:'가죽 갑옷',v:[[5,9,0]],t:v=>`방어력 +${v[0]}`,a:(p,v)=>{p.armor+=v[0];}},
+  {req:()=>moveSpd()<SPEED_CAP,n:'가벼운 장화',v:[[3,6,1],[2,4,0]],t:v=>`이동 속도 +${v[0]}%, 방어력 +${v[1]}`,a:(p,v)=>{p.speed*=1+v[0]/100;p.armor+=v[1];}},
   // 사거리는 딜을 직접 올리지 않음(안전 거리용) → 원거리 시너지·궁수일 때만 등장
-  {req:()=>tag('sniper')>0||S.cls==='archer'||has('longshot'),n:'조준경',v:[[4,8,0]],t:v=>`사거리 +${v[0]}%`,a:(p,v)=>{p.range*=1+v[0]/100;}},
+  {req:()=>tag('sniper')>0||S.cls==='archer'||has('longshot'),n:'조준경',v:[[5,9,0],[1,2,1]],t:v=>`사거리 +${v[0]}%, 치명타 확률 +${v[1]}%`,a:(p,v)=>{p.range*=1+v[0]/100;p.crit+=v[1]/100;}},
   // 보스 러시·레이드엔 잡몹이 없어서 흡수 범위·경험치·골드 획득 카드는 안 나옴
-  {req:()=>!rushOn(),n:'자석',v:[[10,20,0]],t:v=>`경험치·골드 흡수 범위 +${v[0]}%`,a:(p,v)=>{p.magnet*=1+v[0]/100;}},
+  {req:()=>!rushOn(),n:'자석',v:[[12,22,0],[4,8,0]],t:v=>`경험치·골드 흡수 범위 +${v[0]}%, 최대 체력 +${v[1]}`,a:(p,v)=>{p.magnet*=1+v[0]/100;p.maxHp+=v[1];p.hp+=v[1];}},
   {req:()=>S.p.luck<LUCK_CAP,n:'네잎클로버',v:[[.8,1.6,1]],t:v=>`행운 +${v[0]}. 높은 등급과 좋은 수치가 잘 나옵니다`,a:(p,v)=>{p.luck=Math.min(LUCK_CAP,Math.round((p.luck+v[0])*10)/10);}},
-  {cc:1,n:'급소 노리기',v:[[2.5,4.5,1]],t:v=>`치명타 확률 +${v[0]}%`,a:(p,v)=>{p.crit+=v[0]/100;}},
-  {cm:1,n:'치명상',v:[[14,26,0]],t:v=>`치명타 피해 +${v[0]}%`,a:(p,v)=>{p.critM+=v[0]/100;}},
-  {req:()=>!pureMelee(),n:'가속 탄',v:[[6,12,0]],t:v=>`탄속 +${v[0]}%`,a:(p,v)=>{p.bspd*=1+v[0]/100;}},
-  {req:()=>!rushOn(),n:'배움의 서',v:[[3,6,1]],t:v=>`경험치 획득 +${v[0]}%`,a:(p,v)=>{p.xpM=(p.xpM||1)+v[0]/100;}},
-  {req:()=>!rushOn(),n:'황금 주머니',v:[[4,9,0]],t:v=>`골드 획득 +${v[0]}%`,a:(p,v)=>{p.goldM+=v[0]/100;}},
-  {req:()=>S.p.dodge<DODGE_CAP,n:'날렵한 몸놀림',v:[[1.2,2.5,1]],t:v=>`회피 +${v[0]}%`,a:(p,v)=>{p.dodge+=v[0]/100;}},
+  {cc:1,n:'급소 노리기',v:[[4,7,1]],t:v=>`치명타 확률 +${v[0]}%`,a:(p,v)=>{p.crit+=v[0]/100;}},
+  {cm:1,n:'치명상',v:[[30,50,0]],t:v=>`치명타 피해 +${v[0]}%`,a:(p,v)=>{p.critM+=v[0]/100;}},
+  {req:()=>!pureMelee(),n:'가속 탄',v:[[8,14,0],[1,2,1]],t:v=>`탄속 +${v[0]}%, 치명타 확률 +${v[1]}%`,a:(p,v)=>{p.bspd*=1+v[0]/100;p.crit+=v[1]/100;}},
+  {req:()=>!rushOn(),n:'배움의 서',v:[[6,10,1],[.4,.8,1]],t:v=>`경험치 획득 +${v[0]}%, 공격력 +${v[1]}`,a:(p,v)=>{p.xpM=(p.xpM||1)+v[0]/100;p.dmg+=v[1];}},
+  {req:()=>!rushOn(),n:'황금 주머니',v:[[8,14,0],[4,8,0]],t:v=>`골드 획득 +${v[0]}%, 최대 체력 +${v[1]}`,a:(p,v)=>{p.goldM+=v[0]/100;p.maxHp+=v[1];p.hp+=v[1];}},
+  {req:()=>S.p.dodge<DODGE_CAP,n:'날렵한 몸놀림',v:[[2.5,4.5,1]],t:v=>`회피 +${v[0]}%`,a:(p,v)=>{p.dodge+=v[0]/100;}},
   {n:'강철 심장',v:[[3,6,0]],t:v=>`최대 체력 +${v[0]}%`,a:(p,v)=>{p.hpP=(p.hpP||0)+v[0]/100;}},
-  {n:'붕대',v:[[.3,.7,2]],t:v=>`초당 체력 재생 +${v[0]}`,a:(p,v)=>{p.regen+=v[0];}},
-  {req:()=>(S.p.dashD||0)<DASH_MAX,n:'먼 도약',v:[[4,8,0]],t:v=>`대시 거리 +${v[0]} (기본 120, 최대 +${DASH_MAX})`,a:(p,v)=>{p.dashD=Math.min(DASH_MAX,(p.dashD||0)+v[0]);}},
+  {n:'붕대',v:[[.6,1.2,2]],t:v=>`초당 체력 재생 +${v[0]}`,a:(p,v)=>{p.regen+=v[0];}},
+  {req:()=>(S.p.dashD||0)<DASH_MAX,n:'먼 도약',v:[[7,12,0],[2,4,0]],t:v=>`대시 거리 +${v[0]} (기본 120, 최대 +${DASH_MAX}), 방어력 +${v[1]}`,a:(p,v)=>{p.dashD=Math.min(DASH_MAX,(p.dashD||0)+v[0]);p.armor+=v[1];}},
   {req:()=>(S.p.skM||1)>.55,n:'숨 고르기',v:[[3,6,0]],t:v=>`생존기(E) 재사용 −${v[0]}%`,a:(p,v)=>{p.skM=(p.skM||1)*(1-v[0]/100);}},
-  {n:'순발력',v:[[4,8,0]],t:v=>`대시 재사용 −${v[0]}%`,a:(p,v)=>{p.dashMul*=1-v[0]/100;}},
+  {n:'순발력',v:[[6,10,0],[2,4,0]],t:v=>`대시 재사용 −${v[0]}%, 방어력 +${v[1]}`,a:(p,v)=>{p.dashMul*=1-v[0]/100;p.armor+=v[1];}},
   {n:'흡혈 송곳니',v:[[.3,.7,2]],t:v=>`흡혈 +${v[0]}%`,a:(p,v)=>{p.lifesteal+=v[0]/100;}},
   {req:()=>orbitN()>0,n:'회전 부적 연마',g:'회전 부적',v:[[6,12,0],[2,4,0]],t:v=>`회전 부적 피해 +${v[0]}%, 회전 반경 +${v[1]}%`,a:(p,v)=>{p.orbM*=1+v[0]/100;p.orbR*=1+v[1]/100;}},
-  {n:'유리 대포',v:[[8,13,1]],t:v=>`공격력 +${v[0]}%, 최대 체력 −8%`,a:(p,v)=>{p.dmgP=(p.dmgP||0)+v[0]/100;p.hpP=(p.hpP||0)-.08;}},
+  {n:'유리 대포',v:[[6.5,10.5,1]],t:v=>`공격력 +${v[0]}%, 최대 체력 −8%`,a:(p,v)=>{p.dmgP=(p.dmgP||0)+v[0]/100;p.hpP=(p.hpP||0)-.08;}},
   {n:'무거운 갑옷',v:[[6,10,0]],t:v=>`방어력 +${v[0]}, 이동 속도 −4%`,a:(p,v)=>{p.armor+=v[0];p.speed*=.96;}},
-  {n:'광기',v:[[8,13,1]],t:v=>`공격 속도 +${v[0]}%, 받는 피해 +8%`,a:(p,v)=>{p.rateP=(p.rateP||0)+v[0]/100;p.vuln*=1.08;}},
-  {n:'거인의 심장',v:[[4,8,0],[.1,.2,2]],t:v=>`최대 체력 +${v[0]}, 초당 체력 재생 +${v[1]}`,a:(p,v)=>{p.maxHp+=v[0];p.hp+=v[0];p.regen+=v[1];}},
-  {cc:1,n:'사냥꾼의 눈',v:[[.6,1.2,1],[2,3.5,1]],t:v=>`치명타 확률 +${v[0]}%, 사거리 +${v[1]}%`,a:(p,v)=>{p.crit+=v[0]/100;p.range*=1+v[1]/100;}},
+  {n:'광기',v:[[6.5,10.5,1]],t:v=>`공격 속도 +${v[0]}%, 받는 피해 +8%`,a:(p,v)=>{p.rateP=(p.rateP||0)+v[0]/100;p.vuln*=1.08;}},
+  {n:'거인의 심장',v:[[8,14,0],[.3,.5,2]],t:v=>`최대 체력 +${v[0]}, 초당 체력 재생 +${v[1]}`,a:(p,v)=>{p.maxHp+=v[0];p.hp+=v[0];p.regen+=v[1];}},
+  {cc:1,n:'사냥꾼의 눈',v:[[2,3.5,1],[4,7,1]],t:v=>`치명타 확률 +${v[0]}%, 사거리 +${v[1]}%`,a:(p,v)=>{p.crit+=v[0]/100;p.range*=1+v[1]/100;}},
   {n:'전투 본능',v:[[1.6,3.4,1],[1.6,3.4,1]],t:v=>`공격력 +${v[0]}%, 공격 속도 +${v[1]}%`,a:(p,v)=>{p.dmgP=(p.dmgP||0)+v[0]/100;p.rateP=(p.rateP||0)+v[1]/100;}},
-  {n:'철벽 자세',v:[[1.5,2.5,1],[4,7,0]],t:v=>`방어력 +${v[0]}, 최대 체력 +${v[1]}`,a:(p,v)=>{p.armor+=v[0];p.maxHp+=v[1];p.hp+=v[1];}},
-  {req:()=>!pureMelee(),n:'쾌속 장전',v:[[3,6,0],[1.6,3.4,1]],t:v=>`탄속 +${v[0]}%, 공격 속도 +${v[1]}%`,a:(p,v)=>{p.bspd*=1+v[0]/100;p.rateP=(p.rateP||0)+v[1]/100;}},
-  {n:'질주 본능',v:[[1,2,1],[2,3.5,1]],t:v=>`이동 속도 +${v[0]}%, 대시 재사용 −${v[1]}%`,a:(p,v)=>{p.speed*=1+v[0]/100;p.dashMul*=1-v[1]/100;}},
+  {n:'철벽 자세',v:[[2.5,4,1],[6,10,0]],t:v=>`방어력 +${v[0]}, 최대 체력 +${v[1]}`,a:(p,v)=>{p.armor+=v[0];p.maxHp+=v[1];p.hp+=v[1];}},
+  {req:()=>!pureMelee(),n:'쾌속 장전',v:[[6,10,0],[3,5,1]],t:v=>`탄속 +${v[0]}%, 공격 속도 +${v[1]}%`,a:(p,v)=>{p.bspd*=1+v[0]/100;p.rateP=(p.rateP||0)+v[1]/100;}},
+  {n:'질주 본능',v:[[2,3.5,1],[3,5,1]],t:v=>`이동 속도 +${v[0]}%, 대시 재사용 −${v[1]}%`,a:(p,v)=>{p.speed*=1+v[0]/100;p.dashMul*=1-v[1]/100;}},
   {fr:'r',n:'모험가의 주사위',get d(){const k=1;return `공격력 −${Math.round(15*k)}% ~ +${Math.round(25*k)}%, 굴려봐야 압니다`;},f:p=>{const m=Math.round((-15+Math.random()*40)*1);p.dmgP=(p.dmgP||0)+m/100;return `공격력 ${m>=0?'+':''}${m}%`;}},
   // 도박 카드: 후반에도 의미 있게 레벨·시간에 따라 커짐
   {fr:'r',n:'운명의 숫돌',get d(){const k=lvScale(),f=v=>Math.round(v*k*10)/10;return `공격력 −${f(1)} ~ +${f(3)}, 굴려봐야 압니다`;},f:p=>{const m=Math.round((-1+Math.random()*4)*lvScale()*10)/10;p.dmg=Math.max(1,p.dmg+m);return `공격력 ${m>=0?'+':''}${m}`;}},
@@ -3577,8 +3587,8 @@ function spawnAt(type,x,y,noElite,forceElite){
 function ringPos(extra=40){const p=S.p,a=(p.moving&&Math.random()<.6)?Math.atan2(p.lmy,p.lmx)+rand(-1.1,1.1):Math.random()*TAU,r=Math.hypot(GW,GH)/2+extra;return [clamp(p.x+Math.cos(a)*r,20,WW-20),clamp(p.y+Math.sin(a)*r,20,WH-20)];}
 function spawnBurst(){
   if(rushOn())return;
-  if(S.en.length>(S.bossI>=0?(dfM().bc||35):(chapM().cap||190)))return;
-  let n=Math.min(chapM().n,2+Math.floor(S.round*.7));if(S.bossI>=0)n=Math.ceil(n*.35);
+  if(S.en.length>(S.bossI>=0?(dfM().bc||35):(chapM().cap||190)*nmCrowd()))return;
+  let n=Math.round(Math.min(chapM().n,2+Math.floor(S.round*.7))*nmCrowd());if(S.bossI>=0)n=Math.ceil(n*.35);
   const side=Math.floor(Math.random()*4);
   const [cx,cy]=ringPos();
   for(let i=0;i<n;i++)spawnAt(pickType(),cx+rand(-40,40),cy+rand(-40,40));
@@ -3741,7 +3751,7 @@ function spawnBoss(i,cont){
   const b=S.en[S.en.length-1];if(rushOn()){b.bsc=1.5;b.r*=1.5;}b.dmg*=(BOSS_DM[j]||1)*(rushOn()?RUSH_DM*Math.pow(1.16,i):Math.pow(1.15,lp));b.maxHp*=(BOSS_HPM[j]||1)*(rushOn()?rushHpM(i):Math.pow(2.2,lp))*(endless()?nmBossHp():1);b.hp=b.maxHp*(cont&&S.bHpF>0?S.bHpF:1);b.bk=0;go(b,'intro');S.boss=b;
   // 보스 결계: 전체 맵의 약 1/4 넓이(3000×3000) 사각 구역. 분노(체력 50%) 시 85%로, 광폭화마다 5%씩 좁아짐. r = 한 변의 절반
   // 보스 러시: 단계마다 결계가 3%씩 좁아짐 (최소 55%)
-  {const tr=rushOn()?Math.round(1500*Math.max(.55,1-.03*i)):1500,cx=clamp(S.p.x,tr,WW-tr),cy=clamp(S.p.y,tr,WH-tr);S.arena={x:cx,y:cy,r:tr*1.3,tr};
+  {const tr=rushOn()?Math.round(1500*Math.max(.55,1-.03*i)):nmMin()>0?Math.min(1500,nmRingTr()):1500,cx=clamp(S.p.x,tr,WW-tr),cy=clamp(S.p.y,tr,WH-tr);S.arena={x:cx,y:cy,r:tr*1.3,tr};
    const d=Math.hypot(b.x-cx,b.y-cy);if(d>tr*.7){b.x=cx+(b.x-cx)/d*tr*.7;b.y=cy+(b.y-cy)/d*tr*.7;}}
   S.shake=.5;S.bannerT=3.2;
 }
@@ -3777,6 +3787,14 @@ function tele(o){o.t=o.T;S.tele.push(o);}
 const OMEN_COL='#c05cff',OMEN_SRC={omen:1,pat:1,type:'징조'};
 // 보스 패턴(예고 장판·레이저 등): 회피·막기 확률로는 못 피함 → 움직이기·대시·생존기로 피해야 함
 const PAT_SRC={pat:1,boss:true,type:'패턴'};
+// 악몽 결계: 10분부터 싸울 공간이 점점 좁아짐 (1분에 NMRK씩, 최소 NMRMIN = 화면 정도). 억지로 죽이는 게 아니라 피할 공간을 줄임. 보스전 결계도 이 크기를 넘지 않음
+const NMR0=1700,NMRMIN=650,NMRK=120,nmRingTr=()=>Math.max(NMRMIN,NMR0-NMRK*nmMin());
+// 10분 이후 적 수: 1분마다 +6% (최대 +60%)
+const nmCrowd=()=>1+.06*Math.min(10,nmMin());
+function nmRingTick(dt){if(!endless()||rushOn()||nmMin()<=0||S.win||S.bossI>=0)return;const tr=nmRingTr(),p=S.p;
+  if(!S.arena||!S.arena.nm){const cx=clamp(p.x,tr,WW-tr),cy=clamp(p.y,tr,WH-tr);S.arena={x:cx,y:cy,r:Math.max(tr*1.15,Math.abs(p.x-cx)+80,Math.abs(p.y-cy)+80),tr,nm:1};
+    if(!S.nmRingMsg){S.nmRingMsg=1;toast('☠ 악몽 결계가 조여 옵니다! 싸울 공간이 점점 좁아져요');}}
+  else S.arena.tr=tr;}
 function omenTick(dt){if(!endless()||rushOn()||!S.p.alive||S.win)return;const m=nmMin();if(m<2)return;
   S.omT=(S.omT??2)-dt;if(S.omT>0)return;const p=S.p,lv=m-2;// 맵(보스전은 결계) 구석·가장자리에 붙어 있으면 징조가 더 자주 옴 → 구석에 숨어서 버티는 꼼수 방지
   const A=S.arena,x0=A?A.x-A.r:0,x1=A?A.x+A.r:WW,y0=A?A.y-A.r:0,y1=A?A.y+A.r:WH,ex=Math.min(p.x-x0,x1-p.x),ey=Math.min(p.y-y0,y1-p.y),corner=ex<450&&ey<450,edge=Math.min(ex,ey)<260;
@@ -5037,7 +5055,7 @@ function update(dt){
   else if(S.bossI<0&&!S.win&&S.gt>=(S.chap+1)*CH_LEN){S.gt=(S.chap+1)*CH_LEN;spawnBoss(S.chap);}
   {const bi=biomeIdx();if(S.biome==null)S.biome=bi;if(bi!==S.biome){S.prevBiome=S.biome;S.biome=bi;S.biomeT=3;toast('🌲 '+BIOMES[bi].n+'에 들어섰다');}S.biomeT=Math.max(0,(S.biomeT||0)-dt);}
   // spawn & timers
-  S.spawnT-=dt*(S.win?0:S.bossI>=0?.4:evOn('horde')?2.6:evOn('moon')?1.7:1);updEvent(dt);if(S.spawnT<=0){spawnBurst();S.spawnT=Math.max(.2,1.1-S.round*.07)*chapM().sp*dfM().sp*rand(.7,1.3);}
+  S.spawnT-=dt*(S.win?0:S.bossI>=0?.4:evOn('horde')?2.6:evOn('moon')?1.7:1);updEvent(dt);if(S.spawnT<=0){spawnBurst();S.spawnT=Math.max(.2,1.1-S.round*.07)*chapM().sp*dfM().sp*rand(.7,1.3)/nmCrowd();}
   if(S.merch){S.merch.life-=dt;if(S.merch.life<=0){S.merch=null;}else if(p.alive&&Math.abs(p.x-S.merch.x)<44+p.r&&Math.abs(p.y-S.merch.y)<30+p.r){const m=S.merch;S.merch=null;if(AUTO.pick){toast('자동 모드: 상인 건너뜀');}else{openMerch(m);return;}}}
   if(tag('house')>=6){S.intT=(S.intT??30)-dt;if(S.intT<=0){S.intT=30;const it=Math.min(150,Math.floor(S.gold*.1));if(it>0){S.gold+=it;ftext(p.x,p.y-48,'이자 +'+it,'#ffd76a',16);}}}
   if(has('piggy')){S.piggyT-=dt;if(S.piggyT<=0){S.piggyT=30;const it=Math.min(30*L('piggy'),Math.floor(S.gold*.1));if(it>0){S.gold+=it;ftext(p.x,p.y-34,'이자 +'+it,'#d6a94a',15);}}}
@@ -5245,7 +5263,7 @@ function update(dt){
   for(const e of S.en)if(!e.boss){if(e.x<e.r)e.x=e.r;else if(e.x>WW-e.r)e.x=WW-e.r;if(e.y<e.r)e.y=e.r;else if(e.y>WH-e.r)e.y=WH-e.r;}
   if(p.alive&&p.hp>0&&p.hp<=p.maxHp*.02&&S.lowAt==null)S.lowAt=S.t;if(S.lowAt!=null&&p.alive&&S.t-S.lowAt>=10)achUnlock('h_1hp');
   skTick(dt);ultTick(dt);thrTick(dt);if(AUTO.move&&DEV){autoSkill();if(!DEV_LK&&(S.p.ulCd||0)<=0&&(bossOn()||S.en.filter(e=>e.alive).length>25))useUlt();} // 궁극기 자동 사용은 밸런스 측정(DEV_LK 끔)에서만
-  omenTick(dt);updBoss(dt);hbTick(dt);if(p.rdm)p.rdm*=Math.exp(-dt/3);eggTick(dt);if(S.gold>(S.maxGold||0))S.maxGold=S.gold;if(S.npc){S.npc.t+=dt;if(S.npc.t>4.6)S.npc=null;}
+  nmRingTick(dt);omenTick(dt);updBoss(dt);hbTick(dt);if(p.rdm)p.rdm*=Math.exp(-dt/3);eggTick(dt);if(S.gold>(S.maxGold||0))S.maxGold=S.gold;if(S.npc){S.npc.t+=dt;if(S.npc.t>4.6)S.npc=null;}
   // 사령술사 해골 궁수대: 해골 3기 중 1기가 1초마다 뼈 화살
   if(has('n_archers')&&S.skel&&p.alive){S.naT=(S.naT??1)-dt;if(S.naT<=0){S.naT=1;S.skel.forEach((k,i)=>{if(i%3!==0||k.life<=0)return;const e=nearestE(k,p.range);if(e)pBullet(k.x,k.y,Math.atan2(e.y-k.y,e.x-k.x),pDmg()*lv3('n_archers',.5,.6,.8)*undM(),{child:true,sub:'해골 궁수대',pierce:1,r:3,life:.9,bone:true,src:'undead'});});}}
   // 궁수 화살비: 6초마다 적이 가장 몰린 곳
@@ -6150,7 +6168,9 @@ function rarityFx(){
 }
 // 스탯 카드 등급 (행운 0: 영웅 4.6% 전설 0.6%, 행운 30: 영웅 7.5% 전설 1.7%)
 function rollRarity(bonus=0){const L=LK(bonus);const w=[['c',66],['r',26+.55*L],['e',4.5+.15*L],['l',.55+.05*L]];let t=w.reduce((a,b)=>a+b[1],0),x=Math.random()*t;for(const [k,v] of w){if((x-=v)<0)return k;}return 'c';}
-const cardOk=c=>!(PCT_CARDS.has(c.n)&&!pctOpen())&&!(MELEE_CLS.includes(S.cls)&&c.n==='가속 탄')&&!(c.cc&&critFull())&&!(c.cm&&critMFull())&&(!c.req||c.req());
+// 공격 속도가 상한에 닿으면 공격 속도만 올리는 카드는 안 나옴 (받아도 0%)
+const RATE_ONLY=new Set(['손목 단련','날랜 손놀림','광기']);
+const cardOk=c=>!(RATE_ONLY.has(c.n)&&rawRate()>=RATE_CAP()*.98)&&!(PCT_CARDS.has(c.n)&&!pctOpen())&&!(MELEE_CLS.includes(S.cls)&&c.n==='가속 탄')&&!(c.cc&&critFull())&&!(c.cm&&critMFull())&&(!c.req||c.req());
 // 직업 선호 카드는 ×1.6, 최근 9장 안에 나온 카드는 ×0.3 (같은 카드 반복 방지)
 // 루트 스탯 카드: 열렸다고 계속 뜨지 않고, 그 루트가 최근 내 피해에서 차지하는 비중만큼 자주 뜸 (비중 0이면 드물게)
 const CARD_SRC={'정비 키트':['summon'],'포탑 개조':['summon'],'뼈 가루':['summon','undead'],'영혼 사슬':['summon','undead'],'독샘':['poison'],'연료':['fire'],'축전지':['thunder','elem'],'원소 결정':['elem','fire','thunder'],'정령 공명':['elem'],'씨앗 주머니':['nature'],'가시 독':['nature'],'큰 병':['alchemy'],'농축액':['alchemy'],'진동판':['wave'],'그림자 정수':['shadow'],'중력자':['grav'],'성수':['holy'],'성유':['holy'],'성가':['holy'],'시계 태엽':['grav','nature','wave','shadow','summon','elem']};
@@ -6989,12 +7009,17 @@ function openForge(){cosPreviewHide();devGearBak();const card=k=>{const G=GEAR[k
   ${gearMsg?`<div class="gmsg">${gearMsg}</div>`:''}
   <div class="ggrid">${Object.keys(GEAR).map(card).join('')}</div>
   <div class="gprot">${[1,5,10].map(n=>`<button class="btn" data-gprot="${n}" ${!medOk(PROT_COST*n)?'disabled':''}>🛡 보호권 ${n}장 · 🏅 ${(PROT_COST*n).toLocaleString()}</button>`).join('')}</div><p class="sub" style="text-align:center;margin:2px 0 6px">🛡 보호권: 실패해도 단계가 내려가거나 부서지지 않아요 (+5 이상 강화에서 사용)</p>
+  <div class="btnrow"><button class="btn ghost" id="gHist">↩ 장비 기록 (최근 변경 되살리기)</button></div><div id="gHistL"></div>
   ${DEV?`<div class="btnrow"><button class="btn" id="gDevBack">🛠 테스트 전 장비로 되돌리기</button><button class="btn" id="gDevZero">🛠 장비 모두 초기화 (+0, 구입 전)</button></div>`:''}
   <p class="sub">강화 성공률: +1 90% · +2 80% · +3 70% · +4 60% · +5 50% · +6 45% · +7 38% · +8 30% · +9 22% · +10 15%. +5부터 실패하면 한 단계 내려가고, +6부터는 부서져서 +0이 될 수도 있어요 (+6 3% … +10 12%). 지금까지 강화 ${META.gearLog.tries||0}번 · 최고 +${META.gearLog.best||0} · 부서진 장비 ${META.gearLog.broke||0}개</p>`);
   {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}gearMsg='';gearLiveStart($('gLive'));
   $('gBack').onclick=startScreen;
   if($('gDevBack'))$('gDevBack').onclick=()=>{let b=null;try{b=JSON.parse(localStorage.getItem(GEAR_BAK)||'null');}catch(e){}if(!b){gearMsg='되돌릴 기록이 없어요';openForge();return;}
     if(!confirm('대장간을 처음 열었을 때의 장비 상태로 되돌릴까요?'))return;META.gear=b.gear||{};META.prot=b.prot||0;META.gearLog=b.gearLog||{};saveMeta();try{localStorage.removeItem(GEAR_BAK);}catch(e){}gearMsg='🛠 테스트 전 장비로 되돌렸어요';openForge();};
+  $('gHist').onclick=()=>{let L=[];try{L=JSON.parse(localStorage.getItem(GEAR_HIST)||'[]');}catch(e){}const el=$('gHistL');
+    const sum=g=>Object.keys(GEAR).filter(k=>g[k]&&g[k].own).map(k=>GEAR[k].ico+'+'+(g[k].lv||0)).join(' ')||'장비 없음';
+    el.innerHTML=L.length?`<div class="sub" style="text-align:left;margin:6px 0">장비가 바뀔 때마다 남긴 기록이에요. 누르면 그때 장비로 되돌려요 (메달은 그대로)</div>`+L.map((h,i)=>{const d=new Date(h.t);return `<button class="btn ghost" data-gh="${i}" style="display:block;width:100%;margin:3px 0;text-align:left">${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')} · ${sum(h.gear)}</button>`;}).join(''):'<div class="sub">아직 남은 기록이 없어요</div>';
+    el.querySelectorAll('[data-gh]').forEach(b=>b.onclick=()=>{const h=L[+b.dataset.gh];if(!h||!confirm('이 기록의 장비로 되돌릴까요?\n'+sum(h.gear)))return;META.gear=h.gear||{};META.prot=h.prot||0;META.gearLog=h.gearLog||{};saveMeta();gearMsg='↩ 장비를 되돌렸어요';openForge();});};
   if($('gDevZero'))$('gDevZero').onclick=()=>{if(!confirm('장비를 모두 구입 전(+0)으로 초기화할까요? (되돌리기 기록은 남아 있어요)'))return;META.gear={};saveMeta();gearMsg='🛠 장비를 모두 초기화했어요';openForge();};
   ov.querySelectorAll('[data-gprot]').forEach(b=>b.onclick=()=>{const n=+b.dataset.gprot,c=PROT_COST*n;if(!medOk(c))return;META.medals-=c;META.prot=(META.prot||0)+n;saveMeta();gearMsg=`🛡 강화 보호권 ${n}장 구입 (보유 ${META.prot}장)`;openForge();});
   ov.querySelectorAll('[data-gbuy]').forEach(b=>b.onclick=()=>{const k=b.dataset.gbuy;if(!medOk(GEAR_BUY))return;META.medals-=GEAR_BUY;META.gear[k]={own:true,lv:0};saveMeta();gearMsg=`${GEAR[k].ico} ${GEAR[k].n} 구입!`;openForge();});
@@ -7030,7 +7055,13 @@ function openSync(){const code=syncExport();
   $('syPick').onclick=()=>$('syFileIn').click();
   $('syFileIn').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{$('syIn').value=String(r.result||'');msg('파일을 읽었어요. "코드로 가져오기"를 두 번 눌러 적용하세요.');};r.readAsText(f);};
 }
-function saveMeta(){try{localStorage.setItem('chanseo_meta',JSON.stringify(META));}catch(e){}}
+// 장비 기록: 장비가 바뀔 때마다 최근 12개 상태를 따로 남겨 둠 (대장간 → 장비 기록에서 되살리기)
+const GEAR_HIST='chanseo_gear_hist';let gearLastS=null;
+function gearHistPush(){try{const s=JSON.stringify(META.gear||{}),L=JSON.parse(localStorage.getItem(GEAR_HIST)||'[]');if(gearLastS===null)gearLastS=L[0]?JSON.stringify(L[0].gear||{}):'';if(s===gearLastS)return;gearLastS=s;
+  L.unshift({t:Date.now(),gear:META.gear||{},prot:META.prot||0,gearLog:META.gearLog||{}});localStorage.setItem(GEAR_HIST,JSON.stringify(L.slice(0,12)));}catch(e){}}
+function saveMeta(){try{gearHistPush();localStorage.setItem('chanseo_meta',JSON.stringify(META));}catch(e){}}
+// 게임 창을 여러 개 띄웠을 때: 다른 창이 저장하면 이 창도 바로 그 내용으로 맞춤 (예전 내용을 들고 있던 창이 덮어쓰지 않게)
+addEventListener('storage',e=>{if(e.key!=='chanseo_meta'||!e.newValue)return;try{const m=JSON.parse(e.newValue);if(!m||typeof m!=='object')return;for(const k of Object.keys(META))if(!(k in m))delete META[k];Object.assign(META,m);gearLastS=JSON.stringify(META.gear||{});}catch(er){}});
 // 영구 강화: 단계당 효과는 작게, 항목과 단계는 많게 (오래 모으는 성장)
 const MSTAT=[
   {k:'atk',n:'공격력',d:'최종 피해 +2% (곱하기)',max:10,c:15},{k:'rate',n:'공격 속도',d:'최종 공격 속도 +1.5% (곱하기)',max:8,c:22},{k:'hp',n:'최대 체력',d:'최종 최대 체력 +2% (곱하기)',max:10,c:15},
@@ -7691,6 +7722,7 @@ function openMeta(cosOnly){cosPreviewHide();
     return `<button class="mtile sk ${own?'max':''} ${x.k==='uncap'?'ucsk':''}" data-mk="${x.k}" ${can?'':'disabled'}><b>${x.n}</b><span class="md">${x.d}</span><span class="mc">${own?'✔ 보유':'🏅 '+x.c}</span></button>`;}).join('');
   if(cosOnly){show(`<div class="shophead"><h2>👕 외형 꾸미기</h2><button class="btn" id="mBack">돌아가기</button></div>
   <div class="mbal">보유 메달 <b>🏅 ${META.medals}</b><small>능력치 영향 없음 · 눌러서 장착/해제 · 마우스를 올리면 미리보기</small></div>
+<div class="cosEqp"><div class="cosLiveB"><canvas id="cosLive" width="200" height="200"></canvas><small>지금 내 모습</small></div><div class="cosSlots">${Object.keys(COS_CAT).map(cat=>{const e=cosEq(cat);return `<div class="cslot ${e?'on':''} ${cat===COS_TAB?'cur':''}" data-cslot="${cat}" title="${COS_CAT[cat]} · 누르면 이 종류 보기"><i>${COS_ICO[cat]}</i><b>${e?e.n:'비어 있음'}</b><small>${COS_CAT[cat]}</small>${e?`<span class="cx" data-cun="${cat}" title="해제">✕</span>`:''}</div>`;}).join('')}</div></div>
 <div class="cosTabs">${Object.keys(COS_CAT).map(cat=>{const L=COS.filter(x=>x.cat===cat&&(!x.hid||cosOwn(x.k))),e=cosEq(cat);return `<button class="cosTab ${cat===COS_TAB?'on':''}" data-ct="${cat}"><b>${COS_ICO[cat]} ${COS_CAT[cat]}</b><small>${L.filter(x=>cosOwn(x.k)).length}/${L.length} 보유</small><small class="ce">${e?'✔ '+e.n:'장착 없음'}</small></button>`;}).join('')}</div>
 <div class="mgrid ${COS_ANIM?'cosIn':''}">${COS.filter(x=>x.cat===COS_TAB&&(!x.hid||cosOwn(x.k))).sort((p,q)=>(p.ach?1:0)-(q.ach?1:0)||p.c-q.c).map((x,i)=>{const own=cosOwn(x.k),eq=cosEq(COS_TAB)===x;return `<button class="mtile sk ${eq?'max':''} ${own||medOk(x.c)?'':'poor'}" data-cs="${x.k}" style="--i:${i}"><b>${x.n}</b><span class="md">${x.d}</span><span class="mc">${eq?'✔ 장착 중':own?'장착하기':x.ach?'🏆 '+(ACH.find(a=>a.k===x.ach)||{}).n+' 달성 보상':'🏅 '+x.c}</span></button>`;}).join('')}</div>
   <button class="btn ghost" id="cReset" ${cosSpent()?'':'disabled'}>↺ 산 외형 전체 환불 <small>🏅 ${cosSpent()} 환불 · 도전과제 보상 외형은 그대로</small></button>
@@ -7709,7 +7741,11 @@ function openMeta(cosOnly){cosPreviewHide();
   ov.querySelectorAll('[data-mx]').forEach(b=>b.onclick=()=>{const x=MSTAT.find(q=>q.k===b.dataset.mx);let n=0;while(buy1(x))n++;if(n){saveMeta();keepY();}});
   ov.querySelectorAll('[data-mm]').forEach(b=>b.onclick=()=>{const x=MSTAT.find(q=>q.k===b.dataset.mm),l=mlv(x.k);if(!l)return;const r=x.c*l;META.lv[x.k]=l-1;META.medals+=r;META.spent=Math.max(0,metaSpent()-r);saveMeta();keepY();});
   ov.querySelectorAll('[data-mk]').forEach(b=>b.onclick=()=>{const x=MSKILL.find(q=>q.k===b.dataset.mk);if(!medOk(x.c)||META.sk[x.k])return;META.spent=metaSpent()+x.c;META.medals-=x.c;META.sk[x.k]=1;saveMeta();keepY();});
-  ov.querySelectorAll('[data-ct]').forEach(b=>b.onclick=()=>{COS_TAB=b.dataset.ct;COS_ANIM=1;const y=ov.scrollTop;openMeta(1);ov.scrollTop=y;});if(cosOnly)COS_ANIM=0;
+  ov.querySelectorAll('[data-ct]').forEach(b=>b.onclick=()=>{COS_TAB=b.dataset.ct;COS_ANIM=1;const y=ov.scrollTop;openMeta(1);ov.scrollTop=y;});
+  // 장비 칸: 누르면 그 종류 탭으로, ✕는 해제
+  ov.querySelectorAll('[data-cslot]').forEach(b=>b.onclick=()=>{COS_TAB=b.dataset.cslot;COS_ANIM=1;const y=ov.scrollTop;openMeta(1);ov.scrollTop=y;});
+  ov.querySelectorAll('[data-cun]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();META.cos=META.cos||{own:{},eq:{}};META.cos.eq[b.dataset.cun]=null;saveMeta();const y=ov.scrollTop;openMeta(1);ov.scrollTop=y;});
+  if($('cosLive'))gearLiveStart($('cosLive'));if(cosOnly)COS_ANIM=0;
   ov.querySelectorAll('[data-cs]').forEach(b=>{const x=COS.find(q=>q.k===b.dataset.cs);b.addEventListener('mouseenter',()=>cosPreview(x,b));b.addEventListener('mouseleave',cosPreviewHide);
     b.addEventListener('touchstart',()=>{if(b.dataset.pv!=='1'){ov.querySelectorAll('[data-cs]').forEach(o=>o.dataset.pv='');b.dataset.pv='1';b.dataset.tap='1';cosPreview(x,b);}},{passive:true});});
   ov.querySelectorAll('[data-cs]').forEach(b=>b.onclick=()=>{const x=COS.find(q=>q.k===b.dataset.cs);META.cos=META.cos||{own:{},eq:{}};
