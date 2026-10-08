@@ -4920,14 +4920,14 @@ function hud(){
   bf.push(dpsPanel());
   {const show=play||((S.mode==='aug'||S.mode==='stat')&&innerWidth>=760),h=show?bf.join(''):'',B=$('buffs');if(B._h!==h){B.innerHTML=h;B._h=h;}B.classList.toggle('over',!play);bfTipTick();}
   dashBtn.classList.toggle('cd',p.dashCd>0);{const sb=$('skBtn'),K=SKILLS[S.cls];if(K){const c=p.skCd||0;sb.classList.toggle('cd',c>0);const ic=K.ico,sub=c>0?Math.ceil(c)+'초':'E';if(sb._k!==ic+sub){sb._k=ic+sub;$('skIco').textContent=ic;$('skSub').textContent=sub;sb.title=K.n+': '+K.d;}}}
-  const mm=Math.floor(S.gt/60),ss=String(Math.floor(S.gt%60)).padStart(2,'0'),nx=augNextIn(S.pendingLv);
+  const tt=rushOn()?(S.gt||0)+(S.bt||0):S.gt,mm=Math.floor(tt/60),ss=String(Math.floor(tt%60)).padStart(2,'0'),nx=augNextIn(S.pendingLv);
   const key=[S.bossI,S.chap,Math.ceil(p.barrier),Math.ceil(p.hp),Math.round(p.maxHp),S.round,S.gold,S.lvl,Math.floor(S.xp),mm,ss,S.biome,slotCount(),S.round.toFixed(1),S.st.kills,S.augs.length,S.mode==='start',S.st.bosses,S.raidTok,S.dps|0,Math.floor(S.bt||0)].join('|');
   if(key===hudCache)return;hudCache=key;
   $('hud').style.visibility=S.mode==='start'?'hidden':'visible';ovPad();
   $('hpf').style.width=(p.hp/p.maxHp*100)+'%';
   $('bpf').style.width=Math.min(100,p.barrier/p.maxHp*100)+'%';
   $('hpt').textContent=`${Math.ceil(p.hp)} / ${Math.round(p.maxHp)}${p.barrier>=1?' +'+Math.ceil(p.barrier):''}`;
-  $('round').innerHTML=`${S.diff&&S.diff!=='normal'?`<span style="color:${dfM().col}">${dfM().n}</span> `:''}${S.bossI>=0?`<span style="color:#ff6060">⏸ ${mm}:${ss} 보스전</span>`:`${mm}:${ss}<span style="color:var(--muted)">${endless()?'':' / 10:00'}</span>`} <span style="color:var(--brass)">${endless()?(S.chap+1)+'단계':S.bossI===3?'마지막 장':Math.min(4,S.chap+1)+'장'}</span> <span style="color:var(--muted)">${BIOMES[S.biome||0].n}</span> <span style="color:${S.round>12?'#ff6060':S.round>6?'#ffb347':'var(--muted)'}">위협 ${S.round.toFixed(1)}</span>`;
+  $('round').innerHTML=`${S.diff&&S.diff!=='normal'?`<span style="color:${dfM().col}">${dfM().n}</span> `:''}${S.bossI>=0&&!rushOn()?`<span style="color:#ff6060">⏸ ${mm}:${ss} 보스전</span>`:`${mm}:${ss}<span style="color:var(--muted)">${endless()?'':' / 10:00'}</span>`} <span style="color:var(--brass)">${endless()?(S.chap+1)+'단계':S.bossI===3?'마지막 장':Math.min(4,S.chap+1)+'장'}</span> <span style="color:var(--muted)">${BIOMES[S.biome||0].n}</span> <span style="color:${S.round>12?'#ff6060':S.round>6?'#ffb347':'var(--muted)'}">위협 ${S.round.toFixed(1)}</span>`;
   $('left').innerHTML=`처치 ${S.st.kills} <span style="color:#ff9a6a">· DPS ${fmtN(S.dps||0)} <small style="opacity:.75">(최대 ${fmtN(S.dpsMax||0)})</small></span> <span style="color:var(--brass)">· 종합 점수 : ${(endless()?runScore():clearScore()).toLocaleString()}점</span>`;
   // 레이드: 성장 관련 정보(골드·레벨·경험치·증강 칸·시너지)는 숨기고 단계·시간·역할만
   {const rd=raidOn()||duelOn(),d=rd?'none':'';for(const id of ['gold','lv','xp','botLeft']){const el=$(id);if(el&&el.style.display!==d)el.style.display=d;}
@@ -5270,7 +5270,7 @@ function gameOver(win){
     if((d==='god'||d==='hell')&&tkNeed()>0){META.tk=(META.tk||0)+1;unl.push('🎟 직업 봉인 해제권 +1');}}
   unlocked=unl.join(' · ');
   const hsnap=heroOk()?(()=>{try{return heroSnap();}catch(e){return null;}})():null;
-  const sec=Math.floor(S.gt),score=runScore(),medals=runMedals(score);META.medals+=medals;META.total+=medals;saveMeta();
+  const sec=runSec(),score=runScore(),medals=runMedals(score);META.medals+=medals;META.total+=medals;saveMeta();
   if(sec>best){best=sec;try{localStorage.setItem('chipdungeon_best_v5',String(best));}catch(e){}}
   const fmt=x=>`${Math.floor(x/60)}분 ${x%60}초`;
   show(`${unlocked?`<div class="medal" style="justify-content:center"><span>🔓 새로 해금: <b>${unlocked}</b></span></div>`:''}${win?`<h2>🏆 클리어!</h2><p class="sub">10분을 버티고 ${(ET[(S.bossT||[])[3]]||ET.boss4).n}을(를) 쓰러뜨렸습니다. 보스전에 ${fmt(Math.floor(S.bt))} 걸렸어요.</p>`:`<h2>${endless()?'악몽 '+(S.chap+1)+'단계 도달':S.quitEnd?'여기서 정산했습니다':'쓰러졌습니다'}</h2><p class="sub">${endless()?`보스 ${S.st.bosses||0}마리를 잡고`:Math.min(4,S.chap+1)+'장에서'} ${fmt(sec)} 버텼습니다.${S.bossI>=0?` (${ET[bossTypeOf(S.bossI)].n}에게 패배)`:''}</p>`}
@@ -5326,6 +5326,7 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
   {v:38,t:'🔑 이름 비밀번호 · ❓ 자주 묻는 질문',items:[
+    ['change','⚔ <b>보스 러시 시간</b>이 보스전 동안 멈춰서 기록이 1분대로 나오던 문제를 고쳤어요. 이제 실제로 흐른 시간으로 기록되고, 화면 시계도 계속 가요'],
     ['new','📘 게임 설명서에 <b>❓ 자주 묻는 질문</b>을 넣었어요 (해골 병사도 소환물인지, 분신은?, 다른 컴퓨터에서 이름 쓰기 등)'],
     ['new','🔑 <b>이름 비밀번호</b>: 👤 내 이름에서 비밀번호를 정해 두면 <b>다른 컴퓨터·폰</b>에서도 같은 이름+비밀번호로 내 이름을 쓸 수 있어요 (채팅·명예의 전당 등록·결투 전적)']]},
   {v:36,t:'⚔ 결투 보정 · 큰 회피 표시',items:[
@@ -6159,7 +6160,9 @@ const playBonus=()=>((S&&S.st&&S.st.bonus)||0)+dpsBonus();
 const killPts=()=>Math.round(softC(S.st.kills*2,4000));
 const winPts=()=>S.win?3000:0;
 const autoFr=()=>S?Math.round(Math.min(1,(S.amT||0)/Math.max(1,(S.gt||0)+(S.bt||0)))*100)/100:0;
-const curRun=(win)=>({time:Math.floor(S.gt),kills:S.st.kills,lvl:S.lvl,bosses:win?4:(S.st.bosses||0),diff:S.diff||'normal',bonus:playBonus(),ap:autoFr()});
+// 기록 시간: 보통은 보스전 동안 멈추는 생존 시간, 보스 러시는 판 전체가 보스전이라 실제로 흐른 시간
+const runSec=()=>Math.floor(rushOn()?(S.gt||0)+(S.bt||0):(S.gt||0));
+const curRun=(win)=>({time:runSec(),kills:S.st.kills,lvl:S.lvl,bosses:win?4:(S.st.bosses||0),diff:S.diff||'normal',bonus:playBonus(),ap:autoFr()});
 function clearScore(){return scoreOf(curRun(true));}
 function runScore(){return scoreOf(curRun(false));}
 // 메달: 점수 2000점당 1개 × 난이도 메달 배율(md) + 클리어 보너스(cb). 랭킹 점수와 별개로 높은 난이도 보상을 키움
