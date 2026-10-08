@@ -6003,7 +6003,7 @@ function update(dt){
   // 넉백 등으로 몬스터가 맵 밖으로 밀려나가지 않게 (보스는 bossAI에서 따로 처리)
   for(const e of S.en)if(!e.boss){if(e.x<e.r)e.x=e.r;else if(e.x>WW-e.r)e.x=WW-e.r;if(e.y<e.r)e.y=e.r;else if(e.y>WH-e.r)e.y=WH-e.r;}
   if(p.alive&&p.hp>0&&p.hp<=p.maxHp*.02&&S.lowAt==null)S.lowAt=S.t;if(S.lowAt!=null&&p.alive&&S.t-S.lowAt>=10)achUnlock('h_1hp');
-  skTick(dt);ultTick(dt);thrTick(dt);if(AUTO.move&&DEV){autoSkill();if(!DEV_LK&&(S.p.ulCd||0)<=0&&(bossOn()||S.en.filter(e=>e.alive).length>25))useUlt();} // 궁극기 자동 사용은 밸런스 측정(DEV_LK 끔)에서만
+  skTick(dt);ultTick(dt);thrTick(dt);if(AUTO.move&&DEV){autoSkill();if((S.p.ulCd||0)<=0&&(bossOn()||S.en.filter(e=>e.alive).length>25))useUlt();} // 개발자 자동: 생존기·궁극기도 알아서
   nmRingTick(dt);omenTick(dt);updBoss(dt);hbTick(dt);if(p.rdm)p.rdm*=Math.exp(-dt/3);eggTick(dt);if(S.gold>(S.maxGold||0))S.maxGold=S.gold;if(S.npc){S.npc.t+=dt;if(S.npc.t>4.6)S.npc=null;}
   // 사령술사 해골 궁수대: 해골 3기 중 1기가 1초마다 뼈 화살
   if(has('n_archers')&&S.skel&&p.alive){S.naT=(S.naT??1)-dt;if(S.naT<=0){S.naT=1;S.skel.forEach((k,i)=>{if(i%3!==0||k.life<=0)return;const e=nearestE(k,p.range);if(e)pBullet(k.x,k.y,Math.atan2(e.y-k.y,e.x-k.x),pDmg()*lv3('n_archers',.5,.6,.8)*undM(),{child:true,sub:'해골 궁수대',pierce:1,r:3,life:.9,bone:true,src:'undead'});});}}
@@ -9070,6 +9070,8 @@ function campVec(v){const p=S.p;if(!S.camp||!stillAug()||evGoal())return v;
 function autoMoveVec(){const v=campVec(autoMoveVec0()),p=S.p,g=evGoal();if(!g)return v;
   const dx=g.x-p.x,dy=g.y-p.y,d=Math.hypot(dx,dy)||1;if(d<20)return [v[0]*.2,v[1]*.2];
   const w=p.hp/p.maxHp<.45?.35:.7;let x=dx/d*w+v[0]*(1-w),y=dy/d*w+v[1]*(1-w);const l=Math.hypot(x,y)||1;return [x/l,y/l];}
+// 개발자 자동 이동 가중치 (측정으로 맞춤)
+const AI_W={crowd:35,far:.6,nmC:.12};
 function autoMoveVec0(){
   const p=S.p,N=16,STEP=100,M=70;
   // 이동 가능 영역: 보스전이면 결계, 아니면 맵 전체
@@ -9101,6 +9103,9 @@ function autoMoveVec0(){
     for(const e of near){const w=e.elite?1.6:e.boss?1.2:1;const d=Math.hypot(e.x-tx,e.y-ty)/w;if(d<mn)mn=d;
       const dot=((e.x-p.x)*cx+(e.y-p.y)*cy)/(Math.hypot(e.x-p.x,e.y-p.y)||1);if(dot>.6)sc-=40*dot*(1-Math.min(1,Math.hypot(e.x-p.x,e.y-p.y)/300));}
     sc+=Math.min(mn,bossOn&&!mel?Math.max(desired,160):desired)*(bossOn?2.9:2.2);
+    // 개발자 자동(점수 위주): 도착 지점 주변이 붐비면 감점, 한 걸음 더 간 곳(막다른 길)도 확인
+    if(!S.easyAI){let cn=0,mn2=420;const fx=p.x+cx*STEP*2,fy=p.y+cy*STEP*2;for(const e of near){const d=Math.hypot(e.x-tx,e.y-ty);if(d<140)cn+=e.elite?2:1;const d2b=Math.hypot(e.x-fx,e.y-fy);if(d2b<mn2)mn2=d2b;}
+      sc-=cn*AI_W.crowd;sc+=Math.min(mn2,desired)*AI_W.far;}
     if(wide.length){let dn=1e9;for(const e of wide){const d=Math.hypot(e.x-tx,e.y-ty);if(d<dn)dn=d;}if(!bossOn){if(dn>reach)sc-=(dn-reach)*(danger>=3||low?1.2:2.6);else sc+=25;}}
     // 탄환은 현재 위치가 아니라 앞으로 0.6초간 날아갈 경로 기준으로 회피
     for(const b of shots){const ex=b.vx*.6,ey=b.vy*.6,L2=ex*ex+ey*ey||1,u=clamp(((tx-b.x)*ex+(ty-b.y)*ey)/L2,0,1),d=Math.hypot(b.x+ex*u-tx,b.y+ey*u-ty),R0=(b.r||5)+p.r+22;if(d<R0)sc-=(R0-d)*(S.easyAI?3:6);}
@@ -9117,7 +9122,7 @@ function autoMoveVec0(){
     if(S.boss&&S.boss.beams&&S.boss.beams.on!==undefined){const e=S.boss,B=e.beams;for(let k=0;k<B.n;k++){const a2=B.a+B.rot*.35+k*TAU/B.n,ux=Math.cos(a2),uy=Math.sin(a2),px2=tx-e.x,py2=ty-e.y,u=clamp(px2*ux+py2*uy,0,B.len),dd=Math.hypot(px2-ux*u,py2-uy*u);if(dd<B.w/2+p.r+24)sc-=700;}}
     if(goal&&danger<2){const gd=Math.hypot(goal.x-tx,goal.y-ty);sc+=Math.max(0,300-gd)*.8;}
     if(evG&&danger<3){const gd=Math.hypot(evG.x-tx,evG.y-ty),g0=Math.hypot(evG.x-p.x,evG.y-p.y);sc+=(g0-gd)*1.6;}
-    sc+=-Math.hypot(CX-tx,CY-ty)*(A?.05:.02);
+    sc+=-Math.hypot(CX-tx,CY-ty)*(A?(!S.easyAI&&A.nm?AI_W.nmC:.05):.02);
     if(p.amA!==undefined){let df=Math.abs(a-p.amA);if(df>Math.PI)df=TAU-df;sc-=df*6;}
     if(sc>best){best=sc;ba=a;}
   }
