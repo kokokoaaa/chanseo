@@ -181,6 +181,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 .pcard .pq.empty{color:var(--muted);background:none}
 .hof .rank{margin-top:10px}
 .menugrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}.menugrid>.btn{margin:0!important;width:auto;padding:10px 6px;font-size:15px;line-height:1.25}.menugrid .btn small{font-size:11.5px}@media (max-width:640px){.menugrid{grid-template-columns:repeat(2,1fr)}}
+.chartq{position:fixed;inset:0;z-index:9800;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45)}.chartq .cq{background:#0f2a20;border:2px solid var(--brass);border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;align-items:center;gap:12px;color:var(--ivory);font-size:20px;box-shadow:0 8px 30px rgba(0,0,0,.6)}.chartq .cqb{display:flex;gap:12px}.chartq .cqb .btn{min-width:110px;font-size:18px;margin:0}.chartq small{font-size:15px;min-height:1.2em;text-align:center;line-height:1.5}
 .chatb{position:relative}#chatBox .hx-hf_neon,.onll .hx-hf_neon{color:#aef9ff!important;text-shadow:0 0 6px #22e0ff,0 0 12px #22e0ff}#chatBox .chl b.hn{font-weight:bold}.cdot{position:absolute;top:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#ff4f6a;box-shadow:0 0 6px #ff4f6a}
 #chatBox{position:fixed;right:12px;bottom:12px;z-index:9000;width:min(360px,calc(100vw - 24px));height:min(420px,60vh);display:flex;flex-direction:column;background:rgba(8,24,17,.96);border:1px solid var(--brass);border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.6);color:var(--ivory);font-size:14px}
 #chatBox .chh{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid rgba(214,169,74,.35)}#chatBox .chh small{flex:1;color:var(--muted);font-size:11px}#chatBox .chh button{background:none;border:0;color:var(--ivory);font-size:16px;cursor:pointer}
@@ -2684,6 +2685,15 @@ const canPoison=()=>has('toxic')||has('r_venom')||tag('poison')>=2;
 
 /* ---------- fx ---------- */
 function ftext(x,y,s,col,size=14){S.tx.push({x,y,s:String(s),col,size,life:.7});if(S.tx.length>60)S.tx.shift();}
+// 정해 둔 닉네임에게만: 한 판 끝날 때마다 「차트는 쓰고 게임 하시나요?」 → YES 행운 +1 (최대 +5) · NO 행운 −1 (최소 −10). 다음 판부터 계속 적용
+const CHART_NICKS=['힘기범']; // 닉네임에 이 글자가 들어 있으면 (힘기범, 힘기범2 …)
+function chartAsk(){const n=myNick();if(!n||!CHART_NICKS.some(k=>n.includes(k))||document.getElementById('chartQ'))return;
+  const d=document.createElement('div');d.id='chartQ';d.className='chartq';
+  d.innerHTML=`<div class="cq"><b>📋 차트는 쓰고 게임 하시나요?</b><div class="cqb"><button class="btn primary" data-cq="1">YES</button><button class="btn" data-cq="0">NO</button></div><small id="cqMsg"></small></div>`;
+  document.body.appendChild(d);
+  d.querySelectorAll('[data-cq]').forEach(b=>b.onclick=()=>{const y=b.dataset.cq==='1',v=Math.max(-10,Math.min(5,(META.chLk||0)+(y?1:-1)));META.chLk=v;saveMeta();
+    d.querySelectorAll('[data-cq]').forEach(x=>x.disabled=true);$('cqMsg').innerHTML=y?`<span style="color:#7be08f">잘하셨습니다! 행운을 올려드렸습니다 +1 <small>(지금 ${v>0?'+':''}${v})</small></span>`:`<span style="color:#ff8a8a">차트 좀 쓰고 게임하세요.<br>당신의 행운을 내려드렸습니다 −1 <small>(지금 ${v>0?'+':''}${v})</small><br>한 판 더 돌리면 이 창이 뜨고 다시 물어봅니다잉.</span>`;
+    const cl=()=>{if(d.parentNode)d.remove();};setTimeout(cl,y?2200:4500);d.onclick=e=>{if(e.target===d)cl();};});}
 // 결투에서 회피·막기를 크게: 큰 글자 + 퍼지는 빛 고리
 function duelPop(x,y,s,col){S.tx.push({x,y,s,col,size:30,life:1});if(S.tx.length>60)S.tx.shift();S.rings.push({x,y:y+16,r:8,max:46,life:.35,col});S.rings.push({x,y:y+16,r:4,max:28,life:.25,col:'#ffffff'});}
 function burst(x,y,col,n=10){for(let i=0;i<n;i++){const a=Math.random()*TAU,v=rand(60,240);S.pa.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:rand(.25,.5),col});}if(S.pa.length>220)S.pa.splice(0,S.pa.length-220);}
@@ -5270,7 +5280,7 @@ function gameOver(win){
     if((d==='god'||d==='hell')&&tkNeed()>0){META.tk=(META.tk||0)+1;unl.push('🎟 직업 봉인 해제권 +1');}}
   unlocked=unl.join(' · ');
   const hsnap=heroOk()?(()=>{try{return heroSnap();}catch(e){return null;}})():null;
-  const sec=runSec(),score=runScore(),medals=runMedals(score);META.medals+=medals;META.total+=medals;saveMeta();
+  const sec=runSec(),score=runScore(),medals=runMedals(score);META.medals+=medals;META.total+=medals;saveMeta();setTimeout(chartAsk,700);
   if(sec>best){best=sec;try{localStorage.setItem('chipdungeon_best_v5',String(best));}catch(e){}}
   const fmt=x=>`${Math.floor(x/60)}분 ${x%60}초`;
   show(`${unlocked?`<div class="medal" style="justify-content:center"><span>🔓 새로 해금: <b>${unlocked}</b></span></div>`:''}${win?`<h2>🏆 클리어!</h2><p class="sub">10분을 버티고 ${(ET[(S.bossT||[])[3]]||ET.boss4).n}을(를) 쓰러뜨렸습니다. 보스전에 ${fmt(Math.floor(S.bt))} 걸렸어요.</p>`:`<h2>${endless()?'악몽 '+(S.chap+1)+'단계 도달':S.quitEnd?'여기서 정산했습니다':'쓰러졌습니다'}</h2><p class="sub">${endless()?`보스 ${S.st.bosses||0}마리를 잡고`:Math.min(4,S.chap+1)+'장에서'} ${fmt(sec)} 버텼습니다.${S.bossI>=0?` (${ET[bossTypeOf(S.bossI)].n}에게 패배)`:''}</p>`}
@@ -6141,7 +6151,7 @@ const metaSpent=()=>META.spent!=null?META.spent:Math.round((MSTAT.reduce((q,x)=>
 // 영구 공격력·공격 속도·최대 체력·방어·재생은 판 안 합계에 묻히지 않게 '최종값에 곱하기'로 따로 적용 (pDmg·rawRate·hpSync·hurtP·재생)
 function applyMeta(){const p=S.p;p.hp=p.maxHp;p.lifesteal+=.001*mlv('ls');
   p.crit+=.005*mlv('crit');p.critM+=.04*mlv('critm');p.range*=1+.02*mlv('range');p.speed*=1+.01*mlv('spd');p.dashMul*=1-.02*mlv('dash');p.magnet*=1+.08*mlv('magnet');
-  p.xpM=1+.03*mlv('xp');p.goldM+=.05*mlv('gold');S.gold+=25*mlv('sgold');p.luck+=mlv('luck');if(META.sk.token)p.token=true;if(META.sk.key)S.keys=1;if(META.sk.startCard){bonusStat(2,14);}}
+  p.xpM=1+.03*mlv('xp');p.goldM+=.05*mlv('gold');S.gold+=25*mlv('sgold');p.luck+=mlv('luck')+(META.chLk||0);if(META.sk.token)p.token=true;if(META.sk.key)S.keys=1;if(META.sk.startCard){bonusStat(2,14);}}
 // 보스 처치 속도 보너스: 보스마다 기준 시간보다 빨리 잡은 1초당 10점. 보스전 중엔 생존 시간이 멈추므로 실제 걸린 시간은 여기서만 반영
 const BOSS_PAR=[90,90,110,140],BOSS_DM=[.55,.75,1,1];
 const bossSpeedPts=()=>(S.st.btimes||[]).reduce((q,t,i)=>q+Math.round(Math.max(0,(BOSS_PAR[bossHome(i)]||120)-t)*10),0);
@@ -7293,7 +7303,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=38,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=39,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
