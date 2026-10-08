@@ -3694,6 +3694,216 @@ CH.necro={
    cg(this.head,14,10+U);if(st.hurt)hurtEyes(16+U);
   }finally{for(const kk in old)CP[kk]=old[kk];}
  }};
+// ===== 새 디자인 (작은 머리·자연스러운 비율·직업별 팔레트) =====
+const CH_OLD=Object.assign({},CH);
+function dt(P,c,x,y){const v=P[c];if(!v)return;g.fillStyle=v;g.fillRect(x,y,1,1);}
+function cl(P,rows,x0,y0){for(let y=0;y<rows.length;y++){const r=rows[y];for(let x=0;x<r.length;x++){const c=r[x];if(c!=='.')dt(P,c,x0+x,y0+y);}}}
+// 줄마다 반폭(또는 [왼,오른]) 목록으로 모양을 칠함. R: 어두운→밝은 5글자, 왼쪽 위가 밝음
+function shp(P,cx,y0,ws,R,o){o=o||{};ws.forEach((w,i)=>{const l=Array.isArray(w)?w[0]:-w,r=Array.isArray(w)?w[1]:w,m=(l+r)/2,hw=(r-l)/2||1,x0=Math.ceil(l),x1=Math.floor(r);
+  for(let x=x0;x<=x1;x++){const u=(x-m)/hw;let c=u<-.5?R[3]:u<.1?R[2]:u<.55?R[1]:R[0];if(o.hl&&i<o.hl&&u<.2)c=R[4];if(x===x1)c=R[0];else if(x===x0)c=R[2];dt(P,c,cx+x,y0+i);}});}
+const SKN={k:'#f2c79b',K:'#c98a5e',e:'#2b1d2e'};
+CH.knight={
+ P:{1:'#18223c',2:'#26385e',3:'#36507e',4:'#4c6c9e',5:'#7e9ccc',6:'#b4c8e8',k:'#f2c79b',K:'#c98a5e',e:'#2b1d2e',t:'#22365e',T:'#34508a',u:'#4c6cac',L:'#5a3a1e',g:'#e8c45a',s:'#dde4ee',S:'#9aa6b8',x:'#5e6a7e',a:'#4a2810',A:'#7a4824',c:'#a06a38',R:'#d42c35',r:'#8a1428',q:'#ff6b5b',p:'#1c2640',B:'#5a3618',b:'#2e1a0a',W:'#f4f8ff',w:'#aab6c8'},
+ cl(rows,x0,y0){for(let y=0;y<rows.length;y++)for(let x=0;x<rows[y].length;x++){const c=rows[y][x];if(c==='.')continue;g.fillStyle=this.P[c];g.fillRect(x0+x,y0+y,1,1);}},
+ dot(c,x,y){g.fillStyle=this.P[c];g.fillRect(x,y,1,1);},
+ scarf:[['....qRR','.qRRRRr','RRrr...'],['.....qR','..qRRRr','.RRrr..']],
+ torso:['..uTTTTTt..','.uTTTTTTTt.','.uTuTTTTTt.','.uTTTTTTtt.','.LLLLgLLLL.','.tTTTtTTTt.','..tt...tt..'],
+ leg:['pp','pp','pp','BB','BB','BBb'],
+ pauldron:['.ssS','sssS','sSSx','.xx.'],
+ swoosh:[null,[[11,12],[13,11],[15,10],[17,10],[19,10],[21,11],[23,12],[25,14],[27,16],[28,18],[29,20],[29,22],[29,24],[28,26]]],
+ helm(U){// 둥근 투구 (작게): 왼쪽 위가 밝고 가운데 능선
+  for(let y=0;y<8;y++){const w=Math.round(5.8*Math.sqrt(Math.max(0,1-((7.6-y)/8)**2)));for(let x=-w;x<=w;x++){const u=x/(w||1);let c=u<-.15?'4':u<.35?'3':u<.7?'2':'1';if(y<2&&u<.3)c='5';if(x===0)c=y<5?'6':'5';if(x===-1&&y<5)c='5';if(Math.abs(x)===w)c=u<0?'3':'1';this.dot(c,20+x,10+y+U);}}
+  for(let x=14;x<=26;x++){this.dot(x<20?'2':'1',x,17+U);}this.dot('3',15,17+U);
+  for(let y=18;y<=21;y++){this.dot('3',15,y+U);this.dot('1',25,y+U);}
+  this.cl(['KKKKKKKKK','kkekkkekK','kkekkkekK','kkkkkkkKK','.KKKKKKK.'],16,18+U);},
+ shield(x0,y0){for(let y=-5;y<=5;y++)for(let x=-5;x<=5;x++){const d=Math.hypot(x,y);if(d>5.2)continue;let c;
+   if(d>4.1)c=(x+y>2)?'x':(x+y<-3?'s':'S');else{c=((x+7)%3===0)?'a':'A';if(x+y<-3&&d<4.1)c='c';}if(d<1.3)c=(x+y<0)?'s':'S';this.dot(c,x0+x,y0+y);}
+   this.dot('x',x0+1,y0+1);},
+ draw(st){const U=st.U,A=st.atk,ay=st.ay||0;
+  this.cl(this.scarf[st.cf&1],9,22+U);
+  this.cl(this.leg,17,29+st.lL);this.cl(this.leg.map(r=>r.length>2?'.'+r.slice(0,2):r),21,29+st.rL);this.dot('b',23,34+st.rL);this.dot('b',22,34+st.rL);
+  this.cl(this.torso,15,23+U);
+  // 칼 팔
+  if(A===0){this.cl(['TT','Tt','tt','ss','sS'],12,19+U);guard(13,18+U,0,-1,1,'g','G');blade(13,17+U,0,-1,8,'W','S','s');}
+  else{const yy=A<0?ay:0;this.cl(['Tt','Tt','ss','sS'],14,25+U+yy);}
+  this.cl(this.pauldron,12,23+U+(A===0?-1:0));
+  if(A<0){guard(14,28+U+ay,-1,-1,1,'g','G');blade(14,28+U+ay,-1,-1,7,'W','S','s');}
+  else if(A===1){guard(16,28+U,1,1,1,'g','G');blade(16,28+U,1,1,8,'W','S','s');}
+  this.shield(26+(A===1?1:0),27+U+st.sh);
+  if(A===2){guard(16,28+U,1,0,1,'g','G');blade(16,28+U,1,0,11,'W','S','s');}
+  this.helm(U);
+  const f=st.pf?[[21,10],[20,9],[19,8],[18,7],[17,7],[16,6]]:[[21,10],[20,9],[19,8],[18,7],[17,6],[16,6]];
+  for(const [x,y] of f){this.dot('W',x,y+U);this.dot('w',x+1,y+1+U);}
+  if(st.hurt)hurtEyes(18+U);
+ }};
+CH.mage={P:Object.assign({1:'#24124a',2:'#36207a',3:'#4c34a8',4:'#6a4ed0',5:'#9078f0',g:'#e8c45a',G:'#a87e22',h:'#b4b8ca',H:'#e6eaf4',w:'#ffffff',c:'#5ad0f0',z:'#2a1a10'},SKN),
+ draw(st){const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+  cl(P,['zz'],17,34+Math.min(0,st.lL));cl(P,['zz'],21,34+Math.min(0,st.rL));
+  shp(P,20,17+U,[5,5,5,5,5,5,5,5,4.5,4],'hhHHw');
+  shp(P,20,22+U,[3.5,4,4,4.5,4.5,4.5,5,5,5,5.5,5.5],'12345');for(let x=-5;x<=5;x++)dt(P,x<1?'g':'G',20+x,33+U);
+  for(let y=23;y<33;y++){dt(P,'g',20,y+U);dt(P,'G',21,y+U);}for(let x=16;x<=24;x++)dt(P,x<20?'g':'G',x,27+U);dt(P,'c',20,27+U);
+  const sy=A===0||A===1?-3:0,sx=A===1?1:0;
+  for(let y=14+U+sy;y<=34+sy;y++){cp('L',12+sx,y);cp('l',13+sx,y);}
+  const fl=Math.floor((st.t||0)*10)%3,big=A===1?2:A===0?1:0;
+  cg(big===2?['..9..','.989.','98889','.989.','..0..']:['.9.','989','.0.'],(big===2?10:11)+sx,(big===2?8:10-fl%2)+U+sy);
+  cl(P,['.43','543','432','.kK'],13,23+U+(A>=0?-3:ay));cl(P,['43.','432','321','kK.'],24,23+U-ay);
+  cg(A>=0?['.8.','898','909','.0.']:fl?['.9.','898','.0.']:['.8.','.9.','909'],24,27+U-ay);
+  cl(P,['HhHHhHHhH','kkkkkkkkK','kkekkkekK','kkekkkekK','kkkkkkkKK','.KKKKKKK.'],16,17+U);
+  const cone=[];for(let y=4;y<=13;y++){const i=13-y,hw=Math.max(.5,5-i*.5),off=i*.35;cone.push([-hw+off,hw+off]);}shp(P,20,4+U,cone,'12345');dt(P,'4',24,3+U);dt(P,'3',25,3+U);dt(P,'2',26,4+U);
+  shp(P,20,14+U,[5.5],'GGggg');shp(P,20,15+U,[8,9],'12345');
+  if(st.pf)dt(P,'g',19,10+U);else cl(P,['.g.','ggg','.g.'],18,9+U);
+  if(st.hurt)hurtEyes(18+U);
+ }};
+CH.archer={P:Object.assign({1:'#12301a',2:'#1f4a24',3:'#2f6a2e',4:'#46883a',5:'#68a850',b:'#4a2a14',B:'#7a4a24',L:'#7a4a24',l:'#4a2a12',z:'#2a1a0e',g:'#e8c45a',p:'#5a4a30',q:'#3a2e1e',f:'#e8e0c8'},SKN),
+ draw(st){const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+  shp(P,20,23+U,[4,4.5,5,5,5.5,5.5,5],'11223');for(let x=-5;x<=5;x++)if((x+st.cf)%3)dt(P,'1',20+x,30+U);
+  cl(P,['f.f.','LfLf','LLl.','LLl.','LLl.','.Ll.'],23,17+U);
+  cl(P,['pq','pq','pq','LL','zz','zzz'],17,29+st.lL);cl(P,['qp','qp','qp','LL','zz','zzz'],21,29+st.rL);
+  shp(P,20,23+U,[3.5,4,4,4,4,4],'12345');for(let x=16;x<=24;x++)dt(P,'L',x,26+U);dt(P,'g',20,26+U);for(let i=0;i<4;i++)dt(P,'l',17+i*2,23+U+i);
+  const pull=A===0?2:A===1?4:0,bx=27,by=17+U,sx=bx-1-pull;
+  for(let y=by+1;y<=by+8;y++)cp('E',Math.round(bx-1-(y-by-1)/7*pull),y);for(let y=by+8;y<=by+15;y++)cp('E',Math.round(sx+(y-by-8)/7*pull),y);
+  for(let i=0;i<=16;i++){const yy=by+i,cv=Math.round(Math.sin(i/16*Math.PI)*2.5);cp(i%5===0?'5':'L',bx+cv,yy);cp(i%5===0?'6':'l',bx+cv+1,yy);}
+  cp('g',bx+3,by+8);
+  cl(P,['43.','343','.34','.kK'],24,23+U);
+  cl(P,['45','34','34','kK'],A>=0?sx-1:14,23+U+(A>=0?1:ay));
+  if(A===0||A===1){for(let x=sx;x<=bx+5;x++)cp(x===bx+5?'s':'L',x,by+8);cp('q',sx,by+7);cp('q',sx,by+9);cp('W',bx+5,by+7);cp('W',bx+5,by+9);}
+  shp(P,20,9+U,[2,3.5,4.5,5,5.5,6,6,6,6,6,5.5,5],'12345',{hl:3});dt(P,'3',26,12+U);dt(P,'2',27,13+U);
+  cl(P,['bBBbBBbBb','kkkkkkkkK','kkekkkekK','kkekkkekK','kkkkkkkKK','.KKKKKKK.'],16,15+U);
+  cl(P,st.pf?['.5','54','4.']:['5.','45','.4'],20,6+U);
+  if(st.hurt)hurtEyes(16+U);
+ },swoosh:CH_OLD.archer.swoosh};
+CH.rogue={P:Object.assign({1:'#0e0c14',2:'#1c1824',3:'#2c2636',4:'#40384e',5:'#5a5068',r:'#8a1428',R:'#c8323a',q:'#ff6b5b',L:'#4a3424',l:'#2a1c12',z:'#141016',g:'#9a9aa6'},SKN),
+ draw(st){const P=this.P,U=st.U,A=st.atk,yo=st.ay||0;
+  cl(P,st.cf?['.RR..','RRrR.','..rrR']:['.RR..','RRRr.','...rr'],24,21+U);
+  cl(P,['32','32','32','11','zz','zzz'],17,29+st.lL);cl(P,['23','23','23','11','zz','zzz'],21,29+st.rL);
+  shp(P,20,23+U,[3.5,4,4,4,4,3.5],'12345');for(let x=16;x<=24;x++)dt(P,'L',x,26+U);dt(P,'g',20,26+U);for(let i=0;i<4;i++)dt(P,'l',18+i,23+U+i);
+  cl(P,['43','34','43','kK'],14,23+U+(A===0?-3:yo));cl(P,['34','43','32','Kk'],24,23+U+(A===1?-3:-yo));
+  const dag=(x,y,dx,dy)=>{guard(x,y,dx,dy,1,'2','3');blade(x,y,dx,dy,4,'W','S','s');cp('6',x-dx,y-dy);};
+  if(A===0)dag(15,24+U,1,-1);else if(A===2)dag(15,27+U,1,1);else dag(14,27+U+yo,0,1);
+  if(A===1)dag(24,24+U,-1,-1);else if(A===2)dag(24,27+U,-1,1);else dag(25,27+U-yo,0,1);
+  shp(P,20,9+U,[2,3.5,4.5,5,5.5,6,6,6,6,6,5.5],'12345',{hl:2});
+  cl(P,['KKKKKKKKK','kkekkkekK','kkekkkekK','RRRRRRRRr','RqRRRRRrr','.rrrrrrr.'],16,15+U);
+  if(st.hurt){g.fillStyle=P.k;g.fillRect(16,16+U,8,2);cg(['e.e..e.e','.e....e.'],16,16+U);}
+ },swoosh:CH_OLD.rogue.swoosh};
+CH.paladin={swoosh:CH.knight.swoosh,P:Object.assign({W:'#fbf8ef',w:'#e4e8f0',s:'#c4ccd8',S:'#98a2b4',x:'#6a7488',X:'#3e4556',g:'#f3cf4e',G:'#b88c22',v:'#141020',8:'#fff6b0',L:'#8a5530',l:'#5a3420'},SKN),
+ draw(st){const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+  shp(P,20,23+U,[4,4.5,5,5.5,5.5,6,6,6,6],'xSsww');for(let x=-6;x<=6;x++)if((x+st.cf)%3===0)dt(P,'S',20+x,32+U);
+  cl(P,['sS','sx','Sx','SS','xX','xXX'],17,29+st.lL);cl(P,['Ss','xs','xS','SS','Xx','XXx'],21,29+st.rL);
+  shp(P,20,23+U,[3.5,4,4,4,4,4],'xSsww',{hl:1});
+  for(let y=24;y<=29;y++)for(let x=18;x<=22;x++)dt(P,x<20?'W':'w',x,y+U);for(let y=24;y<=28;y++)dt(P,'g',20,y+U);for(let x=18;x<=22;x++)dt(P,'g',x,25+U);
+  for(let x=16;x<=24;x++)dt(P,x<20?'G':'G',x,29+U);
+  cl(P,['sws','Ssx'],15,22+U);cl(P,['wsS','SxX'],23,22+U);
+  cl(P,['GgggggG','gWWgWWG','ggggggG','gWWgWWG','.gWgWG.','..ggG..'],9,22+U+ay);cl(P,['sS','Sx','kK'],14,24+U+ay);
+  const up=A>=0?-5:0,hx=25;cl(P,['Sx','sS','Kk'],24,24+U+(A>=0?-2:-ay));
+  for(let y=17+U+up;y<=27+U+(A>=0?-2:0);y++)dt(P,y%3?'L':'l',hx+1,y);
+  cl(P,['.gG.','gGGG','GgGG','.GG.'],hx,13+U+up);dt(P,'8',hx+1,12+U+up);
+  shp(P,20,9+U,[2.5,4,5,5.5,5.5,5.5,5.5,5.5,5.5,5.5,5,4],'XxSsw',{hl:3});
+  for(let x=15;x<=25;x++)dt(P,x<20?'g':'G',x,13+U);for(let y=9;y<13;y++)dt(P,'g',20,y+U);for(let x=16;x<=24;x++)dt(P,'G',x,20+U);
+  for(let x=16;x<=24;x++)dt(P,'v',x,15+U);for(let y=16;y<=18;y++)dt(P,'v',20,y+U);if(!st.hurt){dt(P,'8',16,15+U);dt(P,'8',24,15+U);dt(P,'8',17,15+U);dt(P,'8',23,15+U);}
+  cl(P,['.W','WW','Ws'],13,12+U);cl(P,['W.','WW','sW'],26,12+U);
+  for(let x=16;x<=24;x++)dt(P,'8',x,6+U);dt(P,'8',15,7+U);dt(P,'8',25,7+U);
+ }};
+CH.necro={P:{1:'#0e0b14',2:'#1c1726',3:'#2e2640',4:'#4a3e62',5:'#665a82',k:'#ddd6c8',K:'#aca291',e:'#5dff7a',E:'#f4f1e6',b:'#cfc6ae',B:'#8e866f',v:'#151018',8:'#d8ffd0',9:'#7dff8a'},
+ draw(st){const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+  shp(P,20,23+U,[4,4.5,5,5.5,5.5,6,6,6,6],'11223');for(let x=-6;x<=6;x++)if((x+st.cf)%2)dt(P,'1',20+x,32+U);
+  shp(P,20,22+U,[3.5,4,4,4.5,4.5,4.5,5,5,5,5.5,5.5],'12345');for(let x=-5;x<=5;x++)if((x+st.cf)%2===0)dt(P,'2',20+x,33+U);
+  for(let y=23;y<33;y+=2)dt(P,'b',20,y+U);for(let x=16;x<=24;x++)dt(P,'B',x,27+U);cl(P,['bEb','EvE'],19,26+U);
+  const sy=A>=0?-3:0,fl=Math.floor((st.t||0)*8)%3;
+  for(let y=14+U+sy;y<=34+sy;y++){dt(P,y%4?'b':'B',12,y);dt(P,'B',13,y);}
+  cl(P,['.EE.','EvvE','EEEE','.EE.'],11,10+U+sy);cl(P,[fl===0?'9..9':fl===1?'.99.':'9.9.'],11,9+U+sy);if(A>=0)cl(P,['8..8','.88.'],11,8+U+sy);
+  cl(P,['.43','432','.kK'],13,23+U+(A>=0?-3:ay));cl(P,['34.','321','kK.'],24,23+U-ay);
+  shp(P,20,9+U,[2,3.5,4.5,5,5.5,6,6,6,6,6,5.5,5],'12345',{hl:2});
+  cl(P,['222222222','kkkkkkkkK','kkekkkekK','kkekkkekK','kkkkkkkKK','.KKKKKKK.'],16,15+U);
+  if(st.hurt)hurtEyes(16+U);
+ }};
+CH.gunner={P:Object.assign({L:'#8a5a32',Y:'#b07a46',y:'#d09a5e',l:'#5a3820',z:'#3a2414',B:'#4a6ab0',b:'#2f4a86',d:'#1f305e',X:'#3e4452',s:'#c8ced8',R:'#c8323a',r:'#8a1428',q:'#ff6b5b',W:'#f4f0e6',g:'#e8c45a',c:'#5a3418'},SKN),
+ draw(st){const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+  cl(P,['Bb','Bb','bd','ll','zz','zzz'],17,29+st.lL);cl(P,['bB','bB','db','ll','zz','zzz'],21,29+st.rL);
+  shp(P,20,22+U,[3.5,4,4,4.5,4.5,5,5],'zlLYy');for(let y=29;y<=30;y++){dt(P,'l',15,y+U);dt(P,'L',16,y+U);dt(P,'L',24,y+U);dt(P,'l',25,y+U);}
+  for(let y=23;y<=26;y++)for(let x=19;x<=21;x++)dt(P,x<21?'W':'s',x,y+U);for(let x=16;x<=24;x++)dt(P,'z',x,27+U);dt(P,'g',20,27+U);
+  cl(P,['LY','LY','Yl','kK'],14,23+U+ay);
+  const up=A>=0?-2:0;cl(P,['YL','YL','kK'],24,23+U+up);cl(P,['XXXXX','.Xs..','.l...'],25,25+U+up);if(A===0)cg(['8.','98','8.'],30,24+U+up);
+  shp(P,20,14+U,[5,5,5,5,5],'zzccc');
+  cl(P,['ccccccccc','kkkkkkkkK','kkekkkekK','kkekkkekK','kkkkkkkKK','.KKKKKKK.'],16,15+U);
+  cl(P,['RqRRRRRrR','.RRRRRrr.'],16,21+U);
+  shp(P,20,8+U,[3,4,4.5,4.5,5],'zlLYy',{hl:2});dt(P,'l',20,8+U);for(let x=15;x<=25;x++)dt(P,'r',x,12+U);
+  shp(P,20,13+U,[9],'zlLYy');shp(P,20,14+U,[7.5],'zzlll');dt(P,'L',11,12+U);dt(P,'l',29,12+U);
+  if(st.hurt)hurtEyes(16+U);
+ }};
+CH.elem={P:Object.assign({1:'#0e3a4a',2:'#174a60',3:'#1f6a88',4:'#2f9ab8',5:'#5fc8e0',h:'#2fa8b8',H:'#5fd0dc',c:'#a8f0f4',W:'#f4f8ff',w:'#c8dce8',g:'#f0c840',G:'#b08a24',r:'#ff5a8a'},SKN),
+ draw(st){const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+  shp(P,20,13+U,[5,5.5,5.5,5.5,5.5,5.5,5.5,5,5,4.5,4],'3hHHc');
+  cl(P,['43','34','23','11','11','111'],17,29+st.lL);cl(P,['34','43','32','11','11','111'],21,29+st.rL);
+  shp(P,20,23+U,[3.5,4,4,4,4,4],'12345');for(let i=0;i<6;i++){dt(P,'W',17+i,23+U+i);dt(P,'w',18+i,23+U+i);}for(let x=16;x<=24;x++)dt(P,'G',x,26+U);dt(P,'r',20,26+U);
+  const fl=Math.floor((st.t||0)*10)%2,big=A>=0;
+  cl(P,['45','34','kK'],14,24+U+ay);cl(P,['43','32','Kk'],24,24+U-ay);
+  cg(big?['.9.','989','898','.0.']:fl?['.9.','989','.0.']:['.8.','.9.','909'],13,(big?20:22)+U+ay);
+  cg(big?['.c.','cEc','EcE','.B.']:fl?['.c.','cEc','.B.']:['.E.','.c.','cBc'],24,(big?20:22)+U-ay);
+  shp(P,20,10+U,[3,4.5,5.5,6,6],'3hHHc',{hl:2});for(let x=15;x<=25;x++)dt(P,'g',x,14+U);dt(P,'r',20,14+U);
+  cl(P,['HhHHhHHhH','kkkkkkkkK','kkekkkekK','kkekkkekK','kkkkkkkKK','.KKKKKKK.'],16,15+U);
+  if(st.hurt)hurtEyes(16+U);
+ }};
+CH.berserk={P:Object.assign({S:'#8e96a6',s:'#c3c9d4',x:'#4a5060',X:'#2e3240',w:'#e8ecf2',G:'#8a5a2a',Y:'#d0782a',y:'#f0a050',L:'#7a4a24',l:'#4a2a12',R:'#5a3a24',r:'#3a2416',E:'#efe6cf',f:'#8a6a4a',F:'#b8946a'},SKN),
+ draw(st){const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+  cl(P,['RR','Rr','rr','ll','ff','fff'],17,29+st.lL);cl(P,['RR','rR','rr','ll','ff','fff'],21,29+st.rL);
+  shp(P,20,23+U,[3.5,4,4,4],'KKkkk');for(let i=0;i<4;i++){dt(P,'L',16+i*2,23+U+i);dt(P,'L',17+i*2,23+U+i);}
+  for(let x=16;x<=24;x++)dt(P,'l',x,27+U);dt(P,'G',20,27+U);shp(P,20,28+U,[4,4.5],'rRRff');
+  cl(P,['FfF','fFf'],13,22+U);
+  cl(P,['FF','kK','kK','kK'],14,23+U+ay);
+  const up=A>=0?-4:0,hx=26;cl(P,['kK','kK'],24,25+U+(A>=0?-2:-ay));
+  for(let y=14+U+up;y<=30+U;y++)dt(P,y%3?'L':'R',hx+1,y);
+  cl(P,['.ww','wsS','wsS','wsS','.ww'],hx-2,14+U+up);cl(P,['ww.','Ssw','Ssw','Ssw','ww.'],hx+2,14+U+up);
+  shp(P,20,9+U,[2.5,4,5,5.5,5.5],'XxSsw',{hl:2});for(let x=14;x<=26;x++)dt(P,'G',x,14+U);
+  cl(P,['kkkkkkkkK','kkekkkekK','kkekkkekK','kkkkkkkKK'],16,15+U);for(let y=14;y<=16;y++)dt(P,'S',20,y+U);
+  cl(P,['YYkkkkkYY','yYYYYYYYY','.YYYYYYY.','..YYYYY..'],16,19+U);
+  cl(P,['E..','EE.','.EE'],12,8+U);cl(P,['..E','.EE','EE.'],26,8+U);
+  if(st.hurt)hurtEyes(15+U);
+ }};
+CH.druid={P:Object.assign({1:'#1a3a14',2:'#2f6a24',3:'#4a8a34',4:'#6aaa48',5:'#9ad85a',L:'#8a5a30',l:'#5a3820',t:'#6a4a2a',T:'#a07a4a',Y:'#c8a070',z:'#2a1a0e',9:'#c8ff7a',8:'#f0ffd0'},SKN),
+ draw(st){const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+  shp(P,20,23+U,[4,4.5,5,5.5,5.5,6,6,6],'12234');for(let x=-6;x<=6;x++)if((x+st.cf)%2)dt(P,'3',20+x,31+U);
+  cl(P,['tL','tL','tL','zl','zz','zzz'],17,29+st.lL);cl(P,['Lt','Lt','Lt','lz','zz','zzz'],21,29+st.rL);
+  shp(P,20,23+U,[3.5,4,4,4,4,4],'ltLTY');for(let x=16;x<=24;x++)dt(P,x%2?'3':'4',x,23+U);for(let x=16;x<=24;x++)dt(P,'z',x,26+U);dt(P,'5',20,26+U);
+  cl(P,['34','23','23','kK'],14,23+U+ay);
+  const up=A>=0?-3:0,fl=Math.floor((st.t||0)*5)%2,x=27;
+  for(let y=13+U+up;y<=33+U;y++){dt(P,y%4?'L':'l',x,y);if(y%5===1)dt(P,'4',x-1,y);if(y%5===3)dt(P,'3',x+1,y);}
+  cl(P,['.LL.','L..L','L.9.','.L..'],x-2,10+U+up);if(fl||A>=0)cl(P,['.8.','8.8','.8.'],x-1,10+U+up);
+  cl(P,['32.','234','.kK'],24,24+U+up);
+  shp(P,20,9+U,[2,3.5,4.5,5,5.5,6,6,6,6,6,5.5],'12345',{hl:3});for(const [a,b] of [[17,11],[22,10],[24,13],[15,13],[19,12]])dt(P,'5',a,b+U);
+  cl(P,['TTTTTTTTT','kkkkkkkkK','kkekkkekK','kkekkkekK','kkkkkkkKK','.KKKKKKK.'],16,15+U);
+  cl(P,['Y.Y','YYY','.Y.'],13,6+U);cl(P,['Y.Y','YYY','.Y.'],24,6+U);
+  if(st.hurt)hurtEyes(16+U);
+ }};
+CH.alch={P:Object.assign({h:'#5a3a22',H:'#8a5a32',j:'#b8804a',X:'#8a6a2a',c:'#ffb347',W:'#f6f8fb',s:'#cfd6e0',S:'#9aa6b8',a:'#6a4a2e',A:'#8a6040',z:'#2a1a10',l:'#4a3020',E:'#ffffff',F:'#8ee06a',N:'#4aa83a',o:'#ff9a3a',b:'#4a9ad8'},SKN),
+ draw(st){const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+  cl(P,['zl','zl','zl','ll','ll','lll'],17,29+st.lL);cl(P,['lz','lz','lz','ll','ll','lll'],21,29+st.rL);
+  shp(P,20,22+U,[3.5,4,4,4.5,4.5,5,5],'SsWWW');for(let y=29;y<=30;y++){dt(P,'s',15,y+U);dt(P,'W',16,y+U);dt(P,'W',24,y+U);dt(P,'S',25,y+U);}
+  for(let y=24;y<=29;y++)for(let x=18;x<=22;x++)dt(P,x<20?'A':'a',x,y+U);dt(P,'a',18,23+U);dt(P,'a',22,23+U);
+  for(let x=16;x<=24;x++)dt(P,'l',x,27+U);cl(P,['o'],16,25+U);dt(P,'o',16,26+U);dt(P,'b',24,25+U);dt(P,'b',24,26+U);
+  cl(P,['Ws','Ws','sS','kK'],14,23+U+ay);
+  const up=A>=0?-3:0,fl=Math.floor((st.t||0)*6)%2;cl(P,['sW','sW','kK'],24,23+U+up);
+  cl(P,['.E.','.E.','FNF','NFN','.N.'],25,21+U+up);if(fl||A>=0)cl(P,['F.F','.F.'],25,18+U+up);
+  shp(P,20,10+U,[3,4.5,5.5,6,6],'hhHHj',{hl:2});dt(P,'H',16,9+U);dt(P,'j',19,8+U);dt(P,'H',23,9+U);dt(P,'H',25,10+U);
+  for(let y=15;y<=18;y++){dt(P,'h',15,y+U);dt(P,'h',25,y+U);}
+  cl(P,['kkkkkkkkK','kkekkkekK','kkekkkekK','kkkkkkkKK','.KKKKKKK.'],16,15+U);
+  for(let x=14;x<=26;x++)dt(P,'X',x,14+U);cl(P,['XccX','XcEX'],15,13+U);cl(P,['XccX','XcEX'],22,13+U);
+  if(st.hurt)hurtEyes(15+U);
+ }};
+CH.gambler={P:Object.assign({z:'#1e1a26',v:'#3a3448',V:'#5a5268',P:'#7a48b8',p:'#4a2678',W:'#f4f1e8',w:'#c8c4bc',R:'#d42c35',r:'#8a1428',g:'#f0c840',G:'#b08a24',c:'#16121a'},SKN),
+ draw(st){const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+  cl(P,['zv','zv','zv','zz','zz','zzz'],17,29+st.lL);cl(P,['vz','vz','vz','zz','zz','zzz'],21,29+st.rL);
+  shp(P,20,23+U,[3.5,4,4,4,4,4],'zzvvV');for(let y=29;y<=30;y++){dt(P,'z',16,y+U);dt(P,'z',24,y+U);}
+  for(let y=23;y<=27;y++)for(let x=18;x<=22;x++)dt(P,x<20?'P':'p',x,y+U);for(let x=19;x<=21;x++)dt(P,'W',x,23+U);dt(P,'w',20,24+U);dt(P,'g',20,25+U);dt(P,'g',20,27+U);
+  cl(P,['RrWrR'],18,22+U);dt(P,'r',20,22+U);
+  cl(P,['zv','zv','vV','kK'],14,23+U+ay);
+  const up=A>=0?-2:0;cl(P,['vz','vz','kK'],24,23+U+up);
+  const ph=((st.t||0)*3)%1,cy=Math.round(20+U+up-Math.sin(ph*Math.PI)*5),w=Math.abs(Math.cos(ph*Math.PI*4))>.5;
+  cl(P,w?['.gg.','gGGg','.gg.']:['.g.','.G.','.g.'],w?24:25,cy);
+  shp(P,20,13+U,[5.5,5.5],'cccvv');for(let y=15;y<=17;y++){dt(P,'c',15,y+U);dt(P,'c',25,y+U);}
+  cl(P,['ccccvcccc','kkkkkkkkK','kkekkkekK','kkekkkekK','kkkkkkkKK','.KKKKKKK.'],16,15+U);
+  shp(P,20,6+U,[4,4,4,4,4,4],'zzvvV',{hl:1});for(let x=16;x<=24;x++)dt(P,x<22?'R':'r',x,10+U);shp(P,20,12+U,[6.5],'zzvvV');
+  if(st.hurt)hurtEyes(16+U);
+ }};
 function hurtEyes(y){g.fillStyle=CP.k;g.fillRect(17,y,6,3);cg(['e.','.e','e.'],17,y);cg(['.e','e.','.e'],21,y);}
 function drawChar(cls,a,t,ap,flash){
   const C=CH[cls];g.clearRect(0,0,40,40);g.save();
@@ -5970,7 +6180,7 @@ function gearFx(c,l,x,y,T,emit,R2){if(l>=2){c.shadowColor=gearCol(l,T);c.shadowB
 const gearSt=l=>l>=10?3:l>=7?2:l>=4?1:0;
 // 직업별 도트 기준 위치 (40칸 그림, 발끝 35번째 줄): [이마 줄, 어깨 줄, 손 줄, 어깨 반폭]. 직업마다 모자·투구가 달라서 장비를 각자 몸에 맞게 붙임
 // [머리 꼭대기 줄, 어깨 줄, 손 줄] (40칸 도트, 발끝 35번째 줄)
-const GEAR_FIT={knight:[6,20,24],mage:[2,19,23],archer:[7,17,23],rogue:[9,19,24],paladin:[4,21,24],necro:[8,20,24],gunner:[6,19,24],elem:[9,19,24],berserk:[6,19,24],druid:[6,19,24],alch:[9,18,23],gambler:[6,19,24]};
+const GEAR_FIT={knight:[5,20,24],mage:[3,19,23],archer:[5,17,23],rogue:[8,19,24],paladin:[4,21,24],necro:[7,20,24],gunner:[7,19,24],elem:[9,19,24],berserk:[5,19,24],druid:[6,19,24],alch:[7,18,23],gambler:[5,19,24]};
 let GFIT_CLS=null; // 명예의 전당 아바타를 그릴 때만 그 기록의 직업으로
 const gFit=()=>{const f=GEAR_FIT[GFIT_CLS||(S&&S.cls)||'knight']||GEAR_FIT.knight;return {top:-(35-f[0])*PXW,sh:-(35-f[1])*PXW,hand:-(35-f[2])*PXW};};
 const gearRim=()=>''; // 갑옷은 겉모습 없음 (예전 윤곽 빛 제거)
@@ -6836,6 +7046,8 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:80,t:'🧙 12직업 새 디자인',items:[
+    ['new','🧙 12직업 모두 새 디자인이에요! 머리를 조금 줄여 몸이 잘 보이게 하고, 직업마다 색과 장식을 새로 입혔어요 (기사 남색 투구·흰 깃털·둥근 방패, 마법사 금띠 고깔모자, 궁수 초록 두건, 도적 복면, 성기사 은빛 통투구, 사령술사 해골 지팡이, 총잡이 카우보이 모자, 정령사 보석 머리띠, 광전사 뿔 투구, 드루이드 사슴뿔 잎 두건, 연금술사 고글, 도박사 실크햇). 동작과 능력은 그대로예요']]},
   {v:79,t:'🏰 이스터에그 건물 새 그림',items:[
     ['new','🏰 맵마다 있는 비밀 장소 건물 34종을 <b>1.4배 크게</b>, 2배 촘촘한 도트로 새로 그렸어요 (기와·통나무·벽돌 질감, 불 켜진 창, 굴뚝 연기, 담쟁이, 깃발 등). 건물이 커진 만큼 부딪히는 범위도 커졌어요']]},
   {v:78,t:'🗺 모든 배경 새 그림',items:[
@@ -9261,7 +9473,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=79,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=80,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
