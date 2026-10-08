@@ -5707,6 +5707,7 @@ function clsDetail(k){
   return `<div class="ch"><b>${C.n}</b><span>${C.role}</span></div><p class="cd">${C.d}</p>
   <div class="cp"><em>고유 능력 · ${pn}</em>${pd||''}</div>
   ${SKILLS[k]?`<div class="cp" style="border-color:#9fd3ff"><em style="color:#9fd3ff">생존기 (E키) · ${SKILLS[k].ico} ${SKILLS[k].n} · 쿨타임 ${SKILLS[k].cd}초</em>${SKILLS[k].d}</div>`:''}
+  ${ULTS[k]?`<div class="cp" style="border-color:${ULTS[k].col}"><em style="color:${ULTS[k].col}">궁극기 (R키) · ${ULTS[k].ico} ${ULTS[k].n} · 쿨타임 ${ULT_CD}초</em>${ULTS[k].d} · 2.2초 무적</div>`:''}
   <div class="cbars">${bar('체력','hp')}${bar('공격력','dmg')}${bar('공격 속도','rate')}${bar('사거리','range')}${bar('이동 속도','speed')}</div>
   <div class="cmeta"><span>레벨업마다</span><span style="color:#9fe8b0">${C.lvd}</span><span>잘 나오는 시너지</span><span>${C.fav.map(t=>`<span class="tg2">${TAGS[t].n}</span>`).join('')}</span><span>주력 시너지</span><span style="color:#ffd76a">${TAGS[C.fav[0]].n}: 1개 더 있는 것으로 계산${HOME_DMG.includes(C.fav[0])?', 관련 피해 +30%':''}</span>${CLS_ROUTE[k]?`<span>추천 루트</span><span style="color:#7be08f">⭐ ${CLS_ROUTE[k].n}: 이 직업에서 더 잘 나와요</span>`:''}</div>
   ${CLS_BUILDS[k]?`<div class="cbuild"><em>추천 빌드</em>${CLS_BUILDS[k].map(([n,d,L])=>`<div><b>${n}</b> <span>${d}</span><small>${L.join(' · ')}</small></div>`).join('')}</div>`:''}`;
@@ -5721,6 +5722,8 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:53,t:'📖 궁극기 설명',items:[
+    ['change','📖 캐릭터 선택 화면과 도감 직업 탭에 <b>궁극기(R)</b> 설명이 생겼어요']]},
   {v:50,t:'⚡ 궁극기 · 🎨 보스 새 그림 · 🥚 이스터에그',items:[
     ['new','⚡ <b>궁극기 (R키 · 폰은 생존기 위 버튼)</b>: 직업마다 화려한 필살기! 화면 안 모든 적에게 큰 피해 + 잠깐 무적. 쿨타임 90초 (판 시작 45초 뒤 첫 사용, 결투에서는 못 씀)'],
     ['new','⚡ 궁극기 증강 4종: <b>영웅의 맥박</b>(쿨타임) · <b>필살의 일격</b>(피해) · <b>영웅의 여운</b>(생존기 초기화·무적) · <b>영웅 서사</b>(처치로 쿨타임 감소). 목걸이·☠ 생존기 숙련도 궁극기 쿨타임을 줄여 줘요'],
@@ -6938,7 +6941,7 @@ function cxList(){
     CX.mobHdr=mk!=='e'?`발견 ${seenN} / ${keys.length} · 체력·공격력은 일반 난이도 초반 기준 (시간·난이도에 따라 강해짐)`:'';
   }else{
     rows=Object.keys(CLASSES).filter(k=>{const C=CLASSES[k];return hit(C.n,C.role,C.d,C.passive);}).map(k=>{const C=CLASSES[k],ex=AUGS.filter(a=>a.cls===k);
-      return `<div class="cxrow" style="--rc:var(--brass)"><div class="h"><b>${C.n}</b><span class="tg">${C.role}</span>${clsOpen(k)?'':'<span class="tg">🔒 봉인</span>'}</div><div class="d">${C.d}</div><div class="s">특성: ${C.passive}</div>${SKILLS[k]?`<div class="s" style="color:#9fd3ff">생존기 (E키) · ${SKILLS[k].ico} ${SKILLS[k].n} · 쿨타임 ${SKILLS[k].cd}초: ${SKILLS[k].d}</div>`:''}<div class="s">잘 맞는 시너지: ${tg(C.fav)}${C.dis&&C.dis.length?` · 안 맞는 시너지: ${tg(C.dis)}`:''}</div><div class="s">레벨업: ${C.lvd||''}</div><div class="s">전용 증강: ${ex.map(a=>a.uc?`♾${a.n}`:a.n).join(', ')} <button class="cxchip" data-cxc="${k}">전용 증강 보기 →</button></div></div>`;});
+      return `<div class="cxrow" style="--rc:var(--brass)"><div class="h"><b>${C.n}</b><span class="tg">${C.role}</span>${clsOpen(k)?'':'<span class="tg">🔒 봉인</span>'}</div><div class="d">${C.d}</div><div class="s">특성: ${C.passive}</div>${SKILLS[k]?`<div class="s" style="color:#9fd3ff">생존기 (E키) · ${SKILLS[k].ico} ${SKILLS[k].n} · 쿨타임 ${SKILLS[k].cd}초: ${SKILLS[k].d}</div>`:''}${ULTS[k]?`<div class="s" style="color:${ULTS[k].col}">궁극기 (R키) · ${ULTS[k].ico} ${ULTS[k].n} · 쿨타임 ${ULT_CD}초: ${ULTS[k].d} · 2.2초 무적</div>`:''}<div class="s">잘 맞는 시너지: ${tg(C.fav)}${C.dis&&C.dis.length?` · 안 맞는 시너지: ${tg(C.dis)}`:''}</div><div class="s">레벨업: ${C.lvd||''}</div><div class="s">전용 증강: ${ex.map(a=>a.uc?`♾${a.n}`:a.n).join(', ')} <button class="cxchip" data-cxc="${k}">전용 증강 보기 →</button></div></div>`;});
   }
   $('cxN').textContent=CX.tab==='mob'&&CX.mobHdr?CX.mobHdr:(CX.tab==='ev'||CX.tab==='vip'||CX.tab==='egg')?`${rows.length-1}개`:`${rows.length}개`;$('cxL').innerHTML=rows.join('')||'<p class="sub">찾는 항목이 없어요</p>';
   $('cxL').querySelectorAll('[data-pt]').forEach(b=>{const sh=()=>patShow(b.dataset.pt,+b.dataset.pi,b);b.onmouseenter=sh;b.onclick=sh;b.onmouseleave=patHide;});
@@ -7794,7 +7797,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=52,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=53,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
