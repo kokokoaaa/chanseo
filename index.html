@@ -2751,7 +2751,7 @@ const CLASSES={
   necro:{lock:true,n:'사령술사',role:'해골 소환',d:'쓰러진 적을 해골 병사로 일으키는 술사',passive:'해골 소환: 처치 시 25% 확률, 그리고 2.5초마다 해골 병사 소환 (최대 5기, 12초, 공격력 100%로 근접 공격). 해골은 주변 근접 적을 끌어당기는 방패 역할 (체력 = 내 최대 체력 50%, 받는 피해 절반)',atk:.35,
     stats:{hp:155,maxHp:155,speed:185,dmg:16,rate:2.1,range:300,bspd:500,armor:7},fav:['undead','summon','curse'],dis:['holy'],
     cards:['힘의 물약','숫돌','조준경','튼튼한 체력','전투 본능','흡혈 송곳니'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
-  gunner:{lock:true,n:'총잡이',role:'매그넘 저격',d:'한 발 한 발이 묵직한 매그넘 리볼버 총잡이',passive:'매그넘 리볼버: 모든 탄이 일반 공격의 1.7배 피해 + 관통 1. 6발 쏘면 짧게 재장전 (탄창 6발 고정)',atk:.18,
+  gunner:{lock:true,n:'총잡이',role:'매그넘 저격',d:'한 발 한 발이 묵직한 매그넘 리볼버 총잡이',passive:'매그넘 리볼버: 모든 탄이 일반 공격의 1.7배 피해 + 관통 1. 6발 쏘면 0.8초 재장전 (탄창 6발 고정, 재장전은 공격 속도와 무관)',atk:.18,
     stats:{hp:160,maxHp:160,speed:200,dmg:12,rate:1.8,range:300,bspd:820,crit:.1,critM:2.1},fav:['rapid','sniper','card'],dis:['summon'],
     cards:['날랜 손놀림','조준경','급소 노리기','치명상','힘의 물약','가벼운 장화'],lvd:'공격력 +0.6%, 치명타 +0.2%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.006;p.crit+=.002;p.maxHp+=1;p.hp+=1;}},
   elem:{lock:true,n:'정령사',role:'원소 순환',d:'화염·냉기·번개를 번갈아 쏘는 정령술사',passive:'원소 공격: 화염(화상)·냉기(1초 둔화)·번개(주변 2명에게 60% 연쇄)를 섞어 쏨. 화염·냉기·번개 시너지를 모을수록 그 원소가 더 자주 나감. 기본 관통 1',atk:.3,
@@ -5728,14 +5728,15 @@ const CLS_BUILDS={
   gambler:[['💰 앞면 몰기','행운으로 앞면 확률·피해 올리기',['판돈 올리기','타짜의 동전','카드 카운팅','이중 동전']],['🎰 대박','연속 앞면·뒷면으로 한 방 노리기',['연승','마틴게일','대박','칩 쌓기']]]};
 let pickCls=(()=>{try{return localStorage.getItem('chipdungeon_cls')||'knight';}catch(e){return 'knight';}})();
 // 직업 고유 능력에 어떤 능력치가 적용되는지 (코드 기준으로 확인한 표)
-const CLS_APPLY={};
+const clsApplyHtml=k=>CLS_APPLY[k]?`<details class="capl"><summary>🔍 고유 능력에 적용되는 능력치</summary><div class="capg"><div><b style="color:#7be08f">✅ 적용돼요</b>${CLS_APPLY[k].y.map(x=>`<span>${x}</span>`).join('')}</div><div><b style="color:#ff8a8a">❌ 적용 안 돼요</b>${CLS_APPLY[k].n.map(x=>`<span>${x}</span>`).join('')}</div></div>${CLS_APPLY[k].m?`<small>${CLS_APPLY[k].m}</small>`:''}</details>`:'';
+const CLS_APPLY={"knight":{"y":["공격력: 회전 베기 피해가 오름","공격 속도: 4번째 공격이 더 빨리 옴","주사위·동전 같은 공격 배율도 같이 붙음","흡혈: 회전 베기에도 적용","표식 등 받는 피해 증가 적용","막기 확률: 「철벽」 증강으로 오름"],"n":["치명타: 회전 베기는 치명타 없음","사거리: 회전 범위는 95로 고정","탄환 개수·관통: 회전 베기와 무관","근접 보정 ×1.6은 회전 베기엔 없음","막기는 보스 패턴 공격엔 안 됨"],"m":"「회오리 베기」 증강이 있으면 3번째(★3은 2번째)마다, 범위 ×1.3, 피해 120~200% · 막으면 0.2초 무적"},"mage":{"y":["공격력: 폭발 피해가 오름","공격 속도: 많이 쏠수록 폭발도 많음","탄환 개수: 탄마다 폭발","관통: 맞은 적마다 폭발","탄속 보너스·집중 등 탄 배율 적용","흡혈·표식 적용"],"n":["치명타: 폭발은 치명타 없음 (직격만)","사거리: 폭발 범위와 무관","직격용 배율(저격·처형 등)은 폭발엔 X"],"m":"폭발 범위는 「화염 확산」·「정신 집중」(멈춰 있을 때)·「촉매」 증강으로만 커짐"},"archer":{"y":["관통 카드·증강과 그대로 더해짐","치명타 확률이 다른 치명타 보너스와 더해짐","치명타 피해 스탯이 그대로 적용"],"n":["따로 발동하는 효과 없음 (스탯 보너스)"],"m":"치명타 100% 넘는 만큼은 치명타 피해로 바뀜 (넘친 1%당 +0.5%)"},"rogue":{"y":["회피 카드·장비 회피와 더해짐 (최대 60%)","대시 재사용 감소 카드와 곱해짐"],"n":["회피는 보스 패턴 공격엔 안 됨","공격력·공격 속도와는 무관"],"m":"대시 재사용 = 2.4초 × 0.7 = 약 1.7초부터 · 회피하면 0.15초 무적"},"paladin":{"y":["공격력: 오라 피해가 오름","신성 시너지·성수 등 빛 피해 증가","성유(범위)·성가(피해) 카드","흡혈·표식 적용","공격 속도: 회복이 더 자주 나옴"],"n":["공격 속도: 오라 피해 횟수는 고정 (0.5초마다)","치명타: 오라는 치명타 없음","사거리: 오라 범위와 무관","탄환 개수·관통: 무관"],"m":"오라 범위는 성유 카드·「확장 오라」·「성역」(멈춰 있을 때)으로만 커짐 · 보스전 분노 단계엔 회복량 줄어듦"},"necro":{"y":["공격력: 해골 피해가 실시간으로 오름","해골 피해 카드(뼈 가루)·망자 시너지","소환 시너지: 4개 피해 ×2, 6개 공격 2배 빠름","해골 수(해골 증원 등)·지속(영혼 사슬)","최대 체력: 해골 체력 = 내 최대 체력 50%","흡혈·표식 적용","쿨타임 감소(시계 태엽): 소환 간격 줄어듦"],"n":["공격 속도: 해골 공격은 0.7초마다 고정","치명타: 해골은 치명타 없음","사거리·탄환 개수·관통: 무관","정비 키트(소환물 피해 카드)는 해골엔 X"],"m":"해골이 30기를 넘으면 넘는 만큼 해골 피해 배율로 · 해골이 받는 피해 = 절반 + 내 방어력 적용 · 해골 공격은 보스 처치 효과(3타) 집계 안 됨"},"gunner":{"y":["공격력·치명타·치명타 피해 모두 적용","탄두 가공 카드(매그넘 탄 피해)","탄환 개수: 한 번에 여러 발 (탄창은 1발만 씀)","관통 카드와 더해짐","공격 속도: 6발 사이 간격이 빨라짐","탄속 보너스도 적용"],"n":["공격 속도: 재장전 시간엔 영향 없음","탄창 수는 6발 고정 (대용량 탄창 증강만 +4)"],"m":"재장전 기본 0.8초, 빠른 장전·쌍권총·총기 숙련으로 줄어듦 (최소 0.35초) · 1.7배는 같은 공격에서 나오는 일부 추가 탄에도 붙음"},"elem":{"y":["공격력: 화상·연쇄 피해 오름","원소 결정·정령 공명 카드(원소 효과 피해)","화염 시너지 등: 화상 피해 증가","시너지 모은 원소가 더 자주 나옴","관통: 맞은 적마다 원소 효과","흡혈·표식 적용","공격 속도: 원소 공격이 자주 나감"],"n":["치명타: 화상·연쇄 번개엔 없음 (직격만)","사거리: 연쇄 거리(180)와 무관","화상은 겹쳐 쌓이지 않음 (센 쪽만)","보스는 냉기 둔화 안 걸림"],"m":"한 번 공격의 탄들은 모두 같은 원소 · 연쇄 번개는 탄 피해(치명타 전)의 60%"},"berserk":{"y":["광란 공격력은 모든 피해에 붙음","흡혈 2%: 흡혈 카드와 더해짐","흡혈은 모든 피해(화상·독 포함)에 적용","보스는 3번 때릴 때마다 처치 1회로 침","광란 최대 수 카드(피의 북)·영구 강화"],"n":["광란 자체는 공격 속도를 안 올림 (광란 시너지 4개부터)","치명타·사거리와 무관"],"m":"4초 지나면 0.3초마다 1중첩씩 빠짐 · 광란 시너지로 중첩당 공격력 조금 더"},"druid":{"y":["공격력: 덩굴 피해가 실시간으로 오름","공격 속도: 덩굴이 더 자주 생김","덩굴 카드(씨앗 주머니 범위·가시 독 피해)","자연 시너지: 피해·지속 증가","흡혈·표식 적용","덩굴이 겹치면 각각 피해"],"n":["치명타: 덩굴은 치명타 없음","사거리: 덩굴 범위와 무관","탄환 개수·관통: 덩굴 1개만","주사위·동전 같은 공격 배율 X","보스는 둔화 안 됨"],"m":"덩굴은 동시에 최대 14개 · 체력 재생은 최대 체력 300 넘으면 비례해 커짐"},"alch":{"y":["공격력: 플라스크·물약 피해 오름","공격 속도: 물약이 자주 나옴","탄환 개수·관통: 맞은 적마다 플라스크","물약 카드(큰 병·농축액)는 물약에만","독·화염·냉기 시너지로 물약 종류 비율","흡혈·표식 적용"],"n":["치명타: 플라스크·물약 모두 없음","사거리: 폭발 범위와 무관","농축액·큰 병은 플라스크엔 X"],"m":"물약 범위 70, 피해 산성 60%·폭발 150%·얼음 80% · 장판은 2.5초, 초당 물약 피해의 20% · 폭발형 플라스크는 피해 1.4배"},"gambler":{"y":["행운: 앞면 확률 오름 (행운 1당 +0.4%)","공격력·치명타·치명타 피해 그대로 적용","판돈 카드: 앞면 피해 증가","타짜의 손 카드: 앞면 확률","탄환 개수: 모든 탄이 같은 동전 결과"],"n":["앞면 확률은 최대 75% (타짜의 손 있으면 80%)","폭발·장판 같은 따로 나가는 피해엔 X"],"m":"기본 앞면 확률 약 52% (행운 5) · 동전은 공격 1번에 1번만 던짐"}};
 function clsDetail(k){
   const C=CLASSES[k],st=C.stats,ks=Object.keys(CLASSES),mx=f=>Math.max(...ks.map(q=>CLASSES[q].stats[f]));
   const bar=(n,f)=>`<span>${n}</span><i><u style="width:${Math.round(st[f]/mx(f)*100)}%"></u></i><span>${st[f]}</span>`;
   const [pn,pd]=C.passive.split(/:\s*/);
   return `<div class="ch"><b>${C.n}</b><span>${C.role}</span></div><p class="cd">${C.d}</p>
   <div class="cp"><em>고유 능력 · ${pn}</em>${pd||''}</div>
-  ${CLS_APPLY[k]?`<details class="capl"><summary>🔍 고유 능력에 적용되는 능력치</summary><div class="capg"><div><b style="color:#7be08f">✅ 적용돼요</b>${CLS_APPLY[k].y.map(x=>`<span>${x}</span>`).join('')}</div><div><b style="color:#ff8a8a">❌ 적용 안 돼요</b>${CLS_APPLY[k].n.map(x=>`<span>${x}</span>`).join('')}</div></div>${CLS_APPLY[k].m?`<small>${CLS_APPLY[k].m}</small>`:''}</details>`:''}
+  ${clsApplyHtml(k)}
   ${SKILLS[k]?`<div class="cp" style="border-color:#9fd3ff"><em style="color:#9fd3ff">생존기 (E키) · ${SKILLS[k].ico} ${SKILLS[k].n} · 쿨타임 ${SKILLS[k].cd}초</em>${SKILLS[k].d}</div>`:''}
   ${ULTS[k]?`<div class="cp" style="border-color:${ULTS[k].col}"><em style="color:${ULTS[k].col}">궁극기 (R키) · ${ULTS[k].ico} ${ULTS[k].n} · 쿨타임 ${ULT_CD}초</em>${ULTS[k].d} · 2.2초 무적</div>`:''}
   <div class="cbars">${bar('체력','hp')}${bar('공격력','dmg')}${bar('공격 속도','rate')}${bar('사거리','range')}${bar('이동 속도','speed')}</div>
@@ -5752,6 +5753,10 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:71,t:'📊 명예의 전당 능력치 · 직업 적용표',items:[
+    ['new','🏆 명예의 전당 기록을 <b>누르면</b> 그 캐릭터의 <b>최종 능력치와 증강</b>을 볼 수 있어요 (결투 데이터가 있는 기록)'],
+    ['new','📖 도감·직업 선택의 직업 설명에 <b>🔍 고유 능력에 적용되는 능력치</b>가 생겼어요. 공격 속도·치명타·사거리 같은 게 고유 능력에 붙는지 한눈에 볼 수 있어요'],
+    ['change','🗺 맵마다 그 맵에 어울리는 몬스터만 나와요 (다른 맵 몬스터가 섞여 나오지 않음)']]},
   {v:70,t:'⚡ 돌발 이벤트 알림',items:[
     ['change','⚡ 돌발 이벤트 알림이 <b>배속과 상관없이 6초</b> 동안 떠 있어요 (빠른 배속에서 너무 빨리 사라지던 문제). 설명 글씨도 조금 키웠어요']]},
   {v:69,t:'🕊 날개 탭 · 초기화 정리',items:[
@@ -7104,7 +7109,7 @@ function cxList(){
     CX.mobHdr=mk!=='e'?`발견 ${seenN} / ${keys.length} · 체력·공격력은 일반 난이도 초반 기준 (시간·난이도에 따라 강해짐)`:'';
   }else{
     rows=Object.keys(CLASSES).filter(k=>{const C=CLASSES[k];return hit(C.n,C.role,C.d,C.passive);}).map(k=>{const C=CLASSES[k],ex=AUGS.filter(a=>a.cls===k);
-      return `<div class="cxrow" style="--rc:var(--brass)"><div class="h"><b>${C.n}</b><span class="tg">${C.role}</span>${clsOpen(k)?'':'<span class="tg">🔒 봉인</span>'}</div><div class="d">${C.d}</div><div class="s">특성: ${C.passive}</div>${SKILLS[k]?`<div class="s" style="color:#9fd3ff">생존기 (E키) · ${SKILLS[k].ico} ${SKILLS[k].n} · 쿨타임 ${SKILLS[k].cd}초: ${SKILLS[k].d}</div>`:''}${ULTS[k]?`<div class="s" style="color:${ULTS[k].col}">궁극기 (R키) · ${ULTS[k].ico} ${ULTS[k].n} · 쿨타임 ${ULT_CD}초: ${ULTS[k].d} · 2.2초 무적</div>`:''}<div class="s">잘 맞는 시너지: ${tg(C.fav)}${C.dis&&C.dis.length?` · 안 맞는 시너지: ${tg(C.dis)}`:''}</div><div class="s">레벨업: ${C.lvd||''}</div><div class="s">전용 증강: ${ex.map(a=>a.uc?`♾${a.n}`:a.n).join(', ')} <button class="cxchip" data-cxc="${k}">전용 증강 보기 →</button></div></div>`;});
+      return `<div class="cxrow" style="--rc:var(--brass)"><div class="h"><b>${C.n}</b><span class="tg">${C.role}</span>${clsOpen(k)?'':'<span class="tg">🔒 봉인</span>'}</div><div class="d">${C.d}</div><div class="s">특성: ${C.passive}</div>${clsApplyHtml(k)}${SKILLS[k]?`<div class="s" style="color:#9fd3ff">생존기 (E키) · ${SKILLS[k].ico} ${SKILLS[k].n} · 쿨타임 ${SKILLS[k].cd}초: ${SKILLS[k].d}</div>`:''}${ULTS[k]?`<div class="s" style="color:${ULTS[k].col}">궁극기 (R키) · ${ULTS[k].ico} ${ULTS[k].n} · 쿨타임 ${ULT_CD}초: ${ULTS[k].d} · 2.2초 무적</div>`:''}<div class="s">잘 맞는 시너지: ${tg(C.fav)}${C.dis&&C.dis.length?` · 안 맞는 시너지: ${tg(C.dis)}`:''}</div><div class="s">레벨업: ${C.lvd||''}</div><div class="s">전용 증강: ${ex.map(a=>a.uc?`♾${a.n}`:a.n).join(', ')} <button class="cxchip" data-cxc="${k}">전용 증강 보기 →</button></div></div>`;});
   }
   $('cxN').textContent=CX.tab==='mob'&&CX.mobHdr?CX.mobHdr:(CX.tab==='ev'||CX.tab==='vip'||CX.tab==='egg')?`${rows.length-1}개`:`${rows.length}개`;$('cxL').innerHTML=rows.join('')||'<p class="sub">찾는 항목이 없어요</p>';
   $('cxL').querySelectorAll('[data-pt]').forEach(b=>{const sh=()=>patShow(b.dataset.pt,+b.dataset.pi,b);b.onmouseenter=sh;b.onclick=sh;b.onmouseleave=patHide;});
@@ -8073,7 +8078,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=70,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=71,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
