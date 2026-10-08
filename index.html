@@ -2145,7 +2145,7 @@ const DEV_H=7621682056880371,devHash=(str,seed=7)=>{let h1=0xdeadbeef^seed,h2=0x
 let DEV=false;try{localStorage.removeItem('chanseo_dev');}catch(e){}
 if(!DEV){AUTO.pick=false;}
 let devTap=[];function devTapVer(){const t=Date.now();devTap=devTap.filter(x=>t-x<2500);devTap.push(t);if(devTap.length<5)return;devTap=[];
-  if(DEV){if(confirm('개발자 모드를 끌까요? (자동 선택·자동 이동 버튼이 사라져요)')){DEV=false;AUTO.pick=false;AUTO.move=false;if(META.title&&!(META.ach&&META.ach[META.title])){META.title='';saveMeta();}try{localStorage.removeItem('chanseo_dev');}catch(e){}saveAuto();refreshAutoBtns();if(!S||S.mode==='start')startScreen();toast('개발자 모드 OFF · 메달은 원래 개수로');}return;}
+  if(DEV){if(confirm('개발자 모드를 끌까요? (자동 선택·자동 이동 버튼이 사라져요)')){DEV=false;AUTO.pick=false;AUTO.move=false;if(META.title&&!(META.ach&&META.ach[META.title])){META.title='';saveMeta();}try{localStorage.removeItem('chanseo_dev');}catch(e){}saveAuto();refreshAutoBtns();if(!S||S.mode==='start')startScreen();toast('개발자 모드 OFF');}return;}
   const pw=prompt('개발자 암호');if(pw==null)return;if(devHash(String(pw).trim())===DEV_H){DEV=true;SUP_DONE=false;setTimeout(supCheck,300);refreshAutoBtns();if(typeof startScreen==='function'&&(!S||S.mode==='start'))startScreen();toast('🛠 개발자 모드 ON (게임을 다시 열면 꺼져요)');}else toast('암호가 틀렸어요');}
 function saveAuto(){try{localStorage.setItem('chipdungeon_auto',JSON.stringify(AUTO));}catch(e){}}
 try{best=+localStorage.getItem('chipdungeon_best_v5')||0;}catch(e){}
@@ -5594,8 +5594,9 @@ function drawPreviews(){
 }
 /* ---------- meta progression ---------- */
 const META=(()=>{try{const m=JSON.parse(localStorage.getItem('chanseo_meta')||'{}');const pc={luck:3,gold:2,xp:3,aug:6,key:5};let rf=0;for(const k in (m.prep||{}))rf+=(m.prep[k]||0)*(pc[k]||0);const {prep,...rest}=m;return {...rest,medals:(m.medals||0)+rf,total:m.total||0,lv:m.lv||{},sk:m.sk||{},clears:m.clears||{},cos:m.cos||{own:{},eq:{}},spent:m.spent!=null?m.spent:null,ucls:m.ucls||[],tk:m.tk||0,mob:m.mob||{},egg:m.egg||{},ach:m.ach||{},title:m.title||'',bk:m.bk||{},hk:m.hk||{},ccls:m.ccls||{},gear:m.gear||{},prot:m.prot||0,gearLog:m.gearLog||{}};}catch(e){return {medals:0,total:0,lv:{},sk:{},clears:{},cos:{own:{},eq:{}},ucls:[],tk:0,mob:{},egg:{},ach:{},title:'',bk:{},hk:{},ccls:{},gear:{},prot:0,gearLog:{}};}})();
-// 개발자 모드: 메달을 써도 줄지 않음 (영구 강화·악몽 강화·장비 대장간·외형 등). 화면엔 10억으로 보이고, 저장되는 값은 실제 보유량. 판에서 번 메달은 그대로 쌓임
-{let _m=META.medals||0;if(!(_m<1e8)){_m=1000;}Object.defineProperty(META,'medals',{enumerable:true,configurable:true,get(){return DEV?Math.max(_m,1e9):_m;},set(v){if(DEV){const cur=Math.max(_m,1e9);if(v>cur)_m+=v-cur;return;}_m=v;}});
+// 개발자 모드: 메달 수는 그대로 보이고, 써도 줄지 않음 (모자라도 살 수 있음 · medOk). 판에서 번 메달은 그대로 쌓임
+const medOk=c=>DEV||META.medals>=c;
+{let _m=META.medals||0;if(!(_m<1e8)){_m=1000;}Object.defineProperty(META,'medals',{enumerable:true,configurable:true,get(){return _m;},set(v){if(DEV&&v<_m)return;_m=v;}});
  Object.defineProperty(META,'toJSON',{enumerable:false,value:function(){const o={};for(const k in this)o[k]=this[k];o.medals=_m;return o;}});}
 // 장비 대장간: 메달로 산 장비를 강화 (모든 직업 공용, 판 밖에서). 높은 단계일수록 성공률↓, 실패 시 단계 하락·파괴 위험. 강화 보호권으로 막을 수 있음
 // 효과는 최종값에 곱해짐 → +10이면 장비 하나당 악몽에서 약 1분 더 버티는 정도
@@ -5617,7 +5618,7 @@ const gearRate=t=>[1,.9,.8,.7,.6,.5,.45,.38,.3,.22,.15][t]||0;       // t = 목�
 const gearBreak=t=>[0,0,0,0,0,0,.03,.05,.07,.09,.12][t]||0;   // 실패 시 파괴 확률
 const gearCost=l=>20*(l+1);
 const gearM={dmg:()=>1+GEAR.sword.per*gearLv('sword'),hp:()=>1+GEAR.helm.per*gearLv('helm'),taken:()=>1-GEAR.armor.per*gearLv('armor'),rate:()=>1+GEAR.acc.per*gearLv('acc'),skcd:()=>1-GEAR.acc.per*gearLv('acc'),dodge:()=>GEAR.cloak.per*gearLv('cloak')};
-function gearEnhance(k,useProt){const g=META.gear[k]||(META.gear[k]={own:false,lv:0});if(!g.own||g.lv>=GEAR_MAX)return null;const c=gearCost(g.lv);if(META.medals<c)return null;
+function gearEnhance(k,useProt){const g=META.gear[k]||(META.gear[k]={own:false,lv:0});if(!g.own||g.lv>=GEAR_MAX)return null;const c=gearCost(g.lv);if(!medOk(c))return null;
   if(useProt&&(META.prot||0)<1)useProt=false;META.medals-=c;if(useProt)META.prot--;const t=g.lv+1,L=META.gearLog;L.tries=(L.tries||0)+1;
   let res;if(Math.random()<gearRate(t)){g.lv=t;res={ok:1,t};if(t>(L.best||0))L.best=t;}
   else if(useProt)res={ok:0,prot:1,t};
@@ -5970,17 +5971,17 @@ function gearLiveStart(cv){if(!cv)return;const id=++GLIVE,g=cv.getContext('2d'),
     requestAnimationFrame(frame);};
   requestAnimationFrame(frame);}
 function openForge(){cosPreviewHide();devGearBak();const card=k=>{const G=GEAR[k],g=META.gear[k]||{},own=gearOwn(k),l=gearLv(k),t=l+1,c=gearCost(l);
-    if(!own)return `<div class="gcard"><div class="gico">${G.ico}</div><b>${G.n}</b><span class="gfx">${G.e} 강화 장비</span>${gearPrevHtml(k,-1)}<div class="gbtns"><button class="btn primary" data-gbuy="${k}" ${META.medals<GEAR_BUY?'disabled':''}>구입 · 🏅 ${GEAR_BUY}</button><button class="btn gph" disabled>-</button></div></div>`;
+    if(!own)return `<div class="gcard"><div class="gico">${G.ico}</div><b>${G.n}</b><span class="gfx">${G.e} 강화 장비</span>${gearPrevHtml(k,-1)}<div class="gbtns"><button class="btn primary" data-gbuy="${k}" ${!medOk(GEAR_BUY)?'disabled':''}>구입 · 🏅 ${GEAR_BUY}</button><button class="btn gph" disabled>-</button></div></div>`;
     const mx=l>=GEAR_MAX,rate=Math.round(gearRate(t)*100),brk=Math.round(gearBreak(t)*100);
     return `<div class="gcard ${l>=7?'hi':''}"><div class="gico">${G.ico}<span class="glv">+${l}</span></div><b>${G.n} +${l}</b><span class="gfx">${l?G.fmt(l):'아직 효과 없음 · 강화하면 올라가요'}</span>${gearPrevHtml(k,l)}
       ${mx?'<span class="gnote">✨ 최대 강화 완료!</span>':`<span class="gnote">+${t} 도전 · 성공 <b>${rate}%</b>${t>=5?` · 실패 시 −1단계`:''}${brk?` · <b style="color:#ff7a7a">파괴 ${brk}%</b>`:''}</span>
-      <div class="gbtns"><button class="btn primary" data-gup="${k}" ${META.medals<c?'disabled':''}>강화 · 🏅 ${c}</button>${t>=5?`<button class="btn" data-gpr="${k}" ${META.medals<c||(META.prot||0)<1?'disabled':''}>🛡 보호권 강화</button>`:'<button class="btn gph" disabled>-</button>'}</div>`}</div>`;};
+      <div class="gbtns"><button class="btn primary" data-gup="${k}" ${!medOk(c)?'disabled':''}>강화 · 🏅 ${c}</button>${t>=5?`<button class="btn" data-gpr="${k}" ${!medOk(c)||(META.prot||0)<1?'disabled':''}>🛡 보호권 강화</button>`:'<button class="btn gph" disabled>-</button>'}</div>`}</div>`;};
   show(`<div class="shophead"><h2>⚒ 장비 대장간</h2><button class="btn" id="gBack">돌아가기</button></div>
   <div class="mbal">보유 메달 <b>🏅 ${META.medals}</b><small>장비는 모든 직업·모든 판에 적용 · 강화 보호권 ${META.prot||0}장</small></div>
   <div class="glive"><canvas id="gLive" width="200" height="200"></canvas><div><b>지금 내 모습</b><small>${CLASSES[pickCls]?CLASSES[pickCls].n:''} · 검·투구·망토를 착용한 모습이에요 (좌우로 돌아봐요)</small><small>카드 아래 그림: 지금 단계 → 다음 단계 모습</small></div></div>
   ${gearMsg?`<div class="gmsg">${gearMsg}</div>`:''}
   <div class="ggrid">${Object.keys(GEAR).map(card).join('')}</div>
-  <div class="gprot">${[1,5,10].map(n=>`<button class="btn" data-gprot="${n}" ${META.medals<PROT_COST*n?'disabled':''}>🛡 보호권 ${n}장 · 🏅 ${(PROT_COST*n).toLocaleString()}</button>`).join('')}</div><p class="sub" style="text-align:center;margin:2px 0 6px">🛡 보호권: 실패해도 단계가 내려가거나 부서지지 않아요 (+5 이상 강화에서 사용)</p>
+  <div class="gprot">${[1,5,10].map(n=>`<button class="btn" data-gprot="${n}" ${!medOk(PROT_COST*n)?'disabled':''}>🛡 보호권 ${n}장 · 🏅 ${(PROT_COST*n).toLocaleString()}</button>`).join('')}</div><p class="sub" style="text-align:center;margin:2px 0 6px">🛡 보호권: 실패해도 단계가 내려가거나 부서지지 않아요 (+5 이상 강화에서 사용)</p>
   ${DEV?`<div class="btnrow"><button class="btn" id="gDevBack">🛠 테스트 전 장비로 되돌리기</button><button class="btn" id="gDevZero">🛠 장비 모두 초기화 (+0, 구입 전)</button></div>`:''}
   <p class="sub">강화 성공률: +1 90% · +2 80% · +3 70% · +4 60% · +5 50% · +6 45% · +7 38% · +8 30% · +9 22% · +10 15%. +5부터 실패하면 한 단계 내려가고, +6부터는 부서져서 +0이 될 수도 있어요 (+6 3% … +10 12%). 지금까지 강화 ${META.gearLog.tries||0}번 · 최고 +${META.gearLog.best||0} · 부서진 장비 ${META.gearLog.broke||0}개</p>`);
   {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}gearMsg='';gearLiveStart($('gLive'));
@@ -5988,8 +5989,8 @@ function openForge(){cosPreviewHide();devGearBak();const card=k=>{const G=GEAR[k
   if($('gDevBack'))$('gDevBack').onclick=()=>{let b=null;try{b=JSON.parse(localStorage.getItem(GEAR_BAK)||'null');}catch(e){}if(!b){gearMsg='되돌릴 기록이 없어요';openForge();return;}
     if(!confirm('대장간을 처음 열었을 때의 장비 상태로 되돌릴까요?'))return;META.gear=b.gear||{};META.prot=b.prot||0;META.gearLog=b.gearLog||{};saveMeta();try{localStorage.removeItem(GEAR_BAK);}catch(e){}gearMsg='🛠 테스트 전 장비로 되돌렸어요';openForge();};
   if($('gDevZero'))$('gDevZero').onclick=()=>{if(!confirm('장비를 모두 구입 전(+0)으로 초기화할까요? (되돌리기 기록은 남아 있어요)'))return;META.gear={};saveMeta();gearMsg='🛠 장비를 모두 초기화했어요';openForge();};
-  ov.querySelectorAll('[data-gprot]').forEach(b=>b.onclick=()=>{const n=+b.dataset.gprot,c=PROT_COST*n;if(META.medals<c)return;META.medals-=c;META.prot=(META.prot||0)+n;saveMeta();gearMsg=`🛡 강화 보호권 ${n}장 구입 (보유 ${META.prot}장)`;openForge();});
-  ov.querySelectorAll('[data-gbuy]').forEach(b=>b.onclick=()=>{const k=b.dataset.gbuy;if(META.medals<GEAR_BUY)return;META.medals-=GEAR_BUY;META.gear[k]={own:true,lv:0};saveMeta();gearMsg=`${GEAR[k].ico} ${GEAR[k].n} 구입!`;openForge();});
+  ov.querySelectorAll('[data-gprot]').forEach(b=>b.onclick=()=>{const n=+b.dataset.gprot,c=PROT_COST*n;if(!medOk(c))return;META.medals-=c;META.prot=(META.prot||0)+n;saveMeta();gearMsg=`🛡 강화 보호권 ${n}장 구입 (보유 ${META.prot}장)`;openForge();});
+  ov.querySelectorAll('[data-gbuy]').forEach(b=>b.onclick=()=>{const k=b.dataset.gbuy;if(!medOk(GEAR_BUY))return;META.medals-=GEAR_BUY;META.gear[k]={own:true,lv:0};saveMeta();gearMsg=`${GEAR[k].ico} ${GEAR[k].n} 구입!`;openForge();});
   const up=(k,pr)=>{const r=gearEnhance(k,pr);if(!r)return;const G=GEAR[k];
     gearMsg=r.ok?`<b style="color:#7be08f">✨ 강화 성공! ${G.ico} ${G.n} +${r.t}</b>`:r.prot?`<b style="color:#9fd3ff">🛡 실패… 보호권 덕분에 그대로</b>`:r.broke?`<b style="color:#ff6a6a">💥 실패! ${G.n}이(가) 부서졌어요… (+0)</b>`:r.down?`<b style="color:#ffb070">💢 실패… 한 단계 내려갔어요 (+${gearLv(k)})</b>`:`<b style="color:#ffd76a">실패… 단계는 그대로예요</b>`;
     if(r.ok&&r.t>=7){chime([523,659,784,1047,1319],'triangle');}if(r.ok&&r.t>=10)achUnlock('h_forge');if(r.ok){const L=Object.keys(GEAR).map(gearLv);achCheck({gear:Math.max(...L),gearAll:Object.keys(GEAR).every(gearOwn)?Math.min(...L):0});}if(r.broke)achUnlock('h_broke');openForge();};
@@ -6554,7 +6555,7 @@ function cxList(){
 }
 function openMeta(){cosPreviewHide();
   const now=x=>{const l=mlv(x.k);return l?x.d.replace(/[\d.]+/,m=>+(parseFloat(m)*l).toFixed(1)):'없음';};
-  const tile=x=>{const l=mlv(x.k),c=mcost(x),mx=l>=x.max,nlk=x.nm&&!diffOpen('nightmare'),lk=x.cls&&!clsOpen(x.cls),can=!nlk&&!lk&&!mx&&META.medals>=c;
+  const tile=x=>{const l=mlv(x.k),c=mcost(x),mx=l>=x.max,nlk=x.nm&&!diffOpen('nightmare'),lk=x.cls&&!clsOpen(x.cls),can=!nlk&&!lk&&!mx&&medOk(c);
     if(nlk)return `<button class="mtile" disabled><b>🔒 ${x.n}</b><span class="md">${x.d}</span><span class="mnow">신 난이도를 깨서 악몽이 열리면 살 수 있어요</span><span class="mc">🔒</span></button>`;
     if(lk)return `<button class="mtile" disabled><b>🔒 ${x.n}</b><span class="md">${x.d} / 단계</span><span class="mnow">${CLASSES[x.cls].n} 봉인 해제 시 열림</span><span class="mc">🔒</span></button>`;
     // 여러 단계 한 번에 사기(최대까지) + 한 단계씩 되돌리기(전액 환불)
@@ -6564,7 +6565,7 @@ function openMeta(){cosPreviewHide();
     <span class="mnow">${l?`지금 ${now(x)}`:'&nbsp;'}</span><span class="mc">${mx?'최대':'🏅 '+c}</span>
     <span class="mbtns"><button class="mb" data-mm="${x.k}" ${l?'':'disabled'} title="한 단계 되돌리기 (🏅 ${x.c*l} 환불)">−</button><button class="mb" data-ms="${x.k}" ${can?'':'disabled'}>+1</button><button class="mb" data-mx="${x.k}" ${nb>=1?'':'disabled'}>${nb>=1?`+${nb} <small>🏅${tot}</small>`:'최대'}</button></span></div>`;};
   const st=MSTAT.filter(x=>!x.cls&&!x.nm).map(tile).join(''),cst=MSTAT.filter(x=>x.cls).map(tile).join(''),nst=MSTAT.filter(x=>x.nm).map(tile).join('');
-  const sk=MSKILL.map(x=>{const own=META.sk[x.k],can=!own&&META.medals>=x.c;
+  const sk=MSKILL.map(x=>{const own=META.sk[x.k],can=!own&&medOk(x.c);
     return `<button class="mtile sk ${own?'max':''} ${x.k==='uncap'?'ucsk':''}" data-mk="${x.k}" ${can?'':'disabled'}><b>${x.n}</b><span class="md">${x.d}</span><span class="mc">${own?'✔ 보유':'🏅 '+x.c}</span></button>`;}).join('');
   show(`<div class="shophead"><h2>🏅 영구 강화</h2><button class="btn" id="mBack">돌아가기</button></div>
   <div class="mbal">보유 메달 <b>🏅 ${META.medals}</b><small>지금까지 ${META.total}개 획득 · 강화는 모든 캐릭터, 모든 판에 적용</small></div>
@@ -6572,21 +6573,21 @@ function openMeta(){cosPreviewHide();
   <h3>☠ 악몽 강화 <small style="color:var(--muted);font-size:13px">악몽이 열리면 살 수 있음 · 악몽의 각성·징조·생존기를 강하게</small></h3><div class="mgrid">${nst}</div>
   <h3>직업 숙련 <small style="color:var(--muted);font-size:13px">직업 봉인을 해제하면 열림 · 그 메커니즘을 쓰는 모든 판에 적용</small></h3><div class="mgrid">${cst}</div>
   <h3>영구 기술 <small style="color:var(--muted);font-size:13px">한 번 사면 계속 적용</small></h3><div class="mgrid">${sk}</div>
-  <h3>외형 <small style="color:var(--muted);font-size:13px">능력치 영향 없음 · 눌러서 장착/해제</small></h3>${Object.keys(COS_CAT).map(cat=>`<h3 style="font-size:15px;margin:10px 0 4px;color:var(--muted)">${COS_CAT[cat]}</h3><div class="mgrid">${COS.filter(x=>x.cat===cat).map(x=>{const own=cosOwn(x.k),eq=cosEq(cat)===x;return `<button class="mtile sk ${eq?'max':''} ${own||META.medals>=x.c?'':'poor'}" data-cs="${x.k}"><b>${x.n}</b><span class="md">${x.d}</span><span class="mc">${eq?'✔ 장착 중':own?'장착하기':x.ach?'🏆 '+(ACH.find(a=>a.k===x.ach)||{}).n+' 달성 보상':'🏅 '+x.c}</span></button>`;}).join('')}</div>`).join('')}
+  <h3>외형 <small style="color:var(--muted);font-size:13px">능력치 영향 없음 · 눌러서 장착/해제</small></h3>${Object.keys(COS_CAT).map(cat=>`<h3 style="font-size:15px;margin:10px 0 4px;color:var(--muted)">${COS_CAT[cat]}</h3><div class="mgrid">${COS.filter(x=>x.cat===cat).map(x=>{const own=cosOwn(x.k),eq=cosEq(cat)===x;return `<button class="mtile sk ${eq?'max':''} ${own||medOk(x.c)?'':'poor'}" data-cs="${x.k}"><b>${x.n}</b><span class="md">${x.d}</span><span class="mc">${eq?'✔ 장착 중':own?'장착하기':x.ach?'🏆 '+(ACH.find(a=>a.k===x.ach)||{}).n+' 달성 보상':'🏅 '+x.c}</span></button>`;}).join('')}</div>`).join('')}
   <button class="btn ghost" id="mReset" ${allSpent()?'':'disabled'}>↺ 전체 초기화 (외형 포함) <small>🏅 ${allSpent()} 환불</small></button>
   <button class="btn primary" id="mBack2">돌아가기</button>`);
   const keepY=()=>{const y=ov.scrollTop;openMeta();ov.scrollTop=y;};
-  const buy1=x=>{const c=mcost(x);if(META.medals<c||mlv(x.k)>=x.max||(x.cls&&!clsOpen(x.cls))||(x.nm&&!diffOpen('nightmare')))return false;META.spent=metaSpent()+c;META.medals-=c;META.lv[x.k]=mlv(x.k)+1;return true;};
+  const buy1=x=>{const c=mcost(x);if(!medOk(c)||mlv(x.k)>=x.max||(x.cls&&!clsOpen(x.cls))||(x.nm&&!diffOpen('nightmare')))return false;META.spent=metaSpent()+c;META.medals-=c;META.lv[x.k]=mlv(x.k)+1;return true;};
   ov.querySelectorAll('[data-ms]').forEach(b=>b.onclick=()=>{if(buy1(MSTAT.find(q=>q.k===b.dataset.ms))){saveMeta();keepY();}});
   ov.querySelectorAll('[data-mx]').forEach(b=>b.onclick=()=>{const x=MSTAT.find(q=>q.k===b.dataset.mx);let n=0;while(buy1(x))n++;if(n){saveMeta();keepY();}});
   ov.querySelectorAll('[data-mm]').forEach(b=>b.onclick=()=>{const x=MSTAT.find(q=>q.k===b.dataset.mm),l=mlv(x.k);if(!l)return;const r=x.c*l;META.lv[x.k]=l-1;META.medals+=r;META.spent=Math.max(0,metaSpent()-r);saveMeta();keepY();});
-  ov.querySelectorAll('[data-mk]').forEach(b=>b.onclick=()=>{const x=MSKILL.find(q=>q.k===b.dataset.mk);if(META.medals<x.c||META.sk[x.k])return;META.spent=metaSpent()+x.c;META.medals-=x.c;META.sk[x.k]=1;saveMeta();keepY();});
+  ov.querySelectorAll('[data-mk]').forEach(b=>b.onclick=()=>{const x=MSKILL.find(q=>q.k===b.dataset.mk);if(!medOk(x.c)||META.sk[x.k])return;META.spent=metaSpent()+x.c;META.medals-=x.c;META.sk[x.k]=1;saveMeta();keepY();});
   ov.querySelectorAll('[data-cs]').forEach(b=>{const x=COS.find(q=>q.k===b.dataset.cs);b.addEventListener('mouseenter',()=>cosPreview(x,b));b.addEventListener('mouseleave',cosPreviewHide);
     b.addEventListener('touchstart',()=>{if(b.dataset.pv!=='1'){ov.querySelectorAll('[data-cs]').forEach(o=>o.dataset.pv='');b.dataset.pv='1';b.dataset.tap='1';cosPreview(x,b);}},{passive:true});});
   ov.querySelectorAll('[data-cs]').forEach(b=>b.onclick=()=>{const x=COS.find(q=>q.k===b.dataset.cs);META.cos=META.cos||{own:{},eq:{}};
     if(b.dataset.tap==='1'&&!cosOwn(x.k)){b.dataset.tap='';return;}
     if(!cosOwn(x.k)&&x.ach)return;
-    if(!cosOwn(x.k)){if(META.medals<x.c)return;cosPreviewHide();META.medals-=x.c;META.cos.own[x.k]=1;META.cos.eq[x.cat]=x.k;}
+    if(!cosOwn(x.k)){if(!medOk(x.c))return;cosPreviewHide();META.medals-=x.c;META.cos.own[x.k]=1;META.cos.eq[x.cat]=x.k;}
     else META.cos.eq[x.cat]=META.cos.eq[x.cat]===x.k?null:x.k;saveMeta();keepY();});
   $('mReset').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.innerHTML='한 번 더 누르면 외형까지 초기화 <small>🏅 '+allSpent()+' 환불</small>';return;}META.medals+=allSpent();META.spent=0;META.lv={};META.sk={};META.cos={own:{},eq:{}};saveMeta();keepY();};
   $('mBack').onclick=()=>{cosPreviewHide();startScreen();};$('mBack2').onclick=()=>{cosPreviewHide();startScreen();};
