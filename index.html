@@ -2143,11 +2143,11 @@ try{Object.assign(AUTO,JSON.parse(localStorage.getItem('chipdungeon_auto')||'{}'
 // 개발자 모드: 자동 선택·자동 이동은 개발자만. 시작 화면 버전 글씨를 5번 연달아 누르면 암호 입력 (암호 원문은 코드에 없고 해시만 비교)
 const DEV_H=7621682056880371,devHash=(str,seed=7)=>{let h1=0xdeadbeef^seed,h2=0x41c6ce57^seed;for(let i=0,ch;i<str.length;i++){ch=str.charCodeAt(i);h1=Math.imul(h1^ch,2654435761);h2=Math.imul(h2^ch,1597334677);}h1=Math.imul(h1^(h1>>>16),2246822507);h1^=Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507);h2^=Math.imul(h1^(h1>>>13),3266489909);return 4294967296*(2097151&h2)+(h1>>>0);};
 // 개발자 모드는 이번에 켠 창에서만: 껐다 켜면(새로 열면) 다시 일반 모드 (예전 버전이 남긴 저장값은 지움)
-let DEV=false;try{localStorage.removeItem('chanseo_dev');}catch(e){}
+let DEV=false,DEV_K='';try{localStorage.removeItem('chanseo_dev');}catch(e){}
 if(!DEV){AUTO.pick=false;}
 let devTap=[];function devTapVer(){const t=Date.now();devTap=devTap.filter(x=>t-x<2500);devTap.push(t);if(devTap.length<5)return;devTap=[];
   if(DEV){if(confirm('개발자 모드를 끌까요? (자동 선택·자동 이동 버튼이 사라져요)')){DEV=false;AUTO.pick=false;AUTO.move=false;if(META.title&&!(META.ach&&META.ach[META.title])){META.title='';saveMeta();}try{localStorage.removeItem('chanseo_dev');}catch(e){}saveAuto();refreshAutoBtns();if(!S||S.mode==='start')startScreen();toast('개발자 모드 OFF');}return;}
-  const pw=prompt('개발자 암호');if(pw==null)return;if(devHash(String(pw).trim())===DEV_H){DEV=true;SUP_DONE=false;setTimeout(supCheck,300);refreshAutoBtns();if(typeof startScreen==='function'&&(!S||S.mode==='start'))startScreen();toast('🛠 개발자 모드 ON (게임을 다시 열면 꺼져요)');}else toast('암호가 틀렸어요');}
+  const pw=prompt('개발자 암호');if(pw==null)return;if(devHash(String(pw).trim())===DEV_H){DEV=true;DEV_K=String(devHash(String(pw).trim(),99));SUP_DONE=false;setTimeout(supCheck,300);refreshAutoBtns();if(typeof startScreen==='function'&&(!S||S.mode==='start'))startScreen();toast('🛠 개발자 모드 ON (게임을 다시 열면 꺼져요)');}else toast('암호가 틀렸어요');}
 function saveAuto(){try{localStorage.setItem('chipdungeon_auto',JSON.stringify(AUTO));}catch(e){}}
 try{best=+localStorage.getItem('chipdungeon_best_v5')||0;}catch(e){}
 // 시작 위치는 맵 가운데 (첫 증강을 고르는 동안 뒤에 보이는 화면도 가운데)
@@ -5364,7 +5364,8 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
-  {v:47,t:'📋 직업별 추천 빌드',items:[
+  {v:48,t:'📋 직업별 추천 빌드',items:[
+    ['change','🟢 같은 이름으로 창을 두 개 켜 두면 접속 중 목록에 두 번 나오던 것을 한 번만 나오게 했어요'],
     ['new','📋 캐릭터 선택에서 <b>모든 직업의 추천 빌드</b>를 볼 수 있어요 (어떤 특화 빌드가 있는지, 핵심 증강은 뭔지)']]},
   {v:44,t:'💛 후원 감사 인사',items:[
     ['change','💛 후원 창에서 보내면 창이 닫히고 <b>감사 인사</b>가 크게 떠요'],
@@ -5575,7 +5576,7 @@ function startScreen(){
   const cards=Object.keys(CLASSES).map(k=>{const C=CLASSES[k],op=clsOpen(k);return `<button class="clscard ${k===pickCls?'on':''} ${op?'':'locked'}" data-cls="${k}">
     <canvas class="pv" data-c="${k}" width="96" height="96"></canvas><b>${op?'':'🔒 '}${C.n}</b><span class="role">${C.role}</span></button>`;}).join('');
   show(`
-  <h1>찬서 <span style="font-size:.5em;color:var(--ivory)">: 찬붕이의 뱀서</span></h1><div id="verLbl" style="margin:-6px 0 8px;font-size:13px;color:var(--muted)">v${BUILD} · ${updLabel()}</div>${DONATE_URL?'<div class="donrow"><button id="donBtn" class="donb"><i class="dcoin">★</i> 참붕이 토큰값 후원하기</button>'+(DEV?' <button id="supBox" class="donb" style="animation:none">💌 후원 메시지함</button>':'')+'</div>':''}
+  <h1>찬서 <span style="font-size:.5em;color:var(--ivory)">: 찬붕이의 뱀서</span></h1><div id="verLbl" style="margin:-6px 0 8px;font-size:13px;color:var(--muted)">v${BUILD} · ${updLabel()}</div>${DONATE_URL?'<div class="donrow"><button id="donBtn" class="donb"><i class="dcoin">★</i> 참붕이 토큰값 후원하기</button>'+(DEV?' <button id="supBox" class="donb" style="animation:none">💌 후원 메시지함</button> <button id="devLog" class="donb" style="animation:none">🖥 기기 기록</button>':'')+'</div>':''}
   <div class="nickbar"><button class="onlb" id="nickBtn">👤 ${myNick()?`<b>${esc(myNick())}</b> ✏`:'내 이름 정하기'}</button></div>
   <div id="onl" class="onl">${onlHtml()}</div>
   <div class="hof" id="board">${boardHtml()}</div>
@@ -5602,7 +5603,7 @@ function startScreen(){
   ov.querySelectorAll('[data-diff]').forEach(b=>b.onclick=()=>{pickDiff=b.dataset.diff;savePickDiff(pickDiff);ov.querySelectorAll('[data-diff]').forEach(x=>x.classList.toggle('primary',x===b));HOF_DIFF=null;refreshBoard();});
   if(sv)$('cont').onclick=()=>continueGame(sv);
   $('go').onclick=()=>beginRun(pickCls);
-  $('meta').onclick=openMeta;onlPaint();if($('donBtn'))$('donBtn').onclick=openDonate;if($('supBox'))$('supBox').onclick=openSupBox;if($('nickBtn'))$('nickBtn').onclick=openNick;$('forgeBtn').onclick=openForge;$('heroBtn').onclick=openHeroes;if($('raidBtn'))$('raidBtn').onclick=openRaid;if($('rushBtn'))$('rushBtn').onclick=openRush;if($('duelBtn'))$('duelBtn').onclick=openDuel;$('sync').onclick=openSync;if($('guideBtn'))$('guideBtn').onclick=()=>openGuide('a');if($('patchBtn'))$('patchBtn').onclick=()=>openPatch(true);if($('verLbl')){$('verLbl').onclick=devTapVer;$('verLbl').style.userSelect='none';}$('codex').onclick=()=>openCodex();$('achBtn').onclick=openAch;
+  $('meta').onclick=openMeta;onlPaint();if($('donBtn'))$('donBtn').onclick=openDonate;if($('supBox'))$('supBox').onclick=openSupBox;if($('devLog'))$('devLog').onclick=()=>openDevLog();if($('nickBtn'))$('nickBtn').onclick=openNick;$('forgeBtn').onclick=openForge;$('heroBtn').onclick=openHeroes;if($('raidBtn'))$('raidBtn').onclick=openRaid;if($('rushBtn'))$('rushBtn').onclick=openRush;if($('duelBtn'))$('duelBtn').onclick=openDuel;$('sync').onclick=openSync;if($('guideBtn'))$('guideBtn').onclick=()=>openGuide('a');if($('patchBtn'))$('patchBtn').onclick=()=>openPatch(true);if($('verLbl')){$('verLbl').onclick=devTapVer;$('verLbl').style.userSelect='none';}$('codex').onclick=()=>openCodex();$('achBtn').onclick=openAch;
   refreshBoard();
 }
 function drawPreviews(){
@@ -6660,6 +6661,10 @@ const DEVID=(()=>{try{let d=localStorage.getItem('chanseo_dev_id');if(!d){d=Math
 const onlId=()=>{let h=2166136261;for(const c of 'on|'+DEVID){h^=c.charCodeAt(0);h=Math.imul(h,16777619)>>>0;}return h.toString(36)+DEVID.length.toString(36);};
 function onlAct(){try{if(!S||S.mode==='start'||!S.started)return '시작 화면';if(duelOn())return '⚔ 결투 중';if(raidOn())return '🗿 레이드 중';
   const D=DIFF[S.diff]||{};if(D.rush)return '⚔ 보스 러시 '+((S.bossI>=0?S.bossI:0)+1)+'단계';return (D.n||'모험')+' '+Math.floor((S.gt||0)/60)+'분째';}catch(e){return '';}}
+// 같은 이름이 여러 창·브라우저(파일로 연 것과 주소로 연 것 등)에서 동시에 켜져 있으면 한 사람으로 묶어 보여 줌 (이름 효과는 있는 쪽, 활동은 최근 것)
+// 기기 종류 (개발자 기기 기록용): 폰/PC · 브라우저 · 파일로 열었는지 주소로 열었는지
+const devUa=()=>{const u=navigator.userAgent||'';const b=/Edg\//.test(u)?'엣지':/Whale/.test(u)?'웨일':/SamsungBrowser/.test(u)?'삼성':/KAKAOTALK/i.test(u)?'카톡':/Chrome|CriOS/.test(u)?'크롬':/Firefox|FxiOS/.test(u)?'파이어폭스':/Safari/.test(u)?'사파리':'기타';return (/Android|iPhone|iPad|iPod|Mobile/i.test(u)?'폰':'PC')+' '+b+' '+(location.protocol==='file:'?'파일':'주소');};
+function onlMerge(L){const m=new Map();for(const x of L){const k=String(x.n||'');const o=m.get(k);if(!o){m.set(k,{...x});continue;}if(x.me)o.me=1;if(!o.fx&&x.fx)o.fx=x.fx;if((x.s||0)<(o.s||0)){o.s=x.s;o.a=x.a;}}return [...m.values()].sort((a,b)=>(b.me||0)-(a.me||0)||(a.s||0)-(b.s||0));}
 function onlHtml(sm){if(!SHEET_URL)return '';if(!ONLINE)return `<span class="onlb" style="opacity:.7;cursor:default">${ONL_FAIL>=2?'🟠':'🟢'} ${sm?'…':ONL_FAIL>=2?'서버 연결 재시도 중…':'접속 확인 중…'}</span> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}</button>`;const L=ONLINE;
   return `<button class="onlb" id="onlBtn" title="지금 접속 중">🟢 ${sm?`<b>${L.length}</b>`:`지금 <b>${L.length}</b>명 접속 중`} ${ONL_OPEN?'▲':'▼'}</button> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}${chatUnread()?'<i class="cdot"></i>':''}</button>${ONL_OPEN?`<div class="onll">${L.map(x=>`<span${x.me?' class="me"':''}>${fxName(x.n,x.fx)}${x.me?' (나)':''} · ${esc(x.a||'')}</span>`).join('')}</div>`:''}`;}
 function onlPaint(){const el=document.getElementById('onl');if(el){el.innerHTML=onlHtml();const b=document.getElementById('onlBtn');if(b)b.onclick=onlToggle;}
@@ -6686,6 +6691,21 @@ function openDonate(){if(!DONATE_URL)return;const n=myNick()||'모험가';
 function donThanks(sent){const o=document.getElementById('dnTy');if(o)o.remove();const d=document.createElement('div');d.id='dnTy';d.className='chartq';
   d.innerHTML=`<div class="cq" style="max-width:min(460px,92vw);font-size:18px;text-align:center;box-shadow:0 0 30px rgba(255,215,106,.45)"><div style="font-size:46px;line-height:1">💛</div><b style="font-size:24px;color:#ffd76a">고마워요!</b><div>${sent?'응원 메시지 잘 받았어요.<br>':''}보내 주신 마음, <b>잘 보태서 쓰겠습니다</b> 🙇</div><button class="btn primary" id="dnTyOk">확인</button></div>`;
   document.body.appendChild(d);const c=()=>{clearTimeout(t);d.remove();};const t=setTimeout(c,4000);d.onclick=e=>{if(e.target===d)c();};$('dnTyOk').onclick=c;}
+// 개발자 모드 전용: 기기별 접속 기록 (같은 기기에서 쓴 이름들을 묶어 봄 · 서버 v5.0 필요)
+let DEVLOG=null;
+async function openDevLog(qs){if(!DEV)return;qs=qs||'';
+  show(`<div class="shophead"><h2>🖥 기기 기록</h2><button class="btn" id="dlgBack">돌아가기</button></div><div style="display:flex;gap:6px"><input id="dlgQ" placeholder="이름으로 찾기" value="${esc(qs)}" style="flex:1;padding:6px 10px;border-radius:8px;border:1px solid var(--brass);background:rgba(0,0,0,.35);color:var(--ivory);font:inherit"><button class="btn" id="dlgRe">🔄</button></div><div id="dlgL" class="sub" style="text-align:center">불러오는 중…</div>`);
+  $('dlgBack').onclick=startScreen;$('dlgRe').onclick=()=>{DEVLOG=null;openDevLog($('dlgQ').value);};
+  const paint=()=>{const el=$('dlgL');if(!el)return;const q=($('dlgQ').value||'').trim();const G=new Map();for(const r of DEVLOG){if(!G.has(r.d))G.set(r.d,[]);G.get(r.d).push(r);}
+    const ft=t=>{if(!t)return '-';const d=new Date(t);return `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;};
+    const nDev={};for(const r of DEVLOG)nDev[r.n]=(nDev[r.n]||new Set()).add(r.d);
+    let L=[...G.entries()].map(([d,rs])=>({d,rs:rs.sort((a,b)=>b.l-a.l),l:Math.max(...rs.map(r=>r.l)),f:Math.min(...rs.map(r=>r.f))})).sort((a,b)=>b.l-a.l);
+    if(q)L=L.filter(g=>g.rs.some(r=>r.n.includes(q)));
+    el.style.textAlign='left';el.innerHTML=`<div style="color:var(--muted);margin:6px 0">기기 ${L.length}대${q?` (「${esc(q)}」 들어간 이름)`:''} · 최근 접속순 · 이름을 누르면 그 이름으로 찾기 · <span style="color:#ff9a6a">주황</span> = 다른 기기에서도 쓴 이름</div><div style="display:flex;flex-direction:column;gap:6px;max-height:62vh;overflow:auto">${L.slice(0,200).map(g=>`<div style="background:rgba(0,0,0,.25);border-radius:8px;padding:6px 10px;color:var(--ivory)"><div><b style="color:#ffd76a">기기 ${esc(g.d.slice(0,6))}</b> <small style="color:var(--muted)">${esc(g.rs[0].ua||'')} · 처음 ${ft(g.f)} · 마지막 ${ft(g.l)}</small></div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">${g.rs.map(r=>`<button class="cxchip" data-dln="${esc(r.n)}" style="${nDev[r.n].size>1?'border-color:#ff9a6a;color:#ff9a6a':''}">${esc(r.n)} <small>×${r.c} · ${ft(r.l)}</small></button>`).join('')}</div></div>`).join('')||'<div>기록이 없어요</div>'}</div>`;
+    el.querySelectorAll('[data-dln]').forEach(b=>b.onclick=()=>{$('dlgQ').value=b.dataset.dln;paint();});};
+  $('dlgQ').oninput=()=>{if(DEVLOG)paint();};
+  try{if(!DEVLOG){if(!SHEET_URL||SRV_V<50)throw new Error('old');const r=await fetch(SHEET_URL+'?dv=1&dk='+encodeURIComponent(DEV_K),{cache:'no-store'});const j=await r.json();if(!j||!Array.isArray(j.rows))throw new Error(j&&j.err||'x');DEVLOG=j.rows;}paint();}
+  catch(e){const el=$('dlgL');if(el)el.textContent=e&&e.message==='old'?'서버 v5.0을 붙여넣고 새 버전으로 배포해야 볼 수 있어요':e&&e.message==='key'?'개발자 키가 맞지 않아요 (개발자 모드를 다시 켜 주세요)':'기록을 불러오지 못했어요 (서버 연결 확인)';}}
 // 개발자 모드 전용: 받은 후원 응원 메시지 전체 보기 (서버에 남은 최근 100개)
 async function openSupBox(){if(!DEV)return;
   show(`<div class="shophead"><h2>💌 후원 메시지함</h2><button class="btn" id="sbBack">돌아가기</button></div><div id="sbL" class="sub" style="text-align:center">불러오는 중…</div><div class="btnrow" style="display:flex;justify-content:center"><button class="btn" id="sbRe">🔄 새로고침</button></div>`);
@@ -6753,10 +6773,10 @@ function openNick(){cosPreviewHide();const cur=myNick();
       }finally{$('nkSave').disabled=false;}}
     try{localStorage.setItem('chipdungeon_nick',n);}catch(e){}toast(toast2);onlPing();CH_PEND=true;startScreen();};
   $('nkSave').onclick=save;['nkIn','nkPin'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.isComposing||e.keyCode===229)return;if(e.key==='Enter')save();}));$('nkBack').onclick=startScreen;setTimeout(()=>{try{$('nkIn').focus();}catch(e){}},50);}
-async function onlPing(bye){if(!SHEET_URL||!MYKEY)return;const u=SHEET_URL+'?ping=1&id='+onlId()+'&n='+encodeURIComponent(myNick()||'모험가')+'&a='+encodeURIComponent(onlAct())+'&fx='+myFx()+(bye?'&bye=1':'');
+async function onlPing(bye){if(!SHEET_URL||!MYKEY)return;const u=SHEET_URL+'?ping=1&id='+onlId()+'&n='+encodeURIComponent(myNick()||'모험가')+'&a='+encodeURIComponent(onlAct())+'&fx='+myFx()+'&ua='+encodeURIComponent(devUa())+(bye?'&bye=1':'');
   if(bye){try{fetch(u,{keepalive:true,cache:'no-store'});}catch(e){}return;}
   const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),15000):0;
-  let ok=false;try{const r=await fetch(u,{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();if(j&&Array.isArray(j.on)){ok=true;ONL_FAIL=0;SRV_V=+j.v||0;ONLINE=j.on;if(j.ct)CHAT_CT=Math.max(CHAT_CT,+j.ct||0);onlPaint();try{supCheck();}catch(e){}}}catch(e){}finally{clearTimeout(to);}
+  let ok=false;try{const r=await fetch(u,{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();if(j&&Array.isArray(j.on)){ok=true;ONL_FAIL=0;SRV_V=+j.v||0;ONLINE=onlMerge(j.on);if(j.ct)CHAT_CT=Math.max(CHAT_CT,+j.ct||0);onlPaint();try{supCheck();}catch(e){}}}catch(e){}finally{clearTimeout(to);}
   if(!ok){ONL_FAIL++;if(!ONLINE)onlPaint();clearTimeout(ONL_RT);ONL_RT=setTimeout(()=>{if(!document.hidden)onlPing();},Math.min(30000,4000*ONL_FAIL));}}
 setTimeout(()=>{onlPaint();onlPing();},300);setInterval(()=>{if(!document.hidden)onlPing();},60000);
 addEventListener('pagehide',()=>onlPing(true));
@@ -7388,7 +7408,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=47,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=48,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}

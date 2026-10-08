@@ -1,6 +1,10 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v4.9
+// 찬서 명예의 전당 서버 (Google Apps Script) v5.0
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
+//
+// v4.9 → v5.0 바뀐 점
+// - 기기별 접속 기록: 접속 신호(ping)가 올 때 '기기' 시트에 기기 표시 · 이름 · 기기 종류 · 처음/마지막 접속을 남김
+//   (같은 기기+이름은 30분에 한 번만 시트를 고침). 개발자 모드 화면에서만 ?dv=1&dk=개발자키 로 받아봄
 //
 // v4.8 → v4.9 바뀐 점
 // - 후원 응원 메시지: 게임의 후원 창에서 보낸 메시지를 '후원' 시트에 저장 (시간 · 이름 · 메시지)
@@ -199,7 +203,8 @@ function ping_(q) {
   if (got) lock.releaseLock();
   let ct = 0;
   try { ct = +(c.get('chat_t') || 0); if (!ct) { const L = chatGet_(); ct = L.length ? L[L.length - 1].t : 0; if (ct) c.put('chat_t', String(ct), 21600); } } catch (err) {}
-  return out_({ v: 49, ct, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
+  if (id && !q.bye) devLog_(id, str_(q.n, 12) || '모험가', str_(q.ua, 30));
+  return out_({ v: 50, ct, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
 }
 
 // 전체 채팅 (최근 CHAT_MAX개만 보관)
@@ -253,6 +258,30 @@ function ownerKh_(nm) {
 }
 function ownerSet_(nm, kh) { try { CacheService.getScriptCache().put('own_' + Utilities.base64EncodeWebSafe(nm), kh || '-', 600); } catch (err) {} }
 
+// 기기별 접속 기록 ('기기' 시트: dev · name · ua · first · last · cnt). 개발자 키가 맞을 때만 목록을 줌
+const DEV_SHEET = '기기', DEV_KEY = '166989976870112', DEV_MAXROWS = 5000;
+function devSheet_() { const ss = book_(); let s = ss.getSheetByName(DEV_SHEET); if (!s) { s = ss.insertSheet(DEV_SHEET); s.getRange(1, 1, 1, 6).setValues([['dev', 'name', 'ua', 'first', 'last', 'cnt']]); s.getRange('A:C').setNumberFormat('@'); } return s; }
+function devLog_(id, n, ua) {
+  if (!id || !n || n === '모험가') return;
+  const c = CacheService.getScriptCache(), ck = 'dv_' + id + '|' + n;
+  try { if (c.get(ck)) return; c.put(ck, '1', 1800); } catch (err) {}
+  const lock = LockService.getScriptLock();
+  try { lock.waitLock(5000); } catch (err) { return; }
+  try {
+    const s = devSheet_(), last = s.getLastRow(), now = Date.now();
+    const v = last >= 2 ? s.getRange(2, 1, last - 1, 2).getValues() : [];
+    const i = v.findIndex(r => String(r[0]) === id && String(r[1]) === n);
+    if (i >= 0) { const r = i + 2, cnt = +s.getRange(r, 6).getValue() || 0; s.getRange(r, 3).setValue(ua); s.getRange(r, 5).setValue(now); s.getRange(r, 6).setValue(cnt + 1); }
+    else if (last - 1 < DEV_MAXROWS) s.appendRow([id, n, ua, now, now, 1]);
+  } catch (err) {} finally { lock.releaseLock(); }
+}
+function devList_(q) {
+  if (String(q.dk || '') !== DEV_KEY) return { err: 'key' };
+  const s = devSheet_(), last = s.getLastRow();
+  if (last < 2) return { rows: [] };
+  return { rows: s.getRange(2, 1, last - 1, 6).getValues().map(r => ({ d: String(r[0]), n: String(r[1]), ua: String(r[2]), f: +r[3] || 0, l: +r[4] || 0, c: +r[5] || 0 })) };
+}
+
 // 후원 응원 메시지 ('후원' 시트, 최근 300줄까지만 남김)
 const SUP_SHEET = '후원';
 function supSheet_() { const ss = book_(); let s = ss.getSheetByName(SUP_SHEET); if (!s) { s = ss.insertSheet(SUP_SHEET); s.getRange(1, 1, 1, 3).setValues([['at', 'name', 'msg']]); s.getRange('B:C').setNumberFormat('@'); } return s; }
@@ -267,6 +296,7 @@ function doGet(e) {
   const q = (e && e.parameter) || {};
   if (q.sup) return out_({ msgs: supList_(q.after) });
   if (q.chat) return chat_(q);
+  if (q.dv) return out_(devList_(q));
   if (q.ping) return ping_(q);
   if (q.own) {
     const nm = str_(q.own, 12), kh = ownerKh_(nm);
