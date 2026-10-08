@@ -3766,6 +3766,7 @@ CH.archer={P:Object.assign({1:'#12301a',2:'#1f4a24',3:'#2f6a2e',4:'#46883a',5:'#
   cp('g',bx+3,by+8);
   cl(P,['43.','343','.34','.kK'],24,23+U);
   cl(P,['45','34','34','kK'],A>=0?sx-1:14,23+U+(A>=0?1:ay));
+  shp(P,20,20+U,[5,5.5,6],'12345',{hl:1});for(let x=-5;x<=5;x+=2)dt(P,'2',20+x,22+U);
   if(A===0||A===1){for(let x=sx;x<=bx+5;x++)cp(x===bx+5?'s':'L',x,by+8);cp('q',sx,by+7);cp('q',sx,by+9);cp('W',bx+5,by+7);cp('W',bx+5,by+9);}
   shp(P,20,9+U,[2,3.5,4.5,5,5.5,6,6,6,6,6,5.5,5],'12345',{hl:3});dt(P,'3',26,12+U);dt(P,'2',27,13+U);
   cl(P,['bBBbBBbBb','kkkkkkkkK','kkekkkekK','kkekkkekK','kkkkkkkKK','.KKKKKKK.'],16,15+U);
@@ -3781,6 +3782,7 @@ CH.rogue={P:Object.assign({1:'#0e0c14',2:'#1c1824',3:'#2c2636',4:'#40384e',5:'#5
   const dag=(x,y,dx,dy)=>{guard(x,y,dx,dy,1,'2','3');blade(x,y,dx,dy,4,'W','S','s');cp('6',x-dx,y-dy);};
   if(A===0)dag(15,24+U,1,-1);else if(A===2)dag(15,27+U,1,1);else dag(14,27+U+yo,0,1);
   if(A===1)dag(24,24+U,-1,-1);else if(A===2)dag(24,27+U,-1,1);else dag(25,27+U-yo,0,1);
+  shp(P,20,21+U,[5,5.5],'rrRRq');dt(P,'q',17,21+U);
   shp(P,20,9+U,[2,3.5,4.5,5,5.5,6,6,6,6,6,5.5],'12345',{hl:2});
   cl(P,['KKKKKKKKK','kkekkkekK','kkekkkekK','RRRRRRRRr','RqRRRRRrr','.rrrrrrr.'],16,15+U);
   if(st.hurt){g.fillStyle=P.k;g.fillRect(16,16+U,8,2);cg(['e.e..e.e','.e....e.'],16,16+U);}
@@ -3797,6 +3799,7 @@ CH.paladin={swoosh:CH.knight.swoosh,P:Object.assign({W:'#fbf8ef',w:'#e4e8f0',s:'
   const up=A>=0?-5:0,hx=25;cl(P,['Sx','sS','Kk'],24,24+U+(A>=0?-2:-ay));
   for(let y=17+U+up;y<=27+U+(A>=0?-2:0);y++)dt(P,y%3?'L':'l',hx+1,y);
   cl(P,['.gG.','gGGG','GgGG','.GG.'],hx,13+U+up);dt(P,'8',hx+1,12+U+up);
+  shp(P,20,20+U,[4.5,5,5.5],'xSsww',{hl:1});for(let x=15;x<=25;x++)dt(P,x<20?'g':'G',x,22+U);
   shp(P,20,9+U,[2.5,4,5,5.5,5.5,5.5,5.5,5.5,5.5,5.5,5,4],'XxSsw',{hl:3});
   for(let x=15;x<=25;x++)dt(P,x<20?'g':'G',x,13+U);for(let y=9;y<13;y++)dt(P,'g',20,y+U);for(let x=16;x<=24;x++)dt(P,'G',x,20+U);
   for(let x=16;x<=24;x++)dt(P,'v',x,15+U);for(let y=16;y<=18;y++)dt(P,'v',20,y+U);if(!st.hurt){dt(P,'8',16,15+U);dt(P,'8',24,15+U);dt(P,'8',17,15+U);dt(P,'8',23,15+U);}
@@ -3830,17 +3833,21 @@ CH.gunner={P:Object.assign({L:'#8a5a32',Y:'#b07a46',y:'#d09a5e',l:'#5a3820',z:'#
   shp(P,20,13+U,[9],'zlLYy');shp(P,20,14+U,[7.5],'zzlll');dt(P,'L',11,12+U);dt(P,'l',29,12+U);
   if(st.hurt)hurtEyes(16+U);
  }};
-CH.elem={P:Object.assign({1:'#0e3a4a',2:'#174a60',3:'#1f6a88',4:'#2f9ab8',5:'#5fc8e0',h:'#2fa8b8',H:'#5fd0dc',c:'#a8f0f4',W:'#f4f8ff',w:'#c8dce8',g:'#f0c840',G:'#b08a24',r:'#ff5a8a'},SKN),
+CH.elem={P:Object.assign({1:'#0e4a5a',2:'#17607a',3:'#2482a4',4:'#38aed0',5:'#7ad8ec',h:'#38b8c8',H:'#7ae0e8',c:'#c8f8fa',W:'#f4f8ff',w:'#c8dce8',g:'#f0c840',G:'#b08a24',r:'#ff5a8a',p:'#ffa8c0',m:'#e06080'},SKN),
  draw(st){const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
-  shp(P,20,13+U,[5,5.5,5.5,5.5,5.5,5.5,5.5,5,5,4.5,4],'3hHHc');
-  cl(P,['43','34','23','11','11','111'],17,29+st.lL);cl(P,['34','43','32','11','11','111'],21,29+st.rL);
-  shp(P,20,23+U,[3.5,4,4,4,4,4],'12345');for(let i=0;i<6;i++){dt(P,'W',17+i,23+U+i);dt(P,'w',18+i,23+U+i);}for(let x=16;x<=24;x++)dt(P,'G',x,26+U);dt(P,'r',20,26+U);
+  shp(P,20,13+U,[5,5.5,6,6,6,6,6,6,6,6,5.5,5,4.5,4],'3hHHc');
+  cl(P,['k','k','4','44'],18,31+st.lL);cl(P,['K','K','4','44'],21,31+st.rL);
+  for(let y=21;y<=22;y++)for(let x=19;x<=21;x++)dt(P,x<21?'k':'K',x,y+U);dt(P,'g',20,22+U);
+  shp(P,20,23+U,[3,3.5,3.5,3],'12345',{hl:1});for(let x=19;x<=21;x++)dt(P,'W',x,23+U);
+  for(let x=17;x<=23;x++)dt(P,'G',x,26+U);dt(P,'r',20,26+U);
+  shp(P,20,27+U,[3.5,4,4.5,5,5.5],'12345');for(let x=-5;x<=5;x++)dt(P,x<0?'c':'5',20+x,31+U);
   const fl=Math.floor((st.t||0)*10)%2,big=A>=0;
-  cl(P,['45','34','kK'],14,24+U+ay);cl(P,['43','32','Kk'],24,24+U-ay);
+  cl(P,['45','4k'],15,24+U+ay);cl(P,['43','k3'],24,24+U-ay);
   cg(big?['.9.','989','898','.0.']:fl?['.9.','989','.0.']:['.8.','.9.','909'],13,(big?20:22)+U+ay);
   cg(big?['.c.','cEc','EcE','.B.']:fl?['.c.','cEc','.B.']:['.E.','.c.','cBc'],24,(big?20:22)+U-ay);
-  shp(P,20,10+U,[3,4.5,5.5,6,6],'3hHHc',{hl:2});for(let x=15;x<=25;x++)dt(P,'g',x,14+U);dt(P,'r',20,14+U);
-  cl(P,['HhHHhHHhH','kkkkkkkkK','kkekkkekK','kkekkkekK','kkkkkkkKK','.KKKKKKK.'],16,15+U);
+  shp(P,20,10+U,[3,4.5,5.5,6,6],'3hHHc',{hl:2});for(let x=15;x<=25;x++)dt(P,'g',x,14+U);dt(P,'r',20,14+U);dt(P,'c',17,14+U);dt(P,'c',23,14+U);
+  cl(P,['HhHHhHHhH','kekkkkkek','kkekkkekK','kkekkkekK','kpkkmkkpK','.KKKKKKK.'],16,15+U);
+  for(let y=15;y<=24;y++){dt(P,'h',15,y+U);dt(P,y%3?'H':'h',25,y+U);}
   if(st.hurt)hurtEyes(16+U);
  }};
 CH.berserk={P:Object.assign({S:'#8e96a6',s:'#c3c9d4',x:'#4a5060',X:'#2e3240',w:'#e8ecf2',G:'#8a5a2a',Y:'#d0782a',y:'#f0a050',L:'#7a4a24',l:'#4a2a12',R:'#5a3a24',r:'#3a2416',E:'#efe6cf',f:'#8a6a4a',F:'#b8946a'},SKN),
@@ -3848,7 +3855,7 @@ CH.berserk={P:Object.assign({S:'#8e96a6',s:'#c3c9d4',x:'#4a5060',X:'#2e3240',w:'
   cl(P,['RR','Rr','rr','ll','ff','fff'],17,29+st.lL);cl(P,['RR','rR','rr','ll','ff','fff'],21,29+st.rL);
   shp(P,20,23+U,[3.5,4,4,4],'KKkkk');for(let i=0;i<4;i++){dt(P,'L',16+i*2,23+U+i);dt(P,'L',17+i*2,23+U+i);}
   for(let x=16;x<=24;x++)dt(P,'l',x,27+U);dt(P,'G',20,27+U);shp(P,20,28+U,[4,4.5],'rRRff');
-  cl(P,['FfF','fFf'],13,22+U);
+  shp(P,20,21+U,[5,5.5],'fFFFF');for(let x=-5;x<=5;x+=2)dt(P,'f',20+x,22+U);cl(P,['FfF','fFf'],13,22+U);
   cl(P,['FF','kK','kK','kK'],14,23+U+ay);
   const up=A>=0?-4:0,hx=26;cl(P,['kK','kK'],24,25+U+(A>=0?-2:-ay));
   for(let y=14+U+up;y<=30+U;y++)dt(P,y%3?'L':'R',hx+1,y);
@@ -3869,6 +3876,7 @@ CH.druid={P:Object.assign({1:'#1a3a14',2:'#2f6a24',3:'#4a8a34',4:'#6aaa48',5:'#9
   for(let y=13+U+up;y<=33+U;y++){dt(P,y%4?'L':'l',x,y);if(y%5===1)dt(P,'4',x-1,y);if(y%5===3)dt(P,'3',x+1,y);}
   cl(P,['.LL.','L..L','L.9.','.L..'],x-2,10+U+up);if(fl||A>=0)cl(P,['.8.','8.8','.8.'],x-1,10+U+up);
   cl(P,['32.','234','.kK'],24,24+U+up);
+  shp(P,20,20+U,[5,5.5,6],'12345',{hl:1});for(let x=-6;x<=6;x+=2)dt(P,'5',20+x,22+U);
   shp(P,20,9+U,[2,3.5,4.5,5,5.5,6,6,6,6,6,5.5],'12345',{hl:3});for(const [a,b] of [[17,11],[22,10],[24,13],[15,13],[19,12]])dt(P,'5',a,b+U);
   cl(P,['TTTTTTTTT','kkkkkkkkK','kkekkkekK','kkekkkekK','kkkkkkkKK','.KKKKKKK.'],16,15+U);
   cl(P,['Y.Y','YYY','.Y.'],13,6+U);cl(P,['Y.Y','YYY','.Y.'],24,6+U);
@@ -3883,6 +3891,7 @@ CH.alch={P:Object.assign({h:'#5a3a22',H:'#8a5a32',j:'#b8804a',X:'#8a6a2a',c:'#ff
   cl(P,['Ws','Ws','sS','kK'],14,23+U+ay);
   const up=A>=0?-3:0,fl=Math.floor((st.t||0)*6)%2;cl(P,['sW','sW','kK'],24,23+U+up);
   cl(P,['.E.','.E.','FNF','NFN','.N.'],25,21+U+up);if(fl||A>=0)cl(P,['F.F','.F.'],25,18+U+up);
+  shp(P,20,20+U,[3.5,4.5],'SsWWW');dt(P,'S',20,21+U);
   shp(P,20,10+U,[3,4.5,5.5,6,6],'hhHHj',{hl:2});dt(P,'H',16,9+U);dt(P,'j',19,8+U);dt(P,'H',23,9+U);dt(P,'H',25,10+U);
   for(let y=15;y<=18;y++){dt(P,'h',15,y+U);dt(P,'h',25,y+U);}
   cl(P,['kkkkkkkkK','kkekkkekK','kkekkkekK','kkkkkkkKK','.KKKKKKK.'],16,15+U);
@@ -3894,7 +3903,7 @@ CH.gambler={P:Object.assign({z:'#1e1a26',v:'#3a3448',V:'#5a5268',P:'#7a48b8',p:'
   cl(P,['zv','zv','zv','zz','zz','zzz'],17,29+st.lL);cl(P,['vz','vz','vz','zz','zz','zzz'],21,29+st.rL);
   shp(P,20,23+U,[3.5,4,4,4,4,4],'zzvvV');for(let y=29;y<=30;y++){dt(P,'z',16,y+U);dt(P,'z',24,y+U);}
   for(let y=23;y<=27;y++)for(let x=18;x<=22;x++)dt(P,x<20?'P':'p',x,y+U);for(let x=19;x<=21;x++)dt(P,'W',x,23+U);dt(P,'w',20,24+U);dt(P,'g',20,25+U);dt(P,'g',20,27+U);
-  cl(P,['RrWrR'],18,22+U);dt(P,'r',20,22+U);
+  cl(P,['.WKW.','WWkWW'],18,20+U);cl(P,['RrWrR'],18,22+U);dt(P,'r',20,22+U);
   cl(P,['zv','zv','vV','kK'],14,23+U+ay);
   const up=A>=0?-2:0;cl(P,['vz','vz','kK'],24,23+U+up);
   const ph=((st.t||0)*3)%1,cy=Math.round(20+U+up-Math.sin(ph*Math.PI)*5),w=Math.abs(Math.cos(ph*Math.PI*4))>.5;
@@ -7046,8 +7055,8 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
-  {v:80,t:'🧙 12직업 새 디자인',items:[
-    ['new','🧙 12직업 모두 새 디자인이에요! 머리를 조금 줄여 몸이 잘 보이게 하고, 직업마다 색과 장식을 새로 입혔어요 (기사 남색 투구·흰 깃털·둥근 방패, 마법사 금띠 고깔모자, 궁수 초록 두건, 도적 복면, 성기사 은빛 통투구, 사령술사 해골 지팡이, 총잡이 카우보이 모자, 정령사 보석 머리띠, 광전사 뿔 투구, 드루이드 사슴뿔 잎 두건, 연금술사 고글, 도박사 실크햇). 동작과 능력은 그대로예요']]},
+  {v:81,t:'🧙 12직업 새 디자인',items:[
+    ['new','🧙 12직업 모두 새 디자인이에요! 머리를 조금 줄여 몸이 잘 보이게 하고, 직업마다 색과 장식을 새로 입혔어요 (기사 남색 투구·흰 깃털·둥근 방패, 마법사 금띠 고깔모자, 궁수 초록 두건, 도적 복면, 성기사 은빛 통투구, 사령술사 해골 지팡이, 총잡이 카우보이 모자, 정령사 긴 머리·보석 머리띠·드레스, 광전사 뿔 투구, 드루이드 사슴뿔 잎 두건, 연금술사 고글, 도박사 실크햇). 동작과 능력은 그대로예요']]},
   {v:79,t:'🏰 이스터에그 건물 새 그림',items:[
     ['new','🏰 맵마다 있는 비밀 장소 건물 34종을 <b>1.4배 크게</b>, 2배 촘촘한 도트로 새로 그렸어요 (기와·통나무·벽돌 질감, 불 켜진 창, 굴뚝 연기, 담쟁이, 깃발 등). 건물이 커진 만큼 부딪히는 범위도 커졌어요']]},
   {v:78,t:'🗺 모든 배경 새 그림',items:[
@@ -9473,7 +9482,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=80,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=81,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
