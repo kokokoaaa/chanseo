@@ -5938,7 +5938,10 @@ function openPatch(all){closePatch();const d=document.createElement('div');d.id=
   const done=()=>{try{localStorage.setItem('chanseo_seenv',String(BUILD));}catch(e){}closePatch();};$('patchOk').onclick=done;d.onclick=e=>{if(e.target===d)done();};}
 function closePatch(){const d=document.getElementById('patchPop');if(d)d.remove();}
 function bootPatch(){let seen=0;try{seen=+(localStorage.getItem('chanseo_seenv')||0);}catch(e){}if(seen<BUILD&&PATCH_NOTES.some(p=>p.v>seen))openPatch(false);}
+const $o=id=>document.getElementById(id)||{};
 function startScreen(){
+  // 판이 진행 중이면(레이드·결투 포함) 시작 화면을 그리지 않음: 다른 창을 닫다가 잘못 불려 게임 위에 덮이고 오류가 나던 문제 방지
+  if(S&&S.started&&S.mode!=='start'&&S.mode!=='over'&&S.mode!=='spec'&&!S.win&&S.p&&S.p.alive)return;
   setTimeout(()=>{try{donorCheck();}catch(e){}},800);
   if(CH_PEND&&!META.chDone&&myNick()&&CHART_NICKS.some(k=>myNick().includes(k))){CH_PEND=false;let ask=true;if((META.chY||0)>=2){META.chSkip=!META.chSkip;ask=!META.chSkip;saveMeta();}if(ask)setTimeout(chartAsk,500);}
   if(typeof UPD!=='undefined'&&UPD.ver>BUILD&&applyUpd())return;
@@ -5971,13 +5974,13 @@ function startScreen(){
   <button class="btn ghost" id="sync">💾 데이터 옮기기 <small>다른 기기로 내보내기 · 가져오기</small></button></div>`);
   ov.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{const k=b.dataset.cls;
     if(!clsOpen(k)){const C=CLASSES[k];$('cdet').innerHTML=clsDetail(k)+unlockInfo(k)+(META.tk>0?`<button class="btn primary" id="ulk" style="margin-top:10px;width:100%;font-size:17px;padding:12px">🔓 ${C.n} 직업 봉인 해제하기</button><p style="margin:6px 0 0;font-size:15px;font-weight:700;color:#ffd76a;text-align:center">🎟 봉인 해제권 <b style="font-size:18px">${META.tk}장</b> 소유</p>`:`<p style="color:#ffb0b0;margin:10px 0 0;font-size:15px;font-weight:700;text-align:center">🔒 봉인된 직업 · 지옥·신 난이도를 클리어하면 봉인 해제권을 받아요<br><span style="color:#ffd76a">🎟 봉인 해제권 0장 소유</span></p>`);
-      if(META.tk>0)$('ulk').onclick=()=>{META.tk--;(META.ucls=META.ucls||[]).push(k);saveMeta();pickCls=k;try{localStorage.setItem('chipdungeon_cls',k);}catch(e){}toast(C.n+' 봉인 해제! '+TAGS[C.fav[0]].n+' 시너지 증강도 이제 나와요');startScreen();};return;}
+      if(META.tk>0)$o('ulk').onclick=()=>{META.tk--;(META.ucls=META.ucls||[]).push(k);saveMeta();pickCls=k;try{localStorage.setItem('chipdungeon_cls',k);}catch(e){}toast(C.n+' 봉인 해제! '+TAGS[C.fav[0]].n+' 시너지 증강도 이제 나와요');startScreen();};return;}
     pickCls=k;try{localStorage.setItem('chipdungeon_cls',pickCls);}catch(e){}
     ov.querySelectorAll('[data-cls]').forEach(x=>x.classList.toggle('on',x===b));$('cdet').innerHTML=clsDetail(pickCls);$('go').firstChild.textContent=`${CLASSES[pickCls].n}(으)로 시작${sv?' (저장 삭제)':''}`;});
   ov.querySelectorAll('[data-diff]').forEach(b=>b.onclick=()=>{pickDiff=b.dataset.diff;savePickDiff(pickDiff);ov.querySelectorAll('[data-diff]').forEach(x=>x.classList.toggle('primary',x===b));HOF_DIFF=null;refreshBoard();});
-  if(sv)$('cont').onclick=()=>continueGame(sv);
-  $('go').onclick=()=>beginRun(pickCls);
-  $('meta').onclick=openMeta;onlPaint();if($('donBtn'))$('donBtn').onclick=openDonate;if($('supBox'))$('supBox').onclick=openSupBox;if($('devLog'))$('devLog').onclick=()=>openDevLog();if($('nickBtn'))$('nickBtn').onclick=openNick;$('forgeBtn').onclick=openForge;$('heroBtn').onclick=openHeroes;if($('raidBtn'))$('raidBtn').onclick=openRaid;if($('rushBtn'))$('rushBtn').onclick=openRush;if($('duelBtn'))$('duelBtn').onclick=openDuel;$('sync').onclick=openSync;if($('guideBtn'))$('guideBtn').onclick=()=>openGuide('a');if($('patchBtn'))$('patchBtn').onclick=()=>openPatch(true);if($('verLbl')){$('verLbl').onclick=devTapVer;$('verLbl').style.userSelect='none';}$('codex').onclick=()=>openCodex();$('achBtn').onclick=openAch;
+  if(sv)$o('cont').onclick=()=>continueGame(sv);
+  $o('go').onclick=()=>beginRun(pickCls);
+  $o('meta').onclick=openMeta;onlPaint();if($('donBtn'))$o('donBtn').onclick=openDonate;if($('supBox'))$o('supBox').onclick=openSupBox;if($('devLog'))$o('devLog').onclick=()=>openDevLog();if($('nickBtn'))$o('nickBtn').onclick=openNick;$o('forgeBtn').onclick=openForge;$o('heroBtn').onclick=openHeroes;if($('raidBtn'))$o('raidBtn').onclick=openRaid;if($('rushBtn'))$o('rushBtn').onclick=openRush;if($('duelBtn'))$o('duelBtn').onclick=openDuel;$o('sync').onclick=openSync;if($('guideBtn'))$o('guideBtn').onclick=()=>openGuide('a');if($('patchBtn'))$o('patchBtn').onclick=()=>openPatch(true);if($('verLbl')){$o('verLbl').onclick=devTapVer;$('verLbl').style.userSelect='none';}$o('codex').onclick=()=>openCodex();$o('achBtn').onclick=openAch;
   refreshBoard();
 }
 function drawPreviews(){
@@ -7827,7 +7830,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=55,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=56,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
