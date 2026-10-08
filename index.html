@@ -4663,7 +4663,7 @@ function update(dt){
   // 넉백 등으로 몬스터가 맵 밖으로 밀려나가지 않게 (보스는 bossAI에서 따로 처리)
   for(const e of S.en)if(!e.boss){if(e.x<e.r)e.x=e.r;else if(e.x>WW-e.r)e.x=WW-e.r;if(e.y<e.r)e.y=e.r;else if(e.y>WH-e.r)e.y=WH-e.r;}
   if(p.alive&&p.hp>0&&p.hp<=p.maxHp*.02&&S.lowAt==null)S.lowAt=S.t;if(S.lowAt!=null&&p.alive&&S.t-S.lowAt>=10)achUnlock('h_1hp');
-  skTick(dt);ultTick(dt);thrTick(dt);if(AUTO.move&&DEV){autoSkill();if((S.p.ulCd||0)<=0&&(bossOn()||S.en.filter(e=>e.alive).length>25))useUlt();}
+  skTick(dt);ultTick(dt);thrTick(dt);if(AUTO.move&&DEV){autoSkill();if(!DEV_LK&&(S.p.ulCd||0)<=0&&(bossOn()||S.en.filter(e=>e.alive).length>25))useUlt();} // 궁극기 자동 사용은 밸런스 측정(DEV_LK 끔)에서만
   omenTick(dt);updBoss(dt);hbTick(dt);if(p.rdm)p.rdm*=Math.exp(-dt/3);eggTick(dt);if(S.gold>(S.maxGold||0))S.maxGold=S.gold;if(S.npc){S.npc.t+=dt;if(S.npc.t>4.6)S.npc=null;}
   // 사령술사 해골 궁수대: 해골 3기 중 1기가 1초마다 뼈 화살
   if(has('n_archers')&&S.skel&&p.alive){S.naT=(S.naT??1)-dt;if(S.naT<=0){S.naT=1;S.skel.forEach((k,i)=>{if(i%3!==0||k.life<=0)return;const e=nearestE(k,p.range);if(e)pBullet(k.x,k.y,Math.atan2(e.y-k.y,e.x-k.x),pDmg()*lv3('n_archers',.5,.6,.8)*undM(),{child:true,sub:'해골 궁수대',pierce:1,r:3,life:.9,bone:true,src:'undead'});});}}
