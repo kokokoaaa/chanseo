@@ -182,7 +182,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 .hof .rank{margin-top:10px}
 .menugrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}.menugrid>.btn{margin:0!important;width:auto;padding:10px 6px;font-size:15px;line-height:1.25}.menugrid .btn small{font-size:11.5px}@media (max-width:640px){.menugrid{grid-template-columns:repeat(2,1fr)}}
 .dnqr{display:flex;align-items:center;justify-content:center;gap:14px;margin:10px 0}.dnqr img{width:150px;height:150px;image-rendering:pixelated;border-radius:8px;background:#fff;padding:4px}.dnqr div{display:flex;flex-direction:column;gap:4px;max-width:260px}.dnqr small{color:var(--muted);font-size:12.5px}@media (max-width:520px){.dnqr{flex-direction:column;text-align:center}}
-.donrow{text-align:center;margin:-2px 0 6px}.donb{position:relative;overflow:hidden;border:1px solid #ffd76a;border-radius:999px;padding:4px 14px;font:inherit;font-size:14px;font-weight:bold;color:#3a2600;cursor:pointer;background:linear-gradient(110deg,#ffe58a 0%,#ffc83a 40%,#fff3c0 50%,#ffc83a 60%,#e8a520 100%);background-size:250% 100%;animation:donsh 2.6s linear infinite;box-shadow:0 0 10px rgba(255,200,60,.55)}.donb .dcoin{display:inline-block;font-style:normal;animation:dcoin 1.6s ease-in-out infinite}@keyframes donsh{0%{background-position:120% 0}100%{background-position:-120% 0}}@keyframes dcoin{0%,100%{transform:rotateY(0)}50%{transform:rotateY(180deg)}}
+.donrow{text-align:center;margin:-2px 0 6px}.donb{position:relative;overflow:hidden;border:1px solid #ffd76a;border-radius:999px;padding:4px 14px;font:inherit;font-size:14px;font-weight:bold;color:#3a2600;cursor:pointer;background:linear-gradient(110deg,#ffe58a 0%,#ffc83a 40%,#fff3c0 50%,#ffc83a 60%,#e8a520 100%);background-size:250% 100%;animation:donsh 2.6s linear infinite;box-shadow:0 0 10px rgba(255,200,60,.55)}.donb .dcoin{display:inline-block;width:17px;height:17px;line-height:15px;border-radius:50%;vertical-align:-3px;font-style:normal;font-size:10px;text-align:center;color:#8a5a00;background:radial-gradient(circle at 35% 30%,#fffbe0 0,#ffe066 35%,#e0a800 75%,#a87400 100%);border:1px solid #8a5a00;box-shadow:0 0 6px rgba(255,215,106,.9);animation:dcoin 1.6s ease-in-out infinite}@keyframes donsh{0%{background-position:120% 0}100%{background-position:-120% 0}}@keyframes dcoin{0%,100%{transform:rotateY(0)}50%{transform:rotateY(180deg)}}
 .chartq{position:fixed;inset:0;z-index:9800;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45)}.chartq .cq{background:#0f2a20;border:2px solid var(--brass);border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;align-items:center;gap:12px;color:var(--ivory);font-size:20px;box-shadow:0 8px 30px rgba(0,0,0,.6)}.chartq .cqb{display:flex;gap:12px}.chartq .cqb .btn{min-width:110px;font-size:18px;margin:0}.chartq small{font-size:15px;min-height:1.2em;text-align:center;line-height:1.5}
 .chatb{position:relative}#chatBox .hx-hf_neon,.onll .hx-hf_neon{color:#aef9ff!important;text-shadow:0 0 6px #22e0ff,0 0 12px #22e0ff}#chatBox .chl b.hn{font-weight:bold}.cdot{position:absolute;top:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#ff4f6a;box-shadow:0 0 6px #ff4f6a}
 #chatBox{position:fixed;right:12px;bottom:12px;z-index:9000;width:min(360px,calc(100vw - 24px));height:min(420px,60vh);display:flex;flex-direction:column;background:rgba(8,24,17,.96);border:1px solid var(--brass);border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.6);color:var(--ivory);font-size:14px}
@@ -2689,6 +2689,8 @@ const canPoison=()=>has('toxic')||has('r_venom')||tag('poison')>=2;
 function ftext(x,y,s,col,size=14){S.tx.push({x,y,s:String(s),col,size,life:.7});if(S.tx.length>60)S.tx.shift();}
 // 정해 둔 닉네임에게만: 한 판 끝날 때마다 「차트는 쓰고 게임 하시나요?」 → YES 행운 +1 (최대 +5) · NO 행운 −1 (최소 −10). 다음 판부터 계속 적용
 const CHART_NICKS=['힘기범']; // 닉네임에 이 글자가 들어 있으면 (힘기범, 힘기범2 …)
+// 시작 화면에 올 때 물어봄: 게임을 켰을 때 한 번 + 한 판 끝날 때마다 다시 (이름을 바꿨을 때도)
+let CH_PEND=true;
 function chartAsk(){const n=myNick();if(!n||!CHART_NICKS.some(k=>n.includes(k))||document.getElementById('chartQ'))return;
   const d=document.createElement('div');d.id='chartQ';d.className='chartq';
   d.innerHTML=`<div class="cq"><b>📋 차트는 쓰고 게임 하시나요?</b><div class="cqb"><button class="btn primary" data-cq="1">YES</button><button class="btn" data-cq="0">NO</button></div><small id="cqMsg"></small></div>`;
@@ -3608,7 +3610,7 @@ const SKILLS={
   berserk:{ico:'💢',n:'불사의 분노',cd:35,d:'4초간 체력이 1 아래로 안 떨어짐 + 광란 즉시 최대'},
   druid:{ico:'🌿',n:'가시 껍질',cd:30,d:'4초간 받는 피해 −60%, 맞을 때마다 가시 반격, 체력 재생 ×5'},
   alch:{ico:'⚗',n:'비상 물약',cd:30,d:'즉시 체력 40% 회복 + 2초간 유리병 보호막 (무적)'},
-  gambler:{ico:'🪙',n:'운명의 동전',cd:25,d:'동전 던지기: 앞면이면 3초 무적 + 공격력 2배, 뒷면이면 체력 25% 회복 (행운이 높을수록 앞면)'}};
+  gambler:{ico:'💰',n:'운명의 동전',cd:25,d:'동전 던지기: 앞면이면 3초 무적 + 공격력 2배, 뒷면이면 체력 25% 회복 (행운이 높을수록 앞면)'}};
 const SK_T=['iwT','skCd','skInvT','skDrT','skThT','skUndT','skRgT','skCrT','skAtkT','skRootT'];
 function skTick(dt){const p=S.p;for(const k of SK_T)if(p[k]>0)p[k]=Math.max(0,p[k]-dt);}
 function skMove(dx,dy,dist){const p=S.p,l=Math.hypot(dx,dy)||1;dx/=l;dy/=l;for(let i=0;i<10;i++){p.x=clamp(p.x+dx*dist/10,20,WW-20);p.y=clamp(p.y+dy*dist/10,20,WH-20);}pushOut(p,p.r);if(S.arena){const A=S.arena,d=Math.hypot(p.x-A.x,p.y-A.y);if(d>A.r-20){p.x=A.x+(p.x-A.x)/d*(A.r-20);p.y=A.y+(p.y-A.y)/d*(A.r-20);}}}
@@ -3627,7 +3629,7 @@ function useSkill(){const p=S&&S.p;if(!p||!p.alive||S.mode!=='play'||(p.skCd||0)
    case 'berserk':p.skUndT=4;p.fy=furyCap();p.fyT=4+(p.fyD||0);say('불사의 분노!');break;
    case 'druid':p.skDrT=4;p.skDr=.6;p.skThT=4;p.skRgT=4;say('가시 껍질!');break;
    case 'alch':p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.4*healM());p.skInvT=2;say('비상 물약!');break;
-   case 'gambler':if(Math.random()<headP()){p.skInvT=3;p.skAtkT=3;say('🪙 앞면! 무적 + 공격력 2배');}else{p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.25*healM());say('🪙 뒷면… 체력 회복');}break;}
+   case 'gambler':if(Math.random()<headP()){p.skInvT=3;p.skAtkT=3;say('💰 앞면! 무적 + 공격력 2배');}else{p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.25*healM());say('💰 뒷면… 체력 회복');}break;}
 }
 // 완벽한 회피: 예고 공격·보스 공격처럼 큰 공격(최대 체력 15% 이상)이 대시 무적 중에 닿으면 (잡몹 몸통은 제외) → 슬로 모션 + 0.6초 무적 + 대시 재사용 절반 환급 + 보너스 점수 (대시 1번에 1회)
 function perfectDodge(){const p=S.p;if(p.pdDone)return;p.pdDone=1;S.smT=Math.max(S.smT||0,.45);p.inv=Math.max(p.inv||0,.6);p.dashCd=(p.dashCd||0)*.5;
@@ -4840,7 +4842,7 @@ function drawMini(){
   mctx.fillStyle='#ffffff';mctx.beginPath();mctx.arc(M/2,M/2,7,0,TAU);mctx.fill();
 }
 // 왼쪽 아래 증강 아이콘 줄: 보유 증강 + 빈 슬롯. PC는 마우스 올리면, 모바일은 누르면 설명
-const TAG_ICO={card:'🃏',dice:'🎲',roulette:'💫',house:'💰',curse:'💀',jackpot:'⭐',blitz:'💨',guard:'🛡',poison:'☠',holy:'✝',frost:'❄',summon:'🔮',sniper:'🎯',thunder:'⚡',fire:'🔥',undead:'🦴',rapid:'🔫',elem:'🌀',fury:'💢',nature:'🌿',alchemy:'⚗',coin:'🪙',mark:'📍',wave:'🌊',shadow:'👤',grav:'🕳'};
+const TAG_ICO={card:'🃏',dice:'🎲',roulette:'💫',house:'💰',curse:'💀',jackpot:'⭐',blitz:'💨',guard:'🛡',poison:'☠',holy:'✝',frost:'❄',summon:'🔮',sniper:'🎯',thunder:'⚡',fire:'🔥',undead:'🦴',rapid:'🔫',elem:'🌀',fury:'💢',nature:'🌿',alchemy:'⚗',coin:'💰',mark:'📍',wave:'🌊',shadow:'👤',grav:'🕳'};
 let augBarKey='',synKey='';
 function renderAugBar(){const el=$('augBar');const k=!S||S.mode==='start'?'':S.augs.map(a=>a.id).join(',')+'|'+MAXA;if(k===augBarKey)return;augBarKey=k;synKey='';if(!k){el.innerHTML='';return;}
   const cell=(a,i)=>{const col=(TIER[a.t]||{}).col||'#d6a94a',ic=a.t==='d'?'🐉':a.uc?'♾':a.vf?'💥':a.t==='f'?'💥':a.t==='v'?'👑':(TAG_ICO[a.tags[0]]||'✦');
@@ -4927,7 +4929,7 @@ function hud(){
   if(S.bless&&S.bless.t>0)bf.push(`<span style="color:#9fd3ff">${S.bless.n} ${S.bless.t.toFixed(0)}</span>`);
   if(skelMax()>0)bf.push(`<span data-tip="skel" style="color:#8cff9a">💀 해골 ${(S.skel||[]).length}/${skelMax()}${skelRaw()>SKEL_CAP?` · 초과 ${skelRaw()-SKEL_CAP} → 해골 피해 ×${(skelRaw()/SKEL_CAP).toFixed(2)}`:''}</span>`);if(has('turret'))bf.push(`<span data-tip="turret" style="color:#9fd3ff">🗼 포탑 ${(S.turrets||[]).length}기 · 다음 ${Math.max(0,S.tuT||0).toFixed(0)}초</span>`);if(shadowOn())bf.push(`<span data-tip="clone" style="color:#c9a0ff">👥 분신 ${(S.clones||[]).length}/${shMax()}</span>`);if(droneN()>0)bf.push(`<span data-tip="drone" style="color:#9fe8ff">🛸 드론 ${droneN()}기</span>`);{const vn=S.zones.filter(z=>z.kind==='vine').length;if(vn||S.cls==='druid'||tag('nature')>=1||has('thornseed'))bf.push(`<span style="color:#d8ff6a">🌿 덩굴 ${vn}/14</span>`);}
   if(p.cfS>=2)bf.push(`<span style="color:#ffd76a">앞면 ${p.cfS}연속</span>`);
-  if(has('gb_chips'))bf.push(`<span style="color:#ffd76a">🪙 부적 ${S.chip||0}/20</span>`);if(has('gb_wheel')&&S.whE>S.t)bf.push(`<span style="color:#ffd76a">🎡 ${['공격력','공격 속도','치명타','폭발','골드'][S.whR]} ${Math.ceil(S.whE-S.t)}초</span>`);if(has('gb_martin')&&p.cfT)bf.push(`<span style="color:#ff4fd8">마틴게일 ×${Math.pow(lv3('gb_martin',1.5,1.65,1.8),p.cfT).toFixed(1)}</span>`);
+  if(has('gb_chips'))bf.push(`<span style="color:#ffd76a">💰 부적 ${S.chip||0}/20</span>`);if(has('gb_wheel')&&S.whE>S.t)bf.push(`<span style="color:#ffd76a">🎡 ${['공격력','공격 속도','치명타','폭발','골드'][S.whR]} ${Math.ceil(S.whE-S.t)}초</span>`);if(has('gb_martin')&&p.cfT)bf.push(`<span style="color:#ff4fd8">마틴게일 ×${Math.pow(lv3('gb_martin',1.5,1.65,1.8),p.cfT).toFixed(1)}</span>`);
   if(UPD.ver>BUILD)bf.push(`<span style="color:#7be08f">🔄 새 패치 v${UPD.ver} · 판 끝나면 적용</span>`);
   if(p.bearT>0)bf.push(`<span style="color:#c98a52">곰 변신 ${p.bearT.toFixed(1)}초</span>`);if(has('d_seasons')){const sn=season();bf.push(`<span style="color:${['#ffb0d0','#ffd76a','#e09a4a','#bfe8ff'][sn]}">${['🌸 봄','☀️ 여름','🍂 가을','❄️ 겨울'][sn]} ${Math.ceil(8-(S.t%8))}초</span>`);}
   if(p.fy>0)bf.push(`<span style="color:#ff6a4a">광란 ${p.fy}</span>`);
@@ -5213,8 +5215,8 @@ function cardShareW(n){const ks=CARD_SRC[n];if(!ks)return 1;const sh=ks.reduce((
 function cardOf(r,bonus=0){const LT=lockedTags(),pool=CARDS.filter(c=>(c.fr?c.fr===r:true)&&!((CARD_TAG[c.n]||[]).length&&(CARD_TAG[c.n]||[]).every(t=>LT.has(t)))&&(!c.cls||c.cls===S.cls||(c.src&&c.src()))&&cardOk(c)),fav=CLASSES[S.cls||'knight'].cards,rec=S.recentC||[],w=c=>(fav.includes(c.n)||c.cls?1.6:1)*(PCT_CARDS.has(c.n)?.35:1)*cardShareW(c.n)*(rec.includes(c.n)?.3:1)*routeW(CARD_TAG[c.n]||[]);
   let t=pool.reduce((q,c)=>q+w(c),0),x=Math.random()*t,pick=pool[pool.length-1];for(const c of pool){if((x-=w(c))<0){pick=c;break;}}
   S.recentC=[...rec,pick.n].slice(-9);return rollCard(pick,r,bonus);}
-const SYM=['🍒','🔔','🪙','💎','7️⃣','💀'];
-function spinSym(){const L=LK();const w={'🍒':22,'🔔':18,'🪙':20,'💎':10+L*.3,'7️⃣':5+L*.25,'💀':Math.max(4,15-L*.37)};let t=0;for(const s of SYM)t+=w[s];let x=Math.random()*t;for(const s of SYM){if((x-=w[s])<0)return s;}return '🍒';}
+const SYM=['🍒','🔔','💰','💎','7️⃣','💀'];
+function spinSym(){const L=LK();const w={'🍒':22,'🔔':18,'💰':20,'💎':10+L*.3,'7️⃣':5+L*.25,'💀':Math.max(4,15-L*.37)};let t=0;for(const s of SYM)t+=w[s];let x=Math.random()*t;for(const s of SYM){if((x-=w[s])<0)return s;}return '🍒';}
 function openCasino(){S.mode='casino';S.log='';S.busy=false;renderCasino();}
 const boxC=()=>price(160*Math.pow(1.35,cb('box'))),healC=()=>price(45),augC=()=>price(450*Math.pow(1.8,cb('aug')));
 function renderCasino(){
@@ -5261,7 +5263,7 @@ function slotResolve(r){
     else if(a==='💎'){const k=cardOf('e');const res=k.f(p);S.log=`다이아 세 개. ${k.n}<br><small>${res||k.d}</small>`;}
     else if(a==='🍒'){p.maxHp+=30;p.hp=p.maxHp;S.log='체리 세 개. 최대 체력 +30, 완전 회복';}
     else if(a==='🔔'){S.gold+=70;S.log='종 세 개. 70 골드';}
-    else if(a==='🪙'){S.gold+=45;S.log='동전 세 개. 45 골드';}
+    else if(a==='💰'){S.gold+=45;S.log='동전 세 개. 45 골드';}
     else{p.maxHp=Math.max(60,p.maxHp-25);p.hp=Math.min(p.hp,p.maxHp);S.log='해골 세 개. 최대 체력 −25';}
     return;
   }
@@ -5286,7 +5288,7 @@ function gameOver(win){
     if((d==='god'||d==='hell')&&tkNeed()>0){META.tk=(META.tk||0)+1;unl.push('🎟 직업 봉인 해제권 +1');}}
   unlocked=unl.join(' · ');
   const hsnap=heroOk()?(()=>{try{return heroSnap();}catch(e){return null;}})():null;
-  const sec=runSec(),score=runScore(),medals=runMedals(score);META.medals+=medals;META.total+=medals;saveMeta();setTimeout(chartAsk,700);
+  const sec=runSec(),score=runScore(),medals=runMedals(score);META.medals+=medals;META.total+=medals;saveMeta();CH_PEND=true;
   if(sec>best){best=sec;try{localStorage.setItem('chipdungeon_best_v5',String(best));}catch(e){}}
   const fmt=x=>`${Math.floor(x/60)}분 ${x%60}초`;
   show(`${unlocked?`<div class="medal" style="justify-content:center"><span>🔓 새로 해금: <b>${unlocked}</b></span></div>`:''}${win?`<h2>🏆 클리어!</h2><p class="sub">10분을 버티고 ${(ET[(S.bossT||[])[3]]||ET.boss4).n}을(를) 쓰러뜨렸습니다. 보스전에 ${fmt(Math.floor(S.bt))} 걸렸어요.</p>`:`<h2>${endless()?'악몽 '+(S.chap+1)+'단계 도달':S.quitEnd?'여기서 정산했습니다':'쓰러졌습니다'}</h2><p class="sub">${endless()?`보스 ${S.st.bosses||0}마리를 잡고`:Math.min(4,S.chap+1)+'장에서'} ${fmt(sec)} 버텼습니다.${S.bossI>=0?` (${ET[bossTypeOf(S.bossI)].n}에게 패배)`:''}</p>`}
@@ -5341,12 +5343,13 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
-  {v:43,t:'💛 후원 감사 인사',items:[
-    ['change','💛 후원 창에서 보내면 창이 닫히고 <b>감사 인사</b>가 크게 떠요']]},
+  {v:44,t:'💛 후원 감사 인사',items:[
+    ['change','💛 후원 창에서 보내면 창이 닫히고 <b>감사 인사</b>가 크게 떠요'],
+    ['change','💰 일부 컴퓨터에서 동전 그림이 네모(□)로 보이던 문제를 고쳤어요']]},
   {v:42,t:'🟢 접속 표시 고침',items:[
     ['change','🟢 서버 연결이 한 번 늦거나 끊기면 「접속 확인 중…」에 1분 넘게 멈춰 있던 문제를 고쳤어요. 이제 몇 초 뒤 알아서 다시 연결해요']]},
-  {v:41,t:'🪙 참붕이 토큰값 후원하기',items:[
-    ['new','🪙 버전 옆 <b>반짝이는 동전</b>을 누르면 참붕이 토큰값을 후원할 수 있어요 (카카오페이). <b>휴대폰</b>은 바로 열리고, <b>컴퓨터</b>는 화면의 QR을 휴대폰 카메라로 찍으면 돼요'],
+  {v:41,t:'💰 참붕이 토큰값 후원하기',items:[
+    ['new','💰 버전 옆 <b>반짝이는 동전</b>을 누르면 참붕이 토큰값을 후원할 수 있어요 (카카오페이). <b>휴대폰</b>은 바로 열리고, <b>컴퓨터</b>는 화면의 QR을 휴대폰 카메라로 찍으면 돼요'],
     ['new','💌 후원 창에서 <b>응원 한마디</b>를 남기면 개발자에게 전해져요']]},
   {v:40,t:'⚔ 보스 러시 더 어렵게',items:[
     ['enemy','⚔ 보스 러시: 단계가 오를수록 <b>결계(싸우는 구역)가 좁아져요</b> (단계마다 3%, 최소 55%)'],
@@ -5539,6 +5542,7 @@ function openPatch(all){closePatch();const d=document.createElement('div');d.id=
 function closePatch(){const d=document.getElementById('patchPop');if(d)d.remove();}
 function bootPatch(){let seen=0;try{seen=+(localStorage.getItem('chanseo_seenv')||0);}catch(e){}if(seen<BUILD&&PATCH_NOTES.some(p=>p.v>seen))openPatch(false);}
 function startScreen(){
+  if(CH_PEND&&myNick()&&CHART_NICKS.some(k=>myNick().includes(k))){CH_PEND=false;setTimeout(chartAsk,500);}
   if(typeof UPD!=='undefined'&&UPD.ver>BUILD&&applyUpd())return;
   if(DIFF[pickDiff]&&DIFF[pickDiff].rush){pickDiff=(()=>{try{return localStorage.getItem('chanseo_diff')||'normal';}catch(e){return 'normal';}})();}
   if(!diffOpen(pickDiff))pickDiff=[...DKEYS].filter(k=>k!=='bossrush').reverse().find(diffOpen)||'normal';
@@ -5548,7 +5552,7 @@ function startScreen(){
   const cards=Object.keys(CLASSES).map(k=>{const C=CLASSES[k],op=clsOpen(k);return `<button class="clscard ${k===pickCls?'on':''} ${op?'':'locked'}" data-cls="${k}">
     <canvas class="pv" data-c="${k}" width="96" height="96"></canvas><b>${op?'':'🔒 '}${C.n}</b><span class="role">${C.role}</span></button>`;}).join('');
   show(`
-  <h1>찬서 <span style="font-size:.5em;color:var(--ivory)">: 찬붕이의 뱀서</span></h1><div id="verLbl" style="margin:-6px 0 8px;font-size:13px;color:var(--muted)">v${BUILD} · ${updLabel()}</div>${DONATE_URL?'<div class="donrow"><button id="donBtn" class="donb"><i class="dcoin">🪙</i> 참붕이 토큰값 후원하기</button>'+(DEV?' <button id="supBox" class="donb" style="animation:none">💌 후원 메시지함</button>':'')+'</div>':''}
+  <h1>찬서 <span style="font-size:.5em;color:var(--ivory)">: 찬붕이의 뱀서</span></h1><div id="verLbl" style="margin:-6px 0 8px;font-size:13px;color:var(--muted)">v${BUILD} · ${updLabel()}</div>${DONATE_URL?'<div class="donrow"><button id="donBtn" class="donb"><i class="dcoin">★</i> 참붕이 토큰값 후원하기</button>'+(DEV?' <button id="supBox" class="donb" style="animation:none">💌 후원 메시지함</button>':'')+'</div>':''}
   <div class="nickbar"><button class="onlb" id="nickBtn">👤 ${myNick()?`<b>${esc(myNick())}</b> ✏`:'내 이름 정하기'}</button></div>
   <div id="onl" class="onl">${onlHtml()}</div>
   <div class="hof" id="board">${boardHtml()}</div>
@@ -6639,7 +6643,7 @@ function onlPaint(){const el=document.getElementById('onl');if(el){el.innerHTML=
 // 후원: 카카오페이 송금 링크 (휴대폰에서만 열림 → 컴퓨터는 QR을 휴대폰으로 찍음). 비어 있으면 버튼이 안 보임. 보상은 운영자가 직접 줌
 const DONATE_URL='https://qr.kakaopay.com/Ej8ZKyo0K',DONATE_QR='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMyAzMyIgc2hhcGUtcmVuZGVyaW5nPSJjcmlzcEVkZ2VzIj48cmVjdCB3aWR0aD0iMzMiIGhlaWdodD0iMzMiIGZpbGw9IiNmZmYiLz48cGF0aCBkPSJNMiAyaDF2MWgtMXpNMyAyaDF2MWgtMXpNNCAyaDF2MWgtMXpNNSAyaDF2MWgtMXpNNiAyaDF2MWgtMXpNNyAyaDF2MWgtMXpNOCAyaDF2MWgtMXpNMTEgMmgxdjFoLTF6TTEyIDJoMXYxaC0xek0xNCAyaDF2MWgtMXpNMTcgMmgxdjFoLTF6TTE4IDJoMXYxaC0xek0xOSAyaDF2MWgtMXpNMjAgMmgxdjFoLTF6TTIxIDJoMXYxaC0xek0yMiAyaDF2MWgtMXpNMjQgMmgxdjFoLTF6TTI1IDJoMXYxaC0xek0yNiAyaDF2MWgtMXpNMjcgMmgxdjFoLTF6TTI4IDJoMXYxaC0xek0yOSAyaDF2MWgtMXpNMzAgMmgxdjFoLTF6TTIgM2gxdjFoLTF6TTggM2gxdjFoLTF6TTExIDNoMXYxaC0xek0xMiAzaDF2MWgtMXpNMTMgM2gxdjFoLTF6TTE0IDNoMXYxaC0xek0yMiAzaDF2MWgtMXpNMjQgM2gxdjFoLTF6TTMwIDNoMXYxaC0xek0yIDRoMXYxaC0xek00IDRoMXYxaC0xek01IDRoMXYxaC0xek02IDRoMXYxaC0xek04IDRoMXYxaC0xek0xMCA0aDF2MWgtMXpNMTIgNGgxdjFoLTF6TTEzIDRoMXYxaC0xek0xNiA0aDF2MWgtMXpNMTggNGgxdjFoLTF6TTIxIDRoMXYxaC0xek0yMiA0aDF2MWgtMXpNMjQgNGgxdjFoLTF6TTI2IDRoMXYxaC0xek0yNyA0aDF2MWgtMXpNMjggNGgxdjFoLTF6TTMwIDRoMXYxaC0xek0yIDVoMXYxaC0xek00IDVoMXYxaC0xek01IDVoMXYxaC0xek02IDVoMXYxaC0xek04IDVoMXYxaC0xek0xMCA1aDF2MWgtMXpNMTEgNWgxdjFoLTF6TTEzIDVoMXYxaC0xek0xNCA1aDF2MWgtMXpNMTggNWgxdjFoLTF6TTE5IDVoMXYxaC0xek0yMCA1aDF2MWgtMXpNMjEgNWgxdjFoLTF6TTI0IDVoMXYxaC0xek0yNiA1aDF2MWgtMXpNMjcgNWgxdjFoLTF6TTI4IDVoMXYxaC0xek0zMCA1aDF2MWgtMXpNMiA2aDF2MWgtMXpNNCA2aDF2MWgtMXpNNSA2aDF2MWgtMXpNNiA2aDF2MWgtMXpNOCA2aDF2MWgtMXpNMTAgNmgxdjFoLTF6TTExIDZoMXYxaC0xek0xNSA2aDF2MWgtMXpNMTYgNmgxdjFoLTF6TTE3IDZoMXYxaC0xek0xOSA2aDF2MWgtMXpNMjAgNmgxdjFoLTF6TTIxIDZoMXYxaC0xek0yMiA2aDF2MWgtMXpNMjQgNmgxdjFoLTF6TTI2IDZoMXYxaC0xek0yNyA2aDF2MWgtMXpNMjggNmgxdjFoLTF6TTMwIDZoMXYxaC0xek0yIDdoMXYxaC0xek04IDdoMXYxaC0xek0xMCA3aDF2MWgtMXpNMTIgN2gxdjFoLTF6TTE0IDdoMXYxaC0xek0xNSA3aDF2MWgtMXpNMTYgN2gxdjFoLTF6TTE3IDdoMXYxaC0xek0xOCA3aDF2MWgtMXpNMTkgN2gxdjFoLTF6TTIyIDdoMXYxaC0xek0yNCA3aDF2MWgtMXpNMzAgN2gxdjFoLTF6TTIgOGgxdjFoLTF6TTMgOGgxdjFoLTF6TTQgOGgxdjFoLTF6TTUgOGgxdjFoLTF6TTYgOGgxdjFoLTF6TTcgOGgxdjFoLTF6TTggOGgxdjFoLTF6TTEwIDhoMXYxaC0xek0xMiA4aDF2MWgtMXpNMTQgOGgxdjFoLTF6TTE2IDhoMXYxaC0xek0xOCA4aDF2MWgtMXpNMjAgOGgxdjFoLTF6TTIyIDhoMXYxaC0xek0yNCA4aDF2MWgtMXpNMjUgOGgxdjFoLTF6TTI2IDhoMXYxaC0xek0yNyA4aDF2MWgtMXpNMjggOGgxdjFoLTF6TTI5IDhoMXYxaC0xek0zMCA4aDF2MWgtMXpNMTAgOWgxdjFoLTF6TTEyIDloMXYxaC0xek0xNCA5aDF2MWgtMXpNMTUgOWgxdjFoLTF6TTE3IDloMXYxaC0xek0yMSA5aDF2MWgtMXpNMiAxMGgxdjFoLTF6TTQgMTBoMXYxaC0xek01IDEwaDF2MWgtMXpNNiAxMGgxdjFoLTF6TTcgMTBoMXYxaC0xek04IDEwaDF2MWgtMXpNMTQgMTBoMXYxaC0xek0xNiAxMGgxdjFoLTF6TTE3IDEwaDF2MWgtMXpNMjQgMTBoMXYxaC0xek0yNSAxMGgxdjFoLTF6TTI2IDEwaDF2MWgtMXpNMjcgMTBoMXYxaC0xek0yOCAxMGgxdjFoLTF6TTIgMTFoMXYxaC0xek0zIDExaDF2MWgtMXpNNCAxMWgxdjFoLTF6TTUgMTFoMXYxaC0xek02IDExaDF2MWgtMXpNMTEgMTFoMXYxaC0xek0xMiAxMWgxdjFoLTF6TTE3IDExaDF2MWgtMXpNMTggMTFoMXYxaC0xek0yMCAxMWgxdjFoLTF6TTIxIDExaDF2MWgtMXpNMjIgMTFoMXYxaC0xek0yMyAxMWgxdjFoLTF6TTI0IDExaDF2MWgtMXpNMjUgMTFoMXYxaC0xek0yNiAxMWgxdjFoLTF6TTMwIDExaDF2MWgtMXpNMiAxMmgxdjFoLTF6TTMgMTJoMXYxaC0xek00IDEyaDF2MWgtMXpNNiAxMmgxdjFoLTF6TTcgMTJoMXYxaC0xek04IDEyaDF2MWgtMXpNOSAxMmgxdjFoLTF6TTEyIDEyaDF2MWgtMXpNMTMgMTJoMXYxaC0xek0xNCAxMmgxdjFoLTF6TTIzIDEyaDF2MWgtMXpNMjUgMTJoMXYxaC0xek0yIDEzaDF2MWgtMXpNNCAxM2gxdjFoLTF6TTUgMTNoMXYxaC0xek02IDEzaDF2MWgtMXpNNyAxM2gxdjFoLTF6TTEwIDEzaDF2MWgtMXpNMTEgMTNoMXYxaC0xek0xMyAxM2gxdjFoLTF6TTE2IDEzaDF2MWgtMXpNMTggMTNoMXYxaC0xek0yMSAxM2gxdjFoLTF6TTIyIDEzaDF2MWgtMXpNMjcgMTNoMXYxaC0xek0yOSAxM2gxdjFoLTF6TTIgMTRoMXYxaC0xek00IDE0aDF2MWgtMXpNNyAxNGgxdjFoLTF6TTggMTRoMXYxaC0xek05IDE0aDF2MWgtMXpNMTkgMTRoMXYxaC0xek0yMSAxNGgxdjFoLTF6TTI3IDE0aDF2MWgtMXpNMjggMTRoMXYxaC0xek00IDE1aDF2MWgtMXpNMTAgMTVoMXYxaC0xek0xMSAxNWgxdjFoLTF6TTEyIDE1aDF2MWgtMXpNMTMgMTVoMXYxaC0xek0xNCAxNWgxdjFoLTF6TTE1IDE1aDF2MWgtMXpNMTYgMTVoMXYxaC0xek0xNyAxNWgxdjFoLTF6TTE5IDE1aDF2MWgtMXpNMjAgMTVoMXYxaC0xek0yMSAxNWgxdjFoLTF6TTIzIDE1aDF2MWgtMXpNMjQgMTVoMXYxaC0xek0yNSAxNWgxdjFoLTF6TTI2IDE1aDF2MWgtMXpNMzAgMTVoMXYxaC0xek0yIDE2aDF2MWgtMXpNMyAxNmgxdjFoLTF6TTcgMTZoMXYxaC0xek04IDE2aDF2MWgtMXpNMTEgMTZoMXYxaC0xek0xNCAxNmgxdjFoLTF6TTE1IDE2aDF2MWgtMXpNMTYgMTZoMXYxaC0xek0xNyAxNmgxdjFoLTF6TTE4IDE2aDF2MWgtMXpNMTkgMTZoMXYxaC0xek0yMCAxNmgxdjFoLTF6TTIyIDE2aDF2MWgtMXpNMjMgMTZoMXYxaC0xek0yNCAxNmgxdjFoLTF6TTI3IDE2aDF2MWgtMXpNMjggMTZoMXYxaC0xek00IDE3aDF2MWgtMXpNNSAxN2gxdjFoLTF6TTYgMTdoMXYxaC0xek0xMCAxN2gxdjFoLTF6TTExIDE3aDF2MWgtMXpNMTUgMTdoMXYxaC0xek0yMCAxN2gxdjFoLTF6TTI0IDE3aDF2MWgtMXpNMjUgMTdoMXYxaC0xek0yOSAxN2gxdjFoLTF6TTIgMThoMXYxaC0xek0zIDE4aDF2MWgtMXpNNiAxOGgxdjFoLTF6TTggMThoMXYxaC0xek0xMSAxOGgxdjFoLTF6TTEzIDE4aDF2MWgtMXpNMTYgMThoMXYxaC0xek0xOSAxOGgxdjFoLTF6TTIwIDE4aDF2MWgtMXpNMjEgMThoMXYxaC0xek0yMiAxOGgxdjFoLTF6TTI3IDE4aDF2MWgtMXpNMjggMThoMXYxaC0xek0yIDE5aDF2MWgtMXpNNCAxOWgxdjFoLTF6TTUgMTloMXYxaC0xek0xMSAxOWgxdjFoLTF6TTEyIDE5aDF2MWgtMXpNMTMgMTloMXYxaC0xek0xNyAxOWgxdjFoLTF6TTE4IDE5aDF2MWgtMXpNMTkgMTloMXYxaC0xek0yMSAxOWgxdjFoLTF6TTIyIDE5aDF2MWgtMXpNMjMgMTloMXYxaC0xek0yNCAxOWgxdjFoLTF6TTI2IDE5aDF2MWgtMXpNMjggMTloMXYxaC0xek0zMCAxOWgxdjFoLTF6TTIgMjBoMXYxaC0xek00IDIwaDF2MWgtMXpNNiAyMGgxdjFoLTF6TTcgMjBoMXYxaC0xek04IDIwaDF2MWgtMXpNOSAyMGgxdjFoLTF6TTEwIDIwaDF2MWgtMXpNMTEgMjBoMXYxaC0xek0xMiAyMGgxdjFoLTF6TTEzIDIwaDF2MWgtMXpNMTQgMjBoMXYxaC0xek0xNyAyMGgxdjFoLTF6TTIwIDIwaDF2MWgtMXpNMjIgMjBoMXYxaC0xek0yMyAyMGgxdjFoLTF6TTI4IDIwaDF2MWgtMXpNMiAyMWgxdjFoLTF6TTUgMjFoMXYxaC0xek03IDIxaDF2MWgtMXpNMTEgMjFoMXYxaC0xek0xMiAyMWgxdjFoLTF6TTE0IDIxaDF2MWgtMXpNMTYgMjFoMXYxaC0xek0xNyAyMWgxdjFoLTF6TTIwIDIxaDF2MWgtMXpNMjYgMjFoMXYxaC0xek0yOSAyMWgxdjFoLTF6TTIgMjJoMXYxaC0xek03IDIyaDF2MWgtMXpNOCAyMmgxdjFoLTF6TTkgMjJoMXYxaC0xek0xMSAyMmgxdjFoLTF6TTEzIDIyaDF2MWgtMXpNMTQgMjJoMXYxaC0xek0xNyAyMmgxdjFoLTF6TTE4IDIyaDF2MWgtMXpNMjIgMjJoMXYxaC0xek0yMyAyMmgxdjFoLTF6TTI0IDIyaDF2MWgtMXpNMjUgMjJoMXYxaC0xek0yNiAyMmgxdjFoLTF6TTI4IDIyaDF2MWgtMXpNMjkgMjJoMXYxaC0xek0zMCAyMmgxdjFoLTF6TTEwIDIzaDF2MWgtMXpNMTEgMjNoMXYxaC0xek0xMiAyM2gxdjFoLTF6TTE0IDIzaDF2MWgtMXpNMTUgMjNoMXYxaC0xek0xNiAyM2gxdjFoLTF6TTE5IDIzaDF2MWgtMXpNMjIgMjNoMXYxaC0xek0yNiAyM2gxdjFoLTF6TTI3IDIzaDF2MWgtMXpNMjggMjNoMXYxaC0xek0yOSAyM2gxdjFoLTF6TTMwIDIzaDF2MWgtMXpNMiAyNGgxdjFoLTF6TTMgMjRoMXYxaC0xek00IDI0aDF2MWgtMXpNNSAyNGgxdjFoLTF6TTYgMjRoMXYxaC0xek03IDI0aDF2MWgtMXpNOCAyNGgxdjFoLTF6TTExIDI0aDF2MWgtMXpNMTIgMjRoMXYxaC0xek0xNCAyNGgxdjFoLTF6TTE1IDI0aDF2MWgtMXpNMTYgMjRoMXYxaC0xek0xNyAyNGgxdjFoLTF6TTE4IDI0aDF2MWgtMXpNMTkgMjRoMXYxaC0xek0yMCAyNGgxdjFoLTF6TTIxIDI0aDF2MWgtMXpNMjIgMjRoMXYxaC0xek0yNCAyNGgxdjFoLTF6TTI2IDI0aDF2MWgtMXpNMjcgMjRoMXYxaC0xek0yOCAyNGgxdjFoLTF6TTIgMjVoMXYxaC0xek04IDI1aDF2MWgtMXpNMTAgMjVoMXYxaC0xek0xMiAyNWgxdjFoLTF6TTE0IDI1aDF2MWgtMXpNMTUgMjVoMXYxaC0xek0xOCAyNWgxdjFoLTF6TTIwIDI1aDF2MWgtMXpNMjEgMjVoMXYxaC0xek0yMiAyNWgxdjFoLTF6TTI2IDI1aDF2MWgtMXpNMiAyNmgxdjFoLTF6TTQgMjZoMXYxaC0xek01IDI2aDF2MWgtMXpNNiAyNmgxdjFoLTF6TTggMjZoMXYxaC0xek0xMCAyNmgxdjFoLTF6TTEzIDI2aDF2MWgtMXpNMTYgMjZoMXYxaC0xek0yMiAyNmgxdjFoLTF6TTIzIDI2aDF2MWgtMXpNMjQgMjZoMXYxaC0xek0yNSAyNmgxdjFoLTF6TTI2IDI2aDF2MWgtMXpNMjggMjZoMXYxaC0xek0yOSAyNmgxdjFoLTF6TTIgMjdoMXYxaC0xek00IDI3aDF2MWgtMXpNNSAyN2gxdjFoLTF6TTYgMjdoMXYxaC0xek04IDI3aDF2MWgtMXpNMTAgMjdoMXYxaC0xek0xMSAyN2gxdjFoLTF6TTE0IDI3aDF2MWgtMXpNMTUgMjdoMXYxaC0xek0xOCAyN2gxdjFoLTF6TTE5IDI3aDF2MWgtMXpNMjAgMjdoMXYxaC0xek0yNSAyN2gxdjFoLTF6TTI3IDI3aDF2MWgtMXpNMjggMjdoMXYxaC0xek0yOSAyN2gxdjFoLTF6TTMwIDI3aDF2MWgtMXpNMiAyOGgxdjFoLTF6TTQgMjhoMXYxaC0xek01IDI4aDF2MWgtMXpNNiAyOGgxdjFoLTF6TTggMjhoMXYxaC0xek0xMCAyOGgxdjFoLTF6TTEyIDI4aDF2MWgtMXpNMTMgMjhoMXYxaC0xek0xNSAyOGgxdjFoLTF6TTE3IDI4aDF2MWgtMXpNMTggMjhoMXYxaC0xek0xOSAyOGgxdjFoLTF6TTIwIDI4aDF2MWgtMXpNMjMgMjhoMXYxaC0xek0yNCAyOGgxdjFoLTF6TTI1IDI4aDF2MWgtMXpNMjYgMjhoMXYxaC0xek0yNyAyOGgxdjFoLTF6TTI4IDI4aDF2MWgtMXpNMjkgMjhoMXYxaC0xek0yIDI5aDF2MWgtMXpNOCAyOWgxdjFoLTF6TTEyIDI5aDF2MWgtMXpNMTMgMjloMXYxaC0xek0xNCAyOWgxdjFoLTF6TTE2IDI5aDF2MWgtMXpNMTcgMjloMXYxaC0xek0yMSAyOWgxdjFoLTF6TTIyIDI5aDF2MWgtMXpNMjQgMjloMXYxaC0xek0yNSAyOWgxdjFoLTF6TTI2IDI5aDF2MWgtMXpNMjcgMjloMXYxaC0xek0yOSAyOWgxdjFoLTF6TTIgMzBoMXYxaC0xek0zIDMwaDF2MWgtMXpNNCAzMGgxdjFoLTF6TTUgMzBoMXYxaC0xek02IDMwaDF2MWgtMXpNNyAzMGgxdjFoLTF6TTggMzBoMXYxaC0xek0xMCAzMGgxdjFoLTF6TTExIDMwaDF2MWgtMXpNMTMgMzBoMXYxaC0xek0xNSAzMGgxdjFoLTF6TTE4IDMwaDF2MWgtMXpNMTkgMzBoMXYxaC0xek0yMSAzMGgxdjFoLTF6TTI0IDMwaDF2MWgtMXpNMjYgMzBoMXYxaC0xek0yNyAzMGgxdjFoLTF6TTI4IDMwaDF2MWgtMXoiIGZpbGw9IiMwMDAiLz48L3N2Zz4=';
 function openDonate(){if(!DONATE_URL)return;const n=myNick()||'모험가';
-  show(`<div class="shophead"><h2>🪙 참붕이 토큰값 후원하기</h2><button class="btn" id="dnBack">돌아가기</button></div>
+  show(`<div class="shophead"><h2>💰 참붕이 토큰값 후원하기</h2><button class="btn" id="dnBack">돌아가기</button></div>
   <p class="sub" style="font-size:16px;text-align:center">찬서를 만드는 참붕이의 <b>토큰값</b>을 응원해 주세요! 🙇</p>
   <div class="nick col"><div style="font-size:14px;color:var(--muted)">💌 <b style="color:var(--ivory)">${esc(n)}</b> 이름으로 응원 메시지를 남길 수 있어요 (120자까지, 비워도 돼요)</div><textarea id="dnMsg" maxlength="120" rows="3" placeholder="응원의 한마디" style="width:100%;resize:none;padding:8px;border-radius:8px;border:1px solid var(--brass);background:rgba(0,0,0,.35);color:var(--ivory);font:inherit"></textarea></div>
   <div class="dnqr"><img src="${DONATE_QR}" alt="카카오페이 송금 QR"><div><b>📱 휴대폰 카메라로 QR을 찍어 주세요</b><small>카카오페이 송금 화면이 열려요 (카카오페이는 휴대폰에서만 돼요)</small><small>휴대폰으로 게임 중이면 아래 버튼을 누르면 바로 열려요</small></div></div>
@@ -6722,7 +6726,7 @@ function openNick(){cosPreviewHide();const cur=myNick();
         else if(own&&n!==cur){msg(`'${n}'은(는) 다른 사람이 이미 쓰고 있는 이름이에요. 내 이름이면 이름 비밀번호를 같이 써 주세요.`);return;}
         else if(own){msg(`'${n}'은(는) 지금 이 컴퓨터에서 주인 확인이 안 돼요. 다른 컴퓨터에서 정한 이름 비밀번호를 같이 써 주세요.`);return;}
       }finally{$('nkSave').disabled=false;}}
-    try{localStorage.setItem('chipdungeon_nick',n);}catch(e){}toast(toast2);onlPing();startScreen();};
+    try{localStorage.setItem('chipdungeon_nick',n);}catch(e){}toast(toast2);onlPing();CH_PEND=true;startScreen();};
   $('nkSave').onclick=save;['nkIn','nkPin'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.isComposing||e.keyCode===229)return;if(e.key==='Enter')save();}));$('nkBack').onclick=startScreen;setTimeout(()=>{try{$('nkIn').focus();}catch(e){}},50);}
 async function onlPing(bye){if(!SHEET_URL||!MYKEY)return;const u=SHEET_URL+'?ping=1&id='+onlId()+'&n='+encodeURIComponent(myNick()||'모험가')+'&a='+encodeURIComponent(onlAct())+'&fx='+myFx()+(bye?'&bye=1':'');
   if(bye){try{fetch(u,{keepalive:true,cache:'no-store'});}catch(e){}return;}
@@ -7059,7 +7063,7 @@ function slotLive(r){
     else if(a==='💎'){S.pendingLv++;msg='다이아. 즉시 레벨업';}
     else if(a==='🔔'){S.flash=.25;for(const e of S.en)if(e.alive)dmgEs('슬롯 종',e,pDmg()*5,'#ffd76a');msg='종 세 개. 화면 전체 폭격';}
     else if(a==='🍒'){p.hp=p.maxHp;msg='체리. 체력 완전 회복';}
-    else if(a==='🪙'){const g=40+Math.floor(effT()/60)*15;S.gold+=g;msg=`동전. ${g} 골드`;}
+    else if(a==='💰'){const g=40+Math.floor(effT()/60)*15;S.gold+=g;msg=`동전. ${g} 골드`;}
     else{S.buffT.vuln=6;for(let i=0;i<14;i++){const an=Math.random()*TAU;spawnAt(pickType(),p.x+Math.cos(an)*260,p.y+Math.sin(an)*260,true);}msg='해골. 적 무리 소환, 6초간 받는 피해 +50%';}
   }else{
     const sk=r.filter(x=>x==='💀').length;
@@ -7104,7 +7108,7 @@ const vipOwned=()=>S.augs.filter(a=>a.t==='v').length;
 const vipCost=()=>1;
 const vipStock=()=>{if(!vipOpen())return [];if(!S.vipStock||S.vipRoll!==S.chap){S.vipRoll=S.chap;S.vipStock=VIPS.filter(v=>!has(v.id)&&augReq(v)).sort(()=>Math.random()-.5).slice(0,3).map(v=>v.id);}return S.vipStock.map(id=>VIPS.find(v=>v.id===id)).filter(v=>v&&augReq(v));};
 const MERCH={
-  chips:{n:'부적 상인',icon:'🪙',col:'#7a5a12',w:()=>24,d:'능력치를 골드로 삽니다. 매번 파는 품목이 다름'},
+  chips:{n:'부적 상인',icon:'💰',col:'#7a5a12',w:()=>24,d:'능력치를 골드로 삽니다. 매번 파는 품목이 다름'},
   smith:{n:'강화 장인',icon:'🔨',col:'#4a4f5a',w:()=>S.augs.some(a=>AUG_UP&&a.lv<3&&a.t!=='v'&&a.t!=='f'&&a.t!=='d')?20:0,d:'증강 ★ 강화'},
   alch:{n:'연금술사',icon:'⚗️',col:'#5a2a6a',w:()=>fusable().length?16:(S.augs.length>=3?5:0),d:'강제 합체, 증강 분해'},
   hub:{n:'보스 상점',icon:'🛒',col:'#3a2a10',w:()=>0,d:''},
@@ -7166,7 +7170,7 @@ function hubBody(m,g){
     h+=`<div class="grid">
       <button class="btn" data-doc="heal" ${g<hc||p.hp>=p.maxHp||m.used.heal?'disabled':''}>❤️ 체력 전부 회복<small>${m.used.heal?'완료':hc+'골드 · 한 번'}</small></button>
       <button class="btn" data-gb="box" ${g<boxC()?'disabled':''}>🎁 능력치 상자<small>${boxC()}골드 · 무작위 스탯 카드</small></button>
-      <button class="btn" data-gb="double" style="grid-column:1/-1" ${g<1?'disabled':''}>🪙 모 아니면 도<small>보유 골드 전부 · 승률 ${Math.round(dbl*100)}%${m.used.double?` · ${m.used.double}번째 도전`:''}</small></button></div>`;}
+      <button class="btn" data-gb="double" style="grid-column:1/-1" ${g<1?'disabled':''}>💰 모 아니면 도<small>보유 골드 전부 · 승률 ${Math.round(dbl*100)}%${m.used.double?` · ${m.used.double}번째 도전`:''}</small></button></div>`;}
   return h+`<button class="btn ghost" data-stats>내 스탯 보기</button><button class="btn primary" id="upBack">상점 나가기 · 다음 장으로</button>`;
 }
 function openShop(back,m){
@@ -7359,7 +7363,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=43,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=44,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
