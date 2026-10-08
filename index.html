@@ -1378,6 +1378,128 @@ const ET={
   bossR:  {n:'심연의 군주',r:34,hp:5600,spd:85,dmg:25,col:'#7a4ac8',xp:0,coin:300,boss:true},
   bossH:  {n:'황금 용',r:36,hp:6000,spd:105,dmg:24,col:'#ffd040',xp:150,coin:0,boss:true,hidb:true}
 };
+// 고해상도 몬스터 도트 도구: 칸마다 재질(부위) 번호를 기억해서, 부위 경계 안쪽 선·색 외곽선·구 음영·반사광·디더링을 자동으로 넣음
+const HD=(()=>{
+  const hex=c=>{c=c.replace('#','');return [parseInt(c.slice(0,2),16),parseInt(c.slice(2,4),16),parseInt(c.slice(4,6),16)];};
+  const mix=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];
+  const BAY=[[0,.5],[.75,.25]];
+  function make(W,H){const d=new Float32Array(W*H*3),a=new Uint8Array(W*H),pid=new Int16Array(W*H).fill(-1);let np=0;
+    const set=(x,y,c,p)=>{x|=0;y|=0;if(x<0||y<0||x>=W||y>=H)return;const i=y*W+x;d[i*3]=c[0];d[i*3+1]=c[1];d[i*3+2]=c[2];a[i]=1;pid[i]=p;};
+    const pick=(ramp,l,x,y)=>{const n=ramp.length,v=Math.max(0,Math.min(.999,l))*n,i=Math.floor(v),fr=v-i;const j=fr>.5+(BAY[y&1][x&1]-.5)*.6&&i<n-1?i+1:i;return ramp[j];};
+    const R=r=>r.map(hex);
+    const L=[-.55,-.65,.52];{const m=Math.hypot(...L);L[0]/=m;L[1]/=m;L[2]/=m;}
+    const api={W,H,
+      part(){return np++;},
+      // 구/타원체: ramp 어두운→밝은. o.rim: 오른쪽 아래 반사광, o.flat: 납작(0~1), o.spec: 하이라이트
+      ell(cx,cy,rx,ry,ramp,o={}){const r=R(ramp),p=o.p??np++;for(let y=Math.floor(cy-ry);y<=Math.ceil(cy+ry);y++)for(let x=Math.floor(cx-rx);x<=Math.ceil(cx+rx);x++){
+        const nx=(x+.5-cx)/rx,ny=(y+.5-cy)/ry,q=nx*nx+ny*ny;if(q>1)continue;if(o.cut&&o.cut(x,y,nx,ny))continue;const nz=Math.sqrt(1-q)*(1-(o.flat||0))+(o.flat||0)*.6;
+        let l=nx*L[0]+ny*L[1]+nz*L[2];l=l*.62+.42;if(o.rim&&nx*.6+ny*.8>.62&&q>.55)l+=.18;set(x,y,pick(r,l,x,y),p);}
+        if(o.spec){const sx=cx-rx*.38,sy=cy-ry*.45;this.ell2(sx,sy,Math.max(1,rx*.18),Math.max(1,ry*.13),o.spec,p);}return p;},
+      ell2(cx,cy,rx,ry,col,p){const c=hex(col);for(let y=Math.floor(cy-ry);y<=Math.ceil(cy+ry);y++)for(let x=Math.floor(cx-rx);x<=Math.ceil(cx+rx);x++){const nx=(x+.5-cx)/rx,ny=(y+.5-cy)/ry;if(nx*nx+ny*ny<=1)set(x,y,c,p??np++);}},
+      // 다각형 (점 목록), 위→아래 / 왼→오른 명암
+      poly(pts,ramp,o={}){const r=R(ramp),p=o.p??np++;let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;for(const [x,y] of pts){x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y);}
+        for(let y=Math.floor(y0);y<=Math.ceil(y1);y++)for(let x=Math.floor(x0);x<=Math.ceil(x1);x++){let ins=false;const px=x+.5,py=y+.5;for(let i=0,j=pts.length-1;i<pts.length;j=i++){const [xi,yi]=pts[i],[xj,yj]=pts[j];if((yi>py)!==(yj>py)&&px<(xj-xi)*(py-yi)/(yj-yi)+xi)ins=!ins;}
+          if(!ins)continue;const tx=(px-x0)/(x1-x0||1),ty=(py-y0)/(y1-y0||1);set(x,y,pick(r,(o.l??.75)-tx*.35-ty*.3,x,y),p);}return p;},
+      rect(x,y,w,h,ramp,o={}){return this.poly([[x,y],[x+w,y],[x+w,y+h],[x,y+h]],ramp,o);},
+      px(x,y,col,p){set(x,y,hex(col),p??-2);},
+      line(x0,y0,x1,y1,col,w=1,p){const c=hex(col);const n=Math.ceil(Math.hypot(x1-x0,y1-y0))*2+1;for(let i=0;i<=n;i++){const t=i/n,x=x0+(x1-x0)*t,y=y0+(y1-y0)*t;for(let a=0;a<w;a++)for(let b=0;b<w;b++)set(x+a-(w>>1),y+b-(w>>1),c,p??-2);}},
+      // 귀여운 눈: 큰 검은 눈 + 하이라이트 2개
+      eye(x,y,rx,ry,o={}){const p=np++;this.ell2(x,y,rx,ry,o.c||'#1a1020',p);if(o.iris)this.ell2(x,y+ry*.25,rx*.7,ry*.55,o.iris,p);this.ell2(x-rx*.35,y-ry*.35,Math.max(.8,rx*.36),Math.max(.8,ry*.3),'#ffffff',p);if(rx>=2)this.px(Math.round(x+rx*.35),Math.round(y+ry*.4),'#ffffff',p);},
+      // 마무리: 부위 경계 안쪽 선 + 색 외곽선
+      finish(o={}){const out=new Float32Array(d),A=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&a[y*W+x];
+        for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;if(!a[i]||pid[i]<0)continue;
+          for(const [dx,dy] of [[1,0],[0,1],[-1,0],[0,-1]]){const X=x+dx,Y=y+dy;if(!A(X,Y))continue;const j=Y*W+X;if(pid[j]===pid[i]||pid[j]<0)continue;
+            const li=d[i*3]+d[i*3+1]+d[i*3+2],lj=d[j*3]+d[j*3+1]+d[j*3+2];if(li<lj||(li===lj&&pid[i]<pid[j])){for(let k=0;k<3;k++)out[i*3+k]=d[i*3+k]*.62;break;}}}
+        const res=new Uint8ClampedArray(W*H*4);
+        for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;if(a[i]){res[i*4]=out[i*3];res[i*4+1]=out[i*3+1];res[i*4+2]=out[i*3+2];res[i*4+3]=255;continue;}
+          let best=null,bl=1e9;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){if(!A(x+dx,y+dy))continue;const j=(y+dy)*W+x+dx,l=d[j*3]+d[j*3+1]+d[j*3+2];if(l<bl){bl=l;best=j;}}
+          if(best!=null){const c=[d[best*3],d[best*3+1],d[best*3+2]],k=y>0&&A(x,y-1)?.28:.38;const o2=mix([22,14,20],c,k);res[i*4]=o2[0];res[i*4+1]=o2[1];res[i*4+2]=o2[2];res[i*4+3]=255;}}
+        return new ImageData(res,W,H);}};
+    return api;}
+  return {make};
+})();
+const PAL={
+ gob:['#1e3a14','#2f5a1e','#46802a','#62a63a','#86c652','#b6e682'],
+ leather:['#2a160c','#45281a','#653c24','#8a5634','#ad7448'],
+ wood:['#2a1a0e','#46301c','#64462a','#86623c','#a8804e'],
+ bat:['#1a0c26','#2e1a46','#462a68','#64408e','#8a62b4','#b294d8'],
+ wing:['#1e0e2c','#36204e','#4e3270','#6a4890'],
+ slime:['#123e1a','#1e6428','#2e8c34','#4cb446','#7ed866','#c0f4a0'],
+ fur:['#7e7e96','#a4a4bc','#cacadc','#e8e8f2','#ffffff'],
+ horn:['#7a5414','#b0801e','#dcaa34','#f4d060','#fff0a8'],
+ pink:['#c06080','#e08aa0','#f8b4c4'],
+};
+// 고해상도(2배 촘촘한) 잡몹 도트: 게임 속 크기는 그대로, 칸만 2배. key = 몬스터 종류
+const MOBS_HD={
+grunt:{sz:26,draw(h,f){const s=f?1:0;
+  // 다리 (걷기)
+  h.rect(19,40+s,5,7-s,PAL.leather,{l:.5});h.rect(28,41-s,5,6+s,PAL.leather,{l:.5});
+  h.ell(21.5,47,4,2,PAL.wood);h.ell(30.5,47,4,2,PAL.wood);
+  // 몸통 (가죽 옷)
+  const body=h.ell(26,36,10,8.5,PAL.leather,{rim:1});
+  h.rect(17,36,18,2.6,['#3a2010','#5a3418','#7a4a22'],{p:body+100});h.rect(24,35.5,4,3.6,['#8a6010','#d4a030','#ffe07a'],{l:.9});
+  // 팔 + 몽둥이
+  h.ell(15,35,3,3.5,PAL.gob);h.line(38,40,44,22+s,'#5a3c22',3);h.ell(44.5,19+s,4,5,PAL.wood,{rim:1});h.px(43,17+s,'#2a1a0e');h.px(46,20+s,'#2a1a0e');h.ell(37,37,3,3.2,PAL.gob);
+  // 귀
+  h.poly([[15,19],[2,11],[5,15],[15,25]],PAL.gob,{l:.85});h.poly([[13,20],[6,15],[13,23]],PAL.pink,{l:.6});
+  h.poly([[37,19],[50,11],[47,15],[37,25]],PAL.gob,{l:.7});h.poly([[39,20],[46,15],[39,23]],PAL.pink,{l:.45});
+  // 머리
+  const hd=h.ell(26,20,13,11.5,PAL.gob,{rim:1,spec:'#d8f4a8'});
+  // 볼터치·눈·입
+  h.ell2(17,25,2.4,1.4,'#ec9a8a',hd);h.ell2(35,25,2.4,1.4,'#ec9a8a',hd);
+  h.eye(20.5,20,2.8,3.4,{iris:'#3a2a10'});h.eye(31.5,20,2.8,3.4,{iris:'#3a2a10'});
+  h.line(23,27,29,27,'#2a1a10');h.px(24,28,'#fffaf0',hd);h.px(28,28,'#fffaf0',hd);
+  // 앞머리 털
+  h.poly([[22,9],[26,4],[27,10]],PAL.gob,{l:.9});h.poly([[27,9],[32,5],[31,10]],PAL.gob,{l:.8});
+}},
+runner:{sz:22,draw(h,f){const up=!f;
+  // 날개 (펄럭임)
+  const wy=up?-6:4;
+  for(const sd of [-1,1]){const bx=22+sd*6,tx=22+sd*20;
+    h.poly([[bx,18],[tx,14+wy],[22+sd*19,22+wy*.5],[22+sd*15,20+wy*.3],[22+sd*12,25],[22+sd*9,22],[bx,25]],PAL.wing,{l:.7});
+    h.line(bx,19,tx,14+wy,'#2a1640',1);h.line(22+sd*9,20,22+sd*15,20+wy*.3,'#2a1640',1);}
+  // 몸
+  h.ell(22,22,9,8.5,PAL.bat,{rim:1,spec:'#d0b8f0'});
+  // 귀
+  h.poly([[15,16],[13,5],[19,13]],PAL.bat,{l:.85});h.poly([[16,14],[14.5,8],[18,13]],PAL.pink,{l:.55});
+  h.poly([[29,16],[31,5],[25,13]],PAL.bat,{l:.65});h.poly([[28,14],[29.5,8],[26,13]],PAL.pink,{l:.4});
+  // 배 털
+  h.ell(22,26,5,3.5,['#8a62b4','#a888cc','#c6aee0'],{flat:.4});
+  // 눈 (빨강)
+  h.eye(18.5,20.5,2.2,2.6,{iris:'#d02040'});h.eye(25.5,20.5,2.2,2.6,{iris:'#d02040'});
+  h.px(20,25,'#fffaf0');h.px(20,26,'#fffaf0');h.px(24,25,'#fffaf0');h.px(24,26,'#fffaf0');h.line(20,24,24,24,'#2a1430');
+  // 발
+  h.px(19,31,'#2a1640');h.px(25,31,'#2a1640');h.px(19,32,'#2a1640');h.px(25,32,'#2a1640');
+}},
+slime:{sz:28,draw(h,f){const sq=f?1.6:0;
+  // 물방울 모양 몸: 아래는 납작, 위는 살짝 뾰족
+  const b=h.ell(28,37+sq*.6,17+sq,15-sq,PAL.slime,{rim:1,cut:(x,y,nx,ny)=>y>49||(ny<-.55&&Math.abs(nx)>(-ny-.55)*2.2+.42)});
+  h.ell(28,23.5+sq*1.2,4,4.5,PAL.slime,{p:b});
+  h.rect(12-sq,46,32+sq*2,3,PAL.slime,{l:.3,p:b});
+  // 속 거품·광택 (몸과 같은 부위 → 테두리 없이 자연스럽게)
+  h.ell2(37,43,1.6,1.6,'#a8ec8c',b);h.ell2(40,39,1,1,'#a8ec8c',b);h.ell2(18,44,1.2,1.2,'#8ade70',b);
+  h.ell2(19.5,31+sq*.4,3.6,2.3,'#eaffdc',b);h.ell2(24.5,27.5+sq*.6,1.3,1,'#ffffff',b);h.ell2(26,24+sq,1,.8,'#ffffff',b);
+  // 얼굴
+  h.eye(22.5,38,2.5,3.1,{});h.eye(33.5,38,2.5,3.1,{});h.ell2(18.5,42.5,2.1,1.2,'#f49aa8',b);h.ell2(37.5,42.5,2.1,1.2,'#f49aa8',b);
+  h.line(26,43,27,44,'#123e1a');h.line(28,44,30,43,'#123e1a');
+}},
+hornrabbit:{sz:22,draw(h,f){const j=f?-2:0;
+  // 꼬리
+  h.ell(9,31+j,3.5,3.5,PAL.fur);
+  // 몸
+  h.ell(18,31+j,10,8,PAL.fur,{rim:1});
+  // 뒷발·앞발
+  h.ell(13,39+j*.3,4,2.2,PAL.fur);h.ell(24,39,3,2,PAL.fur);
+  // 귀
+  h.ell(23,11+j,2.6,7,PAL.fur);h.ell(23,12+j,1.2,5,PAL.pink);h.ell(29,12+j,2.6,7,PAL.fur,{cut:(x,y)=>false});h.ell(29,13+j,1.2,5,PAL.pink);
+  // 머리
+  const hh=h.ell(27,23+j,8,7,PAL.fur,{rim:1,spec:'#ffffff'});
+  // 뿔 (나선)
+  h.poly([[30,17+j],[38,6+j],[33,18+j]],PAL.horn,{l:.9});h.line(31,15+j,34,15+j,'#b0801e');h.line(32,12+j,35,12+j,'#b0801e');h.line(34,9+j,36,9+j,'#b0801e');
+  // 눈·코·볼
+  h.eye(29,22+j,1.8,2.4,{iris:'#c02838'});h.px(35,25+j,'#e07090');h.px(34,26+j,'#e07090');h.ell2(31,26+j,1.6,1,'#f8b4c4',hh);
+}},
+};
 const ESPR=(()=>{
   const cache={};
   const P=(g,c,x,y,w=1,h=1)=>{g.fillStyle=c;g.fillRect(x|0,y|0,w,h);};
@@ -1400,10 +1522,11 @@ const ESPR=(()=>{
     im.data.set(o);g.putImageData(im,0,0);}
   // 좌우 반전본까지 미리 구워 둠. 픽셀 작업용(willReadFrequently) 캔버스는 그리기 느려서 일반 캔버스로 복사해 캐시
   function get(type,f,hit,flip){const k=type+f+(hit?'h':'')+(flip?'f':'');let c=cache[k];if(c)return c;
-    const sz=MDEF[type].sz,mk=o=>{const q=document.createElement('canvas');q.width=q.height=sz;return [q,q.getContext('2d',o)];};
+    const HDm=MOBS_HD[type],hk=HDm?2:1,sz=MDEF[type].sz*hk,mk=o=>{const q=document.createElement('canvas');q.width=q.height=sz;q.hd=hk;return [q,q.getContext('2d',o)];};
     let g;[c,g]=mk();
     if(flip){g.translate(sz,0);g.scale(-1,1);g.drawImage(get(type,f,hit,false),0,0);}
     else if(hit){g.drawImage(get(type,f,false),0,0);g.globalCompositeOperation='source-atop';g.fillStyle='#fff';g.fillRect(0,0,sz,sz);}
+    else if(HDm){const h=HD.make(sz,sz);HDm.draw(h,f);g.putImageData(h.finish(),0,0);}
     else{const [w,gw]=mk({willReadFrequently:true});MDEF[type].draw(gw,f);if(sz>=60)bossShade(w);ART.outline(w);g.drawImage(w,0,0);}
     cache[k]=c;return c;}
   return {get,P,D,L,outline};
@@ -3786,8 +3909,8 @@ function thrTick(dt){const L=S.thr;if(!L||!L.length)return;const p=S.p,sd=skelD(
 function drawThr(){const L=S.thr;if(!L||!L.length||!S.p.alive)return;
   for(const k of L){if(k.x<camX-60||k.x>camX+W+60||k.y<camY-60||k.y>camY+H+60)continue;const g=.5+.5*Math.sin(S.t*4+k.t0);
     ctx.save();ctx.fillStyle=`rgba(90,255,130,${.14+.08*g})`;ctx.beginPath();ctx.ellipse(k.x,k.y+k.r*.8,k.r+10,(k.r+10)*.38,0,0,TAU);ctx.fill();
-    const spr=ESPR.get(k.type,Math.floor(S.t*5+k.t0)%2,k.hit>0,k.f<0),sz=spr.width;ctx.imageSmoothingEnabled=false;ctx.globalAlpha=.88;ctx.filter='grayscale(1) sepia(1) hue-rotate(70deg) saturate(2.6) brightness(1.05)';
-    pxDraw(spr,k.x,k.y+k.r*.9-(k.sw>0?3:0),sz>>1,sz-2);ctx.filter='none';ctx.globalAlpha=1;
+    const spr=ESPR.get(k.type,Math.floor(S.t*5+k.t0)%2,k.hit>0,k.f<0),hk=spr.hd||1,sz=spr.width;ctx.imageSmoothingEnabled=false;ctx.globalAlpha=.88;ctx.filter='grayscale(1) sepia(1) hue-rotate(70deg) saturate(2.6) brightness(1.05)';
+    pxDrawS(spr,k.x,k.y+k.r*.9-(k.sw>0?3:0),sz>>1,sz-2*hk,1/hk);ctx.filter='none';ctx.globalAlpha=1;
     ctx.globalCompositeOperation='lighter';for(let i=0;i<3;i++){const q=(S.t*.7+i/3+k.t0)%1;ctx.globalAlpha=(1-q)*.7;ctx.fillStyle='#7bff8a';ctx.beginPath();ctx.arc(k.x+Math.sin(S.t*3+i*2)*k.r*.6,k.y-k.r-q*24,2.4,0,TAU);ctx.fill();}ctx.restore();
     if(k.hp<k.mhp){const w=28,fr=Math.max(0,k.hp/k.mhp),ty=k.y-k.r*2-8;ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(k.x-w/2,ty,w,4);ctx.fillStyle='#7bff8a';ctx.fillRect(k.x-w/2,ty,w*fr,4);}}}
 function soulShot(x,y,n){for(let i=0;i<n;i++){const e=nearestE({x,y},320);if(!e)return;pBullet(x,y,Math.atan2(e.y-y,e.x-x)+(i?rand(-.5,.5):0),pDmg()*1.2*undM()*(has('n_lich')?1.5:1),{child:true,r:4,ghost:true,life:1,pierce:0,src:'undead'});}}
@@ -4839,9 +4962,9 @@ function drawChip(e){
   if(e.tbT>S.t){ctx.strokeStyle='rgba(200,112,255,.8)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,R+3,0,TAU);ctx.stroke();}
   if(ET[e.type].hid){ctx.globalAlpha=.25+.15*Math.sin(S.t*6);ctx.fillStyle=ET[e.type].col;ctx.beginPath();ctx.arc(x,y,R+14,0,TAU);ctx.fill();ctx.globalAlpha=1;}
   const spr=ESPR.get(e.spr||(e.type==='mimic'&&!e.awake?'mimicc':e.type),Math.floor(S.t*(e.type==='runner'?10:5)+e.rot*3)%2,e.hit>0&&!e.noFlash,S.p.x<e.x);
-  const sz=spr.width,DS=sz*PXW,top=y-air+R*.9-(sz-2)*PXW;
+  const hk=spr.hd||1,sz=spr.width/hk,DS=sz*PXW,top=y-air+R*.9-(sz-2)*PXW;
   if(e.type==='ghost')ctx.globalAlpha=e.phase?.22:.85;else if(e.type==='wraith')ctx.globalAlpha=e.bl>0?Math.max(.1,e.bl/.6*.8):.9;else if(e.under)ctx.globalAlpha=.12;
-  ctx.imageSmoothingEnabled=false;if(e.bsc){ctx.save();if(e.flt)ctx.filter=e.flt;pxDrawS(spr,x,y-air+R*.9,sz>>1,sz-2,e.bsc);ctx.restore();}else pxDraw(spr,x,y-air+R*.9,sz>>1,sz-2);ctx.globalAlpha=1;
+  ctx.imageSmoothingEnabled=false;if(e.bsc){ctx.save();if(e.flt)ctx.filter=e.flt;pxDrawS(spr,x,y-air+R*.9,(sz*hk)>>1,(sz-2)*hk,e.bsc/hk);ctx.restore();}else if(hk>1)pxDrawS(spr,x,y-air+R*.9,(sz*hk)>>1,(sz-2)*hk,1/hk);else pxDraw(spr,x,y-air+R*.9,sz>>1,sz-2);ctx.globalAlpha=1;
   // 소매치기: 금빛 테두리 + 훔친 뒤엔 머리 위 돈주머니와 남은 시간
   if(ET[e.type].thief){ctx.strokeStyle=e.stole?'#ffb030':'rgba(255,215,106,.55)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,R+4,0,TAU);ctx.stroke();if(e.stole){ctx.font='16px sans-serif';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText('💰',x,y-R-6+Math.sin(S.t*8)*2);ctx.font='11px "Do Hyeon",sans-serif';ctx.fillStyle='#ffd76a';ctx.fillText(Math.max(0,Math.ceil(e.flT??15))+'초',x,y-R-22);}}
   if(e.slowT>0){ctx.fillStyle=e.frozen?'rgba(170,220,255,.5)':'rgba(170,220,255,.22)';ctx.beginPath();ctx.arc(x,y,R,0,TAU);ctx.fill();}
@@ -5753,6 +5876,8 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:72,t:'🎨 몬스터 새 그림 (1차)',items:[
+    ['new','🎨 <b>고블린·박쥐·슬라임·뿔토끼</b>를 2배 촘촘한 도트로 새로 그렸어요. 귀엽지만 디테일하게! 다른 몬스터도 차례로 바뀔 예정이에요']]},
   {v:71,t:'📊 명예의 전당 능력치 · 직업 적용표',items:[
     ['new','🏆 명예의 전당 기록을 <b>누르면</b> 그 캐릭터의 <b>최종 능력치와 증강</b>을 볼 수 있어요 (결투 데이터가 있는 기록)'],
     ['new','📖 도감·직업 선택의 직업 설명에 <b>🔍 고유 능력에 적용되는 능력치</b>가 생겼어요. 공격 속도·치명타·사거리 같은 게 고유 능력에 붙는지 한눈에 볼 수 있어요'],
@@ -8078,7 +8203,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=71,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=72,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
