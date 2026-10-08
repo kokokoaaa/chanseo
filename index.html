@@ -2141,11 +2141,12 @@ let S=null,best=0,AUTO={pick:false,move:false};
 try{Object.assign(AUTO,JSON.parse(localStorage.getItem('chipdungeon_auto')||'{}'));}catch(e){}
 // 개발자 모드: 자동 선택·자동 이동은 개발자만. 시작 화면 버전 글씨를 5번 연달아 누르면 암호 입력 (암호 원문은 코드에 없고 해시만 비교)
 const DEV_H=7621682056880371,devHash=(str,seed=7)=>{let h1=0xdeadbeef^seed,h2=0x41c6ce57^seed;for(let i=0,ch;i<str.length;i++){ch=str.charCodeAt(i);h1=Math.imul(h1^ch,2654435761);h2=Math.imul(h2^ch,1597334677);}h1=Math.imul(h1^(h1>>>16),2246822507);h1^=Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507);h2^=Math.imul(h1^(h1>>>13),3266489909);return 4294967296*(2097151&h2)+(h1>>>0);};
-let DEV=false;try{DEV=localStorage.getItem('chanseo_dev')===String(DEV_H);}catch(e){}
+// 개발자 모드는 이번에 켠 창에서만: 껐다 켜면(새로 열면) 다시 일반 모드 (예전 버전이 남긴 저장값은 지움)
+let DEV=false;try{localStorage.removeItem('chanseo_dev');}catch(e){}
 if(!DEV){AUTO.pick=false;}
 let devTap=[];function devTapVer(){const t=Date.now();devTap=devTap.filter(x=>t-x<2500);devTap.push(t);if(devTap.length<5)return;devTap=[];
-  if(DEV){if(confirm('개발자 모드를 끌까요? (자동 선택·자동 이동 버튼이 사라져요)')){DEV=false;AUTO.pick=false;AUTO.move=false;try{localStorage.removeItem('chanseo_dev');}catch(e){}saveAuto();refreshAutoBtns();toast('개발자 모드 OFF');}return;}
-  const pw=prompt('개발자 암호');if(pw==null)return;if(devHash(String(pw).trim())===DEV_H){DEV=true;SUP_DONE=false;setTimeout(supCheck,300);try{localStorage.setItem('chanseo_dev',String(DEV_H));}catch(e){}refreshAutoBtns();toast('🛠 개발자 모드 ON · 자동 선택·자동 이동 버튼이 생겼어요');}else toast('암호가 틀렸어요');}
+  if(DEV){if(confirm('개발자 모드를 끌까요? (자동 선택·자동 이동 버튼이 사라져요)')){DEV=false;AUTO.pick=false;AUTO.move=false;if(META.title&&!(META.ach&&META.ach[META.title])){META.title='';saveMeta();}try{localStorage.removeItem('chanseo_dev');}catch(e){}saveAuto();refreshAutoBtns();if(!S||S.mode==='start')startScreen();toast('개발자 모드 OFF · 메달은 원래 개수로');}return;}
+  const pw=prompt('개발자 암호');if(pw==null)return;if(devHash(String(pw).trim())===DEV_H){DEV=true;SUP_DONE=false;setTimeout(supCheck,300);refreshAutoBtns();if(typeof startScreen==='function'&&(!S||S.mode==='start'))startScreen();toast('🛠 개발자 모드 ON (게임을 다시 열면 꺼져요)');}else toast('암호가 틀렸어요');}
 function saveAuto(){try{localStorage.setItem('chipdungeon_auto',JSON.stringify(AUTO));}catch(e){}}
 try{best=+localStorage.getItem('chipdungeon_best_v5')||0;}catch(e){}
 // 시작 위치는 맵 가운데 (첫 증강을 고르는 동안 뒤에 보이는 화면도 가운데)
@@ -2689,15 +2690,17 @@ const canPoison=()=>has('toxic')||has('r_venom')||tag('poison')>=2;
 function ftext(x,y,s,col,size=14){S.tx.push({x,y,s:String(s),col,size,life:.7});if(S.tx.length>60)S.tx.shift();}
 // 정해 둔 닉네임에게만: 한 판 끝날 때마다 「차트는 쓰고 게임 하시나요?」 → YES 행운 +1 (최대 +5) · NO 행운 −1 (최소 −10). 다음 판부터 계속 적용
 const CHART_NICKS=['힘기범']; // 닉네임에 이 글자가 들어 있으면 (힘기범, 힘기범2 …)
-// 시작 화면에 올 때 물어봄: 게임을 켰을 때 한 번 + 한 판 끝날 때마다 다시 (이름을 바꿨을 때도)
+// 시작 화면에 올 때 물어봄: 게임을 켰을 때 한 번 + 판에 들어갔다 나올 때마다 다시 (중간에 나가도, 이름을 바꿨을 때도)
 let CH_PEND=true;
-function chartAsk(){const n=myNick();if(!n||!CHART_NICKS.some(k=>n.includes(k))||document.getElementById('chartQ'))return;
+function chartAsk(){const n=myNick();if(META.chDone||!n||!CHART_NICKS.some(k=>n.includes(k))||document.getElementById('chartQ'))return;
   const d=document.createElement('div');d.id='chartQ';d.className='chartq';
   d.innerHTML=`<div class="cq"><b>📋 차트는 쓰고 게임 하시나요?</b><div class="cqb"><button class="btn primary" data-cq="1">YES</button><button class="btn" data-cq="0">NO</button></div><small id="cqMsg"></small></div>`;
   document.body.appendChild(d);
-  d.querySelectorAll('[data-cq]').forEach(b=>b.onclick=()=>{const y=b.dataset.cq==='1',v=Math.max(-10,Math.min(5,(META.chLk||0)+(y?1:-1)));META.chLk=v;saveMeta();
-    d.querySelectorAll('[data-cq]').forEach(x=>x.disabled=true);$('cqMsg').innerHTML=y?`<span style="color:#7be08f">잘하셨습니다! 행운을 올려드렸습니다 +1 <small>(지금 ${v>0?'+':''}${v})</small></span>`:`<span style="color:#ff8a8a">차트 좀 쓰고 게임하세요.<br>당신의 행운을 내려드렸습니다 −1 <small>(지금 ${v>0?'+':''}${v})</small><br>한 판 더 돌리면 이 창이 뜨고 다시 물어봅니다잉.</span>`;
-    const cl=()=>{if(d.parentNode)d.remove();};setTimeout(cl,y?2200:4500);d.onclick=e=>{if(e.target===d)cl();};});}
+  d.querySelectorAll('[data-cq]').forEach(b=>b.onclick=()=>{const y=b.dataset.cq==='1',pv=META.chLk||0,v=y?Math.min(5,Math.max(0,pv)+1):Math.max(-10,pv-1);META.chLk=v;META.chY=y?(META.chY||0)+1:0;if(!y)META.chSkip=false;
+    const mst=y&&v>=5;if(mst){META.chDone=1;META.ach=META.ach||{};META.ach.h_chart=1;META.title='h_chart';}saveMeta();
+    d.querySelectorAll('[data-cq]').forEach(x=>x.disabled=true);$('cqMsg').innerHTML=y?`<span style="color:#7be08f">잘하셨습니다! ${pv<0?'깎였던 행운을 되돌리고 +1 올려드렸습니다':'행운을 올려드렸습니다 +1'} <small>(지금 ${v>0?'+':''}${v})</small>${mst?'<br><b style="color:#ffd76a">🏆 칭호 「차트 마스터」를 드립니다! (머리 위에 달아 드렸어요)</b><br><small>이제 이 창은 다시 뜨지 않아요</small>':''}</span>`:`<span style="color:#ff8a8a">차트 좀 쓰고 게임하세요.<br>당신의 행운을 내려드렸습니다 −1 <small>(지금 ${v>0?'+':''}${v})</small><br>한 판 더 돌리면 이 창이 뜨고 다시 물어봅니다잉.</span>`;
+    const cb=d.querySelector('.cqb');if(cb)cb.remove();$('cqMsg').insertAdjacentHTML('afterend','<button class="btn primary" id="cqClose" style="min-width:120px">닫기</button>');$('cqMsg').style.fontSize='16px';
+    const cl=()=>{if(d.parentNode)d.remove();};$('cqClose').onclick=cl;d.onclick=e=>{if(e.target===d)cl();};});}
 // 결투에서 회피·막기를 크게: 큰 글자 + 퍼지는 빛 고리
 function duelPop(x,y,s,col){S.tx.push({x,y,s,col,size:30,life:1});if(S.tx.length>60)S.tx.shift();S.rings.push({x,y:y+16,r:8,max:46,life:.35,col});S.rings.push({x,y:y+16,r:4,max:28,life:.25,col:'#ffffff'});}
 function burst(x,y,col,n=10){for(let i=0;i<n;i++){const a=Math.random()*TAU,v=rand(60,240);S.pa.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:rand(.25,.5),col});}if(S.pa.length>220)S.pa.splice(0,S.pa.length-220);}
@@ -2705,7 +2708,7 @@ let toastT=null;
 function toast(s){toastEl.textContent=s;toastEl.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>toastEl.classList.remove('on'),1300);}
 
 /* ---------- round ---------- */
-function startGame(){setTimeout(()=>{try{onlPing();}catch(e){}},800);
+function startGame(){CH_PEND=true;setTimeout(()=>{try{onlPing();}catch(e){}},800);
   const p=S.p;
   p.x=WW/2;p.y=WH/2;pushOut(p,p.r+4);p.inv=1;p.barrier=barrierMax();p.shield=has('insure')?2+L('insure')+(has('f_insure')?3:0):0;
   S.started=true;S.mode='play';hide();toast('살아남으세요');
@@ -5542,7 +5545,7 @@ function openPatch(all){closePatch();const d=document.createElement('div');d.id=
 function closePatch(){const d=document.getElementById('patchPop');if(d)d.remove();}
 function bootPatch(){let seen=0;try{seen=+(localStorage.getItem('chanseo_seenv')||0);}catch(e){}if(seen<BUILD&&PATCH_NOTES.some(p=>p.v>seen))openPatch(false);}
 function startScreen(){
-  if(CH_PEND&&myNick()&&CHART_NICKS.some(k=>myNick().includes(k))){CH_PEND=false;setTimeout(chartAsk,500);}
+  if(CH_PEND&&!META.chDone&&myNick()&&CHART_NICKS.some(k=>myNick().includes(k))){CH_PEND=false;let ask=true;if((META.chY||0)>=2){META.chSkip=!META.chSkip;ask=!META.chSkip;saveMeta();}if(ask)setTimeout(chartAsk,500);}
   if(typeof UPD!=='undefined'&&UPD.ver>BUILD&&applyUpd())return;
   if(DIFF[pickDiff]&&DIFF[pickDiff].rush){pickDiff=(()=>{try{return localStorage.getItem('chanseo_diff')||'normal';}catch(e){return 'normal';}})();}
   if(!diffOpen(pickDiff))pickDiff=[...DKEYS].filter(k=>k!=='bossrush').reverse().find(diffOpen)||'normal';
@@ -5567,7 +5570,7 @@ function startScreen(){
   <button class="btn ghost" id="forgeBtn">⚒ 장비 대장간 <small>검·투구·갑옷·목걸이·망토 강화 ${Object.keys(GEAR).filter(gearOwn).map(k=>GEAR[k].ico+"+"+gearLv(k)).join(" ")||"(메달로 구입)"}</small></button>
   <button class="btn ghost" id="heroBtn">🗃 내 캐릭터 <small>${(()=>{const n=myHeroes().length;return n?`저장한 캐릭터 ${n}/${HERO_MAX}`:'악몽·보스 러시 캐릭터 저장';})()}</small></button>
   <button class="btn ghost" id="codex">📖 도감 <small>증강 · 합체 · 시너지 · 직업 검색</small></button>
-  <button class="btn ghost" id="achBtn">🏆 도전과제 · 칭호 <small>${Object.keys(META.ach||{}).length} / ${ACH.length} 달성${META.title?' · 「'+(ACH.find(a=>a.k===META.title)||{}).n+'」 장착 중':''}</small></button>
+  <button class="btn ghost" id="achBtn">🏆 도전과제 · 칭호 <small>${DEV?ACH.filter(a=>!a.sec).length:Object.keys(META.ach||{}).filter(k=>{const A=ACH.find(a=>a.k===k);return A&&!A.sec;}).length} / ${ACH.filter(a=>!a.sec).length} 달성${META.title?' · 「'+(ACH.find(a=>a.k===META.title)||{}).n+'」 장착 중':''}</small></button>
   <button class="btn ghost" id="guideBtn">📘 게임 설명서 <small>처음이면 꼭 읽어보세요</small></button>
   <button class="btn ghost" id="patchBtn">📜 패치 노트 <small>v${BUILD} 바뀐 점</small></button>
   <button class="btn ghost" id="sync">💾 데이터 옮기기 <small>다른 기기로 내보내기 · 가져오기</small></button></div>`);
@@ -5590,7 +5593,7 @@ function drawPreviews(){
 /* ---------- meta progression ---------- */
 const META=(()=>{try{const m=JSON.parse(localStorage.getItem('chanseo_meta')||'{}');const pc={luck:3,gold:2,xp:3,aug:6,key:5};let rf=0;for(const k in (m.prep||{}))rf+=(m.prep[k]||0)*(pc[k]||0);const {prep,...rest}=m;return {...rest,medals:(m.medals||0)+rf,total:m.total||0,lv:m.lv||{},sk:m.sk||{},clears:m.clears||{},cos:m.cos||{own:{},eq:{}},spent:m.spent!=null?m.spent:null,ucls:m.ucls||[],tk:m.tk||0,mob:m.mob||{},egg:m.egg||{},ach:m.ach||{},title:m.title||'',bk:m.bk||{},hk:m.hk||{},ccls:m.ccls||{},gear:m.gear||{},prot:m.prot||0,gearLog:m.gearLog||{}};}catch(e){return {medals:0,total:0,lv:{},sk:{},clears:{},cos:{own:{},eq:{}},ucls:[],tk:0,mob:{},egg:{},ach:{},title:'',bk:{},hk:{},ccls:{},gear:{},prot:0,gearLog:{}};}})();
 // 개발자 모드: 메달을 써도 줄지 않음 (영구 강화·악몽 강화·장비 대장간·외형 등). 화면엔 10억으로 보이고, 저장되는 값은 실제 보유량. 판에서 번 메달은 그대로 쌓임
-{let _m=META.medals||0;Object.defineProperty(META,'medals',{enumerable:true,configurable:true,get(){return DEV?Math.max(_m,1e9):_m;},set(v){if(DEV){const cur=Math.max(_m,1e9);if(v>cur)_m+=v-cur;return;}_m=v;}});
+{let _m=META.medals||0;if(!(_m<1e8)){_m=1000;}Object.defineProperty(META,'medals',{enumerable:true,configurable:true,get(){return DEV?Math.max(_m,1e9):_m;},set(v){if(DEV){const cur=Math.max(_m,1e9);if(v>cur)_m+=v-cur;return;}_m=v;}});
  Object.defineProperty(META,'toJSON',{enumerable:false,value:function(){const o={};for(const k in this)o[k]=this[k];o.medals=_m;return o;}});}
 // 장비 대장간: 메달로 산 장비를 강화 (모든 직업 공용, 판 밖에서). 높은 단계일수록 성공률↓, 실패 시 단계 하락·파괴 위험. 강화 보호권으로 막을 수 있음
 // 효과는 최종값에 곱해짐 → +10이면 장비 하나당 악몽에서 약 1분 더 버티는 정도
@@ -6102,6 +6105,7 @@ const ACH=[
   {k:'h_gob',hid:1,n:'고블린의 단골',d:'보물 고블린을 5번 놓치기',p:()=>[(META.hm||{}).goblin||0,5],c:()=>((META.hm||{}).goblin||0)>=5},
   {k:'h_drg',hid:1,n:'아깝다!',d:'황금 용 체력을 10% 미만으로 깎고도 놓치기'},
   {k:'h_blind',hid:1,n:'눈 뜬 장님',d:'한 판에 숨겨진 몬스터 3마리 놓치기'},
+  {k:'h_chart',sec:1,n:'차트 마스터',d:'차트를 꼬박꼬박 쓰는 모범 진료인'},
   {k:'h_egg5',hid:1,n:'동네 단골손님',d:'한 판에 이스터에그 주인 5명 만나기'},
   {k:'h_eggall',hid:1,n:'동네 마당발',d:'이스터에그 34곳 모두 발견',p:()=>[Object.keys(META.egg||{}).length,Object.keys(EGG).length],c:()=>Object.keys(META.egg||{}).length>=Object.keys(EGG).length},
   {k:'h_stone',hid:1,n:'망부석',d:'건물 앞에서 1분 동안 꼼짝 않고 서 있기'},
@@ -6449,9 +6453,9 @@ const cxRoot=()=>cxGame?stEl:ov;
 function cxShow(h){if(cxGame){stEl.innerHTML=`<div class="panel">${h}</div>`;stEl.classList.add('on');stEl.scrollTop=0;}else show(h);}
 function cxClose(){patHide();if(cxGame){cxGame=false;statsOpen=false;stEl.classList.remove('on');stEl.innerHTML='';}else startScreen();}
 // 도전과제·칭호 화면: 달성한 칭호를 눌러 장착 (캐릭터 머리 위에 표시)
-function openAch(){const done=k=>!!(META.ach&&META.ach[k]);
-  show(`<div class="shophead"><h2>🏆 도전과제 · 칭호</h2><button class="btn" id="achBack">돌아가기</button></div><p class="sub">달성 ${ACH.filter(a=>done(a.k)).length} / ${ACH.length} · 달성한 칭호를 누르면 장착 (머리 위에 표시) · 능력치 보상은 없음</p>
-  <div>${ACH.map(a=>{const d=done(a.k),eq=META.title===a.k,rw=a.rw&&COS.find(x=>x.k===a.rw),pr=a.p&&!d?a.p():null;
+function openAch(){const done=k=>DEV||!!(META.ach&&META.ach[k]),AL=ACH.filter(a=>!a.sec||done(a.k));
+  show(`<div class="shophead"><h2>🏆 도전과제 · 칭호</h2><button class="btn" id="achBack">돌아가기</button></div><p class="sub">달성 ${AL.filter(a=>done(a.k)).length} / ${AL.length} · 달성한 칭호를 누르면 장착 (머리 위에 표시) · 능력치 보상은 없음</p>
+  <div>${AL.map(a=>{const d=done(a.k),eq=META.title===a.k,rw=a.rw&&COS.find(x=>x.k===a.rw),pr=a.p&&!d?a.p():null;
     if(a.hid&&!d&&!DEV)return `<div class="cxrow" style="--rc:#555;opacity:.6"><div class="h"><b>❓ 「???」</b><span class="tg" style="background:#5a3d7a;color:#fff">히든</span></div><div class="d">숨겨진 도전과제예요. 이상한 짓을 해 보세요…</div></div>`;
     return `<div class="cxrow" data-tt="${d?a.k:''}" style="--rc:${d?'#ffd76a':'#555'};cursor:${d?'pointer':'default'};${d?'':'opacity:.65'}"><div class="h"><b>${d?'🏆':'🔒'} 「${a.n}」</b>${a.hid?'<span class="tg" style="background:#5a3d7a;color:#fff">히든</span>':''}${eq?'<span class="tg" style="background:#2f8f4e;color:#fff">✔ 장착 중</span>':''}${rw?`<span class="tg" data-cs="${rw.k}" style="background:#b552d6;color:#fff;cursor:help">🎁 외형: ${rw.n} 👁</span>`:''}</div><div class="d">${a.d}${pr?` <small style="color:#ffd76a">(${pr[0]} / ${pr[1]})</small>`:''}</div></div>`;}).join('')}</div>`);
   {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}
@@ -6517,7 +6521,7 @@ function cxList(){
     rows=[`<div class="sub" style="margin:4px 0">보스전이 아닐 때 85~110초마다 무작위로 하나 발생 (같은 이벤트는 연속으로 안 나옴, 보스 직전 45초엔 안 나옴). 등급이 높을수록 어렵고 보상이 큼: <b style="color:#cfe3c4">일반</b>(쉬어가기) · <b style="color:#7fc4f2">희귀</b>(골드·고급 카드) · <b style="color:#c86aff">영웅</b>(증강, 2분 30초부터) · <b style="color:#ffd76a">전설</b>(프리즘 증강, 5분부터)</div>`].concat(Object.keys(EVENTS).sort((a,b)=>'CBAS'.indexOf(EVENTS[a].g)-'CBAS'.indexOf(EVENTS[b].g)).filter(k=>hit(EVENTS[k].n,EVENTS[k].d,TIP[k])).map(k=>{const E=EVENTS[k],TR=evTier(k);return `<div class="cxrow" style="--rc:${TR.col}"><div class="h"><b>${E.icon} ${E.n}</b><span class="tg" style="color:${TR.col}">${TR.n}</span><span class="tg">⏱ ${DUR[k]}초</span></div><div class="d">${E.d}</div><div class="s">💡 팁: ${TIP[k]}</div></div>`;}));
   }else if(CX.tab==='egg'){
     // 이스터에그: 발견한 것만 내용 공개 (개발자 모드는 전부). 못 찾은 건 어느 배경인지만 힌트
-    const bOf=k=>BIOMES.filter(B=>(B.lm||[]).includes(k)).map(B=>B.n).join(' · '),ks=Object.keys(EGG),fnd=ks.filter(k=>(META.egg||{})[k]).length;
+    const bOf=k=>BIOMES.filter(B=>(B.lm||[]).includes(k)).map(B=>B.n).join(' · '),ks=Object.keys(EGG),fnd=DEV?ks.length:ks.filter(k=>(META.egg||{})[k]).length;
     rows=[`<div class="sub" style="margin:4px 0">배경 곳곳의 건축물 앞에 <b>5초</b> 서 있으면 주인이 나와 한마디 해요. 발견 ${fnd} / ${ks.length} · 한 판에 5곳까지 ✨ 플레이 보너스, 처음 찾은 곳은 보너스 더!</div>`].concat(ks.filter(k=>{const sn=DEV||(META.egg||{})[k];return sn?hit(LM_N[k]||k,bOf(k),EGG[k][1].join(' ')):!qs.length;}).map(k=>{const E=EGG[k],sn=DEV||(META.egg||{})[k],me=(META.egg||{})[k];
       return sn?`<div class="cxrow" style="--rc:#ffd76a"><div class="h"><b>${E[0]} ${LM_N[k]||k}</b><span class="tg">${bOf(k)}</span>${me?'<span class="tg" style="background:#2f8f4e;color:#fff">✔ 발견</span>':'<span class="tg">🛠 개발자 보기</span>'}</div><div class="d">${E[1].map(x=>`“${x}”`).join('<br>')}</div></div>`
         :`<div class="cxrow" style="--rc:#555"><div class="h"><b>❓ ???</b><span class="tg">${bOf(k)}</span></div><div class="s">${bOf(k)} 어딘가의 건축물 앞에서 기다려 보세요</div></div>`;}));
@@ -6527,7 +6531,7 @@ function cxList(){
     const gOf=k=>{if(ET[k].boss)return ET[k].hidb?'👑 히든 보스':(bossCh[k]||'')+' 보스';for(const [n,L] of MOB_GROUP)if(L.includes(k))return n;return '기타';},gOrd=k=>{const g=gOf(k),i=MOB_GROUP.findIndex(x=>x[0]===g);return ET[k].boss?100+(ET[k].hidb?9:['1장','2장','3장','마지막 장'].indexOf(bossCh[k])):i<0?50:i;},iOrd=k=>{for(const [,L] of MOB_GROUP){const i=L.indexOf(k);if(i>=0)return i;}return BOSS_POOL.flat().indexOf(k);};
     const keys=Object.keys(ET).filter(k=>MOBINFO[k]&&(mk===''||(mk==='b')===!!ET[k].boss)&&mk!=='e').sort((a,b)=>gOrd(a)-gOrd(b)||iOrd(a)-iOrd(b));
     let lastG='';
-    const seenN=keys.filter(k=>META.mob[k]).length;
+    const seenN=keys.filter(k=>DEV||META.mob[k]).length;
     rows=keys.filter(k=>{const T=ET[k],I=MOBINFO[k];return (DEV||META.mob[k])?hit(T.n,I[0],I[1],BTITLE[k]||'',(BW[k]||[]).join(' '),gOf(k)):!qs.length;}).map(k=>{const T=ET[k],I=MOBINFO[k],seen=(DEV||META.mob[k]),sz=T.boss?72:MDEF[k].sz,w=Math.round(sz*(T.boss?1.3:2.2));
       const g=gOf(k),hd=g!==lastG?`<div style="margin:14px 0 2px;padding:3px 10px;border-left:4px solid var(--brass);font-size:16px;color:#ffd76a;background:rgba(214,169,74,.12);border-radius:4px">${g}</div>`:'';lastG=g;
       const img=`<img src="${mobImg(k,!seen)}" style="width:${w}px;height:${w}px;image-rendering:pixelated;flex:none">`;
@@ -6594,7 +6598,7 @@ function openRush(){cosPreviewHide();const ks=Object.keys(CLASSES);
   <h3>직업을 골라 바로 시작</h3><div class="rgrid">${ks.map(k=>{const op=clsOpen(k),av=op?hofAv(k,(cosEq('skin')||{}).k||''):'';return `<button class="rcard" data-rcls="${k}" ${op?'':'disabled style="opacity:.45"'}>${av?`<img src="${av}" alt="">`:''}<b>${op?'':'🔒 '}${CLASSES[k].n}</b><small>${op?(k===pickCls?'지금 고른 직업':''):'잠김'}</small></button>`;}).join('')}</div>`);
   {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}
   $('brBack').onclick=startScreen;ov.querySelectorAll('[data-rcls]').forEach(b=>b.onclick=()=>{const k=b.dataset.rcls;if(!clsOpen(k))return;pickCls=k;try{localStorage.setItem('chipdungeon_cls',k);}catch(e){}beginRunD('bossrush',k);});}
-function beginRun(cls){clearSave();newRun();S.diff=pickDiff;S.biome=biomeIdx();applyClass(cls);applyMeta();S.seals=mlv('seal')+(rushOn()?RUSH_SEAL:0);S.banL=[];S.bonusAug=(rushOn()?3:1)+(META.sk.extraAug?1:0);openNext();}
+function beginRun(cls){CH_PEND=true;clearSave();newRun();S.diff=pickDiff;S.biome=biomeIdx();applyClass(cls);applyMeta();S.seals=mlv('seal')+(rushOn()?RUSH_SEAL:0);S.banL=[];S.bonusAug=(rushOn()?3:1)+(META.sk.extraAug?1:0);openNext();}
 
 /* ---------- online ranking ---------- */
 let RDB=null,RMYID=null,BOARD=null,RSTATE='loading',SHEET=false;
@@ -7363,7 +7367,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=44,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=45,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
