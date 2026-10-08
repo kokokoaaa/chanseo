@@ -5341,6 +5341,8 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:42,t:'🟢 접속 표시 고침',items:[
+    ['change','🟢 서버 연결이 한 번 늦거나 끊기면 「접속 확인 중…」에 1분 넘게 멈춰 있던 문제를 고쳤어요. 이제 몇 초 뒤 알아서 다시 연결해요']]},
   {v:41,t:'🪙 참붕이 토큰값 후원하기',items:[
     ['new','🪙 버전 옆 <b>반짝이는 동전</b>을 누르면 참붕이 토큰값을 후원할 수 있어요 (카카오페이). <b>휴대폰</b>은 바로 열리고, <b>컴퓨터</b>는 화면의 QR을 휴대폰 카메라로 찍으면 돼요'],
     ['new','💌 후원 창에서 <b>응원 한마디</b>를 남기면 개발자에게 전해져요']]},
@@ -6620,14 +6622,14 @@ const BOARD_KEY='chanseo_board';
 function setBoardFrom(j){BOARD_DW=!!(j.length&&'dw' in j[0]);BOARD=mergeMine(normBoard(j).map(b=>({...b,id:'s_'+b.name+'_'+b.diff})));SHEET=true;RSTATE='on';refreshBoard();}
 // 지금 접속 중인 사람: 1분마다 서버에 신호(이름·하는 것)를 보내고, 최근 2분 안에 신호를 보낸 사람 목록을 받음
 // 접속자 목록은 🟢 버튼으로만 열고 닫음 (열어 둔 상태는 다음에 켜도 유지)
-let SRV_V=0,ONLINE=null,ONL_OPEN=(()=>{try{return localStorage.getItem('chanseo_onl_open')==='1';}catch(e){return false;}})();
+let SRV_V=0,ONLINE=null,ONL_FAIL=0,ONL_RT=0,ONL_OPEN=(()=>{try{return localStorage.getItem('chanseo_onl_open')==='1';}catch(e){return false;}})();
 const onlToggle=()=>{ONL_OPEN=!ONL_OPEN;try{localStorage.setItem('chanseo_onl_open',ONL_OPEN?'1':'0');}catch(e){}onlPaint();};
 // 접속·채팅용 기기 번호: 이름 열쇠와 따로 (같은 이름 비밀번호를 쓰는 두 컴퓨터도 따로 보임)
 const DEVID=(()=>{try{let d=localStorage.getItem('chanseo_dev_id');if(!d){d=Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);localStorage.setItem('chanseo_dev_id',d);}return d;}catch(e){return Math.random().toString(36).slice(2,12);}})();
 const onlId=()=>{let h=2166136261;for(const c of 'on|'+DEVID){h^=c.charCodeAt(0);h=Math.imul(h,16777619)>>>0;}return h.toString(36)+DEVID.length.toString(36);};
 function onlAct(){try{if(!S||S.mode==='start'||!S.started)return '시작 화면';if(duelOn())return '⚔ 결투 중';if(raidOn())return '🗿 레이드 중';
   const D=DIFF[S.diff]||{};if(D.rush)return '⚔ 보스 러시 '+((S.bossI>=0?S.bossI:0)+1)+'단계';return (D.n||'모험')+' '+Math.floor((S.gt||0)/60)+'분째';}catch(e){return '';}}
-function onlHtml(sm){if(!SHEET_URL)return '';if(!ONLINE)return `<span class="onlb" style="opacity:.7;cursor:default">🟢 ${sm?'…':'접속 확인 중…'}</span> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}</button>`;const L=ONLINE;
+function onlHtml(sm){if(!SHEET_URL)return '';if(!ONLINE)return `<span class="onlb" style="opacity:.7;cursor:default">${ONL_FAIL>=2?'🟠':'🟢'} ${sm?'…':ONL_FAIL>=2?'서버 연결 재시도 중…':'접속 확인 중…'}</span> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}</button>`;const L=ONLINE;
   return `<button class="onlb" id="onlBtn" title="지금 접속 중">🟢 ${sm?`<b>${L.length}</b>`:`지금 <b>${L.length}</b>명 접속 중`} ${ONL_OPEN?'▲':'▼'}</button> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}${chatUnread()?'<i class="cdot"></i>':''}</button>${ONL_OPEN?`<div class="onll">${L.map(x=>`<span${x.me?' class="me"':''}>${fxName(x.n,x.fx)}${x.me?' (나)':''} · ${esc(x.a||'')}</span>`).join('')}</div>`:''}`;}
 function onlPaint(){const el=document.getElementById('onl');if(el){el.innerHTML=onlHtml();const b=document.getElementById('onlBtn');if(b)b.onclick=onlToggle;}
   const h=document.getElementById('onlHud');if(h){h.innerHTML=onlHtml(1).replace('id="onlBtn"','id="onlHudBtn"');const hb=document.getElementById('onlHudBtn');if(hb)hb.onclick=e=>{e.stopPropagation();onlToggle();};}
@@ -6706,7 +6708,8 @@ function openNick(){cosPreviewHide();const cur=myNick();
 async function onlPing(bye){if(!SHEET_URL||!MYKEY)return;const u=SHEET_URL+'?ping=1&id='+onlId()+'&n='+encodeURIComponent(myNick()||'모험가')+'&a='+encodeURIComponent(onlAct())+'&fx='+myFx()+(bye?'&bye=1':'');
   if(bye){try{fetch(u,{keepalive:true,cache:'no-store'});}catch(e){}return;}
   const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),15000):0;
-  try{const r=await fetch(u,{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();if(j&&Array.isArray(j.on)){SRV_V=+j.v||0;ONLINE=j.on;supCheck();if(j.ct)CHAT_CT=Math.max(CHAT_CT,+j.ct||0);onlPaint();}}catch(e){}finally{clearTimeout(to);}}
+  let ok=false;try{const r=await fetch(u,{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();if(j&&Array.isArray(j.on)){ok=true;ONL_FAIL=0;SRV_V=+j.v||0;ONLINE=j.on;if(j.ct)CHAT_CT=Math.max(CHAT_CT,+j.ct||0);onlPaint();try{supCheck();}catch(e){}}}catch(e){}finally{clearTimeout(to);}
+  if(!ok){ONL_FAIL++;if(!ONLINE)onlPaint();clearTimeout(ONL_RT);ONL_RT=setTimeout(()=>{if(!document.hidden)onlPing();},Math.min(30000,4000*ONL_FAIL));}}
 setTimeout(()=>{onlPaint();onlPing();},300);setInterval(()=>{if(!document.hidden)onlPing();},60000);
 addEventListener('pagehide',()=>onlPing(true));
 async function loadSheet(tries){tries=tries||0;
@@ -7337,7 +7340,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=41,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=42,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
