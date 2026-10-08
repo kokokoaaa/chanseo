@@ -4410,7 +4410,7 @@ function endEvent(win){
   if(ev.k==='shrine'&&!win)toast('제단이 사라졌다');
   if(ev.k==='moon'){if(win&&S.p.alive){S.keys=(S.keys||0)+1;bonusStat(1);toast('붉은 달을 버텼다! 고급 스탯 카드 + 🔑 열쇠 +1');openNext();}else toast('붉은 달이 졌다');}
   if(ev.k==='chest'){for(const e of S.en)if(e.chestB){if(!win){e.alive=false;burst(e.x,e.y,'#c86aff',16);}e.chestB=false;}
-    if(win){toast(`수호자 격파! 💎 ${TIER[capTier('p')].n} 증강 선택`);if(S.noAug){toast('증강 그만 받기 중 · '+giveAltStat(capTier('p'),true));openNext();}else{S.mode='aug';openAug(true,'저주받은 상자 보상',null,'p');}}else toast(ev.open?'수호자가 상자와 함께 사라졌다':'상자가 사라졌다');}
+    if(win){toast(`수호자 격파! 💎 ${TIER[capTier('p')].n} 증강 선택`);if(S.noAug){toast('증강 그만 받기 중 · '+giveAltStat(capTier('p'),true));openNext();}else if(AUTO.pick){autoAug(capTier('p'));openNext();}else{S.mode='aug';openAug(true,'저주받은 상자 보상',null,'p');}}else toast(ev.open?'수호자가 상자와 함께 사라졌다':'상자가 사라졌다');}
   if(ev.k==='rift'){if(win){const R=[['공격력 +8%',p=>{p.dmgP=(p.dmgP||0)+.08;}],['공격 속도 +7%',p=>{p.rateP=(p.rateP||0)+.07;}],['최대 체력 +10%',p=>{p.hpP=(p.hpP||0)+.1;}],['치명타 확률 +4%',p=>{p.crit+=.04;}],['이동 속도 +6%',p=>{p.speed*=1.06;}]],r=R[Math.floor(Math.random()*R.length)];r[1](S.p);S.flash=.3;toast(`균열을 버텼다! 영구 ${r[0]}`);}else toast('균열이 닫혔다');}
   if(ev.k==='fountain'&&!win)toast('샘이 말라버렸다');
   if(ev.k==='meteor'){if(win){const g=price(70),n=ev.hits===0?2:1;S.gold+=g;bonusStat(n);toast(`유성우를 버텼다! (${ev.hits}번 맞음) ${g} 골드 + 고급 스탯 카드 ${n}장`);openNext();}else toast(`유성에 ${ev.hits}번 맞았다 — 실패`);}
@@ -4420,7 +4420,7 @@ function endEvent(win){
     if(ev.bad){if(win){bonusStat(2);toast('제단의 시련 통과! 고급 스탯 카드 2장');openNext();}else toast('제단의 시련 실패');}else if(!win)toast('제단이 사라졌다');}
   if(ev.k==='totem'){for(const e of S.en)if(e.evTot){if(!win){e.alive=false;burst(e.x,e.y,'#b06ad0',12);}e.evTot=false;e.hunt=false;}if(win){S.bonusAug++;toast('저주 토템 파괴! 증강 1개 선택');openNext();}else toast('토템이 땅속으로 사라졌다');}
   if(ev.k==='bounty'){for(const e of S.en)if(e.bounty){if(!win){e.alive=false;burst(e.x,e.y,'#ffd76a',16);}e.bounty=false;e.hunt=false;}
-    if(win){const g=price(200);S.gold+=g;META.medals=(META.medals||0)+1;saveMeta();toast(`현상수배범 처치! 💎 ${TIER[capTier('p')].n} 증강 + ${g} 골드 + 🏅 메달 1`);if(S.noAug){toast('증강 그만 받기 중 · '+giveAltStat(capTier('p'),true));openNext();}else{S.mode='aug';openAug(true,'현상수배 보상',null,'p');}}else toast('현상수배범이 달아났다');}
+    if(win){const g=price(200);S.gold+=g;META.medals=(META.medals||0)+1;saveMeta();toast(`현상수배범 처치! 💎 ${TIER[capTier('p')].n} 증강 + ${g} 골드 + 🏅 메달 1`);if(S.noAug){toast('증강 그만 받기 중 · '+giveAltStat(capTier('p'),true));openNext();}else if(AUTO.pick){autoAug(capTier('p'));openNext();}else{S.mode='aug';openAug(true,'현상수배 보상',null,'p');}}else toast('현상수배범이 달아났다');}
   if(ev.k==='relic'){if(win){const g=price(45);S.p.luck=Math.min(LUCK_CAP,Math.round((S.p.luck+1)*10)/10);S.gold+=g;toast(`유물을 모두 모았다! 행운 +1, ${g} 골드`);}else toast(`유물 ${ev.rel.filter(o=>o.got).length}/3개만 모았다`);}
 }
 function updEvent(dt){
@@ -6685,6 +6685,7 @@ ov.addEventListener('mousedown',e=>{if(e.target.closest('button'))e.preventDefau
 function hide(){ov.classList.remove('on');ov.innerHTML='';}
 function openNext(){
   joy=null;
+  if(AUTO.pick&&S.started&&!S.backToCasino){autoProcess();if(S.shopPend){S.shopPend=false;autoShop();}resume();return;}
   if(S.bonusSt>0){S.bonusSt--;openStat();return;}
   if(S.pendingLv>0){S.pendingLv--;S.picks++;const at=augTurn();if(at&&augReady())openAug(true,`레벨 ${S.lvl-S.pendingLv} 달성 · 레벨업 증강`);else{if(at)toast(giveAltStat(rollTier()));openStat();}return;}
   if(AUTO.pick&&!S.started&&S.bonusAug>0){S.bonusAug=0;autoAug();startGame();return;}
@@ -9005,8 +9006,8 @@ function scoreAug(a){
   if(S.p.hp<S.p.maxHp*.4&&!isOff(a))sc+=2;
   return sc+Math.random()*.8;
 }
-function autoAug(){
-  const full=slotCount()>=MAXA,opts=full?fullOptions().filter(a=>!a.swap):augOptions(rollTier());
+function autoAug(tier){
+  const full=slotCount()>=MAXA,opts=full?fullOptions().filter(a=>!a.swap):augOptions(tier||rollTier());
   if(!opts.length){autoStat();return;}
   const a=opts.reduce((b,c)=>scoreAug(c)>scoreAug(b)?c:b,opts[0]);
   if(a.up){const o=a.ref;o.lv++;if(o.f)augApply(o);tagCount();ftext(S.p.x,S.p.y-40,o.n+' ★'+o.lv,'#ffd76a',15);tryFuse();return;}
@@ -9526,7 +9527,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=93,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=94,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
