@@ -3889,15 +3889,15 @@ function autoSkill(){const p=S.p;if((p.skCd||0)>0||!p.alive)return;const danger=
 function useSkill(){const p=S&&S.p;if(!p||!p.alive||S.mode!=='play'||(p.skCd||0)>0)return;const K=SKILLS[S.cls];if(!K)return;
   p.skCd=K.cd*(1-.05*mlv('n_skcd'))*gearM.skcd()*Math.max(.5,p.skM||1);if(has('iron_will'))p.iwT=3;S.st.sk=(S.st.sk||0)+1;const say=t=>{ftext(p.x,p.y-42,t,'#e8f4ff',18);S.rings.push({x:p.x,y:p.y,r:10,max:110,life:.4,col:'#e8f4ff'});};
   switch(S.cls){
-   case 'knight':p.skDrT=3;p.skDr=.8;skFx('knight',{d:3,fol:1});S.shake=Math.max(S.shake||0,6);for(const e of S.en){if(!e.alive||e.boss||d2(e,p)>170*170)continue;const a=Math.atan2(e.y-p.y,e.x-p.x);e.x+=Math.cos(a)*90;e.y+=Math.sin(a)*90;e.slowT=Math.max(e.slowT||0,1);}say('철벽 방패!');break;
+   case 'knight':p.skDrT=3;p.skDr=.8;skFx('knight',{d:3,fol:1});S.shake=Math.max(S.shake||0,.4);for(const e of S.en){if(!e.alive||e.boss||d2(e,p)>170*170)continue;const a=Math.atan2(e.y-p.y,e.x-p.x);e.x+=Math.cos(a)*90;e.y+=Math.sin(a)*90;e.slowT=Math.max(e.slowT||0,1);}say('철벽 방패!');break;
    case 'mage':{const ox=p.x,oy=p.y;skMove(p.lmx||1,p.lmy||0,220);skFx('mageO',{d:1.3,x:ox,y:oy});skFx('mageT',{d:.5,x:ox,y:oy,x2:p.x,y2:p.y});p.skInvT=.8;explode(ox,oy,110,pDmg()*3,'#ff8a3a');say('점멸!');break;}
    case 'archer':{const e=nearestE(p,500);let dx=-(p.lmx||1),dy=-(p.lmy||0);if(e){dx=p.x-e.x;dy=p.y-e.y;}const ax0=p.x,ay0=p.y;skMove(dx,dy,250);skFx('archer',{d:1.1,x:p.x,y:p.y,x0:ax0,y0:ay0});p.skInvT=1;explode(p.x,p.y,130,pDmg()*2,'#cfe3c4');say('후방 도약!');break;}
    case 'rogue':p.skInvT=3;p.skCrT=4;skFx('rogue',{d:3,x:p.x,y:p.y});say('연막 은신');if(S.zones.length<70)S.zones.push({x:p.x,y:p.y,r:90,life:3,kind:'smoke'});break;
    case 'paladin':p.skInvT=2.5;skFx('paladin',{d:2.5,fol:1});p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.3*healM());say('신성한 보호!');break;
-   case 'necro':{let n=0;while((S.skel||[]).length<skelMax()&&n<40){const sx=p.x+rand(-60,60),sy=p.y+rand(-60,60);raiseSkel(sx,sy);burst(sx,sy,'#7bff8a',8);n++;}skFx('necro',{d:3,fol:1});S.shake=Math.max(S.shake||0,5);p.skDrT=3;p.skDr=.8;say('뼈 감옥!');break;}
+   case 'necro':{let n=0;while((S.skel||[]).length<skelMax()&&n<40){const sx=p.x+rand(-60,60),sy=p.y+rand(-60,60);raiseSkel(sx,sy);burst(sx,sy,'#7bff8a',8);n++;}skFx('necro',{d:3,fol:1});S.shake=Math.max(S.shake||0,.35);p.skDrT=3;p.skDr=.8;say('뼈 감옥!');break;}
    case 'gunner':{const gx0=p.x,gy0=p.y;skMove(p.lmx||1,p.lmy||0,150);skFx('gunner',{d:.6,x:p.x,y:p.y,x0:gx0,y0:gy0,a:Math.atan2(p.lmy||0,p.lmx||1)});p.skInvT=.6;const b0=Math.atan2(p.lmy||0,p.lmx||1);for(let i=0;i<6;i++)pBullet(p.x,p.y,b0+(i-2.5)*.16,pDmg()*1.7,{sub:'구르기 사격',child:true,pierce:1});p.mag=magN();say('구르기!');break;}
    case 'elem':p.skInvT=2;p.skRootT=2;skFx('elem',{d:2,fol:1});for(const e of S.en){if(!e.alive||d2(e,p)>220*220)continue;if(!e.boss){e.slowT=Math.max(e.slowT||0,3);e.frozen=true;}}S.rings.push({x:p.x,y:p.y,r:10,max:220,life:.5,col:'#bfe8ff'});say('얼음 결계!');break;
-   case 'berserk':p.skUndT=4;skFx('berserk',{d:4,fol:1});S.shake=Math.max(S.shake||0,5);p.fy=furyCap();p.fyT=4+(p.fyD||0);say('불사의 분노!');break;
+   case 'berserk':p.skUndT=4;skFx('berserk',{d:4,fol:1});S.shake=Math.max(S.shake||0,.35);p.fy=furyCap();p.fyT=4+(p.fyD||0);say('불사의 분노!');break;
    case 'druid':p.skDrT=4;p.skDr=.6;p.skThT=4;p.skRgT=4;skFx('druid',{d:4,fol:1});say('가시 껍질!');break;
    case 'alch':p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.4*healM());p.skInvT=2;skFx('alch',{d:2,fol:1});say('비상 물약!');break;
    case 'gambler':{const hd=Math.random()<headP();skFx('gambler',{d:hd?4:2.2,fol:1,h:hd});}if(S.skFx[S.skFx.length-1].h){p.skInvT=3;p.skAtkT=3;say('💰 앞면! 무적 + 공격력 2배');}else{p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.25*healM());say('💰 뒷면… 체력 회복');}break;}
@@ -3923,11 +3923,11 @@ function useUlt(){const p=S&&S.p;if(!ultOk()||(p.ulCd||0)>0||S.ult)return;const 
   p.ulCd=ultCdMax();p.skInvT=Math.max(p.skInvT||0,2.2+(has('ult_echo')?lv3('ult_echo',1,1.5,2):0));if(has('ult_echo'))p.skCd=0;S.st.ult=(S.st.ult||0)+1;
   const camX=p.x-W/2,camY=p.y-H/2,vis=S.en.filter(e=>e.alive&&e.x>camX-40&&e.x<camX+W+40&&e.y>camY-40&&e.y<camY+H+40).sort((a,b)=>(b.boss?1:0)-(a.boss?1:0)).slice(0,36).map(e=>({x:e.x,y:e.y,r:e.r||14,b:!!e.boss}));
   if(vis.length<6)for(let i=vis.length;i<10;i++)vis.push({x:camX+W*(.12+.76*skHash(i*3+S.t)),y:camY+H*(.18+.7*skHash(i*7+S.t)),r:14,f:1});
-  S.ult={k:S.cls,t:0,d:2.6,done:0,T:vis,px:p.x,py:p.y,seed:Math.random()*99};S.smT=Math.max(S.smT||0,.35);S.shake=Math.max(S.shake||0,4);}
+  S.ult={k:S.cls,t:0,d:2.6,done:0,T:vis,px:p.x,py:p.y,seed:Math.random()*99};S.smT=Math.max(S.smT||0,.35);S.shake=Math.max(S.shake||0,.3);}
 function ultTick(dt){const p=S.p,camX=p.x-W/2,camY=p.y-H/2;if(p.ulCd==null)p.ulCd=45;const U=S.ult;if(!U)return;U.t+=dt;
   if(!U.done&&U.t>=ULT_IMP){U.done=1;const cand=U.k==='necro'?S.en.filter(e=>e.alive&&!e.boss&&!ET[e.type].hid&&!ET[e.type].totem&&ESPR&&e.x>camX-60&&e.x<camX+W+60&&e.y>camY-60&&e.y<camY+H+60):[],sec=Math.max(20,(S.gt||0)+(S.bt||0)),dm=Math.max(pDmg()*ULT_M,Math.max(0,(S.st.dmg||0)-((S.dlog||{})['궁극기']||0))/sec*8)*(p.ulDm||1),col=ULTS[U.k].col;
     for(const e of S.en){if(!e.alive||e.x<camX-60||e.x>camX+W+60||e.y<camY-60||e.y>camY+H+60)continue;dmgEs('궁극기',e,e.boss?dm*.5:dm,col);if(U.k==='elem'&&!e.boss){e.slowT=Math.max(e.slowT||0,3);e.frozen=true;}}
-    S.shake=Math.max(S.shake||0,16);S.flash=Math.max(S.flash||0,.5);
+    S.shake=Math.max(S.shake||0,.7);S.flash=Math.max(S.flash||0,.5);
     if(U.k==='paladin'||U.k==='druid')p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.2*healM());
     if(U.k==='necro'){let n=0;while((S.skel||[]).length<skelMax()&&n<40){raiseSkel(p.x+rand(-80,80),p.y+rand(-80,80));n++;}
       const dead=cand.filter(e=>!e.alive).sort((a,b)=>(b.elite?1:0)-(a.elite?1:0)||b.maxHp-a.maxHp).slice(0,THR_MAX);for(const e of dead)raiseThrall(MDEF[e.spr||e.type]?(e.spr||e.type):'grunt',e.x,e.y);if(dead.length)toast(`💀 망령 부하 ${dead.length}마리가 되살아났다! (${(S.thr||[]).length}/${THR_MAX})`);}
