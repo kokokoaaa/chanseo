@@ -7905,7 +7905,7 @@ function openDuel(){cosPreviewHide();const H=myHeroes().sort((a,b)=>(b.score||0)
   ${duelLogHtml()}
   <h3>내 캐릭터</h3>${H.length?`<div class="rgrid">${H.map(card).join('')}</div>`:'<p class="sub">보관한 캐릭터가 없어요.</p>'}
   <h3>상대 고르기</h3><div class="btnrow"><input id="dlCode" placeholder="친구의 대결 코드 붙여넣기 (H2:… / H1:…)" style="flex:1;min-width:0"><button class="btn" id="dlAdd">코드로 추가</button></div>
-  ${O.length?`<div class="rgrid">${O.map(ocard).join('')}</div>`:'<p class="sub">상대가 없어요. 명예의 전당 캐릭터는 이번 업데이트 뒤에 올라간 기록부터 생겨요. 대결 코드를 붙여넣거나 내 다른 캐릭터와 싸워 보세요.</p>'}`);
+  ${O.length?(()=>{const mine=O.map((o,i)=>[o,i]).filter(([o])=>o.src==='🗃 내 캐릭터'),oth=O.map((o,i)=>[o,i]).filter(([o])=>o.src!=='🗃 내 캐릭터'),cg=L=>`<div class="rgrid">${L.map(([o,i])=>ocard(o,i)).join('')}</div>`;return (oth.length?cg(oth):'<p class="sub">다른 사람 상대가 아직 없어요.</p>')+(mine.length?`<h3 style="margin:14px 0 6px;padding-top:10px;border-top:1px dashed rgba(214,169,74,.45)">🗃 내 다른 캐릭터 <small style="color:var(--muted);font-weight:normal">(연습 상대)</small></h3>`+cg(mine):'');})():'<p class="sub">상대가 없어요. 명예의 전당 캐릭터는 이번 업데이트 뒤에 올라간 기록부터 생겨요. 대결 코드를 붙여넣거나 내 다른 캐릭터와 싸워 보세요.</p>'}`);
   {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}
   $('dlBack2').onclick=startScreen;ov.querySelectorAll('[data-dme]').forEach(b=>b.onclick=()=>{DUEL_ME=b.dataset.dme;openDuel();});
   $('dlAdd').onclick=async()=>{const h=await heroUnpack($('dlCode').value);if(!h){toast('대결 코드가 올바르지 않아요');return;}const o=oppOf(h,'🤝 코드');DUEL_CODES=[o,...DUEL_CODES.filter(x=>x.n!==o.n||x.c!==o.c)].slice(0,5);toast(`🤝 ${o.n} 추가!`);openDuel();};
@@ -8823,6 +8823,9 @@ async function nameOwned(nm,key){const ac=window.AbortController?new AbortContro
   try{const r=await fetch(SHEET_URL+'?own='+encodeURIComponent(nm)+'&k='+encodeURIComponent(key||MYKEY),{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();return !!(j&&j.owned);}catch(e){return false;}finally{clearTimeout(to);}}
 async function nameOwned3(nm,key){const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),10000):0;
   try{const r=await fetch(SHEET_URL+'?own='+encodeURIComponent(nm)+'&k='+encodeURIComponent(key||MYKEY),{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();return j&&'owned' in j?!!j.owned:null;}catch(e){return null;}finally{clearTimeout(to);}}
+// 개발자 모드: 명예의 전당 기록이 몇 번째 버전에서 나왔는지. v100부터는 기록에 저장, 그 전은 기록 시각 ↔ 배포 시각(초 − 1791000000, BUILD) 표로 추정
+const BUILD_AT=[[339464,2],[339689,3],[339998,4],[340233,5],[341524,6],[344191,7],[347478,8],[359468,9],[359867,10],[361917,11],[362237,12],[367440,13],[368584,14],[370091,15],[374613,16],[375742,17],[379539,18],[381722,19],[383512,20],[384757,21],[385054,22],[385423,23],[385724,24],[387694,25],[388384,26],[389114,27],[389689,28],[390004,29],[390416,30],[410725,31],[411274,32],[414292,33],[415053,34],[429735,35],[430942,36],[433707,38],[434562,39],[434643,40],[435612,41],[436078,42],[436475,43],[436614,44],[437417,45],[437470,46],[437948,47],[438396,48],[439410,49],[440981,50],[443769,51],[444186,52],[444449,53],[444846,54],[445352,55],[446021,56],[446660,57],[447060,58],[447459,59],[447677,60],[447839,61],[449847,62],[449967,63],[450055,64],[450832,66],[451364,67],[452069,68],[457582,69],[458404,70],[458835,71],[459738,72],[460371,73],[461108,74],[465967,75],[466787,76],[467738,77],[468207,78],[469021,79],[471199,80],[471386,81],[471615,82],[471813,83],[471972,84],[472174,85],[472364,86],[472501,87],[472657,88],[473000,89],[473101,90],[473359,91],[473601,92],[473786,93],[474319,94],[477467,95]];
+function recVer(b){if(b.build)return 'v'+b.build;const t=(+b.at||0)/1000-1791000000;if(!b.at)return '';if(t<BUILD_AT[0][0])return 'v2 이전';let v=BUILD_AT[0][1];for(const [s,n] of BUILD_AT){if(s<=t)v=n;else break;}return '~v'+v;}
 const myNick=()=>{try{return localStorage.getItem('chipdungeon_nick')||'';}catch(e){return '';}};
 // 후원자 감사 표시: 이 이름의 「주인 컴퓨터」(이름을 처음 등록한 열쇠, 또는 같은 이름 비밀번호)에서만 칭호 「후원자 그저 빛」(행운 +3)과 반짝이는 이름을 줌
 // 서버가 「이 열쇠가 주인 맞음」이라고 답할 때만 (연결 실패면 안 줌). 처음 받을 때 한 번 자동으로 달아 주고, 그 뒤 바꾸는 건 자유
@@ -8834,14 +8837,14 @@ async function donorCheck(){const n=myNick().trim();if(!SHEET_URL||!DONORS.inclu
   document.body.appendChild(d);$('dnrOk').onclick=()=>{d.remove();if(!S||S.mode==='start')startScreen();};}
 // 난이도: diff 칸 우선, 없으면 직업 칸의 ':' 뒤. 예전 서버가 12자로 잘라 저장한 것('knight:night' 등)도 앞글자로 알아봄
 const clsS=b=>String(b.cls||'').split('~')[0].split('@')[0],skinOf=b=>(String(b.cls||'').split('~')[0].split('@')[1])||b.skin||'',bonusOf=b=>+b.bonus||+String(b.cls||'').split('~')[1]||0,apOf=b=>+b.ap||(+String(b.cls||'').split('~')[2]||0)/100,
-  segOf=(b,i)=>String(b.cls||'').split('~')[i]||'',titleOf=b=>b.title||segOf(b,3),auraOf=b=>b.aura||segOf(b,4),gearOf=b=>b.gear||segOf(b,5),lookOf=b=>b.look||(segOf(b,6)==='o'?'old':segOf(b,6)==='n'?'new':''),frameOf=b=>b.frame||(/^fr_[a-z]+$/.test(segOf(b,7))?segOf(b,7):'');
+  segOf=(b,i)=>String(b.cls||'').split('~')[i]||'',titleOf=b=>b.title||segOf(b,3),auraOf=b=>b.aura||segOf(b,4),gearOf=b=>b.gear||segOf(b,5),lookOf=b=>b.look||(segOf(b,6)==='o'?'old':segOf(b,6)==='n'?'new':''),frameOf=b=>b.frame||(/^fr_[a-z]+$/.test(segOf(b,7))?segOf(b,7):''),buildOf=b=>+b.build||+segOf(b,8)||0;
 const dOf=b=>{const c=clsS(b).split('#')[0];let k=String(b.diff||(c.includes(':')?c.split(':')[1]:'normal'));if(DIFF[k])return k;return Object.keys(DIFF).find(x=>k&&x.startsWith(k))||'normal';};
 const calcScore=b=>scoreOf({...b,diff:dOf(b),bonus:bonusOf(b),ap:apOf(b)});
 // 결투 전적 "w3d1l2" → {w,d,l}
 const dwOf=v=>{if(v&&typeof v==='object')return v;const m=String(v||'').match(/^w(\d+)d(\d+)l(\d+)$/);return m?{w:+m[1],d:+m[2],l:+m[3]}:null;};
 const dwStr=()=>{const R=META.duel;return R&&(R.w||R.l||R.d)?`${R.w||0}-${R.d||0}-${R.l||0}`:'';};
 let BOARD_DW=false; // 서버가 결투 전적 칸을 아는지 (v4.2 이상)
-function normBoard(list){return list.map(b=>({...b,dw:dwOf(b.dw),diff:dOf(b),fx:clsS(b).split('#')[1]||b.fx||'',bonus:bonusOf(b),ap:apOf(b),title:titleOf(b),aura:auraOf(b),gear:gearOf(b),look:lookOf(b),frame:frameOf(b),skin:skinOf(b),cls:clsS(b).split('#')[0].split(':')[0],name:String(b.name||''),time:+b.time||0,lvl:+b.lvl||0,kills:+b.kills||0,bosses:+b.bosses||0,comment:String(b.comment||''),score:calcScore(b)})).sort((a,b)=>b.score-a.score);}
+function normBoard(list){return list.map(b=>({...b,dw:dwOf(b.dw),diff:dOf(b),fx:clsS(b).split('#')[1]||b.fx||'',bonus:bonusOf(b),ap:apOf(b),title:titleOf(b),aura:auraOf(b),gear:gearOf(b),look:lookOf(b),frame:frameOf(b),build:buildOf(b),skin:skinOf(b),cls:clsS(b).split('#')[0].split(':')[0],name:String(b.name||''),time:+b.time||0,lvl:+b.lvl||0,kills:+b.kills||0,bosses:+b.bosses||0,comment:String(b.comment||''),score:calcScore(b)})).sort((a,b)=>b.score-a.score);}
 // 내 등록 기록 백업: 서버가 어떤 기록(예: 새 난이도)을 반영하지 못해도 내 화면에서는 사라지지 않게. 서버에 더 높은 기록이 있으면 서버 것을 씀
 const myRecs=()=>{try{return JSON.parse(localStorage.getItem('chanseo_myrec')||'{}');}catch(e){return {};}};
 const saveMyRec=r=>{try{const m=myRecs();const old=m[r.diff];if(!old||scoreOf({...r})>=scoreOf({...old}))m[r.diff]=r;localStorage.setItem('chanseo_myrec',JSON.stringify(m));}catch(e){}};
@@ -9086,11 +9089,19 @@ async function onlPing(bye){if(!SHEET_URL||!MYKEY)return;const u=SHEET_URL+'?pin
 setTimeout(()=>{onlPaint();onlPing();},300);// 예비 서버 신호: 실시간 서버에 연결돼 있으면 50초마다(예비 서버 부담 줄이기), 아니면 25초마다
 let ONL_LP=0;setInterval(()=>{if(document.hidden)return;const now=Date.now();if(FB&&now-ONL_LP<49000)return;ONL_LP=now;onlPing();},25000);
 addEventListener('pagehide',()=>onlPing(true));
+// 이 기기에만 남은 내 최고 기록 다시 올리기: 예전 서버(v5.2 이하)는 보너스를 뺀 점수로 비교해서, 보너스가 큰 기록이
+// 서버에 안 올라가고 이 기기에만 남은 경우가 있음 → 서버 v5.3 v5.4(기록 시각 저장) 이상이면 서버 기록보다 높은 내 기록을 한 번 다시 보냄
+let MYREC_SYNCED=false;
+function myRecSync(){if(MYREC_SYNCED||!SHEET_URL||SRV_V<54)return;MYREC_SYNCED=true;const m=myRecs();
+  for(const k in m){const r=m[k];if(!r||!r.name||r.name==='익명'||!HOF_KEYS.includes(k))continue;const at=+r.at||(SC3_AT-1),mine=scoreOf({...r,diff:k,at});
+    const sv=(BOARD||[]).find(b=>b.name===r.name&&b.diff===k&&!b.local);if(sv&&sv.score>=mine-1)continue;
+    try{fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({...r,diff:k,at,k:MYKEY})});}catch(e){}}
+  setTimeout(loadSheet,4000);}
 async function loadSheet(tries){tries=tries||0;
   if(!tries&&!SHEET){try{const c=JSON.parse(localStorage.getItem(BOARD_KEY)||'null');if(Array.isArray(c)&&c.length)setBoardFrom(c);}catch(e){}}
   const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),15000):0;
   try{const r=await fetch(SHEET_URL,{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();if(!Array.isArray(j))throw 0;
-    setBoardFrom(j);try{localStorage.setItem(BOARD_KEY,JSON.stringify(j));}catch(e){}}
+    setBoardFrom(j);try{localStorage.setItem(BOARD_KEY,JSON.stringify(j));}catch(e){}setTimeout(myRecSync,4000);}
   catch(e){if(tries<1){setTimeout(()=>loadSheet(tries+1),1500);return;}if(!SHEET){RSTATE='off';refreshBoard();}}
   finally{clearTimeout(to);}}
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -9168,7 +9179,7 @@ function boardHtml(){
   const f=x=>`${Math.floor(x/60)}:${String(Math.floor(x%60)).padStart(2,'0')}`;
   const me=b=>SHEET?(b.name&&b.name===myNick()):!!RMYID&&String(b.id).startsWith(RMYID);
   const cn=b=>CLASSES[b.cls]?CLASSES[b.cls].n:'?';
-  const nm=b=>`<span class="hn ${b.fx?'hx-'+b.fx:''}">${FX_PRE[b.fx]||''}${esc(b.name.slice(0,12)||'이름 없음')}</span>${(()=>{const A=b.title&&ACH.find(a=>a.k===b.title);return A?`<small class="htt">「${A.n}」</small>`:'';})()}${b.local?'<small title="서버에 아직 반영되지 않은 이 기기의 기록" style="opacity:.7"> 📱</small>':''}`;
+  const nm=b=>`<span class="hn ${b.fx?'hx-'+b.fx:''}">${FX_PRE[b.fx]||''}${esc(b.name.slice(0,12)||'이름 없음')}</span>${DEV&&recVer(b)?`<small title="이 기록을 세운 게임 버전 (~는 기록 시각으로 추정)" style="margin-left:4px;padding:0 4px;border-radius:4px;background:rgba(95,201,217,.22);color:#9fe8ff;font-size:11px">${recVer(b)}</small>`:''}${(()=>{const A=b.title&&ACH.find(a=>a.k===b.title);return A?`<small class="htt">「${A.n}」</small>`:'';})()}${b.local?'<small title="서버에 아직 반영되지 않은 이 기기의 기록" style="opacity:.7"> 📱</small>':''}`;
   HOF_B=B;const del=i=>DEV?`<button class="hdel" data-del="${i}" title="이 기록 삭제 (개발자)">🗑</button>`:'';const top=B.slice(0,3).map((b,i)=>`<div data-hi="${i}" class="pcard p${i+1} ${me(b)?'me':''} ${b.frame?'fr-'+b.frame:''} ${b.fx?'hc-'+b.fx:''}">${del(i)}<span class="pm">${['🥇','🥈','🥉'][i]}</span>${(()=>{const a=hofAv(b.cls,b.skin,b.aura,b.gear,recLook(b));return a?`<img class="hav" src="${a}" alt="">`:'';})()}<span class="pn">${nm(b)}</span><span class="pc">${DIFF[b.diff]&&DIFF[b.diff].rush?'⚔ '+(+b.bosses||0)+'단계 돌파 · ':DIFF[b.diff]&&DIFF[b.diff].endless?'☠ '+((+b.bosses||0)+1)+'단계 · ':b.bosses>=4?'👑 클리어 · ':''}${cn(b)} · Lv ${b.lvl} · ${f(b.time)}</span><span class="ps">${b.score.toLocaleString()}점</span><span class="pq ${b.comment?'':'empty'}">${b.comment?'“'+esc(b.comment.slice(0,40))+'”':'한마디 없음'}</span></div>`).join('');
   const rest=B.slice(3,HOF_ALL?30:7).map((b,i)=>`<div data-hi="${i+3}" class="rrow ${me(b)?'me':''} ${b.frame?'fr-'+b.frame:''} ${b.fx?'hc-'+b.fx:''}">${del(i+3)}<span class="rn">${i+4}</span><span class="rnm"><b>${(()=>{const a=hofAv(b.cls,b.skin,b.aura,b.gear,recLook(b));return a?`<img class="hav s" src="${a}" alt="">`:'';})()}${nm(b)}${me(b)?' (나)':''}</b>${b.comment?`<i>“${esc(b.comment.slice(0,40))}”</i>`:''}</span><span class="rc">${DIFF[b.diff]&&DIFF[b.diff].rush?'⚔'+(+b.bosses||0)+'단계 ':DIFF[b.diff]&&DIFF[b.diff].endless?'☠'+((+b.bosses||0)+1)+'단계 ':b.bosses>=4?'👑 ':''}${cn(b)}<br>Lv ${b.lvl} · ${f(b.time)}</span><span class="rt">${b.score.toLocaleString()}</span></div>`).join('');
   const more=B.length>7?`<button class="btn more" id="hofMore">${HOF_ALL?'접기':`전체 순위 보기 (${Math.min(B.length,30)}위까지)`}</button>`:'';
@@ -9196,7 +9207,7 @@ async function submitScore(nick,comment,run){
   const cur=(BOARD||[]).find(b=>b.diff===dk&&(sheet?b.name===nick:b.id===docId));
   const better=!cur||run.score>cur.score;
   if(!better&&!comment){say(`'${nick}'의 이전 최고 점수(${cur.score.toLocaleString()}점)가 더 높아서 그대로 둘게요. 한마디를 쓰면 한마디만 바꿀 수 있어요.`);return;}
-  const hf=cosEq('hof');const rec={name:nick,cls:run.cls+(dk==='normal'?'':':'+dk)+(hf?'#'+hf.k:'')+(cosEq('skin')?'@'+cosEq('skin').k:'')+(()=>{const sg=[run.bonus||0,run.ap?Math.round(run.ap*100):'',META.title||'',auraStr(),gearCode(),lookOld(run.cls)?'o':'n',(cosEq('frame')||{}).k||''];while(sg.length&&(sg[sg.length-1]===''||/^-+$/.test(String(sg[sg.length-1]))||sg[sg.length-1]===0))sg.pop();return sg.length?'~'+sg.join('~'):'';})(),bonus:run.bonus||0,ap:run.ap||0,diff:dk,time:run.sec,lvl:run.lvl,kills:run.kills,bosses:run.bosses,gold:run.gold||0,score:run.score,comment,k:MYKEY};if(dwStr())rec.dw=dwStr();
+  const hf=cosEq('hof');const rec={name:nick,cls:run.cls+(dk==='normal'?'':':'+dk)+(hf?'#'+hf.k:'')+(cosEq('skin')?'@'+cosEq('skin').k:'')+(()=>{const sg=[run.bonus||0,run.ap?Math.round(run.ap*100):'',META.title||'',auraStr(),gearCode(),lookOld(run.cls)?'o':'n',(cosEq('frame')||{}).k||'',BUILD];while(sg.length&&(sg[sg.length-1]===''||/^-+$/.test(String(sg[sg.length-1]))||sg[sg.length-1]===0))sg.pop();return sg.length?'~'+sg.join('~'):'';})(),bonus:run.bonus||0,ap:run.ap||0,diff:dk,time:run.sec,lvl:run.lvl,kills:run.kills,bosses:run.bosses,gold:run.gold||0,score:run.score,comment,k:MYKEY,at:run.at||Date.now()};if(dwStr())rec.dw=dwStr();
   const done=better?`명예의 전당에 ${run.score.toLocaleString()}점으로 등록했어요!`:`이전 최고 점수(${cur.score.toLocaleString()}점)가 더 높아서 점수는 그대로 두고 한마디만 바꿨어요.`;
   if(run.snap&&better){try{rec.hero=await heroPack({...run.snap,name:nick});}catch(e){}}
   say('등록 중…');if(btn)btn.disabled=true;

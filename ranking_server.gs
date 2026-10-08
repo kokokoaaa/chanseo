@@ -1,6 +1,9 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v5.3
+// 찬서 명예의 전당 서버 (Google Apps Script) v5.4
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
+//
+// v5.3 → v5.4 바뀐 점
+// - 기록 시각(at)을 게임이 보낸 값으로 저장 (이 기기에만 남았던 예전 기록을 다시 올릴 때 그 당시 점수식 적용)
 //
 // v5.2 → v5.3 바뀐 점
 // - 기록 비교·순위를 게임 화면과 같은 '최종 점수'(플레이 보너스·자동 비율 포함)로 함. 예전엔 보너스를 뺀 점수로 비교해서
@@ -232,7 +235,7 @@ function ping_(q) {
   if (id && !q.bye) devLog_(id, str_(q.n, 12) || '모험가', str_(q.ua, 30));
   let w = 0;
   try { w = id && c.get('watch_' + id) ? 1 : 0; } catch (err) {}
-  return out_({ v: 53, ct, w, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 54, ct, w, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
 }
 
 // 전체 채팅 (최근 CHAT_MAX개만 보관)
@@ -429,7 +432,8 @@ function doPost(e) {
       names.forEach((x, i) => { if (String(x[0]) === nm) { s.getRange(i + 2, c).setValue(dw); n++; } });
       return out_({ ok: true, result: 'dw', n });
     }
-    const r = clean_(d);
+    // 기록 시각: 게임이 보낸 값(그 판을 한 시각)을 씀. 지금보다 미래거나 너무 옛날이면 서버 시각
+    const at0 = +d.at || 0, r = clean_(d, at0 > 1.7e12 && at0 <= Date.now() + 60000 ? at0 : 0);
     const last = s.getLastRow();
     const keys = last > 1 ? s.getRange(2, 1, last - 1, 2).getValues().map(x => String(x[0]) + '\u0001' + String(x[1])) : [];
     const i = keys.indexOf(r.name + '\u0001' + r.diff);
