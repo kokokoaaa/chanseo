@@ -1,6 +1,10 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v4.7
+// 찬서 명예의 전당 서버 (Google Apps Script) v4.8
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
+//
+// v4.7 → v4.8 바뀐 점
+// - 이름 비밀번호: 게임이 이름+비밀번호로 만든 열쇠로 바꿔 달라고 하면(rekey), 지금 주인이거나 주인이 없을 때만 바꿔 줌
+//   → 다른 컴퓨터에서도 같은 이름+비밀번호면 주인으로 인정
 //
 // v4.6 → v4.7 바뀐 점
 // - 채팅·접속 중 목록에 이름 효과(fx: 금빛 이름 등, 게임에서 메달로 산 것)를 같이 저장해서 보여줌
@@ -191,7 +195,7 @@ function ping_(q) {
   if (got) lock.releaseLock();
   let ct = 0;
   try { ct = +(c.get('chat_t') || 0); if (!ct) { const L = chatGet_(); ct = L.length ? L[L.length - 1].t : 0; if (ct) c.put('chat_t', String(ct), 21600); } } catch (err) {}
-  return out_({ ct, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 48, ct, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
 }
 
 // 전체 채팅 (최근 CHAT_MAX개만 보관)
@@ -281,6 +285,14 @@ function doPost(e) {
     if (claim) own.rows.forEach(rw => s.getRange(rw, HEAD.indexOf('kh') + 1).setValue(my));
     if (nm0 !== '익명' && (own.kh || my)) ownerSet_(nm0, own.kh || my);
     d.kh = nm0 === '익명' ? '' : (own.kh || my);
+    // 이름 열쇠 바꾸기 (비밀번호 설정): 지금 주인 열쇠가 맞거나 주인이 없을 때만
+    if (d.rekey) {
+      const nk = kh_(d.nk);
+      if (!nk || nm0 === '익명') return out_({ ok: false });
+      own.rows.forEach(rw => s.getRange(rw, HEAD.indexOf('kh') + 1).setValue(nk));
+      ownerSet_(nm0, nk);
+      return out_({ ok: true, result: 'rekey', n: own.rows.length });
+    }
     // 결투 전적만 갱신 (그 이름의 기록이 있을 때만, 새 줄은 만들지 않음)
     if (d.dwOnly) {
       const dw = dw_(d.dw), nm = str_(d.name, 12), last = s.getLastRow();
