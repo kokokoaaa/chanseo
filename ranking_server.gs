@@ -1,6 +1,10 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v4.8
+// 찬서 명예의 전당 서버 (Google Apps Script) v4.9
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
+//
+// v4.8 → v4.9 바뀐 점
+// - 후원 응원 메시지: 게임의 후원 창에서 보낸 메시지를 '후원' 시트에 저장 (시간 · 이름 · 메시지)
+//   ?sup=1&after=시간 으로 그 뒤 메시지를 받아감 (개발자 모드 화면에 띄움)
 //
 // v4.7 → v4.8 바뀐 점
 // - 이름 비밀번호: 게임이 이름+비밀번호로 만든 열쇠로 바꿔 달라고 하면(rekey), 지금 주인이거나 주인이 없을 때만 바꿔 줌
@@ -195,7 +199,7 @@ function ping_(q) {
   if (got) lock.releaseLock();
   let ct = 0;
   try { ct = +(c.get('chat_t') || 0); if (!ct) { const L = chatGet_(); ct = L.length ? L[L.length - 1].t : 0; if (ct) c.put('chat_t', String(ct), 21600); } } catch (err) {}
-  return out_({ v: 48, ct, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 49, ct, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
 }
 
 // 전체 채팅 (최근 CHAT_MAX개만 보관)
@@ -249,8 +253,19 @@ function ownerKh_(nm) {
 }
 function ownerSet_(nm, kh) { try { CacheService.getScriptCache().put('own_' + Utilities.base64EncodeWebSafe(nm), kh || '-', 600); } catch (err) {} }
 
+// 후원 응원 메시지 ('후원' 시트, 최근 300줄까지만 남김)
+const SUP_SHEET = '후원';
+function supSheet_() { const ss = book_(); let s = ss.getSheetByName(SUP_SHEET); if (!s) { s = ss.insertSheet(SUP_SHEET); s.getRange(1, 1, 1, 3).setValues([['at', 'name', 'msg']]); s.getRange('B:C').setNumberFormat('@'); } return s; }
+function supList_(after) {
+  const s = supSheet_(), last = s.getLastRow();
+  if (last < 2) return [];
+  const n = Math.min(100, last - 1), v = s.getRange(last - n + 1, 1, n, 3).getValues();
+  return v.map(r => ({ t: +r[0], n: String(r[1]), m: String(r[2]) })).filter(x => x.t > (+after || 0));
+}
+
 function doGet(e) {
   const q = (e && e.parameter) || {};
+  if (q.sup) return out_({ msgs: supList_(q.after) });
   if (q.chat) return chat_(q);
   if (q.ping) return ping_(q);
   if (q.own) {
@@ -278,6 +293,15 @@ function doPost(e) {
     const d = JSON.parse(e.postData.contents);
     const s = sheet_();
     try { CacheService.getScriptCache().remove(CACHE_KEY); } catch (err) {}
+    // 후원 응원 메시지 (이름 확인 없음, 120자까지)
+    if (d.sup) {
+      const msg = String(d.msg || '').replace(/\s+/g, ' ').trim().slice(0, 120);
+      if (!msg) return out_({ ok: false });
+      const ss = supSheet_();
+      ss.appendRow([Date.now(), str_(d.name, 12) || '익명', msg.replace(/^[=+\-@]+/, '')]);
+      if (ss.getLastRow() > 301) ss.deleteRows(2, ss.getLastRow() - 301);
+      return out_({ ok: true, result: 'sup' });
+    }
     // 이름 주인 확인: 주인이 있는 이름은 같은 열쇠로만. 주인이 없으면 열쇠와 함께 처음 올린 기기가 주인
     const nm0 = str_(d.name, 12) || '익명', my = kh_(d.k), own = nm0 === '익명' ? { rows: [], kh: '' } : owner_(s, nm0);
     if (own.kh && own.kh !== my) return out_({ ok: false, result: 'owned' });

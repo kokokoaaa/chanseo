@@ -2144,7 +2144,7 @@ let DEV=false;try{DEV=localStorage.getItem('chanseo_dev')===String(DEV_H);}catch
 if(!DEV){AUTO.pick=false;}
 let devTap=[];function devTapVer(){const t=Date.now();devTap=devTap.filter(x=>t-x<2500);devTap.push(t);if(devTap.length<5)return;devTap=[];
   if(DEV){if(confirm('개발자 모드를 끌까요? (자동 선택·자동 이동 버튼이 사라져요)')){DEV=false;AUTO.pick=false;AUTO.move=false;try{localStorage.removeItem('chanseo_dev');}catch(e){}saveAuto();refreshAutoBtns();toast('개발자 모드 OFF');}return;}
-  const pw=prompt('개발자 암호');if(pw==null)return;if(devHash(String(pw).trim())===DEV_H){DEV=true;try{localStorage.setItem('chanseo_dev',String(DEV_H));}catch(e){}refreshAutoBtns();toast('🛠 개발자 모드 ON · 자동 선택·자동 이동 버튼이 생겼어요');}else toast('암호가 틀렸어요');}
+  const pw=prompt('개발자 암호');if(pw==null)return;if(devHash(String(pw).trim())===DEV_H){DEV=true;SUP_DONE=false;setTimeout(supCheck,300);try{localStorage.setItem('chanseo_dev',String(DEV_H));}catch(e){}refreshAutoBtns();toast('🛠 개발자 모드 ON · 자동 선택·자동 이동 버튼이 생겼어요');}else toast('암호가 틀렸어요');}
 function saveAuto(){try{localStorage.setItem('chipdungeon_auto',JSON.stringify(AUTO));}catch(e){}}
 try{best=+localStorage.getItem('chipdungeon_best_v5')||0;}catch(e){}
 // 시작 위치는 맵 가운데 (첫 증강을 고르는 동안 뒤에 보이는 화면도 가운데)
@@ -6630,14 +6630,25 @@ function onlPaint(){const el=document.getElementById('onl');if(el){el.innerHTML=
   document.querySelectorAll('[data-chat]').forEach(b=>b.onclick=e=>{e.stopPropagation();chatToggle();});}
 // 후원: 토스 송금 링크 (비어 있으면 버튼이 안 보임). 보상은 운영자가 직접 줌
 const DONATE_URL='';
-function openDonate(){if(!DONATE_URL)return;const n=myNick()||'닉네임',ex=n+' - 응원합니다!';
+function openDonate(){if(!DONATE_URL)return;const n=myNick()||'모험가';
   show(`<div class="shophead"><h2>🪙 참붕이 토큰값 후원하기</h2><button class="btn" id="dnBack">돌아가기</button></div>
   <p class="sub" style="font-size:16px;text-align:center">찬서를 만드는 참붕이의 <b>토큰값</b>을 응원해 주세요! 🙇</p>
-  <div class="medal" style="flex-direction:column;align-items:center;gap:6px"><span>📝 송금할 때 <b>메모</b>에 <b>닉네임과 응원의 한마디</b> 부탁드립니다</span><span style="font-size:15px">예: <b id="dnEx">${esc(ex)}</b> <button class="btn" id="dnCopy" style="padding:2px 10px;font-size:13px">복사</button></span></div>
-  <div class="btnrow"><button class="btn primary" id="dnGo">💙 토스로 후원하기</button></div>
+  <div class="nick col"><div style="font-size:14px;color:var(--muted)">💌 <b style="color:var(--ivory)">${esc(n)}</b> 이름으로 응원 메시지를 남길 수 있어요 (120자까지, 비워도 돼요)</div><textarea id="dnMsg" maxlength="120" rows="3" placeholder="응원의 한마디" style="width:100%;resize:none;padding:8px;border-radius:8px;border:1px solid var(--brass);background:rgba(0,0,0,.35);color:var(--ivory);font:inherit"></textarea></div>
+  <div class="btnrow"><button class="btn primary" id="dnGo">💙 메시지 보내고 토스로 후원하기</button></div>
   <p class="sub" style="text-align:center">어린이 친구들은 꼭 부모님께 먼저 여쭤보세요.</p>`);
-  $('dnBack').onclick=startScreen;$('dnGo').onclick=()=>{try{window.open(DONATE_URL,'_blank','noopener');}catch(e){location.href=DONATE_URL;}};
-  $('dnCopy').onclick=async()=>{try{await navigator.clipboard.writeText(ex);toast('메모 예시를 복사했어요');}catch(e){toast('복사가 안 돼요. 직접 적어 주세요');}};}
+  $('dnBack').onclick=startScreen;
+  $('dnGo').onclick=()=>{const m=String($('dnMsg').value||'').trim().slice(0,120);
+    if(m){if(SHEET_URL&&SRV_V>=49){try{fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({sup:1,name:n,msg:m,k:MYKEY})}).catch(()=>{});}catch(e){}toast('💌 응원 메시지를 보냈어요. 고마워요!');}else toast('지금은 메시지를 보낼 수 없어요 (서버 연결 확인)');}
+    try{window.open(DONATE_URL,'_blank','noopener');}catch(e){location.href=DONATE_URL;}};}
+// 개발자 모드: 새 후원 응원 메시지를 창으로 보여 줌 (한 번 본 건 다시 안 뜸)
+let SUP_DONE=false;
+async function supCheck(){if(SUP_DONE||!DEV||!SHEET_URL||SRV_V<49||document.getElementById('supQ'))return;SUP_DONE=true;
+  let seen=0;try{seen=+(localStorage.getItem('chanseo_sup_seen')||0);}catch(e){}
+  try{const r=await fetch(SHEET_URL+'?sup=1&after='+seen,{cache:'no-store'});const j=await r.json();const L=(j&&j.msgs)||[];if(!L.length)return;
+    const d=document.createElement('div');d.id='supQ';d.className='chartq';
+    d.innerHTML=`<div class="cq" style="max-width:min(520px,92vw);font-size:16px"><b>💌 새 후원 응원 메시지 ${L.length}개</b><div style="display:flex;flex-direction:column;gap:6px;max-height:50vh;overflow:auto;width:100%">${L.map(x=>{const t=new Date(x.t);return `<div style="background:rgba(0,0,0,.25);border-radius:8px;padding:6px 10px"><small style="color:var(--muted)">${t.getMonth()+1}/${t.getDate()} ${t.getHours()}:${String(t.getMinutes()).padStart(2,'0')}</small> <b style="color:#ffd76a">${esc(x.n)}</b><div>${esc(x.m)}</div></div>`;}).join('')}</div><button class="btn primary" id="supOk">다 봤어요</button></div>`;
+    document.body.appendChild(d);$('supOk').onclick=()=>{try{localStorage.setItem('chanseo_sup_seen',String(Math.max(...L.map(x=>x.t))));}catch(e){}d.remove();};
+  }catch(e){SUP_DONE=false;}}
 // 이름 효과 (메달로 산 명예의 전당 이름 꾸미기): 채팅·접속 중 목록 이름에도 그대로
 const myFx=()=>{const x=cosEq('hof');return x?x.k:'';};
 function fxName(n,fx,me){const ok=fx&&COS.some(q=>q.k===fx&&q.cat==='hof');return `<b class="hn${ok?' hx-'+fx:''}${me&&!ok?' me':''}">${ok&&fx==='hf_crown'?'👑 ':''}${esc(n)}</b>`;}
@@ -6690,7 +6701,7 @@ function openNick(){cosPreviewHide();const cur=myNick();
 async function onlPing(bye){if(!SHEET_URL||!MYKEY)return;const u=SHEET_URL+'?ping=1&id='+onlId()+'&n='+encodeURIComponent(myNick()||'모험가')+'&a='+encodeURIComponent(onlAct())+'&fx='+myFx()+(bye?'&bye=1':'');
   if(bye){try{fetch(u,{keepalive:true,cache:'no-store'});}catch(e){}return;}
   const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),15000):0;
-  try{const r=await fetch(u,{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();if(j&&Array.isArray(j.on)){SRV_V=+j.v||0;ONLINE=j.on;if(j.ct)CHAT_CT=Math.max(CHAT_CT,+j.ct||0);onlPaint();}}catch(e){}finally{clearTimeout(to);}}
+  try{const r=await fetch(u,{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();if(j&&Array.isArray(j.on)){SRV_V=+j.v||0;ONLINE=j.on;supCheck();if(j.ct)CHAT_CT=Math.max(CHAT_CT,+j.ct||0);onlPaint();}}catch(e){}finally{clearTimeout(to);}}
 setTimeout(()=>{onlPaint();onlPing();},300);setInterval(()=>{if(!document.hidden)onlPing();},60000);
 addEventListener('pagehide',()=>onlPing(true));
 async function loadSheet(tries){tries=tries||0;
