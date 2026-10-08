@@ -1,6 +1,12 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v5.0
+// 찬서 명예의 전당 서버 (Google Apps Script) v5.1
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
+//
+// v5.0 → v5.1 바뀐 점
+// - 접속 중 목록에 게임 버전(b)과 짧은 기기 표시(u)를 같이 돌려줌 (개발자 모드에서 버전 확인·관전용)
+// - 이름 주인 초기화 (개발자 키): ?unown=이름&dk= → 그 이름의 주인 열쇠를 지움 (다른 기기로 옮겨 쓰다 막힌 경우)
+// - 간이 관전 (개발자 키가 맞을 때만, 한 사람당 관전자 1명): ?spec=u&me=&dk= 로 관전 시작/계속 → 그 사람의 최근 상태를 돌려줌
+//   관전당하는 게임은 ping 응답의 w=1을 보고 1.5초마다 ?snap=1&id=&d=상태 를 보냄 (보는 사람이 없으면 w=0 → 멈춤). 상태는 캐시에만 둠
 //
 // v4.9 → v5.0 바뀐 점
 // - 기기별 접속 기록: 접속 신호(ping)가 올 때 '기기' 시트에 기기 표시 · 이름 · 기기 종류 · 처음/마지막 접속을 남김
@@ -196,7 +202,7 @@ function ping_(q) {
   try { m = JSON.parse(c.get(ONLINE_KEY) || '{}') || {}; } catch (err) { m = {}; }
   for (const k in m) if (now - m[k].t > ONLINE_SEC * 1000) delete m[k];
   if (id && q.bye) delete m[id];
-  else if (id) m[id] = { n: str_(q.n, 12) || '모험가', a: str_(q.a, 24), t: now, fx: fx_(q.fx) };
+  else if (id) m[id] = { n: str_(q.n, 12) || '모험가', a: str_(q.a, 24), t: now, fx: fx_(q.fx), b: num_(q.b, 99999) };
   const ks = Object.keys(m);
   if (ks.length > 200) ks.sort((a, b) => m[a].t - m[b].t).slice(0, ks.length - 200).forEach(k => delete m[k]);
   try { c.put(ONLINE_KEY, JSON.stringify(m), 600); } catch (err) {}
@@ -204,7 +210,9 @@ function ping_(q) {
   let ct = 0;
   try { ct = +(c.get('chat_t') || 0); if (!ct) { const L = chatGet_(); ct = L.length ? L[L.length - 1].t : 0; if (ct) c.put('chat_t', String(ct), 21600); } } catch (err) {}
   if (id && !q.bye) devLog_(id, str_(q.n, 12) || '모험가', str_(q.ua, 30));
-  return out_({ v: 50, ct, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
+  let w = 0;
+  try { w = id && c.get('watch_' + id) ? 1 : 0; } catch (err) {}
+  return out_({ v: 51, ct, w, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
 }
 
 // 전체 채팅 (최근 CHAT_MAX개만 보관)
@@ -275,6 +283,34 @@ function devLog_(id, n, ua) {
     else if (last - 1 < DEV_MAXROWS) s.appendRow([id, n, ua, now, now, 1]);
   } catch (err) {} finally { lock.releaseLock(); }
 }
+// 간이 관전: watch_대상 = 보는 사람 id (20초 유지), snap_대상 = 대상의 최근 상태 (30초 유지)
+function spec_(q) {
+  if (String(q.dk || '') !== DEV_KEY) return { err: 'key' };
+  const c = CacheService.getScriptCache(), u = String(q.spec).replace(/[^A-Za-z0-9]/g, '').slice(0, 16), me = String(q.me || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 16);
+  if (!u || !me) return { err: 'id' };
+  const wk = 'watch_' + u, cur = c.get(wk);
+  if (q.stop) { if (cur === me) c.remove(wk); return { ok: 1 }; }
+  if (cur && cur !== me) return { busy: 1 };
+  c.put(wk, me, 20);
+  return { d: c.get('snap_' + u) || '' };
+}
+// 이름 주인 초기화 (개발자 키): 그 이름 기록들의 kh 칸을 비움 → 다음에 그 이름으로 기록을 올리는 기기가 새 주인
+function unown_(q) {
+  if (String(q.dk || '') !== DEV_KEY) return { err: 'key' };
+  const nm = str_(q.unown, 12);if (!nm) return { err: 'name' };
+  const lock = LockService.getScriptLock();try { lock.waitLock(8000); } catch (err) { return { err: 'busy' }; }
+  try { const s = sheet_(), own = owner_(s, nm), kc = HEAD.indexOf('kh') + 1;
+    for (const r of own.rows) s.getRange(r, kc).setValue('');
+    ownerSet_(nm, '');try { CacheService.getScriptCache().remove(CACHE_KEY); } catch (err) {}
+    return { ok: 1, n: own.rows.length, had: own.kh ? 1 : 0 };
+  } finally { lock.releaseLock(); }
+}
+function snap_(q) {
+  const c = CacheService.getScriptCache(), id = String(q.id || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 16);
+  if (!id || !c.get('watch_' + id)) return { w: 0 };
+  try { c.put('snap_' + id, String(q.d || '').slice(0, 6000), 30); } catch (err) {}
+  return { w: 1 };
+}
 function devList_(q) {
   if (String(q.dk || '') !== DEV_KEY) return { err: 'key' };
   const s = devSheet_(), last = s.getLastRow();
@@ -297,6 +333,9 @@ function doGet(e) {
   if (q.sup) return out_({ msgs: supList_(q.after) });
   if (q.chat) return chat_(q);
   if (q.dv) return out_(devList_(q));
+  if (q.spec) return out_(spec_(q));
+  if (q.unown) return out_(unown_(q));
+  if (q.snap) return out_(snap_(q));
   if (q.ping) return ping_(q);
   if (q.own) {
     const nm = str_(q.own, 12), kh = ownerKh_(nm);
