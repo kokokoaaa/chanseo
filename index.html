@@ -8997,12 +8997,15 @@ function scoreAug(a){
   if(a.up)return 2+(3-a.ref.lv)+(isOff(a.ref)?2.5:0)+({s:0,g:.5,p:1}[a.ref.t]||0);
   let sc={s:1,g:2.5,p:4}[a.t]||1;
   if(a.fuseNow)sc+=20;else if(partnerOf(a.id))sc+=5;
-  if(isOff(a))sc+=4;if(a.cls)sc+=3;
+  const W=typeof AI_W!=='undefined'?AI_W:{m1:4,m2:2,off:4,def:0};
+  if(isOff(a))sc+=W.off;if(a.cls)sc+=3;
+  // 악몽 8분 뒤부터는 가드(생존) 시너지에 가산 (측정용, 기본 0)
+  if(W.def&&endless()&&(S.gt||0)+(S.bt||0)>=480&&a.tags.includes('guard'))sc+=W.def;
   const cnt={};for(const t of a.tags)cnt[t]=(cnt[t]||0)+1;
   const [m1,m2]=mainTags();
   for(const t in cnt){const c=tag(t),n=c+cnt[t];sc+=c*1.2;for(const th of [2,4,6])if(c<th&&n>=th)sc+=th;
     // 사람처럼 메인 시너지 하나(+보조 하나)에 몰아서 쌓음. 관련 없는 시너지로 흩어지면 감점
-    if(t===m1)sc+=4*cnt[t];else if(t===m2)sc+=2*cnt[t];else if(c===0)sc-=1.5;}
+    if(t===m1)sc+=W.m1*cnt[t];else if(t===m2)sc+=W.m2*cnt[t];else if(c===0)sc-=1.5;}
   if(S.p.hp<S.p.maxHp*.4&&!isOff(a))sc+=2;
   return sc+Math.random()*.8;
 }
@@ -9017,7 +9020,7 @@ const BADCARD=['러시안 회전','동전 던지기','모험가의 주사위','�
 const OFFCARD=['숫돌','힘의 물약','날랜 손놀림','손목 단련','치명상','급소 노리기','전투 본능','유리 대포','광기','쾌속 장전','사냥꾼의 눈','다연발','관통 탄'];
 function autoStat(){
   const bonus=S.boostN>0?(S.boostB||6):S.boost?6:0;const cards=[];let tries=0;while(cards.length<3&&tries<60){tries++;const c=cardOf(boostRar(bonus),bonus);if(!cards.some(x=>x.n===c.n))cards.push(c);}S.boost=false;if(S.boostN>0){S.boostN--;if(!S.boostN)S.boostB=0;}
-  const sc=c=>({c:1,r:2,e:3.5,l:5}[c.r])-(BADCARD.includes(c.n)?5:0)+(OFFCARD.includes(c.n)?1.2:0)+(c.u!=null?c.u:.4)+Math.random()*.5;
+  const sc=c=>({c:1,r:2,e:3.5,l:5}[c.r])-(BADCARD.includes(c.n)?5:0)+(OFFCARD.includes(c.n)?(typeof AI_W!=='undefined'?AI_W.cOff:1.2):0)+(c.u!=null?c.u:.4)+Math.random()*.5;
   const c=cards.reduce((b,x)=>sc(x)>sc(b)?x:b,cards[0]);c.f(S.p);tryFuse();
   ftext(S.p.x,S.p.y-28,c.n,'#5fc9d9',14);
 }
@@ -9076,7 +9079,7 @@ function autoMoveVec(){const v=campVec(autoMoveVec0()),p=S.p,g=evGoal();
   const dx=g.x-p.x,dy=g.y-p.y,d=Math.hypot(dx,dy)||1;if(d<20)return [v[0]*.2,v[1]*.2];
   const w=p.hp/p.maxHp<.45?.35:(DEV&&!S.easyAI?AI_W.ev:.7);let x=dx/d*w+v[0]*(1-w),y=dy/d*w+v[1]*(1-w);const l=Math.hypot(x,y)||1;return [x/l,y/l];}
 // 개발자 자동 이동 가중치 (측정으로 맞춤)
-const AI_W={crowd:35,far:.6,nmC:.12,egg:1,pd:1,pdf:1,ev:.85};
+const AI_W={crowd:35,far:.6,nmC:.12,egg:1,pd:1,pdf:1,ev:.85,m1:4,m2:2,off:4,cOff:1.2,def:0};
 // 개발자 자동(점수 위주): 근처 이스터에그 건물의 조건에 맞춰 움직임. 한 판 5개까지만 점수라 그 뒤엔 안 함
 function aiEggPlan(){const p=S.p;if(!AI_W.egg||bossOn()||S.npc||(S.st.eggN||0)>=5||typeof lmAt!=='function')return null;
   let crowd=0;for(const e of S.en)if(e.alive&&d2(e,p)<120*120)crowd++;if(crowd>=4)return null;
