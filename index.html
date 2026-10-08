@@ -3918,10 +3918,10 @@ const ultCdMax=()=>ULT_CD*(S&&S.p&&S.p.ulCdM||1)*(1-.05*mlv('n_skcd'))*gearM.skc
 const ultOk=()=>S&&S.p&&S.p.alive&&S.mode==='play'&&ULTS[S.cls]&&!dfM().duel;
 function useUlt(){const p=S&&S.p;if(!ultOk()||(p.ulCd||0)>0||S.ult)return;const U=ULTS[S.cls];
   p.ulCd=ultCdMax();p.skInvT=Math.max(p.skInvT||0,2.2+(has('ult_echo')?lv3('ult_echo',1,1.5,2):0));if(has('ult_echo'))p.skCd=0;S.st.ult=(S.st.ult||0)+1;
-  const vis=S.en.filter(e=>e.alive&&e.x>camX-40&&e.x<camX+W+40&&e.y>camY-40&&e.y<camY+H+40).sort((a,b)=>(b.boss?1:0)-(a.boss?1:0)).slice(0,36).map(e=>({x:e.x,y:e.y,r:e.r||14,b:!!e.boss}));
+  const camX=p.x-W/2,camY=p.y-H/2,vis=S.en.filter(e=>e.alive&&e.x>camX-40&&e.x<camX+W+40&&e.y>camY-40&&e.y<camY+H+40).sort((a,b)=>(b.boss?1:0)-(a.boss?1:0)).slice(0,36).map(e=>({x:e.x,y:e.y,r:e.r||14,b:!!e.boss}));
   if(vis.length<6)for(let i=vis.length;i<10;i++)vis.push({x:camX+W*(.12+.76*skHash(i*3+S.t)),y:camY+H*(.18+.7*skHash(i*7+S.t)),r:14,f:1});
   S.ult={k:S.cls,t:0,d:2.6,done:0,T:vis,px:p.x,py:p.y,seed:Math.random()*99};S.smT=Math.max(S.smT||0,.35);S.shake=Math.max(S.shake||0,4);}
-function ultTick(dt){const p=S.p;if(p.ulCd==null)p.ulCd=45;const U=S.ult;if(!U)return;U.t+=dt;
+function ultTick(dt){const p=S.p,camX=p.x-W/2,camY=p.y-H/2;if(p.ulCd==null)p.ulCd=45;const U=S.ult;if(!U)return;U.t+=dt;
   if(!U.done&&U.t>=ULT_IMP){U.done=1;const cand=U.k==='necro'?S.en.filter(e=>e.alive&&!e.boss&&!ET[e.type].hid&&!ET[e.type].totem&&ESPR&&e.x>camX-60&&e.x<camX+W+60&&e.y>camY-60&&e.y<camY+H+60):[],sec=Math.max(20,(S.gt||0)+(S.bt||0)),dm=Math.max(pDmg()*ULT_M,(S.st.dmg||0)/sec*8)*(p.ulDm||1),col=ULTS[U.k].col;
     for(const e of S.en){if(!e.alive||e.x<camX-60||e.x>camX+W+60||e.y<camY-60||e.y>camY+H+60)continue;dmgEs('궁극기',e,dm,col);if(U.k==='elem'&&!e.boss){e.slowT=Math.max(e.slowT||0,3);e.frozen=true;}}
     S.shake=Math.max(S.shake||0,16);S.flash=Math.max(S.flash||0,.5);
