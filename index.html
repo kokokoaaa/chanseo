@@ -181,10 +181,10 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 .pcard .pq.empty{color:var(--muted);background:none}
 .hof .rank{margin-top:10px}
 .menugrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}.menugrid>.btn{margin:0!important;width:auto;padding:10px 6px;font-size:15px;line-height:1.25}.menugrid .btn small{font-size:11.5px}@media (max-width:640px){.menugrid{grid-template-columns:repeat(2,1fr)}}
-.chatb{position:relative}.cdot{position:absolute;top:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#ff4f6a;box-shadow:0 0 6px #ff4f6a}
+.chatb{position:relative}#chatBox .hx-hf_neon,.onll .hx-hf_neon{color:#aef9ff!important;text-shadow:0 0 6px #22e0ff,0 0 12px #22e0ff}#chatBox .chl b.hn{font-weight:bold}.cdot{position:absolute;top:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#ff4f6a;box-shadow:0 0 6px #ff4f6a}
 #chatBox{position:fixed;right:12px;bottom:12px;z-index:9000;width:min(360px,calc(100vw - 24px));height:min(420px,60vh);display:flex;flex-direction:column;background:rgba(8,24,17,.96);border:1px solid var(--brass);border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.6);color:var(--ivory);font-size:14px}
 #chatBox .chh{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid rgba(214,169,74,.35)}#chatBox .chh small{flex:1;color:var(--muted);font-size:11px}#chatBox .chh button{background:none;border:0;color:var(--ivory);font-size:16px;cursor:pointer}
-#chatBox .chl{flex:1;overflow-y:auto;padding:6px 10px;display:flex;flex-direction:column;gap:3px;word-break:break-all}#chatBox .chl small{color:var(--muted);font-size:11px}#chatBox .chl b{color:#9fd3ff}#chatBox .chl b.me{color:#ffd76a}
+#chatBox .chl{flex:1;overflow-y:auto;padding:6px 10px;display:flex;flex-direction:column;gap:3px;word-break:break-all}#chatBox .chl small{color:var(--muted);font-size:11px}#chatBox .chl b:not([class*='hx-']){color:#9fd3ff}#chatBox .chl b.me:not([class*='hx-']){color:#ffd76a}
 #chatBox .chi{display:flex;gap:6px;padding:8px}#chatBox .chi input{flex:1;min-width:0;padding:6px 8px;border-radius:8px;border:1px solid var(--brass);background:rgba(0,0,0,.35);color:var(--ivory);font:inherit}#chatBox .chi button{padding:6px 10px;border-radius:8px;border:1px solid var(--brass);background:#d6a94a;color:#1a120a;font:inherit;cursor:pointer}#chatBox .chm{color:#ffb070;font-size:12px;padding:0 10px 6px}
 .nickbar{text-align:center;margin:-2px 0 6px}
 .onl{text-align:center;margin:-2px 0 8px}.onlb{background:rgba(0,0,0,.25);border:1px solid rgba(123,224,143,.5);color:var(--ivory);border-radius:999px;padding:3px 12px;font:inherit;font-size:13px;cursor:pointer}.onlb b{color:#7be08f}.onll{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 8px;margin-top:6px;font-size:12.5px}.onll span{background:rgba(0,0,0,.25);border-radius:8px;padding:2px 8px}.onll span.me{border:1px solid rgba(255,215,106,.5)}
@@ -5323,6 +5323,8 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:35,t:'💬 채팅 이름 효과',items:[
+    ['new','💬 메달로 산 <b>이름 효과</b>(금빛·불타는·네온·무지개·👑 황제)가 <b>채팅과 🟢 접속 중 목록</b>에도 보여요. 꾸미기 상점의 명예의 전당 꾸미기를 장착하면 돼요']]},
   {v:34,t:'⚒ 장비 디자인 새로',items:[
     ['new','⚒ <b>검·투구·망토</b>가 단계마다 <b>모양이 바뀌어요</b> (+3 · +5 · +7 · +9 · +10). 투구는 날개 → 볏 → 금관 → 도는 보석 → 무지개 후광, 망토는 털깃·문장 → 별무늬 → 무지개'],
     ['change','📿 반지 → <b>목걸이</b>로 바뀌었어요 (효과는 그대로: 공격 속도 · 생존기 쿨타임). 갑옷·목걸이는 겉모습 없이 능력만 올라가요'],
@@ -6102,11 +6104,11 @@ const COS=[
   {k:'sk_lava',cat:'skin',n:'용암',d:'붉게 달아오른 몸에서 불씨가 튐',c:2500,f:'sepia(1) saturate(5) hue-rotate(-25deg) brightness(.95)'},
   {k:'sk_crystal',cat:'skin',n:'수정',d:'투명한 수정 몸에 반짝이는 파편',c:0,ach:'a_mob100',f:'hue-rotate(200deg) saturate(1.6) brightness(1.35)',a:.85},
   {k:'sk_abyss',cat:'skin',n:'악몽',d:'뒤집힌 색, 붉은 눈빛이 새어 나옴',c:0,ach:'a_nm25',f:'invert(1) hue-rotate(180deg) saturate(1.5)'},
-  {k:'hf_gold',cat:'hof',n:'금빛 이름',d:'명예의 전당 이름이 금빛',c:400},
-  {k:'hf_fire',cat:'hof',n:'불타는 이름',d:'명예의 전당 이름이 불타오름',c:800},
-  {k:'hf_neon',cat:'hof',n:'네온 카드',d:'명예의 전당 칸에 네온 테두리',c:1500},
-  {k:'hf_rainbow',cat:'hof',n:'무지개 이름',d:'명예의 전당 이름이 무지개로 흐름',c:2500},
-  {k:'hf_crown',cat:'hof',n:'황제',d:'명예의 전당 이름 앞 왕관 + 황금 테두리',c:4000}
+  {k:'hf_gold',cat:'hof',n:'금빛 이름',d:'명예의 전당·채팅 이름이 금빛',c:400},
+  {k:'hf_fire',cat:'hof',n:'불타는 이름',d:'명예의 전당·채팅 이름이 불타오름',c:800},
+  {k:'hf_neon',cat:'hof',n:'네온 카드',d:'명예의 전당 칸에 네온 테두리 · 채팅 이름이 네온빛',c:1500},
+  {k:'hf_rainbow',cat:'hof',n:'무지개 이름',d:'명예의 전당·채팅 이름이 무지개로 흐름',c:2500},
+  {k:'hf_crown',cat:'hof',n:'황제',d:'명예의 전당·채팅 이름 앞 왕관 + 황금 테두리',c:4000}
 ];
 const COS_CAT={skin:'캐릭터 색',trail:'탄환 궤적',kill:'처치 효과',aura:'오라',hof:'명예의 전당'};
 // 초기화 환불 총액: 영구 강화 + 산 외형 전부
@@ -6579,10 +6581,13 @@ const onlId=()=>{let h=2166136261;for(const c of 'on|'+MYKEY){h^=c.charCodeAt(0)
 function onlAct(){try{if(!S||S.mode==='start'||!S.started)return '시작 화면';if(duelOn())return '⚔ 결투 중';if(raidOn())return '🗿 레이드 중';
   const D=DIFF[S.diff]||{};if(D.rush)return '⚔ 보스 러시 '+((S.bossI>=0?S.bossI:0)+1)+'단계';return (D.n||'모험')+' '+Math.floor((S.gt||0)/60)+'분째';}catch(e){return '';}}
 function onlHtml(sm){if(!SHEET_URL)return '';if(!ONLINE)return `<span class="onlb" style="opacity:.7;cursor:default">🟢 ${sm?'…':'접속 확인 중…'}</span> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}</button>`;const L=ONLINE;
-  return `<button class="onlb" id="onlBtn" title="지금 접속 중">🟢 ${sm?`<b>${L.length}</b>`:`지금 <b>${L.length}</b>명 접속 중`} ${ONL_OPEN?'▲':'▼'}</button> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}${chatUnread()?'<i class="cdot"></i>':''}</button>${ONL_OPEN?`<div class="onll">${L.map(x=>`<span${x.me?' class="me"':''}><b>${esc(x.n)}</b>${x.me?' (나)':''} · ${esc(x.a||'')}</span>`).join('')}</div>`:''}`;}
+  return `<button class="onlb" id="onlBtn" title="지금 접속 중">🟢 ${sm?`<b>${L.length}</b>`:`지금 <b>${L.length}</b>명 접속 중`} ${ONL_OPEN?'▲':'▼'}</button> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}${chatUnread()?'<i class="cdot"></i>':''}</button>${ONL_OPEN?`<div class="onll">${L.map(x=>`<span${x.me?' class="me"':''}>${fxName(x.n,x.fx)}${x.me?' (나)':''} · ${esc(x.a||'')}</span>`).join('')}</div>`:''}`;}
 function onlPaint(){const el=document.getElementById('onl');if(el){el.innerHTML=onlHtml();const b=document.getElementById('onlBtn');if(b)b.onclick=onlToggle;}
   const h=document.getElementById('onlHud');if(h){h.innerHTML=onlHtml(1).replace('id="onlBtn"','id="onlHudBtn"');const hb=document.getElementById('onlHudBtn');if(hb)hb.onclick=e=>{e.stopPropagation();onlToggle();};}
   document.querySelectorAll('[data-chat]').forEach(b=>b.onclick=e=>{e.stopPropagation();chatToggle();});}
+// 이름 효과 (메달로 산 명예의 전당 이름 꾸미기): 채팅·접속 중 목록 이름에도 그대로
+const myFx=()=>{const x=cosEq('hof');return x?x.k:'';};
+function fxName(n,fx,me){const ok=fx&&COS.some(q=>q.k===fx&&q.cat==='hof');return `<b class="hn${ok?' hx-'+fx:''}${me&&!ok?' me':''}">${ok&&fx==='hf_crown'?'👑 ':''}${esc(n)}</b>`;}
 // 전체 채팅: 서버에 최근 60개만 남음. 창을 열어 두면 2초마다 새 메시지를 받음 (앞 요청이 안 끝났으면 건너뜀)
 let CHAT=[],CHAT_OPEN=false,CHAT_CT=0,CHAT_T=null,CHAT_PEND=[],CHAT_BUSY=0,CHAT_SEQ=0,CHAT_APPLIED=0;
 const chatSeen=()=>{try{return +(localStorage.getItem('chanseo_chat_seen')||0);}catch(e){return 0;}};
@@ -6595,14 +6600,14 @@ function chatPaint(){let box=document.getElementById('chatBox');
     $('chX').onclick=()=>chatToggle(false);$('chGo').onclick=chatSend;$('chIn').addEventListener('keydown',e=>{e.stopPropagation();if(e.isComposing||e.keyCode===229)return;if(e.key==='Enter'){e.preventDefault();chatSend();}if(e.key==='Escape')chatToggle(false);});}
   const L=$('chL'),atEnd=L.scrollTop+L.clientHeight>=L.scrollHeight-20,me=myNick();
   const all=[...CHAT,...CHAT_PEND];
-  L.innerHTML=all.length?all.map(x=>{const d=new Date(x.t);return `<div${x.p?' style="opacity:.55"':''}><small>${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}</small> <b${x.n===me?' class="me"':''}>${esc(x.n)}</b> ${esc(x.m)}${x.p?' <small>보내는 중…</small>':''}</div>`;}).join(''):'<div class="chm">아직 메시지가 없어요. 첫 인사를 남겨 보세요!</div>';
+  L.innerHTML=all.length?all.map(x=>{const d=new Date(x.t);return `<div${x.p?' style="opacity:.55"':''}><small>${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}</small> ${fxName(x.n,x.fx,x.n===me)} ${esc(x.m)}${x.p?' <small>보내는 중…</small>':''}</div>`;}).join(''):'<div class="chm">아직 메시지가 없어요. 첫 인사를 남겨 보세요!</div>';
   if(atEnd||!L.dataset.init){L.scrollTop=L.scrollHeight;L.dataset.init=1;}chatMark();onlPaint();}
-async function chatFetch(say){if(!SHEET_URL)return;const u=SHEET_URL+'?chat=1'+(say!=null?'&say='+encodeURIComponent(say)+'&id='+onlId()+'&n='+encodeURIComponent(myNick()||'모험가')+'&k='+encodeURIComponent(MYKEY):'');
+async function chatFetch(say){if(!SHEET_URL)return;const u=SHEET_URL+'?chat=1'+(say!=null?'&say='+encodeURIComponent(say)+'&id='+onlId()+'&n='+encodeURIComponent(myNick()||'모험가')+'&k='+encodeURIComponent(MYKEY)+'&fx='+myFx():'');
   const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),15000):0,sq=++CHAT_SEQ;CHAT_BUSY++;
   try{const r=await fetch(u,{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();if(j&&Array.isArray(j.msgs)&&sq>CHAT_APPLIED){CHAT_APPLIED=sq;CHAT=j.msgs;if(CHAT.length)CHAT_CT=Math.max(CHAT_CT,CHAT[CHAT.length-1].t);}chatPaint();return j;}catch(e){return null;}finally{clearTimeout(to);CHAT_BUSY--;}}
 let CHAT_SENDING=null;
 async function chatSend(){const i=$('chIn'),m=String(i.value||'').trim();if(!m)return;if(CHAT_SENDING===m){i.value='';return;}CHAT_SENDING=m;i.value='';$('chM').textContent='';
-  const pm={t:Date.now(),n:myNick()||'모험가',m,p:1};CHAT_PEND.push(pm);const L=$('chL');chatPaint();if(L)L.scrollTop=L.scrollHeight;
+  const pm={t:Date.now(),n:myNick()||'모험가',m,p:1,fx:myFx()};CHAT_PEND.push(pm);const L=$('chL');chatPaint();if(L)L.scrollTop=L.scrollHeight;
   const j=await chatFetch(m);CHAT_SENDING=null;CHAT_PEND=CHAT_PEND.filter(x=>x!==pm);chatPaint();
   const M=$('chM');if(!M)return;M.textContent=!j?'보내지 못했어요. 인터넷 연결을 확인해 주세요.':j.ok===false?(j.err==='owned'?'이 이름은 다른 사람이 쓰고 있어서 말할 수 없어요. 👤에서 이름을 바꿔 주세요.':j.err==='fast'?'조금 천천히 보내 주세요.':'보내지 못했어요.'):'';if(j&&j.ok===false&&j.err!=='empty')i.value=m;}
 function chatToggle(on){CHAT_OPEN=on==null?!CHAT_OPEN:on;clearInterval(CHAT_T);CHAT_T=null;chatPaint();if(CHAT_OPEN){chatFetch();CHAT_T=setInterval(()=>{if(!document.hidden&&!CHAT_BUSY)chatFetch();},2000);setTimeout(()=>{try{$('chIn').focus();}catch(e){}},50);}}
@@ -6616,7 +6621,7 @@ function openNick(){cosPreviewHide();const cur=myNick();
     if(n!==cur&&SHEET){msg('이름 확인 중…');$('nkSave').disabled=true;const own=await nameOwned(n);$('nkSave').disabled=false;if(own){msg(`'${n}'은(는) 다른 사람이 이미 쓰고 있는 이름이에요.`);return;}}
     try{localStorage.setItem('chipdungeon_nick',n);}catch(e){}toast('👤 이름: '+n);onlPing();startScreen();};
   $('nkSave').onclick=save;$('nkIn').addEventListener('keydown',e=>{if(e.isComposing||e.keyCode===229)return;if(e.key==='Enter')save();});$('nkBack').onclick=startScreen;setTimeout(()=>{try{$('nkIn').focus();}catch(e){}},50);}
-async function onlPing(bye){if(!SHEET_URL||!MYKEY)return;const u=SHEET_URL+'?ping=1&id='+onlId()+'&n='+encodeURIComponent(myNick()||'모험가')+'&a='+encodeURIComponent(onlAct())+(bye?'&bye=1':'');
+async function onlPing(bye){if(!SHEET_URL||!MYKEY)return;const u=SHEET_URL+'?ping=1&id='+onlId()+'&n='+encodeURIComponent(myNick()||'모험가')+'&a='+encodeURIComponent(onlAct())+'&fx='+myFx()+(bye?'&bye=1':'');
   if(bye){try{fetch(u,{keepalive:true,cache:'no-store'});}catch(e){}return;}
   const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),15000):0;
   try{const r=await fetch(u,{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();if(j&&Array.isArray(j.on)){ONLINE=j.on;if(j.ct)CHAT_CT=Math.max(CHAT_CT,+j.ct||0);onlPaint();}}catch(e){}finally{clearTimeout(to);}}
@@ -7250,7 +7255,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=34,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=35,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}

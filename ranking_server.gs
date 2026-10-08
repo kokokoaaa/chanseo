@@ -1,6 +1,9 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v4.6
+// 찬서 명예의 전당 서버 (Google Apps Script) v4.7
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
+//
+// v4.6 → v4.7 바뀐 점
+// - 채팅·접속 중 목록에 이름 효과(fx: 금빛 이름 등, 게임에서 메달로 산 것)를 같이 저장해서 보여줌
 //
 // v4.5 → v4.6 바뀐 점
 // - 채팅·이름 확인이 빨라짐: 이름 주인 정보를 캐시에 10분 기억해서 메시지마다 시트를 읽지 않음
@@ -181,14 +184,14 @@ function ping_(q) {
   try { m = JSON.parse(c.get(ONLINE_KEY) || '{}') || {}; } catch (err) { m = {}; }
   for (const k in m) if (now - m[k].t > ONLINE_SEC * 1000) delete m[k];
   if (id && q.bye) delete m[id];
-  else if (id) m[id] = { n: str_(q.n, 12) || '모험가', a: str_(q.a, 24), t: now };
+  else if (id) m[id] = { n: str_(q.n, 12) || '모험가', a: str_(q.a, 24), t: now, fx: fx_(q.fx) };
   const ks = Object.keys(m);
   if (ks.length > 200) ks.sort((a, b) => m[a].t - m[b].t).slice(0, ks.length - 200).forEach(k => delete m[k]);
   try { c.put(ONLINE_KEY, JSON.stringify(m), 600); } catch (err) {}
   if (got) lock.releaseLock();
   let ct = 0;
   try { ct = +(c.get('chat_t') || 0); if (!ct) { const L = chatGet_(); ct = L.length ? L[L.length - 1].t : 0; if (ct) c.put('chat_t', String(ct), 21600); } } catch (err) {}
-  return out_({ ct, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
+  return out_({ ct, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
 }
 
 // 전체 채팅 (최근 CHAT_MAX개만 보관)
@@ -219,7 +222,7 @@ function chat_(q) {
       // 같은 기기가 같은 말을 30초 안에 또 보내면 (한글 입력 Enter 두 번 등) 한 번만 남김
       if (last && last.m === msg && now - last.t < 30000) return out_({ ok: true, dup: 1, msgs: L.map(chatOut_) });
       if (last && now - last.t < 3000) return out_({ ok: false, err: 'fast', msgs: L.map(chatOut_) });
-      L.push({ t: now, id, n: nm, m: msg });
+      L.push({ t: now, id, n: nm, m: msg, fx: fx_(q.fx) });
       while (L.length > CHAT_MAX) L.shift();
       chatSet_(L);
       CacheService.getScriptCache().put('chat_t', String(now), 21600);
@@ -228,7 +231,8 @@ function chat_(q) {
   }
   return out_({ msgs: chatGet_().map(chatOut_) });
 }
-const chatOut_ = x => ({ t: x.t, n: x.n, m: x.m, u: x.id.slice(0, 6) });
+const fx_ = v => String(v || '').replace(/[^a-z_0-9]/g, '').slice(0, 16);
+const chatOut_ = x => ({ t: x.t, n: x.n, m: x.m, u: x.id.slice(0, 6), fx: x.fx || '' });
 function clearChat() { chatSet_([]); CacheService.getScriptCache().remove('chat_t'); }
 
 // 이름 주인 열쇠값 (캐시 10분, 주인 없으면 '-')
