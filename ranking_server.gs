@@ -3,6 +3,11 @@
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
 //
 // v5.2 → v5.3 바뀐 점
+// - 기록 비교·순위를 게임 화면과 같은 '최종 점수'(플레이 보너스·자동 비율 포함)로 함. 예전엔 보너스를 뺀 점수로 비교해서
+//   보너스가 큰 좋은 기록이 보너스 적은 새 기록에 덮여 사라질 수 있었음
+// - 목록에 기록 시각(at)을 같이 보냄 → 게임이 기록 버전별 점수식(v1·v2·악몽 v3)을 정확히 적용
+// - 악몽 v3 점수식(SC3_AT 이후): 생존 시간을 NM_TK배로 환산. v2(10분 이후 제곱)는 폐지 → 모든 기록을 v1 식으로 (전당은 원래 v1로 보여 줬음)
+// - 레이드 기록(diff=raid): 점수 = 단계 × 100만 − 처치 시간(초)
 // - 기록 삭제 (개발자 키): ?delrec=이름&diff=난이도&dk= → 그 이름·난이도의 명예의 전당 기록 줄을 지움
 //
 // v5.1 → v5.2 바뀐 점
@@ -75,7 +80,7 @@ const OLD_SHEET = 'ranking_v2';
 const HEAD = ['name', 'diff', 'cls', 'time', 'lvl', 'kills', 'bosses', 'score', 'comment', 'at', 'hero', 'hh', 'dw', 'kh'];
 const LIST_COLS = 10; // 목록에 필요한 칸 (name ~ at)
 const CACHE_KEY = 'list_v43';
-const DIFFS = { normal: 1, hard: 1.5, hell: 2.2, god: 3.2, nightmare: 4, bossrush: 4 };
+const DIFFS = { normal: 1, hard: 1.5, hell: 2.2, god: 3.2, nightmare: 4, bossrush: 4, raid: 1 };
 
 function book_() {
   const a = SpreadsheetApp.getActiveSpreadsheet();
@@ -133,7 +138,7 @@ const str_ = (v, n) => String(v || '').replace(/\s+/g, ' ').trim().replace(/^[=+
 const dw_ = v => { const m = String(v || '').match(/^(\d{1,6})-(\d{1,6})-(\d{1,6})$/); return m ? 'w' + m[1] + 'd' + m[2] + 'l' + m[3] : ''; };
 const softC_ = (x, c) => x <= c ? x : c * (1 + Math.log(x / c));
 // 점수 계산식 v2 (게임과 같음): 이 시각 이후 기록은 10분 이후 생존 점수가 커지고 보스 처치 800점
-const SC2_AT = 1791462600000;
+const SC2_AT = 1791462600000, SC3_AT = 1791493000000, NM_TK = 1.6;
 const timePts_ = (t, v2) => !v2 || t <= 600 ? t * 12 : 7200 + 12 * ((t - 600) + (t - 600) * (t - 600) / 240);
 
 function clean_(d, at) {
@@ -154,12 +159,19 @@ function clean_(d, at) {
   r.kh = String(d.kh || '');
   r.diff = diffOf_(d.diff, r.cls);
   // 점수는 서버에서 다시 계산 (조작 방지). 게임과 같은 식
-  r.score = r.diff === 'bossrush'
-    ? Math.round((r.bosses * 2500 + r.lvl * 30 + r.time * 2) * DIFFS.bossrush)
-    : Math.round((timePts_(r.time, +r.at >= SC2_AT) + softC_(r.kills * 2, 4000) + r.lvl * 30 + r.bosses * (+r.at >= SC2_AT ? 800 : 400) + (r.bosses >= 4 ? 3000 : 0)) * (DIFFS[r.diff] || 1));
+  r.score = score_(r);
   return r;
 }
 
+// 게임과 같은 최종 점수: (기본 + 플레이 보너스) × 난이도 배율 × (1 − 0.1 × 자동 비율). 보너스·자동 비율은 cls의 ~칸에 들어 있음
+function score_(r) {
+  if (r.diff === 'raid') return Math.max(0, r.lvl * 1000000 - Math.min(999999, r.time));
+  const seg = String(r.cls || '').split('~'), bonus = Math.max(0, +seg[1] || 0), ap = Math.min(1, Math.max(0, (+seg[2] || 0) / 100)), v2 = false; // v2(제곱 시간 점수)는 v5.3에서 폐지: 게임 화면과 같게 모든 기록 v1 식
+  const base = r.diff === 'bossrush'
+    ? r.bosses * 2500 + r.lvl * 30 + r.time * 2
+    : timePts_(r.diff === 'nightmare' && +r.at >= SC3_AT ? r.time * NM_TK : r.time, v2) + softC_(r.kills * 2, 4000) + r.lvl * 30 + r.bosses * (v2 ? 800 : 400) + (r.bosses >= 4 ? 3000 : 0);
+  return Math.round(Math.round((base + bonus) * (DIFFS[r.diff] || 1)) * (1 - 0.1 * ap));
+}
 function rows_(s) {
   const v = s.getDataRange().getValues();
   v.shift();
@@ -181,7 +193,7 @@ function listJson_() {
   const v = s.getRange(2, 1, last - 1, LIST_COLS).getValues();
   const hc = HEAD.indexOf('hh') + 1, ex = s.getLastColumn() >= hc + 1 ? s.getRange(2, hc, last - 1, 2).getValues() : [];
   const all = v.map((r, i) => { const o = Object.fromEntries(HEAD.slice(0, LIST_COLS).map((h, j) => [h, r[j]]));
-      return { name: String(o.name), diff: fixDiff_(o), cls: String(o.cls), time: +o.time, lvl: +o.lvl, kills: +o.kills, bosses: +o.bosses, score: +o.score, comment: String(o.comment || ''), h: ex[i] && ex[i][0] ? 1 : 0, dw: ex[i] ? String(ex[i][1] || '') : '' }; })
+      return { name: String(o.name), diff: fixDiff_(o), cls: String(o.cls), at: +o.at || 0, time: +o.time, lvl: +o.lvl, kills: +o.kills, bosses: +o.bosses, comment: String(o.comment || ''), score: score_({ diff: fixDiff_(o), cls: String(o.cls), time: +o.time || 0, lvl: +o.lvl || 0, kills: +o.kills || 0, bosses: +o.bosses || 0, at: +o.at || 0 }), h: ex[i] && ex[i][0] ? 1 : 0, dw: ex[i] ? String(ex[i][1] || '') : '' }; })
     .sort((a, b) => b.score - a.score);
   const per = {};
   return JSON.stringify(all.filter(r => (per[r.diff] = (per[r.diff] || 0) + 1) <= 50));
@@ -426,7 +438,9 @@ function doPost(e) {
       return out_({ ok: true, result: 'new' });
     }
     const row = i + 2;
-    const oldScore = +s.getRange(row, HEAD.indexOf('score') + 1).getValue() || 0;
+    // 예전 줄도 같은 최종 점수식으로 다시 계산해서 비교 (저장된 score 칸은 예전 서버가 보너스 없이 쓴 값일 수 있음)
+    const ov = s.getRange(row, 1, 1, LIST_COLS).getValues()[0], oo = Object.fromEntries(HEAD.slice(0, LIST_COLS).map((h, j) => [h, ov[j]]));
+    const oldScore = score_({ diff: fixDiff_(oo), cls: String(oo.cls), time: +oo.time || 0, lvl: +oo.lvl || 0, kills: +oo.kills || 0, bosses: +oo.bosses || 0, at: +oo.at || 0 });
     if (r.score > oldScore) {
       s.getRange(row, 1, 1, HEAD.length).setValues([HEAD.map(h => r[h])]);
       return out_({ ok: true, result: 'best' });
