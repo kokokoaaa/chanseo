@@ -7383,8 +7383,8 @@ function startScreen(){
   <button class="btn ghost" id="sync">💾 데이터 옮기기 <small>다른 기기로 내보내기 · 가져오기</small></button></div>`);
   ov.querySelectorAll('[data-lk]').forEach(t=>t.onclick=ev=>{ev.stopPropagation();const c=t.dataset.lk;META.look=META.look||{};if(META.look[c]==='old')delete META.look[c];else META.look[c]='old';saveMeta();const o=lookOld(c);t.classList.toggle('old',o);t.textContent=o?'옛 모습':'새 모습';});
   ov.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{const k=b.dataset.cls;
-    if(!clsOpen(k)){const C=CLASSES[k];$('cdet').innerHTML=clsDetail(k)+unlockInfo(k)+(META.tk>0?`<button class="btn primary" id="ulk" style="margin-top:10px;width:100%;font-size:17px;padding:12px">🔓 ${C.n} 직업 봉인 해제하기</button><p style="margin:6px 0 0;font-size:15px;font-weight:700;color:#ffd76a;text-align:center">🎟 봉인 해제권 <b style="font-size:18px">${META.tk}장</b> 소유</p>`:`<p style="color:#ffb0b0;margin:10px 0 0;font-size:15px;font-weight:700;text-align:center">🔒 봉인된 직업 · 지옥·신 난이도를 클리어하면 봉인 해제권을 받아요<br><span style="color:#ffd76a">🎟 봉인 해제권 0장 소유</span></p>`);
-      if(META.tk>0)$o('ulk').onclick=()=>{META.tk--;(META.ucls=META.ucls||[]).push(k);saveMeta();pickCls=k;try{localStorage.setItem('chipdungeon_cls',k);}catch(e){}toast(C.n+' 봉인 해제! '+TAGS[C.fav[0]].n+' 시너지 증강도 이제 나와요');startScreen();};return;}
+    if(!clsOpen(k)){const C=CLASSES[k];$('cdet').innerHTML=clsDetail(k)+unlockInfo(k)+(DEV||META.tk>0?`<button class="btn primary" id="ulk" style="margin-top:10px;width:100%;font-size:17px;padding:12px">🔓 ${C.n} 직업 봉인 해제하기</button><p style="margin:6px 0 0;font-size:15px;font-weight:700;color:#ffd76a;text-align:center">${DEV?'🛠 개발자 모드 · 해제권을 쓰지 않아요':`🎟 봉인 해제권 <b style="font-size:18px">${META.tk}장</b> 소유`}</p>`:`<p style="color:#ffb0b0;margin:10px 0 0;font-size:15px;font-weight:700;text-align:center">🔒 봉인된 직업 · 지옥·신 난이도를 클리어하면 봉인 해제권을 받아요<br><span style="color:#ffd76a">🎟 봉인 해제권 0장 소유</span></p>`);
+      if(DEV||META.tk>0)$o('ulk').onclick=()=>{if(!DEV)META.tk--;(META.ucls=META.ucls||[]).push(k);saveMeta();pickCls=k;try{localStorage.setItem('chipdungeon_cls',k);}catch(e){}toast(C.n+' 봉인 해제! '+TAGS[C.fav[0]].n+' 시너지 증강도 이제 나와요');startScreen();};return;}
     pickCls=k;try{localStorage.setItem('chipdungeon_cls',pickCls);}catch(e){}
     ov.querySelectorAll('[data-cls]').forEach(x=>x.classList.toggle('on',x===b));$('cdet').innerHTML=clsDetail(pickCls);$('go').firstChild.textContent=`${CLASSES[pickCls].n}(으)로 시작${sv?' (저장 삭제)':''}`;});
   ov.querySelectorAll('[data-diff]').forEach(b=>b.onclick=()=>{pickDiff=b.dataset.diff;savePickDiff(pickDiff);ov.querySelectorAll('[data-diff]').forEach(x=>x.classList.toggle('primary',x===b));HOF_DIFF=null;refreshBoard();});
@@ -9130,7 +9130,7 @@ function autoMoveVec0(){
 function cycleZoom(){ZOOM=(ZOOM+1)%ZOOM_N;try{localStorage.setItem('chanseo_zoom',ZOOM);}catch(e){}resize();refreshAutoBtns();toast(`시야 ${ZOOM+1}단계 (${[1,1.25,1.5,1.75,2][ZOOM]}배 넓게)`);}
 $('zoomBtn').addEventListener('click',cycleZoom);
 // 배속 해금: 처음엔 x1만. 일반·어려움·지옥·신을 클리어할 때마다 x2 → x3 → x4 → x5
-const speedMax=()=>1+['normal','hard','hell','god'].filter(k=>(META.clears||{})[k]).length;
+const speedMax=()=>DEV?5:1+['normal','hard','hell','god'].filter(k=>(META.clears||{})[k]).length;
 function cycleSpeed(){const mx=speedMax();if(mx<=1){toast('🔒 배속은 일반 난이도를 클리어하면 열려요');return;}AUTO.speed=((Math.min(AUTO.speed||1,mx))%mx)+1;saveAuto();refreshAutoBtns();toast(AUTO.speed===1?'보통 속도':AUTO.speed+'배속');}
 function refreshAutoBtns(){$('zoomBtn').textContent='🔭 '+(ZOOM+1);if((AUTO.speed||1)>speedMax())AUTO.speed=speedMax();const sb=$('speedBtn');sb.textContent='x'+(AUTO.speed||1);sb.classList.toggle('on',(AUTO.speed||1)>1);const a=$('autoPickBtn'),m=$('autoMoveBtn');a.textContent='자동 선택 '+(AUTO.pick?'ON':'OFF');m.textContent='자동 이동 '+(AUTO.move?'ON':'OFF');a.classList.toggle('on',AUTO.pick);m.classList.toggle('on',AUTO.move);a.style.display=DEV?'':'none';m.style.display='';const nc=$('noCdBtn');nc.style.display=DEV?'':'none';nc.textContent='쿨타임 무시 '+(DEV_NOCD?'ON':'OFF');nc.classList.toggle('on',DEV_NOCD);}
 $('speedBtn').addEventListener('click',cycleSpeed);
@@ -9521,7 +9521,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=92,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=93,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
