@@ -3566,7 +3566,9 @@ const magN=()=>6+(has('g_bigmag')?4:0);
 const reloadT=()=>Math.max(.35,.8*(has('g_twin')?.5:1)*(has('g_bigmag')?1.25:1)*(S.p.rlM||1)*(1-.05*mlv('m_rapid')));
 function ricoShot(t,dm,n){const o=nearestE(t,220,new Set([t]));if(o)pBullet(t.x,t.y,Math.atan2(o.y-t.y,o.x-t.x),dm,{sub:'도탄',child:true,r:3,rc:n,hit:new Set([t]),sure:has('f_trickshot'),life:.6,pierce:0});}
 // 해골 최대 수: 실제로 나오는 해골은 30기까지, 넘는 만큼은 해골 피해 배율로 바뀜 (skelRaw/30)
-const SKEL_CAP=30,skelMax=()=>Math.min(SKEL_CAP,skelRaw()),skelRaw=()=>(S.cls==='necro'?5:0)+(S.p.skN||0)+(has('n_horde')?Math.max(0,tag('undead')+tag('summon')-5):0)+(tag('undead')>=1?1:0)+(tag('undead')>=4?2:0)+(has('raise')?2:0)+(has('n_legion')?lv3('n_legion',1,2,3):0)+(has('n_lich')?2:0)+(has('f_bonelord')?2:0);
+// 차트 마스터 칭호를 단 힘기범 전용: 사령술사 해골 최대 +10 (상한도 +10)
+const chartSk=()=>S&&S.cls==='necro'&&META.title==='h_chart'&&CHART_NICKS.some(k=>myNick().includes(k))?10:0;
+const SKEL_CAP=30,skelMax=()=>Math.min(SKEL_CAP+chartSk(),skelRaw()+chartSk()),skelRaw=()=>(S.cls==='necro'?5:0)+(S.p.skN||0)+(has('n_horde')?Math.max(0,tag('undead')+tag('summon')-5):0)+(tag('undead')>=1?1:0)+(tag('undead')>=4?2:0)+(has('raise')?2:0)+(has('n_legion')?lv3('n_legion',1,2,3):0)+(has('n_lich')?2:0)+(has('f_bonelord')?2:0);
 const skelC=()=>(has('f_deathlord')?.1:0)+(S.cls==='necro'?.25:tag('undead')>=1?.08:0)+(tag('undead')>=4?.1:0)+(has('raise')?lv3('raise',.06,.08,.1):0)+(has('n_legion')?.1:0);
 const skelD=()=>Math.max(1,skelRaw()/SKEL_CAP)*pDmg()*(S.cls==='necro'?1:.6)*(1+(S.p.skD||0))*(1+.05*mlv('m_undead'))*sumM()/(1+(S.p.sumD||0))*undM()*(tag('undead')>=6?2:1)*(has('f_bonelord')?1+.03*(S.skel?S.skel.length:0):1);
 // 해골이 맞음: 받는 피해 절반 + 내 방어력 적용, 체력 0이면 사라짐 (사라질 때 효과 발동)
@@ -6105,7 +6107,7 @@ const ACH=[
   {k:'h_gob',hid:1,n:'고블린의 단골',d:'보물 고블린을 5번 놓치기',p:()=>[(META.hm||{}).goblin||0,5],c:()=>((META.hm||{}).goblin||0)>=5},
   {k:'h_drg',hid:1,n:'아깝다!',d:'황금 용 체력을 10% 미만으로 깎고도 놓치기'},
   {k:'h_blind',hid:1,n:'눈 뜬 장님',d:'한 판에 숨겨진 몬스터 3마리 놓치기'},
-  {k:'h_chart',sec:1,n:'차트 마스터',d:'차트를 꼬박꼬박 쓰는 모범 진료인'},
+  {k:'h_chart',sec:1,n:'차트 마스터',d:'차트를 꼬박꼬박 쓰는 모범 진료인 · 칭호를 달면 사령술사 해골 최대 +10'},
   {k:'h_egg5',hid:1,n:'동네 단골손님',d:'한 판에 이스터에그 주인 5명 만나기'},
   {k:'h_eggall',hid:1,n:'동네 마당발',d:'이스터에그 34곳 모두 발견',p:()=>[Object.keys(META.egg||{}).length,Object.keys(EGG).length],c:()=>Object.keys(META.egg||{}).length>=Object.keys(EGG).length},
   {k:'h_stone',hid:1,n:'망부석',d:'건물 앞에서 1분 동안 꼼짝 않고 서 있기'},
@@ -7367,7 +7369,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=45,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=46,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
