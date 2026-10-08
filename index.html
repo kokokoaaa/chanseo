@@ -1276,7 +1276,7 @@ function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);
 const keys={};
 // 한글 입력 상태에서도 E·WASD 등이 먹히게: 글자 키는 e.code(물리 키 위치)로 판단
 const keyOf=e=>e.code&&/^Key[A-Z]$/.test(e.code)?e.code.slice(3).toLowerCase():String(e.key||'').toLowerCase();
-addEventListener('keydown',e=>{if(e.target&&(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'))return;const k=keyOf(e);if(k==='tab'||k==='i'){e.preventDefault();if(S&&S.mode!=='start'){if(cxGame)cxClose();toggleStats();}return;}if(k==='escape'&&cxGame){cxClose();return;}if(k==='escape'&&statsOpen){toggleStats();return;}if(k==='e'&&S&&S.mode==='play'){useSkill();return;}if(k==='r'&&S&&S.mode==='play'){useUlt();return;}if(k==='x'&&S&&S.mode!=='start'){cycleSpeed();return;}if(k==='z'&&S&&S.mode!=='start'){cycleZoom();return;}if(DEV&&k==='p'&&S&&S.mode!=='start'){$('autoPickBtn').click();return;}if(k==='m'&&S&&S.mode!=='start'){$('autoMoveBtn').click();return;}if(k==='b'&&S&&S.mode==='shop'&&S.shopBack){S.shopBack();return;}if(k==='escape'&&S&&S.mode==='shop'&&S.shopBack){S.shopBack();return;}keys[k]=true;if((k===' '||k==='shift')&&S&&S.mode==='play'){e.preventDefault();dash();}});
+addEventListener('keydown',e=>{if(e.target&&(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'))return;const k=keyOf(e);if(k==='tab'||k==='i'){e.preventDefault();if(S&&S.mode!=='start'){if(cxGame)cxClose();toggleStats();}return;}if(k==='escape'&&cxGame){cxClose();return;}if(k==='escape'&&SPEC){specStop();return;}if(k==='escape'&&statsOpen){toggleStats();return;}if(k==='e'&&S&&S.mode==='play'){useSkill();return;}if(k==='r'&&S&&S.mode==='play'){useUlt();return;}if(k==='x'&&S&&S.mode!=='start'){cycleSpeed();return;}if(k==='z'&&S&&S.mode!=='start'){cycleZoom();return;}if(DEV&&k==='p'&&S&&S.mode!=='start'){$('autoPickBtn').click();return;}if(k==='m'&&S&&S.mode!=='start'){$('autoMoveBtn').click();return;}if(k==='b'&&S&&S.mode==='shop'&&S.shopBack){S.shopBack();return;}if(k==='escape'&&S&&S.mode==='shop'&&S.shopBack){S.shopBack();return;}keys[k]=true;if((k===' '||k==='shift')&&S&&S.mode==='play'){e.preventDefault();dash();}});
 addEventListener('keyup',e=>{keys[keyOf(e)]=false;keys[String(e.key||'').toLowerCase()]=false;});
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false;});
 let joy=null;
@@ -4971,7 +4971,7 @@ function drawPlayer(p){
   ctx.filter='none';ctx.globalAlpha=1;ctx.restore();
   if(gOn){ctx.save();ctx.globalAlpha=gA;drawGearFront(p,p.y+R+3-gBob,S.t,emitG);ctx.restore();}
   if(sk)skinPost(ctx,p.x,p.y,sk,S.t);
-  if(META.title&&p.alive){const A=ACH.find(a=>a.k===META.title);if(A){ctx.save();ctx.font='12px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.75)';const ty=p.y-R*3.6;ctx.strokeText('「'+A.n+'」',p.x,ty);ctx.fillStyle=A.rw?hue(S.t,0):'#ffd76a';ctx.fillText('「'+A.n+'」',p.x,ty);ctx.restore();}}
+  {const TT=SPEC_OV&&S.mode==='spec'?SPEC_OV.ti:META.title;if(TT&&p.alive){const A=ACH.find(a=>a.k===TT);if(A){ctx.save();ctx.font='12px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.75)';const ty=p.y-R*3.6;ctx.strokeText('「'+A.n+'」',p.x,ty);ctx.fillStyle=A.rw?hue(S.t,0):'#ffd76a';ctx.fillText('「'+A.n+'」',p.x,ty);ctx.restore();}}}
   if(p.barrier>0){ctx.strokeStyle='rgba(127,196,242,.85)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(p.x,p.y,R+9,0,TAU*Math.min(1,p.barrier/(barrierMax()||1)));ctx.stroke();}
   if(p.shield>0){ctx.strokeStyle='rgba(123,224,143,.7)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x,p.y,R+14,0,TAU*p.shield/3);ctx.stroke();}
 }
@@ -6587,7 +6587,9 @@ const COS_CAT={skin:'캐릭터 색',trail:'탄환 궤적',kill:'처치 효과',a
 // 초기화 환불 총액: 영구 강화 + 산 외형 전부
 const cosSpent=()=>COS.reduce((q,x)=>q+(cosOwn(x.k)?x.c:0),0),allSpent=()=>metaSpent()+cosSpent();
 const cosOwn=k=>!!(META.cos&&META.cos.own&&META.cos.own[k]);
-const cosEq=cat=>{const k=META.cos&&META.cos.eq&&META.cos.eq[cat];return k?COS.find(x=>x.k===k):null;};
+// SPEC_OV: 관전 중에는 관전 대상의 겉모습(스킨·오라·이름 효과)·칭호를 씀
+let SPEC_OV=null;
+const cosEq=cat=>{const k=SPEC_OV&&S&&S.mode==='spec'?SPEC_OV[cat]:META.cos&&META.cos.eq&&META.cos.eq[cat];return k?COS.find(x=>x.k===k):null;};
 const rainbowCol=(o=0)=>`hsl(${(S?S.t*120:0)+o}deg,90%,65%)`;
 const mlv=k=>META.lv[k]||0;
 const mcost=x=>x.c*(mlv(x.k)+1);
@@ -7133,23 +7135,28 @@ setTimeout(fbInit,600);
 // 관전당하는 쪽: ping 응답 w=1이면 1.5초마다 지금 상태 요약을 보냄 (보는 사람이 없어지면 서버가 w=0 → 멈춤)
 // 보는 쪽: 1.5초마다 요약을 받아 화면에 다시 그림 (사이는 부드럽게 이어 붙임). 실제 게임과 1~2초 차이, 총알·이펙트는 생략
 const ET_K=Object.keys(ET);let SNAP_ON=false;
-function specSnap(){if(!S||S.mode==='start'||!S.p)return {m:'start',n:myNick()};const p=S.p,R2=760*760;
+function specSnap(){if(!S||S.mode==='start'||!S.p)return {m:'start',n:myNick(),pc:typeof pickCls!=='undefined'?pickCls:'',pd:typeof pickDiff!=='undefined'?pickDiff:''};const p=S.p,R2=760*760;
   const es=S.en.filter(e=>e.alive&&!e.phase&&(e.x-p.x)**2+(e.y-p.y)**2<R2).sort((a,b)=>(b.boss?1:0)-(a.boss?1:0)||((a.x-p.x)**2+(a.y-p.y)**2)-((b.x-p.x)**2+(b.y-p.y)**2)).slice(0,28);for(const e of es)if(!e._sid)e._sid=(S._sidN=(S._sidN||0)+1);
   return {m:S.mode==='play'||S.mode==='dying'?'play':S.mode,n:myNick(),c:S.cls,x:Math.round(p.x),y:Math.round(p.y),h:Math.round(Math.max(0,p.hp)/p.maxHp*100),l:S.lvl,t:Math.round((S.gt||0)+(S.bt||0)),k:S.st.kills||0,bi:S.biome||0,d:S.diff||'normal',
-    e:es.map(e=>[ET_K.indexOf(e.type),Math.round(e.x-p.x),Math.round(e.y-p.y),Math.round(e.hp/e.maxHp*100),e._sid].join(',')).join(';'),a:S.arena?[Math.round(S.arena.x-p.x),Math.round(S.arena.y-p.y),Math.round(S.arena.r)].join(','):''};}
+    e:es.map(e=>[ET_K.indexOf(e.type),Math.round(e.x-p.x),Math.round(e.y-p.y),Math.round(e.hp/e.maxHp*100),e._sid].join(',')).join(';'),a:S.arena?[Math.round(S.arena.x-p.x),Math.round(S.arena.y-p.y),Math.round(S.arena.r)].join(','):'',ti:META.title||'',cs:(META.cos&&META.cos.eq&&META.cos.eq.skin)||'',au:(META.cos&&META.cos.eq&&META.cos.eq.aura)||'',hf:(META.cos&&META.cos.eq&&META.cos.eq.hof)||'',g:gearCode(),ag:(S.augs||[]).map(a=>a.id+':'+(a.lv||1)).join(','),sp:AUTO.speed||1};}
 async function snapLoop(){if(SNAP_ON||!SHEET_URL)return;SNAP_ON=true;
   try{while(SNAP_ON){const d=encodeURIComponent(JSON.stringify(specSnap()));let w=0;try{const r=await fetch(SHEET_URL+'?snap=1&id='+onlId()+'&d='+d,{cache:'no-store'});const j=await r.json();w=j&&j.w;}catch(e){w=1;}
     if(!w)break;await new Promise(r=>setTimeout(r,1500));}}finally{SNAP_ON=false;}}
 let SPEC=null;
-async function specStart(u,n,f){if(!DEV||!SHEET_URL||(!f&&SRV_V<51))return;if(S&&S.started&&S.mode!=='start'&&S.mode!=='spec'&&S.mode!=='over'){toast('관전은 메인 화면에서만 할 수 있어요');return;}if(SPEC)specStop();SPEC={u,n,snap:null,busy:0,fb:!!(FB&&f)};newRun();S.mode='spec';hide();ONL_OPEN=false;onlPaint();specBar();if(SPEC.fb)fbSpecStart(SPEC);else specPoll();}
+async function specStart(u,n,f){if(!DEV||!SHEET_URL||(!f&&SRV_V<51))return;if(S&&S.started&&S.mode!=='start'&&S.mode!=='spec'&&S.mode!=='over'){toast('관전은 메인 화면에서만 할 수 있어요');return;}if(SPEC)specStop();SPEC={u,n,snap:null,busy:0,fb:!!(FB&&f)};{const sp=SPEC;sp.bt=setInterval(()=>{if(SPEC!==sp){clearInterval(sp.bt);return;}specBar();},1000);}newRun();S.mode='spec';hide();ONL_OPEN=false;onlPaint();specBar();if(SPEC.fb)fbSpecStart(SPEC);else specPoll();}
 async function specPoll(){const sp=SPEC;while(SPEC===sp){try{const r=await fetch(SHEET_URL+'?spec='+encodeURIComponent(sp.u)+'&me='+onlId()+'&dk='+encodeURIComponent(DEV_K),{cache:'no-store'});const j=await r.json();
     if(j&&j.busy){toast('다른 사람이 이미 보는 중이에요');specStop();return;}if(j&&j.err){toast('관전 오류: '+j.err);specStop();return;}if(j&&j.d){try{specApply(JSON.parse(j.d));}catch(e){}}else sp.wait=(sp.wait||0)+1;}catch(e){}
     specBar();await new Promise(r=>setTimeout(r,1500));}}
-function specStop(){const sp=SPEC;SPEC=null;if(sp&&sp.fb)fbSpecStop(sp);else if(sp&&SHEET_URL){try{fetch(SHEET_URL+'?spec='+encodeURIComponent(sp.u)+'&stop=1&me='+onlId()+'&dk='+encodeURIComponent(DEV_K),{cache:'no-store'});}catch(e){}}const b=document.getElementById('specBar');if(b)b.remove();newRun();startScreen();}
-function specBar(){let b=document.getElementById('specBar');if(!SPEC){if(b)b.remove();return;}if(!b){b=document.createElement('div');b.id='specBar';b.style.cssText='position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:9000;white-space:nowrap;max-width:96vw;overflow:hidden;background:rgba(10,6,20,.85);border:2px solid #c86aff;border-radius:999px;padding:6px 14px;color:#fff;font:15px "Do Hyeon",sans-serif;display:flex;gap:10px;align-items:center';document.body.appendChild(b);}
-  const s=SPEC.snap;b.innerHTML=`👁 <b>${esc(SPEC.n)}</b> 관전 중 ${s?(s.m==='start'?'· 시작 화면에 있어요':`· ${CLASSES[s.c]?CLASSES[s.c].n:''} Lv${s.l} · ${Math.floor(s.t/60)}분 ${s.t%60}초 · 처치 ${s.k} · 체력 ${s.h}%`):(SPEC.wait>2?'· 신호 기다리는 중 (상대 게임이 최신이어야 해요)':'· 연결 중…')}${SPEC.fb?' <small style="opacity:.6">실시간</small>':' <small style="opacity:.6">옛 서버(느림)</small>'} <button class="btn" id="specX" style="padding:2px 10px;font-size:14px">나가기</button>`;$('specX').onclick=specStop;}
-function specApply(s){const sp=SPEC;if(!sp)return;sp.snap=s;if(s.m==='start'){S.en.length=0;return;}
+function specStop(){const sp=SPEC;SPEC=null;SPEC_OV=null;GEAR_OVR=null;augBarKey='';if(sp&&sp.fb)fbSpecStop(sp);else if(sp&&SHEET_URL){try{fetch(SHEET_URL+'?spec='+encodeURIComponent(sp.u)+'&stop=1&me='+onlId()+'&dk='+encodeURIComponent(DEV_K),{cache:'no-store'});}catch(e){}}const b=document.getElementById('specBar');if(b)b.remove();newRun();startScreen();}
+function specBar(){let b=document.getElementById('specBar');if(!SPEC){if(b)b.remove();return;}if(!b){b=document.createElement('div');b.id='specBar';b.style.cssText='position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:9000;white-space:nowrap;max-width:96vw;overflow:hidden;background:rgba(10,6,20,.85);border:2px solid #c86aff;border-radius:999px;padding:6px 14px;color:#fff;font:15px "Do Hyeon",sans-serif;display:flex;gap:10px;align-items:center';b.innerHTML='<span id="specT"></span><button class="btn" id="specX" style="padding:2px 10px;font-size:14px">나가기</button>';document.body.appendChild(b);$('specX').onpointerdown=e=>{e.preventDefault();e.stopPropagation();specStop();};}
+  const s=SPEC.snap,stale=SPEC.seen&&performance.now()-SPEC.seen>(SPEC.fb?6000:9000),h=`👁 <b>${esc(SPEC.n)}</b> 관전 중 ${stale?'· <b style="color:#ff9a6a">📴 신호 끊김 (게임을 껐거나 인터넷 문제)</b> ':''}${s?(s.m==='start'?`· 🏠 시작 화면${s.pc&&CLASSES[s.pc]?' · '+CLASSES[s.pc].n+' 고르는 중':''}${s.pd&&DIFF[s.pd]?' · '+DIFF[s.pd].n:''}`:s.m==='over'||s.m==='revive'?`· <b style="color:#ff6a6a">💀 쓰러짐</b> · Lv${s.l} · ${Math.floor(s.t/60)}분 ${s.t%60}초 · 처치 ${s.k}`:`· ${CLASSES[s.c]?CLASSES[s.c].n:''} Lv${s.l} · ${Math.floor(s.t/60)}분 ${s.t%60}초 · 처치 ${s.k} · 체력 ${s.h}%${s.m==='aug'?' · <b style="color:#ffd76a">✨ 증강 고르는 중</b>':s.m==='shop'?' · <b style="color:#ffd76a">🛒 상점</b>':''}${(s.sp||1)>1?' · x'+s.sp+'배속':''}`):(SPEC.wait>2?'· 신호 기다리는 중 (상대 게임이 최신이어야 해요)':'· 연결 중…')}${SPEC.fb?' <small style="opacity:.6">실시간</small>':' <small style="opacity:.6">옛 서버(느림)</small>'}`;const t=$('specT');if(t&&t.innerHTML!==h)t.innerHTML=h;}
+function specApply(s){const sp=SPEC;if(!sp)return;const pm=sp.snap&&sp.snap.m;sp.snap=s;sp.seen=performance.now();
+  // 상태가 바뀌면 바로 알림: 쓰러짐 · 시작 화면으로 나감 · 새 판 시작
+  if(pm&&pm!==s.m){if(s.m==='over'||s.m==='revive')toast(`💀 ${SPEC.n} 쓰러짐! Lv${s.l} · ${Math.floor((s.t||0)/60)}분 ${(s.t||0)%60}초 · 처치 ${s.k}`);else if(s.m==='start')toast(`🏠 ${SPEC.n} 시작 화면으로 나갔어요`);else if(pm==='start')toast(`▶ ${SPEC.n} 새 판 시작!`);}
+  if(s.m==='start'){S.en.length=0;specBar();return;}
   const now=performance.now();if(sp.lt){const g=Math.min(2000,Math.max(120,now-sp.lt));sp.dur=sp.dur?sp.dur*.7+g*.3:g;}sp.lt=now;
+  SPEC_OV={ti:s.ti||'',skin:s.cs||'',aura:s.au||'',hof:s.hf||''};GEAR_OVR=s.g?gearDecode(s.g):null;
+  if(s.ag!==sp.ag){sp.ag=s.ag;const F=[...FUSIONS,...VFUSIONS];S.augs=(s.ag||'').split(',').filter(Boolean).map(q=>{const [id,lv]=q.split(':');const f=F.find(x=>x.id===id);if(f)return fusionObj(f);const a=augDef(id)||DRAGON.find(x=>x.id===id);return a?{...a,lv:+lv||1}:null;}).filter(Boolean);try{tagCount();}catch(e){}augBarKey='';}
   if(S.cls!==s.c&&CLASSES[s.c]){applyClass(s.c);}S.biome=s.bi||0;S.lvl=s.l;S.gt=s.t;S.bt=0;S.st.kills=s.k;S.diff=s.d;
   const p=S.p,go=(o,x,y)=>{if(o.tx==null){o.x=x;o.y=y;}o.fx0=o.x;o.fy0=o.y;o.tx=x;o.ty=y;o.t0=now;};
   go(p,s.x,s.y);p.hp=p.maxHp*s.h/100;
@@ -7895,7 +7902,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=64,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=66,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
