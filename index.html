@@ -2303,7 +2303,7 @@ try{Object.assign(AUTO,JSON.parse(localStorage.getItem('chipdungeon_auto')||'{}'
 // 개발자 모드: 자동 선택·자동 이동은 개발자만. 시작 화면 버전 글씨를 5번 연달아 누르면 암호 입력 (암호 원문은 코드에 없고 해시만 비교)
 const DEV_H=7621682056880371,devHash=(str,seed=7)=>{let h1=0xdeadbeef^seed,h2=0x41c6ce57^seed;for(let i=0,ch;i<str.length;i++){ch=str.charCodeAt(i);h1=Math.imul(h1^ch,2654435761);h2=Math.imul(h2^ch,1597334677);}h1=Math.imul(h1^(h1>>>16),2246822507);h1^=Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507);h2^=Math.imul(h1^(h1>>>13),3266489909);return 4294967296*(2097151&h2)+(h1>>>0);};
 // 개발자 모드는 이번에 켠 창에서만: 껐다 켜면(새로 열면) 다시 일반 모드 (예전 버전이 남긴 저장값은 지움)
-let DEV=false,DEV_K='';try{localStorage.removeItem('chanseo_dev');}catch(e){}
+let DEV=false,DEV_K='',DEV_LK=true; // DEV_LK: 개발자 모드면 판 시작 행운 30 (밸런스 측정 스크립트는 끔)try{localStorage.removeItem('chanseo_dev');}catch(e){}
 if(!DEV){AUTO.pick=false;}
 let devTap=[];function devTapVer(){const t=Date.now();devTap=devTap.filter(x=>t-x<2500);devTap.push(t);if(devTap.length<5)return;devTap=[];
   if(DEV){if(confirm('개발자 모드를 끌까요? (자동 선택·자동 이동 버튼이 사라져요)')){DEV=false;AUTO.pick=false;AUTO.move=false;if(META.title&&!(META.ach&&META.ach[META.title])){META.title='';saveMeta();}try{localStorage.removeItem('chanseo_dev');}catch(e){}saveAuto();refreshAutoBtns();if(!S||S.mode==='start')startScreen();toast('개발자 모드 OFF');}return;}
@@ -6570,7 +6570,7 @@ const metaSpent=()=>META.spent!=null?META.spent:Math.round((MSTAT.reduce((q,x)=>
 // 영구 공격력·공격 속도·최대 체력·방어·재생은 판 안 합계에 묻히지 않게 '최종값에 곱하기'로 따로 적용 (pDmg·rawRate·hpSync·hurtP·재생)
 function applyMeta(){const p=S.p;p.hp=p.maxHp;p.lifesteal+=.001*mlv('ls');
   p.crit+=.005*mlv('crit');p.critM+=.04*mlv('critm');p.range*=1+.02*mlv('range');p.speed*=1+.01*mlv('spd');p.dashMul*=1-.02*mlv('dash');p.magnet*=1+.08*mlv('magnet');
-  p.xpM=1+.03*mlv('xp');p.goldM+=.05*mlv('gold');S.gold+=25*mlv('sgold');p.luck+=mlv('luck')+(META.chLk||0)+(META.ach&&META.ach.h_donor?3:0);if(META.sk.token)p.token=true;if(META.sk.key)S.keys=1;if(META.sk.startCard){bonusStat(2,14);}}
+  p.xpM=1+.03*mlv('xp');p.goldM+=.05*mlv('gold');S.gold+=25*mlv('sgold');p.luck+=mlv('luck')+(META.chLk||0)+(META.ach&&META.ach.h_donor?3:0);if(DEV&&DEV_LK)p.luck=Math.max(p.luck,30);if(META.sk.token)p.token=true;if(META.sk.key)S.keys=1;if(META.sk.startCard){bonusStat(2,14);}}
 // 보스 처치 속도 보너스: 보스마다 기준 시간보다 빨리 잡은 1초당 10점. 보스전 중엔 생존 시간이 멈추므로 실제 걸린 시간은 여기서만 반영
 const BOSS_PAR=[90,90,110,140],BOSS_DM=[.55,.75,1,1];
 const bossSpeedPts=()=>(S.st.btimes||[]).reduce((q,t,i)=>q+Math.round(Math.max(0,(BOSS_PAR[bossHome(i)]||120)-t)*10),0);
@@ -7794,7 +7794,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=51,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=52,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
