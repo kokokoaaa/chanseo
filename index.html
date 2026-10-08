@@ -423,22 +423,7 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 .rule{font-size:13px;color:var(--muted);line-height:1.6;margin-top:12px}
 @media (prefers-reduced-motion: reduce){.card:hover{transform:none}}
 /* ===== 메인 화면 (v103): 시상식장 배경 + 전당 무대 + 게임 선택 + 영웅 선택 창 ===== */
-#ov.home{padding:0!important;align-items:stretch!important;
- background:
-  radial-gradient(ellipse 14% 7% at 22% 3%,rgba(255,230,160,.7),transparent 70%),
-  radial-gradient(ellipse 16% 8% at 50% 2%,rgba(255,230,160,.75),transparent 70%),
-  radial-gradient(ellipse 14% 7% at 78% 3%,rgba(255,230,160,.7),transparent 70%),
-  conic-gradient(from 160deg at 22% -2%,transparent 0deg,rgba(255,232,170,.13) 10deg,transparent 22deg),
-  conic-gradient(from 168deg at 50% -2%,transparent 0deg,rgba(255,232,170,.15) 12deg,transparent 24deg),
-  conic-gradient(from 176deg at 78% -2%,transparent 0deg,rgba(255,232,170,.13) 10deg,transparent 22deg),
-  linear-gradient(90deg,transparent 0 4%,rgba(120,80,30,.55) 4% 4.4%,rgba(232,190,100,.45) 4.4% 5.6%,rgba(120,80,30,.55) 5.6% 6%,transparent 6% 94%,rgba(120,80,30,.55) 94% 94.4%,rgba(232,190,100,.45) 94.4% 95.6%,rgba(120,80,30,.55) 95.6% 96%,transparent 96%),
-  linear-gradient(180deg,rgba(0,0,0,.25),transparent 30%,transparent 70%,rgba(0,0,0,.55)),
-  repeating-linear-gradient(90deg,rgba(0,0,0,.32) 0,rgba(255,170,170,.06) 26px,rgba(0,0,0,.32) 52px),
-  linear-gradient(180deg,#5a1422 0%,#4a0f1c 45%,#300a12 80%,#1a0508 100%)!important}
-#ov.home::before{content:'';position:fixed;left:0;right:0;bottom:0;height:16vh;pointer-events:none;z-index:0;
- background:radial-gradient(ellipse 4% 26% at 6% 100%,#0a0204 60%,transparent 62%),radial-gradient(ellipse 4% 30% at 14% 100%,#0a0204 60%,transparent 62%),radial-gradient(ellipse 4% 24% at 22% 100%,#0a0204 60%,transparent 62%),radial-gradient(ellipse 4% 28% at 78% 100%,#0a0204 60%,transparent 62%),radial-gradient(ellipse 4% 26% at 86% 100%,#0a0204 60%,transparent 62%),radial-gradient(ellipse 4% 30% at 94% 100%,#0a0204 60%,transparent 62%),linear-gradient(0deg,rgba(0,0,0,.6),transparent)}
-#ov.home::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.55;
- background:radial-gradient(circle,#ffd76a 0 2px,transparent 3px) 0 0/140px 120px,radial-gradient(circle,#ff7aa8 0 2px,transparent 3px) 60px 40px/170px 150px,radial-gradient(circle,#7ad8ff 0 2px,transparent 3px) 100px 80px/190px 130px}
+#ov.home{padding:0!important;align-items:stretch!important;background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(80,60,40,.25),transparent 70%),linear-gradient(180deg,#16121a 0%,#0e0b12 60%,#08060a 100%)!important}
 .panel.home{position:relative;z-index:1;max-width:none!important;width:100%;min-height:100vh;margin:0!important;padding:0!important;border:none!important;border-radius:0!important;box-shadow:none!important;background:transparent!important;display:flex;flex-direction:column}
 .home .hTop{position:sticky;top:0;z-index:30;display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;padding:8px 18px;background:linear-gradient(180deg,rgba(10,2,4,.9),rgba(10,2,4,.65));border-bottom:1px solid rgba(214,169,74,.5);backdrop-filter:blur(4px)}
 .home .hTop h1{margin:0;font-size:30px;line-height:1;background:linear-gradient(180deg,#fff6c8,#ffd76a 45%,#b8801a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #3a2200)}
@@ -488,7 +473,22 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 .home .hDock .btn:hover i{border-color:#ffd76a;box-shadow:0 0 12px rgba(255,215,106,.6)}
 .home .hDock .btn b{font-weight:normal}.home .hDock .btn small{display:none}
 /* 명예의 전당 */
-.home .hof{flex:1;position:relative;margin:0!important;padding:12px!important;border-radius:16px!important;border:2px solid #ffd76a!important;background:radial-gradient(ellipse at 50% 20%,rgba(255,215,106,.25),transparent 55%),linear-gradient(180deg,rgba(40,24,6,.92),rgba(16,10,4,.94))!important;box-shadow:0 0 0 3px #6a4a12,0 0 30px rgba(255,200,90,.4),inset 0 0 40px rgba(255,200,90,.12)}
+.home .hof{flex:1;position:relative;isolation:isolate;overflow:hidden;margin:0!important;padding:12px!important;border-radius:16px!important;border:2px solid #ffd76a!important;
+ background:
+  radial-gradient(ellipse 16% 6% at 22% 0%,rgba(255,230,160,.75),transparent 70%),
+  radial-gradient(ellipse 18% 7% at 50% 0%,rgba(255,230,160,.8),transparent 70%),
+  radial-gradient(ellipse 16% 6% at 78% 0%,rgba(255,230,160,.75),transparent 70%),
+  conic-gradient(from 160deg at 22% -2%,transparent 0deg,rgba(255,232,170,.14) 10deg,transparent 22deg),
+  conic-gradient(from 168deg at 50% -2%,transparent 0deg,rgba(255,232,170,.16) 12deg,transparent 24deg),
+  conic-gradient(from 176deg at 78% -2%,transparent 0deg,rgba(255,232,170,.14) 10deg,transparent 22deg),
+  linear-gradient(90deg,rgba(120,80,30,.6) 0 .6%,rgba(232,190,100,.5) .6% 2.2%,rgba(120,80,30,.6) 2.2% 2.8%,transparent 2.8% 97.2%,rgba(120,80,30,.6) 97.2% 97.8%,rgba(232,190,100,.5) 97.8% 99.4%,rgba(120,80,30,.6) 99.4%),
+  radial-gradient(circle,rgba(255,215,106,.5) 0 2px,transparent 3px) 0 0/140px 120px,radial-gradient(circle,rgba(255,122,168,.45) 0 2px,transparent 3px) 60px 40px/170px 150px,radial-gradient(circle,rgba(122,216,255,.4) 0 2px,transparent 3px) 100px 80px/190px 130px,
+  linear-gradient(180deg,rgba(0,0,0,.2),transparent 30%,transparent 75%,rgba(0,0,0,.5)),
+  repeating-linear-gradient(90deg,rgba(0,0,0,.32) 0,rgba(255,170,170,.06) 26px,rgba(0,0,0,.32) 52px),
+  linear-gradient(180deg,#5a1422 0%,#4a0f1c 45%,#300a12 80%,#1a0508 100%)!important;
+ box-shadow:0 0 0 3px #6a4a12,0 0 30px rgba(255,200,90,.4),inset 0 0 40px rgba(255,200,90,.12)}
+.home .hof::after{content:'';position:absolute;left:0;right:0;bottom:0;height:70px;pointer-events:none;z-index:-1;
+ background:radial-gradient(ellipse 5% 40% at 6% 100%,#0a0204 60%,transparent 62%),radial-gradient(ellipse 5% 46% at 15% 100%,#0a0204 60%,transparent 62%),radial-gradient(ellipse 5% 38% at 24% 100%,#0a0204 60%,transparent 62%),radial-gradient(ellipse 5% 44% at 76% 100%,#0a0204 60%,transparent 62%),radial-gradient(ellipse 5% 40% at 85% 100%,#0a0204 60%,transparent 62%),radial-gradient(ellipse 5% 46% at 94% 100%,#0a0204 60%,transparent 62%),linear-gradient(0deg,rgba(0,0,0,.5),transparent)}
 .home .hof h2{text-align:center;font-size:26px;letter-spacing:3px;margin:0 0 6px;background:linear-gradient(180deg,#fffbe0,#ffd76a 50%,#c88a1a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #3a2200)}
 .home .hof .hsub{margin:2px 0 6px}
 .home .stagebg{position:relative;margin:4px -2px 8px;padding:34px 0 0;border-radius:12px;overflow:hidden;background:radial-gradient(ellipse at 50% 100%,rgba(255,200,120,.35),transparent 55%),linear-gradient(180deg,#1a0408 0%,#2a0810 45%,#3a1408 100%);box-shadow:inset 0 0 30px rgba(0,0,0,.7)}
@@ -7333,8 +7333,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
-  {v:103,t:'🏛 새 시작 화면',items:[
-    ['change','🏛 시작 화면이 <b>시상식장</b>으로 새로 꾸며졌어요. 왼쪽에는 <b>🏆 명예의 전당 무대</b>(1~3등은 단상 위에 왕관을 쓰고 서 있어요)가 늘 보이고, 오른쪽에서 게임을 골라요'],
+  {v:104,t:'🏛 새 시작 화면',items:[
+    ['change','🏛 시작 화면이 새로 꾸며졌어요. 왼쪽에는 시상식장처럼 꾸민 <b>🏆 명예의 전당 무대</b>(1~3등은 단상 위에 왕관을 쓰고 서 있어요)가 늘 보이고, 오른쪽에서 게임을 골라요'],
     ['change','🎮 난이도나 ☠ 무한의 악몽을 누르면 <b>영웅 선택 창</b>이 열려요. 직업을 고르고 ▶ 시작! 지난번 영웅으로 <b>▶ 바로 시작</b>도 할 수 있어요'],
     ['change','📱 아래 메뉴(영구 강화·외형·대장간·도감·도전과제·설명서 등)는 화면 맨 아래 한 줄로 모였어요'],
   ]},
@@ -10057,7 +10057,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=103,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=104,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
