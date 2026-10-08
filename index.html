@@ -6498,7 +6498,7 @@ const ACH=[
   {k:'h_gob',hid:1,n:'고블린의 단골',d:'보물 고블린을 5번 놓치기',p:()=>[(META.hm||{}).goblin||0,5],c:()=>((META.hm||{}).goblin||0)>=5},
   {k:'h_drg',hid:1,n:'아깝다!',d:'황금 용 체력을 10% 미만으로 깎고도 놓치기'},
   {k:'h_blind',hid:1,n:'눈 뜬 장님',d:'한 판에 숨겨진 몬스터 3마리 놓치기'},
-  {k:'h_donor',sec:1,n:'참붕이의 후원자',d:'참붕이에게 토큰값을 후원해 준 고마운 모험가 💛'},
+  {k:'h_donor',sec:1,n:'후원자 그저 빛',d:'참붕이에게 토큰값을 후원해 준 고마운 모험가 💛 · 행운 +3'},
   {k:'h_chart',sec:1,n:'차트 마스터',d:'차트를 꼬박꼬박 쓰는 모범 진료인 · 칭호를 달면 사령술사 해골 최대 +10'},
   {k:'h_egg5',hid:1,n:'동네 단골손님',d:'한 판에 이스터에그 3곳 발견'},
   {k:'h_eggall',hid:1,n:'동네 마당발',d:'한 판에 이스터에그 5곳 발견'},
@@ -6570,7 +6570,7 @@ const metaSpent=()=>META.spent!=null?META.spent:Math.round((MSTAT.reduce((q,x)=>
 // 영구 공격력·공격 속도·최대 체력·방어·재생은 판 안 합계에 묻히지 않게 '최종값에 곱하기'로 따로 적용 (pDmg·rawRate·hpSync·hurtP·재생)
 function applyMeta(){const p=S.p;p.hp=p.maxHp;p.lifesteal+=.001*mlv('ls');
   p.crit+=.005*mlv('crit');p.critM+=.04*mlv('critm');p.range*=1+.02*mlv('range');p.speed*=1+.01*mlv('spd');p.dashMul*=1-.02*mlv('dash');p.magnet*=1+.08*mlv('magnet');
-  p.xpM=1+.03*mlv('xp');p.goldM+=.05*mlv('gold');S.gold+=25*mlv('sgold');p.luck+=mlv('luck')+(META.chLk||0);if(META.sk.token)p.token=true;if(META.sk.key)S.keys=1;if(META.sk.startCard){bonusStat(2,14);}}
+  p.xpM=1+.03*mlv('xp');p.goldM+=.05*mlv('gold');S.gold+=25*mlv('sgold');p.luck+=mlv('luck')+(META.chLk||0)+(META.ach&&META.ach.h_donor?3:0);if(META.sk.token)p.token=true;if(META.sk.key)S.keys=1;if(META.sk.startCard){bonusStat(2,14);}}
 // 보스 처치 속도 보너스: 보스마다 기준 시간보다 빨리 잡은 1초당 10점. 보스전 중엔 생존 시간이 멈추므로 실제 걸린 시간은 여기서만 반영
 const BOSS_PAR=[90,90,110,140],BOSS_DM=[.55,.75,1,1];
 const bossSpeedPts=()=>(S.st.btimes||[]).reduce((q,t,i)=>q+Math.round(Math.max(0,(BOSS_PAR[bossHome(i)]||120)-t)*10),0);
@@ -7007,13 +7007,13 @@ function setMyKey(k){MYKEY=k;try{localStorage.setItem('chanseo_key',k);}catch(e)
 async function nameOwned(nm,key){const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),10000):0;
   try{const r=await fetch(SHEET_URL+'?own='+encodeURIComponent(nm)+'&k='+encodeURIComponent(key||MYKEY),{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();return !!(j&&j.owned);}catch(e){return false;}finally{clearTimeout(to);}}
 const myNick=()=>{try{return localStorage.getItem('chipdungeon_nick')||'';}catch(e){return '';}};
-// 후원자 감사 표시: 이 이름의 「주인 컴퓨터」(이름을 처음 등록한 열쇠, 또는 같은 이름 비밀번호)에서만 칭호 「참붕이의 후원자」와 반짝이는 이름을 줌
+// 후원자 감사 표시: 이 이름의 「주인 컴퓨터」(이름을 처음 등록한 열쇠, 또는 같은 이름 비밀번호)에서만 칭호 「후원자 그저 빛」(행운 +3)과 반짝이는 이름을 줌
 // 서버가 「이 열쇠가 주인 맞음」이라고 답할 때만 (연결 실패면 안 줌). 처음 받을 때 한 번 자동으로 달아 주고, 그 뒤 바꾸는 건 자유
 const DONORS=['김성록'];let DONOR_CK='';
 async function donorCheck(){const n=myNick();if(!SHEET_URL||!DONORS.includes(n)||DONOR_CK===n)return;if(META.ach&&META.ach.h_donor&&cosOwn('hf_donor'))return;DONOR_CK=n;
   try{const r=await fetch(SHEET_URL+'?own='+encodeURIComponent(n)+'&k='+encodeURIComponent(MYKEY),{cache:'no-store'});const j=await r.json();if(!j||j.owned!==false)return;}catch(e){DONOR_CK='';return;}
   META.ach=META.ach||{};META.ach.h_donor=1;META.cos=META.cos||{own:{},eq:{}};META.cos.own.hf_donor=1;if(!META.donorSet){META.donorSet=1;META.cos.eq.hof='hf_donor';META.title='h_donor';}saveMeta();try{onlPing();}catch(e){}
-  const d=document.createElement('div');d.className='chartq';d.innerHTML=`<div class="cq" style="max-width:min(460px,92vw);text-align:center;box-shadow:0 0 30px rgba(255,215,106,.5)"><div style="font-size:44px;line-height:1">💛</div><b style="font-size:22px"><span class="hn hx-hf_donor">💛 ${esc(n)}</span> 님</b><div>참붕이에게 토큰값을 후원해 주셔서 정말 고마워요!<br>칭호 <b style="color:#ffd76a">「참붕이의 후원자」</b>와<br><b>반짝반짝 빛나는 이름</b>을 드렸어요 ✨</div><button class="btn primary" id="dnrOk">고마워요!</button></div>`;
+  const d=document.createElement('div');d.className='chartq';d.innerHTML=`<div class="cq" style="max-width:min(460px,92vw);text-align:center;box-shadow:0 0 30px rgba(255,215,106,.5)"><div style="font-size:44px;line-height:1">💛</div><b style="font-size:22px"><span class="hn hx-hf_donor">💛 ${esc(n)}</span> 님</b><div>참붕이에게 토큰값을 후원해 주셔서 정말 고마워요!<br>칭호 <b style="color:#ffd76a">「후원자 그저 빛」</b>(행운 +3)과<br><b>반짝반짝 빛나는 이름</b>을 드렸어요 ✨</div><button class="btn primary" id="dnrOk">고마워요!</button></div>`;
   document.body.appendChild(d);$('dnrOk').onclick=()=>{d.remove();if(!S||S.mode==='start')startScreen();};}
 // 난이도: diff 칸 우선, 없으면 직업 칸의 ':' 뒤. 예전 서버가 12자로 잘라 저장한 것('knight:night' 등)도 앞글자로 알아봄
 const clsS=b=>String(b.cls||'').split('~')[0].split('@')[0],skinOf=b=>(String(b.cls||'').split('~')[0].split('@')[1])||b.skin||'',bonusOf=b=>+b.bonus||+String(b.cls||'').split('~')[1]||0,apOf=b=>+b.ap||(+String(b.cls||'').split('~')[2]||0)/100,
