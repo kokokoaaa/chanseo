@@ -294,7 +294,7 @@ h3{font-family:'Do Hyeon',sans-serif;font-weight:400;font-size:19px;margin:18px 
 .card{background:var(--ivory);color:var(--ink);border:3px solid var(--rc);border-radius:10px;padding:12px;text-align:left;cursor:pointer;font:inherit;line-height:1.45;font-size:15px}
 .card:hover{transform:translateY(-2px)}
 #dsel{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}#dsel .btn{margin:0;min-height:44px;align-self:stretch;padding:6px 2px;font-size:15px;white-space:nowrap}#dsel .btn small{font-size:10.5px;white-space:normal}#endc{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}#endc .btn{margin:0;min-height:48px;padding:8px 6px}@media (max-width:480px){#dsel .btn{font-size:13px;padding:5px 1px}#dsel .btn small{font-size:9.5px}}
-.dtabs{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:4px 0 10px}.dtabs .btn,.dtabs .btn.primary{margin:0!important;padding:6px 2px!important;font-size:14px!important;min-height:0}#dsel .btn,#dsel .btn.primary{margin:0!important;padding:8px 4px!important;font-size:17px!important}
+.dtabs{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:4px 0 10px}.dtabs.hof3{grid-template-columns:repeat(3,1fr)}.dtabs .btn,.dtabs .btn.primary{margin:0!important;padding:6px 2px!important;font-size:14px!important;min-height:0}#dsel .btn,#dsel .btn.primary{margin:0!important;padding:8px 4px!important;font-size:17px!important}
 .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:6px 0 10px}.tabs .btn,.tabs .btn.primary{margin:0!important;padding:8px 4px!important;font-size:14px!important;min-height:48px;line-height:1.25}.tabs .btn small{font-size:11px!important}
 .card{position:relative}
 @keyframes cPop{0%{transform:scale(.55) rotate(-5deg);opacity:0}60%{transform:scale(1.1) rotate(1deg);opacity:1}100%{transform:scale(1)}}
@@ -3380,7 +3380,7 @@ function withActual(desc,f){const W=a=>a.map(l=>`<div>${l}</div>`).join(''),L=de
   return W(L.map(line=>{const m=PV.find(([k])=>line.startsWith(k));if(!m)return line;
     const a=v(m[1]);let b=null;S.p=c;try{if(!c.__ap){c.__ap=1;f(c);}b=v(m[1]);}catch(e){}finally{S.p=P0;}
     if(a==null||b==null||Math.abs(b-a)<Math.pow(10,-m[2])/2)return line;const d=b-a;
-    const pc=a>0?Math.abs(d/a*100):0;return `${line} <small style="opacity:.7">(${d>0?'+':'−'}${Math.abs(d).toFixed(m[2])}${pc>=.1?` · 실제 ${d>0?'+':'−'}${pc.toFixed(pc<10?1:0)}%`:''})</small>`;}));}
+    const pc=a>0?Math.abs(d/a*100):0;return `${line}<br><small style="opacity:.72">실적용 ${d>0?'+':'−'}${Math.abs(d).toFixed(m[2])}${pc>=.1?` (${d>0?'+':'−'}${pc.toFixed(pc<10?1:0)}%)`:''}</small>`;}));}
 // 증강 미리보기: 이 증강을 얻었을 때(★2) 주요 스탯이 얼마나 바뀌는지. 잠깐 적용해서 계산한 뒤 그대로 되돌림
 const PREV_ST=[['공격력',()=>pDmg(),1],['공격 속도',()=>pRate(),2,'/초'],['최대 체력',()=>(hpSync(),S.p.maxHp),0],['방어력',()=>armorEff(),0],['회피',()=>dodgeC()*100,1,'%'],['치명타 확률',()=>critC()*100,1,'%'],['치명타 피해',()=>critMul()*100,0,'%'],['이동 속도',()=>moveSpd(),0],['사거리',()=>pureMelee()?meleeR():S.p.range,0],['탄속',()=>pureMelee()?null:S.p.bspd,0],['관통',()=>pureMelee()?meleeCap():S.p.pierce,0],['탄환',()=>pureMelee()?meleeArc(S.p.multi):S.p.multi,0,'발'],['흡혈',()=>S.p.lifesteal*100,1,'%'],['초당 재생',()=>S.p.regen,1],['행운',()=>LK(),1],['골드 획득',()=>S.p.goldM*100,0,'%'],['대시 재사용',()=>dashCdVal(),2,'초']];
 function augPreview(a){
@@ -5298,8 +5298,8 @@ function useSkill(){const p=S&&S.p;if(!p||!p.alive||S.mode!=='play'||(p.skCd||0)
    case 'alch':p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.4*healM());p.skInvT=2;skFx('alch',{d:2,fol:1});say('비상 물약!');break;
    case 'gambler':{const hd=Math.random()<headP();skFx('gambler',{d:hd?4:2.2,fol:1,h:hd});}if(S.skFx[S.skFx.length-1].h){p.skInvT=3;p.skAtkT=3;say('💰 앞면! 무적 + 공격력 2배');}else{p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.25*healM());say('💰 뒷면… 체력 회복');}break;}
 }
-// 궁극기 (R키 · 폰 버튼): 쿨타임 90초(판 시작 45초 뒤 첫 사용). 화면 안 모든 적에게 공격력 30배 (또는 이번 판 평균 DPS 8초치 중 큰 쪽, 보스는 절반) + 2.2초 무적. 결투에서는 못 씀
-const ULT_CD=90,ULT_M=30,ULT_IMP=.8;
+// 궁극기 (R키 · 폰 버튼): 쿨타임 90초(판 시작 45초 뒤 첫 사용). 화면 안 모든 적에게 공격력 15배 (또는 이번 판 평균 DPS 4초치 중 큰 쪽, 보스는 절반이고 최대 체력 8%까지 · 레이드 거신 3%) + 2.2초 무적. 결투에서는 못 씀
+const ULT_CD=90,ULT_M=15,ULT_DS=4,ULT_BOSS=.08,ULT_IMP=.8;
 const ULTS={
   knight:{ico:'⚔',n:'성검 낙하',col:'#ffd76a',d:'하늘에서 거대한 성검이 떨어져 화면 안 모든 적에게 큰 피해'},
   mage:{ico:'☄',n:'메테오 스톰',col:'#ff7a2a',d:'운석이 비처럼 쏟아져 화면 안 모든 적에게 큰 피해'},
@@ -5321,8 +5321,8 @@ function useUlt(){const p=S&&S.p;if(!ultOk()||(p.ulCd||0)>0||S.ult)return;const 
   if(vis.length<6)for(let i=vis.length;i<10;i++)vis.push({x:camX+W*(.12+.76*skHash(i*3+S.t)),y:camY+H*(.18+.7*skHash(i*7+S.t)),r:14,f:1});
   S.ult={k:S.cls,t:0,d:2.6,done:0,T:vis,px:p.x,py:p.y,seed:Math.random()*99};S.smT=Math.max(S.smT||0,.35);S.shake=Math.max(S.shake||0,.3);}
 function ultTick(dt){const p=S.p,camX=p.x-W/2,camY=p.y-H/2;if(p.ulCd==null)p.ulCd=45;const U=S.ult;if(!U)return;U.t+=dt;
-  if(!U.done&&U.t>=ULT_IMP){U.done=1;const cand=U.k==='necro'?S.en.filter(e=>e.alive&&!e.boss&&!ET[e.type].hid&&!ET[e.type].totem&&ESPR&&e.x>camX-60&&e.x<camX+W+60&&e.y>camY-60&&e.y<camY+H+60):[],sec=Math.max(20,(S.gt||0)+(S.bt||0)),dm=Math.max(pDmg()*ULT_M,Math.max(0,(S.st.dmg||0)-((S.dlog||{})['궁극기']||0))/sec*8)*(p.ulDm||1),col=ULTS[U.k].col;
-    for(const e of S.en){if(!e.alive||e.x<camX-60||e.x>camX+W+60||e.y<camY-60||e.y>camY+H+60)continue;dmgEs('궁극기',e,e.boss?dm*.5:dm,col);if(U.k==='elem'&&!e.boss){e.slowT=Math.max(e.slowT||0,3);e.frozen=true;}}
+  if(!U.done&&U.t>=ULT_IMP){U.done=1;const cand=U.k==='necro'?S.en.filter(e=>e.alive&&!e.boss&&!ET[e.type].hid&&!ET[e.type].totem&&ESPR&&e.x>camX-60&&e.x<camX+W+60&&e.y>camY-60&&e.y<camY+H+60):[],sec=Math.max(20,(S.gt||0)+(S.bt||0)),dm=Math.max(pDmg()*ULT_M,Math.max(0,(S.st.dmg||0)-((S.dlog||{})['궁극기']||0))/sec*ULT_DS)*(p.ulDm||1),col=ULTS[U.k].col;
+    for(const e of S.en){if(!e.alive||e.x<camX-60||e.x>camX+W+60||e.y<camY-60||e.y>camY+H+60)continue;dmgEs('궁극기',e,e.boss?Math.min(dm*.5,e.maxHp*(raidOn()?.03:ULT_BOSS)):dm,col);if(U.k==='elem'&&!e.boss){e.slowT=Math.max(e.slowT||0,3);e.frozen=true;}}
     S.shake=Math.max(S.shake||0,.7);S.flash=Math.max(S.flash||0,.5);
     if(U.k==='paladin'||U.k==='druid')p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.2*healM());
     if(U.k==='necro'){let n=0;while((S.skel||[]).length<skelMax()&&n<40){raiseSkel(p.x+rand(-80,80),p.y+rand(-80,80));n++;}
@@ -6974,9 +6974,14 @@ function gainAug(a){
   ups.forEach(([t,n],i)=>augFx(`⚡ 시너지 ${TAGS[t].n} ${n}단계`,TAGS[t]['t'+n],'#7be08f',n>=6,.55*(i+1)));
   tryFuse(true);
 }
+// 큰 알림 띠: 여러 개가 한꺼번에 오면(증강 + 칭호 등) 1.3초 간격으로 차례로 띄우고, 아직 떠 있는 띠가 있으면 그 아래 줄에 띄움
+let AFX_NEXT=0;const AFX_ON=[];
 function augFx(title,sub,col,big,delay=0){
+  const now=performance.now(),at=Math.max(now+delay,AFX_NEXT);AFX_NEXT=at+1300;delay=at-now;
   setTimeout(()=>{
-    const bn=document.createElement('div');bn.className='abanner';bn.style.color=col;bn.innerHTML=`<b>${title}</b>${sub?`<small>${sub}</small>`:''}`;document.body.appendChild(bn);setTimeout(()=>bn.remove(),2300);
+    const bn=document.createElement('div');bn.className='abanner';bn.style.color=col;bn.innerHTML=`<b>${title}</b>${sub?`<small>${sub}</small>`:''}`;
+    let slot=0;while(AFX_ON.includes(slot))slot++;AFX_ON.push(slot);if(slot)bn.style.marginTop=(slot*78)+'px';
+    document.body.appendChild(bn);setTimeout(()=>{bn.remove();const i=AFX_ON.indexOf(slot);if(i>=0)AFX_ON.splice(i,1);},2600);
     const fl=document.createElement('div');fl.className='rflash';fl.style.background=`radial-gradient(circle at 50% 40%,${col}55,transparent 65%)`;document.body.appendChild(fl);setTimeout(()=>fl.remove(),800);
     const cx=innerWidth/2,cy=innerHeight*.32,N=big?40:22;
     for(let i=0;i<N;i++){const d=document.createElement('i'),an=Math.random()*Math.PI*2,v=120+Math.random()*(big?240:150),sz=4+Math.random()*6;
@@ -7157,6 +7162,14 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:101,t:'🗿 레이드 거신 강화 + 알림 정리',items:[
+    ['nerf','⚡ <b>궁극기 피해 절반</b>: 공격력 30배 → 15배 (또는 평균 DPS 8초치 → 4초치). 보스에게는 한 번에 최대 체력의 8%까지 (레이드 거신 3%). 화면의 적이 전부 한 방에 지워지던 문제'],
+    ['change','⚔ 내 캐릭터(보관함·내 이름의 전당 기록)와의 결투는 연습 경기로 처리돼 전적·보상에 들어가지 않아요. 결투 상대 목록에서도 내 캐릭터는 아래에 따로 묶여요'],
+    ['change','🃏 스탯 카드의 실제 증가량을 줄 아래에 따로 보여 줘요: 「실적용 +2.8 (+6.5%)」'],
+    ['change','🏆 명예의 전당 탭을 두 줄로: 지옥 · 신 · 악몽 / 보스 러시 · 레이드 · 결투'],
+    ['enemy','🗿 <b>레이드 거신이 팀에 맞춰 강해져요</b>: 체력은 팀 화력에 맞춰(단계마다 더 오래 버팀), 공격은 팀 체력에 맞춰 세져요. 악몽에서 키운 강한 캐릭터로 순식간에 녹이던 문제 수정'],
+    ['enemy','🗿 레이드에서 궁극기는 거신 최대 체력의 <b>3%까지만</b> 깎아요'],
+    ['change','🏆 도전과제·칭호 알림이 여러 개 한꺼번에 떠도 겹치지 않고 차례로, 아래 줄에 이어서 떠요']]},
   {v:100,t:'☠ 악몽 단축 · 건물 충돌 · 이스터에그 보너스',items:[
     ['enemy','☠ <b>악몽이 훨씬 빡세져요</b>: 압박(적 피해·체력·속도 상승, 한 방 상한 풀림, 결계)이 10분 → <b>6분</b>부터, 징조는 8분부터'],
     ['enemy','☠ 새 공격 <b>악몽의 파동</b> (9분부터): 화면 전체가 붉게 물들고 <b>빛의 원</b>이 생겨요. 시간이 다 되면 원 밖은 <b>즉사</b> (대시 무적·보호막으로도 못 막음). 갈수록 자주 오고 원은 적고 작아져요'],
@@ -7174,7 +7187,7 @@ const PATCH_NOTES=[
     ['enemy','⚠ <b>보스 패턴</b>(예고 장판·돌진·레이저 같은 큰 공격)의 피해가 <b>×1.4</b>로 세졌어요 (일반 난이도 ×1.2). 한 방 피해 상한도 같이 올라서, 맞으면 정말 아파요 — <b>꼭 피하세요!</b> 대시로 받아내면 완벽한 회피 보너스'],
     ['change','🗺 사냥·제단·상자 수호자·현상금 같은 이벤트 정예와 보스가 부르는 졸개도 <b>지금 배경에 사는 몬스터</b> 중에서 나와요. 다른 배경 몬스터가 섞여 나오던 문제 수정'],
     ['change','🔔 증강을 고른 뒤처럼 알림이 여러 개 한꺼번에 뜨면, 겹치지 않고 <b>하나씩 차례로 쌓여서</b> 천천히 사라져요'],
-    ['change','🃏 스탯 카드의 공격력·공격 속도·최대 체력·이동 속도 줄에 <b>실제로 몇 % 오르는지</b>가 같이 보여요 (예: 공격력 +4.1 (+37 · 실제 +15%)). 숫자 카드와 % 카드 중 뭐가 더 센지 바로 비교!'],
+    ['change','🃏 스탯 카드의 공격력·공격 속도·최대 체력·이동 속도 줄 아래에 <b>실제로 오르는 양</b>이 보여요 (예: 공격력 +4.1 ↵ 실적용 +37 (+15%)). 숫자 카드와 % 카드 중 뭐가 더 센지 바로 비교!'],
     ['change','🥚 같은 건축물(예: 허수아비)이 맵에 여러 채 있을 때 이스터에그가 연달아 다시 터지던 문제 수정: <b>이스터에그는 종류마다 한 판에 한 번</b>. 한 번 찾으면 같은 종류 건축물 위의 ❔도 사라져요'],
     ['nerf','🃏 <b>퍼센트 스탯 카드</b>(유리 대포·힘의 물약·강철 심장 등)가 레벨이 오를수록 너무 커져서(한 장에 +50% 이상) 그동안 올린 스탯을 무의미하게 만들던 문제 수정: 레벨과 상관없이 고정, 전설 등급도 ×2까지만 (예: 영웅 유리 대포 최대 +51% → 약 +27%). 카드에 <b>실제 몇 % 오르는지</b>가 같이 보여서 숫자 카드(숫돌 등)와 비슷한 가치로 맞췄어요'],
     ['change','🦇 박쥐·🦋 나비·제왕나비 날개를 더 정교하게 다시 그렸어요 (뼈대·막 그라데이션, 날개 무늬·눈알 무늬)'],
@@ -7590,6 +7603,9 @@ const roleOf=c=>RAID_ROLE[c]||RAID_DPS;
 // 직접 조작할 때 '저장 당시 최대 DPS' 대비 거신에게 실제로 들어가는 비율 (측정값. 잡몹 무리에 강한 광역 직업은 낮음)
 const RAID_HAND={knight:.07,paladin:.075,necro:.04,mage:.14,archer:.155,druid:.135,berserk:.15};
 const RAID_TOK=3; // 부활 기회 (팀 공유): 동료를 일으키거나 내가 쓰러졌을 때 1회씩 씀
+// 거신 체력 = max(단계 기본값, 팀 예상 초당 피해 × 단계별 목표 시간). 악몽에서 키운 캐릭터는 DPS가 수천만이라 고정 체력이면 순식간에 녹음
+// 거신 피해 = max(단계 기본값, 팀 평균 최대 체력 × 단계별 비율). 팀이 강할수록 거신도 같이 강해짐
+const RAID_SEC=[55,80,105,135,165],RAID_HIT=[.07,.09,.11,.14,.17];
 const RAID_HP=[4.5e6,1.9e7,8.2e7,3.5e8,1.5e9],RAID_DMG=[350,520,780,1170,1750],RAID_MEDAL=[150,250,400,600,900],RAID_PAR=240;
 const raidOn=()=>!!(S&&dfM().raid);
 let DEV_RAID_TEST=false;
@@ -7606,12 +7622,12 @@ function beginRaid(tier,ids){const L=myHeroes(),hs=ids.map(id=>L.find(h=>h.id===
   S.augs=(me.augs||[]).map(([id,lv,q,pq,dl])=>{const f=[...FUSIONS,...VFUSIONS].find(x=>x.id===id);if(f){const o=fusionObj(f);if(pq)o.pq=pq;return o;}const a=AUGS.find(x=>x.id===id)||VIPS.find(x=>x.id===id)||DRAGON.find(x=>x.id===id);return a?{...a,lv,q:q||1,dl:dl||undefined}:null;}).filter(Boolean);
   tagCount();S.noAug=true;S.started=true;S.raidMe=me.id;S.raidTok=RAID_TOK;S.raidIds=hs.map(h=>h.id);
   const p=S.p;p.x=WW/2;p.y=WH/2+60;hpSync();p.hp=p.maxHp;p.inv=2;p.alive=true;p.barrier=barrierMax();
-  S.allies=hs.slice(1).map(allyOf);raidRoles();S.rushT=3;S.mode='play';hide();
+  S.allies=hs.slice(1).map(allyOf);S.raidTeam={d:heroD(me)+S.allies.reduce((a,q)=>a+q.dps,0),h:[me,...hs.slice(1)].reduce((a,h)=>a+Math.max(200,((h.p||{}).maxHp||200)*(1+(h.aw||0)*awHp())),0)/hs.length};raidRoles();S.rushT=3;S.mode='play';hide();
   S.arena={x:WW/2,y:WH/2-100,r:1400,tr:1100};
   toast(`⚔ 레이드 ${tier+1}단계 「${RAID_N[tier]}」 · 동료 ${S.allies.length}명과 함께!`);}
 function spawnRaidBoss(){const t=S.raidTier||0,A=S.arena;S.bossI=0;S.bossT=['raidboss'];S.tele=[];S.hz=[];S.bStart=S.bt||0;S.bHit=0;
   spawnAt('raidboss',A.x,A.y-120,true);const b=S.en[S.en.length-1];b.spr='bossG';b.bsc=2.4;b.flt='hue-rotate(215deg) saturate(1.5) brightness(.85)';b.noFlash=1;b.r=ET.raidboss.r;
-  b.maxHp=b.hp=RAID_HP[t];b.dmg=b.baseDmg=RAID_DMG[t];b.bk=0;go(b,'intro');S.boss=b;S.shake=.6;S.flash=.3;S.bannerT=0;
+  const tm=S.raidTeam||{d:0,h:0};b.maxHp=b.hp=Math.round(Math.max(RAID_HP[t],tm.d*RAID_SEC[t]));b.dmg=b.baseDmg=Math.round(Math.max(RAID_DMG[t],tm.h*RAID_HIT[t]));b.bk=0;go(b,'intro');S.boss=b;S.shake=.6;S.flash=.3;S.bannerT=0;
   toast(`🗿 ${RAID_N[t]} 등장! 예고 공격을 피하고, 쓰러진 동료 곁에 서 있으면 일으켜 세울 수 있어요`);}
 // 거신이 노릴 대상: 나와 살아 있는 동료 중 하나 (나를 조금 더 자주)
 function raidTargets(){const L=[S.p].filter(q=>q.alive);for(const a of S.allies||[])if(a.alive)L.push(a);return L;}
@@ -7872,13 +7888,14 @@ function drawRival(e){const x=e.x,y=e.y,R=e.r;ctx.save();ctx.fillStyle='rgba(0,0
   const O=S.duel&&S.duel.opp;if(O){const A=O.t&&ACH.find(a=>a.k===O.t);ctx.font='12px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.75)';const nm=(A?'「'+A.n+'」 ':'')+O.n;ctx.strokeText(nm,x,y-R*3.4);ctx.fillStyle='#ff9a9a';ctx.fillText(nm,x,y-R*3.4);}
   ctx.restore();}
 function duelOver(win){if(S.duelDone)return;S.duelDone=1;S.mode='over';joy=null;clearSave();const draw=win==='draw';win=win===true;const D=S.duel||{},R=duelRec(),t=Math.round((S.bt||0)-(S.bStart||0)),me=myHeroes().find(h=>h.id===D.me);
-  const W=duelReward(D.r||1,D.opp),prac=W.prac,medals=win?W.w:draw?W.d:W.l;
+  // 내 캐릭터(보관함·내 이름의 전당 기록)와의 결투는 연습: 전적·보상 없음
+  const selfD=!!(D.opp&&(D.opp.src==='🗃 내 캐릭터'||(D.opp.hof&&D.opp.hof.name&&D.opp.hof.name===myNick()))),W=duelReward(D.r||1,D.opp),prac=W.prac||selfD,medals=prac?0:win?W.w:draw?W.d:W.l;
   if(!prac){if(win)R.w++;else if(draw)R.d=(R.d||0)+1;else R.l++;if(win&&D.opp)R.best=Math.max(R.best||0,D.opp.s||0);if(win)duelFarmAdd(D.opp);}
   duelLogAdd(me,D,win?'w':draw?'d':'l',t,prac);
   META.medals+=medals;META.total+=medals;saveMeta();if(!prac)duelPush();achCheck({duelW:R.w,upset:win&&(D.r||1)>=2});
   const hp=S.boss&&S.boss.alive?Math.round(S.boss.hp/S.boss.maxHp*100):0;
   show(`<h2>${win?'🏆 결투 승리!':draw?(D.ko?'🤝 무승부 (서로 쓰러짐)':'🤝 무승부'):'💀 결투 패배'}</h2><p class="sub">${me?esc(heroName(me)):'?'} vs ${D.opp?esc(D.opp.n)+' ('+CLASSES[D.opp.c].n+')':'?'} · 상대 전투력 ×${(D.r||1).toFixed(2)}</p>
-  <div class="medal"><span>${win?`걸린 시간 <b>${Math.floor(t/60)}분 ${t%60}초</b>`:`상대 남은 체력 <b>${hp}%</b>${draw?` · 내 체력 <b>${Math.round(Math.max(0,S.p.hp)/S.p.maxHp*100)}%</b>`:''}`}</span><span>🏅 메달 <b>+${medals}</b> <small>(보유 ${META.medals})</small></span></div>${prac?`<p class="sub" style="text-align:center;color:#ffb070">🥋 연습 경기: 상대 전투력이 내 절반도 안 돼서 전적·보상이 없어요</p>`:W.half?`<p class="sub" style="text-align:center;color:#ffb070">오늘 이미 이긴 상대라 승리 보상이 줄었어요</p>`:''}
+  <div class="medal"><span>${win?`걸린 시간 <b>${Math.floor(t/60)}분 ${t%60}초</b>`:`상대 남은 체력 <b>${hp}%</b>${draw?` · 내 체력 <b>${Math.round(Math.max(0,S.p.hp)/S.p.maxHp*100)}%</b>`:''}`}</span><span>🏅 메달 <b>+${medals}</b> <small>(보유 ${META.medals})</small></span></div>${prac?`<p class="sub" style="text-align:center;color:#ffb070">🥋 연습 경기: ${selfD?'내 캐릭터와의 결투라':'상대 전투력이 내 절반도 안 돼서'} 전적·보상이 없어요</p>`:W.half?`<p class="sub" style="text-align:center;color:#ffb070">오늘 이미 이긴 상대라 승리 보상이 줄었어요</p>`:''}
   <div class="stats"><span>전체 전적</span><span>${R.w}승 ${R.d||0}무 ${R.l}패</span>${me?`<span>${esc(heroName(me))} 전적</span><span>${wdl(heroDRec(me.id))}</span>`:''}<span>이긴 가장 강한 상대</span><span>${R.best?R.best.toLocaleString()+'점':'-'}</span></div>${duelLogHtml()}
   <div class="btnrow"><button class="btn primary" id="dlAgain">다시 도전</button><button class="btn" id="dlBack">상대 고르기</button><button class="btn ghost" id="dlHome">시작 화면</button></div>`);
   $('dlAgain').onclick=()=>{newRun();const m=myHeroes().find(h=>h.id===D.me);if(m&&D.opp)duelPreview(m,D.opp);else openDuel();};$('dlBack').onclick=()=>{newRun();openDuel();};$('dlHome').onclick=()=>{newRun();startScreen();};}
@@ -9160,28 +9177,26 @@ async function hofStatOpen(b){if(!b)return;let w=document.getElementById('hofSt'
 function hofTipHide(){const t=document.getElementById('hofTip');if(t)t.style.display='none';}
 function boardHtml(){
   const hd=HOF_KEYS.includes(HOF_DIFF)?HOF_DIFF:'nightmare';
-  const head=`<h2>🏆 명예의 전당</h2><div class="dtabs">${HOF_KEYS.map(k=>`<button class="btn ${k===hd?'primary':''}" data-hd="${k}">${HOF_TAB[k]}</button>`).join('')}</div><p class="hsub">${hd==='raid'?'높은 단계 → 빠른 처치 순':hd==='duel'?'':DIFF[hd].n+' 난이도 순위'}</p>`;
+  const head=`<h2>🏆 명예의 전당</h2><div class="dtabs hof3">${HOF_KEYS.map(k=>`<button class="btn ${k===hd?'primary':''}" data-hd="${k}">${HOF_TAB[k]}</button>`).join('')}</div><p class="hsub">${hd==='raid'?'높은 단계 → 빠른 처치 순':hd==='duel'?'':DIFF[hd].n+' 난이도 순위'}</p>`;
   const note=t=>head+`<p class="sub" style="text-align:center;margin:0">${t}</p>`;
-  if((hd==='raid'||hd==='duel')&&RSTATE!=='loading'&&RSTATE!=='err'){
-    const row=(i,nm,mid,right)=>`<div class="rrow"><span class="rn">${i+1}</span><span class="rnm"><b>${esc(String(nm).slice(0,12))}</b></span><span class="rc">${mid}</span><span class="rs">${right}</span></div>`;
-    if(hd==='raid'){const L=(BOARD||[]).filter(b=>b.diff==='raid').sort((a,b)=>b.lvl-a.lvl||a.time-b.time).slice(0,30);
-      if(!L.length)return note('아직 레이드 기록이 없어요. 레이드를 깨면 내 이름으로 자동으로 올라가요.');
-      return head+`<div class="rank">${L.map((b,i)=>row(i,b.name,`${esc(b.comment||'')}`,`<b>${b.lvl}단계</b> · ${Math.floor(b.time/60)}분 ${b.time%60}초`)).join('')}</div>`;}
-    const M={};for(const b of BOARD||[]){if(!b.dw||!b.name)continue;const o=M[b.name];if(!o||(b.dw.w+b.dw.d+b.dw.l)>(o.w+o.d+o.l))M[b.name]=b.dw;}
-    const L=Object.entries(M).filter(([,d])=>d.w+d.d+d.l>0).sort((a,b)=>b[1].w-a[1].w||(b[1].w/(b[1].w+b[1].d+b[1].l))-(a[1].w/(a[1].w+a[1].d+a[1].l))).slice(0,30);
-    if(!L.length)return note('아직 결투 전적이 없어요.');
-    return head+`<p class="hsub">결투 승리 순 (같으면 승률)</p><div class="rank">${L.map(([n,d],i)=>row(i,n,`${d.w}승 ${d.d}무 ${d.l}패`,`승률 <b>${Math.round(d.w/(d.w+d.d+d.l)*100)}%</b>`)).join('')}</div>`;}
   if(RSTATE==='off')return note('랭킹 서버에 연결하지 못했어요. 인터넷 연결을 확인해주세요.');
   if(RSTATE==='loading')return note('랭킹 불러오는 중…');
   if(RSTATE==='err')return note('랭킹을 불러오지 못했어요.');
-  const B=(BOARD||[]).filter(b=>b.diff===hd);
-  if(!B.length)return note(`아직 ${DIFF[hd].n} 난이도 기록이 없어요. 첫 기록의 주인공이 되어보세요.`);
+  // 결투: 이름마다 결투 전적(dw)이 있는 기록 하나(가장 높은 점수의 캐릭터)를 골라 승리 → 승률 순. 레이드: 높은 단계 → 빠른 처치 순(점수 순과 같음)
+  const dwN=d=>d?d.w+d.d+d.l:0,wr=d=>dwN(d)?d.w/dwN(d):0;
+  const B=hd==='duel'?(()=>{const M={};for(const b of BOARD||[]){if(!dwN(b.dw)||!b.name||b.diff==='raid')continue;const o=M[b.name];if(!o||(b.score||0)>(o.score||0))M[b.name]=b;}return Object.values(M).sort((a,b)=>b.dw.w-a.dw.w||wr(b.dw)-wr(a.dw));})():(BOARD||[]).filter(b=>b.diff===hd);
+  if(!B.length)return note(hd==='duel'?'아직 결투 전적이 없어요. 다른 사람 캐릭터와 결투해 이겨 보세요!':hd==='raid'?'아직 레이드 기록이 없어요. 레이드를 깨면 내 이름으로 자동으로 올라가요.':`아직 ${DIFF[hd].n} 난이도 기록이 없어요. 첫 기록의 주인공이 되어보세요.`);
   const f=x=>`${Math.floor(x/60)}:${String(Math.floor(x%60)).padStart(2,'0')}`;
   const me=b=>SHEET?(b.name&&b.name===myNick()):!!RMYID&&String(b.id).startsWith(RMYID);
   const cn=b=>CLASSES[b.cls]?CLASSES[b.cls].n:'?';
   const nm=b=>`<span class="hn ${b.fx?'hx-'+b.fx:''}">${FX_PRE[b.fx]||''}${esc(b.name.slice(0,12)||'이름 없음')}</span>${DEV&&recVer(b)?`<small title="이 기록을 세운 게임 버전 (~는 기록 시각으로 추정)" style="margin-left:4px;padding:0 4px;border-radius:4px;background:rgba(95,201,217,.22);color:#9fe8ff;font-size:11px">${recVer(b)}</small>`:''}${(()=>{const A=b.title&&ACH.find(a=>a.k===b.title);return A?`<small class="htt">「${A.n}」</small>`:'';})()}${b.local?'<small title="서버에 아직 반영되지 않은 이 기기의 기록" style="opacity:.7"> 📱</small>':''}`;
-  HOF_B=B;const del=i=>DEV?`<button class="hdel" data-del="${i}" title="이 기록 삭제 (개발자)">🗑</button>`:'';const top=B.slice(0,3).map((b,i)=>`<div data-hi="${i}" class="pcard p${i+1} ${me(b)?'me':''} ${b.frame?'fr-'+b.frame:''} ${b.fx?'hc-'+b.fx:''}">${del(i)}<span class="pm">${['🥇','🥈','🥉'][i]}</span>${(()=>{const a=hofAv(b.cls,b.skin,b.aura,b.gear,recLook(b));return a?`<img class="hav" src="${a}" alt="">`:'';})()}<span class="pn">${nm(b)}</span><span class="pc">${DIFF[b.diff]&&DIFF[b.diff].rush?'⚔ '+(+b.bosses||0)+'단계 돌파 · ':DIFF[b.diff]&&DIFF[b.diff].endless?'☠ '+((+b.bosses||0)+1)+'단계 · ':b.bosses>=4?'👑 클리어 · ':''}${cn(b)} · Lv ${b.lvl} · ${f(b.time)}</span><span class="ps">${b.score.toLocaleString()}점</span><span class="pq ${b.comment?'':'empty'}">${b.comment?'“'+esc(b.comment.slice(0,40))+'”':'한마디 없음'}</span></div>`).join('');
-  const rest=B.slice(3,HOF_ALL?30:7).map((b,i)=>`<div data-hi="${i+3}" class="rrow ${me(b)?'me':''} ${b.frame?'fr-'+b.frame:''} ${b.fx?'hc-'+b.fx:''}">${del(i+3)}<span class="rn">${i+4}</span><span class="rnm"><b>${(()=>{const a=hofAv(b.cls,b.skin,b.aura,b.gear,recLook(b));return a?`<img class="hav s" src="${a}" alt="">`:'';})()}${nm(b)}${me(b)?' (나)':''}</b>${b.comment?`<i>“${esc(b.comment.slice(0,40))}”</i>`:''}</span><span class="rc">${DIFF[b.diff]&&DIFF[b.diff].rush?'⚔'+(+b.bosses||0)+'단계 ':DIFF[b.diff]&&DIFF[b.diff].endless?'☠'+((+b.bosses||0)+1)+'단계 ':b.bosses>=4?'👑 ':''}${cn(b)}<br>Lv ${b.lvl} · ${f(b.time)}</span><span class="rt">${b.score.toLocaleString()}</span></div>`).join('');
+  const pcT=b=>hd==='duel'?`⚔ ${b.dw.w}승 ${b.dw.d}무 ${b.dw.l}패 · ${cn(b)}`:hd==='raid'?`🗿 ${b.lvl}단계 「${RAID_N[b.lvl-1]||''}」 · ${cn(b)}`:`${DIFF[b.diff]&&DIFF[b.diff].rush?'⚔ '+(+b.bosses||0)+'단계 돌파 · ':DIFF[b.diff]&&DIFF[b.diff].endless?'☠ '+((+b.bosses||0)+1)+'단계 · ':b.bosses>=4?'👑 클리어 · ':''}${cn(b)} · Lv ${b.lvl} · ${f(b.time)}`;
+  const psT=b=>hd==='duel'?`${b.dw.w}승 <small style="font-size:.6em;opacity:.8">승률 ${Math.round(wr(b.dw)*100)}%</small>`:hd==='raid'?`${Math.floor(b.time/60)}분 ${b.time%60}초`:`${b.score.toLocaleString()}점`;
+  const rcT=b=>hd==='duel'?`${cn(b)}<br>${b.dw.w}승 ${b.dw.d}무 ${b.dw.l}패`:hd==='raid'?`🗿 ${b.lvl}단계<br>${cn(b)}`:`${DIFF[b.diff]&&DIFF[b.diff].rush?'⚔'+(+b.bosses||0)+'단계 ':DIFF[b.diff]&&DIFF[b.diff].endless?'☠'+((+b.bosses||0)+1)+'단계 ':b.bosses>=4?'👑 ':''}${cn(b)}<br>Lv ${b.lvl} · ${f(b.time)}`;
+  const rtT=b=>hd==='duel'?`${b.dw.w}승 · ${Math.round(wr(b.dw)*100)}%`:hd==='raid'?`${Math.floor(b.time/60)}:${String(b.time%60).padStart(2,'0')}`:b.score.toLocaleString();
+  const cmT=b=>hd==='raid'?(b.comment?'🤝 '+esc(b.comment.slice(0,40)):''):b.comment?'“'+esc(b.comment.slice(0,40))+'”':'';
+  HOF_B=B;const del=i=>DEV&&hd!=='duel'?`<button class="hdel" data-del="${i}" title="이 기록 삭제 (개발자)">🗑</button>`:'';const top=B.slice(0,3).map((b,i)=>`<div data-hi="${i}" class="pcard p${i+1} ${me(b)?'me':''} ${b.frame?'fr-'+b.frame:''} ${b.fx?'hc-'+b.fx:''}">${del(i)}<span class="pm">${['🥇','🥈','🥉'][i]}</span>${(()=>{const a=hofAv(b.cls,b.skin,b.aura,b.gear,recLook(b));return a?`<img class="hav" src="${a}" alt="">`:'';})()}<span class="pn">${nm(b)}</span><span class="pc">${pcT(b)}</span><span class="ps">${psT(b)}</span><span class="pq ${cmT(b)?'':'empty'}">${cmT(b)||'한마디 없음'}</span></div>`).join('');
+  const rest=B.slice(3,HOF_ALL?30:7).map((b,i)=>`<div data-hi="${i+3}" class="rrow ${me(b)?'me':''} ${b.frame?'fr-'+b.frame:''} ${b.fx?'hc-'+b.fx:''}">${del(i+3)}<span class="rn">${i+4}</span><span class="rnm"><b>${(()=>{const a=hofAv(b.cls,b.skin,b.aura,b.gear,recLook(b));return a?`<img class="hav s" src="${a}" alt="">`:'';})()}${nm(b)}${me(b)?' (나)':''}</b>${cmT(b)?`<i>${cmT(b)}</i>`:''}</span><span class="rc">${rcT(b)}</span><span class="rt">${rtT(b)}</span></div>`).join('');
   const more=B.length>7?`<button class="btn more" id="hofMore">${HOF_ALL?'접기':`전체 순위 보기 (${Math.min(B.length,30)}위까지)`}</button>`:'';
   return head+`<div class="podium">${top}</div>${rest?`<div class="rank">${rest}</div>`:''}${more}`;
 }
@@ -9192,10 +9207,11 @@ async function hofDel(b){const nm=String(b.name||''),df=b.diff;if(!DEV||!nm)retu
   if(!confirm(`「${nm}」의 ${DIFF[df]?DIFF[df].n:df} 기록을 명예의 전당에서 지울까요?\n되돌릴 수 없어요.`))return;
   const dropLocal=()=>{try{const m=myRecs();if(m[df]&&(m[df].name===nm||b.local)){delete m[df];localStorage.setItem('chanseo_myrec',JSON.stringify(m));}}catch(e){}};
   if(b.local){dropLocal();BOARD=(BOARD||[]).filter(x=>x!==b);refreshBoard();toast('이 기기의 기록을 지웠어요');return;}
-  if(!SHEET_URL){toast('서버 주소가 없어요');return;}if(SRV_V&&SRV_V<53){toast('서버 v5.3이 필요해요 (ranking_server.gs 다시 붙여넣기)');return;}
+  if(!SHEET_URL){toast('서버 주소가 없어요');return;}
   try{const r=await fetch(SHEET_URL+'?delrec='+encodeURIComponent(nm)+'&diff='+encodeURIComponent(df)+'&dk='+encodeURIComponent(DEV_K),{cache:'no-store'});const j=await r.json();
     if(j&&j.ok){dropLocal();BOARD=(BOARD||[]).filter(x=>!(x.name===nm&&x.diff===df));refreshBoard();toast(`🗑 「${nm}」 기록 ${j.n||0}줄 삭제`);}
-    else toast(j&&j.err==='key'?'개발자 키가 맞지 않아요':j&&j.err?'삭제 실패: '+j.err:'서버 v5.3이 필요해요 (ranking_server.gs 다시 붙여넣기)');}
+    else if(Array.isArray(j))alert(`서버가 아직 삭제 기능이 없는 예전 버전으로 응답했어요 (지금 서버 ${SRV_V?'v'+(SRV_V/10).toFixed(1):'버전 확인 안 됨'}).\n\nApps Script에서 코드를 붙여넣은 뒤 꼭\n배포 → 배포 관리 → 연필(수정) → 버전: 「새 버전」 → 배포\n를 눌러야 실제 서버가 바뀌어요. (저장만 하면 예전 버전이 계속 돌아가요)`);
+    else toast(j&&j.err==='key'?'개발자 키가 맞지 않아요':j&&j.err?'삭제 실패: '+j.err:'삭제 실패');}
   catch(e){toast('삭제 실패 (인터넷 확인)');}}
 async function submitScore(nick,comment,run){
   const msg=document.getElementById('rmsg'),btn=document.getElementById('rsub');const say=t=>{if(msg)msg.textContent=t;};
@@ -9804,7 +9820,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=100,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=101,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
