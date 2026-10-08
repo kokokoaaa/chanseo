@@ -403,8 +403,9 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 /* 모바일: 스탯·도감 버튼을 오른쪽에 세로로 쌓고, 정보창은 그 왼쪽 영역에서만 줄바꿈 → 글자와 버튼이 겹치지 않음 */
 @media (max-width:520px){#hud{padding-right:112px;font-size:15px;gap:3px 10px}#statBtn,#cxBtn{right:8px;padding:4px 6px;font-size:14px;width:86px;text-align:center}#onlHud .onlb{padding:3px 6px;font-size:13px}#statBtn{top:8px}#cxBtn{top:42px}#autoBar{top:78px;right:8px}#buffs{top:236px}#toast{top:150px;font-size:16px;max-width:86vw;text-align:center}}
 .bar .bf{background:#7fc4f2;opacity:.85}
-#st{position:absolute;inset:0;display:none;align-items:flex-start;justify-content:center;background:rgba(3,14,10,.88);padding:16px;overflow-y:auto;touch-action:auto;z-index:5}
+#st{position:absolute;inset:0;display:none;align-items:flex-start;justify-content:center;background:rgba(3,14,10,.88);padding:16px;overflow-y:auto;touch-action:auto;z-index:60}
 #st.on{display:flex}
+#st .panel>.shophead{cursor:move;user-select:none}#st .panel>.shophead button{cursor:pointer}
 .sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:6px 22px}
 .sgrp h3{margin:14px 0 6px;color:var(--brass)}
 .srow{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid rgba(241,231,207,.08);font-size:15px}
@@ -7081,9 +7082,10 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
-  {v:96,t:'🕊 날개·이름 효과·전당 테두리 + 스탯 창 정리',items:[
+  {v:97,t:'🕊 날개·이름 효과·전당 테두리 + 스탯 창 정리',items:[
     ['new','🕊 새 날개 11종! 박쥐·나비·제왕나비·벚꽃·요정·숲·기계·수정·지옥불·폭풍·세라핌 날개. 모양이 모두 달라요 (펄럭이는 박쥐 막, 무늬 나비, 떨리는 요정 날개, 빛줄기 흐르는 기계 판 등)'],
     ['new','✨ 명예의 전당 이름 효과 11종 추가: 용암·벚꽃·번개·심연·노을·숲·눈꽃·사탕·기사·달빛·우주'],
+    ['change','🪟 게임 중 스탯·도감 창이 위쪽 정보 띠에 가려지지 않게 맨 앞에 떠요. 창 제목줄을 잡고 끌면 원하는 곳으로 옮길 수 있어요 (제목줄을 두 번 누르면 제자리)'],
     ['change','📊 스탯 창이 처음엔 <b>숫자만</b> 보여요. 위쪽 <b>자세한 설명 ▼</b>을 누르면 줄마다 계산식·설명이 열리고, 다시 누르면 닫혀요 (고른 상태는 기억해요)'],
     ['new','🖼 외형 꾸미기에 <b>전당 테두리</b> 칸이 생겼어요! 명예의 전당 내 칸의 테두리를 꾸며요 (황금·덩굴·서리·벚꽃·불꽃·그림자·별빛·무지개·왕·용·우주 11종). 기록을 올릴 때 장착한 테두리가 같이 저장돼요']]},
   {v:92,t:'🏆 기록은 그 판의 모습으로',items:[
@@ -9490,6 +9492,15 @@ function openShop(back,m){
 /* ---------- stats ---------- */
 let statsOpen=false;
 const stEl=$('st');
+// 스탯·도감 창: 제목줄을 잡고 끌면 창이 움직임 (게임 중 다시 열어도 그 자리)
+let ST_OFF={x:0,y:0};
+function stDragApply(){const P=stEl.querySelector('.panel');if(P)P.style.transform=ST_OFF.x||ST_OFF.y?`translate(${ST_OFF.x}px,${ST_OFF.y}px)`:'';}
+stEl.addEventListener('pointerdown',e=>{const h=e.target.closest&&e.target.closest('.panel>.shophead');if(!h||e.target.closest('button,select,input'))return;
+  const sx=e.clientX,sy=e.clientY,ox=ST_OFF.x,oy=ST_OFF.y;h.setPointerCapture&&h.setPointerCapture(e.pointerId);
+  const mv=ev=>{ST_OFF={x:ox+ev.clientX-sx,y:oy+ev.clientY-sy};stDragApply();},up=()=>{h.removeEventListener('pointermove',mv);h.removeEventListener('pointerup',up);h.removeEventListener('pointercancel',up);};
+  h.addEventListener('pointermove',mv);h.addEventListener('pointerup',up);h.addEventListener('pointercancel',up);e.preventDefault();});
+new MutationObserver(stDragApply).observe(stEl,{childList:true});
+stEl.addEventListener('dblclick',e=>{if(e.target.closest&&e.target.closest('.panel>.shophead')&&!e.target.closest('button')){ST_OFF={x:0,y:0};stDragApply();}});
 function toggleStats(){statsOpen=!statsOpen;joy=null;{const pp=document.getElementById('stipPop');if(pp)pp.style.display='none';}if(statsOpen){renderStats();stEl.classList.add('on');}else{stEl.classList.remove('on');stEl.innerHTML='';}}
 $('statBtn').addEventListener('click',()=>{if(S&&S.mode!=='start'){if(cxGame)cxClose();toggleStats();}});
 $('buffs').addEventListener('click',e=>{if(e.target.closest('[data-dpsbox]')){DPSBOX=!DPSBOX;try{localStorage.setItem('chanseo_dpsbox',DPSBOX?'1':'0');}catch(x){}if(S)S._dpH=null;}});
@@ -9614,7 +9625,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=96,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=97,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
