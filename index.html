@@ -1021,51 +1021,46 @@ function decoAt(cx,cy,q){const h=hash(cx*3+q,cy*7-q);if(h>.62)return null;const 
 const LC=900;
 function lmAt(cx,cy){const h=hash(cx*13+5,cy*17+3);if(h>.35)return null;const x=cx*LC+150+hash(cx+31,cy-7)*(LC-300),y=cy*LC+150+hash(cx-19,cy+23)*(LC-300);
   if(x<120||y<120||x>WW-120||y>WH-120)return null;const B=BIOMES[S&&S.biome!=null?S.biome:0];if(!B.lm)return null;const k=B.lm[Math.floor(hash(cx+3,cy+9)*B.lm.length)],L=BART.LM[k];return {x,y,k,r:L[2]};}
-// 이스터에그: 건축물 앞에 5초 서 있으면 주인이 나와 한마디 함 (게임에는 영향 없음, 밀쳐내지 않음). 발견한 종류는 도감·칭호용으로 기록
+// 이스터에그: 배경마다 비밀 장소(건축물) 하나. 장소마다 다른 조건을 맞추면 주인이 나와 한마디 함 (게임에는 영향 없음, 밀쳐내지 않음). 발견한 종류는 도감·칭호용으로 기록
 // 도감용 건축물 이름
 const LM_N={cottage:'오두막',well:'우물',hut:'나무꾼 오두막',stones:'고인돌',barn:'헛간',haystack:'건초 더미',ruin:'폐허',witch:'마녀의 집',burnt:'불탄 집',pyramid:'피라미드',obelisk:'오벨리스크',igloo:'이글루',icespire:'얼음 첨탑',stilt:'수상 가옥',bigcrystal:'거대 수정',mine:'광산 입구',mausoleum:'납골당',chapel:'예배당',altar:'제단',obsidian:'흑요석 탑',windmill:'풍차',tent:'천막',shrine:'사당',camp:'야영지',scarecrow:'허수아비',tower:'망루',oasis:'오아시스',snowfort:'눈 요새',statue:'석상',wreck:'난파선',gate:'묘지 문',forge:'대장간',cursed:'저주받은 눈',minecart:'광차'};
-const EGG={cottage:['👵',['이 녀석아! 남의 집 앞에서 뭘 기웃거려?','우리 집 감자 훔쳐가려고 그러지?!','썩 꺼져! 빗자루 맛 좀 볼래?']],
- well:['🐸',['우물 안 개구리라고 무시하지 마라 개굴!','동전 던질 거 아니면 비켜!']],
- hut:['🧔',['도끼 들고 있는 거 안 보이냐? 저리 가!','장작 패는 중이다. 다치기 싫으면 비켜.']],
- stones:['🧙',['고대의 돌이 너를 거부한다…','여긴 신성한 곳이다. 신발은 벗고 와라.']],
- barn:['🐄',['음메에에! (꺼지라는 뜻)','우유는 안 판다 음메.']],
- haystack:['🐔',['꼬꼬댁! 알 낳는 중이야!','건초더미에서 바늘 찾냐? 꺼져!']],
- ruin:['👻',['여긴 내 폐허야… 우우우…','돌 하나라도 가져가면 저주할 거야.']],
- witch:['🧙‍♀️',['이히히! 마침 솥에 넣을 재료가 필요했는데?','두꺼비로 만들어 버리기 전에 사라져라!']],
- burnt:['🧑‍🚒',['불 다 꺼졌어! 구경 그만하고 가!','집 태운 거 너지? 너 맞지?']],
- pyramid:['🤴',['파라오의 잠을 깨운 자, 저주를 받으리라!','관광은 오전 9시부터다.']],
- obelisk:['🦅',['끼에엑! 내 둥지 건드리지 마!','여기 꼭대기는 내 자리다!']],
- igloo:['🐧',['펭! 여긴 펭귄 전용이다!','문 닫아! 찬바람 들어와!']],
- icespire:['⛄',['녹이지 마… 녹이지 마…','여기 서 있으면 너도 얼어붙는다.']],
- stilt:['🐊',['집 밑에서 뭐 하냐? 저녁거리 되고 싶어?','이 늪은 내 거다.']],
- bigcrystal:['🧚',['반짝이는 거 좋아하지? 만지면 손 잘라.','이 수정은 비매품입니다!']],
- mine:['👷',['안전모 없이는 출입 금지!','금 캐러 왔냐? 다 캤다, 돌아가.']],
- mausoleum:['💀',['조용히 해… 다들 자고 있잖아.','여기 자리 없다. 다음에 와.']],
- chapel:['👼',['회개하라!','헌금함은 오른쪽입니다.']],
- altar:['😈',['제물이 제 발로 오다니!','흐흐… 너의 영혼 냄새가 좋구나.']],
- obsidian:['🦎',['뜨거워! 뜨겁다고!','여기 앉으면 엉덩이 탄다.']],
- windmill:['👨‍🌾',['바람개비 구경 그만하고 밀가루나 사 가!','돌리지 마! 내가 돌려!']],
- tent:['🧕',['천막 안 들여다보지 마!','내 낙타 봤어? 못 봤으면 가.']],
- shrine:['🧘',['…명상 중이다. 방해하지 마라.','마음을 비우고 오너라. 그리고 지갑도.']],
- camp:['🧑‍🦰',['불 쬐러 왔냐? 자리 없어.','마시멜로는 내 거다.']],
- scarecrow:['🎃',['나… 사실 살아 있어.','까마귀보다 네가 더 무섭다.']],
- tower:['💂',['정지! 통행증을 보여라!','탑 위에서 다 지켜보고 있었다.']],
- oasis:['🐫',['퉤! (침 뱉음)','물은 공짜 아니다. 낙타세 내라.']],
- snowfort:['🧒',['눈싸움 하자! 받아라!','우리 요새 무너뜨리면 엄마한테 이를 거야!']],
- statue:['🗿',['……(석상이 고개를 돌린다)','움직이지 않는 척하는 것도 힘들다고.']],
- wreck:['🦜',['보물은 없다! 꽥!','배 고치는 중이야, 저리 가!']],
- gate:['🧛',['이 문은 산 자를 위한 것이 아니다.','밤 12시 이후에 다시 와라…']],
- forge:['⚒️',['장비 수리는 줄 서서!','뜨거운 쇳물 맛 좀 볼래?']],
- cursed:['👁️',['눈을 마주치지 마라…','심연이 너를 들여다본다.']],
- minecart:['🐀',['찍찍! 내 수레야!','타고 싶으면 표 끊어.']]};
+// 배경마다 비밀 장소 하나 (건축물 위에 ❔). 장소마다 찾는 방법이 다름 · [주인, 대사, 도감 힌트, 조건 종류, 값]
+const EGG={
+ well:['🐸',['우물 안 개구리라고 무시하지 마라 개굴!','첨벙거리지 마! 물 튄다 개굴!'],'우물 둘레에서 첨벙첨벙 대시를 3번 해 봐','dash',3],
+ stones:['🧙',['고대의 돌이 너를 받아들였다…','기다림을 아는 자로구나.'],'고인돌 앞에서 5초 동안 꼼짝 말고 기다려 봐','still',5],
+ scarecrow:['🎃',['까마귀 쫓아 줘서 고마워!','나… 사실 살아 있어.'],'허수아비 대신 밭을 지켜 줘 (근처에서 적 15마리 처치)','kill',15],
+ witch:['🧙‍♀️',['이히히! 다친 녀석이 제 발로 오다니?','물약 한 병 줄까? 공짜는 아니다!'],'다친 몸(체력 절반 아래)으로 마녀의 집 앞에 3초 머물러 봐','lowhp',3],
+ burnt:['🧑‍🚒',['불길 속에서도 한 대도 안 맞다니! 소방관 해라!','불 다 꺼졌어! 구경 그만하고 가!'],'불탄 집 곁에서 8초 동안 한 대도 맞지 말고 버텨 봐','nohit',8],
+ pyramid:['🤴',['파라오의 무덤을 한 바퀴 돌다니, 관광객이냐?','파라오의 잠을 깨운 자, 저주를 받으리라!'],'피라미드 둘레를 한 바퀴 빙 돌아 봐','circle',1],
+ igloo:['🐧',['펭! 너도 뒤뚱뒤뚱 걷는구나!','문 닫아! 찬바람 들어와!'],'이글루 앞에서 펭귄처럼 좌우로 뒤뚱뒤뚱 (6번 왔다 갔다)','wiggle',6],
+ wreck:['🦜',['보물이다! 꽥! 보물 냄새!','배 고치는 데 보태 줘, 꽥!'],'골드를 300 넘게 들고 난파선 곁에 가 봐','gold',300],
+ bigcrystal:['🧚',['수정이 너의 성장에 반짝였어!','반짝이는 거 좋아하지? 만지면 손 잘라.'],'거대 수정 곁에서 레벨업 해 봐','lvl',1],
+ statue:['🗿',['……(석상이 고개를 돌린다) 너 꽤 버티는구나.','움직이지 않는 척하는 것도 힘들다고.'],'석상처럼 10초 동안 꼼짝 말아 봐','still',10],
+ forge:['⚒️',['오, 그 기술 쓸 만한데? 망치질 좀 배워 볼래?','장비 수리는 줄 서서!'],'대장간 화로 앞에서 생존기(E)를 써 봐','skill',1]};
+const eggCnt=()=>Object.keys(EGG).filter(k=>(META.egg||{})[k]).length;
 function eggTick(dt){const p=S.p;if(!p.alive||S.npc)return;let best=null,bd=1e9;
-  for(let cx=Math.floor((p.x-300)/LC);cx<=Math.floor((p.x+300)/LC);cx++)for(let cy=Math.floor((p.y-300)/LC);cy<=Math.floor((p.y+300)/LC);cy++){const m=lmAt(cx,cy);if(!m)continue;const d=Math.hypot(m.x-p.x,m.y-12-p.y);if(d<m.r+90&&d<bd){bd=d;best=m;}}
-  const id=best?best.x+','+best.y:null;
-  if(id&&!p.moving){S.stoneT=(S.stoneT||0)+dt;if(S.stoneT>=60)achUnlock('h_stone');}else S.stoneT=0;
-  if(!id||id!==S.eggId){S.eggId=id;S.eggT=0;return;}
-  S.eggDone=S.eggDone||{};if(S.eggDone[id])return;S.eggT+=dt;if(S.eggT<5)return;
-  S.eggDone[id]=1;const E=EGG[best.k];if(!E)return;S.st.eggN=(S.st.eggN||0)+1;if(S.st.eggN>=5)achUnlock('h_egg5');if(S.st.eggN<=5)addBonus('egg',BONUS_PTS.egg);if(!(META.egg||{})[best.k])addBonus('eggNew',BONUS_PTS.eggNew);const line=E[1][Math.floor(Math.random()*E[1].length)];S.npc={x:best.x,y:best.y+34,em:E[0],txt:line,t:0,nm:LM_N[best.k]||''};toast(`🥚 이스터에그! ${LM_N[best.k]||'건물'} 주인이 나타났다`);for(let i=0;i<3;i++)burst(best.x+rand(-30,30),best.y-20+rand(-30,10),'#ffe27a',14);
-  META.egg=META.egg||{};if(!META.egg[best.k]){META.egg[best.k]=1;saveMeta();toast(`🥚 이스터에그 발견! (${Object.keys(META.egg).length}/${Object.keys(EGG).length})`);achCheck(null);}}
+  for(let cx=Math.floor((p.x-420)/LC);cx<=Math.floor((p.x+420)/LC);cx++)for(let cy=Math.floor((p.y-420)/LC);cy<=Math.floor((p.y+420)/LC);cy++){const m=lmAt(cx,cy);if(!m)continue;const d=Math.hypot(m.x-p.x,m.y-12-p.y);if(d<m.r+220&&d<bd){bd=d;best=m;}}
+  const near=!!best&&bd<best.r+90;
+  if(near&&!p.moving){S.stoneT=(S.stoneT||0)+dt;if(S.stoneT>=60)achUnlock('h_stone');}else S.stoneT=0;
+  const E=best&&EGG[best.k],id=E?best.x+','+best.y:null;
+  if(!id){S.eggId=null;return;}
+  S.eggDone=S.eggDone||{};if(S.eggDone[id])return;
+  if(id!==S.eggId){S.eggId=id;S.eggS={t:0,hp:p.hp,dash:S.st.dash||0,kill:S.st.kills||0,sk:S.st.sk||0,lv:S.lvl,ang:null,acc:0,px:p.x,sx:0,fl:0};}
+  const st=S.eggS,v=E[4];let ok=false;
+  switch(E[3]){
+    case 'dash':ok=(S.st.dash||0)-st.dash>=v;break;
+    case 'still':if(near&&!p.moving)st.t+=dt;else st.t=0;ok=st.t>=v;break;
+    case 'kill':ok=(S.st.kills||0)-st.kill>=v;break;
+    case 'lowhp':if(near&&p.hp<p.maxHp*.5)st.t+=dt;else st.t=0;ok=st.t>=v;break;
+    case 'nohit':if(p.hp<st.hp-.01)st.t=0;else if(near)st.t+=dt;st.hp=p.hp;ok=st.t>=v;break;
+    case 'circle':{const a=Math.atan2(p.y-best.y,p.x-best.x);if(st.ang!=null){let da=a-st.ang;while(da>Math.PI)da-=TAU;while(da<-Math.PI)da+=TAU;st.acc+=da;}st.ang=a;ok=Math.abs(st.acc)>=TAU*v;break;}
+    case 'wiggle':{const dx=p.x-st.px;st.px=p.x;if(near&&Math.abs(dx)>.3){const sg=Math.sign(dx);if(st.sx&&sg!==st.sx)st.fl++;st.sx=sg;}ok=st.fl>=v;break;}
+    case 'gold':if(near&&S.gold>=v)st.t+=dt;else st.t=0;ok=st.t>=1.5;break;
+    case 'lvl':if(!near)st.lv=S.lvl;ok=S.lvl>st.lv;break;
+    case 'skill':if(!near)st.sk=S.st.sk||0;ok=(S.st.sk||0)>st.sk;break;}
+  if(!ok)return;
+  S.eggDone[id]=1;S.st.eggN=(S.st.eggN||0)+1;if(S.st.eggN>=3)achUnlock('h_egg5');if(S.st.eggN>=5)achUnlock('h_eggall');if(S.st.eggN<=5)addBonus('egg',BONUS_PTS.egg);if(!(META.egg||{})[best.k])addBonus('eggNew',BONUS_PTS.eggNew);const line=E[1][Math.floor(Math.random()*E[1].length)];S.npc={x:best.x,y:best.y+34,em:E[0],txt:line,t:0,nm:LM_N[best.k]||''};toast(`🥚 이스터에그! ${LM_N[best.k]||'건물'} 주인이 나타났다`);for(let i=0;i<3;i++)burst(best.x+rand(-30,30),best.y-20+rand(-30,10),'#ffe27a',14);
+  META.egg=META.egg||{};if(!META.egg[best.k]){META.egg[best.k]=1;saveMeta();toast(`🥚 이스터에그 발견! (${eggCnt()}/${Object.keys(EGG).length})`);achCheck(null);}}
 function drawNpc(){const n=S.npc;if(!n)return;const k=Math.min(1,n.t/.25),out=n.t>4.2?Math.max(0,1-(n.t-4.2)/.4):1;if(out<=0)return;
   ctx.save();ctx.globalAlpha=out;
   // 발밑 금빛 원 + 반짝임: 이스터에그라는 게 한눈에 보이게
@@ -1086,12 +1081,14 @@ function solidsNear(x,y,rad){const out=[];const r=rad+80;
 function pushOut(e,rad){for(const o of solidsNear(e.x,e.y,rad)){const dx=e.x-o.x,dy=e.y-o.y,d=Math.hypot(dx,dy),m=rad+o.r;if(d<m){if(d<.01){e.x+=m;continue;}e.x=o.x+dx/d*m;e.y=o.y+dy/d*m;}}}
 function inSolid(x,y,rad){for(const o of solidsNear(x,y,rad))if((x-o.x)**2+(y-o.y)**2<(rad+o.r)**2)return true;return false;}
 // 나무는 바닥과 따로 모아 두었다가 캐릭터·몬스터와 발 위치 순서로 그림 (뒤에 있으면 가려짐, 반투명 처리 없음)
-const TREEV=[];
+const TREEV=[],EGGQ=[];
+// 이스터에그 장소 표시: 건축물 위에 둥실거리는 ❔ (찾은 곳은 사라짐)
+function drawEggQ(){if(!S||!S.p)return;const t=performance.now()/1000;for(const q of EGGQ){const by=q.y+Math.sin(t*2.4+q.x*.01)*4,a=.75+.25*Math.sin(t*3+q.y);ctx.save();ctx.globalAlpha=a;ctx.fillStyle='rgba(20,14,0,.55)';ctx.beginPath();ctx.arc(q.x,by,13,0,TAU);ctx.fill();ctx.strokeStyle='#ffe27a';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#ffe27a';ctx.font='bold 16px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('?',q.x,by+1);ctx.restore();}}
 function drawTree(t){pxDraw(t.img,t.x,t.y,t.img.width>>1,t.img.height-2);}
 // 길: 맵을 가로·세로로 지나는 구불구불한 길 2개씩
 const ROADS_H=[WH*.34,WH*.67],ROADS_V=[WW*.31,WW*.69],RW=64;
 const roadOff=(t,k)=>Math.sin(t/520+k*2.1)*110+Math.sin(t/190+k)*28;
-function drawWorldBg(){TREEV.length=0;
+function drawWorldBg(){TREEV.length=0;EGGQ.length=0;
   const x0=Math.max(0,camX-20),y0=Math.max(0,camY-20),x1=Math.min(WW,camX+W+20),y1=Math.min(WH,camY+H+20);
   const bi=S&&S.biome!=null?S.biome:0,pb=S&&S.prevBiome!=null?S.prevBiome:bi,tr=S&&S.biomeT>0?S.biomeT/3:0;
   // 맵 바깥: 배경색으로 채움 (검은 공간 대신)
@@ -1115,6 +1112,7 @@ function drawWorldBg(){TREEV.length=0;
     if(m.x+img.width<x0-40||m.x-img.width>x1+40||m.y<y0-40||m.y-img.height*1.6>y1+40)continue;
     ctx.fillStyle=BART.ROAD[bi][1];ctx.globalAlpha=.55;ctx.beginPath();ctx.ellipse(m.x,m.y+10,img.width*1.5,46,0,0,TAU);ctx.fill();ctx.fillStyle=BART.ROAD[bi][0];ctx.globalAlpha=.7;ctx.beginPath();ctx.ellipse(m.x,m.y+10,img.width*1.3,38,0,0,TAU);ctx.fill();ctx.globalAlpha=1;
     ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(m.x,m.y-2,img.width*.55,8,0,0,TAU);ctx.fill();TREEV.push({x:m.x,y:m.y,img,big:1});
+    if(EGG[m.k]&&!(S.eggDone&&S.eggDone[m.x+','+m.y]))EGGQ.push({x:m.x,y:m.y-img.height*1.6-14,k:m.k});
     // 건축물 주변 소품
     for(let i=0;i<5;i++){const a=hash(m.x+i,m.y)*TAU,r=img.width*1.6+hash(m.y,i)*60,k=B.deco[i%B.deco.length],di=BIO.deco(k);pxDraw(di,m.x+Math.cos(a)*r,m.y+20+Math.sin(a)*r*.45,di.width>>1,di.height-2);}}
   // 맵 끝: 테두리 밖으로 빽빽한 나무(배경별 나무)·바위 벽
@@ -4698,9 +4696,7 @@ function draw(){
      if(S.p.alive){drawPlayer(S.p);const P=S.p;if(P.skInvT>0||P.skDrT>0||P.skUndT>0){ctx.save();ctx.globalAlpha=.25+.12*Math.sin(S.t*10);ctx.fillStyle=P.skUndT>0?'#ff5a3a':P.skInvT>0?'#e8f4ff':'#9fd3ff';ctx.beginPath();ctx.arc(P.x,P.y-8,P.r+16,0,TAU);ctx.fill();ctx.globalAlpha=.8;ctx.strokeStyle=ctx.fillStyle;ctx.lineWidth=2;ctx.stroke();ctx.restore();}}
      else if(S.p.deadAt!=null&&HERO.canvas){const p=S.p;HERO.draw(S.cls||'knight','dead',(S.t-p.deadAt)/.16,0,false);{ctx.save();ctx.imageSmoothingEnabled=false;heroBlit(HERO.canvas,p.x,p.y+p.r+3,1,true);ctx.restore();}}}}
    ctx.imageSmoothingEnabled=true;}
-  drawBeams();drawNpc();if(S.abul)drawAllyShots();
-  // 이스터에그 힌트: 건축물 앞에 2초 넘게 서 있으면 ❔
-  if(S.eggT>2&&S.eggId&&!S.npc&&!(S.eggDone&&S.eggDone[S.eggId])){const [ex,ey]=S.eggId.split(',').map(Number);ctx.font='22px serif';ctx.textAlign='center';ctx.globalAlpha=.5+.5*Math.sin(S.t*8);ctx.fillText('❔',ex,ey-60-(S.eggT-2)*6);ctx.globalAlpha=1;}
+  drawBeams();drawEggQ();drawNpc();if(S.abul)drawAllyShots();
   const offV=(x,y,m=40)=>x<camX-m||x>camX+W+m||y<camY-m||y>camY+H+m;
   const trl=cosEq('trail');
   for(const b of S.pr){if(offV(b.x,b.y))continue;
@@ -5364,6 +5360,10 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:49,t:'🥚 이스터에그 새 단장',items:[
+    ['change','🥚 이스터에그를 <b>배경마다 한 곳</b>으로 정리했어요 (겹치던 건 지움). 건축물 위에 <b style="color:#ffe27a">❔</b>가 떠 있으면 그곳!'],
+    ['change','🥚 장소마다 <b>찾는 방법이 달라요</b>: 둘레 돌기, 대시, 펭귄 걸음, 다친 채로 찾아가기, 꼼짝 않고 기다리기 등. 📖 도감 이스터에그 탭에 힌트가 있어요'],
+    ['change','🏆 이스터에그 도전과제도 새 개수(11곳)에 맞췄어요']]},
   {v:48,t:'📋 직업별 추천 빌드',items:[
     ['change','🟢 같은 이름으로 창을 두 개 켜 두면 접속 중 목록에 두 번 나오던 것을 한 번만 나오게 했어요'],
     ['new','📋 캐릭터 선택에서 <b>모든 직업의 추천 빌드</b>를 볼 수 있어요 (어떤 특화 빌드가 있는지, 핵심 증강은 뭔지)']]},
@@ -6117,9 +6117,9 @@ const ACH=[
   {k:'a_boss16',n:'보스 수집가',d:'보스 16종 모두 처치',rw:'au_dragon',p:()=>[BOSS_POOL.flat().filter(b=>META.bk&&META.bk[b]).length,16],c:()=>BOSS_POOL.flat().every(b=>META.bk&&META.bk[b])},
   {k:'a_mob50',n:'몬스터 연구가',d:'몬스터 도감 절반 발견',p:()=>[Object.keys(ET).filter(k=>MOBINFO[k]&&META.mob[k]).length,Math.ceil(Object.keys(ET).filter(k=>MOBINFO[k]).length/2)],c:()=>{const L=Object.keys(ET).filter(k=>MOBINFO[k]);return L.filter(k=>META.mob[k]).length>=L.length/2;}},
   {k:'a_mob100',n:'몬스터 박사',d:'몬스터 도감 전부 발견',rw:'sk_crystal',p:()=>{const L=Object.keys(ET).filter(k=>MOBINFO[k]);return [L.filter(k=>META.mob[k]).length,L.length];},c:()=>Object.keys(ET).filter(k=>MOBINFO[k]).every(k=>META.mob[k])},
-  {k:'a_egg10',n:'동네 마실꾼',d:'이스터에그 10종 발견',p:()=>[Object.keys(META.egg||{}).length,10],c:()=>Object.keys(META.egg||{}).length>=10},
-  {k:'a_egg20',n:'참견쟁이',d:'이스터에그 20종 발견',p:()=>[Object.keys(META.egg||{}).length,20],c:()=>Object.keys(META.egg||{}).length>=20},
-  {k:'a_eggall',n:'전국 민폐왕',d:'이스터에그 전부 발견',p:()=>[Object.keys(META.egg||{}).length,Object.keys(EGG).length],c:()=>Object.keys(META.egg||{}).length>=Object.keys(EGG).length},
+  {k:'a_egg10',n:'동네 마실꾼',d:'이스터에그 4곳 발견',p:()=>[eggCnt(),4],c:()=>eggCnt()>=4},
+  {k:'a_egg20',n:'참견쟁이',d:'이스터에그 8곳 발견',p:()=>[eggCnt(),8],c:()=>eggCnt()>=8},
+  {k:'a_eggall',n:'전국 민폐왕',d:'이스터에그 전부 발견',p:()=>[eggCnt(),Object.keys(EGG).length],c:()=>eggCnt()>=Object.keys(EGG).length},
   {k:'a_uc',n:'한계 돌파',d:'고점 돌파 증강을 가진 채로 클리어',c:R=>R&&R.win&&R.uc},
   {k:'a_naked',n:'맨몸의 전설',d:'증강 3개 이하로 클리어',c:R=>R&&R.win&&R.augN<=3},
   // 히든 도전과제: 달성 전에는 이름·조건이 ???로 보임 (개발자 모드는 공개)
@@ -6128,8 +6128,8 @@ const ACH=[
   {k:'h_drg',hid:1,n:'아깝다!',d:'황금 용 체력을 10% 미만으로 깎고도 놓치기'},
   {k:'h_blind',hid:1,n:'눈 뜬 장님',d:'한 판에 숨겨진 몬스터 3마리 놓치기'},
   {k:'h_chart',sec:1,n:'차트 마스터',d:'차트를 꼬박꼬박 쓰는 모범 진료인 · 칭호를 달면 사령술사 해골 최대 +10'},
-  {k:'h_egg5',hid:1,n:'동네 단골손님',d:'한 판에 이스터에그 주인 5명 만나기'},
-  {k:'h_eggall',hid:1,n:'동네 마당발',d:'이스터에그 34곳 모두 발견',p:()=>[Object.keys(META.egg||{}).length,Object.keys(EGG).length],c:()=>Object.keys(META.egg||{}).length>=Object.keys(EGG).length},
+  {k:'h_egg5',hid:1,n:'동네 단골손님',d:'한 판에 이스터에그 3곳 발견'},
+  {k:'h_eggall',hid:1,n:'동네 마당발',d:'한 판에 이스터에그 5곳 발견'},
   {k:'h_stone',hid:1,n:'망부석',d:'건물 앞에서 1분 동안 꼼짝 않고 서 있기'},
   {k:'h_nodash',hid:1,n:'꿋꿋한 두 발',d:'대시를 한 번도 쓰지 않고 클리어',c:R=>R&&R.win&&!R.dash},
   {k:'h_1hp',hid:1,n:'구사일생',d:'체력 2% 이하로 떨어졌다가 10초 더 버티기'},
@@ -6542,11 +6542,11 @@ function cxList(){
     const DUR={},TIP={};for(const k in EVENTS){DUR[k]=EVENTS[k].T;TIP[k]=EVENTS[k].tip;}
     rows=[`<div class="sub" style="margin:4px 0">보스전이 아닐 때 85~110초마다 무작위로 하나 발생 (같은 이벤트는 연속으로 안 나옴, 보스 직전 45초엔 안 나옴). 등급이 높을수록 어렵고 보상이 큼: <b style="color:#cfe3c4">일반</b>(쉬어가기) · <b style="color:#7fc4f2">희귀</b>(골드·고급 카드) · <b style="color:#c86aff">영웅</b>(증강, 2분 30초부터) · <b style="color:#ffd76a">전설</b>(프리즘 증강, 5분부터)</div>`].concat(Object.keys(EVENTS).sort((a,b)=>'CBAS'.indexOf(EVENTS[a].g)-'CBAS'.indexOf(EVENTS[b].g)).filter(k=>hit(EVENTS[k].n,EVENTS[k].d,TIP[k])).map(k=>{const E=EVENTS[k],TR=evTier(k);return `<div class="cxrow" style="--rc:${TR.col}"><div class="h"><b>${E.icon} ${E.n}</b><span class="tg" style="color:${TR.col}">${TR.n}</span><span class="tg">⏱ ${DUR[k]}초</span></div><div class="d">${E.d}</div><div class="s">💡 팁: ${TIP[k]}</div></div>`;}));
   }else if(CX.tab==='egg'){
-    // 이스터에그: 발견한 것만 내용 공개 (개발자 모드는 전부). 못 찾은 건 어느 배경인지만 힌트
-    const bOf=k=>BIOMES.filter(B=>(B.lm||[]).includes(k)).map(B=>B.n).join(' · '),ks=Object.keys(EGG),fnd=DEV?ks.length:ks.filter(k=>(META.egg||{})[k]).length;
-    rows=[`<div class="sub" style="margin:4px 0">배경 곳곳의 건축물 앞에 <b>5초</b> 서 있으면 주인이 나와 한마디 해요. 발견 ${fnd} / ${ks.length} · 한 판에 5곳까지 ✨ 플레이 보너스, 처음 찾은 곳은 보너스 더!</div>`].concat(ks.filter(k=>{const sn=DEV||(META.egg||{})[k];return sn?hit(LM_N[k]||k,bOf(k),EGG[k][1].join(' ')):!qs.length;}).map(k=>{const E=EGG[k],sn=DEV||(META.egg||{})[k],me=(META.egg||{})[k];
-      return sn?`<div class="cxrow" style="--rc:#ffd76a"><div class="h"><b>${E[0]} ${LM_N[k]||k}</b><span class="tg">${bOf(k)}</span>${me?'<span class="tg" style="background:#2f8f4e;color:#fff">✔ 발견</span>':'<span class="tg">🛠 개발자 보기</span>'}</div><div class="d">${E[1].map(x=>`“${x}”`).join('<br>')}</div></div>`
-        :`<div class="cxrow" style="--rc:#555"><div class="h"><b>❓ ???</b><span class="tg">${bOf(k)}</span></div><div class="s">${bOf(k)} 어딘가의 건축물 앞에서 기다려 보세요</div></div>`;}));
+    // 이스터에그: 배경마다 한 곳. 못 찾은 곳도 어느 배경인지 + 찾는 방법 힌트를 보여 줌 (개발자 모드는 전부 공개)
+    const bOf=k=>BIOMES.filter(B=>(B.lm||[]).includes(k)).map(B=>B.n).join(' · '),ks=Object.keys(EGG),fnd=DEV?ks.length:eggCnt();
+    rows=[`<div class="sub" style="margin:4px 0">배경마다 <b>비밀 장소가 한 곳</b>씩 있어요. 건축물 위에 <b style="color:#ffe27a">❔</b>가 떠 있으면 그곳! 장소마다 찾는 방법이 달라요 (아래 힌트). 발견 ${fnd} / ${ks.length} · 한 판에 5곳까지 ✨ 플레이 보너스, 처음 찾은 곳은 보너스 더!</div>`].concat(ks.filter(k=>hit(LM_N[k]||k,bOf(k),EGG[k][2],(DEV||(META.egg||{})[k])?EGG[k][1].join(' '):'')).map(k=>{const E=EGG[k],sn=DEV||(META.egg||{})[k],me=(META.egg||{})[k];
+      return sn?`<div class="cxrow" style="--rc:#ffd76a"><div class="h"><b>${E[0]} ${LM_N[k]||k}</b><span class="tg">${bOf(k)}</span>${me?'<span class="tg" style="background:#2f8f4e;color:#fff">✔ 발견</span>':'<span class="tg">🛠 개발자 보기</span>'}</div><div class="s">💡 ${E[2]}</div><div class="d">${E[1].map(x=>`“${x}”`).join('<br>')}</div></div>`
+        :`<div class="cxrow" style="--rc:#555"><div class="h"><b>❓ ${LM_N[k]||'???'}</b><span class="tg">${bOf(k)}</span></div><div class="s">💡 힌트: ${E[2]}</div></div>`;}));
   }else if(CX.tab==='mob'){
     const mk=CX.mk||'',BW={};BIO_MOB.forEach((m,i)=>{for(const k in m)if(m[k]>=1.5)(BW[k]=BW[k]||[]).push(BIOMES[i].n);});
     const bossCh={};BOSS_POOL.forEach((L,i)=>L.forEach(k=>bossCh[k]=['1장','2장','3장','마지막 장'][i]));
@@ -7412,7 +7412,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=48,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=49,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
