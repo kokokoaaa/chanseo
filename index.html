@@ -5744,6 +5744,8 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:69,t:'↺ 초기화 버튼 정리',items:[
+    ['change','🏅 메달 상점의 초기화는 이제 <b>강화만</b> 되돌려요 (외형은 그대로). 산 외형 환불은 👕 <b>외형 꾸미기</b> 화면 아래 버튼으로 따로 해요. 도전과제 보상 외형은 환불해도 그대로 남아요']]},
   {v:68,t:'🏅 메달 상점 · 👕 외형 꾸미기',items:[
     ['change','🏅 <b>영구 강화</b>의 이름이 <b>메달 상점</b>으로 바뀌었어요'],
     ['new','👕 외형은 시작 화면의 <b>외형 꾸미기</b> 메뉴로 따로 나왔어요. 캐릭터 색·탄환 궤적·처치 효과·오라·이름 효과 <b>탭을 누르면 좌르륵</b> 펼쳐져요'],
@@ -6667,7 +6669,7 @@ const COS=[
   {k:'hf_dragon',cat:'hof',n:'용의 이름',d:'명예의 전당·채팅 이름 앞 🐉 + 불꽃 테두리',c:3500,x:{g:['#ff3d1f','#ffd040','#ff9a2a'],sp:1.4,pre:'🐉 ',box:'#ff7a2a'}}
 ];
 const COS_CAT={skin:'캐릭터 색',trail:'탄환 궤적',kill:'처치 효과',aura:'오라',hof:'명예의 전당'};
-// 초기화 환불 총액: 영구 강화 + 산 외형 전부
+// 초기화 환불 총액: 메달 상점 강화 + 산 외형 전부
 const cosSpent=()=>COS.reduce((q,x)=>q+(cosOwn(x.k)?x.c:0),0),allSpent=()=>metaSpent()+cosSpent();
 const cosOwn=k=>!!(META.cos&&META.cos.own&&META.cos.own[k]);
 // SPEC_OV: 관전 중에는 관전 대상의 겉모습(스킨·오라·이름 효과)·칭호를 씀
@@ -7109,6 +7111,7 @@ function openMeta(cosOnly){cosPreviewHide();
   <div class="mbal">보유 메달 <b>🏅 ${META.medals}</b><small>능력치 영향 없음 · 눌러서 장착/해제 · 마우스를 올리면 미리보기</small></div>
 <div class="cosTabs">${Object.keys(COS_CAT).map(cat=>{const L=COS.filter(x=>x.cat===cat&&(!x.hid||cosOwn(x.k))),e=cosEq(cat);return `<button class="cosTab ${cat===COS_TAB?'on':''}" data-ct="${cat}"><b>${COS_ICO[cat]} ${COS_CAT[cat]}</b><small>${L.filter(x=>cosOwn(x.k)).length}/${L.length} 보유</small><small class="ce">${e?'✔ '+e.n:'장착 없음'}</small></button>`;}).join('')}</div>
 <div class="mgrid ${COS_ANIM?'cosIn':''}">${COS.filter(x=>x.cat===COS_TAB&&(!x.hid||cosOwn(x.k))).sort((p,q)=>(p.ach?1:0)-(q.ach?1:0)||p.c-q.c).map((x,i)=>{const own=cosOwn(x.k),eq=cosEq(COS_TAB)===x;return `<button class="mtile sk ${eq?'max':''} ${own||medOk(x.c)?'':'poor'}" data-cs="${x.k}" style="--i:${i}"><b>${x.n}</b><span class="md">${x.d}</span><span class="mc">${eq?'✔ 장착 중':own?'장착하기':x.ach?'🏆 '+(ACH.find(a=>a.k===x.ach)||{}).n+' 달성 보상':'🏅 '+x.c}</span></button>`;}).join('')}</div>
+  <button class="btn ghost" id="cReset" ${cosSpent()?'':'disabled'}>↺ 산 외형 전체 환불 <small>🏅 ${cosSpent()} 환불 · 도전과제 보상 외형은 그대로</small></button>
   <button class="btn primary" id="mBack2">돌아가기</button>`);}
   else show(`<div class="shophead"><h2>🏅 메달 상점</h2><button class="btn" id="mBack">돌아가기</button></div>
   <div class="mbal">보유 메달 <b>🏅 ${META.medals}</b><small>지금까지 ${META.total}개 획득 · 강화는 모든 캐릭터, 모든 판에 적용</small></div>
@@ -7116,7 +7119,7 @@ function openMeta(cosOnly){cosPreviewHide();
   <h3>☠ 악몽 강화 <small style="color:var(--muted);font-size:13px">악몽이 열리면 살 수 있음 · 악몽의 각성·징조·생존기를 강하게</small></h3><div class="mgrid">${nst}</div>
   <h3>직업 숙련 <small style="color:var(--muted);font-size:13px">직업 봉인을 해제하면 열림 · 그 메커니즘을 쓰는 모든 판에 적용</small></h3><div class="mgrid">${cst}</div>
   <h3>영구 기술 <small style="color:var(--muted);font-size:13px">한 번 사면 계속 적용</small></h3><div class="mgrid">${sk}</div>
-  <button class="btn ghost" id="mReset" ${allSpent()?'':'disabled'}>↺ 전체 초기화 (외형 포함) <small>🏅 ${allSpent()} 환불</small></button>
+  <button class="btn ghost" id="mReset" ${metaSpent()?'':'disabled'}>↺ 강화 전체 초기화 <small>🏅 ${metaSpent()} 환불 · 외형은 그대로</small></button>
   <button class="btn primary" id="mBack2">돌아가기</button>`);
   const keepY=()=>{const y=ov.scrollTop;openMeta(cosOnly);ov.scrollTop=y;};
   const buy1=x=>{const c=mcost(x);if(!medOk(c)||mlv(x.k)>=x.max||(x.cls&&!clsOpen(x.cls))||(x.nm&&!diffOpen('nightmare')))return false;META.spent=metaSpent()+c;META.medals-=c;META.lv[x.k]=mlv(x.k)+1;return true;};
@@ -7132,7 +7135,9 @@ function openMeta(cosOnly){cosPreviewHide();
     if(!cosOwn(x.k)&&x.ach)return;
     if(!cosOwn(x.k)){if(!medOk(x.c))return;cosPreviewHide();META.medals-=x.c;META.cos.own[x.k]=1;META.cos.eq[x.cat]=x.k;}
     else META.cos.eq[x.cat]=META.cos.eq[x.cat]===x.k?null:x.k;saveMeta();keepY();});
-  if($('mReset'))$('mReset').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.innerHTML='한 번 더 누르면 외형까지 초기화 <small>🏅 '+allSpent()+' 환불</small>';return;}META.medals+=allSpent();META.spent=0;META.lv={};META.sk={};META.cos={own:{},eq:{}};saveMeta();keepY();};
+  if($('mReset'))$('mReset').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.innerHTML='한 번 더 누르면 강화 초기화 <small>🏅 '+metaSpent()+' 환불</small>';return;}META.medals+=metaSpent();META.spent=0;META.lv={};META.sk={};saveMeta();keepY();};
+  // 외형 초기화: 메달로 산 외형만 환불 (도전과제·후원 보상 외형은 그대로)
+  if($('cReset'))$('cReset').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.innerHTML='한 번 더 누르면 외형 초기화 <small>🏅 '+cosSpent()+' 환불</small>';return;}META.medals+=cosSpent();const C=META.cos||{own:{},eq:{}},keep=k=>{const x=COS.find(q=>q.k===k);return x&&!x.c;};for(const k in C.own)if(!keep(k))delete C.own[k];for(const c in C.eq)if(C.eq[c]&&!keep(C.eq[c]))C.eq[c]=null;META.cos=C;saveMeta();keepY();};
   $('mBack').onclick=()=>{cosPreviewHide();startScreen();};$('mBack2').onclick=()=>{cosPreviewHide();startScreen();};
 }
 // 정해진 난이도로 시작 (보스 러시 등). 시작 화면의 난이도 선택은 그대로 둠
@@ -7198,7 +7203,7 @@ function onlAct(){try{if(!S||S.mode==='start'||!S.started)return '시작 화면'
 const devUa=()=>{const u=navigator.userAgent||'';const b=/Edg\//.test(u)?'엣지':/Whale/.test(u)?'웨일':/SamsungBrowser/.test(u)?'삼성':/KAKAOTALK/i.test(u)?'카톡':/Chrome|CriOS/.test(u)?'크롬':/Firefox|FxiOS/.test(u)?'파이어폭스':/Safari/.test(u)?'사파리':'기타';return (/Android|iPhone|iPad|iPod|Mobile/i.test(u)?'폰':'PC')+' '+b+' '+(location.protocol==='file:'?'파일':'주소');};
 function onlMerge(L){const m=new Map();for(const x of L){const k=String(x.n||'');const o=m.get(k);if(!o){m.set(k,{...x});continue;}if(x.me)o.me=1;if(!o.fx&&x.fx)o.fx=x.fx;if(!o.f&&x.f){o.u=x.u;o.f=1;}if((x.s||0)<(o.s||0)){o.s=x.s;o.a=x.a;if(!o.f||x.f)o.u=x.u;o.b=x.b;}}return [...m.values()].sort((a,b)=>(b.me||0)-(a.me||0)||(a.s||0)-(b.s||0));}
 function onlHtml(sm){if(!SHEET_URL)return '';if(!ONLINE)return `<span class="onlb" style="opacity:.7;cursor:default">${ONL_FAIL>=2?'🟠':'🟢'} ${sm?'…':ONL_FAIL>=2?'서버 연결 재시도 중…':'접속 확인 중…'}</span> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}</button>`;const L=ONLINE;
-  return `<button class="onlb" id="onlBtn" title="지금 접속 중">🟢 ${sm?`<b>${L.length}</b>`:`지금 <b>${L.length}</b>명 접속 중`} ${ONL_OPEN?'▲':'▼'}</button> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}${chatUnread()?'<i class="cdot"></i>':''}</button>${ONL_OPEN?`<div class="onll">${DEV&&!sm?`<small style="opacity:.75">🛠 실시간 신호 ${FB?ONL_FB.length+'개':'연결 안 됨'} · 옛 서버 신호 ${ONL_AS.length}개 → 이름 ${L.length}명${ONL_FAIL?' (응답 실패 '+ONL_FAIL+'회)':''}</small>`:''}${L.map(x=>`<span${x.me?' class="me"':''}>${fxName(x.n,x.fx)}${x.me?' (나)':''} · ${esc(x.a||'')}${DEV&&x.b?` <small style="opacity:.7">v${x.b}</small>`:''}${DEV&&!x.me&&x.u&&(x.f||SRV_V>=51)?` <button class="cxchip" data-spec="${esc(x.u)}" data-sf="${x.f?1:''}" data-sn="${esc(x.n)}" title="관전">👁</button>`:''}</span>`).join('')}</div>`:''}`;}
+  return `<button class="onlb" id="onlBtn" title="지금 접속 중">🟢 ${sm?`<b>${L.length}</b>`:`지금 <b>${L.length}</b>명 접속 중`} ${ONL_OPEN?'▲':'▼'}</button> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}${chatUnread()?'<i class="cdot"></i>':''}</button>${ONL_OPEN?`<div class="onll">${DEV&&!sm?`<small style="opacity:.75">🛠 실시간 신호 ${FB?ONL_FB.length+'개':'연결 안 됨'} · 예비 서버 신호 ${ONL_AS.length}개 → 이름 ${L.length}명${ONL_FAIL?' (응답 실패 '+ONL_FAIL+'회)':''}</small>`:''}${L.map(x=>`<span${x.me?' class="me"':''}>${fxName(x.n,x.fx)}${x.me?' (나)':''} · ${esc(x.a||'')}${DEV&&x.b?` <small style="opacity:.7">v${x.b}</small>`:''}${DEV&&!x.me&&x.u&&(x.f||SRV_V>=51)?` <button class="cxchip" data-spec="${esc(x.u)}" data-sf="${x.f?1:''}" data-sn="${esc(x.n)}" title="관전">👁</button>`:''}</span>`).join('')}</div>`:''}`;}
 function onlPaint(){const el=document.getElementById('onl');if(el){el.innerHTML=onlHtml();const b=document.getElementById('onlBtn');if(b)b.onclick=onlToggle;}
   const h=document.getElementById('onlHud');if(h){h.innerHTML=onlHtml(1).replace('id="onlBtn"','id="onlHudBtn"');const hb=document.getElementById('onlHudBtn');if(hb)hb.onclick=e=>{e.stopPropagation();onlToggle();};}
   document.querySelectorAll('[data-chat]').forEach(b=>b.onclick=e=>{e.stopPropagation();chatToggle();});
@@ -7272,7 +7277,7 @@ async function specPoll(){const sp=SPEC;while(SPEC===sp){try{const r=await fetch
     specBar();await new Promise(r=>setTimeout(r,1500));}}
 function specStop(){const sp=SPEC;SPEC=null;SPEC_OV=null;GEAR_OVR=null;augBarKey='';if(sp&&sp.fb)fbSpecStop(sp);else if(sp&&SHEET_URL){try{fetch(SHEET_URL+'?spec='+encodeURIComponent(sp.u)+'&stop=1&me='+onlId()+'&dk='+encodeURIComponent(DEV_K),{cache:'no-store'});}catch(e){}}const b=document.getElementById('specBar');if(b)b.remove();newRun();startScreen();}
 function specBar(){let b=document.getElementById('specBar');if(!SPEC){if(b)b.remove();return;}if(!b){b=document.createElement('div');b.id='specBar';b.style.cssText='position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:9000;white-space:nowrap;max-width:96vw;overflow:hidden;background:rgba(10,6,20,.85);border:2px solid #c86aff;border-radius:999px;padding:6px 14px;color:#fff;font:15px "Do Hyeon",sans-serif;display:flex;gap:10px;align-items:center';b.innerHTML='<span id="specT"></span><button class="btn" id="specX" style="padding:2px 10px;font-size:14px">나가기</button>';document.body.appendChild(b);$('specX').onpointerdown=e=>{e.preventDefault();e.stopPropagation();specStop();};}
-  const s=SPEC.snap,stale=SPEC.seen&&performance.now()-SPEC.seen>(SPEC.fb?6000:9000),h=`👁 <b>${esc(SPEC.n)}</b> 관전 중 ${stale?'· <b style="color:#ff9a6a">📴 신호 끊김 (게임을 껐거나 인터넷 문제)</b> ':''}${s?(s.m==='start'?`· 🏠 시작 화면${s.pc&&CLASSES[s.pc]?' · '+CLASSES[s.pc].n+' 고르는 중':''}${s.pd&&DIFF[s.pd]?' · '+DIFF[s.pd].n:''}`:s.m==='over'||s.m==='revive'?`· <b style="color:#ff6a6a">💀 쓰러짐</b> · Lv${s.l} · ${Math.floor(s.t/60)}분 ${s.t%60}초 · 처치 ${s.k}`:`· ${CLASSES[s.c]?CLASSES[s.c].n:''} Lv${s.l} · ${Math.floor(s.t/60)}분 ${s.t%60}초 · 처치 ${s.k} · 체력 ${s.h}%${s.m==='aug'?' · <b style="color:#ffd76a">✨ 증강 고르는 중</b>':s.m==='shop'?' · <b style="color:#ffd76a">🛒 상점</b>':''}${(s.sp||1)>1?' · x'+s.sp+'배속':''}`):(SPEC.wait>2?'· 신호 기다리는 중 (상대 게임이 최신이어야 해요)':'· 연결 중…')}${SPEC.fb?' <small style="opacity:.6">실시간</small>':' <small style="opacity:.6">옛 서버(느림)</small>'}`;const t=$('specT');if(t&&t.innerHTML!==h)t.innerHTML=h;}
+  const s=SPEC.snap,stale=SPEC.seen&&performance.now()-SPEC.seen>(SPEC.fb?6000:9000),h=`👁 <b>${esc(SPEC.n)}</b> 관전 중 ${stale?'· <b style="color:#ff9a6a">📴 신호 끊김 (게임을 껐거나 인터넷 문제)</b> ':''}${s?(s.m==='start'?`· 🏠 시작 화면${s.pc&&CLASSES[s.pc]?' · '+CLASSES[s.pc].n+' 고르는 중':''}${s.pd&&DIFF[s.pd]?' · '+DIFF[s.pd].n:''}`:s.m==='over'||s.m==='revive'?`· <b style="color:#ff6a6a">💀 쓰러짐</b> · Lv${s.l} · ${Math.floor(s.t/60)}분 ${s.t%60}초 · 처치 ${s.k}`:`· ${CLASSES[s.c]?CLASSES[s.c].n:''} Lv${s.l} · ${Math.floor(s.t/60)}분 ${s.t%60}초 · 처치 ${s.k} · 체력 ${s.h}%${s.m==='aug'?' · <b style="color:#ffd76a">✨ 증강 고르는 중</b>':s.m==='shop'?' · <b style="color:#ffd76a">🛒 상점</b>':''}${(s.sp||1)>1?' · x'+s.sp+'배속':''}`):(SPEC.wait>2?'· 신호 기다리는 중 (상대 게임이 최신이어야 해요)':'· 연결 중…')}${SPEC.fb?' <small style="opacity:.6">실시간</small>':' <small style="opacity:.6">예비 서버(느림)</small>'}`;const t=$('specT');if(t&&t.innerHTML!==h)t.innerHTML=h;}
 function specApply(s){const sp=SPEC;if(!sp)return;const pm=sp.snap&&sp.snap.m;sp.snap=s;sp.seen=performance.now();
   // 상태가 바뀌면 바로 알림: 쓰러짐 · 시작 화면으로 나감 · 새 판 시작
   if(pm&&pm!==s.m){if(s.m==='over'||s.m==='revive')toast(`💀 ${SPEC.n} 쓰러짐! Lv${s.l} · ${Math.floor((s.t||0)/60)}분 ${(s.t||0)%60}초 · 처치 ${s.k}`);else if(s.m==='start')toast(`🏠 ${SPEC.n} 시작 화면으로 나갔어요`);else if(pm==='start')toast(`▶ ${SPEC.n} 새 판 시작!`);}
@@ -8028,7 +8033,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=68,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=69,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
