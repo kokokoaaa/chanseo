@@ -1285,6 +1285,17 @@ cv.addEventListener('pointermove',e=>{if(joy&&e.pointerId===joy.id){joy.x=e.clie
 const endJ=e=>{if(joy&&e.pointerId===joy.id)joy=null;};
 cv.addEventListener('pointerup',endJ);cv.addEventListener('pointercancel',endJ);
 dashBtn.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(S&&S.mode==='play')dash();});
+// 대시·생존기·궁극기 버튼에 마우스를 올리면 설명 (대시는 거리 원도 표시)
+let BTN_TIP=null;
+function btnTipHtml(k){if(!S||!S.p)return '';const p=S.p,sec=v=>(Math.round(v*10)/10)+'초';
+  if(k==='dash')return `<b>💨 대시 <small>(Space · Shift)</small></b><small style="color:#9fe8b0">거리 ${Math.round(dashDist())} · 재사용 ${sec(dashCdVal())}${p.dashCd>0?' · 남은 '+sec(p.dashCd):''}</small>잠깐 무적이 되며 빠르게 이동해요. 무적 중에 보스·예고 공격을 아슬아슬하게 피하면 「완벽한 회피」 (슬로 모션 + 재사용 절반 환급)`;
+  if(k==='sk'){const K=SKILLS[S.cls];if(!K)return '';const cd=K.cd*(1-.05*mlv('n_skcd'))*gearM.skcd()*Math.max(.5,p.skM||1);return `<b>${K.ico} 생존기 · ${K.n} <small>(E)</small></b><small style="color:#9fd3ff">쿨타임 ${sec(cd)}${p.skCd>0?' · 남은 '+sec(p.skCd):' · 사용 가능'}</small>${K.d}`;}
+  if(k==='ul'){const U=ULTS[S.cls];if(!U)return '';return `<b>${U.ico} 궁극기 · ${U.n} <small>(R)</small></b><small style="color:${U.col}">쿨타임 ${sec(ultCdMax())}${p.ulCd>0?' · 남은 '+sec(p.ulCd):' · 사용 가능'}${(p.ulDm||1)>1?' · 피해 ×'+(Math.round(p.ulDm*100)/100):''}</small>${U.d} · 2.2초 무적`;}return '';}
+function btnTipShow(el,k){const tip=document.getElementById('augTip');BTN_TIP=k;const h=btnTipHtml(k);if(!h)return;tip.style.setProperty('--ac',k==='ul'?(ULTS[S.cls]||{}).col||'#ffd76a':k==='sk'?'#9fd3ff':'#9fe8b0');tip.innerHTML=h;tip.style.display='block';
+  const r=el.getBoundingClientRect();tip.style.left=Math.max(8,Math.min(innerWidth-tip.offsetWidth-8,r.right-tip.offsetWidth))+'px';tip.style.top=Math.max(8,r.top-tip.offsetHeight-8)+'px';}
+function btnTipHide(){BTN_TIP=null;const tip=document.getElementById('augTip');tip.style.display='none';}
+for(const [id,k] of [['dash','dash'],['skBtn','sk'],['ulBtn','ul']]){const el=document.getElementById(id);el.addEventListener('mouseenter',()=>btnTipShow(el,k));el.addEventListener('mouseleave',btnTipHide);el.removeAttribute('title');}
+setInterval(()=>{if(BTN_TIP){const el=document.getElementById(BTN_TIP==='dash'?'dash':BTN_TIP==='sk'?'skBtn':'ulBtn');if(el&&el.offsetParent)btnTipShow(el,BTN_TIP);else btnTipHide();}},250);
 document.getElementById('skBtn').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(S&&S.mode==='play')useSkill();});
 document.getElementById('ulBtn').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(S&&S.mode==='play')useUlt();});
 
@@ -5057,6 +5068,7 @@ function draw(){
      if(S.p.alive){drawPlayer(S.p);const P=S.p;if(P.skInvT>0||P.skDrT>0||P.skUndT>0){ctx.save();ctx.globalAlpha=.25+.12*Math.sin(S.t*10);ctx.fillStyle=P.skUndT>0?'#ff5a3a':P.skInvT>0?'#e8f4ff':'#9fd3ff';ctx.beginPath();ctx.arc(P.x,P.y-8,P.r+16,0,TAU);ctx.fill();ctx.globalAlpha=.8;ctx.strokeStyle=ctx.fillStyle;ctx.lineWidth=2;ctx.stroke();ctx.restore();}}
      else if(S.p.deadAt!=null&&HERO.canvas){const p=S.p;HERO.draw(S.cls||'knight','dead',(S.t-p.deadAt)/.16,0,false);{ctx.save();ctx.imageSmoothingEnabled=false;heroBlit(HERO.canvas,p.x,p.y+p.r+3,1,true);ctx.restore();}}}}
    ctx.imageSmoothingEnabled=true;}
+  if(BTN_TIP==='dash'&&S.p&&S.p.alive){const P=S.p,R0=dashDist();ctx.save();ctx.strokeStyle='rgba(159,232,176,.75)';ctx.lineWidth=2;ctx.setLineDash([8,6]);ctx.beginPath();ctx.ellipse(P.x,P.y,R0,R0,0,0,TAU);ctx.stroke();ctx.setLineDash([]);const a=Math.atan2(P.lmy||0,P.lmx||1);ctx.fillStyle='rgba(159,232,176,.9)';ctx.beginPath();ctx.arc(P.x+Math.cos(a)*R0,P.y+Math.sin(a)*R0,5,0,TAU);ctx.fill();ctx.restore();}
   drawBeams();drawEggQ();drawSkFx(1);drawNpc();drawUlt();if(S.abul)drawAllyShots();
   const offV=(x,y,m=40)=>x<camX-m||x>camX+W+m||y<camY-m||y>camY+H+m;
   const trl=cosEq('trail');
@@ -5302,7 +5314,7 @@ function hud(){
   if(raidOn()){const M=raidMembers();bf.push(`<span style="color:#d8b0ff">🗿 부활 기회 ${S.raidTok||0} · ${M.map(m=>`${roleOf(m.cls).ico}${m.me?'나':(m.o.name||'')}${m.o.alive?'':'💀'}`).join(' · ')}</span>`);if((S.raidTeam||1)>1)bf.push(`<span style="color:#ffd76a">⚗ 팀 피해 +${Math.round((S.raidTeam-1)*100)}%</span>`);}
   bf.push(dpsPanel());
   {const show=play||((S.mode==='aug'||S.mode==='stat')&&innerWidth>=760),h=show?bf.join(''):'',B=$('buffs');if(B._h!==h){B.innerHTML=h;B._h=h;}B.classList.toggle('over',!play);bfTipTick();}
-  dashBtn.classList.toggle('cd',p.dashCd>0);{const sb=$('skBtn'),K=SKILLS[S.cls];if(K){const c=p.skCd||0;sb.classList.toggle('cd',c>0);const ic=K.ico,sub=c>0?Math.ceil(c)+'초':'E';if(sb._k!==ic+sub){sb._k=ic+sub;$('skIco').textContent=ic;$('skSub').textContent=sub;sb.title=K.n+': '+K.d;}}}{const ub=$('ulBtn'),U=ULTS[S.cls];if(U){const c=p.ulCd||0;ub.classList.toggle('cd',c>0);ub.classList.toggle('rdy',c<=0);const sub=c>0?Math.ceil(c)+'초':'R';if(ub._k!==U.ico+sub){ub._k=U.ico+sub;$('ulIco').textContent=U.ico;$('ulSub').textContent=sub;ub.title='궁극기 '+U.n+': '+U.d;}}}
+  dashBtn.classList.toggle('cd',p.dashCd>0);{const sb=$('skBtn'),K=SKILLS[S.cls];if(K){const c=p.skCd||0;sb.classList.toggle('cd',c>0);const ic=K.ico,sub=c>0?Math.ceil(c)+'초':'E';if(sb._k!==ic+sub){sb._k=ic+sub;$('skIco').textContent=ic;$('skSub').textContent=sub;}}}{const ub=$('ulBtn'),U=ULTS[S.cls];if(U){const c=p.ulCd||0;ub.classList.toggle('cd',c>0);ub.classList.toggle('rdy',c<=0);const sub=c>0?Math.ceil(c)+'초':'R';if(ub._k!==U.ico+sub){ub._k=U.ico+sub;$('ulIco').textContent=U.ico;$('ulSub').textContent=sub;}}}
   const tt=rushOn()?(S.gt||0)+(S.bt||0):S.gt,mm=Math.floor(tt/60),ss=String(Math.floor(tt%60)).padStart(2,'0'),nx=augNextIn(S.pendingLv);
   const key=[S.bossI,S.chap,Math.ceil(p.barrier),Math.ceil(p.hp),Math.round(p.maxHp),S.round,S.gold,S.lvl,Math.floor(S.xp),mm,ss,S.biome,slotCount(),S.round.toFixed(1),S.st.kills,S.augs.length,S.mode==='start',S.st.bosses,S.raidTok,S.dps|0,Math.floor(S.bt||0)].join('|');
   if(key===hudCache)return;hudCache=key;
@@ -5724,6 +5736,8 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:64,t:'💡 버튼 설명',items:[
+    ['new','💡 게임 중 <b>대시 · 생존기(E) · 궁극기(R)</b> 버튼에 마우스를 올리면 설명과 쿨타임이 나와요. 대시는 <b>거리</b>와 함께 캐릭터 주변에 대시 거리 원이 보여요']]},
   {v:58,t:'🔑 여러 브라우저에서 내 이름 쓰기',items:[
     ['change','🔑 크롬·엣지처럼 다른 브라우저나 다른 컴퓨터에서 내 이름으로 채팅이 막히면, <b>이름 비밀번호로 해결하는 방법</b>을 창으로 알려 줘요 (📘 설명서 자주 묻는 질문에도 있어요)']]},
   {v:57,t:'💬 실시간 채팅',items:[
@@ -7881,7 +7895,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=63,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=64,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
