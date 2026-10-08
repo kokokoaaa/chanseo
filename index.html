@@ -9076,7 +9076,7 @@ function autoMoveVec(){const v=campVec(autoMoveVec0()),p=S.p,g=evGoal();
   const dx=g.x-p.x,dy=g.y-p.y,d=Math.hypot(dx,dy)||1;if(d<20)return [v[0]*.2,v[1]*.2];
   const w=p.hp/p.maxHp<.45?.35:(DEV&&!S.easyAI?AI_W.ev:.7);let x=dx/d*w+v[0]*(1-w),y=dy/d*w+v[1]*(1-w);const l=Math.hypot(x,y)||1;return [x/l,y/l];}
 // 개발자 자동 이동 가중치 (측정으로 맞춤)
-const AI_W={crowd:35,far:.6,nmC:.12,egg:1,pd:1,ev:.85};
+const AI_W={crowd:35,far:.6,nmC:.12,egg:1,pd:1,pdf:1,ev:.85};
 // 개발자 자동(점수 위주): 근처 이스터에그 건물의 조건에 맞춰 움직임. 한 판 5개까지만 점수라 그 뒤엔 안 함
 function aiEggPlan(){const p=S.p;if(!AI_W.egg||bossOn()||S.npc||(S.st.eggN||0)>=5||typeof lmAt!=='function')return null;
   let crowd=0;for(const e of S.en)if(e.alive&&d2(e,p)<120*120)crowd++;if(crowd>=4)return null;
@@ -9137,7 +9137,7 @@ function autoMoveVec0(){
       sc-=k*(db<lo?(lo-db)*2.4:db>hi?(db-hi)*3:0);if(db<minW)sc-=(minW-db)*4;}
     // 보스 예고 공격·장판 회피
     for(const t of S.tele){if(!t.dmg&&t.k==='c')continue;
-      const tk=S.easyAI?.5:(AI_W.pd&&t.omen&&p.dashCd<=0&&p.hp>p.maxHp*.5&&(S.st.pd||0)<20&&!S.tele.some(o=>o!==t&&o.dmg&&Math.abs(o.t-t.t)<.4)?.15:1);
+      const tk=S.easyAI?.5:(AI_W.pdf&&t.omen&&p.dashCd<=0&&p.hp>p.maxHp*.5&&(S.st.pd||0)<20&&!S.tele.some(o=>o!==t&&o.dmg&&Math.abs(o.t-t.t)<.4)?.15:1);
       if(t.k==='c'){const d=Math.hypot(t.x-tx,t.y-ty),m2=Math.hypot(t.x-(p.x+cx*STEP*.5),t.y-(p.y+cy*STEP*.5));if(d<t.r+p.r+10)sc-=(900*(1-d/(t.r+p.r+10))+300)*tk;if(m2<t.r)sc-=200*tk;}
       else{const ux=Math.cos(t.a),uy=Math.sin(t.a),px2=tx-t.x,py2=ty-t.y,u=clamp(px2*ux+py2*uy,0,t.len),dd=Math.hypot(px2-ux*u,py2-uy*u);if(dd<t.w/2+p.r+16)sc-=900*tk;}}
     for(const h of S.hz){const d=Math.hypot(h.x-tx,h.y-ty);if(d<h.r+p.r+6)sc-=500;}
