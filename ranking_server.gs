@@ -1,6 +1,9 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v5.2
+// 찬서 명예의 전당 서버 (Google Apps Script) v5.3
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
+//
+// v5.2 → v5.3 바뀐 점
+// - 기록 삭제 (개발자 키): ?delrec=이름&diff=난이도&dk= → 그 이름·난이도의 명예의 전당 기록 줄을 지움
 //
 // v5.1 → v5.2 바뀐 점
 // - 점수 계산식 v2: 새로 올라오는 기록부터 10분 이후 생존 점수가 커지고 보스 처치 800점 (예전 기록 점수는 그대로)
@@ -217,7 +220,7 @@ function ping_(q) {
   if (id && !q.bye) devLog_(id, str_(q.n, 12) || '모험가', str_(q.ua, 30));
   let w = 0;
   try { w = id && c.get('watch_' + id) ? 1 : 0; } catch (err) {}
-  return out_({ v: 51, ct, w, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 53, ct, w, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
 }
 
 // 전체 채팅 (최근 CHAT_MAX개만 보관)
@@ -310,6 +313,19 @@ function unown_(q) {
     return { ok: 1, n: own.rows.length, had: own.kh ? 1 : 0 };
   } finally { lock.releaseLock(); }
 }
+// 기록 삭제 (개발자 키): 이름·난이도가 같은 줄을 모두 지움 (아래 줄부터 지워야 줄 번호가 안 밀림)
+function delrec_(q) {
+  if (String(q.dk || '') !== DEV_KEY) return { err: 'key' };
+  const nm = str_(q.delrec, 12), df = String(q.diff || '');if (!nm || !df) return { err: 'name' };
+  const lock = LockService.getScriptLock();try { lock.waitLock(8000); } catch (err) { return { err: 'busy' }; }
+  try { const s = sheet_(), last = s.getLastRow();if (last < 2) return { ok: 1, n: 0 };
+    const v = s.getRange(2, 1, last - 1, LIST_COLS).getValues(), rows = [];
+    v.forEach((r, i) => { const o = Object.fromEntries(HEAD.slice(0, LIST_COLS).map((h, j) => [h, r[j]])); if (String(o.name) === nm && fixDiff_(o) === df) rows.push(i + 2); });
+    rows.reverse().forEach(rw => s.deleteRow(rw));
+    try { CacheService.getScriptCache().remove(CACHE_KEY); } catch (err) {}
+    return { ok: 1, n: rows.length };
+  } finally { lock.releaseLock(); }
+}
 function snap_(q) {
   const c = CacheService.getScriptCache(), id = String(q.id || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 16);
   if (!id || !c.get('watch_' + id)) return { w: 0 };
@@ -340,6 +356,7 @@ function doGet(e) {
   if (q.dv) return out_(devList_(q));
   if (q.spec) return out_(spec_(q));
   if (q.unown) return out_(unown_(q));
+  if (q.delrec) return out_(delrec_(q));
   if (q.snap) return out_(snap_(q));
   if (q.ping) return ping_(q);
   if (q.own) {
