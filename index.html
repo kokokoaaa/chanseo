@@ -7202,7 +7202,7 @@ let CHAT_SENDING=null;
 async function chatSend(){const i=$('chIn'),m=String(i.value||'').trim();if(!m)return;if(CHAT_SENDING===m){i.value='';return;}CHAT_SENDING=m;i.value='';$('chM').textContent='';
   const pm={t:Date.now(),n:myNick()||'모험가',m,p:1,fx:myFx()};CHAT_PEND.push(pm);const L=$('chL');chatPaint();if(L)L.scrollTop=L.scrollHeight;
   const j=FB?await fbChatSend(m):await chatFetch(m);CHAT_SENDING=null;CHAT_PEND=CHAT_PEND.filter(x=>x!==pm);chatPaint();
-  const M=$('chM');if(!M)return;M.textContent=!j?'보내지 못했어요. 인터넷 연결을 확인해 주세요.':j.ok===false?(j.err==='owned'?'이 이름은 다른 사람이 쓰고 있어서 말할 수 없어요. 👤에서 이름을 바꿔 주세요.':j.err==='fast'?'조금 천천히 보내 주세요.':'보내지 못했어요.'):'';if(j&&j.ok===false&&j.err!=='empty')i.value=m;}
+  const M=$('chM');if(!M)return;M.textContent=!j?'보내지 못했어요. 인터넷 연결을 확인해 주세요.':j.ok===false?(j.err==='owned'?'이 이름의 주인은 다른 브라우저·컴퓨터예요. 내 이름이면 원래 쓰던 곳에서 👤 내 이름 → 이름 비밀번호를 정하고, 여기서도 같은 이름+비밀번호를 넣어 주세요.':j.err==='fast'?'조금 천천히 보내 주세요.':'보내지 못했어요.'):'';if(j&&j.ok===false&&j.err!=='empty')i.value=m;}
 function chatToggle(on){CHAT_OPEN=on==null?!CHAT_OPEN:on;clearInterval(CHAT_T);CHAT_T=null;chatPaint();if(CHAT_OPEN){if(!FB){chatFetch();CHAT_T=setInterval(()=>{if(!document.hidden&&!CHAT_BUSY)chatFetch();},2000);}setTimeout(()=>{try{$('chIn').focus();}catch(e){}},50);}}
 // 내 이름: 한 번 정해 두면 접속 중 목록과 명예의 전당 등록에 그대로 쓰임
 function openNick(){cosPreviewHide();const cur=myNick();
@@ -7862,7 +7862,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=57,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=58,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
