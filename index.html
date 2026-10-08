@@ -423,9 +423,9 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 .rule{font-size:13px;color:var(--muted);line-height:1.6;margin-top:12px}
 @media (prefers-reduced-motion: reduce){.card:hover{transform:none}}
 /* ===== 메인 화면 (v103): 시상식장 배경 + 전당 무대 + 게임 선택 + 영웅 선택 창 ===== */
-#ov.home{padding:0!important;align-items:stretch!important;background:radial-gradient(ellipse 70% 45% at 50% 0%,rgba(120,150,200,.16),transparent 70%),linear-gradient(180deg,#222b3d 0%,#1a2131 55%,#141a26 100%)!important}
+#ov.home{padding:0!important;align-items:stretch!important;background:radial-gradient(ellipse 70% 45% at 50% 0%,rgba(140,210,170,.14),transparent 70%),linear-gradient(180deg,#1e3a2f 0%,#172e25 55%,#11221c 100%)!important}
 .panel.home{position:relative;z-index:1;max-width:none!important;width:100%;min-height:100vh;margin:0!important;padding:0!important;border:none!important;border-radius:0!important;box-shadow:none!important;background:transparent!important;display:flex;flex-direction:column}
-.home .hTop{position:sticky;top:0;z-index:30;display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;padding:8px 18px;background:linear-gradient(180deg,rgba(22,28,42,.95),rgba(22,28,42,.8));border-bottom:1px solid rgba(160,180,215,.25);backdrop-filter:blur(4px)}
+.home .hTop{position:sticky;top:0;z-index:30;display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;padding:8px 18px;background:linear-gradient(180deg,rgba(14,30,24,.95),rgba(14,30,24,.8));border-bottom:1px solid rgba(150,210,180,.25);backdrop-filter:blur(4px)}
 .home .hTop h1{margin:0;font-size:30px;line-height:1;background:linear-gradient(180deg,#fff6c8,#ffd76a 45%,#b8801a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #3a2200)}
 .home .hTop h1 span{font-size:14px;-webkit-text-fill-color:#d8cbb0}
 .home .hTop #verLbl{font-size:12px;color:var(--muted)}
@@ -437,13 +437,13 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 .home .hSect{font-size:13px;letter-spacing:2px;color:#ffd76a;margin:2px 0 -4px}.home .hSect small{letter-spacing:0;color:#bfae8a;font-size:11px;margin-left:6px}
 .home .hUnlock{font-size:12px;color:#d8cbb0;text-align:center}
 /* 바로 시작 */
-.home .hQuick{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:14px;border:1px solid rgba(170,190,225,.28);background:linear-gradient(90deg,rgba(255,215,106,.12),rgba(255,255,255,.04))}
+.home .hQuick{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:14px;border:1px solid rgba(150,210,180,.28);background:linear-gradient(90deg,rgba(255,215,106,.12),rgba(255,255,255,.04))}
 .home .hQuick canvas{width:64px;height:64px}.home .hQuick b{display:block;font-size:17px;color:#ffe9b0}.home .hQuick small{display:block;font-size:12px;color:#d8cbb0}
 .home .hQuick .btn{margin:0 0 0 auto!important;width:auto!important;padding:10px 18px!important;font-size:17px!important;white-space:nowrap}
 /* 난이도: 길로 이어진 원 */
 .home #dsel{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:0;padding:6px 0}
 .home #dsel::before{content:'';position:absolute;left:12%;right:12%;top:50%;height:4px;background:repeating-linear-gradient(90deg,#d6a94a 0 10px,transparent 10px 18px);opacity:.7}
-.home #dsel .btn{position:relative;z-index:1;margin:0 auto!important;width:72px!important;height:72px;min-height:0!important;border-radius:50%!important;display:flex;flex-direction:column;justify-content:center;align-items:center;font-size:15px!important;padding:0!important;border:3px solid #5d6e90!important;background:radial-gradient(circle at 35% 30%,#3d4a66,#1f2739)!important;white-space:normal!important;line-height:1.1}
+.home #dsel .btn{position:relative;z-index:1;margin:0 auto!important;width:72px!important;height:72px;min-height:0!important;border-radius:50%!important;display:flex;flex-direction:column;justify-content:center;align-items:center;font-size:15px!important;padding:0!important;border:3px solid #55806c!important;background:radial-gradient(circle at 35% 30%,#3a6252,#1b3229)!important;white-space:normal!important;line-height:1.1}
 .home #dsel .btn small{font-size:9px!important}
 .home #dsel .btn.primary{border-color:#ffd76a!important;background:radial-gradient(circle at 35% 30%,#ffe9a8,#c88a1a)!important;color:#2a1800!important;box-shadow:0 0 18px rgba(255,215,106,.7)}
 .home #dsel .btn:disabled{opacity:.45;font-size:12px!important;line-height:1.15}
@@ -458,22 +458,21 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 /* 참붕이 밥 사주기 */
 .home .hDon{position:relative;align-self:center;margin:24px auto 0;display:flex;align-items:center;gap:10px;padding:0 8px;border:none!important;background:none!important;box-shadow:none!important;cursor:pointer;color:#f3e3c0;text-align:left;transition:transform .15s}
 .home .hDon:hover{transform:scale(1.04)}.home .hDon:hover .dt b{color:#fff1c4;text-shadow:0 0 10px rgba(255,215,106,.6)}
-.home .hDon .hug{position:relative;flex:0 0 104px;height:104px;margin:14px 0 -6px}
-.home .hDon .hug canvas{position:absolute;inset:0;width:104px;height:104px;image-rendering:pixelated}
-.home .hDon .bowl{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);font-size:38px;line-height:1;filter:drop-shadow(0 2px 2px rgba(0,0,0,.5));animation:hbob 2.4s ease-in-out infinite}
-.home .hDon .bub{position:absolute;left:66px;top:-10px;padding:4px 10px;border-radius:12px;background:#fff8e6;color:#5a3410;font-size:13px;font-weight:bold;white-space:nowrap;box-shadow:0 2px 4px rgba(0,0,0,.35)}
+.home .hDon .hug{position:relative;flex:0 0 144px;height:120px;margin-top:16px}
+.home .hDon .hug canvas{position:absolute;inset:0;width:144px;height:120px;image-rendering:pixelated}
+.home .hDon .bub{position:absolute;left:108px;top:-4px;padding:4px 10px;border-radius:12px;background:#fff8e6;color:#5a3410;font-size:13px;font-weight:bold;white-space:nowrap;box-shadow:0 2px 4px rgba(0,0,0,.35)}
 .home .hDon .bub::after{content:'';position:absolute;left:10px;bottom:-6px;border:6px solid transparent;border-top-color:#fff8e6;border-bottom:0}
 .home .hDon .dt b{display:block;font-size:18px;color:#ffe2a0}.home .hDon .dt small{display:block;font-size:12px;color:#c9b08a;margin-top:2px}
 @keyframes spk{30%{opacity:1;transform:scale(1.3)}60%{opacity:0}}
 @keyframes hbob{50%{transform:translateY(-5px)}}
 /* 아래 메뉴 */
-.home .hDock{display:flex!important;justify-content:center;flex-wrap:wrap;gap:8px;padding:10px 14px 14px;margin:0!important;background:linear-gradient(0deg,rgba(18,23,35,.95),rgba(18,23,35,.6));border-top:1px solid rgba(160,180,215,.22)}
-.home .hDock .btn{width:84px!important;min-height:0!important;margin:0!important;padding:4px 2px!important;border:none!important;background:none!important;display:flex;flex-direction:column;align-items:center;color:#dfe6f2;font-size:12px!important}
-.home .hDock .btn i{display:flex;align-items:center;justify-content:center;width:50px;height:50px;border-radius:14px;font-style:normal;font-size:25px;margin-bottom:3px;background:linear-gradient(180deg,#34405a,#222b3f);border:1px solid rgba(170,190,225,.35);box-shadow:0 3px 0 rgba(0,0,0,.35)}
+.home .hDock{display:flex!important;justify-content:center;flex-wrap:wrap;gap:8px;padding:10px 14px 14px;margin:0!important;background:linear-gradient(0deg,rgba(12,26,20,.95),rgba(12,26,20,.6));border-top:1px solid rgba(150,210,180,.22)}
+.home .hDock .btn{width:84px!important;min-height:0!important;margin:0!important;padding:4px 2px!important;border:none!important;background:none!important;display:flex;flex-direction:column;align-items:center;color:#e1efe7;font-size:12px!important}
+.home .hDock .btn i{display:flex;align-items:center;justify-content:center;width:50px;height:50px;border-radius:14px;font-style:normal;font-size:25px;margin-bottom:3px;background:linear-gradient(180deg,#2f5244,#1d362c);border:1px solid rgba(150,210,180,.35);box-shadow:0 3px 0 rgba(0,0,0,.35)}
 .home .hDock .btn:hover i{border-color:#ffd76a;box-shadow:0 0 12px rgba(255,215,106,.6)}
 .home .hDock .btn b{font-weight:normal}.home .hDock .btn small{display:none}
 /* 명예의 전당 */
-.home .hof{flex:1;position:relative;margin:0!important;padding:12px!important;border-radius:16px!important;border:2px solid rgba(232,196,110,.75)!important;background:linear-gradient(180deg,#273149,#1d2538)!important;box-shadow:0 0 0 1px rgba(0,0,0,.4),0 6px 22px rgba(0,0,0,.35)}
+.home .hof{flex:1;position:relative;margin:0!important;padding:12px!important;border-radius:16px!important;border:2px solid rgba(232,196,110,.75)!important;background:linear-gradient(180deg,#22413a,#183029)!important;box-shadow:0 0 0 1px rgba(0,0,0,.4),0 6px 22px rgba(0,0,0,.35)}
 .home .hof h2{text-align:center;font-size:26px;letter-spacing:3px;margin:0 0 6px;background:linear-gradient(180deg,#fffbe0,#ffd76a 50%,#c88a1a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #3a2200)}
 .home .hof .hsub{margin:2px 0 6px}
 .home .stagebg{position:relative;margin:4px -2px 8px;padding:34px 0 0;border-radius:12px;overflow:hidden;background:radial-gradient(ellipse at 50% 100%,rgba(255,200,120,.35),transparent 55%),linear-gradient(180deg,#1a0408 0%,#2a0810 45%,#3a1408 100%);box-shadow:inset 0 0 30px rgba(0,0,0,.7)}
@@ -7320,7 +7319,7 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
   {v:105,t:'🎨 시작 화면 색감',items:[
-    ['change','🎨 시작 화면 색을 눈이 편한 차분한 남색 톤으로 바꿨어요. 시상식 꾸밈은 명예의 전당 무대에만 남겼어요'],
+    ['change','🎨 시작 화면 색을 눈이 편한 차분한 초록 톤으로 바꿨어요. 시상식 꾸밈은 명예의 전당 무대에만 남겼어요'],
   ]},
   {v:104,t:'🏛 새 시작 화면',items:[
     ['change','🏛 시작 화면이 새로 꾸며졌어요. 왼쪽에는 시상식장처럼 꾸민 <b>🏆 명예의 전당 무대</b>(1~3등은 단상 위에 왕관을 쓰고 서 있어요)가 늘 보이고, 오른쪽에서 게임을 골라요'],
@@ -7681,7 +7680,7 @@ function startScreen(){
     <div class="hUnlock">증강 해금: <b style="color:${TIER.s.col}">실버 ✅</b> · ${['g','p','v'].map(t=>`<b style="color:${TIER[t].col}">${TIER[t].n} ${tierOpen(t)?'✅':'🔒'}</b>${tierOpen(t)?'':`<small>(${DIFF[TIER_UNLOCK[t]].n} 클리어)</small>`}`).join(' · ')}</div>
     <div class="hSect">엔드 컨텐츠</div>
     <div class="btnrow" id="endc"><button class="btn nmBtn ${pickDiff==='nightmare'?'primary':''}" data-diff="nightmare" ${diffOpen('nightmare')?'':'disabled'}><span class="skull">☠</span><b>${diffOpen('nightmare')?'':'🔒 '}무한의 악몽</b><small>${diffOpen('nightmare')?'끝없이 조여 오는 결계 · 악몽의 파동':'신 클리어 시 열림'}</small><span class="pick">${diffOpen('nightmare')?'영웅 고르기 ▸':''}</span></button><button class="btn" id="rushBtn" ${diffOpen('bossrush')?'':'disabled'}><i>${diffOpen('bossrush')?'⚔':'🔒'}</i><b>보스 러시${(META.clears||{}).bossrush?' ✔':''}</b><small>${diffOpen('bossrush')?'보스만 연달아':'무한의 악몽이 열리면'}</small></button><button class="btn" id="raidBtn" ${myHeroes().length?'':'disabled'}><i>${myHeroes().length?'🗿':'🔒'}</i><b>레이드</b><small>${myHeroes().length?'3인 거신 토벌':'캐릭터 저장 시 열림'}</small></button><button class="btn" id="duelBtn" ${myHeroes().length?'':'disabled'}><i>${myHeroes().length?'⚔':'🔒'}</i><b>결투</b><small>${myHeroes().length?'전당 캐릭터와 1:1':'캐릭터 저장 시 열림'}</small></button></div>
-    ${DONATE_URL?`<button id="donBtn" class="hDon"><span class="hug"><canvas class="pv" data-c="${pickCls}" data-idle="1" data-z="1.3" width="104" height="104" id="donPv"></canvas><span class="bowl">🍚</span><span class="bub">배고파요…</span></span><span class="dt"><b>참붕이 밥 사주기</b><small>게임이 재밌었다면 밥 한 끼 응원해 주세요</small></span></button>`:''}
+    ${DONATE_URL?`<button id="donBtn" class="hDon"><span class="hug"><canvas width="48" height="40" id="donArt"></canvas><span class="bub">배고파요…</span></span><span class="dt"><b>참붕이 밥 사주기</b><small>게임이 재밌었다면 밥 한 끼 응원해 주세요</small></span></button>`:''}
    </div>
   </div>
   <div class="menugrid hDock">${mBtn('meta','🏅','메달 상점',`보유 메달 ${META.medals}개 · 능력·기술 강화`)}${mBtn('cosBtn','👕','외형',(()=>{const e=Object.keys(COS_CAT).map(c=>cosEq(c)).filter(Boolean);return e.length?e.map(x=>x.n).join(" · ")+" 장착 중":"스킨 · 오라 · 이름 효과";})())}${mBtn('forgeBtn','⚒','대장간','검·투구·갑옷·목걸이·망토 강화 '+(Object.keys(GEAR).filter(gearOwn).map(k=>GEAR[k].ico+"+"+gearLv(k)).join(" ")||"(메달로 구입)"))}${mBtn('heroBtn','🗃','내 캐릭터',(()=>{const n=myHeroes().length;return n?`저장한 캐릭터 ${n}/${HERO_MAX}`:'무한의 악몽·보스 러시 캐릭터 저장';})())}${mBtn('codex','📖','도감','증강 · 합체 · 시너지 · 직업 검색')}${mBtn('achBtn','🏆','도전과제',`${DEV?ACH.filter(a=>!a.sec).length:Object.keys(META.ach||{}).filter(k=>{const A=ACH.find(a=>a.k===k);return A&&!A.sec;}).length} / ${ACH.filter(a=>!a.sec).length} 달성${META.title?' · 「'+(ACH.find(a=>a.k===META.title)||{}).n+'」 장착 중':''}`)}${mBtn('guideBtn','📘','설명서','처음이면 꼭 읽어보세요')}${mBtn('patchBtn','📜','패치 노트',`v${BUILD} 바뀐 점`)}${mBtn('sync','💾','데이터','다른 기기로 내보내기 · 가져오기')}</div>
@@ -7697,13 +7696,47 @@ function startScreen(){
       if(DEV||META.tk>0)$o('ulk').onclick=()=>{if(!DEV)META.tk--;(META.ucls=META.ucls||[]).push(k);saveMeta();pickCls=k;try{localStorage.setItem('chipdungeon_cls',k);}catch(e){}toast(C.n+' 봉인 해제! '+TAGS[C.fav[0]].n+' 시너지 증강도 이제 나와요');startScreen();};return;}
     pickCls=k;try{localStorage.setItem('chipdungeon_cls',pickCls);}catch(e){}
     ov.querySelectorAll('[data-cls]').forEach(x=>x.classList.toggle('on',x===b));$('cdet').innerHTML=clsDetail(pickCls);$('go').firstChild.textContent=`${goLabel()}${sv?' (저장 삭제)':''}`;
-    if($('selPv'))$('selPv').dataset.c=pickCls;if($('qkPv'))$('qkPv').dataset.c=pickCls;if($('donPv'))$('donPv').dataset.c=pickCls;if($('qkName'))$('qkName').textContent=CLASSES[pickCls].n;});
+    if($('selPv'))$('selPv').dataset.c=pickCls;if($('qkPv'))$('qkPv').dataset.c=pickCls;if($('qkName'))$('qkName').textContent=CLASSES[pickCls].n;});
   ov.querySelectorAll('[data-diff]').forEach(b=>b.onclick=()=>{pickDiff=b.dataset.diff;savePickDiff(pickDiff);ov.querySelectorAll('[data-diff]').forEach(x=>x.classList.toggle('primary',x===b));const g=$('go');if(g)g.firstChild.textContent=goLabel()+(sv?' (저장 삭제)':'');if($('qkMode'))$('qkMode').textContent=pickDiff==='nightmare'?'☠ 무한의 악몽':DIFF[pickDiff].n;openSel();});
   $o('selBack').onclick=()=>$('selWin').classList.remove('on');if($('quickGo'))$o('quickGo').onclick=()=>beginRun(pickCls);$o('cosBtn2').onclick=()=>openMeta(1);
   if(sv)$o('cont').onclick=()=>continueGame(sv);
   $o('go').onclick=()=>beginRun(pickCls);
-  $o('meta').onclick=()=>openMeta();$o('cosBtn').onclick=()=>openMeta(1);onlPaint();if($('donBtn'))$o('donBtn').onclick=openDonate;if($('supBox'))$o('supBox').onclick=openSupBox;if($('devLog'))$o('devLog').onclick=()=>openDevLog();if($('nickBtn'))$o('nickBtn').onclick=openNick;$o('forgeBtn').onclick=openForge;$o('heroBtn').onclick=openHeroes;if($('raidBtn'))$o('raidBtn').onclick=openRaid;if($('rushBtn'))$o('rushBtn').onclick=openRush;if($('duelBtn'))$o('duelBtn').onclick=openDuel;$o('sync').onclick=openSync;if($('guideBtn'))$o('guideBtn').onclick=()=>openGuide('a');if($('patchBtn'))$o('patchBtn').onclick=()=>openPatch(true);if($('verLbl')){$o('verLbl').onclick=devTapVer;$('verLbl').style.userSelect='none';}$o('codex').onclick=()=>openCodex();$o('achBtn').onclick=openAch;
+  $o('meta').onclick=()=>openMeta();$o('cosBtn').onclick=()=>openMeta(1);onlPaint();if($('donBtn'))$o('donBtn').onclick=openDonate;if($('donArt'))drawDonArt($('donArt'));if($('supBox'))$o('supBox').onclick=openSupBox;if($('devLog'))$o('devLog').onclick=()=>openDevLog();if($('nickBtn'))$o('nickBtn').onclick=openNick;$o('forgeBtn').onclick=openForge;$o('heroBtn').onclick=openHeroes;if($('raidBtn'))$o('raidBtn').onclick=openRaid;if($('rushBtn'))$o('rushBtn').onclick=openRush;if($('duelBtn'))$o('duelBtn').onclick=openDuel;$o('sync').onclick=openSync;if($('guideBtn'))$o('guideBtn').onclick=()=>openGuide('a');if($('patchBtn'))$o('patchBtn').onclick=()=>openPatch(true);if($('verLbl')){$o('verLbl').onclick=devTapVer;$('verLbl').style.userSelect='none';}$o('codex').onclick=()=>openCodex();$o('achBtn').onclick=openAch;
   refreshBoard();
+}
+// 참붕이: 검·방패 내려놓고 밥그릇 드는 기사 (48x40 도트)
+function drawDonArt(cv){const W=48,H=40;cv.width=W;cv.height=H;const g=cv.getContext('2d');g.clearRect(0,0,W,H);
+ const px=(x,y,c)=>{g.fillStyle=c;g.fillRect(x,y,1,1);},rect=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x,y,w,h);},
+ ell=(cx,cy,rx,ry,c,f)=>{for(let y=Math.floor(cy-ry);y<=cy+ry;y++)for(let x=Math.floor(cx-rx);x<=cx+rx;x++){const d=((x+.5-cx)/rx)**2+((y+.5-cy)/ry)**2;if(d<=1&&(!f||f(x,y)))px(x,y,c);}};
+ const K='#1d1622',SK='#f6cfa4',SS='#dfa57a',M='#c9d3e0',MD='#8693a8',MH='#f2f6fb',B='#3d63b8',BD='#27427e',GO='#ffd76a',GD='#c8942a',RW='#ffffff',RS='#dfe5ec',BW='#b5482e',BWD='#7a2a18',BL='#e6ecf3',BLD='#9aa6b6',HI='#6a3a1a',PL='#e0405a';
+ // 바닥 그림자
+ ell(24,37,13,2,'rgba(0,0,0,.28)');ell(8,37.5,8,1.5,'rgba(0,0,0,.22)');ell(40,37.5,7,1.6,'rgba(0,0,0,.22)');
+ // 바닥에 내려놓은 검 (왼쪽, 누워 있음)
+ rect(1,35,11,2,BL);rect(1,36,11,1,BLD);px(0,35,BLD);rect(12,33,1,6,GD);rect(12,34,1,4,GO);rect(13,35,3,2,HI);rect(16,35,1,2,GO);
+ // 바닥에 내려놓은 방패 (오른쪽, 비스듬히 기대어)
+ ell(40,34,6,4.2,GD);ell(40,34,5,3.3,B);ell(40,34.6,5,2.6,BD,(x,y)=>y>34);rect(39,32,2,5,GO);rect(37,34,6,1,GO);
+ // 다리
+ rect(19,30,4,5,BD);rect(25,30,4,5,BD);rect(18,34,6,2,K);rect(24,34,6,2,K);rect(19,34,4,1,'#3a2a30');rect(25,34,4,1,'#3a2a30');
+ // 몸통 갑옷
+ ell(24,26,7,6,K);ell(24,26,6,5,B);rect(18,27,12,1,GD);rect(18,28,12,1,GO);ell(24,24,4,2,'#5a80d0',(x,y)=>y<24);
+ // 팔 (그릇 양옆을 받침)
+ rect(15,23,3,4,BD);rect(30,23,3,4,BD);rect(15,26,3,3,SK);rect(30,26,3,3,SK);px(15,28,SS);px(32,28,SS);
+ // 머리 (얼굴 보이는 투구)
+ ell(24,12,9,8.5,K);ell(24,12,8,7.5,SK);
+ ell(24,9,8.3,6,M,(x,y)=>y<=9);ell(24,8,7,4.5,MH,(x,y)=>y<=6&&x<24);rect(16,9,17,2,MD);rect(16,9,17,1,M);
+ rect(16,10,2,6,M);rect(31,10,2,6,M);rect(16,15,2,1,MD);rect(31,15,2,1,MD);
+ // 투구 깃털
+ rect(23,1,3,3,PL);rect(24,0,3,2,PL);px(27,1,'#ff7a90');
+ // 얼굴: 반짝이는 눈, 볼, 침 흘리는 입
+ rect(20,12,2,3,K);rect(27,12,2,3,K);px(20,12,'#fff');px(27,12,'#fff');
+ rect(18,15,2,1,'#ff9a9a');rect(29,15,2,1,'#ff9a9a');
+ rect(23,16,3,2,'#8a2a2a');rect(23,16,3,1,K);px(24,17,'#ff7070');px(26,18,'#9fd8ff');px(26,19,'#9fd8ff');
+ // 밥그릇 (손 위, 얼굴 아래)
+ ell(24,26.5,8,4,BWD,(x,y)=>y>=25);ell(24,26,7.4,3.5,BW,(x,y)=>y>=25);rect(17,25,15,1,GO);rect(22,30,5,1,BWD);
+ ell(24,24.8,6.4,3.3,RS,(x,y)=>y<25);ell(24,24.5,5.8,3,RW,(x,y)=>y<25);px(21,23,RS);px(26,23,RS);
+ // 그릇을 받친 손
+ rect(14,25,3,3,K);rect(15,25,2,2,SK);rect(31,25,3,3,K);rect(32,25,2,2,SK);
+
 }
 function drawPreviews(){
   ov.querySelectorAll('canvas.pv').forEach(c=>{const k=c.dataset.c,sel=k===pickCls,t=performance.now()/1000;
