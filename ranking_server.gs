@@ -1,7 +1,9 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v5.1
+// 찬서 명예의 전당 서버 (Google Apps Script) v5.2
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
 //
+// v5.1 → v5.2 바뀐 점
+// - 점수 계산식 v2: 새로 올라오는 기록부터 10분 이후 생존 점수가 커지고 보스 처치 800점 (예전 기록 점수는 그대로)
 // v5.0 → v5.1 바뀐 점
 // - 접속 중 목록에 게임 버전(b)과 짧은 기기 표시(u)를 같이 돌려줌 (개발자 모드에서 버전 확인·관전용)
 // - 이름 주인 초기화 (개발자 키): ?unown=이름&dk= → 그 이름의 주인 열쇠를 지움 (다른 기기로 옮겨 쓰다 막힌 경우)
@@ -127,6 +129,9 @@ const str_ = (v, n) => String(v || '').replace(/\s+/g, ' ').trim().replace(/^[=+
 // 시트가 날짜로 바꾸지 않게 "w3d1l2" 꼴로 저장
 const dw_ = v => { const m = String(v || '').match(/^(\d{1,6})-(\d{1,6})-(\d{1,6})$/); return m ? 'w' + m[1] + 'd' + m[2] + 'l' + m[3] : ''; };
 const softC_ = (x, c) => x <= c ? x : c * (1 + Math.log(x / c));
+// 점수 계산식 v2 (게임과 같음): 이 시각 이후 기록은 10분 이후 생존 점수가 커지고 보스 처치 800점
+const SC2_AT = 1791462600000;
+const timePts_ = (t, v2) => !v2 || t <= 600 ? t * 12 : 7200 + 12 * ((t - 600) + (t - 600) * (t - 600) / 240);
 
 function clean_(d, at) {
   const r = {
@@ -148,7 +153,7 @@ function clean_(d, at) {
   // 점수는 서버에서 다시 계산 (조작 방지). 게임과 같은 식
   r.score = r.diff === 'bossrush'
     ? Math.round((r.bosses * 2500 + r.lvl * 30 + r.time * 2) * DIFFS.bossrush)
-    : Math.round((r.time * 12 + softC_(r.kills * 2, 4000) + r.lvl * 30 + r.bosses * 400 + (r.bosses >= 4 ? 3000 : 0)) * (DIFFS[r.diff] || 1));
+    : Math.round((timePts_(r.time, +r.at >= SC2_AT) + softC_(r.kills * 2, 4000) + r.lvl * 30 + r.bosses * (+r.at >= SC2_AT ? 800 : 400) + (r.bosses >= 4 ? 3000 : 0)) * (DIFFS[r.diff] || 1));
   return r;
 }
 

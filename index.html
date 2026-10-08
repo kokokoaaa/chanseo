@@ -6940,15 +6940,24 @@ function duelOver(win){if(S.duelDone)return;S.duelDone=1;S.mode='over';joy=null;
   <div class="stats"><span>전체 전적</span><span>${R.w}승 ${R.d||0}무 ${R.l}패</span>${me?`<span>${esc(heroName(me))} 전적</span><span>${wdl(heroDRec(me.id))}</span>`:''}<span>이긴 가장 강한 상대</span><span>${R.best?R.best.toLocaleString()+'점':'-'}</span></div>${duelLogHtml()}
   <div class="btnrow"><button class="btn primary" id="dlAgain">다시 도전</button><button class="btn" id="dlBack">상대 고르기</button><button class="btn ghost" id="dlHome">시작 화면</button></div>`);
   $('dlAgain').onclick=()=>{newRun();const m=myHeroes().find(h=>h.id===D.me);if(m&&D.opp)duelPreview(m,D.opp);else openDuel();};$('dlBack').onclick=()=>{newRun();openDuel();};$('dlHome').onclick=()=>{newRun();startScreen();};}
-function duelOpps(){const L=[];for(const b of (BOARD||[])){if(!HOF_KEYS.includes(b.diff)||!CLASSES[b.cls]||!b.h)continue;L.push({n:b.name||'이름 없음',c:b.cls,k:b.skin||'',t:b.title||'',s:b.score||0,g:b.gear||'',src:'🏆 '+DIFF[b.diff].n,hof:{name:b.name,diff:b.diff}});if(L.length>=15)break;}
-  for(const h of myHeroes())if(h.id!==DUEL_ME)L.push(oppOf({...h,name:heroName(h)},'🗃 내 캐릭터'));
-  return [...DUEL_CODES,...L];}
+// 결투 상대: 내가 고른 캐릭터와 같은 모드(악몽은 악몽끼리, 보스 러시는 보스 러시끼리)만. 내 캐릭터의 명예의 전당 기록(= 나 자신)은 빼고, 그 모드 랭킹 순위를 같이 보여 줌
+function duelOpps(){const L=[],me=myHeroes().find(h=>h.id===DUEL_ME),md=me?(me.diff||'nightmare'):null,nk=myNick();
+  const rk={};for(const k of HOF_KEYS)rk[k]=(BOARD||[]).filter(b=>b.diff===k).sort((a,b)=>(b.score||0)-(a.score||0));
+  for(const b of (BOARD||[])){if(!HOF_KEYS.includes(b.diff)||!CLASSES[b.cls]||!b.h)continue;if(md&&b.diff!==md)continue;if(me&&b.name===nk&&Math.abs((b.score||0)-(me.score||0))<1)continue;
+    L.push({n:b.name||'이름 없음',c:b.cls,k:b.skin||'',t:b.title||'',s:b.score||0,g:b.gear||'',src:'🏆 '+DIFF[b.diff].n,rank:rk[b.diff].indexOf(b)+1,hof:{name:b.name,diff:b.diff,score:b.score||0}});{const q=L[L.length-1];if(HERO_MEM[heroCK(q)])q.hero=HERO_MEM[heroCK(q)];}if(L.length>=15)break;}
+  for(const h of myHeroes())if(h.id!==DUEL_ME&&(!md||(h.diff||'nightmare')===md))L.push(oppOf({...h,name:heroName(h)},'🗃 내 캐릭터'));
+  return [...DUEL_CODES.filter(o=>!md||!o.hero||!o.hero.diff||o.hero.diff===md),...L].sort((a,b)=>(a.rank||999)-(b.rank||999));}
 // 명예의 전당 기록의 캐릭터 내려받기
-async function hofHero(o){if(o.hero)return o.hero;try{const r=await fetch(SHEET_URL+'?hero='+encodeURIComponent(o.hof.name)+'&diff='+encodeURIComponent(o.hof.diff),{cache:'no-store'});const j=await r.json();const h=await heroUnpack(j&&j.hero);if(h){h.name=h.name||o.n;o.hero=h;}return h;}catch(e){return null;}}
+// 한 번 받은 캐릭터 정보는 저장해 두고 다시 씀 (예비 서버가 느려서). 같은 이름·모드·점수면 같은 캐릭터
+const HERO_MEM={},HERO_CACHE='chanseo_hero_cache',heroCK=o=>o.hof.name+'|'+o.hof.diff+'|'+(o.hof.score||0);
+function heroCacheGet(o){try{return (JSON.parse(localStorage.getItem(HERO_CACHE)||'{}'))[heroCK(o)]||null;}catch(e){return null;}}
+function heroCachePut(o,code){try{const m=JSON.parse(localStorage.getItem(HERO_CACHE)||'{}');m[heroCK(o)]=code;const ks=Object.keys(m);if(ks.length>40)for(const k of ks.slice(0,ks.length-40))delete m[k];localStorage.setItem(HERO_CACHE,JSON.stringify(m));}catch(e){}}
+async function hofHero(o){if(o.hero)return o.hero;if(HERO_MEM[heroCK(o)])return o.hero=HERO_MEM[heroCK(o)];{const c=heroCacheGet(o);if(c){const h=await heroUnpack(c);if(h){h.name=h.name||o.n;o.hero=HERO_MEM[heroCK(o)]=h;return h;}}}
+  try{const r=await fetch(SHEET_URL+'?hero='+encodeURIComponent(o.hof.name)+'&diff='+encodeURIComponent(o.hof.diff),{cache:'no-store'});const j=await r.json();if(j&&j.hero)heroCachePut(o,j.hero);const h=await heroUnpack(j&&j.hero);if(h){h.name=h.name||o.n;o.hero=HERO_MEM[heroCK(o)]=h;}return h;}catch(e){return null;}}
 function openDuel(){cosPreviewHide();const H=myHeroes().sort((a,b)=>(b.score||0)-(a.score||0));if(!H.some(h=>h.id===DUEL_ME))DUEL_ME=H[0]?H[0].id:null;
   const me=H.find(h=>h.id===DUEL_ME),O=duelOpps(),R=duelRec();
   const card=(h)=>{const av=hofAv(h.cls,h.skin);return `<button class="rcard ${h.id===DUEL_ME?'on':''}" data-dme="${h.id}">${h.id===DUEL_ME?'<span class="rbadge">🎮 나</span>':''}${av?`<img src="${av}" alt="">`:''}<b>${esc(heroName(h))}</b><small>${CLASSES[h.cls].n} · 점수 ${(h.score||0).toLocaleString()}</small><small>⚔ ${wdl(heroDRec(h.id))}</small></button>`;};
-  const ocard=(o,i)=>{const av=hofAv(o.c,o.k,'',o.g),r=me&&o.hero?heroPow(o.hero)/heroPow(me):null,A=o.t&&ACH.find(a=>a.k===o.t);return `<button class="rcard" data-dop="${i}">${av?`<img src="${av}" alt="">`:''}<b>${esc(o.n)}</b>${A?`<small class="rrole">「${A.n}」</small>`:''}<small>${o.src} · ${CLASSES[o.c].n} · ${(o.s||0).toLocaleString()}점</small>${r==null?'<small style="color:var(--muted)">누르면 캐릭터를 불러와요</small>':`<small style="color:${r>1.3?'#ff8a8a':r<.8?'#7be08f':'#ffd76a'}">${r>1.5?'강함':r<.67?'약함':'비슷함'} · 전투력 ×${r.toFixed(2)}${r<DUEL_PRAC?' · 🥋 연습':''}</small>`}</button>`;};
+  const ocard=(o,i)=>{const av=hofAv(o.c,o.k,'',o.g),r=me&&o.hero?heroPow(o.hero)/heroPow(me):null,A=o.t&&ACH.find(a=>a.k===o.t);return `<button class="rcard" data-dop="${i}">${av?`<img src="${av}" alt="">`:''}<b>${esc(o.n)}</b>${A?`<small class="rrole">「${A.n}」</small>`:''}${o.rank?`<small style="color:#ffd76a">🏆 ${DIFF[o.hof.diff].n} 랭킹 ${o.rank}위</small>`:''}<small>${o.src} · ${CLASSES[o.c].n} · ${(o.s||0).toLocaleString()}점</small>${r==null?'<small style="color:var(--muted)">누르면 캐릭터를 불러와요</small>':`<small style="color:${r>1.3?'#ff8a8a':r<.8?'#7be08f':'#ffd76a'}">${r>1.5?'강함':r<.67?'약함':'비슷함'} · 전투력 ×${r.toFixed(2)}${r<DUEL_PRAC?' · 🥋 연습':''}</small>`}</button>`;};
   show(`<div class="shophead"><h2>⚔ 결투</h2><button class="btn" id="dlBack2">돌아가기</button></div>
   <p class="sub">내 캐릭터로 명예의 전당에 올라간 <b>실제 캐릭터</b>·내 다른 캐릭터·친구의 <b>대결 코드</b>와 1:1! 상대는 그 캐릭터의 체력·방어력·화력·각성만큼 강하고, 직업답게 쏘고 베고 필살기를 써요. 예고를 보고 피하고 대시를 잘 쓰는 게 승부! · 제한 시간 ${DUEL_LIMIT}초, 넘기면 무승부 · 전적 ${R.w}승 ${R.d||0}무 ${R.l}패</p>
   ${duelLogHtml()}
@@ -6958,6 +6967,7 @@ function openDuel(){cosPreviewHide();const H=myHeroes().sort((a,b)=>(b.score||0)
   {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}
   $('dlBack2').onclick=startScreen;ov.querySelectorAll('[data-dme]').forEach(b=>b.onclick=()=>{DUEL_ME=b.dataset.dme;openDuel();});
   $('dlAdd').onclick=async()=>{const h=await heroUnpack($('dlCode').value);if(!h){toast('대결 코드가 올바르지 않아요');return;}const o=oppOf(h,'🤝 코드');DUEL_CODES=[o,...DUEL_CODES.filter(x=>x.n!==o.n||x.c!==o.c)].slice(0,5);toast(`🤝 ${o.n} 추가!`);openDuel();};
+  {const need=O.filter(o=>!o.hero&&o.hof);(async()=>{let got=0;for(const o of need.slice(0,8)){if(!document.querySelector('[data-dop]'))return;if(await hofHero(o))got++;}if(got&&document.querySelector('[data-dop]')&&!document.getElementById('dlCode').value){const y=ov.scrollTop;openDuel();ov.scrollTop=y;}})();}
   ov.querySelectorAll('[data-dop]').forEach(b=>b.onclick=async()=>{const o=O[+b.dataset.dop];if(!me||!o)return;if(!o.hero){toast('캐릭터 불러오는 중…');const h=await hofHero(o);if(!h){toast('이 기록의 캐릭터를 불러오지 못했어요');return;}}duelPreview(me,o);});}
 // 결투 전: 나와 상대 비교 + 걸린 보상
 function duelPreview(me,o){const h=o.hero,r=heroPow(h)/heroPow(me),W=duelReward(r,o);
@@ -7303,10 +7313,14 @@ const bossSpeedPts=()=>(S.st.btimes||[]).reduce((q,t,i)=>q+Math.round(Math.max(0
 // 점수: 명예의 전당에 저장되는 값(생존 시간·처치·레벨·보스·난이도)만으로 계산 → 예전 기록도 같은 식으로 다시 매김
 // 골드·보스 처치 속도는 빼고(골드 증강 빌드가 점수로 튀지 않게), 처치는 2000마리(4000점)부터 로그로 완만하게. 보스 4마리(클리어)면 +3000
 const softC=(x,c)=>x<=c?x:c*(1+Math.log(x/c));
-const scoreOf0=r=>{const b=+r.bosses||0,d=DIFF[r.diff]||DIFF.normal;if(d.rush)return Math.round((b*2500+(+r.lvl||0)*30+(+r.time||0)*2+(+r.bonus||0))*(d.sc||1));return Math.round(((+r.time||0)*12+softC((+r.kills||0)*2,4000)+(+r.lvl||0)*30+b*400+(b>=4?3000:0)+(+r.bonus||0))*(d.sc||1));};
+// 점수 계산식 v2 (SC2_AT 이후 기록): 악몽 난이도를 크게 올리면서, 예전 기록을 깎지 않고 새 기록을 올려 줌
+//  · 10분 이후 생존 1초의 점수가 1분마다 +50%씩 커짐 (20분 생존 = 시간 점수 약 2.2배) · 보스 처치 400 → 800
+//  · 이스터에그·이벤트 같은 플레이 보너스는 BONUS_PTS 자체를 2배로 (판에서 쌓인 값이라 예전 기록엔 영향 없음)
+const SC2_AT=1791462600000,timePts=(t,v2)=>!v2||t<=600?t*12:7200+12*((t-600)+(t-600)*(t-600)/240);
+const scoreOf0=r=>{const b=+r.bosses||0,d=DIFF[r.diff]||DIFF.normal,v2=(+r.at||0)>=SC2_AT;if(d.rush)return Math.round((b*2500+(+r.lvl||0)*30+(+r.time||0)*2+(+r.bonus||0))*(d.sc||1));return Math.round((timePts(+r.time||0,v2)+softC((+r.kills||0)*2,4000)+(+r.lvl||0)*30+b*(v2?800:400)+(b>=4?3000:0)+(+r.bonus||0))*(d.sc||1));};
 const AUTO_SC=.1,scoreOf=r=>Math.round(scoreOf0(r)*(1-AUTO_SC*Math.min(1,Math.max(0,+r.ap||0))));
 // 플레이 보너스: 직접 찾아내고 해내는 것(황금 용·숨겨진 몬스터·이스터에그·이벤트 성공·보스 노히트)과 최고 DPS에 주는 추가 점수 (난이도 배율 전 점수)
-const BONUS_PTS={dragon:3000,hidden:400,egg:500,eggNew:1000,evC:200,evB:400,evA:800,evS:1500,nohit:1000,dodge:150};
+const BONUS_PTS={dragon:6000,hidden:800,egg:1000,eggNew:2000,evC:400,evB:800,evA:1600,evS:3000,nohit:2000,dodge:300};
 const BONUS_N={dragon:'🐉 황금 용 처치',hidden:'👀 숨겨진 몬스터',egg:'🥚 이스터에그',eggNew:'🥚 새 이스터에그 발견',ev:'⚡ 돌발 이벤트 성공',nohit:'🛡 보스 노히트',bossM:'🏅 보스 사냥꾼',dodge:'💨 완벽한 회피',dps:'💥 최고 DPS'};
 function addBonus(k,pts,g){if(!S||!S.st||!pts)return;S.st.bonus=(S.st.bonus||0)+pts;const bl=S.st.bl||(S.st.bl={});const key=g||k;bl[key]=(bl[key]||0)+pts;const v=Math.round(pts*(dfM().sc||1));if(S.p)ftext(S.p.x,S.p.y-46,'✨ 보너스 +'+v.toLocaleString(),'#ffe27a',16);}
 // 최고 DPS 보너스: DPS 1천 넘는 10배마다 +800 (1만 800 · 100만 2,400 · 1억 4,000)
@@ -7317,7 +7331,7 @@ const winPts=()=>S.win?3000:0;
 const autoFr=()=>S?Math.round(Math.min(1,(S.amT||0)/Math.max(1,(S.gt||0)+(S.bt||0)))*100)/100:0;
 // 기록 시간: 보통은 보스전 동안 멈추는 생존 시간, 보스 러시는 판 전체가 보스전이라 실제로 흐른 시간
 const runSec=()=>Math.floor(rushOn()?(S.gt||0)+(S.bt||0):(S.gt||0));
-const curRun=(win)=>({time:runSec(),kills:S.st.kills,lvl:S.lvl,bosses:win?4:(S.st.bosses||0),diff:S.diff||'normal',bonus:playBonus(),ap:autoFr()});
+const curRun=(win)=>({at:Date.now(),time:runSec(),kills:S.st.kills,lvl:S.lvl,bosses:win?4:(S.st.bosses||0),diff:S.diff||'normal',bonus:playBonus(),ap:autoFr()});
 function clearScore(){return scoreOf(curRun(true));}
 function runScore(){return scoreOf(curRun(false));}
 // 메달: 점수 2000점당 1개 × 난이도 메달 배율(md) + 클리어 보너스(cb). 랭킹 점수와 별개로 높은 난이도 보상을 키움
