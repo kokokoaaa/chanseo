@@ -414,7 +414,7 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
   <div id="ov"></div>
   <div id="st"></div>
   <button id="statBtn">스탯 (Tab)</button><button id="cxBtn">📖 도감</button><div id="onlHud"></div>
-  <div id="autoBar"><button id="autoPickBtn">자동 선택 OFF</button><button id="autoMoveBtn">자동 이동 OFF</button><button id="speedBtn">x1</button><button id="zoomBtn" title="시야 넓이">🔭 1</button><button id="bgmBtn">🎵</button></div>
+  <div id="autoBar"><button id="autoPickBtn">자동 선택 OFF</button><button id="autoMoveBtn">자동 이동 OFF</button><button id="noCdBtn" style="display:none">쿨타임 무시 OFF</button><button id="speedBtn">x1</button><button id="zoomBtn" title="시야 넓이">🔭 1</button><button id="bgmBtn">🎵</button></div>
 </div>
 <script>
 window.addEventListener('error',function(e){var d=document.getElementById('errbox');if(!d){d=document.createElement('div');d.id='errbox';d.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:99;background:#300;color:#fdd;font:13px/1.4 monospace;padding:8px 10px;border:1px solid #f66;border-radius:6px;white-space:pre-wrap;max-height:40%;overflow:auto';document.body.appendChild(d);}d.textContent+='오류: '+(e.message||e)+' ('+(e.lineno||'?')+':'+(e.colno||'?')+')\n';});
@@ -3805,7 +3805,7 @@ const SKILLS={
   alch:{ico:'⚗',n:'비상 물약',cd:30,d:'즉시 체력 40% 회복 + 2초간 유리병 보호막 (무적)'},
   gambler:{ico:'💰',n:'운명의 동전',cd:25,d:'동전 던지기: 앞면이면 3초 무적 + 공격력 2배, 뒷면이면 체력 25% 회복 (행운이 높을수록 앞면)'}};
 const SK_T=['iwT','skCd','ulCd','skInvT','skDrT','skThT','skUndT','skRgT','skCrT','skAtkT','skRootT'];
-function skTick(dt){const p=S.p;for(const k of SK_T)if(p[k]>0)p[k]=Math.max(0,p[k]-dt);skFxTick(dt);}
+function skTick(dt){const p=S.p;for(const k of SK_T)if(p[k]>0)p[k]=Math.max(0,p[k]-dt);if(DEV&&typeof DEV_NOCD!=='undefined'&&DEV_NOCD){p.skCd=0;p.ulCd=0;p.dashCd=0;}skFxTick(dt);}
 // 생존기 연출: 직업마다 전용 그림 (바닥 층 L=0, 캐릭터 위 층 L=1). 판정·수치에는 영향 없음
 function skFx(k,o){(S.skFx=S.skFx||[]).push(Object.assign({k,t:0,d:1},o||{}));}
 function skFxTick(dt){if(!S.skFx)return;for(const f of S.skFx)f.t+=dt;S.skFx=S.skFx.filter(f=>f.t<f.d);}
@@ -7492,7 +7492,7 @@ $('zoomBtn').addEventListener('click',cycleZoom);
 // 배속 해금: 처음엔 x1만. 일반·어려움·지옥·신을 클리어할 때마다 x2 → x3 → x4 → x5
 const speedMax=()=>1+['normal','hard','hell','god'].filter(k=>(META.clears||{})[k]).length;
 function cycleSpeed(){const mx=speedMax();if(mx<=1){toast('🔒 배속은 일반 난이도를 클리어하면 열려요');return;}AUTO.speed=((Math.min(AUTO.speed||1,mx))%mx)+1;saveAuto();refreshAutoBtns();toast(AUTO.speed===1?'보통 속도':AUTO.speed+'배속');}
-function refreshAutoBtns(){$('zoomBtn').textContent='🔭 '+(ZOOM+1);if((AUTO.speed||1)>speedMax())AUTO.speed=speedMax();const sb=$('speedBtn');sb.textContent='x'+(AUTO.speed||1);sb.classList.toggle('on',(AUTO.speed||1)>1);const a=$('autoPickBtn'),m=$('autoMoveBtn');a.textContent='자동 선택 '+(AUTO.pick?'ON':'OFF');m.textContent='자동 이동 '+(AUTO.move?'ON':'OFF');a.classList.toggle('on',AUTO.pick);m.classList.toggle('on',AUTO.move);a.style.display=DEV?'':'none';m.style.display='';}
+function refreshAutoBtns(){$('zoomBtn').textContent='🔭 '+(ZOOM+1);if((AUTO.speed||1)>speedMax())AUTO.speed=speedMax();const sb=$('speedBtn');sb.textContent='x'+(AUTO.speed||1);sb.classList.toggle('on',(AUTO.speed||1)>1);const a=$('autoPickBtn'),m=$('autoMoveBtn');a.textContent='자동 선택 '+(AUTO.pick?'ON':'OFF');m.textContent='자동 이동 '+(AUTO.move?'ON':'OFF');a.classList.toggle('on',AUTO.pick);m.classList.toggle('on',AUTO.move);a.style.display=DEV?'':'none';m.style.display='';const nc=$('noCdBtn');nc.style.display=DEV?'':'none';nc.textContent='쿨타임 무시 '+(DEV_NOCD?'ON':'OFF');nc.classList.toggle('on',DEV_NOCD);}
 $('speedBtn').addEventListener('click',cycleSpeed);
 /* ---------- BGM ---------- */
 // 파일 없이 WebAudio로 만드는 부적튠. 실제 시간 기준으로 스케줄해서 게임 배속과 무관. 필드 곡 / 보스 곡 자동 전환
@@ -7528,6 +7528,8 @@ function bgmTick(){
 setInterval(bgmTick,30);
 const refreshBgmBtn=()=>{const b=$('bgmBtn');b.textContent=BGM.on?'🎵':'🔇';b.classList.toggle('on',BGM.on);b.title=BGM.on?'BGM 끄기':'BGM 켜기';};
 $('bgmBtn').addEventListener('click',()=>{BGM.on=!BGM.on;try{localStorage.setItem('chanseo_bgm',BGM.on?'1':'0');}catch(e){}refreshBgmBtn();});refreshBgmBtn();
+// 개발자 테스트: 대시·생존기(E)·궁극기(R) 쿨타임 없이 계속 쓰기 (이번에 켠 창에서만)
+let DEV_NOCD=false;$('noCdBtn').addEventListener('click',()=>{if(!DEV)return;DEV_NOCD=!DEV_NOCD;refreshAutoBtns();toast(DEV_NOCD?'🛠 쿨타임 무시 ON · 대시·E·R 계속 쓸 수 있어요':'쿨타임 무시 OFF');});
 $('autoPickBtn').addEventListener('click',()=>{if(!DEV)return;AUTO.pick=!AUTO.pick;saveAuto();refreshAutoBtns();toast(AUTO.pick?'자동 선택 ON. 레벨업, 증강을 알아서 고릅니다':'자동 선택 OFF');});
 $('autoMoveBtn').addEventListener('click',()=>{AUTO.move=!AUTO.move;saveAuto();refreshAutoBtns();if(AUTO.move&&S)S.campAsked=0;setTimeout(campAsk,50);toast(AUTO.move?'자동 이동 ON. 직접 조작하면 그동안은 수동':'자동 이동 OFF');});
 refreshAutoBtns();
@@ -7879,7 +7881,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=62,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=63,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
