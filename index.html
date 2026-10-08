@@ -7047,7 +7047,7 @@ function continueGame(d){
   S.augs=d.augs.map(([id,lv,q,pq,dl])=>{const f=[...FUSIONS,...VFUSIONS].find(x=>x.id===id);if(f){const o=fusionObj(f);if(pq)o.pq=pq;return o;}const a=AUGS.find(x=>x.id===id)||VIPS.find(x=>x.id===id)||DRAGON.find(x=>x.id===id);return a?{...a,lv,q:q||1,dl:dl||undefined}:null;}).filter(Boolean);
   tagCount();S.round=diffAt(effT());
   S.started=true;const p=S.p;p.x=WW/2;p.y=WH/2;p.inv=2;p.alive=true;p.barrier=barrierMax();
-  S.mode='play';hide();toast('이어하기');
+  S.mode='play';hide();CH_PEND=true;toast('이어하기');
   if(S.bossI>=0)spawnBoss(S.bossI,true);
   if(S.pendingLv>0||S.bonusAug>0||S.bonusSt>0)openNext();
 }
@@ -7348,7 +7348,7 @@ function renderStats(){
      x.onclick=e=>{if(pop.style.display==='block'&&pop.dataset.k===x.textContent){pop.style.display='none';return;}pop.dataset.k=x.textContent;place(x,e);};});}
   $('stSave').onclick=()=>{saveGame(false);};
   // 아직 시작 전(첫 증강·카드 선택 화면)이면 저장할 게 없으니 그냥 메인으로
-  $('stQuit').onclick=()=>{if(!S.started||saveGame(false)){toggleStats();newRun();startScreen();}};
+  $('stQuit').onclick=()=>{if(!S.started||saveGame(false)){toggleStats();newRun();CH_PEND=true;startScreen();}};
   // 정산 종료: 쓰러진 것과 같게 처리(메달·명예의 전당 등록·악몽 10분 해제권). 실수 방지로 두 번 눌러야 함
   if($('stEnd'))$('stEnd').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.innerHTML='한 번 더 누르면 정산하고 끝냅니다';return;}toggleStats();S.quitEnd=true;gameOver(false);};
 }
