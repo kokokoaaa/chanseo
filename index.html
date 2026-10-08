@@ -3292,7 +3292,6 @@ const CARDS=[
   {cls:'gunner',n:'탄두 가공',g:'총잡이 리볼버',v:[[8,15,0]],t:v=>`매그넘 탄 피해 +${v[0]}%`,a:(p,v)=>{p.lbD=(p.lbD||0)+v[0]/100;}},
   {cls:'gunner',req:()=>(S.p.rlM||1)>.4,n:'빠른 장전',g:'총잡이 리볼버',v:[[5,10,0]],t:v=>`재장전 시간 −${v[0]}%`,a:(p,v)=>{p.rlM=(p.rlM||1)*(1-v[0]/100);}},
   {src:()=>tag('elem')>=1||has('elemcoin'),cls:'elem',n:'원소 결정',g:'원소 효과',v:[[8,15,0]],t:v=>`화상·둔화·연쇄·원소 구슬 피해 +${v[0]}%`,a:(p,v)=>{p.elD=(p.elD||0)+v[0]/100;}},
-  {src:()=>tag('elem')>=1||has('elemcoin'),cls:'elem',n:'정령 공명',g:'원소 효과',v:[[2,4,1],[3,6,0]],t:v=>`공격 속도 +${v[0]}%, 원소 효과 피해 +${v[1]}%`,a:(p,v)=>{p.rateP=(p.rateP||0)+v[0]/100;p.elD=(p.elD||0)+v[1]/100;}},
   {src:()=>furyOn(),cls:'berserk',n:'피의 북',g:'광란',v:[[2,3,0]],t:v=>`광란 최대 중첩 +${v[0]}`,a:(p,v)=>{p.fyC=(p.fyC||0)+v[0];}},
   {src:()=>furyOn(),cls:'berserk',n:'끝없는 분노',g:'광란',v:[[4,8,0]],t:v=>`광란이 최대일 때 공격 속도 +${v[0]}%`,a:(p,v)=>{p.fyR=(p.fyR||0)+v[0]/100;}},
   {src:()=>has('thornseed')||tag('nature')>=1||has('gravebloom')||has('gravvine'),cls:'druid',n:'씨앗 주머니',g:'덩굴 지대',v:[[6,12,0]],t:v=>`덩굴 지대 범위 +${v[0]}%`,a:(p,v)=>{p.vnR=(p.vnR||0)+v[0]/100;}},
@@ -3307,33 +3306,30 @@ const CARDS=[
   {req:()=>rawRate()<RATE_CAP(),n:'날랜 손놀림',v:[[4,8,1]],t:v=>`공격 속도 +${v[0]}%`,a:(p,v)=>{p.rateP=(p.rateP||0)+v[0]/100;}},
   {n:'튼튼한 체력',v:[[8,16,0]],t:v=>`최대 체력 +${v[0]}`,a:(p,v)=>{p.maxHp+=v[0];p.hp+=v[0];}},
   {n:'가죽 갑옷',v:[[5,9,0]],t:v=>`방어력 +${v[0]}`,a:(p,v)=>{p.armor+=v[0];}},
-  {req:()=>moveSpd()<SPEED_CAP,n:'가벼운 장화',v:[[3,6,1],[2,4,0]],t:v=>`이동 속도 +${v[0]}%, 방어력 +${v[1]}`,a:(p,v)=>{p.speed*=1+v[0]/100;p.armor+=v[1];}},
+  {req:()=>moveSpd()<SPEED_CAP,n:'가벼운 장화',v:[[4,7,1]],t:v=>`이동 속도 +${v[0]}%`,a:(p,v)=>{p.speed*=1+v[0]/100;}},
   // 사거리는 딜을 직접 올리지 않음(안전 거리용) → 원거리 시너지·궁수일 때만 등장
-  {req:()=>tag('sniper')>0||S.cls==='archer'||has('longshot'),n:'조준경',v:[[5,9,0],[1,2,1]],t:v=>`사거리 +${v[0]}%, 치명타 확률 +${v[1]}%`,a:(p,v)=>{p.range*=1+v[0]/100;p.crit+=v[1]/100;}},
+  {req:()=>tag('sniper')>0||S.cls==='archer'||has('longshot'),n:'조준경',v:[[6,11,0]],t:v=>`사거리 +${v[0]}%`,a:(p,v)=>{p.range*=1+v[0]/100;}},
   // 보스 러시·레이드엔 잡몹이 없어서 흡수 범위·경험치·골드 획득 카드는 안 나옴
-  {req:()=>!rushOn(),n:'자석',v:[[12,22,0],[4,8,0]],t:v=>`경험치·골드 흡수 범위 +${v[0]}%, 최대 체력 +${v[1]}`,a:(p,v)=>{p.magnet*=1+v[0]/100;p.maxHp+=v[1];p.hp+=v[1];}},
+  {req:()=>!rushOn(),n:'자석',v:[[15,28,0]],t:v=>`경험치·골드 흡수 범위 +${v[0]}%`,a:(p,v)=>{p.magnet*=1+v[0]/100;}},
   {req:()=>S.p.luck<LUCK_CAP,n:'네잎클로버',v:[[.8,1.6,1]],t:v=>`행운 +${v[0]}. 높은 등급과 좋은 수치가 잘 나옵니다`,a:(p,v)=>{p.luck=Math.min(LUCK_CAP,Math.round((p.luck+v[0])*10)/10);}},
   {cc:1,n:'급소 노리기',v:[[4,7,1]],t:v=>`치명타 확률 +${v[0]}%`,a:(p,v)=>{p.crit+=v[0]/100;}},
   {cm:1,n:'치명상',v:[[30,50,0]],t:v=>`치명타 피해 +${v[0]}%`,a:(p,v)=>{p.critM+=v[0]/100;}},
-  {req:()=>!pureMelee(),n:'가속 탄',v:[[8,14,0],[1,2,1]],t:v=>`탄속 +${v[0]}%, 치명타 확률 +${v[1]}%`,a:(p,v)=>{p.bspd*=1+v[0]/100;p.crit+=v[1]/100;}},
-  {req:()=>!rushOn(),n:'배움의 서',v:[[6,10,1],[.4,.8,1]],t:v=>`경험치 획득 +${v[0]}%, 공격력 +${v[1]}`,a:(p,v)=>{p.xpM=(p.xpM||1)+v[0]/100;p.dmg+=v[1];}},
-  {req:()=>!rushOn(),n:'황금 주머니',v:[[8,14,0],[4,8,0]],t:v=>`골드 획득 +${v[0]}%, 최대 체력 +${v[1]}`,a:(p,v)=>{p.goldM+=v[0]/100;p.maxHp+=v[1];p.hp+=v[1];}},
+  {req:()=>!pureMelee(),n:'가속 탄',v:[[10,18,0]],t:v=>`탄속 +${v[0]}%`,a:(p,v)=>{p.bspd*=1+v[0]/100;}},
+  {req:()=>!rushOn(),n:'배움의 서',v:[[8,13,1]],t:v=>`경험치 획득 +${v[0]}%`,a:(p,v)=>{p.xpM=(p.xpM||1)+v[0]/100;}},
+  {req:()=>!rushOn(),n:'황금 주머니',v:[[10,17,0]],t:v=>`골드 획득 +${v[0]}%`,a:(p,v)=>{p.goldM+=v[0]/100;}},
   {req:()=>S.p.dodge<DODGE_CAP,n:'날렵한 몸놀림',v:[[2.5,4.5,1]],t:v=>`회피 +${v[0]}%`,a:(p,v)=>{p.dodge+=v[0]/100;}},
   {n:'강철 심장',v:[[3,6,0]],t:v=>`최대 체력 +${v[0]}%`,a:(p,v)=>{p.hpP=(p.hpP||0)+v[0]/100;}},
   {n:'붕대',v:[[.6,1.2,2]],t:v=>`초당 체력 재생 +${v[0]}`,a:(p,v)=>{p.regen+=v[0];}},
-  {req:()=>(S.p.dashD||0)<DASH_MAX,n:'먼 도약',v:[[7,12,0],[2,4,0]],t:v=>`대시 거리 +${v[0]} (기본 120, 최대 +${DASH_MAX}), 방어력 +${v[1]}`,a:(p,v)=>{p.dashD=Math.min(DASH_MAX,(p.dashD||0)+v[0]);p.armor+=v[1];}},
+  {req:()=>(S.p.dashD||0)<DASH_MAX,n:'먼 도약',v:[[8,14,0]],t:v=>`대시 거리 +${v[0]} (기본 120, 최대 +${DASH_MAX})`,a:(p,v)=>{p.dashD=Math.min(DASH_MAX,(p.dashD||0)+v[0]);}},
   {req:()=>(S.p.skM||1)>.55,n:'숨 고르기',v:[[3,6,0]],t:v=>`생존기(E) 재사용 −${v[0]}%`,a:(p,v)=>{p.skM=(p.skM||1)*(1-v[0]/100);}},
-  {n:'순발력',v:[[6,10,0],[2,4,0]],t:v=>`대시 재사용 −${v[0]}%, 방어력 +${v[1]}`,a:(p,v)=>{p.dashMul*=1-v[0]/100;p.armor+=v[1];}},
+  {n:'순발력',v:[[7,12,0]],t:v=>`대시 재사용 −${v[0]}%`,a:(p,v)=>{p.dashMul*=1-v[0]/100;}},
   {n:'흡혈 송곳니',v:[[.3,.7,2]],t:v=>`흡혈 +${v[0]}%`,a:(p,v)=>{p.lifesteal+=v[0]/100;}},
   {req:()=>orbitN()>0,n:'회전 부적 연마',g:'회전 부적',v:[[6,12,0],[2,4,0]],t:v=>`회전 부적 피해 +${v[0]}%, 회전 반경 +${v[1]}%`,a:(p,v)=>{p.orbM*=1+v[0]/100;p.orbR*=1+v[1]/100;}},
   {n:'유리 대포',v:[[6.5,10.5,1]],t:v=>`공격력 +${v[0]}%, 최대 체력 −8%`,a:(p,v)=>{p.dmgP=(p.dmgP||0)+v[0]/100;p.hpP=(p.hpP||0)-.08;}},
   {n:'무거운 갑옷',v:[[6,10,0]],t:v=>`방어력 +${v[0]}, 이동 속도 −4%`,a:(p,v)=>{p.armor+=v[0];p.speed*=.96;}},
   {n:'광기',v:[[6.5,10.5,1]],t:v=>`공격 속도 +${v[0]}%, 받는 피해 +8%`,a:(p,v)=>{p.rateP=(p.rateP||0)+v[0]/100;p.vuln*=1.08;}},
   {n:'거인의 심장',v:[[8,14,0],[.3,.5,2]],t:v=>`최대 체력 +${v[0]}, 초당 체력 재생 +${v[1]}`,a:(p,v)=>{p.maxHp+=v[0];p.hp+=v[0];p.regen+=v[1];}},
-  {cc:1,n:'사냥꾼의 눈',v:[[2,3.5,1],[4,7,1]],t:v=>`치명타 확률 +${v[0]}%, 사거리 +${v[1]}%`,a:(p,v)=>{p.crit+=v[0]/100;p.range*=1+v[1]/100;}},
-  {n:'전투 본능',v:[[1.6,3.4,1],[1.6,3.4,1]],t:v=>`공격력 +${v[0]}%, 공격 속도 +${v[1]}%`,a:(p,v)=>{p.dmgP=(p.dmgP||0)+v[0]/100;p.rateP=(p.rateP||0)+v[1]/100;}},
   {n:'철벽 자세',v:[[2.5,4,1],[6,10,0]],t:v=>`방어력 +${v[0]}, 최대 체력 +${v[1]}`,a:(p,v)=>{p.armor+=v[0];p.maxHp+=v[1];p.hp+=v[1];}},
-  {req:()=>!pureMelee(),n:'쾌속 장전',v:[[6,10,0],[3,5,1]],t:v=>`탄속 +${v[0]}%, 공격 속도 +${v[1]}%`,a:(p,v)=>{p.bspd*=1+v[0]/100;p.rateP=(p.rateP||0)+v[1]/100;}},
   {n:'질주 본능',v:[[2,3.5,1],[3,5,1]],t:v=>`이동 속도 +${v[0]}%, 대시 재사용 −${v[1]}%`,a:(p,v)=>{p.speed*=1+v[0]/100;p.dashMul*=1-v[1]/100;}},
   {fr:'r',n:'모험가의 주사위',get d(){const k=1;return `공격력 −${Math.round(15*k)}% ~ +${Math.round(25*k)}%, 굴려봐야 압니다`;},f:p=>{const m=Math.round((-15+Math.random()*40)*1);p.dmgP=(p.dmgP||0)+m/100;return `공격력 ${m>=0?'+':''}${m}%`;}},
   // 도박 카드: 후반에도 의미 있게 레벨·시간에 따라 커짐
@@ -3345,7 +3341,7 @@ const CARDS=[
   {n:'불사의 맹세',v:[[.15,.3,2],[.12,.25,2]],t:v=>`흡혈 +${v[0]}%, 초당 체력 재생 +${v[1]}`,a:(p,v)=>{p.lifesteal+=v[0]/100;p.regen+=v[1];}},
   {fr:'l',n:'다연발',d:'탄환 +1발',f:p=>{p.multi+=1;}},
   {fr:'l',n:'결사',v:[[18,28,0]],t:v=>`공격력 +${v[0]}%, 받는 피해 +50%`,a:(p,v)=>{p.dmgP=(p.dmgP||0)+v[0]/100;p.vuln*=1.5;}},
-  {fr:'l',cc:1,n:'럭키 세븐',v:[[.8,1.5,1],[1.5,2.5,1]],t:v=>`행운 +${v[0]}, 치명타 확률 +${v[1]}%`,a:(p,v)=>{p.luck=Math.round((p.luck+v[0])*10)/10;p.crit+=v[1]/100;}},
+  {fr:'l',n:'럭키 세븐',v:[[1.5,3,1]],t:v=>`행운 +${v[0]}`,a:(p,v)=>{p.luck=Math.min(LUCK_CAP,Math.round((p.luck+v[0])*10)/10);}},
 ];
 // 0~1 굴림. 행운이 높을수록 1 쪽으로 치우침 (행운 5면 평균 0.5 → 0.62, 행운 10이면 0.69)
 // 행운 상한 30. 모든 행운 효과는 0~30 구간에 고르게 퍼져 있고 30을 넘는 행운은 무시됨
@@ -4339,7 +4335,8 @@ function spawnBurst(){
 const HID_MOB=['gemslime','mimic','luckycat'];
 function hidRoll(){if(rushOn()||S.bossI>=0||effT()<60||(S.hidN||0)>=6||S.en.some(e=>ET[e.type].hid))return;if(Math.random()>.008*(1+LK()/LUCK_CAP))return;
   S.hidN=(S.hidN||0)+1;const t=HID_MOB[Math.floor(Math.random()*HID_MOB.length)],p=S.p,a=Math.random()*TAU,r=t==='mimic'?260:330;spawnAt(t,clamp(p.x+Math.cos(a)*r,30,WW-30),clamp(p.y+Math.sin(a)*r,30,WH-30),true);
-  toast(t==='gemslime'?'💎 보석 슬라임 출현! 도망가기 전에 잡으세요':t==='luckycat'?'🐱 행운 고양이 출현! 잡으면 행운 +4 · 프리즘 증강':'🎁 근처에 수상한 상자가 보인다…');}
+  hidBan(t==='gemslime'?['💎 보석 슬라임 출현!','도망가기 전에 잡으세요 · 미니맵 ★','#7fe0ff']:t==='luckycat'?['🐱 행운 고양이 출현!','잡으면 행운 +4 · 골드 · 프리즘 증강 · 맞으면 멀리 순간이동 · 미니맵 ★','#ffd76a']:['🎁 수상한 상자가 보인다…','근처를 살펴보세요 · 미니맵 ★','#c89bff']);}
+function hidBan(a){S.hidBanner={s:a[0],d:a[1],col:a[2],t:5,T:5};}
 // 히든 보스: 6분 이후 보스전이 아닐 때 30초마다 3% (히든 몹을 잡을 때마다 +6%). 한 판에 한 번
 function hbTick(dt){if(rushOn()||S.hbDone||S.bossI>=0||S.win||(S.gt||0)<360)return;S.hbT=(S.hbT??30)-dt;if(S.hbT>0)return;S.hbT=30;if(Math.random()<.005+.01*Math.min(4,S.hidK||0))spawnHB();}
 function spawnHB(){S.hbDone=1;const p=S.p,a=Math.random()*TAU,e=spawnAt('bossH',clamp(p.x+Math.cos(a)*320,60,WW-60),clamp(p.y+Math.sin(a)*320,60,WH-60),true),j=Math.min(3,S.chap||0);
@@ -4428,6 +4425,7 @@ function endEvent(win){
 function updEvent(dt){
   if(S.bossI>=0||S.win||rushOn())return;
   if(S.evBanner){S.evBanner.t-=dt/(AUTO.speed||1);if(S.evBanner.t<=0)S.evBanner=null;}
+  if(S.hidBanner){S.hidBanner.t-=dt/(AUTO.speed||1);if(S.hidBanner.t<=0)S.hidBanner=null;}
   if(S.bless&&S.bless.t>0){S.bless.t-=dt;if(S.bless.k==='guard'&&S.p.alive)S.p.hp=Math.min(S.p.maxHp,S.p.hp+S.p.maxHp*.02*dt);}
   // 보스 등장 45초 전부터는 새 퀘스트를 시작하지 않음 (보스가 나오면 진행 중 퀘스트가 실패 처리되므로)
   if(!S.ev){S.evT=(S.evT??50)-dt;if(S.evT<=0&&(S.chap+1)*CH_LEN-S.gt>45)startEvent();return;}
@@ -5710,9 +5708,9 @@ function onKill(e){
   if(e.boss&&!e.hid2)bossDown(e);
   if(e.hid2)hbDown(e);
   if(T.hid){S.hidK=(S.hidK||0)+1;addBonus('hidden',BONUS_PTS.hidden);META.hk=META.hk||{};META.hk[e.type]=1;achCheck(null);
-    if(e.type==='gemslime'){const v=S.next*1.5/(TS*(p.xpM||1))/14;for(let i=0;i<14;i++)S.dr.push({x:e.x+rand(-40,40),y:e.y+rand(-40,40),v,xp:1});toast('💎 보석 슬라임 처치! 경험치 폭탄');}
+    if(e.type==='gemslime'){const v=S.next*1.5/(TS*(p.xpM||1))/14;for(let i=0;i<14;i++)S.dr.push({x:e.x+rand(-40,40),y:e.y+rand(-40,40),v,xp:1});hidBan(['💎 보석 슬라임 처치!','경험치 폭탄이 쏟아졌어요','#7fe0ff']);}
     if(e.type==='mimic'){S.bonusAug++;const g=price(80);for(let i=0;i<10;i++)S.dr.push({x:e.x+rand(-30,30),y:e.y+rand(-30,30),v:g/10/TS});toast('🎁 미믹 처치! 증강 1개 + 골드');}
-    if(e.type==='luckycat'){p.luck+=4;S.prismN=(S.prismN||0)+1;const g=price(120);for(let i=0;i<12;i++)S.dr.push({x:e.x+rand(-30,30),y:e.y+rand(-30,30),v:g/12/TS});toast(tierOpen('p')?'🐱 행운 고양이! 행운 +4 · 골드 · 다음 증강은 💎 프리즘 확정':'🐱 행운 고양이! 행운 +4 · 골드');}}
+    if(e.type==='luckycat'){p.luck+=4;S.prismN=(S.prismN||0)+1;const g=price(120);for(let i=0;i<12;i++)S.dr.push({x:e.x+rand(-30,30),y:e.y+rand(-30,30),v:g/12/TS});hidBan(['🐱 행운 고양이 포획!',tierOpen('p')?'행운 +4 · 골드 · 다음 증강은 💎 프리즘 확정':'행운 +4 · 골드','#ffd76a']);}}
   if(e.stole){const g=Math.round(e.stole*1.5);S.gold+=g;ftext(e.x,e.y-e.r-14,'+'+g+' 골드 되찾음','#ffd76a',16);}
   if(hasAf(e,'split'))for(let i=0;i<(e.ak<1?2:3);i++)spawnAt(e.type==='slime'?'slimelet':'runner',e.x+rand(-12,12),e.y+rand(-12,12),true);
   if(hasAf(e,'volatile'))tele({k:'c',vol:1,x:e.x,y:e.y,r:90,T:.85,dmg:e.dmg*1.2*e.ak,col:'#ff7a3a',fx:t=>burst(t.x,t.y,'#ff7a3a',16)});
@@ -6519,8 +6517,8 @@ function draw(){
    for(const [x,y,c,l] of tg){const sx=x-camX,sy=y-camY;if(sx>=0&&sx<=W&&sy>=0&&sy<=H)continue;const a=Math.atan2(sy-H/2,sx-W/2),ex=clamp(sx,30,W-30),ey=clamp(sy,70,H-40);
      ctx.save();ctx.translate(ex,ey);ctx.rotate(a);ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(13,0);ctx.lineTo(-7,-8);ctx.lineTo(-7,8);ctx.closePath();ctx.fill();ctx.restore();
      ctx.fillStyle=c;ctx.font='12px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(l,ex-Math.cos(a)*26,ey-Math.sin(a)*20);}}
-  if(S.evBanner){const B=S.evBanner,a=Math.max(0,Math.min(1,B.t*2,((B.T||2.6)-B.t)*5));ctx.globalAlpha=a;ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,H*.18,W,68);ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillStyle=B.col;ctx.font=`${W<500?26:32}px "Do Hyeon",sans-serif`;ctx.fillText(B.s,W/2,H*.18+24);ctx.fillStyle='#f1e7cf';ctx.font=`${W<500?14:16}px "Gowun Dodum",sans-serif`;ctx.fillText(B.d,W/2,H*.18+52,W-16);ctx.globalAlpha=1;}
+  for(const [B,y0] of [[S.evBanner,H*.18],[S.hidBanner,H*.18+(S.evBanner?76:0)]]){if(!B)continue;const a=Math.max(0,Math.min(1,B.t*2,((B.T||2.6)-B.t)*5));ctx.globalAlpha=a;ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,y0,W,68);ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillStyle=B.col;ctx.font=`${W<500?26:32}px "Do Hyeon",sans-serif`;ctx.fillText(B.s,W/2,y0+24);ctx.fillStyle='#f1e7cf';ctx.font=`${W<500?14:16}px "Gowun Dodum",sans-serif`;ctx.fillText(B.d,W/2,y0+52,W-16);ctx.globalAlpha=1;}
   if(S.flash>0){ctx.fillStyle=`rgba(255,215,106,${S.flash})`;ctx.fillRect(0,0,W,H);}
   if(S.merch){const M=MERCH[S.merch.k],sx=S.merch.x-camX,sy=S.merch.y-camY;if(sx<0||sx>W||sy<0||sy>H){const a=Math.atan2(sy-H/2,sx-W/2),ex=clamp(sx,30,W-30),ey=clamp(sy,70,H-40);
     ctx.save();ctx.translate(ex,ey);ctx.rotate(a);ctx.fillStyle='#d6a94a';ctx.beginPath();ctx.moveTo(14,0);ctx.lineTo(-8,-9);ctx.lineTo(-8,9);ctx.closePath();ctx.fill();ctx.restore();
@@ -7058,7 +7056,7 @@ const CLS_BUILDS={
 let pickCls=(()=>{try{return localStorage.getItem('chipdungeon_cls')||'knight';}catch(e){return 'knight';}})();
 // 직업 고유 능력에 어떤 능력치가 적용되는지 (코드 기준으로 확인한 표)
 const clsApplyHtml=k=>CLS_APPLY[k]?`<details class="capl"><summary>🔍 고유 능력에 적용되는 능력치</summary><div class="capg"><div><b style="color:#7be08f">✅ 적용돼요</b>${CLS_APPLY[k].y.map(x=>`<span>${x}</span>`).join('')}</div><div><b style="color:#ff8a8a">❌ 적용 안 돼요</b>${CLS_APPLY[k].n.map(x=>`<span>${x}</span>`).join('')}</div></div>${CLS_APPLY[k].m?`<small>${CLS_APPLY[k].m}</small>`:''}</details>`:'';
-const CLS_APPLY={"knight":{"y":["공격력: 회전 베기 피해가 오름","공격 속도: 4번째 공격이 더 빨리 옴","주사위·동전 같은 공격 배율도 같이 붙음","흡혈: 회전 베기에도 적용","표식 등 받는 피해 증가 적용","막기 확률: 「철벽」 증강으로 오름"],"n":["치명타: 회전 베기는 치명타 없음","사거리: 회전 범위는 95로 고정","탄환 개수·관통: 회전 베기와 무관","근접 보정 ×1.6은 회전 베기엔 없음","막기는 보스 패턴 공격엔 안 됨"],"m":"「회오리 베기」 증강이 있으면 3번째(★3은 2번째)마다, 범위 ×1.3, 피해 120~200% · 막으면 0.2초 무적"},"mage":{"y":["공격력: 폭발 피해가 오름","공격 속도: 많이 쏠수록 폭발도 많음","탄환 개수: 탄마다 폭발","관통: 맞은 적마다 폭발","탄속 보너스·집중 등 탄 배율 적용","흡혈·표식 적용"],"n":["치명타: 폭발은 치명타 없음 (직격만)","사거리: 폭발 범위와 무관","직격용 배율(저격·처형 등)은 폭발엔 X"],"m":"폭발 범위는 「화염 확산」·「정신 집중」(멈춰 있을 때)·「촉매」 증강으로만 커짐"},"archer":{"y":["관통 카드·증강과 그대로 더해짐","치명타 확률이 다른 치명타 보너스와 더해짐","치명타 피해 스탯이 그대로 적용"],"n":["따로 발동하는 효과 없음 (스탯 보너스)"],"m":"치명타 100% 넘는 만큼은 치명타 피해로 바뀜 (넘친 1%당 +0.5%)"},"rogue":{"y":["회피 카드·장비 회피와 더해짐 (최대 60%)","대시 재사용 감소 카드와 곱해짐"],"n":["회피는 보스 패턴 공격엔 안 됨","공격력·공격 속도와는 무관"],"m":"대시 재사용 = 2.4초 × 0.7 = 약 1.7초부터 · 회피하면 0.15초 무적"},"paladin":{"y":["공격력: 오라 피해가 오름","신성 시너지·성수 등 빛 피해 증가","성유(범위)·성가(피해) 카드","흡혈·표식 적용","공격 속도: 회복이 더 자주 나옴"],"n":["공격 속도: 오라 피해 횟수는 고정 (0.5초마다)","치명타: 오라는 치명타 없음","사거리: 오라 범위와 무관","탄환 개수·관통: 무관"],"m":"오라 범위는 성유 카드·「확장 오라」·「성역」(멈춰 있을 때)으로만 커짐 · 보스전 분노 단계엔 회복량 줄어듦"},"necro":{"y":["공격력: 해골 피해가 실시간으로 오름","해골 피해 카드(뼈 가루)·망자 시너지","소환 시너지: 4개 피해 ×2, 6개 공격 2배 빠름","해골 수(해골 증원 등)·지속(영혼 사슬)","최대 체력: 해골 체력 = 내 최대 체력 50%","흡혈·표식 적용","쿨타임 감소(시계 태엽): 소환 간격 줄어듦"],"n":["공격 속도: 해골 공격은 0.7초마다 고정","치명타: 해골은 치명타 없음","사거리·탄환 개수·관통: 무관","정비 키트(소환물 피해 카드)는 해골엔 X"],"m":"해골이 30기를 넘으면 넘는 만큼 해골 피해 배율로 · 해골이 받는 피해 = 절반 + 내 방어력 적용 · 해골 공격은 보스 처치 효과(3타) 집계 안 됨"},"gunner":{"y":["공격력·치명타·치명타 피해 모두 적용","탄두 가공 카드(매그넘 탄 피해)","탄환 개수: 한 번에 여러 발 (탄창은 1발만 씀)","관통 카드와 더해짐","공격 속도: 6발 사이 간격이 빨라짐","탄속 보너스도 적용"],"n":["공격 속도: 재장전 시간엔 영향 없음","탄창 수는 6발 고정 (대용량 탄창 증강만 +4)"],"m":"재장전 기본 0.8초, 빠른 장전·쌍권총·총기 숙련으로 줄어듦 (최소 0.35초) · 1.7배는 같은 공격에서 나오는 일부 추가 탄에도 붙음"},"elem":{"y":["공격력: 화상·연쇄 피해 오름","원소 결정·정령 공명 카드(원소 효과 피해)","화염 시너지 등: 화상 피해 증가","시너지 모은 원소가 더 자주 나옴","관통: 맞은 적마다 원소 효과","흡혈·표식 적용","공격 속도: 원소 공격이 자주 나감"],"n":["치명타: 화상·연쇄 번개엔 없음 (직격만)","사거리: 연쇄 거리(180)와 무관","화상은 겹쳐 쌓이지 않음 (센 쪽만)","보스는 냉기 둔화 안 걸림"],"m":"한 번 공격의 탄들은 모두 같은 원소 · 연쇄 번개는 탄 피해(치명타 전)의 60%"},"berserk":{"y":["광란 공격력은 모든 피해에 붙음","흡혈 2%: 흡혈 카드와 더해짐","흡혈은 모든 피해(화상·독 포함)에 적용","보스는 3번 때릴 때마다 처치 1회로 침","광란 최대 수 카드(피의 북)·영구 강화"],"n":["광란 자체는 공격 속도를 안 올림 (광란 시너지 4개부터)","치명타·사거리와 무관"],"m":"4초 지나면 0.3초마다 1중첩씩 빠짐 · 광란 시너지로 중첩당 공격력 조금 더"},"druid":{"y":["공격력: 덩굴 피해가 실시간으로 오름","공격 속도: 덩굴이 더 자주 생김","덩굴 카드(씨앗 주머니 범위·가시 독 피해)","자연 시너지: 피해·지속 증가","흡혈·표식 적용","덩굴이 겹치면 각각 피해"],"n":["치명타: 덩굴은 치명타 없음","사거리: 덩굴 범위와 무관","탄환 개수·관통: 덩굴 1개만","주사위·동전 같은 공격 배율 X","보스는 둔화 안 됨"],"m":"덩굴은 동시에 최대 14개 · 체력 재생은 최대 체력 300 넘으면 비례해 커짐"},"alch":{"y":["공격력: 플라스크·물약 피해 오름","공격 속도: 물약이 자주 나옴","탄환 개수·관통: 맞은 적마다 플라스크","물약 카드(큰 병·농축액)는 물약에만","독·화염·냉기 시너지로 물약 종류 비율","흡혈·표식 적용"],"n":["치명타: 플라스크·물약 모두 없음","사거리: 폭발 범위와 무관","농축액·큰 병은 플라스크엔 X"],"m":"물약 범위 70, 피해 산성 60%·폭발 150%·얼음 80% · 장판은 2.5초, 초당 물약 피해의 20% · 폭발형 플라스크는 피해 1.4배"},"gambler":{"y":["행운: 앞면 확률 오름 (행운 1당 +0.4%)","공격력·치명타·치명타 피해 그대로 적용","판돈 카드: 앞면 피해 증가","타짜의 손 카드: 앞면 확률","탄환 개수: 모든 탄이 같은 동전 결과"],"n":["앞면 확률은 최대 75% (타짜의 손 있으면 80%)","폭발·장판 같은 따로 나가는 피해엔 X"],"m":"기본 앞면 확률 약 52% (행운 5) · 동전은 공격 1번에 1번만 던짐"}};
+const CLS_APPLY={"knight":{"y":["공격력: 회전 베기 피해가 오름","공격 속도: 4번째 공격이 더 빨리 옴","주사위·동전 같은 공격 배율도 같이 붙음","흡혈: 회전 베기에도 적용","표식 등 받는 피해 증가 적용","막기 확률: 「철벽」 증강으로 오름"],"n":["치명타: 회전 베기는 치명타 없음","사거리: 회전 범위는 95로 고정","탄환 개수·관통: 회전 베기와 무관","근접 보정 ×1.6은 회전 베기엔 없음","막기는 보스 패턴 공격엔 안 됨"],"m":"「회오리 베기」 증강이 있으면 3번째(★3은 2번째)마다, 범위 ×1.3, 피해 120~200% · 막으면 0.2초 무적"},"mage":{"y":["공격력: 폭발 피해가 오름","공격 속도: 많이 쏠수록 폭발도 많음","탄환 개수: 탄마다 폭발","관통: 맞은 적마다 폭발","탄속 보너스·집중 등 탄 배율 적용","흡혈·표식 적용"],"n":["치명타: 폭발은 치명타 없음 (직격만)","사거리: 폭발 범위와 무관","직격용 배율(저격·처형 등)은 폭발엔 X"],"m":"폭발 범위는 「화염 확산」·「정신 집중」(멈춰 있을 때)·「촉매」 증강으로만 커짐"},"archer":{"y":["관통 카드·증강과 그대로 더해짐","치명타 확률이 다른 치명타 보너스와 더해짐","치명타 피해 스탯이 그대로 적용"],"n":["따로 발동하는 효과 없음 (스탯 보너스)"],"m":"치명타 100% 넘는 만큼은 치명타 피해로 바뀜 (넘친 1%당 +0.5%)"},"rogue":{"y":["회피 카드·장비 회피와 더해짐 (최대 60%)","대시 재사용 감소 카드와 곱해짐"],"n":["회피는 보스 패턴 공격엔 안 됨","공격력·공격 속도와는 무관"],"m":"대시 재사용 = 2.4초 × 0.7 = 약 1.7초부터 · 회피하면 0.15초 무적"},"paladin":{"y":["공격력: 오라 피해가 오름","신성 시너지·성수 등 빛 피해 증가","성유(범위)·성가(피해) 카드","흡혈·표식 적용","공격 속도: 회복이 더 자주 나옴"],"n":["공격 속도: 오라 피해 횟수는 고정 (0.5초마다)","치명타: 오라는 치명타 없음","사거리: 오라 범위와 무관","탄환 개수·관통: 무관"],"m":"오라 범위는 성유 카드·「확장 오라」·「성역」(멈춰 있을 때)으로만 커짐 · 보스전 분노 단계엔 회복량 줄어듦"},"necro":{"y":["공격력: 해골 피해가 실시간으로 오름","해골 피해 카드(뼈 가루)·망자 시너지","소환 시너지: 4개 피해 ×2, 6개 공격 2배 빠름","해골 수(해골 증원 등)·지속(영혼 사슬)","최대 체력: 해골 체력 = 내 최대 체력 50%","흡혈·표식 적용","쿨타임 감소(시계 태엽): 소환 간격 줄어듦"],"n":["공격 속도: 해골 공격은 0.7초마다 고정","치명타: 해골은 치명타 없음","사거리·탄환 개수·관통: 무관","정비 키트(소환물 피해 카드)는 해골엔 X"],"m":"해골이 30기를 넘으면 넘는 만큼 해골 피해 배율로 · 해골이 받는 피해 = 절반 + 내 방어력 적용 · 해골 공격은 보스 처치 효과(3타) 집계 안 됨"},"gunner":{"y":["공격력·치명타·치명타 피해 모두 적용","탄두 가공 카드(매그넘 탄 피해)","탄환 개수: 한 번에 여러 발 (탄창은 1발만 씀)","관통 카드와 더해짐","공격 속도: 6발 사이 간격이 빨라짐","탄속 보너스도 적용"],"n":["공격 속도: 재장전 시간엔 영향 없음","탄창 수는 6발 고정 (대용량 탄창 증강만 +4)"],"m":"재장전 기본 0.8초, 빠른 장전·쌍권총·총기 숙련으로 줄어듦 (최소 0.35초) · 1.7배는 같은 공격에서 나오는 일부 추가 탄에도 붙음"},"elem":{"y":["공격력: 화상·연쇄 피해 오름","원소 결정 카드(원소 효과 피해)","화염 시너지 등: 화상 피해 증가","시너지 모은 원소가 더 자주 나옴","관통: 맞은 적마다 원소 효과","흡혈·표식 적용","공격 속도: 원소 공격이 자주 나감"],"n":["치명타: 화상·연쇄 번개엔 없음 (직격만)","사거리: 연쇄 거리(180)와 무관","화상은 겹쳐 쌓이지 않음 (센 쪽만)","보스는 냉기 둔화 안 걸림"],"m":"한 번 공격의 탄들은 모두 같은 원소 · 연쇄 번개는 탄 피해(치명타 전)의 60%"},"berserk":{"y":["광란 공격력은 모든 피해에 붙음","흡혈 2%: 흡혈 카드와 더해짐","흡혈은 모든 피해(화상·독 포함)에 적용","보스는 3번 때릴 때마다 처치 1회로 침","광란 최대 수 카드(피의 북)·영구 강화"],"n":["광란 자체는 공격 속도를 안 올림 (광란 시너지 4개부터)","치명타·사거리와 무관"],"m":"4초 지나면 0.3초마다 1중첩씩 빠짐 · 광란 시너지로 중첩당 공격력 조금 더"},"druid":{"y":["공격력: 덩굴 피해가 실시간으로 오름","공격 속도: 덩굴이 더 자주 생김","덩굴 카드(씨앗 주머니 범위·가시 독 피해)","자연 시너지: 피해·지속 증가","흡혈·표식 적용","덩굴이 겹치면 각각 피해"],"n":["치명타: 덩굴은 치명타 없음","사거리: 덩굴 범위와 무관","탄환 개수·관통: 덩굴 1개만","주사위·동전 같은 공격 배율 X","보스는 둔화 안 됨"],"m":"덩굴은 동시에 최대 14개 · 체력 재생은 최대 체력 300 넘으면 비례해 커짐"},"alch":{"y":["공격력: 플라스크·물약 피해 오름","공격 속도: 물약이 자주 나옴","탄환 개수·관통: 맞은 적마다 플라스크","물약 카드(큰 병·농축액)는 물약에만","독·화염·냉기 시너지로 물약 종류 비율","흡혈·표식 적용"],"n":["치명타: 플라스크·물약 모두 없음","사거리: 폭발 범위와 무관","농축액·큰 병은 플라스크엔 X"],"m":"물약 범위 70, 피해 산성 60%·폭발 150%·얼음 80% · 장판은 2.5초, 초당 물약 피해의 20% · 폭발형 플라스크는 피해 1.4배"},"gambler":{"y":["행운: 앞면 확률 오름 (행운 1당 +0.4%)","공격력·치명타·치명타 피해 그대로 적용","판돈 카드: 앞면 피해 증가","타짜의 손 카드: 앞면 확률","탄환 개수: 모든 탄이 같은 동전 결과"],"n":["앞면 확률은 최대 75% (타짜의 손 있으면 80%)","폭발·장판 같은 따로 나가는 피해엔 X"],"m":"기본 앞면 확률 약 52% (행운 5) · 동전은 공격 1번에 1번만 던짐"}};
 function clsDetail(k){
   const C=CLASSES[k],st=C.stats,ks=Object.keys(CLASSES),mx=f=>Math.max(...ks.map(q=>CLASSES[q].stats[f]));
   const bar=(n,f)=>`<span>${n}</span><i><u style="width:${Math.round(st[f]/mx(f)*100)}%"></u></i><span>${st[f]}</span>`;
@@ -7082,9 +7080,12 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
-  {v:97,t:'🕊 날개·이름 효과·전당 테두리 + 스탯 창 정리',items:[
+  {v:98,t:'🕊 날개·이름 효과·전당 테두리 + 스탯 창 정리',items:[
     ['new','🕊 새 날개 11종! 박쥐·나비·제왕나비·벚꽃·요정·숲·기계·수정·지옥불·폭풍·세라핌 날개. 모양이 모두 달라요 (펄럭이는 박쥐 막, 무늬 나비, 떨리는 요정 날개, 빛줄기 흐르는 기계 판 등)'],
     ['new','✨ 명예의 전당 이름 효과 11종 추가: 용암·벚꽃·번개·심연·노을·숲·눈꽃·사탕·기사·달빛·우주'],
+    ['change','🐱 행운 고양이·보석 슬라임·수상한 상자가 나타나거나 잡았을 때, 화면 가운데 띠로 <b>5초 동안</b> 크게 알려줘요 (배속과 상관없이 충분히 읽을 수 있게)'],
+    ['change','🕊 날개가 몸보다 위에 떠 보이던 위치를 등(어깨)에 맞췄어요'],
+    ['change','🃏 <b>스탯 카드는 한 장에 한 가지</b>만 올려줘요. 서로 관계없는 두 능력치를 같이 올리던 카드(가벼운 장화·조준경·자석·가속 탄·배움의 서·황금 주머니·먼 도약·순발력·럭키 세븐)는 한 가지만 올리는 대신 수치가 커졌어요. 방어력+체력처럼 관련 있는 짝(철벽 자세·거인의 심장·불사의 맹세·질주 본능)은 그대로예요. 다른 카드와 겹치던 전투 본능·쾌속 장전·사냥꾼의 눈·정령 공명은 빠졌어요'],
     ['change','🪟 게임 중 스탯·도감 창이 위쪽 정보 띠에 가려지지 않게 맨 앞에 떠요. 창 제목줄을 잡고 끌면 원하는 곳으로 옮길 수 있어요 (제목줄을 두 번 누르면 제자리)'],
     ['change','📊 스탯 창이 처음엔 <b>숫자만</b> 보여요. 위쪽 <b>자세한 설명 ▼</b>을 누르면 줄마다 계산식·설명이 열리고, 다시 누르면 닫혀요 (고른 상태는 기억해요)'],
     ['new','🖼 외형 꾸미기에 <b>전당 테두리</b> 칸이 생겼어요! 명예의 전당 내 칸의 테두리를 꾸며요 (황금·덩굴·서리·벚꽃·불꽃·그림자·별빛·무지개·왕·용·우주 11종). 기록을 올릴 때 장착한 테두리가 같이 저장돼요']]},
@@ -8138,9 +8139,9 @@ const COS=[
   {k:'fr_shadow',cat:'frame',n:'그림자 테두리',d:'보랏빛 어둠이 흐르는 테두리',c:1500,x:{g:['#14081e','#7a2aff','#b552d6'],sp:3,glow:'#7a2aff'}},
   {k:'fr_star',cat:'frame',n:'별빛 테두리',d:'반짝이는 별빛 테두리 + 모서리 별',c:2000,x:{g:['#ffd76a','#ffffff','#fff3c4'],sp:2.5,glow:'#fff3a0',o:'✦'}},
   {k:'fr_rainbow',cat:'frame',n:'무지개 테두리',d:'무지개가 빙글빙글 흐르는 테두리',c:2500,x:{g:['#ff5a5a','#ffd040','#5ae070','#5ab0ff','#b07aff'],sp:2,glow:'#ffffff'}},
-  {k:'fr_king',cat:'frame',n:'왕의 테두리',d:'두꺼운 황금 테두리 + 위에 왕관',c:3500,x:{g:['#b88c22','#ffd76a','#fff3c4','#ffd76a'],sp:3,glow:'#ffd76a',top:'👑',w:3}},
+  {k:'fr_king',cat:'frame',n:'왕의 테두리',d:'두꺼운 황금 테두리 + 위에 왕관',c:3500,x:{g:['#b88c22','#ffd76a','#fff3c4','#ffd76a'],sp:3,glow:'#ffd76a',top:'👑',o2:'💎',w:3}},
   {k:'fr_dragon',cat:'frame',n:'용의 테두리',d:'붉은 금빛 테두리 + 모서리 용',c:4000,x:{g:['#8a1414','#ff3d1f','#ffd040'],sp:2,glow:'#ff5a1a',o:'🐉',w:3}},
-  {k:'fr_cosmos',cat:'frame',n:'우주 테두리',d:'별이 흐르는 푸른 우주 테두리 + 위에 은하',c:4500,x:{g:['#1a2a8a','#7f5cff','#5fc9d9','#ffffff'],sp:2.4,glow:'#5f8aff',top:'🌌',w:3}},
+  {k:'fr_cosmos',cat:'frame',n:'우주 테두리',d:'별이 흐르는 푸른 우주 테두리 + 위에 은하',c:4500,x:{g:['#1a2a8a','#7f5cff','#5fc9d9','#ffffff'],sp:2.4,glow:'#5f8aff',top:'🌌',o2:'✨',w:3}},
   {k:'hf_lava',cat:'hof',n:'용암 이름',d:'명예의 전당·채팅 이름이 끓는 용암처럼 흐름',c:1200,x:{g:['#ff3d1f','#ffb040','#5a0a04'],sp:1.6,sh:'#ff5a1a'}},
   {k:'hf_sakura',cat:'hof',n:'벚꽃 이름',d:'명예의 전당·채팅 이름 앞 🌸 + 벚꽃빛',c:900,x:{g:['#ffb0c8','#ffffff','#ff6a9a'],pre:'🌸 '}},
   {k:'hf_thunder',cat:'hof',n:'번개 이름',d:'명예의 전당·채팅 이름 앞 ⚡ + 번쩍이는 노랑·하늘빛',c:1800,x:{g:['#ffe040','#9fe8ff','#ffffff'],sp:.9,pre:'⚡ ',sh:'#ffe040'}},
@@ -8250,9 +8251,9 @@ function genAura(c,x,y,o,T,emit){const R=Math.random,fy=y+12,C=i=>cc(o.c[i%o.c.l
       c.strokeStyle=C(1);c.lineWidth=2;for(const off of [0,Math.PI/3]){c.beginPath();for(let i=0;i<=3;i++){const a=off+i*TAU/3;i?c.lineTo(Math.cos(a)*40,Math.sin(a)*40):c.moveTo(Math.cos(a)*40,Math.sin(a)*40);}c.stroke();}
       for(let i=0;i<12;i++){const a=i*TAU/12;c.fillStyle=C(i);c.fillRect(Math.cos(a)*45-2,Math.sin(a)*45-2,4,4);}c.restore();if(R()<.25){const a=R()*TAU;emit({x:x+Math.cos(a)*40,y:fy+Math.sin(a)*16,vx:0,vy:-45,dr:.97,life:.7,col:C(1),sh:'star',s:3,vr:4});}}
     if(t==='halo'){const hy=y-44+Math.sin(T*3)*1.5;c.globalAlpha=.9;c.strokeStyle=C(0);c.lineWidth=2.5;c.beginPath();c.ellipse(x,hy,12,4,0,0,TAU);c.stroke();c.globalAlpha=.3;c.lineWidth=8;c.stroke();c.globalAlpha=.18;c.fillStyle=C(1);c.beginPath();c.arc(x,y-14,40,0,TAU);c.fill();}
-    if(t==='wings'){for(const sd of [-1,1])for(let i=0;i<6;i++){const fl=Math.sin(T*3)*.12;c.save();c.translate(x+sd*8,y-20);c.rotate(sd*(.5+i*.22+fl));c.globalAlpha=.88;c.fillStyle=C(i);c.beginPath();c.ellipse(sd*(10+i*2),0,17-i,4.5,0,0,TAU);c.fill();c.restore();}}
+    if(t==='wings'){for(const sd of [-1,1])for(let i=0;i<6;i++){const fl=Math.sin(T*3)*.12;c.save();c.translate(x+sd*8,y-20+5);c.rotate(sd*(.5+i*.22+fl));c.globalAlpha=.88;c.fillStyle=C(i);c.beginPath();c.ellipse(sd*(10+i*2),0,17-i,4.5,0,0,TAU);c.fill();c.restore();}}
     // 새 날개 모양들 (양쪽 대칭, 어깨 기준점에서 펼침)
-    if(['bat','fly','fairy','mech','crys','leafw','flamew','feather'].includes(t)){const fl=Math.sin(T*(t==='fairy'?14:t==='fly'?5:3)),sx0=x,sy0=y-22;
+    if(['bat','fly','fairy','mech','crys','leafw','flamew','feather'].includes(t)){const fl=Math.sin(T*(t==='fairy'?14:t==='fly'?5:3)),sx0=x,sy0=y-22+WDY;
       for(const sd of [-1,1]){c.save();c.translate(sx0+sd*6,sy0);c.scale(sd,1);c.rotate(-.15-fl*(t==='fairy'?.08:.14));c.globalAlpha=.9;
         if(t==='bat'){c.fillStyle=C(0);c.beginPath();c.moveTo(0,0);c.lineTo(14,-14);c.lineTo(30,-10);c.lineTo(40,4);c.quadraticCurveTo(32,2,28,12);c.quadraticCurveTo(22,6,16,14);c.quadraticCurveTo(10,8,2,10);c.closePath();c.fill();
           c.strokeStyle=C(1);c.lineWidth=1.6;c.beginPath();c.moveTo(0,0);c.lineTo(14,-14);c.lineTo(30,-10);c.moveTo(14,-14);c.lineTo(28,12);c.moveTo(14,-14);c.lineTo(16,14);c.moveTo(30,-10);c.lineTo(40,4);c.stroke();}
@@ -8312,12 +8313,13 @@ function trailFx(c,x,y,dx,dy,it,T,emit){if(it.x)return genTrail(c,x,y,dx,dy,it.x
     if(Math.random()<.35)emit({x:x-dx*20,y:y-dy*20,vx:nx*60*(Math.random()-.5),vy:ny*60*(Math.random()-.5),dr:.9,life:.6,col:hue(T,Math.random()*360),sh:'star',s:5,vr:5});}
   c.globalAlpha=1;c.lineCap='butt';}
 // 오라 (캐릭터 발밑 / 뒤)
+const WDY=15; // 날개를 등(어깨)에 붙이는 높이 보정
 function auraFx(c,x,y,it,T,emit){if(it.x)return genAura(c,x,y,it.x,T,emit);const t=COS_TIER[it.k]||1,pu=1+Math.sin(T*4)*.08;
   if(t>=5){c.save();const R=Math.random,fy=y+12;
     if(t===5){for(let i=0;i<10;i++){const a=T*1.6+i*TAU/10,rx=34+Math.sin(T*2+i)*6;c.save();c.translate(x+Math.cos(a)*rx,y-6+Math.sin(a)*rx*.45);c.rotate(a*2);c.fillStyle=i%2?'#ffc8d8':'#f0a0b8';c.globalAlpha=.9;c.beginPath();c.ellipse(0,0,4,2.2,0,0,TAU);c.fill();c.restore();}if(R()<.3)emit({x:x+(R()-.5)*60,y:y-30,vx:(R()-.5)*20,vy:20,g:30,dr:.98,life:1,col:'#ffc8d8',sh:'leaf',s:3,rot:R()*6,vr:6});}
     if(t===6){c.translate(x,fy);c.scale(1,.42);for(let i=0;i<80;i++){const r=6+i*.6,a=T*1.2+i*.32;c.globalAlpha=.75*(1-i/80);c.fillStyle=i%7===0?'#ffffff':hue(0,250+i*1.5);c.beginPath();c.arc(Math.cos(a)*r,Math.sin(a)*r,i%7===0?2.5:1.6,0,TAU);c.fill();}c.globalAlpha=.25;const g=c.createRadialGradient(0,0,2,0,0,55);g.addColorStop(0,'#c8a0ff');g.addColorStop(1,'rgba(80,40,160,0)');c.fillStyle=g;c.beginPath();c.arc(0,0,55,0,TAU);c.fill();}
-    if(t===7){for(const sd of [-1,1]){for(let i=0;i<7;i++){const k=i/7,fl=Math.sin(T*10+i)*3;c.globalAlpha=.55*(1-k*.6);c.fillStyle=i<2?'#ffe27a':i<5?'#ff9a2a':'#e0451f';c.beginPath();c.ellipse(x+sd*(14+i*5),y-18-i*3+fl,7-k*3,13-k*6,sd*.6,0,TAU);c.fill();}}if(R()<.5)emit({x:x+(R()<.5?-1:1)*R()*40,y:y-24,vx:(R()-.5)*20,vy:-60,dr:.95,life:.5,col:R()<.5?'#ff9a2a':'#ffe27a',sh:'ember',s:3});}
-    if(t===8){for(const sd of [-1,1]){for(let i=0;i<6;i++){const fl=Math.sin(T*3)*.12;c.save();c.translate(x+sd*8,y-20);c.rotate(sd*(.5+i*.22+fl));c.globalAlpha=.92;c.fillStyle=i%2?'#ffffff':'#e8f0ff';c.beginPath();c.ellipse(sd*(10+i*2),0,16-i,4,0,0,TAU);c.fill();c.restore();}}
+    if(t===7){for(const sd of [-1,1]){for(let i=0;i<7;i++){const k=i/7,fl=Math.sin(T*10+i)*3;c.globalAlpha=.55*(1-k*.6);c.fillStyle=i<2?'#ffe27a':i<5?'#ff9a2a':'#e0451f';c.beginPath();c.ellipse(x+sd*(14+i*5),y-18+WDY-i*3+fl,7-k*3,13-k*6,sd*.6,0,TAU);c.fill();}}if(R()<.5)emit({x:x+(R()<.5?-1:1)*R()*40,y:y-24,vx:(R()-.5)*20,vy:-60,dr:.95,life:.5,col:R()<.5?'#ff9a2a':'#ffe27a',sh:'ember',s:3});}
+    if(t===8){for(const sd of [-1,1]){for(let i=0;i<6;i++){const fl=Math.sin(T*3)*.12;c.save();c.translate(x+sd*8,y-20+5);c.rotate(sd*(.5+i*.22+fl));c.globalAlpha=.92;c.fillStyle=i%2?'#ffffff':'#e8f0ff';c.beginPath();c.ellipse(sd*(10+i*2),0,16-i,4,0,0,TAU);c.fill();c.restore();}}
       c.globalAlpha=.9;c.strokeStyle='#fff3a0';c.lineWidth=2.5;c.beginPath();c.ellipse(x,y-44+Math.sin(T*3)*1.5,12,4,0,0,TAU);c.stroke();c.globalAlpha=.3;c.lineWidth=7;c.stroke();if(R()<.25)emit({x:x+(R()-.5)*40,y:y-20,vx:0,vy:30,g:20,dr:.98,life:.9,col:'#ffffff',sh:'leaf',s:2.5,rot:R()*6,vr:4});}
     if(t===9){for(let i=0;i<14;i++){const a=T*2.2-i*.22,r=40,px=x+Math.cos(a)*r,py=y-8+Math.sin(a)*r*.5;c.globalAlpha=1-i/16;c.fillStyle=i===0?'#fff3c4':i%2?'#ffd040':'#e8b830';c.beginPath();c.arc(px,py,i===0?6:5-i*.25,0,TAU);c.fill();if(i===0){c.fillStyle='#ff4020';c.beginPath();c.arc(px+Math.cos(a+1.57)*2,py+Math.sin(a+1.57)*1,1.5,0,TAU);c.fill();}}
       c.globalAlpha=.2;c.fillStyle='#ffd040';c.beginPath();c.ellipse(x,fy,40,14,0,0,TAU);c.fill();if(R()<.4)emit({x:x+Math.cos(T*2.2)*40,y:y-8+Math.sin(T*2.2)*20,vx:0,vy:-40,dr:.96,life:.5,col:'#ffb030',sh:'ember',s:3});}
@@ -8866,10 +8868,14 @@ async function supCheck(){if(SUP_DONE||!DEV||!SHEET_URL||SRV_V<49||document.getE
 const myFx=()=>{const x=cosEq('hof');return x?x.k:'';};
 const FX_PRE={hf_crown:'👑 ',hf_donor:'💛 '};
 // 새 이름 효과: x 값으로 CSS를 만들어 붙임
-{let css='@keyframes frm{to{background-position:0 0,300% 0}}';
- for(const x of COS)if(x.cat==='frame'&&x.x){const o=x.x,w=o.w||2,bg='#0f231a';css+=`.fr-${x.k}{position:relative;border:${w}px solid transparent!important;background:linear-gradient(${bg},${bg}) padding-box,linear-gradient(90deg,${o.g.concat(o.g[0]).join(',')}) border-box!important;background-size:100% 100%,300% 100%!important;animation:frm ${o.sp||3}s linear infinite;box-shadow:0 0 14px ${o.glow}66!important}`;
-  if(o.o)css+=`.fr-${x.k}::before,.fr-${x.k}::after{content:'${o.o}';position:absolute;font-size:16px;line-height:1;pointer-events:none;filter:drop-shadow(0 0 4px ${o.glow})}.fr-${x.k}::before{top:-8px;left:-6px}.fr-${x.k}::after{bottom:-8px;right:-6px}`;
-  if(o.top)css+=`.fr-${x.k}::before{content:'${o.top}';position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:20px;line-height:1;pointer-events:none;filter:drop-shadow(0 0 5px ${o.glow})}`;}
+{let css='@keyframes frm{0%{background-position:160% 0,0 0,0 0}100%{background-position:-120% 0,0 0,300% 0}}@keyframes frb{0%,100%{transform:translateY(0) rotate(-8deg) scale(1)}50%{transform:translateY(-4px) rotate(8deg) scale(1.15)}}@keyframes frt{0%,100%{transform:translateX(-50%) translateY(0) scale(1)}50%{transform:translateX(-50%) translateY(-5px) scale(1.12)}}';
+ for(const x of COS)if(x.cat==='frame'&&x.x){const o=x.x,w=(o.w||2)+1,bg='#0f231a',G=o.glow,k=x.k;
+  // 3겹 배경: 지나가는 광택 · 카드 바탕 · 흐르는 색 테두리 + 숨 쉬듯 번쩍이는 바깥·안쪽 빛
+  css+=`@keyframes frp-${k}{0%,100%{box-shadow:0 0 10px ${G}88,0 0 2px ${G},inset 0 0 8px ${G}44}50%{box-shadow:0 0 26px ${G},0 0 48px ${o.g[1]}99,inset 0 0 18px ${G}88}}`;
+  css+=`.fr-${k}{position:relative;border:${w}px solid transparent!important;background:linear-gradient(110deg,transparent 38%,rgba(255,255,255,.16) 48%,rgba(255,255,255,.04) 54%,transparent 62%) padding-box,linear-gradient(${bg},${bg}) padding-box,linear-gradient(90deg,${o.g.concat(o.g[0]).join(',')}) border-box!important;background-size:260% 100%,100% 100%,300% 100%!important;animation:frm ${o.sp||3}s linear infinite,frp-${k} 1.8s ease-in-out infinite!important}`;
+  if(o.o)css+=`.fr-${k}::before,.fr-${k}::after{content:'${o.o}';position:absolute;font-size:24px;line-height:1;pointer-events:none;z-index:2;filter:drop-shadow(0 0 6px ${G}) drop-shadow(0 0 2px #fff);animation:frb 2.2s ease-in-out infinite}.fr-${k}::before{top:-13px;left:-11px}.fr-${k}::after{bottom:-13px;right:-11px;animation-delay:-1.1s}`;
+  if(o.top)css+=`.fr-${k}::before{content:'${o.top}';position:absolute;top:-22px;left:50%;font-size:30px;line-height:1;pointer-events:none;z-index:2;filter:drop-shadow(0 0 8px ${G}) drop-shadow(0 0 2px #fff);animation:frt 2s ease-in-out infinite}`;
+  if(o.top&&o.o2)css+=`.fr-${k}::after{content:'${o.o2}';position:absolute;bottom:-13px;right:-11px;font-size:22px;line-height:1;pointer-events:none;z-index:2;filter:drop-shadow(0 0 6px ${G});animation:frb 2.2s ease-in-out infinite}`;}
  for(const x of COS)if(x.cat==='hof'&&x.x){const o=x.x;css+=`.hx-${x.k}{background:linear-gradient(90deg,${o.g.concat(o.g[0]).join(',')});background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:hfm ${o.sp||2}s linear infinite;filter:drop-shadow(0 0 6px ${o.sh||o.g[0]})}`;if(o.box)css+=`.hc-${x.k}{box-shadow:0 0 0 2px ${o.box},0 0 18px ${o.box}!important}`;if(o.pre)FX_PRE[x.k]=o.pre;}
   const st=document.createElement('style');st.textContent=css;document.head.appendChild(st);}
 function fxName(n,fx,me){const ok=fx&&COS.some(q=>q.k===fx&&q.cat==='hof');return `<b class="hn${ok?' hx-'+fx:''}${me&&!ok?' me':''}">${ok?(FX_PRE[fx]||''):''}${esc(n)}</b>`;}
@@ -9625,7 +9631,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=97,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=98,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
