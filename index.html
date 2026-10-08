@@ -3853,23 +3853,29 @@ CH.elem={P:Object.assign({1:'#0e4a5a',2:'#17607a',3:'#2482a4',4:'#38aed0',5:'#7a
   for(let y=15;y<=24;y++){dt(P,'h',15,y+U);dt(P,y%3?'H':'h',25,y+U);}
   if(st.hurt)hurtEyes(16+U);
  }};
-CH.berserk={P:Object.assign({1:'#4a1408',2:'#7a2410',3:'#b03c18',4:'#de6626',5:'#ff9a4a',S:'#8e96a6',s:'#c3c9d4',x:'#4a5060',X:'#2e3240',w:'#e8ecf2',v:'#2e1c10',V:'#4a3020',W:'#6a4a2e',f:'#44444c',F:'#74747e',g:'#b0b0ba',y:'#5a1010',Y:'#9a2424',B:'#2a4aa8',E:'#f4f0e6',b:'#2a1408',R:'#8a1a1a'},SKN),
+CH.berserk={P:Object.assign({a:'#4a2a08',b:'#7a4a14',c:'#b07a2a',d:'#d8a448',f:'#f4d080',r:'#6a0e0e',R:'#a81c1c',q:'#e04a3a',l:'#4a2c14',L:'#7a4a24',S:'#8e96a6',s:'#c3c9d4',x:'#4a5060',X:'#2e3240',w:'#e8ecf2',E:'#f4f0e6',z:'#2a1408',m:'#b8784c'},SKN),
  draw(st){const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
-  // 뒤로 넘긴 사자 갈기 머리
-  shp(P,20,11+U,[5,5.5,6,6,6,5.5,5,4.5,4],'12345');dt(P,'2',14,19+U);dt(P,'2',26,19+U);
-  cl(P,['vV','vV','vW','ff','ff','fff'],17,29+st.lL);cl(P,['Vv','Vv','Wv','ff','ff','fff'],21,29+st.rL);
-  // 가죽 조끼 + 징 박힌 끈 + 큰 쇠 버클
-  shp(P,20,23+U,[5,4.5,4,3.5],'vvVWW',{hl:1});for(let y=23;y<=26;y++)dt(P,y%2?'s':'x',20,y+U);
-  for(let x=16;x<=24;x++)dt(P,'v',x,27+U);cl(P,['xswx'],19,27+U);shp(P,20,28+U,[4,4.5],'yyYYY');for(let x=-4;x<=4;x+=2)dt(P,'b',20+x,29+U);
-  cl(P,['kK','kK','xS','kK'],14,23+U+ay);
-  const up=A>=0?-5:0,hx=27;cl(P,['kKkk','xSkk','kKk.'],24,24+U+(A>=0?-2:-ay));
-  for(let y=16+U+up;y<=32+U;y++)dt(P,y%4===0?'R':y%2?'V':'v',hx+1,y);
+  // 붉은 망토 (뒤)
+  shp(P,20,21+U,[5.5,6,6,6,6,6.5,6.5,6.5,6.5,6],'rrRRq');for(let y=24;y<=30;y+=2){dt(P,'r',16,y+U);dt(P,'r',24,y+U);}for(let x=-6;x<=6;x++)if((x+st.cf)%3===0)dt(P,'r',20+x,31+U);
+  // 다리: 청동 정강이받이 + 샌들
+  cl(P,['kK','kK','dc','dc','zl','zll'],17,29+st.lL);cl(P,['kK','kK','cd','cd','lz','llz'],21,29+st.rL);
+  // 맨몸 상체 (역삼각형, 가슴·복근 음영) + 비스듬한 가죽 칼띠
+  shp(P,20,23+U,[5,4.5,4,3.5,3.5],'KKkkk',{hl:2});for(const x of [17,18,22,23])dt(P,'m',x,24+U);for(let y=25;y<=27;y++)dt(P,'m',20,y+U);dt(P,'m',18,26+U);dt(P,'m',22,26+U);
+  for(let i=0;i<5;i++)dt(P,'l',23-i,23+U+i);
+  // 청동 허리띠 + 가죽 치마 띠
+  for(let x=16;x<=24;x++)dt(P,x<20?'d':'c',x,28+U);for(let x=16;x<=24;x++){dt(P,x%2?'L':'l',x,29+U);dt(P,x%2?'l':'L',x,30+U);}
+  // 목·어깨
+  shp(P,20,19+U,[2,2.5,4.5,5],'KKkkk');dt(P,'d',15,22+U);dt(P,'d',25,22+U);
+  cl(P,['kK','kK','dc','kK'],14,23+U+ay);
+  const up=A>=0?-5:0,hx=27;cl(P,['kKkk','dckk','kKk.'],24,24+U+(A>=0?-2:-ay));
+  for(let y=16+U+up;y<=32+U;y++)dt(P,y%2?'L':'l',hx+1,y);
   cl(P,['..xX','.xsS','xswS','xswS','.xsS','..xX'],hx-3,16+U+up);cl(P,['Xx..','Ssx.','Swsx','Swsx','Ssx.','Xx..'],hx+2,16+U+up);dt(P,'w',hx+1,15+U+up);
-  // 늑대 털 망토 (어깨)
-  shp(P,20,19+U,[5,6,6.5],'ffFgg',{hl:1});for(let x=-6;x<=6;x+=2)dt(P,'f',20+x,22+U);dt(P,'E',14,20+U);dt(P,'E',26,20+U);
-  // 얼굴: 날카로운 눈썹, 눈 위 푸른 전투 칠, 짧은 수염
-  shp(P,20,9+U,[2.5,4.5,5.5,6],'12345',{hl:2});for(const [x,y] of [[16,8],[19,7],[22,7],[24,8],[18,8],[21,8]])dt(P,'4',x,y+U);
-  cl(P,['343334343','kbbkkkbbK','BEeBBBeEB','kkkkkkkKK','33kkkkk33','.3343433.'],16,13+U);
+  // 코린트식 청동 투구: T자 얼굴 틈, 코 가리개
+  shp(P,20,9+U,[2.5,4.5,5.5,6,6,6,6,6,5.5,5],'abcdf',{hl:3});
+  cl(P,['KKKKcKKKK','KEeKcKeEK'],16,14+U);cl(P,['KkcK.','Kzzz.','.zzz.'].map(r=>r.replace('.','')),18,16+U);
+  for(let y=13;y<=16;y++)dt(P,'c',20,y+U);
+  // 붉은 말총 볏 (앞뒤로 둥글게)
+  for(let x=13;x<=27;x++){const t=9-Math.round(5*Math.sin(Math.PI*(x-13)/14));dt(P,'q',x,t+U);dt(P,'R',x,t+1+U);if(t+2<9+0)dt(P,'r',x,t+2+U);if(x%2)dt(P,'q',x,t-1+U);}
   if(st.hurt)hurtEyes(14+U);
  }};
 CH.druid={P:Object.assign({1:'#1a3a14',2:'#2f6a24',3:'#4a8a34',4:'#6aaa48',5:'#9ad85a',L:'#8a5a30',l:'#5a3820',t:'#6a4a2a',T:'#a07a4a',Y:'#c8a070',z:'#2a1a0e',9:'#c8ff7a',8:'#f0ffd0'},SKN),
@@ -6196,7 +6202,7 @@ function gearFx(c,l,x,y,T,emit,R2){if(l>=2){c.shadowColor=gearCol(l,T);c.shadowB
 const gearSt=l=>l>=10?3:l>=7?2:l>=4?1:0;
 // 직업별 도트 기준 위치 (40칸 그림, 발끝 35번째 줄): [이마 줄, 어깨 줄, 손 줄, 어깨 반폭]. 직업마다 모자·투구가 달라서 장비를 각자 몸에 맞게 붙임
 // [머리 꼭대기 줄, 어깨 줄, 손 줄] (40칸 도트, 발끝 35번째 줄)
-const GEAR_FIT={knight:[5,20,24],mage:[3,19,23],archer:[5,17,23],rogue:[8,19,24],paladin:[4,21,24],necro:[7,20,24],gunner:[7,19,24],elem:[9,19,24],berserk:[7,19,24],druid:[6,19,24],alch:[7,18,23],gambler:[5,19,24]};
+const GEAR_FIT={knight:[5,20,24],mage:[3,19,23],archer:[5,17,23],rogue:[8,19,24],paladin:[4,21,24],necro:[7,20,24],gunner:[7,19,24],elem:[9,19,24],berserk:[4,19,24],druid:[6,19,24],alch:[7,18,23],gambler:[5,19,24]};
 let GFIT_CLS=null; // 명예의 전당 아바타를 그릴 때만 그 기록의 직업으로
 const gFit=()=>{const f=GEAR_FIT[GFIT_CLS||(S&&S.cls)||'knight']||GEAR_FIT.knight;return {top:-(35-f[0])*PXW,sh:-(35-f[1])*PXW,hand:-(35-f[2])*PXW};};
 const gearRim=()=>''; // 갑옷은 겉모습 없음 (예전 윤곽 빛 제거)
@@ -7062,8 +7068,8 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
-  {v:86,t:'🧙 12직업 새 디자인',items:[
-    ['new','🧙 12직업 모두 새 디자인이에요! 머리를 조금 줄여 몸이 잘 보이게 하고, 직업마다 색과 장식을 새로 입혔어요 (기사 남색 투구·흰 깃털·둥근 방패, 마법사 금띠 고깔모자, 궁수 초록 두건, 도적 복면, 성기사 얼굴이 보이는 은투구, 사령술사 해골 지팡이, 총잡이 카우보이 모자, 정령사 긴 머리·보석 머리띠·드레스, 광전사 불꽃 갈기 머리·푸른 전투 칠·늑대 털 망토, 드루이드 사슴뿔 잎 두건, 연금술사 고글, 도박사 실크햇). 동작과 능력은 그대로예요'],
+  {v:87,t:'🧙 12직업 새 디자인',items:[
+    ['new','🧙 12직업 모두 새 디자인이에요! 머리를 조금 줄여 몸이 잘 보이게 하고, 직업마다 색과 장식을 새로 입혔어요 (기사 남색 투구·흰 깃털·둥근 방패, 마법사 금띠 고깔모자, 궁수 초록 두건, 도적 복면, 성기사 얼굴이 보이는 은투구, 사령술사 해골 지팡이, 총잡이 카우보이 모자, 정령사 긴 머리·보석 머리띠·드레스, 광전사 스파르타 전사(붉은 볏 청동 투구·붉은 망토), 드루이드 사슴뿔 잎 두건, 연금술사 고글, 도박사 실크햇). 동작과 능력은 그대로예요'],
     ['change','🔑 이름 비밀번호를 저장할 때 서버에 정말 저장됐는지 확인해요. 저장이 안 됐거나 서버에 연결하지 못하면 알려 주고, 비밀번호가 다를 때는 어떻게 하면 되는지 안내해요']]},
   {v:79,t:'🏰 이스터에그 건물 새 그림',items:[
     ['new','🏰 맵마다 있는 비밀 장소 건물 34종을 <b>1.4배 크게</b>, 2배 촘촘한 도트로 새로 그렸어요 (기와·통나무·벽돌 질감, 불 켜진 창, 굴뚝 연기, 담쟁이, 깃발 등). 건물이 커진 만큼 부딪히는 범위도 커졌어요']]},
@@ -9498,7 +9504,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=86,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=87,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
