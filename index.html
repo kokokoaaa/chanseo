@@ -7211,7 +7211,7 @@ function nameHelp(){if(document.getElementById('nmHelp'))return;const n=myNick()
   <div style="font-size:15px;line-height:1.6">크롬과 엣지처럼 <b>브라우저가 다르거나 다른 컴퓨터·폰</b>이면 게임은 다른 기기로 봐요. 이 이름의 주인은 <b>처음 기록을 올린 곳</b>이라 여기서는 막혔어요.</div>
   <div style="font-size:15px;line-height:1.7;background:rgba(0,0,0,.25);border-radius:8px;padding:8px 12px"><b style="color:#ffd76a">① 원래 쓰던 곳</b>에서 👤 내 이름 → 이름 그대로 두고 <b>이름 비밀번호</b>(4자 이상)를 넣고 저장<br><b style="color:#ffd76a">② 여기</b>에서도 👤 내 이름 → <b>같은 이름 + 같은 비밀번호</b>를 넣고 저장<br><small style="color:var(--muted)">이제 양쪽 모두에서 채팅·기록 올리기가 돼요. 메달·장비까지 옮기려면 💾 데이터 옮기기</small></div>
   <div style="font-size:14px;color:var(--muted)">내 이름이 아니라면 다른 이름으로 바꿔 주세요.</div>
-  <div style="display:flex;gap:8px;justify-content:center"><button class="btn primary" id="nmGo">👤 내 이름 열기</button><button class="btn" id="nmX">닫기</button></div></div>`;
+  <div style="display:flex;gap:8px;justify-content:center"><button class="btn primary" id="nmGo" style="white-space:nowrap">👤 내 이름 열기</button><button class="btn" id="nmX" style="white-space:nowrap;min-width:80px;flex:none">닫기</button></div></div>`;
   document.body.appendChild(d);const cl=()=>d.remove();$('nmX').onclick=cl;d.onclick=e=>{if(e.target===d)cl();};$('nmGo').onclick=()=>{cl();chatToggle(false);if(!S||S.mode==='start')openNick();else toast('메인 화면에서 👤 내 이름을 눌러 주세요');};}
 function chatToggle(on){CHAT_OPEN=on==null?!CHAT_OPEN:on;clearInterval(CHAT_T);CHAT_T=null;chatPaint();if(CHAT_OPEN){if(!FB){chatFetch();CHAT_T=setInterval(()=>{if(!document.hidden&&!CHAT_BUSY)chatFetch();},2000);}setTimeout(()=>{try{$('chIn').focus();}catch(e){}},50);}}
 // 내 이름: 한 번 정해 두면 접속 중 목록과 명예의 전당 등록에 그대로 쓰임
