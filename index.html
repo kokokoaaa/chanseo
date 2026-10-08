@@ -3090,7 +3090,7 @@ function startEvent(){
   if(k==='altar'){const [x,y]=farPos(380);ev.x=x;ev.y=y;ev.r=55;ev.ch=0;pushOut(ev,30);}
   if(k==='totem'){const a0=Math.random()*TAU;for(let i=0;i<4;i++){const a=a0+i*TAU/4,r=rand(260,360);const e=spawnAt('totem',clamp(S.p.x+Math.cos(a)*r,40,WW-40),clamp(S.p.y+Math.sin(a)*r,40,WH-40),true);e.maxHp=Math.max(200,pDmg()*pRate()*5);e.hp=e.maxHp;e.r*=1.3;e.hunt=true;e.evTot=true;}}
   if(k==='bounty'){const [cx,cy]=ringPos(20);const t=['tank','boar','shield','yeti','crystalgolem'].filter(x=>ET[x]);const e=spawnAt(t[Math.floor(Math.random()*t.length)],cx,cy,false,true);e.hp*=9;e.maxHp*=9;e.r*=1.8;e.dmg*=1.6;e.hunt=true;e.bounty=true;}
-  const TR=evTier(k);S.evBanner={s:`[${TR.n}] ${E.icon} ${E.n}`,d:E.d,col:TR.col,t:2.6};
+  const TR=evTier(k);S.evBanner={s:`[${TR.n}] ${E.icon} ${E.n}`,d:E.d,col:TR.col,t:6,T:6};
 }
 function endEvent(win){
   const ev=S.ev;if(!ev)return;S.ev=null;S.evT=rand(85,110);
@@ -3116,7 +3116,7 @@ function endEvent(win){
 }
 function updEvent(dt){
   if(S.bossI>=0||S.win||rushOn())return;
-  if(S.evBanner){S.evBanner.t-=dt;if(S.evBanner.t<=0)S.evBanner=null;}
+  if(S.evBanner){S.evBanner.t-=dt/(AUTO.speed||1);if(S.evBanner.t<=0)S.evBanner=null;}
   if(S.bless&&S.bless.t>0){S.bless.t-=dt;if(S.bless.k==='guard'&&S.p.alive)S.p.hp=Math.min(S.p.maxHp,S.p.hp+S.p.maxHp*.02*dt);}
   // 보스 등장 45초 전부터는 새 퀘스트를 시작하지 않음 (보스가 나오면 진행 중 퀘스트가 실패 처리되므로)
   if(!S.ev){S.evT=(S.evT??50)-dt;if(S.evT<=0&&(S.chap+1)*CH_LEN-S.gt>45)startEvent();return;}
@@ -5188,8 +5188,8 @@ function draw(){
    for(const [x,y,c,l] of tg){const sx=x-camX,sy=y-camY;if(sx>=0&&sx<=W&&sy>=0&&sy<=H)continue;const a=Math.atan2(sy-H/2,sx-W/2),ex=clamp(sx,30,W-30),ey=clamp(sy,70,H-40);
      ctx.save();ctx.translate(ex,ey);ctx.rotate(a);ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(13,0);ctx.lineTo(-7,-8);ctx.lineTo(-7,8);ctx.closePath();ctx.fill();ctx.restore();
      ctx.fillStyle=c;ctx.font='12px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(l,ex-Math.cos(a)*26,ey-Math.sin(a)*20);}}
-  if(S.evBanner){const B=S.evBanner,a=Math.max(0,Math.min(1,B.t*2,(2.6-B.t)*5));ctx.globalAlpha=a;ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(0,H*.18,W,64);ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillStyle=B.col;ctx.font=`${W<500?26:32}px "Do Hyeon",sans-serif`;ctx.fillText(B.s,W/2,H*.18+24);ctx.fillStyle='#f1e7cf';ctx.font='14px "Gowun Dodum",sans-serif';ctx.fillText(B.d,W/2,H*.18+50);ctx.globalAlpha=1;}
+  if(S.evBanner){const B=S.evBanner,a=Math.max(0,Math.min(1,B.t*2,((B.T||2.6)-B.t)*5));ctx.globalAlpha=a;ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,H*.18,W,68);ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillStyle=B.col;ctx.font=`${W<500?26:32}px "Do Hyeon",sans-serif`;ctx.fillText(B.s,W/2,H*.18+24);ctx.fillStyle='#f1e7cf';ctx.font=`${W<500?14:16}px "Gowun Dodum",sans-serif`;ctx.fillText(B.d,W/2,H*.18+52,W-16);ctx.globalAlpha=1;}
   if(S.flash>0){ctx.fillStyle=`rgba(255,215,106,${S.flash})`;ctx.fillRect(0,0,W,H);}
   if(S.merch){const M=MERCH[S.merch.k],sx=S.merch.x-camX,sy=S.merch.y-camY;if(sx<0||sx>W||sy<0||sy>H){const a=Math.atan2(sy-H/2,sx-W/2),ex=clamp(sx,30,W-30),ey=clamp(sy,70,H-40);
     ctx.save();ctx.translate(ex,ey);ctx.rotate(a);ctx.fillStyle='#d6a94a';ctx.beginPath();ctx.moveTo(14,0);ctx.lineTo(-8,-9);ctx.lineTo(-8,9);ctx.closePath();ctx.fill();ctx.restore();
@@ -5744,6 +5744,8 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:70,t:'⚡ 돌발 이벤트 알림',items:[
+    ['change','⚡ 돌발 이벤트 알림이 <b>배속과 상관없이 6초</b> 동안 떠 있어요 (빠른 배속에서 너무 빨리 사라지던 문제). 설명 글씨도 조금 키웠어요']]},
   {v:69,t:'🕊 날개 탭 · 초기화 정리',items:[
     ['new','🕊 외형 꾸미기에 <b>날개</b> 탭이 따로 생겼어요. 이제 <b>오라와 날개를 같이</b> 장착할 수 있어요 (오라 칸에 끼고 있던 날개는 날개 칸으로 자동으로 옮겨져요)'],
     ['fix','🕊 대장간·명예의 전당 그림에서 날개·오라가 발밑에 그려지던 문제를 고쳤어요 (게임 화면과 같은 자리) · 천사 날개 광륜이 머리 바로 위로'],
@@ -8050,7 +8052,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=69,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=70,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
