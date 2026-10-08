@@ -456,8 +456,8 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 .home #endc .nmBtn .skull{position:absolute;right:12px;top:0;font-size:70px;opacity:.3}
 .home #endc .nmBtn .pick{position:absolute;right:14px;bottom:12px;padding:5px 12px;border-radius:10px;background:#fff;color:#a01830;font-weight:bold;font-size:13px}
 /* 참붕이 밥 사주기 */
-.home .hDon{position:relative;margin-top:8px;display:flex;align-items:center;gap:10px;padding:10px 14px 10px 8px;border-radius:16px;border:1px solid rgba(214,169,74,.45);cursor:pointer;color:#f3e3c0;background:linear-gradient(160deg,rgba(60,30,14,.85),rgba(30,14,8,.9));box-shadow:0 4px 12px rgba(0,0,0,.35);text-align:left}
-.home .hDon:hover{border-color:#d6a94a;background:linear-gradient(160deg,rgba(80,42,18,.9),rgba(36,16,8,.92))}
+.home .hDon{position:relative;align-self:center;margin:24px auto 0;display:flex;align-items:center;gap:10px;padding:0 8px;border:none!important;background:none!important;box-shadow:none!important;cursor:pointer;color:#f3e3c0;text-align:left;transition:transform .15s}
+.home .hDon:hover{transform:scale(1.04)}.home .hDon:hover .dt b{color:#fff1c4;text-shadow:0 0 10px rgba(255,215,106,.6)}
 .home .hDon .hug{position:relative;flex:0 0 104px;height:104px;margin:14px 0 -6px}
 .home .hDon .hug canvas{position:absolute;inset:0;width:104px;height:104px;image-rendering:pixelated}
 .home .hDon .bowl{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);font-size:38px;line-height:1;filter:drop-shadow(0 2px 2px rgba(0,0,0,.5));animation:hbob 2.4s ease-in-out infinite}
@@ -558,6 +558,7 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 @media (max-width:760px){
  .home .hTop{padding:6px 10px;gap:6px}.home .hTop h1{font-size:24px}.home .hTop h1 span,.home .hTop #verLbl{display:none}
  .home .hMain{display:flex;flex-direction:column;padding:10px}
+ .home .hDon{margin:14px auto 4px}
  .home .hQuick canvas{width:48px;height:48px}
  .home #dsel .btn{width:62px!important;height:62px}
  .home .hDock .btn{width:62px!important}.home .hDock .btn i{width:42px;height:42px;font-size:20px}
