@@ -440,7 +440,7 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
   <div id="autoBar"><button id="autoPickBtn">자동 선택 OFF</button><button id="autoMoveBtn">자동 이동 OFF</button><button id="noCdBtn" style="display:none">쿨타임 무시 OFF</button><button id="speedBtn">x1</button><button id="zoomBtn" title="시야 넓이">🔭 1</button><button id="bgmBtn">🎵</button></div>
 </div>
 <script>
-window.addEventListener('error',function(e){var d=document.getElementById('errbox');if(!d){d=document.createElement('div');d.id='errbox';d.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:99;background:#300;color:#fdd;font:13px/1.4 monospace;padding:8px 10px;border:1px solid #f66;border-radius:6px;white-space:pre-wrap;max-height:40%;overflow:auto';document.body.appendChild(d);}d.textContent+='오류: '+(e.message||e)+' ('+(e.lineno||'?')+':'+(e.colno||'?')+')\n';});
+window.addEventListener('error',function(e){if(!e.filename&&/^Script error\.?$/i.test(String(e.message||'')))return;var d=document.getElementById('errbox');if(!d){d=document.createElement('div');d.id='errbox';d.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:99;background:#300;color:#fdd;font:13px/1.4 monospace;padding:8px 10px;border:1px solid #f66;border-radius:6px;white-space:pre-wrap;max-height:40%;overflow:auto';document.body.appendChild(d);}d.textContent+='오류: '+(e.message||e)+' ('+(e.lineno||'?')+':'+(e.colno||'?')+')\n';});
 </script>
 <script>
 (()=>{
@@ -7061,8 +7061,9 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
-  {v:84,t:'🧙 12직업 새 디자인',items:[
-    ['new','🧙 12직업 모두 새 디자인이에요! 머리를 조금 줄여 몸이 잘 보이게 하고, 직업마다 색과 장식을 새로 입혔어요 (기사 남색 투구·흰 깃털·둥근 방패, 마법사 금띠 고깔모자, 궁수 초록 두건, 도적 복면, 성기사 얼굴이 보이는 은투구, 사령술사 해골 지팡이, 총잡이 카우보이 모자, 정령사 긴 머리·보석 머리띠·드레스, 광전사 휜 뿔 투구·쇠 가슴갑옷·털 망토, 드루이드 사슴뿔 잎 두건, 연금술사 고글, 도박사 실크햇). 동작과 능력은 그대로예요']]},
+  {v:85,t:'🧙 12직업 새 디자인',items:[
+    ['new','🧙 12직업 모두 새 디자인이에요! 머리를 조금 줄여 몸이 잘 보이게 하고, 직업마다 색과 장식을 새로 입혔어요 (기사 남색 투구·흰 깃털·둥근 방패, 마법사 금띠 고깔모자, 궁수 초록 두건, 도적 복면, 성기사 얼굴이 보이는 은투구, 사령술사 해골 지팡이, 총잡이 카우보이 모자, 정령사 긴 머리·보석 머리띠·드레스, 광전사 휜 뿔 투구·쇠 가슴갑옷·털 망토, 드루이드 사슴뿔 잎 두건, 연금술사 고글, 도박사 실크햇). 동작과 능력은 그대로예요'],
+    ['change','🔑 이름 비밀번호를 저장할 때 서버에 정말 저장됐는지 확인해요. 저장이 안 됐거나 서버에 연결하지 못하면 알려 주고, 비밀번호가 다를 때는 어떻게 하면 되는지 안내해요']]},
   {v:79,t:'🏰 이스터에그 건물 새 그림',items:[
     ['new','🏰 맵마다 있는 비밀 장소 건물 34종을 <b>1.4배 크게</b>, 2배 촘촘한 도트로 새로 그렸어요 (기와·통나무·벽돌 질감, 불 켜진 창, 굴뚝 연기, 담쟁이, 깃발 등). 건물이 커진 만큼 부딪히는 범위도 커졌어요']]},
   {v:78,t:'🗺 모든 배경 새 그림',items:[
@@ -8596,6 +8597,8 @@ function pinKey(nm,pin){const src='chanseo|'+nm+'|'+pin;let out='';for(let s0=0;
 function setMyKey(k){MYKEY=k;try{localStorage.setItem('chanseo_key',k);}catch(e){}}
 async function nameOwned(nm,key){const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),10000):0;
   try{const r=await fetch(SHEET_URL+'?own='+encodeURIComponent(nm)+'&k='+encodeURIComponent(key||MYKEY),{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();return !!(j&&j.owned);}catch(e){return false;}finally{clearTimeout(to);}}
+async function nameOwned3(nm,key){const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),10000):0;
+  try{const r=await fetch(SHEET_URL+'?own='+encodeURIComponent(nm)+'&k='+encodeURIComponent(key||MYKEY),{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();return j&&'owned' in j?!!j.owned:null;}catch(e){return null;}finally{clearTimeout(to);}}
 const myNick=()=>{try{return localStorage.getItem('chipdungeon_nick')||'';}catch(e){return '';}};
 // 후원자 감사 표시: 이 이름의 「주인 컴퓨터」(이름을 처음 등록한 열쇠, 또는 같은 이름 비밀번호)에서만 칭호 「후원자 그저 빛」(행운 +3)과 반짝이는 이름을 줌
 // 서버가 「이 열쇠가 주인 맞음」이라고 답할 때만 (연결 실패면 안 줌). 처음 받을 때 한 번 자동으로 달아 주고, 그 뒤 바꾸는 건 자유
@@ -8826,12 +8829,18 @@ function openNick(){cosPreviewHide();const cur=myNick();
     if(pin&&SRV_V<48){msg('랭킹 서버가 아직 이름 비밀번호를 몰라요. 서버를 새 버전(v4.8)으로 바꾼 뒤 다시 해 주세요.');return;}
     let toast2='👤 이름: '+n;
     if(SHEET){msg('이름 확인 중…');$('nkSave').disabled=true;
-      try{const own=await nameOwned(n);
+      try{const own=await nameOwned3(n);
+        if(own===null){msg('랭킹 서버에 연결하지 못했어요. 인터넷 연결을 확인하고 다시 저장해 주세요.');return;}
         if(pin){const nk=pinKey(n,pin);
-          if(!own){// 지금 이 컴퓨터가 주인이거나 주인이 없음 → 비밀번호 열쇠로 바꿈
-            try{await fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({name:n,rekey:1,k:MYKEY,nk})});}catch(e){}setMyKey(nk);toast2='🔑 이름 비밀번호를 정했어요 · '+n;}
-          else if(!(await nameOwned(n,nk))){setMyKey(nk);toast2='🔑 비밀번호 확인! 이 컴퓨터에서도 '+n+' 이름을 써요';}
-          else{msg(`'${n}'은(는) 다른 사람이 쓰는 이름이거나 비밀번호가 달라요.`);return;}}
+          if(!own){// 지금 이 컴퓨터가 주인이거나 주인이 없음 → 비밀번호 열쇠로 바꾸고, 서버에 정말 바뀌었는지 확인
+            try{await fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({name:n,rekey:1,k:MYKEY,nk})});}catch(e){}
+            const ok=await nameOwned3(n,nk);
+            if(ok!==false){msg(ok===null?'비밀번호를 서버에 저장했는지 확인하지 못했어요. 인터넷 연결을 확인하고 다시 저장해 주세요.':'서버에 비밀번호가 저장되지 않았어요. 잠시 뒤 다시 저장해 주세요.');return;}
+            setMyKey(nk);toast2='🔑 이름 비밀번호를 정했어요 · '+n;}
+          else{const ok=await nameOwned3(n,nk);
+            if(ok===false){setMyKey(nk);toast2='🔑 비밀번호 확인! 이 컴퓨터에서도 '+n+' 이름을 써요';}
+            else if(ok===null){msg('랭킹 서버에 연결하지 못했어요. 인터넷 연결을 확인하고 다시 저장해 주세요.');return;}
+            else{msg(`'${n}'의 비밀번호가 맞지 않아요. 이름을 처음 쓴 컴퓨터·폰에서 👤 내 이름 → 같은 이름에 비밀번호를 넣고 「저장」을 한 번 더 눌러 저장한 뒤, 여기서 다시 해 주세요.`);return;}}}
         else if(own&&n!==cur){msg(`'${n}'은(는) 다른 사람이 이미 쓰고 있는 이름이에요. 내 이름이면 이름 비밀번호를 같이 써 주세요.`);return;}
         else if(own){msg(`'${n}'은(는) 지금 이 컴퓨터에서 주인 확인이 안 돼요. 다른 컴퓨터에서 정한 이름 비밀번호를 같이 써 주세요.`);return;}
       }finally{$('nkSave').disabled=false;}}
@@ -9488,7 +9497,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=84,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=85,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
