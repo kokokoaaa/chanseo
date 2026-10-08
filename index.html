@@ -766,14 +766,40 @@ M.bossH={sz:72,draw(g,f){const gd=['#7a4a08','#b8800f','#e8b830','#ffe070','#fff
   B(g,T,36,48,13,12);P(g,'#fff0b0',32,42,8,14);for(let y=44;y<56;y+=3)P(g,gd[2],32,y,8,1);
   B(g,T,36,26,11,9);B(g,T,45,30,7,5);P(g,K,50,29,2,1);P(g,'#ff4020',39,23,3,2);P(g,'#ffff80',39,23,1,1);
   for(let i=0;i<5;i++){P(g,gd[4],27-i,18-i,2,2);P(g,gd[4],44+i,18-i,2,2);}crown(g,28,16,16);P(g,W,45,34,1,2);P(g,W,48,34,1,2);}};
-M.bossK={sz:72,draw(g,f){const bn=T3(R.bone),st=T3(R.stone);
-  C(g,[R.bone[1],R.bone[2]],28,56+(f?0:1),5,13-(f?0:1));C(g,[R.bone[1],R.bone[2]],39,56+(f?1:0),5,13-(f?1:0));P(g,'#1e1a14',26,69,9,1);P(g,'#1e1a14',37,69,9,1);
-  B(g,st,36,48,13,10);P(g,st[0],27,47,18,2);P(g,'#7a1e24',34,43,4,13);
-  B(g,st,21,48+(f?1:0),5,6);B(g,st,51,48+(f?0:1),5,6);
-  B(g,['#3a2a1a','#5e4428','#8a6a3a'],15,53,7,10);P(g,R.gold[2],13,50,4,7);P(g,'#7a1e24',14,56,2,2);
-  L(g,'#c4c8cc',55,52,67,12+f*2);L(g,'#eef2f6',56,52,68,12+f*2);L(g,'#8c9096',54,52,66,12+f*2);P(g,R.gold[2],51,50,9,3);
-  B(g,bn,36,27,13,12);P(g,K,29,24,4,5);P(g,K,40,24,4,5);P(g,'#ff3030',30,26,2,2);P(g,'#ff3030',41,26,2,2);P(g,K,35,31,2,2);for(let i=0;i<5;i++)P(g,i%2?K:W,31+i*2,35,2,2);
-  P(g,st[1],22,15,28,4);P(g,st[2],22,15,28,1);for(let i=0;i<7;i++){P(g,bn[2],20-i,14-i,3,2);P(g,bn[2],49+i,14-i,3,2);}}};
+M.bossK={sz:72,draw(g,f){const bn=T3(R.bone),ir=['#1e2028','#33363f','#4e535e','#727885','#a3a9b4'],rd=['#2e080c','#561018','#83202a'],gd=R.gold,wd=['#2e1a0e','#4e3018','#76502a','#9a6c3a'];
+  const ring=(cx,cy,rx,ry,c)=>{for(let a=0;a<64;a++){const t=a/64*TAU;P(g,c,Math.round(cx+Math.cos(t)*rx),Math.round(cy+Math.sin(t)*ry),1,1);}};
+  // 찢어진 망토 (뒤)
+  for(let y=37;y<68;y++){const w=13+(y-37)*.42,sw=f?(y-37)*.06:-(y-37)*.04;for(let x=Math.floor(36-w+sw);x<=Math.ceil(36+w+sw);x++){if(y>58&&((x*7+y*3)%6)<(y-58)*.7)continue;const e=Math.abs(x-36-sw)/w;P(g,e>.8?rd[0]:((x+y*2)%11===0?rd[2]:rd[1]),x,y,1,1);}}
+  // 다리뼈·무릎·쇠 장화
+  C(g,[bn[0],bn[1],bn[2]],29,54+(f?0:1),4,12-(f?0:1));C(g,[bn[0],bn[1],bn[2]],40,54+(f?1:0),4,12-(f?1:0));
+  B(g,ir.slice(1),31,58+(f?0:1),3,2.4);B(g,ir.slice(1),42,58+(f?1:0),3,2.4);P(g,ir[4],30,57+(f?0:1),2,1);P(g,ir[4],41,57+(f?1:0),2,1);
+  B(g,ir.slice(1),30,67,5.5,2.4);B(g,ir.slice(1),43,67,5.5,2.4);P(g,ir[4],26,66,4,1);P(g,ir[4],39,66,4,1);P(g,K,25,69,11,1);P(g,K,38,69,11,1);
+  // 허리띠 + 해골 버클 + 늘어진 사슬 갑옷
+  for(let x=27;x<46;x++)for(let y=55;y<59;y++)if((x+y)%2===0)P(g,ir[2],x,y,1,1);else P(g,ir[1],x,y,1,1);
+  P(g,ir[1],26,51,21,4);P(g,ir[3],26,51,21,1);B(g,bn,36.5,53,2.8,2.4);P(g,K,35,52,1,1);P(g,K,37,52,1,1);P(g,K,36,54,1,1);
+  // 가슴 갑옷: 가운데가 깨져 갈비뼈가 보임
+  B(g,ir.slice(1),36,44,12,9);P(g,K,31,37,11,14);for(let i=0;i<4;i++){P(g,bn[1],31,38+i*3,11,2);P(g,bn[2],31,38+i*3,11,1);}P(g,bn[2],35,37,2,14);P(g,'#ff4030',35,44,2,2);P(g,'#ffb070',35,44,1,1);
+  P(g,ir[4],27,39,3,1);P(g,ir[4],43,39,3,1);for(let i=0;i<3;i++){P(g,gd[2],26+i*2,47+i,1,1);P(g,gd[2],46-i*2,47+i,1,1);}
+  // 가시 어깨 갑옷
+  B(g,ir.slice(1),22,40,7,5);B(g,ir.slice(1),50,40,7,5);P(g,gd[2],16,43,12,1);P(g,gd[2],45,43,12,1);P(g,gd[3],16,43,4,1);P(g,gd[3],45,43,4,1);
+  for(let i=0;i<3;i++){L(g,ir[4],17+i*4,37,15+i*4,31-i*2);L(g,ir[3],18+i*4,37,16+i*4,31-i*2);L(g,ir[4],49+i*4,37,51+i*4,31-i*2);L(g,ir[3],50+i*4,37,52+i*4,31-i*2);}
+  // 뼈 팔
+  C(g,[bn[0],bn[1],bn[2]],19,45,3,9);C(g,[bn[0],bn[1],bn[2]],51,45,3,9);B(g,bn,20.5,45,2,1.6);B(g,bn,52.5,45,2,1.6);
+  // 둥근 방패: 나무 + 쇠 테 + 해골 문양 + 징
+  B(g,wd.slice(1),14,56,8.5,9.5);for(let x=7;x<22;x+=3)L(g,wd[0],x,47,x,65);ring(14,56,8,9,ir[2]);ring(14,56,8.6,9.6,ir[1]);ring(14,56,7.4,8.4,gd[2]);
+  B(g,bn,14,55,3.4,3);P(g,K,12,54,2,2);P(g,K,15,54,2,2);P(g,'#ff3030',12,54,1,1);P(g,'#ff3030',15,54,1,1);for(let i=0;i<4;i++)P(g,i%2?K:W,12+i,58,1,1);
+  for(const [a,b] of [[14,47],[14,65],[6,56],[22,56]])P(g,gd[3],a,b,1,1);
+  // 대검: 넓은 칼날 + 홈 + 붉은 룬 + 금 가드
+  const bx0=54,by0=52,bx1=68,by1=9+f*2;for(let o=-1;o<=2;o++)L(g,o<0?ir[2]:o>1?ir[1]:ir[4],bx0+o,by0,bx1+o,by1);L(g,'#eef2f6',bx0,by0-1,bx1,by1);L(g,ir[1],bx0+1,by0-3,bx1,by1+4);
+  for(let i=1;i<6;i++){const t=i/6.5;P(g,i%2?'#ff4a30':'#ff9a50',Math.round(bx0+1+(bx1-bx0)*t),Math.round(by0-3+(by1+4-by0+3)*t),1,1);}
+  P(g,gd[1],49,51,11,3);P(g,gd[3],49,51,11,1);P(g,gd[2],48,50,2,4);P(g,gd[2],59,50,2,4);C(g,wd,52,54,3,6);B(g,gd,53.5,61,2,1.8);
+  // 머리: 두개골 + 뿔 달린 투구 + 갈라진 금 + 빛나는 눈
+  B(g,bn,36,27,12,11);
+  B(g,ir.slice(1),36,21,13,8,(x,y)=>y>24);P(g,ir[1],23,23,27,3);P(g,ir[4],23,23,27,1);P(g,ir[3],35,13,2,10);P(g,gd[2],24,25,25,1);
+  for(let i=0;i<9;i++){const w=i<3?3:2;P(g,i<6?bn[2]:bn[1],22-i,19-i*1.2,w,2);P(g,i<6?bn[2]:bn[1],48+i,19-i*1.2,w,2);}P(g,bn[0],13,8,2,2);P(g,bn[0],57,8,2,2);
+  P(g,K,28,26,6,6);P(g,K,39,26,6,6);P(g,'#ff2a20',30,28,3,3);P(g,'#ff2a20',41,28,3,3);P(g,'#ffc080',30,28,1,1);P(g,'#ffc080',41,28,1,1);P(g,'rgba(255,60,40,.5)',27,27,1,4);P(g,'rgba(255,60,40,.5)',45,27,1,4);
+  L(g,K,42,18,45,25);L(g,K,45,25,44,27);P(g,K,35,32,3,2);
+  P(g,bn[0],29,35,15,4);for(let i=0;i<7;i++)P(g,i%2?bn[0]:W,30+i*2,35,2,3);P(g,K,30,38,13,1);}};
 // 서리 마녀: 얼음빛 로브와 고깔모자, 흰 머리, 얼음 수정 지팡이
 M.bossF={sz:72,draw(g,f){const ic=['#2e6a96','#5aa8d8','#a8dcf8'],dk=['#14304a','#1f4a70','#2e6a96'];
   P(g,'#10202e',28,69,7,1);P(g,'#10202e',37,69,7,1);
@@ -1216,13 +1242,25 @@ const ESPR=(()=>{
   function outline(c){const g=c.getContext('2d'),W=c.width,H=c.height,im=g.getImageData(0,0,W,H),d=im.data,o=new Uint8ClampedArray(d);
     for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=(y*W+x)*4;if(d[i+3])continue;const n=(x>0&&d[i-1])||(x<W-1&&d[i+7])||(y>0&&d[i-W*4+3])||(y<H-1&&d[i+W*4+3]);if(n){o[i]=26;o[i+1]=18;o[i+2]=14;o[i+3]=255;}}
     im.data.set(o);g.putImageData(im,0,0);}
+  // 보스 도트 다듬기: 입체 음영(왼쪽 위 빛·오른쪽 아래 그림자), 색 경계 안쪽 선, 위→아래 명암, 미세한 재질 질감
+  function bossShade(c){const g=c.getContext('2d'),W=c.width,H=c.height,im=g.getImageData(0,0,W,H),d=im.data,o=new Uint8ClampedArray(d);
+    const A=(x,y)=>x<0||y<0||x>=W||y>=H?0:d[(y*W+x)*4+3],top=new Int16Array(W).fill(-1),bot=new Int16Array(W).fill(-1);
+    for(let x=0;x<W;x++)for(let y=0;y<H;y++)if(A(x,y)){if(top[x]<0)top[x]=y;bot[x]=y;}
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=(y*W+x)*4;if(!d[i+3])continue;let f=1;
+      if(!A(x-1,y)||!A(x,y-1))f*=1.22;else if(!A(x-2,y)||!A(x,y-2))f*=1.08;
+      if(!A(x+1,y)||!A(x,y+1))f*=.74;else if(!A(x+2,y)||!A(x,y+2)||!A(x+1,y+1))f*=.88;
+      for(const [nx,ny] of [[x+1,y],[x,y+1]]){if(!A(nx,ny))continue;const j=(ny*W+nx)*4,df=Math.abs(d[i]-d[j])+Math.abs(d[i+1]-d[j+1])+Math.abs(d[i+2]-d[j+2]);if(df>90){const li=d[i]+d[i+1]+d[i+2],lj=d[j]+d[j+1]+d[j+2];if(li<lj)f*=.8;}}
+      const h=Math.max(1,bot[x]-top[x]),t=(y-top[x])/h;f*=1.07-.16*t;
+      const n=Math.sin(x*12.9898+y*78.233)*43758.5453;f*=1+((n-Math.floor(n))-.5)*.07;
+      o[i]=Math.min(255,d[i]*f);o[i+1]=Math.min(255,d[i+1]*f);o[i+2]=Math.min(255,d[i+2]*f);}
+    im.data.set(o);g.putImageData(im,0,0);}
   // 좌우 반전본까지 미리 구워 둠. 픽셀 작업용(willReadFrequently) 캔버스는 그리기 느려서 일반 캔버스로 복사해 캐시
   function get(type,f,hit,flip){const k=type+f+(hit?'h':'')+(flip?'f':'');let c=cache[k];if(c)return c;
     const sz=MDEF[type].sz,mk=o=>{const q=document.createElement('canvas');q.width=q.height=sz;return [q,q.getContext('2d',o)];};
     let g;[c,g]=mk();
     if(flip){g.translate(sz,0);g.scale(-1,1);g.drawImage(get(type,f,hit,false),0,0);}
     else if(hit){g.drawImage(get(type,f,false),0,0);g.globalCompositeOperation='source-atop';g.fillStyle='#fff';g.fillRect(0,0,sz,sz);}
-    else{const [w,gw]=mk({willReadFrequently:true});MDEF[type].draw(gw,f);ART.outline(w);g.drawImage(w,0,0);}
+    else{const [w,gw]=mk({willReadFrequently:true});MDEF[type].draw(gw,f);if(sz>=60)bossShade(w);ART.outline(w);g.drawImage(w,0,0);}
     cache[k]=c;return c;}
   return {get,P,D,L,outline};
 })();
@@ -4322,15 +4360,15 @@ function update(dt){
     if(T.totem){e.ttT=(e.ttT||0)-dt;if(e.ttT<=0){e.ttT=.5;for(const o of S.en)if(o.alive&&o!==e&&!o.boss&&d2(o,e)<170*170)o.tbT=S.t+.6;}continue;}
     // 행운 고양이: 맞을 때마다(체력 20%) 멀리 순간이동 (3번까지)
     if(e.type==='luckycat'&&(e.bkn??3)>0&&e.hp<(e.lhp??e.maxHp)-e.maxHp*.2){e.bkn=(e.bkn??3)-1;e.lhp=e.hp;burst(e.x,e.y,'#ffd76a',14);const a=Math.random()*TAU;e.x=clamp(p.x+Math.cos(a)*240,20,WW-20);e.y=clamp(p.y+Math.sin(a)*240,20,WH-20);burst(e.x,e.y,'#ffd76a',14);}
-    // 소매치기: 훔친 뒤 8초 안에 못 잡으면 도망
-    if(e.stole){e.flT=(e.flT??8)-dt;if(e.flT<=0){e.alive=false;burst(e.x,e.y,'#ffd76a',14);toast(`소매치기가 ${e.stole} 골드를 들고 도망쳤다!`);continue;}}
+    // 소매치기: 훔친 뒤 15초 안에 못 잡으면 도망 (돈주머니가 무거워 느려짐)
+    if(e.stole){e.flT=(e.flT??15)-dt;if(e.flT<=0){e.alive=false;burst(e.x,e.y,'#ffd76a',14);toast(`소매치기가 ${e.stole} 골드를 들고 도망쳤다!`);continue;}}
     // 해골 병사 어그로: 반경 90 안의 근접 잡몹은 해골을 노림 (원거리·돌진·자폭·보스 제외), 한 번 붙으면 160까지 따라감
     // 해골 어그로: 해골 1기당 최대 4마리까지만 끌어당김 (떼로 몰려 순식간에 녹는 것 방지)
     let sk=null;if(S.skel&&S.skel.length&&!T.range&&!T.flee&&!T.bomb&&!T.charge){if(e.tk&&e.tk.life>0&&d2(e.tk,e)<160*160){sk=e.tk;sk.ag=(sk.ag||0)+1;}else{e.tk=null;for(const k of S.skel)if(k.life>0&&(k.ag||0)<4&&d2(k,e)<90*90){sk=k;e.tk=k;k.ag=(k.ag||0)+1;break;}}}
     const tg_=sk||p,dx=tg_.x-e.x,dy=tg_.y-e.y,d=Math.hypot(dx,dy)||1;
     if(T.mimic&&!e.awake){e.cd=1;if(d<130||e.hp<e.maxHp){e.awake=1;S.shake=.2;ftext(e.x,e.y-e.r-8,'미믹이다!','#ff6060',18);}else continue;}
     if(e.slowT>0){e.slowT-=dt;if(e.frozen&&e.slowT>0)continue;}else e.frozen=false;
-    let spd=e.spd*(e.rootT>S.t&&!e.boss?0:1)*(e.ps>0&&has('neuro')?lv3('neuro',.6,.45,.3):1)*(e.slowT>0?.4:1)*(has('gravity')&&d<150?1-lv3('gravity',.2,.3,.4):1)*(evOn('moon')?1.2:1)*(e.tbT>S.t?1.3:1)*(e.stole?1.15:1),vx=dx/d,vy=dy/d;
+    let spd=e.spd*(e.rootT>S.t&&!e.boss?0:1)*(e.ps>0&&has('neuro')?lv3('neuro',.6,.45,.3):1)*(e.slowT>0?.4:1)*(has('gravity')&&d<150?1-lv3('gravity',.2,.3,.4):1)*(evOn('moon')?1.2:1)*(e.tbT>S.t?1.3:1)*(e.stole?.8:1),vx=dx/d,vy=dy/d;
     if(T.charge){e.ccd=(e.ccd??rand(1,3))-dt;
       if(e.chT>0){e.chT-=dt;vx=e.cx;vy=e.cy;spd=(T.lance?620:560)*(e.slowT>0?.4:1);
         // 돌격 기사: 3연속 돌진 (돌진이 끝날 때마다 0.4초 다시 조준)
@@ -4374,7 +4412,7 @@ function update(dt){
     else if(sk){if(d<e.r+11&&e.cd<=0){skHit(sk,e.dmg);e.cd=.9;}}
     else if(!T.range&&!T.flee&&d<e.r+p.r+3&&e.cd<=0){hurtP(e.dmg,e);e.cd=.9;
       if(T.leech&&!e.latch){e.latch=1;e.la=Math.atan2(e.y-p.y,e.x-p.x);ftext(p.x,p.y-26,'거머리! 대시로 떼기','#ff6080',14);}
-      if(T.thief&&!e.stole&&S.gold>0){const g=Math.min(S.gold,Math.max(5,Math.round(S.gold*.08)));S.gold-=g;e.stole=g;ftext(p.x,p.y-26,'-'+g+' 골드 도둑맞음!','#ffd76a',16);if(!S.thTold){S.thTold=1;toast('💰 소매치기! 8초 안에 잡으면 골드를 되찾아요 (화살표·미니맵에 표시)');}}
+      if(T.thief&&!e.stole&&S.gold>0){const g=Math.min(S.gold,Math.max(5,Math.round(S.gold*.08)));S.gold-=g;e.stole=g;ftext(p.x,p.y-26,'-'+g+' 골드 도둑맞음!','#ffd76a',16);if(!S.thTold){S.thTold=1;toast('💰 소매치기! 15초 안에 잡으면 골드를 되찾아요 (화살표·미니맵에 표시)');}}
       if(e.affs){if(hasAf(e,'vamp'))e.hp=Math.min(e.maxHp,e.hp+e.maxHp*.12*e.ak);if(hasAf(e,'frost'))S.buffT.slow=Math.max(S.buffT.slow||0,1.5);}
       // 흡혈 박쥐: 나를 물면 보스 체력 0.4% 회복
       if(e.type==='vbat'&&S.boss&&S.boss.alive&&S.boss.type==='bossV'){const B=S.boss;B.hp=Math.min(B.maxHp,B.hp+B.maxHp*.002);ftext(B.x,B.y-B.r-10,'흡혈','#ff6070',13);}}
@@ -4538,7 +4576,7 @@ function drawChip(e){
   if(e.type==='ghost')ctx.globalAlpha=e.phase?.22:.85;else if(e.type==='wraith')ctx.globalAlpha=e.bl>0?Math.max(.1,e.bl/.6*.8):.9;else if(e.under)ctx.globalAlpha=.12;
   ctx.imageSmoothingEnabled=false;if(e.bsc){ctx.save();if(e.flt)ctx.filter=e.flt;pxDrawS(spr,x,y-air+R*.9,sz>>1,sz-2,e.bsc);ctx.restore();}else pxDraw(spr,x,y-air+R*.9,sz>>1,sz-2);ctx.globalAlpha=1;
   // 소매치기: 금빛 테두리 + 훔친 뒤엔 머리 위 돈주머니와 남은 시간
-  if(ET[e.type].thief){ctx.strokeStyle=e.stole?'#ffb030':'rgba(255,215,106,.55)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,R+4,0,TAU);ctx.stroke();if(e.stole){ctx.font='16px sans-serif';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText('💰',x,y-R-6+Math.sin(S.t*8)*2);ctx.font='11px "Do Hyeon",sans-serif';ctx.fillStyle='#ffd76a';ctx.fillText(Math.max(0,Math.ceil(e.flT??8))+'초',x,y-R-22);}}
+  if(ET[e.type].thief){ctx.strokeStyle=e.stole?'#ffb030':'rgba(255,215,106,.55)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,R+4,0,TAU);ctx.stroke();if(e.stole){ctx.font='16px sans-serif';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText('💰',x,y-R-6+Math.sin(S.t*8)*2);ctx.font='11px "Do Hyeon",sans-serif';ctx.fillStyle='#ffd76a';ctx.fillText(Math.max(0,Math.ceil(e.flT??15))+'초',x,y-R-22);}}
   if(e.slowT>0){ctx.fillStyle=e.frozen?'rgba(170,220,255,.5)':'rgba(170,220,255,.22)';ctx.beginPath();ctx.arc(x,y,R,0,TAU);ctx.fill();}
   if(e.elite){ctx.strokeStyle='#ffd76a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,R+5,0,TAU);ctx.stroke();
     ctx.fillStyle='#ffd76a';ctx.beginPath();for(let i=0;i<6;i++){const sa=i*TAU/6+S.t;ctx.moveTo(x+Math.cos(sa)*(R+10),y+Math.sin(sa)*(R+10));ctx.lineTo(x+Math.cos(sa+.18)*(R+4),y+Math.sin(sa+.18)*(R+4));ctx.lineTo(x+Math.cos(sa-.18)*(R+4),y+Math.sin(sa-.18)*(R+4));ctx.closePath();}ctx.fill();}
@@ -5440,7 +5478,10 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
-  {v:49,t:'🥚 이스터에그 새 단장',items:[
+  {v:49,t:'🥚 이스터에그 새 단장 · ✨ 생존기 연출',items:[
+    ['new','✨ <b>생존기(E)</b> 12종에 직업마다 전용 연출이 생겼어요 (뼈 감옥은 진짜 뼈 감옥이 솟아올라요!)'],
+    ['buff','💰 <b>소매치기</b>: 쫓는 시간 8초 → <b>15초</b>, 돈주머니가 무거워서 도망 속도가 느려져요'],
+    ['new','🎨 보스 그림에 음영·질감이 더해졌고, <b>해골 기사</b>가 새 모습으로 바뀌었어요'],
     ['change','🥚 이스터에그를 <b>배경마다 한 곳</b>으로 정리했어요 (겹치던 건 지움). 건축물 위에 <b style="color:#ffe27a">❔</b>가 떠 있으면 그곳!'],
     ['change','🥚 장소마다 <b>찾는 방법이 달라요</b>: 둘레 돌기, 대시, 펭귄 걸음, 다친 채로 찾아가기, 꼼짝 않고 기다리기 등. 📖 도감 이스터에그 탭에 힌트가 있어요'],
     ['change','🏆 이스터에그 도전과제도 새 개수(11곳)에 맞췄어요']]},
