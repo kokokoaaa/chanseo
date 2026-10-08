@@ -6639,7 +6639,7 @@ function openDonate(){if(!DONATE_URL)return;const n=myNick()||'모험가';
   <p class="sub" style="font-size:16px;text-align:center">찬서를 만드는 참붕이의 <b>토큰값</b>을 응원해 주세요! 🙇</p>
   <div class="nick col"><div style="font-size:14px;color:var(--muted)">💌 <b style="color:var(--ivory)">${esc(n)}</b> 이름으로 응원 메시지를 남길 수 있어요 (120자까지, 비워도 돼요)</div><textarea id="dnMsg" maxlength="120" rows="3" placeholder="응원의 한마디" style="width:100%;resize:none;padding:8px;border-radius:8px;border:1px solid var(--brass);background:rgba(0,0,0,.35);color:var(--ivory);font:inherit"></textarea></div>
   <div class="dnqr"><img src="${DONATE_QR}" alt="카카오페이 송금 QR"><div><b>📱 휴대폰 카메라로 QR을 찍어 주세요</b><small>카카오페이 송금 화면이 열려요 (카카오페이는 휴대폰에서만 돼요)</small><small>휴대폰으로 게임 중이면 아래 버튼을 누르면 바로 열려요</small></div></div>
-  <div class="btnrow"><button class="btn primary" id="dnGo">💛 메시지 보내고 카카오페이로 후원하기</button></div>
+  <div class="btnrow" style="display:flex;justify-content:center"><button class="btn primary" id="dnGo">💛 메시지 보내고 응원하기</button></div>
   <p class="sub" style="text-align:center">어린이 친구들은 꼭 부모님께 먼저 여쭤보세요.</p>`);
   $('dnBack').onclick=startScreen;
   $('dnGo').onclick=()=>{const mob=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);const m=String($('dnMsg').value||'').trim().slice(0,120);
