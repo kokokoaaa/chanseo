@@ -181,6 +181,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 .pcard .pq.empty{color:var(--muted);background:none}
 .hof .rank{margin-top:10px}
 .menugrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}.menugrid>.btn{margin:0!important;width:auto;padding:10px 6px;font-size:15px;line-height:1.25}.menugrid .btn small{font-size:11.5px}@media (max-width:640px){.menugrid{grid-template-columns:repeat(2,1fr)}}
+.donrow{text-align:center;margin:-2px 0 6px}.donb{position:relative;overflow:hidden;border:1px solid #ffd76a;border-radius:999px;padding:4px 14px;font:inherit;font-size:14px;font-weight:bold;color:#3a2600;cursor:pointer;background:linear-gradient(110deg,#ffe58a 0%,#ffc83a 40%,#fff3c0 50%,#ffc83a 60%,#e8a520 100%);background-size:250% 100%;animation:donsh 2.6s linear infinite;box-shadow:0 0 10px rgba(255,200,60,.55)}.donb .dcoin{display:inline-block;font-style:normal;animation:dcoin 1.6s ease-in-out infinite}@keyframes donsh{0%{background-position:120% 0}100%{background-position:-120% 0}}@keyframes dcoin{0%,100%{transform:rotateY(0)}50%{transform:rotateY(180deg)}}
 .chartq{position:fixed;inset:0;z-index:9800;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45)}.chartq .cq{background:#0f2a20;border:2px solid var(--brass);border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;align-items:center;gap:12px;color:var(--ivory);font-size:20px;box-shadow:0 8px 30px rgba(0,0,0,.6)}.chartq .cqb{display:flex;gap:12px}.chartq .cqb .btn{min-width:110px;font-size:18px;margin:0}.chartq small{font-size:15px;min-height:1.2em;text-align:center;line-height:1.5}
 .chatb{position:relative}#chatBox .hx-hf_neon,.onll .hx-hf_neon{color:#aef9ff!important;text-shadow:0 0 6px #22e0ff,0 0 12px #22e0ff}#chatBox .chl b.hn{font-weight:bold}.cdot{position:absolute;top:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#ff4f6a;box-shadow:0 0 6px #ff4f6a}
 #chatBox{position:fixed;right:12px;bottom:12px;z-index:9000;width:min(360px,calc(100vw - 24px));height:min(420px,60vh);display:flex;flex-direction:column;background:rgba(8,24,17,.96);border:1px solid var(--brass);border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.6);color:var(--ivory);font-size:14px}
@@ -5539,7 +5540,7 @@ function startScreen(){
   const cards=Object.keys(CLASSES).map(k=>{const C=CLASSES[k],op=clsOpen(k);return `<button class="clscard ${k===pickCls?'on':''} ${op?'':'locked'}" data-cls="${k}">
     <canvas class="pv" data-c="${k}" width="96" height="96"></canvas><b>${op?'':'🔒 '}${C.n}</b><span class="role">${C.role}</span></button>`;}).join('');
   show(`
-  <h1>찬서 <span style="font-size:.5em;color:var(--ivory)">: 찬붕이의 뱀서</span></h1><div id="verLbl" style="margin:-6px 0 8px;font-size:13px;color:var(--muted)">v${BUILD} · ${updLabel()}</div>
+  <h1>찬서 <span style="font-size:.5em;color:var(--ivory)">: 찬붕이의 뱀서</span></h1><div id="verLbl" style="margin:-6px 0 8px;font-size:13px;color:var(--muted)">v${BUILD} · ${updLabel()}</div>${DONATE_URL?'<div class="donrow"><button id="donBtn" class="donb"><i class="dcoin">🪙</i> 참붕이 토큰값 후원하기</button></div>':''}
   <div class="nickbar"><button class="onlb" id="nickBtn">👤 ${myNick()?`<b>${esc(myNick())}</b> ✏`:'내 이름 정하기'}</button></div>
   <div id="onl" class="onl">${onlHtml()}</div>
   <div class="hof" id="board">${boardHtml()}</div>
@@ -5566,7 +5567,7 @@ function startScreen(){
   ov.querySelectorAll('[data-diff]').forEach(b=>b.onclick=()=>{pickDiff=b.dataset.diff;savePickDiff(pickDiff);ov.querySelectorAll('[data-diff]').forEach(x=>x.classList.toggle('primary',x===b));HOF_DIFF=null;refreshBoard();});
   if(sv)$('cont').onclick=()=>continueGame(sv);
   $('go').onclick=()=>beginRun(pickCls);
-  $('meta').onclick=openMeta;onlPaint();if($('nickBtn'))$('nickBtn').onclick=openNick;$('forgeBtn').onclick=openForge;$('heroBtn').onclick=openHeroes;if($('raidBtn'))$('raidBtn').onclick=openRaid;if($('rushBtn'))$('rushBtn').onclick=openRush;if($('duelBtn'))$('duelBtn').onclick=openDuel;$('sync').onclick=openSync;if($('guideBtn'))$('guideBtn').onclick=()=>openGuide('a');if($('patchBtn'))$('patchBtn').onclick=()=>openPatch(true);if($('verLbl')){$('verLbl').onclick=devTapVer;$('verLbl').style.userSelect='none';}$('codex').onclick=()=>openCodex();$('achBtn').onclick=openAch;
+  $('meta').onclick=openMeta;onlPaint();if($('donBtn'))$('donBtn').onclick=openDonate;if($('nickBtn'))$('nickBtn').onclick=openNick;$('forgeBtn').onclick=openForge;$('heroBtn').onclick=openHeroes;if($('raidBtn'))$('raidBtn').onclick=openRaid;if($('rushBtn'))$('rushBtn').onclick=openRush;if($('duelBtn'))$('duelBtn').onclick=openDuel;$('sync').onclick=openSync;if($('guideBtn'))$('guideBtn').onclick=()=>openGuide('a');if($('patchBtn'))$('patchBtn').onclick=()=>openPatch(true);if($('verLbl')){$('verLbl').onclick=devTapVer;$('verLbl').style.userSelect='none';}$('codex').onclick=()=>openCodex();$('achBtn').onclick=openAch;
   refreshBoard();
 }
 function drawPreviews(){
@@ -6627,6 +6628,16 @@ function onlHtml(sm){if(!SHEET_URL)return '';if(!ONLINE)return `<span class="onl
 function onlPaint(){const el=document.getElementById('onl');if(el){el.innerHTML=onlHtml();const b=document.getElementById('onlBtn');if(b)b.onclick=onlToggle;}
   const h=document.getElementById('onlHud');if(h){h.innerHTML=onlHtml(1).replace('id="onlBtn"','id="onlHudBtn"');const hb=document.getElementById('onlHudBtn');if(hb)hb.onclick=e=>{e.stopPropagation();onlToggle();};}
   document.querySelectorAll('[data-chat]').forEach(b=>b.onclick=e=>{e.stopPropagation();chatToggle();});}
+// 후원: 토스 송금 링크 (비어 있으면 버튼이 안 보임). 보상은 운영자가 직접 줌
+const DONATE_URL='';
+function openDonate(){if(!DONATE_URL)return;const n=myNick()||'닉네임',ex=n+' - 응원합니다!';
+  show(`<div class="shophead"><h2>🪙 참붕이 토큰값 후원하기</h2><button class="btn" id="dnBack">돌아가기</button></div>
+  <p class="sub" style="font-size:16px;text-align:center">찬서를 만드는 참붕이의 <b>토큰값</b>을 응원해 주세요! 🙇</p>
+  <div class="medal" style="flex-direction:column;align-items:center;gap:6px"><span>📝 송금할 때 <b>메모</b>에 <b>닉네임과 응원의 한마디</b> 부탁드립니다</span><span style="font-size:15px">예: <b id="dnEx">${esc(ex)}</b> <button class="btn" id="dnCopy" style="padding:2px 10px;font-size:13px">복사</button></span></div>
+  <div class="btnrow"><button class="btn primary" id="dnGo">💙 토스로 후원하기</button></div>
+  <p class="sub" style="text-align:center">어린이 친구들은 꼭 부모님께 먼저 여쭤보세요.</p>`);
+  $('dnBack').onclick=startScreen;$('dnGo').onclick=()=>{try{window.open(DONATE_URL,'_blank','noopener');}catch(e){location.href=DONATE_URL;}};
+  $('dnCopy').onclick=async()=>{try{await navigator.clipboard.writeText(ex);toast('메모 예시를 복사했어요');}catch(e){toast('복사가 안 돼요. 직접 적어 주세요');}};}
 // 이름 효과 (메달로 산 명예의 전당 이름 꾸미기): 채팅·접속 중 목록 이름에도 그대로
 const myFx=()=>{const x=cosEq('hof');return x?x.k:'';};
 function fxName(n,fx,me){const ok=fx&&COS.some(q=>q.k===fx&&q.cat==='hof');return `<b class="hn${ok?' hx-'+fx:''}${me&&!ok?' me':''}">${ok&&fx==='hf_crown'?'👑 ':''}${esc(n)}</b>`;}
