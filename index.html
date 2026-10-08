@@ -6207,7 +6207,11 @@ const gearSt=l=>l>=10?3:l>=7?2:l>=4?1:0;
 const GEAR_FIT={knight:[5,20,24],mage:[3,19,23],archer:[5,17,23],rogue:[8,19,24],paladin:[4,21,24],necro:[7,20,24],gunner:[7,19,24],elem:[9,19,24],berserk:[5,19,24],druid:[6,19,24],alch:[7,18,23],gambler:[5,19,24]};
 const GEAR_FIT_OLD={knight:[6,20,24],mage:[2,19,23],archer:[7,17,23],rogue:[9,19,24],paladin:[4,21,24],necro:[8,20,24],gunner:[6,19,24],elem:[9,19,24],berserk:[6,19,24],druid:[6,19,24],alch:[9,18,23],gambler:[6,19,24]};
 // 직업 모습: 외형 꾸미기에서 직업마다 새 모습/옛 모습을 고름 (META.look[직업]='old')
-function lookOld(c){try{return !!(META.look&&META.look[c]==='old');}catch(e){return false;}}
+const NEW_LOOK_AT=1791472680000;let LOOK_OVR=null;
+function lookOld(c){if(LOOK_OVR!=null)return LOOK_OVR;try{return !!(META.look&&META.look[c]==='old');}catch(e){return false;}}
+// 기록(명예의 전당·보관함 캐릭터)을 그 판의 모습으로: look 'old'/'new'가 있으면 그대로, 없으면 새 디자인(v88) 전 기록은 옛 모습
+const recLook=b=>!b?null:b.look==='old'||b.look===true?true:b.look==='new'||b.look===false?false:(+b.at>0&&+b.at<NEW_LOOK_AT);
+function withLook(old,fn){const pv=LOOK_OVR;LOOK_OVR=old==null?null:!!old;try{return fn();}finally{LOOK_OVR=pv;}}
 const gFitOf=c=>(lookOld(c)?GEAR_FIT_OLD:GEAR_FIT)[c]||GEAR_FIT.knight;
 let GFIT_CLS=null; // 명예의 전당 아바타를 그릴 때만 그 기록의 직업으로
 const gFit=()=>{const f=gFitOf(GFIT_CLS||(S&&S.cls)||'knight');return {top:-(35-f[0])*PXW,sh:-(35-f[1])*PXW,hand:-(35-f[2])*PXW};};
@@ -7074,6 +7078,8 @@ function openGuide(t){if(t)guideTab=t;show(`<div class="shophead"><h2 style="fon
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:91,t:'🏆 기록은 그 판의 모습으로',items:[
+    ['change','🏆 명예의 전당·캐릭터 보관함·결투·레이드에서 캐릭터가 <b>그 판을 할 때의 모습</b>(새 모습 / 옛 모습)으로 보여요. 새 디자인이 나오기 전 기록은 옛 모습이에요']]},
   {v:90,t:'🧍 옛 모습 고르기',items:[
     ['new','🧍 캐릭터 선택 창에서 직업 카드 오른쪽 위의 <b>새 모습 / 옛 모습</b> 표시를 누르면 그 직업의 모습이 바뀌어요. 직업마다 따로 저장돼요 (능력치 영향 없음)']]},
   {v:88,t:'🧙 12직업 새 디자인',items:[
@@ -7433,7 +7439,7 @@ const saveHeroes=L=>{try{localStorage.setItem(HERO_KEY,JSON.stringify(L));return
 const heroOk=()=>!!S&&S.started&&endless();
 function heroSnap(){const p=S.p,st={};try{hpSync();for(const [n,f,dg,u] of PREV_ST){if(!HERO_ST.includes(n))continue;const v=f();if(v!=null&&isFinite(v))st[n]=(+v).toFixed(dg)+(u||'');}}catch(e){}
   const d={id:Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36),at:Date.now(),v:BUILD,cls:S.cls,diff:S.diff||'nightmare',lvl:S.lvl,score:runScore(),time:Math.floor((S.gt||0)+(S.bt||0)),bosses:S.st.bosses||0,aw:awakeN(),dps:Math.round(S.dpsMax||0),da:Math.round((S.st.dmg||0)/Math.max(1,(S.gt||0)+(S.bt||0))),
-    skin:cosEq('skin')?cosEq('skin').k:'',name:'',title:META.title||'',gear:gearCode(),aura:auraStr(),st,p:{},s:{},augs:S.augs.map(a=>[a.id,a.lv,a.q||1,a.pq||0,a.dl||null])};
+    skin:cosEq('skin')?cosEq('skin').k:'',look:lookOld(S.cls)?'old':'new',name:'',title:META.title||'',gear:gearCode(),aura:auraStr(),st,p:{},s:{},augs:S.augs.map(a=>[a.id,a.lv,a.q||1,a.pq||0,a.dl||null])};
   for(const k of PKEYS)d.p[k]=p[k];d.p.hp=d.p.maxHp;for(const k of ['cls','lvl','fused','takeAll','potN','vineN','boostN','boostB','diff'])d.s[k]=S[k];return d;}
 const heroName=h=>h.name||`${CLASSES[h.cls]?CLASSES[h.cls].n:h.cls} Lv${h.lvl}`;
 const heroAugN=id=>{const a=[...AUGS,...VIPS,...DRAGON,...FUSIONS,...VFUSIONS].find(x=>x.id===id);return a?a.n:null;};
@@ -7442,7 +7448,7 @@ function heroSave(snap){const L=myHeroes(),same=L.filter(h=>h.cls===snap.cls);le
   if(same.length>=HERO_PER||L.length>=HERO_MAX){const pool=same.length>=HERO_PER?same:L,low=pool.reduce((a,b)=>(b.score||0)<(a.score||0)?b:a);
     if(!confirm(`${same.length>=HERO_PER?CLASSES[snap.cls].n+' 칸':'보관함'}이 가득 찼어요 (${same.length>=HERO_PER?HERO_PER:HERO_MAX}칸).\n점수가 가장 낮은 「${heroName(low)}」(${(low.score||0).toLocaleString()}점)을 지우고 저장할까요?`))return false;rm=low.id;}
   const N=L.filter(h=>h.id!==rm);N.push(snap);if(!saveHeroes(N)){toast('저장 공간이 부족해요');return false;}toast(`🗃 「${heroName(snap)}」 보관함에 저장!`);return true;}
-function heroCard(h,i){const C=CLASSES[h.cls]||{n:h.cls},av=hofAv(h.cls,h.skin),aug=(h.augs||[]).map(a=>heroAugN(a[0])).filter(Boolean),d=new Date(h.at||0);
+function heroCard(h,i){const C=CLASSES[h.cls]||{n:h.cls},av=hofAv(h.cls,h.skin,'','',recLook(h)),aug=(h.augs||[]).map(a=>heroAugN(a[0])).filter(Boolean),d=new Date(h.at||0);
   return `<div class="hcard"><div class="hhead">${av?`<img src="${av}" alt="">`:''}<div><b>${esc(heroName(h))}</b><small>${C.n} · ${DIFF[h.diff]?DIFF[h.diff].n:''} · ${d.getMonth()+1}/${d.getDate()}</small></div></div>
     <div class="hsum"><span>점수 <b>${(h.score||0).toLocaleString()}</b></span><span>${Math.floor((h.time||0)/60)}분 ${(h.time||0)%60}초</span><span>레벨 ${h.lvl}</span><span>보스 ${h.bosses||0}</span>${h.aw?`<span>🔥 각성 ${h.aw}</span>`:''}<span>최대 DPS ${fmtN(h.dps||0)}</span><span>⚔ 결투 ${wdl(heroDRec(h.id))}</span></div>
     <div class="hst">${HERO_ST.filter(k=>h.st&&h.st[k]!=null).map(k=>`<span>${k}<b>${h.st[k]}</b></span>`).join('')}</div>
@@ -7480,7 +7486,7 @@ const raidOpenT=t=>t===0||!!raidBest()['c'+(t-1)];
 function allyOf(h,i){const P=h.p||{},sp=(P.speed||200),mel=MELEE_CLS.includes(h.cls),hp=Math.max(200,(P.maxHp||200)*(1+(h.aw||0)*awHp()));
   // 동료 초당 피해 = 저장 당시 최대 DPS × (그 직업을 직접 조작했을 때 거신에게 들어가는 비율, 측정값) × 0.65 → 손으로 하는 것의 60~70%
   const dps=Math.max(50,(RAID_HAND[h.cls]||.1)*.65*(h.dps||1e5));
-  return {id:h.id,cls:h.cls,name:heroName(h),skin:h.skin||'',x:WW/2+(i?1:-1)*90,y:WH/2+100,r:14,hp,maxHp:hp,armor:Math.max(0,P.armor||0),dps,mel,rng:mel?0:Math.min(420,Math.max(220,P.range||300)),sp:Math.min(320,sp),alive:true,cd:rand(0,.4),mvT:0,tx:0,ty:0,inv:0,hurtT:0,atkT:0,face:1,orb:(i?1:-1)*1.2,revT:0,rv:0};}
+  return {id:h.id,cls:h.cls,name:heroName(h),skin:h.skin||'',look:recLook(h),x:WW/2+(i?1:-1)*90,y:WH/2+100,r:14,hp,maxHp:hp,armor:Math.max(0,P.armor||0),dps,mel,rng:mel?0:Math.min(420,Math.max(220,P.range||300)),sp:Math.min(320,sp),alive:true,cd:rand(0,.4),mvT:0,tx:0,ty:0,inv:0,hurtT:0,atkT:0,face:1,orb:(i?1:-1)*1.2,revT:0,rv:0};}
 function beginRaid(tier,ids){const L=myHeroes(),hs=ids.map(id=>L.find(h=>h.id===id)).filter(Boolean);if(!hs.length)return;const me=hs[0];
   clearSave();newRun();S.diff='raid';S.raidTier=tier;S.raidAw=me.aw||0;
   for(const k of PKEYS)if(me.p[k]!==undefined)S.p[k]=me.p[k];for(const k in (me.s||{}))if(me.s[k]!==undefined&&k!=='diff')S[k]=me.s[k];S.cls=me.cls;S.diff='raid';
@@ -7561,10 +7567,10 @@ function raidTeleHit(t){if(!S.allies||!t.dmg)return;for(const a of S.allies){if(
 function raidBulletHit(b){if(!S.allies)return false;for(const a of S.allies)if(a.alive&&d2(b,a)<(a.r+b.r)**2){allyHurt(a,b.dmg,'탄');b.life=0;return true;}return false;}
 function drawAlly(a){const x=a.x,y=a.y,R=a.r;ctx.save();
   ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(x,y+R+3,R*.95,R*.36,0,0,TAU);ctx.fill();
-  if(!a.alive){ctx.globalAlpha=.55;HERO.draw(a.cls,'dead',3,0,false);ctx.imageSmoothingEnabled=false;heroBlit(HERO.canvas,x,y+R+3,1,true);ctx.globalAlpha=1;
+  if(!a.alive){ctx.globalAlpha=.55;withLook(a.look,()=>HERO.draw(a.cls,'dead',3,0,false));ctx.imageSmoothingEnabled=false;heroBlit(HERO.canvas,x,y+R+3,1,true);ctx.globalAlpha=1;
     if(a.rv>0){const need=raidMembers().some(m=>m.o.alive&&roleOf(m.cls).mend)?1.5:3;ctx.strokeStyle='#7be08f';ctx.lineWidth=4;ctx.beginPath();ctx.arc(x,y-6,26,-Math.PI/2,-Math.PI/2+TAU*Math.min(1,a.rv/need));ctx.stroke();}
     ctx.font='12px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.fillStyle='#ff9a9a';ctx.fillText((S.raidTok||0)>0?'쓰러짐 · 곁에 서 있으면 부활':'쓰러짐 · 부활 기회 없음',x,y-40);ctx.restore();return;}
-  HERO.draw(a.cls,a.atkT>0?'attack':a.moving?'walk':'idle',S.t+a.orb,a.atkT>0?1-a.atkT/.25:0,a.hurtT>.15);ctx.imageSmoothingEnabled=HERO.hires;
+  withLook(a.look,()=>HERO.draw(a.cls,a.atkT>0?'attack':a.moving?'walk':'idle',S.t+a.orb,a.atkT>0?1-a.atkT/.25:0,a.hurtT>.15));ctx.imageSmoothingEnabled=HERO.hires;
   const sk=a.skin?COS.find(q=>q.k===a.skin):null;if(sk&&sk.cat==='skin'){ctx.filter=sk.f||'none';if(sk.a)ctx.globalAlpha=sk.a;}
   if(a.inv>0&&Math.floor(S.t*14)%2)ctx.globalAlpha=.4;heroBlit(HERO.canvas,x,y+R+3,1,true);ctx.filter='none';ctx.globalAlpha=1;
   const w=40,f=Math.max(0,a.hp/a.maxHp);ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(x-w/2,y-46,w,5);ctx.fillStyle=f>.5?'#7be08f':f>.25?'#ffd76a':'#ff6a6a';ctx.fillRect(x-w/2,y-46,w*f,5);
@@ -7585,7 +7591,7 @@ function raidOver(win){S.mode='over';joy=null;clearSave();const t=S.raidTier||0,
 let RAID_SEL=[],RAID_TIER=0;
 function openRaid(){cosPreviewHide();const L=myHeroes().sort((a,b)=>(b.score||0)-(a.score||0)),R=raidBest();RAID_SEL=RAID_SEL.filter(id=>L.some(h=>h.id===id));
   if(!raidOpenT(RAID_TIER))RAID_TIER=0;
-  const card=h=>{const i=RAID_SEL.indexOf(h.id),av=hofAv(h.cls,h.skin);return `<button class="rcard ${i>=0?'on':''}" data-rsel="${h.id}">${i>=0?`<span class="rbadge">${i===0?'🎮 나':'🤝 동료'}</span>`:''}${av?`<img src="${av}" alt="">`:''}<b>${esc(heroName(h))}</b><small class="rrole">${roleOf(h.cls).ico} ${roleOf(h.cls).n}</small><small>${CLASSES[h.cls]?CLASSES[h.cls].n:''} · 점수 ${(h.score||0).toLocaleString()} · 각성 ${h.aw||0}</small><small>공격력 ${h.st&&h.st['공격력']||'-'} · 체력 ${h.st&&h.st['최대 체력']||'-'}</small></button>`;};
+  const card=h=>{const i=RAID_SEL.indexOf(h.id),av=hofAv(h.cls,h.skin,'','',recLook(h));return `<button class="rcard ${i>=0?'on':''}" data-rsel="${h.id}">${i>=0?`<span class="rbadge">${i===0?'🎮 나':'🤝 동료'}</span>`:''}${av?`<img src="${av}" alt="">`:''}<b>${esc(heroName(h))}</b><small class="rrole">${roleOf(h.cls).ico} ${roleOf(h.cls).n}</small><small>${CLASSES[h.cls]?CLASSES[h.cls].n:''} · 점수 ${(h.score||0).toLocaleString()} · 각성 ${h.aw||0}</small><small>공격력 ${h.st&&h.st['공격력']||'-'} · 체력 ${h.st&&h.st['최대 체력']||'-'}</small></button>`;};
   show(`<div class="shophead"><h2>🗿 레이드</h2><button class="btn" id="rdBack2">돌아가기</button></div>
   <p class="sub">보관한 캐릭터를 최대 <b>3명</b> 골라 거대 보스 <b>심연의 거신</b>에 도전해요. 처음 고른 캐릭터를 <b>내가 조작</b>하고, 나머지는 동료로 함께 싸워요. 판 중 성장은 없어요 — 저장된 능력 그대로! 쓰러진 동료는 곁에 서 있으면 일으켜요 (<b>부활 기회 ${RAID_TOK}번</b>, 내가 쓰러져도 1번 씀).</p>
   <div class="rroles">${[...new Set(Object.values(RAID_ROLE).map(r=>r.n))].map(n=>{const r=Object.values(RAID_ROLE).find(x=>x.n===n),cs=Object.keys(RAID_ROLE).filter(k=>RAID_ROLE[k].n===n).map(k=>CLASSES[k].n).join('·');return `<span><b>${r.ico} ${n}</b> ${cs} — ${r.d}</span>`;}).join('')}<span><b>${RAID_DPS.ico} 딜러</b> 그 밖의 직업 — ${RAID_DPS.d}</span></div>
@@ -7601,7 +7607,7 @@ function openRaid(){cosPreviewHide();const L=myHeroes().sort((a,b)=>(b.score||0)
 // 상대는 직업답게 움직임 (원거리는 거리 두고 사격, 근접은 붙어서 베기·돌진) + 직업별 필살기(예고 후 발동) → 피하는 컨트롤이 중요
 // 캐릭터 압축 코드: 'H2:' + base64(gzip(JSON)) (gzip을 못 쓰는 브라우저는 'H1:' + base64(JSON))
 function heroSlim(h){const p={};for(const k in (h.p||{})){const v=h.p[k];if(typeof v==='number'&&isFinite(v)&&v!==0)p[k]=+v.toPrecision(5);}
-  return {v:h.v,cls:h.cls,name:h.name||'',lvl:h.lvl,score:h.score,time:h.time,bosses:h.bosses,aw:h.aw,dps:h.dps,da:h.da,skin:h.skin||'',st:h.st,p,s:h.s,augs:h.augs,title:h.title||'',gear:h.gear||'',aura:h.aura||''};}
+  return {v:h.v,cls:h.cls,name:h.name||'',lvl:h.lvl,score:h.score,time:h.time,bosses:h.bosses,aw:h.aw,dps:h.dps,da:h.da,skin:h.skin||'',look:h.look||'',at:h.at,st:h.st,p,s:h.s,augs:h.augs,title:h.title||'',gear:h.gear||'',aura:h.aura||''};}
 async function heroPack(h){const j=JSON.stringify(heroSlim(h));
   try{if(typeof CompressionStream!=='undefined'){const cs=new Blob([j]).stream().pipeThrough(new CompressionStream('gzip'));const u=new Uint8Array(await new Response(cs).arrayBuffer());let b='';for(let i=0;i<u.length;i+=8192)b+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return 'H2:'+btoa(b);}}catch(e){}
   try{return 'H1:'+btoa(unescape(encodeURIComponent(j)));}catch(e){return '';}}
@@ -7651,7 +7657,7 @@ const DUEL_PROF={knight:{mel:1,sp:'charge'},berserk:{mel:1,sp:'charge'},paladin:
 ET.rival={n:'결투 상대',r:14,hp:1e6,spd:200,dmg:10,col:'#ff6a6a',xp:0,coin:0,boss:true};
 BTITLE.rival='결투';
 // 상대 정보: {n:이름, c:직업, k:코스튬, t:칭호, s:점수, g:장비}
-const oppOf=(h,src)=>({n:String(h.name||heroName(h)||'도전자').slice(0,12),c:h.cls,k:h.skin||'',t:h.title||'',s:h.score||0,g:h.gear||'',src,hero:h});
+const oppOf=(h,src)=>({n:String(h.name||heroName(h)||'도전자').slice(0,12),c:h.cls,k:h.skin||'',t:h.title||'',s:h.score||0,g:h.gear||'',look:recLook(h),src,hero:h});
 let DUEL_ME=null,DUEL_OPP=null,DUEL_CODES=[];
 function beginDuel(meId,opp){const me=myHeroes().find(h=>h.id===meId);if(!me||!opp)return;
   clearSave();newRun();S.diff='duel';S.raidAw=me.aw||0;
@@ -7667,7 +7673,7 @@ function beginDuel(meId,opp){const me=myHeroes().find(h=>h.id===meId);if(!me||!o
   toast(`⚔ 결투! ${heroName(me)} vs ${opp.n} (${CLASSES[opp.c].n})`);}
 function spawnRival(){const D=S.duel,O=D.opp,A=S.arena,P=DUEL_PROF[O.c]||DUEL_PROF.archer,mh=S.p.maxHp;
   ET.rival.n=`${O.n} (${CLASSES[O.c].n})`;S.bossI=0;S.bossT=['rival'];S.tele=[];S.hz=[];S.bStart=S.bt||0;S.bHit=0;
-  spawnAt('rival',A.x,A.y-220,true);const e=S.en[S.en.length-1];e.maxHp=e.hp=1e6;e.r=14;e.cls=O.c;e.skin=O.k;e.prof=P;e.spd=(CLASSES[O.c].stats.speed||200)*1.05;
+  spawnAt('rival',A.x,A.y-220,true);const e=S.en[S.en.length-1];e.maxHp=e.hp=1e6;e.r=14;e.cls=O.c;e.skin=O.k;e.look=O.look!=null?O.look:O.hero?recLook(O.hero):null;e.prof=P;e.spd=(CLASSES[O.c].stats.speed||200)*1.05;
   const M=D.meHero,oldOpp=M?DUEL_T*(heroEHP(M)/DUEL_HREF)/(heroD(O.hero)/DUEL_DREF):1;
   const dps=heroD(O.hero)*DUEL_HREF/(DUEL_DREF*DUEL_T)*(M&&D.tOpp?oldOpp/D.tOpp/DUEL_HITR:1); // 상대가 1초에 넣는 피해 (보정 반영, 피하는 몫 포함)
   e.hero=O.hero;e.bd=dps*.9;e.dmg=e.baseDmg=dps*.8;e.spD=dps*2.6;e.acd=1.2;e.scd=4.5;e.dcd=3;e.r=18;D.t0=S.bt||0;e.bk=0;go(e,'intro');S.boss=e;S.shake=.4;S.bannerT=0;}
@@ -7744,7 +7750,7 @@ function drawRival(e){const x=e.x,y=e.y,R=e.r;ctx.save();ctx.fillStyle='rgba(0,0
   if(e.undT>S.t){ctx.strokeStyle='rgba(255,70,50,.85)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,R+12+Math.sin(S.t*12)*2,0,TAU);ctx.stroke();}
   if(e.frzT>0){ctx.fillStyle='rgba(168,220,248,.45)';ctx.fillRect(x-R-6,y-R*3,R*2+12,R*4);}
   if(e.dashT>0||e.stT>S.t){ctx.globalAlpha=e.stT>S.t?.22:.4;}ctx.strokeStyle='rgba(255,90,90,.75)';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(x,y+R+3,R*1.3,R*.5,0,0,TAU);ctx.stroke();
-  HERO.draw(e.cls,(e.atkT||0)>0?'attack':'walk',S.t+1.7,(e.atkT||0)>0?1-e.atkT/.3:0,e.hit>0);e.atkT=Math.max(0,(e.atkT||0)-1/60);ctx.imageSmoothingEnabled=HERO.hires;
+  withLook(e.look,()=>HERO.draw(e.cls,(e.atkT||0)>0?'attack':'walk',S.t+1.7,(e.atkT||0)>0?1-e.atkT/.3:0,e.hit>0));e.atkT=Math.max(0,(e.atkT||0)-1/60);ctx.imageSmoothingEnabled=HERO.hires;
   const sk=e.skin?COS.find(q=>q.k===e.skin):null;if(sk&&sk.cat==='skin'){ctx.filter=sk.f||'none';if(sk.a)ctx.globalAlpha=sk.a;}heroBlit(HERO.canvas,x,y+R+3,1,true);ctx.filter='none';ctx.globalAlpha=1;
   const O=S.duel&&S.duel.opp;if(O){const A=O.t&&ACH.find(a=>a.k===O.t);ctx.font='12px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.75)';const nm=(A?'「'+A.n+'」 ':'')+O.n;ctx.strokeText(nm,x,y-R*3.4);ctx.fillStyle='#ff9a9a';ctx.fillText(nm,x,y-R*3.4);}
   ctx.restore();}
@@ -7763,7 +7769,7 @@ function duelOver(win){if(S.duelDone)return;S.duelDone=1;S.mode='over';joy=null;
 function duelOpps(){const L=[],me=myHeroes().find(h=>h.id===DUEL_ME),md=me?(me.diff||'nightmare'):null,nk=myNick();
   const rk={};for(const k of HOF_KEYS)rk[k]=(BOARD||[]).filter(b=>b.diff===k).sort((a,b)=>(b.score||0)-(a.score||0));
   for(const b of (BOARD||[])){if(!HOF_KEYS.includes(b.diff)||!CLASSES[b.cls]||!b.h)continue;if(md&&b.diff!==md)continue;if(me&&b.name===nk&&Math.abs((b.score||0)-(me.score||0))<1)continue;
-    L.push({n:b.name||'이름 없음',c:b.cls,k:b.skin||'',t:b.title||'',s:b.score||0,g:b.gear||'',src:'🏆 '+DIFF[b.diff].n,rank:rk[b.diff].indexOf(b)+1,hof:{name:b.name,diff:b.diff,score:b.score||0}});{const q=L[L.length-1];if(HERO_MEM[heroCK(q)])q.hero=HERO_MEM[heroCK(q)];}if(L.length>=15)break;}
+    L.push({n:b.name||'이름 없음',c:b.cls,k:b.skin||'',t:b.title||'',s:b.score||0,g:b.gear||'',look:recLook(b),src:'🏆 '+DIFF[b.diff].n,rank:rk[b.diff].indexOf(b)+1,hof:{name:b.name,diff:b.diff,score:b.score||0}});{const q=L[L.length-1];if(HERO_MEM[heroCK(q)])q.hero=HERO_MEM[heroCK(q)];}if(L.length>=15)break;}
   for(const h of myHeroes())if(h.id!==DUEL_ME&&(!md||(h.diff||'nightmare')===md))L.push(oppOf({...h,name:heroName(h)},'🗃 내 캐릭터'));
   return [...DUEL_CODES.filter(o=>!md||!o.hero||!o.hero.diff||o.hero.diff===md),...L].sort((a,b)=>(a.rank||999)-(b.rank||999));}
 // 명예의 전당 기록의 캐릭터 내려받기
@@ -7775,8 +7781,8 @@ async function hofHero(o){if(o.hero)return o.hero;if(HERO_MEM[heroCK(o)])return 
   try{const r=await fetch(SHEET_URL+'?hero='+encodeURIComponent(o.hof.name)+'&diff='+encodeURIComponent(o.hof.diff),{cache:'no-store'});const j=await r.json();if(j&&j.hero)heroCachePut(o,j.hero);const h=await heroUnpack(j&&j.hero);if(h){h.name=h.name||o.n;o.hero=HERO_MEM[heroCK(o)]=h;}return h;}catch(e){return null;}}
 function openDuel(){cosPreviewHide();const H=myHeroes().sort((a,b)=>(b.score||0)-(a.score||0));if(!H.some(h=>h.id===DUEL_ME))DUEL_ME=H[0]?H[0].id:null;
   const me=H.find(h=>h.id===DUEL_ME),O=duelOpps(),R=duelRec();
-  const card=(h)=>{const av=hofAv(h.cls,h.skin);return `<button class="rcard ${h.id===DUEL_ME?'on':''}" data-dme="${h.id}">${h.id===DUEL_ME?'<span class="rbadge">🎮 나</span>':''}${av?`<img src="${av}" alt="">`:''}<b>${esc(heroName(h))}</b><small>${CLASSES[h.cls].n} · 점수 ${(h.score||0).toLocaleString()}</small><small>⚔ ${wdl(heroDRec(h.id))}</small></button>`;};
-  const ocard=(o,i)=>{const av=hofAv(o.c,o.k,'',o.g),r=me&&o.hero?heroPow(o.hero)/heroPow(me):null,A=o.t&&ACH.find(a=>a.k===o.t);return `<button class="rcard" data-dop="${i}">${av?`<img src="${av}" alt="">`:''}<b>${esc(o.n)}</b>${A?`<small class="rrole">「${A.n}」</small>`:''}${o.rank?`<small style="color:#ffd76a">🏆 ${DIFF[o.hof.diff].n} 랭킹 ${o.rank}위</small>`:''}<small>${o.src} · ${CLASSES[o.c].n} · ${(o.s||0).toLocaleString()}점</small>${r==null?'<small style="color:var(--muted)">누르면 캐릭터를 불러와요</small>':`<small style="color:${r>1.3?'#ff8a8a':r<.8?'#7be08f':'#ffd76a'}">${r>1.5?'강함':r<.67?'약함':'비슷함'} · 전투력 ×${r.toFixed(2)}${r<DUEL_PRAC?' · 🥋 연습':''}</small>`}</button>`;};
+  const card=(h)=>{const av=hofAv(h.cls,h.skin,'','',recLook(h));return `<button class="rcard ${h.id===DUEL_ME?'on':''}" data-dme="${h.id}">${h.id===DUEL_ME?'<span class="rbadge">🎮 나</span>':''}${av?`<img src="${av}" alt="">`:''}<b>${esc(heroName(h))}</b><small>${CLASSES[h.cls].n} · 점수 ${(h.score||0).toLocaleString()}</small><small>⚔ ${wdl(heroDRec(h.id))}</small></button>`;};
+  const ocard=(o,i)=>{const av=hofAv(o.c,o.k,'',o.g,o.look),r=me&&o.hero?heroPow(o.hero)/heroPow(me):null,A=o.t&&ACH.find(a=>a.k===o.t);return `<button class="rcard" data-dop="${i}">${av?`<img src="${av}" alt="">`:''}<b>${esc(o.n)}</b>${A?`<small class="rrole">「${A.n}」</small>`:''}${o.rank?`<small style="color:#ffd76a">🏆 ${DIFF[o.hof.diff].n} 랭킹 ${o.rank}위</small>`:''}<small>${o.src} · ${CLASSES[o.c].n} · ${(o.s||0).toLocaleString()}점</small>${r==null?'<small style="color:var(--muted)">누르면 캐릭터를 불러와요</small>':`<small style="color:${r>1.3?'#ff8a8a':r<.8?'#7be08f':'#ffd76a'}">${r>1.5?'강함':r<.67?'약함':'비슷함'} · 전투력 ×${r.toFixed(2)}${r<DUEL_PRAC?' · 🥋 연습':''}</small>`}</button>`;};
   show(`<div class="shophead"><h2>⚔ 결투</h2><button class="btn" id="dlBack2">돌아가기</button></div>
   <p class="sub">내 캐릭터로 명예의 전당에 올라간 <b>실제 캐릭터</b>·내 다른 캐릭터·친구의 <b>대결 코드</b>와 1:1! 상대는 그 캐릭터의 체력·방어력·화력·각성만큼 강하고, <b>그 직업 그대로</b> 평타·고유 능력·생존기(E)·궁극기(R)를 써요. 예고를 보고 피하고 대시를 잘 쓰는 게 승부! · 제한 시간 ${DUEL_LIMIT}초, 넘기면 무승부 · 전적 ${R.w}승 ${R.d||0}무 ${R.l}패</p>
   ${duelLogHtml()}
@@ -7790,7 +7796,7 @@ function openDuel(){cosPreviewHide();const H=myHeroes().sort((a,b)=>(b.score||0)
   ov.querySelectorAll('[data-dop]').forEach(b=>b.onclick=async()=>{const o=O[+b.dataset.dop];if(!me||!o)return;if(!o.hero){toast('캐릭터 불러오는 중…');const h=await hofHero(o);if(!h){toast('이 기록의 캐릭터를 불러오지 못했어요');return;}}duelPreview(me,o);});}
 // 결투 전: 나와 상대 비교 + 걸린 보상
 function duelPreview(me,o){const h=o.hero,r=heroPow(h)/heroPow(me),W=duelReward(r,o);
-  const col=(x,lbl)=>{const av=hofAv(x.cls,x.skin);return `<div class="hcard" style="align-items:center;text-align:center">${av?`<img src="${av}" alt="" style="width:56px;height:56px;image-rendering:pixelated">`:''}<b>${esc(lbl)}</b><small style="color:var(--muted)">${CLASSES[x.cls]?CLASSES[x.cls].n:'?'} · 레벨 ${x.lvl||'?'} · 점수 ${(x.score||0).toLocaleString()}</small></div>`;};
+  const col=(x,lbl)=>{const av=hofAv(x.cls,x.skin,'','',recLook(x));return `<div class="hcard" style="align-items:center;text-align:center">${av?`<img src="${av}" alt="" style="width:56px;height:56px;image-rendering:pixelated">`:''}<b>${esc(lbl)}</b><small style="color:var(--muted)">${CLASSES[x.cls]?CLASSES[x.cls].n:'?'} · 레벨 ${x.lvl||'?'} · 점수 ${(x.score||0).toLocaleString()}</small></div>`;};
   const row=(n,a,b,f)=>{const c=a>b*1.05?'#7be08f':a<b/1.05?'#ff8a8a':'var(--ivory)',d=b>a*1.05?'#7be08f':b<a/1.05?'#ff8a8a':'var(--ivory)';return `<span style="color:${c};text-align:right">${f(a)}</span><span style="text-align:center;color:var(--muted)">${n}</span><span style="color:${d}">${f(b)}</span>`;};
   const n0=x=>Math.round(x).toLocaleString();
   show(`<div class="shophead"><h2>⚔ 결투 준비</h2><button class="btn" id="dpBack">돌아가기</button></div>
@@ -8626,14 +8632,14 @@ async function donorCheck(){const n=myNick().trim();if(!SHEET_URL||!DONORS.inclu
   document.body.appendChild(d);$('dnrOk').onclick=()=>{d.remove();if(!S||S.mode==='start')startScreen();};}
 // 난이도: diff 칸 우선, 없으면 직업 칸의 ':' 뒤. 예전 서버가 12자로 잘라 저장한 것('knight:night' 등)도 앞글자로 알아봄
 const clsS=b=>String(b.cls||'').split('~')[0].split('@')[0],skinOf=b=>(String(b.cls||'').split('~')[0].split('@')[1])||b.skin||'',bonusOf=b=>+b.bonus||+String(b.cls||'').split('~')[1]||0,apOf=b=>+b.ap||(+String(b.cls||'').split('~')[2]||0)/100,
-  segOf=(b,i)=>String(b.cls||'').split('~')[i]||'',titleOf=b=>b.title||segOf(b,3),auraOf=b=>b.aura||segOf(b,4),gearOf=b=>b.gear||segOf(b,5);
+  segOf=(b,i)=>String(b.cls||'').split('~')[i]||'',titleOf=b=>b.title||segOf(b,3),auraOf=b=>b.aura||segOf(b,4),gearOf=b=>b.gear||segOf(b,5),lookOf=b=>b.look||(segOf(b,6)==='o'?'old':segOf(b,6)==='n'?'new':'');
 const dOf=b=>{const c=clsS(b).split('#')[0];let k=String(b.diff||(c.includes(':')?c.split(':')[1]:'normal'));if(DIFF[k])return k;return Object.keys(DIFF).find(x=>k&&x.startsWith(k))||'normal';};
 const calcScore=b=>scoreOf({...b,diff:dOf(b),bonus:bonusOf(b),ap:apOf(b)});
 // 결투 전적 "w3d1l2" → {w,d,l}
 const dwOf=v=>{if(v&&typeof v==='object')return v;const m=String(v||'').match(/^w(\d+)d(\d+)l(\d+)$/);return m?{w:+m[1],d:+m[2],l:+m[3]}:null;};
 const dwStr=()=>{const R=META.duel;return R&&(R.w||R.l||R.d)?`${R.w||0}-${R.d||0}-${R.l||0}`:'';};
 let BOARD_DW=false; // 서버가 결투 전적 칸을 아는지 (v4.2 이상)
-function normBoard(list){return list.map(b=>({...b,dw:dwOf(b.dw),diff:dOf(b),fx:clsS(b).split('#')[1]||b.fx||'',bonus:bonusOf(b),ap:apOf(b),title:titleOf(b),aura:auraOf(b),gear:gearOf(b),skin:skinOf(b),cls:clsS(b).split('#')[0].split(':')[0],name:String(b.name||''),time:+b.time||0,lvl:+b.lvl||0,kills:+b.kills||0,bosses:+b.bosses||0,comment:String(b.comment||''),score:calcScore(b)})).sort((a,b)=>b.score-a.score);}
+function normBoard(list){return list.map(b=>({...b,dw:dwOf(b.dw),diff:dOf(b),fx:clsS(b).split('#')[1]||b.fx||'',bonus:bonusOf(b),ap:apOf(b),title:titleOf(b),aura:auraOf(b),gear:gearOf(b),look:lookOf(b),skin:skinOf(b),cls:clsS(b).split('#')[0].split(':')[0],name:String(b.name||''),time:+b.time||0,lvl:+b.lvl||0,kills:+b.kills||0,bosses:+b.bosses||0,comment:String(b.comment||''),score:calcScore(b)})).sort((a,b)=>b.score-a.score);}
 // 내 등록 기록 백업: 서버가 어떤 기록(예: 새 난이도)을 반영하지 못해도 내 화면에서는 사라지지 않게. 서버에 더 높은 기록이 있으면 서버 것을 씀
 const myRecs=()=>{try{return JSON.parse(localStorage.getItem('chanseo_myrec')||'{}');}catch(e){return {};}};
 const saveMyRec=r=>{try{const m=myRecs();const old=m[r.diff];if(!old||scoreOf({...r})>=scoreOf({...old}))m[r.diff]=r;localStorage.setItem('chanseo_myrec',JSON.stringify(m));}catch(e){}};
@@ -8890,7 +8896,8 @@ const HOF_KEYS=['nightmare','bossrush'];
 // 명예의 전당 아바타: 그 기록의 직업 + 장착한 캐릭터 색(외형)
 const HOF_AV={};
 // 명예의 전당 아바타: 코스튬 + 오라 + 장비(그 기록을 올릴 때 끼고 있던 것)
-function hofAv(cls,skin,aura,gear){const key=cls+'|'+skin+'|'+(aura||'')+'|'+(gear||'');if(HOF_AV[key])return HOF_AV[key];if(!CLASSES[cls]||typeof HERO==='undefined'||!HERO.canvas)return '';
+function hofAv(cls,skin,aura,gear,look){return withLook(look,()=>hofAv0(cls,skin,aura,gear,look));}
+function hofAv0(cls,skin,aura,gear,look){const key=cls+'|'+skin+'|'+(aura||'')+'|'+(gear||'')+'|'+(look==null?'':look?'o':'n');if(HOF_AV[key])return HOF_AV[key];if(!CLASSES[cls]||typeof HERO==='undefined'||!HERO.canvas)return '';
   try{const c=document.createElement('canvas');c.width=c.height=56;const g=c.getContext('2d');g.imageSmoothingEnabled=false;const x=skin?COS.find(q=>q.k===skin):null,au=auraList(aura),G=gearDecode(gear);
     auraAt(g,28,62,1.9,au,.6);
     const gearPass=front=>{if(!G)return;const oc=ctx;GEAR_OVR=G;GFIT_CLS=cls;ctx=g;try{g.save();g.translate(28,62);g.scale(1.9/PXW,1.9/PXW);const P={x:0,y:0};if(front)drawGearFront(P,0,0,null);else drawGearBack(P,0,0,null);g.restore();}catch(e){}finally{ctx=oc;GEAR_OVR=null;GFIT_CLS=null;}};
@@ -8918,7 +8925,7 @@ function hofTipBind(el){let tip=document.getElementById('hofTip');if(!tip){tip=d
 // 명예의 전당 기록을 누르면: 그 캐릭터의 최종 능력치·증강 (결투 데이터가 있는 기록만 능력치가 있음)
 async function hofStatOpen(b){if(!b)return;let w=document.getElementById('hofSt');if(!w){w=document.createElement('div');w.id='hofSt';w.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:12px';document.body.appendChild(w);w.onclick=e=>{if(e.target===w)w.remove();};}
   const box=x=>`<div style="background:#0d2a20;border:2px solid var(--brass);border-radius:14px;padding:14px 16px;max-width:420px;width:100%;max-height:86vh;overflow:auto;color:var(--ivory);font-size:14px;line-height:1.55">${x}<div style="text-align:center;margin-top:10px"><button class="btn" id="hsX">닫기</button></div></div>`;
-  const av=hofAv(b.cls,b.skin,b.aura,b.gear),top=`<div style="display:flex;gap:10px;align-items:center;margin-bottom:6px">${av?`<img src="${av}" style="width:72px;height:72px;image-rendering:pixelated">`:''}<div>${hofTipHtml(b)}</div></div>`;
+  const av=hofAv(b.cls,b.skin,b.aura,b.gear,recLook(b)),top=`<div style="display:flex;gap:10px;align-items:center;margin-bottom:6px">${av?`<img src="${av}" style="width:72px;height:72px;image-rendering:pixelated">`:''}<div>${hofTipHtml(b)}</div></div>`;
   const paint=x=>{w.innerHTML=box(top+x);$('hsX').onclick=()=>w.remove();};
   if(!b.h){paint('<div style="color:var(--muted);text-align:center;margin-top:6px">📊 이 기록에는 능력치 정보가 없어요<br><small>(결투 데이터가 같이 올라간 기록만 볼 수 있어요)</small></div>');return;}
   paint('<div style="color:var(--muted);text-align:center">📊 능력치 불러오는 중…</div>');
@@ -8943,8 +8950,8 @@ function boardHtml(){
   const me=b=>SHEET?(b.name&&b.name===myNick()):!!RMYID&&String(b.id).startsWith(RMYID);
   const cn=b=>CLASSES[b.cls]?CLASSES[b.cls].n:'?';
   const nm=b=>`<span class="hn ${b.fx?'hx-'+b.fx:''}">${FX_PRE[b.fx]||''}${esc(b.name.slice(0,12)||'이름 없음')}</span>${(()=>{const A=b.title&&ACH.find(a=>a.k===b.title);return A?`<small class="htt">「${A.n}」</small>`:'';})()}${b.local?'<small title="서버에 아직 반영되지 않은 이 기기의 기록" style="opacity:.7"> 📱</small>':''}`;
-  HOF_B=B;const top=B.slice(0,3).map((b,i)=>`<div data-hi="${i}" class="pcard p${i+1} ${me(b)?'me':''} ${b.fx?'hc-'+b.fx:''}"><span class="pm">${['🥇','🥈','🥉'][i]}</span>${(()=>{const a=hofAv(b.cls,b.skin,b.aura,b.gear);return a?`<img class="hav" src="${a}" alt="">`:'';})()}<span class="pn">${nm(b)}</span><span class="pc">${DIFF[b.diff]&&DIFF[b.diff].rush?'⚔ '+(+b.bosses||0)+'단계 돌파 · ':DIFF[b.diff]&&DIFF[b.diff].endless?'☠ '+((+b.bosses||0)+1)+'단계 · ':b.bosses>=4?'👑 클리어 · ':''}${cn(b)} · Lv ${b.lvl} · ${f(b.time)}</span><span class="ps">${b.score.toLocaleString()}점</span><span class="pq ${b.comment?'':'empty'}">${b.comment?'“'+esc(b.comment.slice(0,40))+'”':'한마디 없음'}</span></div>`).join('');
-  const rest=B.slice(3,HOF_ALL?30:7).map((b,i)=>`<div data-hi="${i+3}" class="rrow ${me(b)?'me':''} ${b.fx?'hc-'+b.fx:''}"><span class="rn">${i+4}</span><span class="rnm"><b>${(()=>{const a=hofAv(b.cls,b.skin,b.aura,b.gear);return a?`<img class="hav s" src="${a}" alt="">`:'';})()}${nm(b)}${me(b)?' (나)':''}</b>${b.comment?`<i>“${esc(b.comment.slice(0,40))}”</i>`:''}</span><span class="rc">${DIFF[b.diff]&&DIFF[b.diff].rush?'⚔'+(+b.bosses||0)+'단계 ':DIFF[b.diff]&&DIFF[b.diff].endless?'☠'+((+b.bosses||0)+1)+'단계 ':b.bosses>=4?'👑 ':''}${cn(b)}<br>Lv ${b.lvl} · ${f(b.time)}</span><span class="rt">${b.score.toLocaleString()}</span></div>`).join('');
+  HOF_B=B;const top=B.slice(0,3).map((b,i)=>`<div data-hi="${i}" class="pcard p${i+1} ${me(b)?'me':''} ${b.fx?'hc-'+b.fx:''}"><span class="pm">${['🥇','🥈','🥉'][i]}</span>${(()=>{const a=hofAv(b.cls,b.skin,b.aura,b.gear,recLook(b));return a?`<img class="hav" src="${a}" alt="">`:'';})()}<span class="pn">${nm(b)}</span><span class="pc">${DIFF[b.diff]&&DIFF[b.diff].rush?'⚔ '+(+b.bosses||0)+'단계 돌파 · ':DIFF[b.diff]&&DIFF[b.diff].endless?'☠ '+((+b.bosses||0)+1)+'단계 · ':b.bosses>=4?'👑 클리어 · ':''}${cn(b)} · Lv ${b.lvl} · ${f(b.time)}</span><span class="ps">${b.score.toLocaleString()}점</span><span class="pq ${b.comment?'':'empty'}">${b.comment?'“'+esc(b.comment.slice(0,40))+'”':'한마디 없음'}</span></div>`).join('');
+  const rest=B.slice(3,HOF_ALL?30:7).map((b,i)=>`<div data-hi="${i+3}" class="rrow ${me(b)?'me':''} ${b.fx?'hc-'+b.fx:''}"><span class="rn">${i+4}</span><span class="rnm"><b>${(()=>{const a=hofAv(b.cls,b.skin,b.aura,b.gear,recLook(b));return a?`<img class="hav s" src="${a}" alt="">`:'';})()}${nm(b)}${me(b)?' (나)':''}</b>${b.comment?`<i>“${esc(b.comment.slice(0,40))}”</i>`:''}</span><span class="rc">${DIFF[b.diff]&&DIFF[b.diff].rush?'⚔'+(+b.bosses||0)+'단계 ':DIFF[b.diff]&&DIFF[b.diff].endless?'☠'+((+b.bosses||0)+1)+'단계 ':b.bosses>=4?'👑 ':''}${cn(b)}<br>Lv ${b.lvl} · ${f(b.time)}</span><span class="rt">${b.score.toLocaleString()}</span></div>`).join('');
   const more=B.length>7?`<button class="btn more" id="hofMore">${HOF_ALL?'접기':`전체 순위 보기 (${Math.min(B.length,30)}위까지)`}</button>`:'';
   return head+`<div class="podium">${top}</div>${rest?`<div class="rank">${rest}</div>`:''}${more}`;
 }
@@ -8959,7 +8966,7 @@ async function submitScore(nick,comment,run){
   const cur=(BOARD||[]).find(b=>b.diff===dk&&(sheet?b.name===nick:b.id===docId));
   const better=!cur||run.score>cur.score;
   if(!better&&!comment){say(`'${nick}'의 이전 최고 점수(${cur.score.toLocaleString()}점)가 더 높아서 그대로 둘게요. 한마디를 쓰면 한마디만 바꿀 수 있어요.`);return;}
-  const hf=cosEq('hof');const rec={name:nick,cls:run.cls+(dk==='normal'?'':':'+dk)+(hf?'#'+hf.k:'')+(cosEq('skin')?'@'+cosEq('skin').k:'')+(()=>{const sg=[run.bonus||0,run.ap?Math.round(run.ap*100):'',META.title||'',auraStr(),gearCode()];while(sg.length&&(sg[sg.length-1]===''||/^-+$/.test(String(sg[sg.length-1]))||sg[sg.length-1]===0))sg.pop();return sg.length?'~'+sg.join('~'):'';})(),bonus:run.bonus||0,ap:run.ap||0,diff:dk,time:run.sec,lvl:run.lvl,kills:run.kills,bosses:run.bosses,gold:run.gold||0,score:run.score,comment,k:MYKEY};if(dwStr())rec.dw=dwStr();
+  const hf=cosEq('hof');const rec={name:nick,cls:run.cls+(dk==='normal'?'':':'+dk)+(hf?'#'+hf.k:'')+(cosEq('skin')?'@'+cosEq('skin').k:'')+(()=>{const sg=[run.bonus||0,run.ap?Math.round(run.ap*100):'',META.title||'',auraStr(),gearCode(),lookOld(run.cls)?'o':'n'];while(sg.length&&(sg[sg.length-1]===''||/^-+$/.test(String(sg[sg.length-1]))||sg[sg.length-1]===0))sg.pop();return sg.length?'~'+sg.join('~'):'';})(),bonus:run.bonus||0,ap:run.ap||0,diff:dk,time:run.sec,lvl:run.lvl,kills:run.kills,bosses:run.bosses,gold:run.gold||0,score:run.score,comment,k:MYKEY};if(dwStr())rec.dw=dwStr();
   const done=better?`명예의 전당에 ${run.score.toLocaleString()}점으로 등록했어요!`:`이전 최고 점수(${cur.score.toLocaleString()}점)가 더 높아서 점수는 그대로 두고 한마디만 바꿨어요.`;
   if(run.snap&&better){try{rec.hero=await heroPack({...run.snap,name:nick});}catch(e){}}
   say('등록 중…');if(btn)btn.disabled=true;
@@ -9513,7 +9520,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=90,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=91,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
