@@ -7194,6 +7194,8 @@ const PATCH_NOTES=[
   {v:102,t:'☠ 무한의 악몽',items:[
     ['change','☠ 악몽이 난이도 줄에서 빠지고 <b>엔드 컨텐츠의 「☠ 무한의 악몽」</b>으로 옮겨졌어요. 엔드 컨텐츠 맨 위 버튼을 누르고 직업을 골라 시작! (신 클리어 시 열림 · 규칙과 기록은 그대로)'],
     ['change','▶ 시작 버튼에 지금 고른 모드가 함께 보여요 (예: ☠ 무한의 악몽 · 기사(으)로 시작)'],
+    ['new','🏆 기존 도전과제 중 어려운 것들(장비 +7·모두 +10, 보스 러시 10·15단계, 레이드 4·5단계·혼자·완벽한 팀워크, 12직업 클리어, 이스터에그 전부, 증강 3개 이하 클리어, 이변의 주인공 등)에도 <b>외형 보상</b>을 달았어요. 이미 달성한 사람도 받아요'],
+    ['change','🏆 「악몽 그 자체」는 무한의 악몽이 짧아진 만큼 25분 → <b>18분</b> 버티기로 바뀌었어요'],
     ['change','❤ 「체력이 낮을 때」 조건을 모두 없앴어요 (회복이 많은 게임이라 맞추기 거의 불가능): 기사의 맹세는 큰 공격(최대 체력 15% 이상)을 맞을 때만 발동, 붉은 달은 큰 공격을 3번 맞으면 실패, 마녀의 집·오아시스 이스터에그는 다른 방법으로 바뀌었어요']]},
   {v:101,t:'🗿 레이드 강화 · 도전과제 · 이스터에그 · 전당 꾸미기',items:[
     ['new','🥚 <b>이스터에그 11곳 추가</b> (풍차·사당·망루·헛간·오벨리스크·오아시스·눈 요새·광산·예배당·제단·천막). 궁극기 쓰기, 정예 처치, 체력 가득 채우고 기다리기 같은 <b>새로운 방법</b>도 생겼어요'],
@@ -7516,7 +7518,7 @@ const goLabel=()=>(pickDiff==='nightmare'?'☠ 무한의 악몽 · ':DIFF[pickDi
 function startScreen(){
   // 판이 진행 중이면(레이드·결투 포함) 시작 화면을 그리지 않음: 다른 창을 닫다가 잘못 불려 게임 위에 덮이고 오류가 나던 문제 방지
   if(S&&S.started&&S.mode!=='start'&&S.mode!=='over'&&S.mode!=='spec'&&!S.win&&S.p&&S.p.alive)return;
-  setTimeout(()=>{try{donorCheck();}catch(e){}},800);
+  setTimeout(()=>{try{donorCheck();}catch(e){}},800);try{achRwSync();}catch(e){}
   if(CH_PEND&&!META.chDone&&myNick()&&CHART_NICKS.some(k=>myNick().includes(k))){CH_PEND=false;let ask=true;if((META.chY||0)>=2){META.chSkip=!META.chSkip;ask=!META.chSkip;saveMeta();}if(ask)setTimeout(chartAsk,500);}
   if(typeof UPD!=='undefined'&&UPD.ver>BUILD&&applyUpd())return;
   if(DIFF[pickDiff]&&DIFF[pickDiff].rush){pickDiff=(()=>{try{return localStorage.getItem('chanseo_diff')||'normal';}catch(e){return 'normal';}})();}
@@ -8116,21 +8118,21 @@ const MSKILL=[
 const DRANK=k=>DKEYS.indexOf(k);
 const ACH=[
   {k:'g_5',n:'견습 대장장이',d:'장비 하나를 +5까지 강화',c:R=>R&&R.gear>=5},
-  {k:'g_7',n:'숙련 대장장이',d:'장비 하나를 +7까지 강화',c:R=>R&&R.gear>=7},
-  {k:'g_all',n:'완전 무장',d:'장비 다섯 가지(검·투구·갑옷·목걸이·망토)를 모두 +10까지 강화',c:R=>R&&R.gearAll>=10},
+  {k:'g_7',rw:'fr_gold',n:'숙련 대장장이',d:'장비 하나를 +7까지 강화',c:R=>R&&R.gear>=7},
+  {k:'g_all',hard:1,rw:'au_crown',n:'완전 무장',d:'장비 다섯 가지(검·투구·갑옷·목걸이·망토)를 모두 +10까지 강화',c:R=>R&&R.gearAll>=10},
   {k:'br_5',n:'보스 사냥꾼',d:'보스 러시 5단계 돌파',c:R=>R&&R.rush>=5},
-  {k:'br_10',n:'보스 학살자',d:'보스 러시 10단계 돌파',c:R=>R&&R.rush>=10},
-  {k:'br_15',n:'끝없는 결투자',d:'보스 러시 15단계 돌파',c:R=>R&&R.rush>=15},
-  {k:'r_team',n:'완벽한 팀워크',d:'레이드에서 동료 2명이 한 번도 쓰러지지 않고 클리어',c:R=>R&&R.raid>=1&&R.noLoss},
-  {k:'r_solo',n:'홀로 선 영웅',d:'레이드를 동료 없이 혼자 클리어',c:R=>R&&R.raid>=1&&R.solo},
+  {k:'br_10',rw:'tr_thunder',n:'보스 학살자',d:'보스 러시 10단계 돌파',c:R=>R&&R.rush>=10},
+  {k:'br_15',hard:1,rw:'sk_storm',n:'끝없는 결투자',d:'보스 러시 15단계 돌파',c:R=>R&&R.rush>=15},
+  {k:'r_team',rw:'kl_holy',n:'완벽한 팀워크',d:'레이드에서 동료 2명이 한 번도 쓰러지지 않고 클리어',c:R=>R&&R.raid>=1&&R.noLoss},
+  {k:'r_solo',hard:1,rw:'hf_knight',n:'홀로 선 영웅',d:'레이드를 동료 없이 혼자 클리어',c:R=>R&&R.raid>=1&&R.solo},
   {k:'d_1',n:'첫 결투 승리',d:'결투에서 처음으로 이기기',c:R=>R&&R.duelW>=1},
   {k:'d_10',n:'결투의 달인',d:'결투 10번 이기기',c:R=>R&&R.duelW>=10},
-  {k:'d_up',n:'이변의 주인공',d:'나보다 전투력이 2배 이상인 상대를 결투에서 이기기',c:R=>R&&R.upset},
+  {k:'d_up',rw:'kl_lightning',n:'이변의 주인공',d:'나보다 전투력이 2배 이상인 상대를 결투에서 이기기',c:R=>R&&R.upset},
   {k:'r_1',n:'거신 사냥꾼',d:'레이드 1단계 클리어',c:R=>R&&R.raid>=1},
   {k:'r_2',n:'거신을 깨운 자',d:'레이드 2단계 클리어',c:R=>R&&R.raid>=2},
   {k:'r_3',n:'분노를 잠재운 자',d:'레이드 3단계 클리어',c:R=>R&&R.raid>=3},
-  {k:'r_4',n:'심연의 정복자',d:'레이드 4단계 클리어',c:R=>R&&R.raid>=4},
-  {k:'r_5',n:'종말을 막은 영웅',d:'레이드 5단계 클리어',c:R=>R&&R.raid>=5},
+  {k:'r_4',rw:'au_hellfire',n:'심연의 정복자',d:'레이드 4단계 클리어',c:R=>R&&R.raid>=4},
+  {k:'r_5',hard:1,rw:'fr_dragon',n:'종말을 막은 영웅',d:'레이드 5단계 클리어',c:R=>R&&R.raid>=5},
   {k:'a_first',n:'견습 모험가',d:'아무 난이도나 처음 클리어',c:R=>R&&R.win},
   {k:'a_hard',n:'숙련자',d:'어려움 이상 클리어',c:R=>R&&R.win&&DRANK(R.diff)>=1},
   {k:'a_hell',n:'지옥 생존자',d:'지옥 이상 클리어',c:R=>R&&R.win&&DRANK(R.diff)>=2},
@@ -8145,23 +8147,23 @@ const ACH=[
   {k:'e_late',n:'늦깎이 탐험가',d:'10분이 지난 뒤에 이스터에그 발견',rw:'hf_moon'},
   {k:'d_30',hard:1,n:'결투의 왕',d:'결투 30번 이기기',rw:'fr_king',c:R=>R&&R.duelW>=30},
   {k:'r_fast',hard:1,n:'번개 토벌대',d:'레이드 3단계 이상을 90초 안에 클리어',rw:'fr_cosmos',c:R=>R&&R.raid>=3&&R.raidSec<=90},
-  {k:'a_nm25',n:'악몽 그 자체',d:'악몽에서 25분 버티기',rw:'sk_abyss',c:R=>R&&R.diff==='nightmare'&&R.t>=1500},
-  {k:'a_allcls',n:'만능 재주꾼',d:'12개 직업 모두 한 번씩 클리어',p:()=>[Object.keys(META.ccls||{}).length,12],c:()=>Object.keys(META.ccls||{}).length>=12},
+  {k:'a_nm25',hard:1,n:'악몽 그 자체',d:'무한의 악몽에서 18분 버티기 (예전 기준 25분)',rw:'sk_abyss',c:R=>R&&R.diff==='nightmare'&&R.t>=1080},
+  {k:'a_allcls',hard:1,rw:'sk_starlight',n:'만능 재주꾼',d:'12개 직업 모두 한 번씩 클리어',p:()=>[Object.keys(META.ccls||{}).length,12],c:()=>Object.keys(META.ccls||{}).length>=12},
   {k:'a_kill3k',n:'학살자',d:'한 판에 3,000마리 처치',c:R=>R&&R.kills>=3000},
-  {k:'a_lv60',n:'초월자',d:'한 판에 레벨 60 달성',c:R=>R&&R.lvl>=60},
+  {k:'a_lv60',rw:'tr_comet',n:'초월자',d:'한 판에 레벨 60 달성',c:R=>R&&R.lvl>=60},
   {k:'a_rich',n:'졸부',d:'한 판에 골드 10,000 보유',c:R=>R&&R.maxGold>=10000},
-  {k:'a_nohit',n:'무결점',d:'피해를 한 번도 안 받고 보스 처치'},
+  {k:'a_nohit',rw:'fr_star',n:'무결점',d:'피해를 한 번도 안 받고 보스 처치'},
   {k:'a_dragon',n:'용사냥꾼',d:'히든 보스 황금 용 처치',rw:'tr_dragon'},
   {k:'a_dragonaug',n:'용의 축복',d:'황금 용 전용 증강 획득'},
   {k:'a_hidden3',n:'보물 사냥꾼',d:'히든 몹 3종(보석 슬라임·미믹·행운 고양이) 모두 처치',rw:'kl_treasure',p:()=>[Object.keys(META.hk||{}).length,3],c:()=>Object.keys(META.hk||{}).length>=3},
-  {k:'a_boss16',n:'보스 수집가',d:'보스 16종 모두 처치',rw:'au_dragon',p:()=>[BOSS_POOL.flat().filter(b=>META.bk&&META.bk[b]).length,16],c:()=>BOSS_POOL.flat().every(b=>META.bk&&META.bk[b])},
+  {k:'a_boss16',hard:1,n:'보스 수집가',d:'보스 16종 모두 처치',rw:'au_dragon',p:()=>[BOSS_POOL.flat().filter(b=>META.bk&&META.bk[b]).length,16],c:()=>BOSS_POOL.flat().every(b=>META.bk&&META.bk[b])},
   {k:'a_mob50',n:'몬스터 연구가',d:'몬스터 도감 절반 발견',p:()=>[Object.keys(ET).filter(k=>MOBINFO[k]&&META.mob[k]).length,Math.ceil(Object.keys(ET).filter(k=>MOBINFO[k]).length/2)],c:()=>{const L=Object.keys(ET).filter(k=>MOBINFO[k]);return L.filter(k=>META.mob[k]).length>=L.length/2;}},
   {k:'a_mob100',n:'몬스터 박사',d:'몬스터 도감 전부 발견',rw:'sk_crystal',p:()=>{const L=Object.keys(ET).filter(k=>MOBINFO[k]);return [L.filter(k=>META.mob[k]).length,L.length];},c:()=>Object.keys(ET).filter(k=>MOBINFO[k]).every(k=>META.mob[k])},
   {k:'a_egg10',n:'동네 마실꾼',d:'이스터에그 4곳 발견',p:()=>[eggCnt(),4],c:()=>eggCnt()>=4},
   {k:'a_egg20',n:'참견쟁이',d:'이스터에그 8곳 발견',p:()=>[eggCnt(),8],c:()=>eggCnt()>=8},
-  {k:'a_eggall',n:'전국 민폐왕',d:'이스터에그 전부 발견',p:()=>[eggCnt(),Object.keys(EGG).length],c:()=>eggCnt()>=Object.keys(EGG).length},
-  {k:'a_uc',n:'한계 돌파',d:'고점 돌파 증강을 가진 채로 클리어',c:R=>R&&R.win&&R.uc},
-  {k:'a_naked',n:'맨몸의 전설',d:'증강 3개 이하로 클리어',c:R=>R&&R.win&&R.augN<=3},
+  {k:'a_eggall',hard:1,rw:'hf_cosmos',n:'전국 민폐왕',d:'이스터에그 전부 발견',p:()=>[eggCnt(),Object.keys(EGG).length],c:()=>eggCnt()>=Object.keys(EGG).length},
+  {k:'a_uc',rw:'tr_rbstar',n:'한계 돌파',d:'고점 돌파 증강을 가진 채로 클리어',c:R=>R&&R.win&&R.uc},
+  {k:'a_naked',hard:1,rw:'sk_ghost',n:'맨몸의 전설',d:'증강 3개 이하로 클리어',c:R=>R&&R.win&&R.augN<=3},
   // 히든 도전과제: 달성 전에는 이름·조건이 ???로 보임 (개발자 모드는 공개)
   {k:'h_cat',hid:1,n:'고양이 알레르기',d:'행운 고양이를 10번 놓치기',p:()=>[(META.hm||{}).luckycat||0,10],c:()=>((META.hm||{}).luckycat||0)>=10},
   {k:'h_gob',hid:1,n:'고블린의 단골',d:'보물 고블린을 5번 놓치기',p:()=>[(META.hm||{}).goblin||0,5],c:()=>((META.hm||{}).goblin||0)>=5},
@@ -8182,6 +8184,8 @@ const ACH=[
 ];
 function achUnlock(k){META.ach=META.ach||{};if(META.ach[k])return;const A=ACH.find(a=>a.k===k);if(!A)return;META.ach[k]=1;if(A.rw){META.cos=META.cos||{own:{},eq:{}};META.cos.own[A.rw]=1;}saveMeta();
   if(S)(S.newAch=S.newAch||[]).push(k);const rw=A.rw&&COS.find(x=>x.k===A.rw);augFx(`🏆 도전과제 달성: ${A.n}`,`칭호 「${A.n}」${rw?' · 외형 「'+rw.n+'」':''} 획득`,'#ffd76a',true);}
+// 예전에 달성한 도전과제에 나중에 보상이 생기면, 시작 화면을 열 때 보상 외형을 채워 줌
+function achRwSync(){let n=0;META.cos=META.cos||{own:{},eq:{}};META.cos.own=META.cos.own||{};for(const A of ACH)if(A.rw&&META.ach&&META.ach[A.k]&&!META.cos.own[A.rw]){META.cos.own[A.rw]=1;n++;}if(n){saveMeta();setTimeout(()=>toast(`🎁 예전에 달성한 도전과제 보상 외형 ${n}개를 받았어요`),600);}}
 function achCheck(R){for(const A of ACH){if(META.ach&&META.ach[A.k])continue;try{if(A.c&&A.c(R))achUnlock(A.k);}catch(e){}}}
 const COS=[
   {k:'tr_gold',cat:'trail',n:'황금 궤적',d:'탄환 뒤에 금빛 꼬리',c:150,col:'#ffd76a'},
