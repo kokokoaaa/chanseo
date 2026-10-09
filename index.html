@@ -1394,7 +1394,8 @@ const inArena=(x,y,pad=0)=>{const A=S.arena;return !A||(Math.abs(x-A.x)<A.r-pad&
 // 아직 안 한 이스터에그 건축물 중 가장 가까운 것 (결계 위치 정할 때)
 function eggNearest(x,y,R){let b=null,bd=R;if(!S)return null;const D=S.eggDone||{};for(let cx=Math.floor((x-R)/LC);cx<=Math.floor((x+R)/LC);cx++)for(let cy=Math.floor((y-R)/LC);cy<=Math.floor((y+R)/LC);cy++){const m=lmAt(cx,cy);if(!m||!eggOn(m.k)||D[m.k]||D[m.x+','+m.y])continue;const d=Math.hypot(m.x-x,m.y-y);if(d<bd){bd=d;b=m;}}return b;}
 // 이번 판에 이 배경에서 이스터에그가 걸린 건축물 종류 하나 (판마다 무작위, 아직 못 찾은 종류를 먼저 고름)
-function eggKOf(){if(!S)return '';const b=S.biome!=null?S.biome:0;S.eggK=S.eggK||{};if(S.eggK[b]==null){const c0=(BIOMES[b].lm||[]).filter(k=>EGG[k]),cu=c0.filter(k=>!Object.values(S.eggK).includes(k)&&!(S.eggDone||{})[k]),c=cu.length?cu:c0,nw=c.filter(k=>!(META.egg||{})[k]),pool=nw.length?nw:c;S.eggK[b]=pool.length?pool[Math.floor(Math.random()*pool.length)]:'';}return S.eggK[b];}
+function eggKOf(){if(!S||rushOn())return ''; // 보스 러시·레이드·결투에는 이스터에그 없음
+  const b=S.biome!=null?S.biome:0;S.eggK=S.eggK||{};if(S.eggK[b]==null){const c0=(BIOMES[b].lm||[]).filter(k=>EGG[k]),cu=c0.filter(k=>!Object.values(S.eggK).includes(k)&&!(S.eggDone||{})[k]),c=cu.length?cu:c0,nw=c.filter(k=>!(META.egg||{})[k]),pool=nw.length?nw:c;S.eggK[b]=pool.length?pool[Math.floor(Math.random()*pool.length)]:'';}return S.eggK[b];}
 const eggOn=k=>!!EGG[k]&&k===eggKOf();
 const eggCnt=()=>Object.keys(EGG).filter(k=>(META.egg||{})[k]).length;
 function eggTick(dt){const p=S.p;if(!p.alive||S.npc)return;let best=null,bd=1e9;
@@ -7448,7 +7449,10 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
-  {v:158,t:'📈 직업별 상한 · 체력 재생 상향',items:[
+  {v:159,t:'🥚 보스 러시 정리',items:[
+    ['change','🥚 보스 러시(레이드·결투 포함)에서는 이스터에그가 나오지 않아요','look'],
+  ]},
+{v:158,t:'📈 직업별 상한 · 체력 재생 상향',items:[
     ['up','📈 직업마다 어울리는 상한이 조금 더 높아요: 도적(회피 70%·대시 최소 0.3초·치명타 피해 600%), 궁수(공격 속도 +2회·이동 250), 총잡이(공격 속도 +2회·재장전 최소 0.3초), 도박사(행운 40·치명타 피해 600%), 광전사(이동 260·공격 속도 +1회), 마법사(치명타 피해 600%), 정령사(공격 속도 +1회), 드루이드(이동 250). 도감 → 직업과 스탯 창에서 볼 수 있어요'],
     ['up','💚 체력 재생 카드 상향: 붕대 +1.5~2.5, 거인의 심장 재생 +0.6~1, 불사의 맹세 재생 +0.3~0.6. 영구 강화 「체력 재생」은 단계마다 초당 최대 체력의 0.1% (2배)'],
     ['change','🐞 정령사 얼음 결계(못 움직임) 중에 대시로 빠져나가던 문제를 고쳤어요','bug'],
@@ -10641,7 +10645,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=158,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=159,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
