@@ -9319,7 +9319,7 @@ function recVer(b){if(b.build)return 'v'+b.build;const t=(+b.at||0)/1000-1791000
 const myNick=()=>{try{return String(localStorage.getItem('chipdungeon_nick')||'').replace(/\s+/g,' ').trim();}catch(e){return '';}}; // 서버도 앞뒤 공백을 지우니 같게
 // 후원자 감사 표시: 이 이름의 「주인 컴퓨터」(이름을 처음 등록한 열쇠, 또는 같은 이름 비밀번호)에서만 칭호 「후원자 그저 빛」(행운 +3)과 반짝이는 이름을 줌
 // 서버가 「이 열쇠가 주인 맞음」이라고 답할 때만 (연결 실패면 안 줌). 처음 받을 때 한 번 자동으로 달아 주고, 그 뒤 바꾸는 건 자유
-const DONORS=['김성록'];let DONOR_CK='';
+const DONORS=['김성록','병원망한청년'];let DONOR_CK='';
 async function donorCheck(){const n=myNick().trim();if(!SHEET_URL||!DONORS.includes(n)||DONOR_CK===n)return;if(META.ach&&META.ach.h_donor&&cosOwn('hf_donor'))return;DONOR_CK=n;
   try{const r=await fetch(SHEET_URL+'?own='+encodeURIComponent(n)+'&k='+encodeURIComponent(MYKEY),{cache:'no-store'});const j=await r.json();if(!j||j.owned!==false)return;}catch(e){DONOR_CK='';return;}
   META.ach=META.ach||{};META.ach.h_donor=1;META.cos=META.cos||{own:{},eq:{}};META.cos.own.hf_donor=1;if(!META.donorSet){META.donorSet=1;META.cos.eq.hof='hf_donor';META.title='h_donor';}saveMeta();try{onlPing();}catch(e){}
@@ -10359,7 +10359,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=132,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=133,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
