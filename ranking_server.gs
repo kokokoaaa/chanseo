@@ -3,7 +3,7 @@
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
 //
 // v6.4 → v6.5 바뀐 점
-// - 이름 비밀번호 맞히기 막기: 한 이름에 틀린 열쇠가 10분에 30번 넘게 오면 잠시 확인을 멈춤 (?own · cload)
+// - 이름 비밀번호 맞히기 막기: 한 이름에 틀린 열쇠가 10분 구간에 40번 넘게 오면 잠시 확인을 멈춤 (?own · cload)
 // - 관리자가 기록을 지우면 이름 주인 정보도 바로 새로 고침, 지운 기록을 옛 기기가 다시 올려도 이름을 가져가지 않음
 // - 예전 서버에서 보통으로 저장된 보스 러시 기록이 새 기록과 따로 두 줄이 되던 문제
 // - 서버가 바쁠 때 채팅·접속 기록이 오류 대신 busy로 응답, 클라우드 저장·응원·쪽지는 전당 목록 캐시를 비우지 않음
@@ -400,9 +400,11 @@ function cload_(q) {
   return out_({ ok: true, at: +v[2] || 0, md: +v[3] || 0, data: data || '', none: data ? 0 : 1 });
 }
 // 이름 비밀번호 무차별 대입 막기: 이름마다 10분 동안 틀린 열쇠 횟수
-const FAIL_MAX = 30;
-function failOver_(nm) { try { return +(CacheService.getScriptCache().get('kf_' + Utilities.base64EncodeWebSafe(nm)) || 0) >= FAIL_MAX; } catch (err) { return false; } }
-function failAdd_(nm) { try { const c = CacheService.getScriptCache(), k = 'kf_' + Utilities.base64EncodeWebSafe(nm); c.put(k, String(+(c.get(k) || 0) + 1), 600); } catch (err) {} }
+const FAIL_MAX = 40;
+// 10분 단위 고정 구간으로 셈 (틀릴 때마다 10분이 다시 늘어나지 않게)
+const failK_ = nm => 'kf_' + Utilities.base64EncodeWebSafe(nm) + '_' + Math.floor(Date.now() / 600000);
+function failOver_(nm) { try { return +(CacheService.getScriptCache().get(failK_(nm)) || 0) >= FAIL_MAX; } catch (err) { return false; } }
+function failAdd_(nm) { try { const c = CacheService.getScriptCache(), k = failK_(nm); c.put(k, String(+(c.get(k) || 0) + 1), 700); } catch (err) {} }
 function ownerSet_(nm, kh) { try { CacheService.getScriptCache().put('own_' + Utilities.base64EncodeWebSafe(nm), kh || '-', 600); } catch (err) {} }
 
 // 기기별 접속 기록 ('기기' 시트: dev · name · ua · first · last · cnt). 개발자 키가 맞을 때만 목록을 줌
