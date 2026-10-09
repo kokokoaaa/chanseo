@@ -4262,6 +4262,8 @@ const DLOOK={
    if(D.armor==='def')C.cl(C.pauldron,12,23+U+(A===0?-1:0));else this.pauldron(U,D.armor,A===0?-1:0);
    if(A<0)bl(14,28+U+ay,-1,-1,7);else if(A===1)bl(16,28+U,1,1,8);
    if(D.shd==='def')C.shield(26+(A===1?1:0),27+U+st.sh);else if(D.shd)this.shieldD(26+(A===1?1:0),27+U+st.sh,D.shd);
+   else{const ly=24+U+(st.sh||0),rows=D.armor==='def'?null:D.armor==null?['kK','kK','kK','kK','kK']:['AB','BC','CC','BC','kK'];/* 방패가 없으면 왼팔(소매 + 손)을 그림 */
+    if(rows)dpaint(rows,25,ly,D.armor==null?{}:dPal('armor',D.armor));else{C.cl(['Tt','Tt','tt','ss','sS'],25,ly);}dpaint(['kK'],25,ly+5,{});}
    if(A===2)bl(16,28+U,1,0,11);
    this.head(U,D.hat,st);
    if(D.hat==='def'){const f=st.pf?[[21,10],[20,9],[19,8],[18,7],[17,7],[16,6]]:[[21,10],[20,9],[19,8],[18,7],[17,6],[16,6]];for(const [x,y] of f){C.dot('W',x,y+U);C.dot('w',x+1,y+1+U);}}
