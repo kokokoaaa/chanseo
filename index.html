@@ -98,8 +98,6 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 @keyframes hfd{50%{filter:drop-shadow(0 0 13px rgba(255,245,170,1)) brightness(1.3)}}
 .hc-hf_donor{box-shadow:0 0 0 2px #ffd76a,0 0 24px rgba(255,235,150,.9)!important;background:linear-gradient(110deg,rgba(255,215,106,.22),rgba(255,255,255,.08),rgba(255,215,106,.22))!important}
 @keyframes hfm{to{background-position:200% 0}}
-.hc-hf_neon{box-shadow:0 0 0 2px #5fc9d9,0 0 16px rgba(95,201,217,.8)!important}
-.hc-hf_crown{box-shadow:0 0 0 2px #ffd76a,0 0 20px rgba(255,215,106,.75)!important;background:linear-gradient(180deg,rgba(255,215,106,.18),transparent)!important}
 #augTip .tl{display:block;color:var(--muted)}
 #augTip .tl.on{color:#f1e7cf}
 #augTip .tl.on::before{content:'✔ ';color:#7be08f}
@@ -7418,7 +7416,11 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
-  {v:150,t:'📘 설명 다듬기',items:[
+  {v:151,t:'🎨 이름과 테두리 나누기',items:[
+    ['change','🎨 이름 꾸미기는 이제 이름 색·효과만, 테두리는 「테두리」에서 따로 골라요. 테두리가 붙어 있던 이름(네온·황제·은하·성스러운·용·눈꽃·기사·우주)을 가진 사람은 비슷한 테두리를 무료로 받고, 끼고 있던 이름에 맞춰 테두리도 함께 착용돼요','look'],
+    ['new','✨ 새 테두리: 네온 테두리 · 은하 테두리 · 기사의 테두리','look'],
+  ]},
+{v:150,t:'📘 설명 다듬기',items:[
     ['change','📘 쓰이지 않던 증강 「강화하면」 설명과 ★ 표시를 없앴어요. 합체하면 재료가 된 두 증강의 효과가 한 단계 더 강해진다고 알기 쉽게 바꿨어요','look'],
   ]},
 {v:149,t:'🐞 버그 정리 3차',items:[
@@ -7923,7 +7925,7 @@ function closePatch(){const d=document.getElementById('patchPop');if(d)d.remove(
 function bootPatch(){let seen=0;try{seen=+(localStorage.getItem('chanseo_seenv')||0);}catch(e){}if(seen<BUILD&&PATCH_NOTES.some(p=>p.v>seen))openPatch(false);}
 const $o=id=>document.getElementById(id)||{};
 const goLabel=()=>(pickDiff==='nightmare'?'☠ 무한의 악몽 · ':DIFF[pickDiff]?DIFF[pickDiff].n+' · ':'')+CLASSES[pickCls].n+'(으)로 시작';
-function startScreen(){
+function startScreen(){try{frMig();}catch(e){}
   // 판이 진행 중이면(레이드·결투 포함) 시작 화면을 그리지 않음: 다른 창을 닫다가 잘못 불려 게임 위에 덮이고 오류가 나던 문제 방지
   if(S&&S.started&&S.mode!=='start'&&S.mode!=='over'&&S.mode!=='spec'&&!S.win&&S.p&&S.p.alive)return;
   setTimeout(()=>{try{donorCheck();}catch(e){}},800);try{achRwSync();}catch(e){}
@@ -8758,9 +8760,9 @@ const COS=[
   {k:'sk_abyss',cat:'skin',n:'악몽',d:'뒤집힌 색, 붉은 눈빛이 새어 나옴',c:0,ach:'a_nm25',f:'invert(1) hue-rotate(180deg) saturate(1.5)'},
   {k:'hf_gold',cat:'hof',n:'금빛 이름',d:'명예의 전당·채팅 이름이 금빛',c:400},
   {k:'hf_fire',cat:'hof',n:'불타는 이름',d:'명예의 전당·채팅 이름이 불타오름',c:800},
-  {k:'hf_neon',cat:'hof',n:'네온 카드',d:'명예의 전당 칸에 네온 테두리 · 채팅 이름이 네온빛',c:1500},
+  {k:'hf_neon',cat:'hof',n:'네온 이름',d:'명예의 전당·채팅 이름이 네온빛',c:1500},
   {k:'hf_rainbow',cat:'hof',n:'무지개 이름',d:'명예의 전당·채팅 이름이 무지개로 흐름',c:2500},
-  {k:'hf_crown',cat:'hof',n:'황제',d:'명예의 전당·채팅 이름 앞 왕관 + 황금 테두리',c:4000},
+  {k:'hf_crown',cat:'hof',n:'황제',d:'명예의 전당·채팅 이름 앞 👑 + 황금빛 이름',c:4000},
   {k:'hf_donor',cat:'hof',n:'후원자의 빛',d:'명예의 전당·채팅·접속 중 이름이 반짝반짝 빛남 + 💛 (후원자 전용)',c:0,hid:1}
   ,
   // ── 새 외형 (x: 색·모양 값으로 그리는 공통 효과) ──
@@ -8839,10 +8841,13 @@ const COS=[
   {k:'hf_ocean',cat:'hof',n:'바다 이름',d:'명예의 전당·채팅 이름이 파도처럼 흐름',c:900,x:{g:['#1a6ad0','#5fc9d9','#bfefff'],sp:3}},
   {k:'hf_shadow',cat:'hof',n:'그림자 이름',d:'명예의 전당·채팅 이름이 보랏빛 그림자',c:1200,x:{g:['#7f5cff','#e2c4ff','#4a1a7a'],sh:'#b552d6'}},
   {k:'hf_star',cat:'hof',n:'별빛 이름',d:'명예의 전당·채팅 이름 앞 ⭐ + 별빛',c:1800,x:{g:['#ffd76a','#ffffff','#fff3c4'],pre:'⭐ '}},
-  {k:'hf_galaxy',cat:'hof',n:'은하 이름',d:'명예의 전당·채팅 이름이 은하처럼 일렁임 + 보라 테두리',c:2000,x:{g:['#7f5cff','#ff5ad8','#5fc9d9','#b552d6'],sp:2.6,box:'#b552d6'}},
-  {k:'hf_holy',cat:'hof',n:'성스러운 이름',d:'명예의 전당·채팅 이름 앞 ✨ + 금빛 테두리',c:3000,x:{g:['#fff3c4','#ffd76a','#ffffff'],pre:'✨ ',box:'#fff3a0'}},
-  {k:'hf_dragon',cat:'hof',n:'용의 이름',d:'명예의 전당·채팅 이름 앞 🐉 + 불꽃 테두리',c:3500,x:{g:['#ff3d1f','#ffd040','#ff9a2a'],sp:1.4,pre:'🐉 ',box:'#ff7a2a'}},
+  {k:'hf_galaxy',cat:'hof',n:'은하 이름',d:'명예의 전당·채팅 이름이 은하처럼 일렁임',c:2000,x:{g:['#7f5cff','#ff5ad8','#5fc9d9','#b552d6'],sp:2.6}},
+  {k:'hf_holy',cat:'hof',n:'성스러운 이름',d:'명예의 전당·채팅 이름 앞 ✨ + 성스러운 금빛',c:3000,x:{g:['#fff3c4','#ffd76a','#ffffff'],pre:'✨ ',sh:'#fff3a0'}},
+  {k:'hf_dragon',cat:'hof',n:'용의 이름',d:'명예의 전당·채팅 이름 앞 🐉 + 이글거리는 불꽃빛',c:3500,x:{g:['#ff3d1f','#ffd040','#ff9a2a'],sp:1.4,pre:'🐉 ',sh:'#ff7a2a'}},
   // 명예의 전당 테두리: 내 기록 칸의 테두리 (g 테두리 색, sp 흐르는 속도, glow 빛, o 모서리 장식, top 위 가운데 장식, w 두께)
+  {k:'fr_neon',cat:'frame',n:'네온 테두리',d:'하늘빛 네온이 깜빡이는 테두리',c:1200,x:{g:['#22e0ff','#aef9ff','#5fc9d9'],sp:2,glow:'#22e0ff'}},
+  {k:'fr_galaxy',cat:'frame',n:'은하 테두리',d:'보랏빛 은하가 흐르는 테두리 + 모서리 별',c:1800,x:{g:['#7f5cff','#ff5ad8','#5fc9d9','#b552d6'],sp:2.6,glow:'#b552d6',o:'✧'}},
+  {k:'fr_silver',cat:'frame',n:'기사의 테두리',d:'단단한 은빛 테두리 + 모서리 검',c:2000,x:{g:['#8e9bb0','#ffffff','#c8d2e0'],sp:4,glow:'#c8d2e0',o:'⚔'}},
   {k:'fr_gold',cat:'frame',n:'황금 테두리',d:'명예의 전당 내 칸에 은은한 황금 테두리',c:600,x:{g:['#8a6420','#ffd76a','#fff3c4'],sp:6,glow:'#ffd76a'}},
   {k:'fr_vine',cat:'frame',n:'덩굴 테두리',d:'초록 덩굴 테두리 + 모서리 잎사귀',c:800,x:{g:['#2f6a2a','#78c050','#c8f08a'],sp:5,glow:'#5aa844',o:'🌿'}},
   {k:'fr_ice',cat:'frame',n:'서리 테두리',d:'얼음빛 테두리 + 모서리 눈꽃',c:1000,x:{g:['#5fc9d9','#ffffff','#9fe8ff'],sp:4,glow:'#9fe8ff',o:'❄'}},
@@ -8860,11 +8865,11 @@ const COS=[
   {k:'hf_abyss',cat:'hof',n:'심연 이름',d:'명예의 전당·채팅 이름이 깊은 보랏빛 어둠',c:1500,x:{g:['#4a1a7a','#b552d6','#14081e'],sp:3,sh:'#7a2aff'}},
   {k:'hf_sunset',cat:'hof',n:'노을 이름',d:'명예의 전당·채팅 이름이 노을빛으로 물듦',c:900,x:{g:['#ff6a3a','#ffb050','#c0407a'],sp:3}},
   {k:'hf_forest',cat:'hof',n:'숲의 이름',d:'명예의 전당·채팅 이름 앞 🍃 + 숲빛',c:900,x:{g:['#3e8a34','#a8e070','#2f5e22'],pre:'🍃 '}},
-  {k:'hf_snow',cat:'hof',n:'눈꽃 이름',d:'명예의 전당·채팅 이름 앞 ❄ + 하얀 눈빛 테두리',c:2000,x:{g:['#ffffff','#bfe8ff','#e8f4ff'],pre:'❄ ',box:'#bfe8ff'}},
+  {k:'hf_snow',cat:'hof',n:'눈꽃 이름',d:'명예의 전당·채팅 이름 앞 ❄ + 하얀 눈빛',c:2000,x:{g:['#ffffff','#bfe8ff','#e8f4ff'],pre:'❄ ',sh:'#bfe8ff'}},
   {k:'hf_candy',cat:'hof',n:'사탕 이름',d:'명예의 전당·채팅 이름이 알록달록 사탕빛',c:1500,x:{g:['#ff8ac8','#8affd0','#ffe080','#a0b8ff'],sp:2.2}},
-  {k:'hf_knight',cat:'hof',n:'기사의 이름',d:'명예의 전당·채팅 이름 앞 ⚔ + 은빛 테두리',c:2500,x:{g:['#e8ecf2','#8e9bb0','#ffffff'],pre:'⚔ ',box:'#c8d2e0'}},
+  {k:'hf_knight',cat:'hof',n:'기사의 이름',d:'명예의 전당·채팅 이름 앞 ⚔ + 은빛',c:2500,x:{g:['#e8ecf2','#8e9bb0','#ffffff'],pre:'⚔ ',sh:'#c8d2e0'}},
   {k:'hf_moon',cat:'hof',n:'달빛 이름',d:'명예의 전당·채팅 이름 앞 🌙 + 은은한 달빛',c:2000,x:{g:['#dfe8ff','#9ab0e0','#ffffff'],sp:3.5,pre:'🌙 ',sh:'#bfd0ff'}},
-  {k:'hf_cosmos',cat:'hof',n:'우주의 이름',d:'명예의 전당·채팅 이름 앞 🌌 + 별빛 일렁임 + 푸른 테두리',c:4500,x:{g:['#1a2a8a','#7f5cff','#5fc9d9','#ffffff'],sp:2,pre:'🌌 ',box:'#5f8aff'}},
+  {k:'hf_cosmos',cat:'hof',n:'우주의 이름',d:'명예의 전당·채팅 이름 앞 🌌 + 별빛 일렁임',c:4500,x:{g:['#1a2a8a','#7f5cff','#5fc9d9','#ffffff'],sp:2,pre:'🌌 ',sh:'#5f8aff'}},
 ];
 const COS_CAT={skin:'캐릭터 색',trail:'탄환 궤적',kill:'처치 효과',aura:'오라',wing:'날개',hof:'명예의 전당',frame:'전당 테두리'};
 // 날개는 오라와 따로 장착 (예전에 오라 칸에 낀 날개는 날개 칸으로 옮김)
@@ -8877,8 +8882,13 @@ const auraList=str=>String(str||'').split('+').map(k=>COS.find(q=>q.k===k&&(q.ca
 // 초기화 환불 총액: 메달 상점 강화 + 산 외형 전부
 // 달성한 도전과제의 보상 외형은 메달로 산 게 아니라 환불하지 않음 (예전엔 환불받고 시작 화면에서 다시 공짜로 받아 메달이 무한히 늘었음)
 const cosRw=k=>ACH.some(a=>a.rw===k&&META.ach&&META.ach[a.k]);
-const cosSpent=()=>COS.reduce((q,x)=>q+(cosOwn(x.k)&&!cosRw(x.k)?x.c:0),0),allSpent=()=>metaSpent()+cosSpent();
+const cosSpent=()=>COS.reduce((q,x)=>q+(cosOwn(x.k)&&!cosRw(x.k)&&!((META.cos||{}).gift||{})[x.k]?x.c:0),0),allSpent=()=>metaSpent()+cosSpent();
 const cosOwn=k=>!!(META.cos&&META.cos.own&&META.cos.own[k]);
+// v151: 이름 꾸미기에 붙어 있던 테두리를 「테두리」 칸으로 분리 → 그 이름을 이미 산 사람에게 같은 느낌의 테두리를 선물 (환불 대상 아님), 이름을 끼고 있었으면 테두리도 함께 착용
+const FR_SPLIT={hf_neon:'fr_neon',hf_crown:'fr_king',hf_galaxy:'fr_galaxy',hf_holy:'fr_gold',hf_dragon:'fr_dragon',hf_snow:'fr_ice',hf_knight:'fr_silver',hf_cosmos:'fr_cosmos'};
+function frMig(){if(META.frMig)return;META.frMig=1;const C=META.cos=META.cos||{own:{},eq:{}};C.own=C.own||{};C.eq=C.eq||{};C.gift=C.gift||{};let n=[];
+  for(const h in FR_SPLIT){const f=FR_SPLIT[h];if(!C.own[h])continue;if(!C.own[f]){C.own[f]=1;C.gift[f]=1;n.push(COS.find(x=>x.k===f).n);}if(C.eq.hof===h&&!C.eq.frame)C.eq.frame=f;}
+  saveMeta();if(n.length)setTimeout(()=>toast('🎁 이름 꾸미기의 테두리가 따로 분리됐어요! 선물: '+n.join(', ')),1200);}
 // SPEC_OV: 관전 중에는 관전 대상의 겉모습(스킨·오라·이름 효과)·칭호를 씀
 let SPEC_OV=null;
 const cosEq=cat=>{const k=SPEC_OV&&S&&S.mode==='spec'?SPEC_OV[cat]:META.cos&&META.cos.eq&&META.cos.eq[cat];return k?COS.find(x=>x.k===k):null;};
@@ -9425,7 +9435,7 @@ function openMeta(cosOnly){cosPreviewHide();
     else META.cos.eq[x.cat]=META.cos.eq[x.cat]===x.k?null:x.k;saveMeta();keepY();});
   if($('mReset'))$('mReset').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.innerHTML='한 번 더 누르면 강화 초기화 <small>🏅 '+metaSpent()+' 환불</small>';return;}META.medals+=metaSpent();META.spent=0;META.lv={};META.sk={};saveMeta();keepY();};
   // 외형 초기화: 메달로 산 외형만 환불 (도전과제·후원 보상 외형은 그대로)
-  if($('cReset'))$('cReset').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.innerHTML='한 번 더 누르면 외형 초기화 <small>🏅 '+cosSpent()+' 환불</small>';return;}META.medals+=cosSpent();const C=META.cos||{own:{},eq:{}},keep=k=>{const x=COS.find(q=>q.k===k);return x&&(!x.c||cosRw(k));};for(const k in C.own)if(!keep(k))delete C.own[k];for(const c in C.eq)if(C.eq[c]&&!keep(C.eq[c]))C.eq[c]=null;META.cos=C;saveMeta();keepY();};
+  if($('cReset'))$('cReset').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.innerHTML='한 번 더 누르면 외형 초기화 <small>🏅 '+cosSpent()+' 환불</small>';return;}META.medals+=cosSpent();const C=META.cos||{own:{},eq:{}},keep=k=>{const x=COS.find(q=>q.k===k);return x&&(!x.c||cosRw(k));};for(const k in C.own)if(!keep(k))delete C.own[k];for(const c in C.eq)if(C.eq[c]&&!keep(C.eq[c]))C.eq[c]=null;C.gift={};META.cos=C;saveMeta();keepY();};
   $('mBack').onclick=()=>{cosPreviewHide();startScreen();};$('mBack2').onclick=()=>{cosPreviewHide();startScreen();};
 }
 // 정해진 난이도로 시작 (보스 러시 등). 시작 화면의 난이도 선택은 그대로 둠
@@ -10551,7 +10561,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=150,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=151,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
