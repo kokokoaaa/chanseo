@@ -4358,8 +4358,10 @@ const season=()=>has('d_seasons')?Math.floor((S.t||0)/8)%4:-1;
 const critRaw=()=>(season()===2?.12:0)+(whOn(2)?.2*whK():0)+S.p.crit+ex('dice')*.04+(has('a_still')&&!S.p.moving?.1:0)+(has('fortune')?LK()*lv3('fortune',.006,.008,.01):0);
 const critC=()=>Math.min(CRIT_CAP,critRaw());
 const CRIT_DMG_CAP_F=()=>has('sharpshot')?8:5;
-const critMul=()=>(has('sharpshot')?1:0)+(has('f_luckstar')?LK()*.02:0)+(has('r_vital')?critRaw()*100*lv3('r_vital',.01,.015,.02):0)+(has('gb_dice')?Math.max(0,S.p.luck)*lv3('gb_dice',.02,.03,.04):0)+Math.min(CRIT_DMG_CAP_F(),S.p.critM+ex('dice')*.15+Math.max(0,critRaw()-CRIT_CAP)*.5);
-const critFull=()=>critRaw()>=CRIT_CAP,critMFull=()=>critMul()>=CRIT_DMG_CAP_F();
+// 치명타 피해: 기본(카드·장비 등)은 상한까지, 일부 증강(저격·행운의 별·급소·운명의 주사위)은 상한 위에 더해짐
+const critMBase=()=>Math.min(CRIT_DMG_CAP_F(),S.p.critM+ex('dice')*.15+Math.max(0,critRaw()-CRIT_CAP)*.5),critMExtra=()=>(has('sharpshot')?1:0)+(has('f_luckstar')?LK()*.02:0)+(has('r_vital')?critRaw()*100*lv3('r_vital',.01,.015,.02):0)+(has('gb_dice')?Math.max(0,S.p.luck)*lv3('gb_dice',.02,.03,.04):0);
+const critMul=()=>critMExtra()+critMBase();
+const critFull=()=>critRaw()>=CRIT_CAP,critMFull=()=>critMBase()>=CRIT_DMG_CAP_F()-1e-9;
 const stackCapped=x=>(x.k==='crit'&&critFull())||(x.k==='critm'&&critMFull())||(x.k==='luck'&&S.p.luck>=LUCK_CAP)||(x.k==='dodge'&&S.p.dodge>=DODGE_CAP)||(x.k==='rate'&&rawRate()>=RATE_CAP());
 // 피격 기준 조건: 흡혈·재생 때문에 '체력 ○% 이하'는 거의 안 켜져서, '맞은 뒤 ○초' / '최근 받은 피해량'으로 판정
 const hitRec=(sec=2.5)=>S.t-(S.p.hitT??-99)<sec;
@@ -7423,7 +7425,22 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
-  {v:152,t:'🎨 카드 보기 편하게',items:[
+  {v:155,t:'🛡 보안 · 레이드·결투 정리',items:[
+    ['change','🛡 명예의 전당 기록·결투 코드에 이상한 코드가 섞여 들어와도 화면에서 실행되지 않게 막았어요','bug'],
+    ['change','🐞 레이드·결투를 하면 저장해 둔 판(이어하기)이 지워지던 문제를 고쳤어요','bug'],
+    ['change','🐞 결투에서 이긴 뒤 2초 안에 정산을 누르면 패배로 기록되던 문제, 궁수·강령술사·도박사 상대는 가만히 서 있으면 하나도 안 맞던 문제를 고쳤어요','bug'],
+    ['change','⚖ 결투 진 판·비긴 판 보상도 같은 상대·같은 날 반복하면 줄어요. 싸운 시간은 일시정지 시간을 빼고 셉니다','bug'],
+    ['change','🐞 학살자(광전사)가 함성·전쟁의 신으로 끝없이 쌓이던 문제를 고쳤어요 (처치로만 쌓여요)','bug'],
+    ['change','🐞 이어하기하면 생존기(E)·궁극기(R) 쿨타임이 초기화되던 문제, 도박사 부적·연속 앞면이 사라지던 문제를 고쳤어요','bug'],
+    ['change','🐞 레이드·결투에서 처치 수로 커지는 증강(수확·두꺼운 가죽)이 0부터 시작하던 문제, 망자의 군세가 후반에 한 방에 쓰러지던 문제, 구르기 사격의 즉시 재장전이 안 되던 문제를 고쳤어요','bug'],
+    ['change','🐞 저격 시너지가 있을 때 사거리 증강을 지웠다 다시 받으면 사거리가 계속 늘던 문제, 왕실 증강을 사도 바로 합체하지 않던 문제를 고쳤어요','bug'],
+    ['change','📊 대시 재사용은 최소 0.35초예요. 최소치에 닿으면 대시 카드가 더 안 나오고, 스탯 창·카드에 최소치가 보여요','look'],
+    ['change','📊 치명타 피해는 「500% / 500% + 증강 추가분」처럼 상한과 상한을 넘는 증강분을 나눠서 보여 줘요. 카드 미리보기의 이동 속도도 상한(230)까지만 보여요','look'],
+    ['change','🥚 이스터에그를 깨면 알림에 「방법」도 함께 나와요','look'],
+    ['change','⌨ 시야 넓이(멀리 보기) 단축키가 <b>Y</b>로 바뀌었어요 (Z도 계속 돼요)','look'],
+    ['change','🐞 이름 없는 사람끼리 접속 목록에서 한 줄로 합쳐지던 문제, 메뉴에서 돌아올 때마다 명예의 전당을 통째로 다시 받던 문제를 고쳤어요','bug'],
+  ]},
+{v:152,t:'🎨 카드 보기 편하게',items:[
     ['change','👀 스탯 카드의 「(지금보다 +9.8%)」 같은 괄호 설명이 다음 줄에 작게 따로 나와요. 괄호 안 쉼표 때문에 줄이 이상하게 나뉘던 것도 고쳤어요','look'],
   ]},
 {v:151,t:'🎨 이름과 테두리 나누기',items:[
@@ -10516,7 +10533,7 @@ function renderStats(){
     row('공격력',pDmg().toFixed(1),`기본 ${p.dmg.toFixed(1)} × (1 + 보너스 합계 ${Math.round((p.dmgP||0)*100)}%)`+(bonus.length?`, ${bonus.join(', ')}`:'')),
     row('공격 속도',rate.toFixed(2)+`회/초 <small>/ ${RATE_CAP()}</small>`,raw>RATE_CAP()?`상한 초과 ${Math.round((raw/RATE_CAP()-1)*100)}% → 공격력 ×${(1+(raw/RATE_CAP()-1)*.5).toFixed(2)}`:''),
     row('치명타 확률',pct(critC())+' <small>/ 100%</small>',critRaw()>CRIT_CAP?`초과 ${Math.round((critRaw()-CRIT_CAP)*100)}% → 치명타 피해 +${Math.round((critRaw()-CRIT_CAP)*50)}%`:critFull()?'최대치. 치명타 확률 카드가 더 안 나와요':''),
-    row('치명타 피해',pct(critMul())+' <small>/ 500%</small>',critMFull()?'최대치 500%. 치명타 피해 카드가 더 안 나와요':''),
+    row('치명타 피해',pct(critMBase())+` <small>/ ${pct(CRIT_DMG_CAP_F())}</small>`+(critMExtra()>.001?` <small style="color:#ffd76a">+ 증강 ${pct(critMExtra())}</small>`:''),(critMFull()?`최대치 ${pct(CRIT_DMG_CAP_F())}. 치명타 피해 카드가 더 안 나와요`:'')+(critMExtra()>.001?`${critMFull()?' · ':''}일부 증강은 상한 위에 더해져서 실제 배율은 ${pct(critMul())}`:'')),
     ...(pureMelee()?[
     row('베기 각도',meleeArc(n)+'°','탄환 +1마다 +40° (최대 360°)','근접 직업은 탄환을 쏘지 않고 휘둘러 벰. 탄환 수가 늘면 한 번에 베는 각도가 넓어짐'),
     row('동시 타격',meleeCap()+'마리','관통 +1마다 +2마리','한 번 휘두를 때 맞히는 최대 적 수 (가까운 순). 관통 스탯이 여기에 적용'),
