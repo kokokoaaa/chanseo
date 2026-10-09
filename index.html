@@ -7402,8 +7402,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
-  {v:138,t:'☁ 데이터 고르기 · 백업',items:[
-    ['change','☁ 「어느 데이터를 쓸까요?」 창에 양쪽의 <b>장착 중인 칭호·외형</b>, 도전과제 수, 지금까지 받은 메달도 보여 줘요','look'],
+  {v:139,t:'☁ 데이터 고르기 · 백업',items:[
+    ['change','☁ 「어느 데이터를 쓸까요?」 창에 양쪽 데이터의 <b>캐릭터 모습</b>(마지막 직업 + 장착 외형·오라·날개·장비)을 그림으로 보여 주고, <b>장착 중인 칭호·외형</b>, 도전과제 수, 지금까지 받은 메달도 보여 줘요','look'],
     ['change','↺ 서버 데이터를 불러오거나 서버에 덮어쓸 때, 바뀌기 전 데이터를 이 기기에 <b>자동 백업</b>해요. 💾 데이터 옮기기 → 「이 백업으로 되돌리기」로 되돌릴 수 있어요','play'],
   ]},
   {v:135,t:'🏆 단계형 도전과제 · 🏷 칭호는 외형에서',items:[
@@ -8456,19 +8456,22 @@ async function csLoad(n,k){const ac=window.AbortController?new AbortController()
 const csSum=d=>{try{const m=JSON.parse(d.chanseo_meta||'{}'),h=(()=>{try{return JSON.parse(d.chanseo_heroes||'[]');}catch(e){return [];}})();
   // 판단용: 장착한 외형·칭호·도전과제 수·누적 메달도 같이
   const eq=Object.entries((m.cos&&m.cos.eq)||{}).filter(([,k])=>k).map(([c,k])=>{const x=COS.find(q=>q.k===k);return x?(COS_ICO[c]||'')+' '+x.n:'';}).filter(Boolean),ti=m.title&&ACH.find(a=>a.k===m.title);
-  return {md:Math.floor(m.medals||0),tot:Math.floor(m.total||0),lv:Object.values(m.lv||{}).reduce((a,b)=>a+(+b||0),0),cls:(m.ucls||[]).length,cos:Object.keys((m.cos&&m.cos.own)||{}).length,hero:Array.isArray(h)?h.length:Object.keys(h||{}).length,eq,ti:ti?ti.n:'',ach:Object.keys(m.ach||{}).length};}catch(e){return null;}};
+  const ce=(m.cos&&m.cos.eq)||{},cl=CLASSES[d.chipdungeon_cls]?d.chipdungeon_cls:'knight',gc=GEAR_KEYS.map(k=>{const g=m.gear&&m.gear[k];return g&&g.own?(g.lv||0).toString(11):'-';}).join(''),av={cls:cl,skin:ce.skin||'',aura:[ce.wing,ce.aura].filter(Boolean).join('+'),gear:gc};
+  return {av,md:Math.floor(m.medals||0),tot:Math.floor(m.total||0),lv:Object.values(m.lv||{}).reduce((a,b)=>a+(+b||0),0),cls:(m.ucls||[]).length,cos:Object.keys((m.cos&&m.cos.own)||{}).length,hero:Array.isArray(h)?h.length:Object.keys(h||{}).length,eq,ti:ti?ti.n:'',ach:Object.keys(m.ach||{}).length};}catch(e){return null;}};
 // 덮어쓰기 전 자동 백업 (이 기기에만, 한 칸씩): dev = 불러오기 전 이 기기 데이터, srv = 이 기기 데이터로 덮어쓰기 전 서버 데이터
 const bakSave=(slot,label,code)=>{try{localStorage.setItem('chanseo_bak_'+slot,JSON.stringify({at:Date.now(),label,code}));}catch(e){}};
 const bakGet=slot=>{try{const b=JSON.parse(localStorage.getItem('chanseo_bak_'+slot)||'null');return b&&b.code?b:null;}catch(e){return null;}};
 const csSumCode=code=>{try{return csSum(JSON.parse(decodeURIComponent(escape(atob(String(code).slice(4))))).d);}catch(e){return null;}};
-const csSumLocal=()=>{let h=null;try{h=localStorage.getItem('chanseo_heroes');}catch(e){}return csSum({chanseo_meta:JSON.stringify(META),chanseo_heroes:h});};
+const csSumLocal=()=>{let h=null,c='';try{h=localStorage.getItem('chanseo_heroes');c=localStorage.getItem('chipdungeon_cls')||'';}catch(e){}return csSum({chanseo_meta:JSON.stringify(META),chanseo_heroes:h,chipdungeon_cls:c});};
+// 데이터 고르기 창용 캐릭터 그림 (그 데이터의 마지막 직업 + 장착 외형·오라·날개·장비)
+const csAvImg=x=>{try{const a=x&&x.av;if(!a)return '';const u=hofAv(a.cls,a.skin,a.aura,a.gear,'');return u?`<img src="${u}" alt="" style="width:138px;height:138px;image-rendering:pixelated;display:block;margin:0 auto">`:'';}catch(e){return '';}};
 const csMd=code=>{try{const o=JSON.parse(decodeURIComponent(escape(atob(String(code).slice(4)))));return Math.floor(JSON.parse(o.d.chanseo_meta).medals||0);}catch(e){return null;}};
 // 다른 기기에서 이름+비밀번호 확인 직후: 서버 데이터가 있으면 불러올지 고르게 함
 async function csOffer(n,k,after){if(SRV_V<56){after();return;}const j=await csLoad(n,k);
   if(!j||!j.ok){after();return;}if(j.none||!j.data){after();csFlagSet(n);setTimeout(()=>csUpload(true,true),500);return;}
   const dt=new Date(j.at||0),ds=`${dt.getMonth()+1}월 ${dt.getDate()}일 ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`,sm=csMd(j.data),mm=Math.floor(META.medals||0);
-  const A=csSumCode(j.data)||{md:sm||0,lv:0,cls:0,cos:0,hero:0},B=csSumLocal()||{md:mm,lv:0,cls:0,cos:0,hero:0},sc=x=>x.md+x.lv*200+x.cls*500+x.cos*100+x.hero*50,rec=sc(A)>=sc(B)?'A':'B';
-  const box=(t,x,when,me)=>`<div style="padding:12px;border:2px solid ${rec===me?'var(--brass)':'rgba(255,255,255,.2)'};border-radius:12px;background:${rec===me?'rgba(255,215,106,.08)':'transparent'}"><b>${t}</b>${rec===me?' <span style="color:#ffd76a;font-size:12px">⭐ 추천 (더 많이 진행됨)</span>':''}<div style="margin-top:6px;line-height:1.7;font-size:14px">🏅 메달 ${x.md.toLocaleString()}개${x.tot?` <small style="opacity:.7">(지금까지 ${x.tot.toLocaleString()}개 획득)</small>`:''}<br>⚒ 영구 강화 합계 ${x.lv}<br>🔓 해금 직업 ${x.cls}개<br>🏆 도전과제 ${x.ach||0}개<br>👕 외형 ${x.cos}개 보유<br>🗃 내 캐릭터 ${x.hero}명</div>
+  const A=csSumCode(j.data)||{md:sm||0,lv:0,cls:0,cos:0,hero:0,eq:[]},B=csSumLocal()||{md:mm,lv:0,cls:0,cos:0,hero:0},sc=x=>x.md+x.lv*200+x.cls*500+x.cos*100+x.hero*50,rec=sc(A)>=sc(B)?'A':'B';
+  const box=(t,x,when,me)=>`<div style="padding:12px;border:2px solid ${rec===me?'var(--brass)':'rgba(255,255,255,.2)'};border-radius:12px;background:${rec===me?'rgba(255,215,106,.08)':'transparent'}"><b>${t}</b>${rec===me?' <span style="color:#ffd76a;font-size:12px">⭐ 추천 (더 많이 진행됨)</span>':''}<div style="margin:6px 0 2px;padding:4px;border-radius:10px;background:radial-gradient(circle at 50% 70%,rgba(255,215,106,.18),rgba(0,0,0,.25) 70%)">${csAvImg(x)}<div style="text-align:center;font-size:12px;opacity:.8">${x.av&&CLASSES[x.av.cls]?CLASSES[x.av.cls].n:''}${x.ti?' · 「'+esc(x.ti)+'」':''}</div></div><div style="margin-top:6px;line-height:1.7;font-size:14px">🏅 메달 ${x.md.toLocaleString()}개${x.tot?` <small style="opacity:.7">(지금까지 ${x.tot.toLocaleString()}개 획득)</small>`:''}<br>⚒ 영구 강화 합계 ${x.lv}<br>🔓 해금 직업 ${x.cls}개<br>🏆 도전과제 ${x.ach||0}개<br>👕 외형 ${x.cos}개 보유<br>🗃 내 캐릭터 ${x.hero}명</div>
     <div style="margin-top:6px;padding:6px 8px;border-radius:8px;background:rgba(0,0,0,.25);font-size:13px;line-height:1.6"><b style="color:#ffd76a">지금 장착</b><br>🏷 칭호: ${x.ti?'「'+esc(x.ti)+'」':'없음'}<br>${(x.eq&&x.eq.length)?x.eq.map(esc).join('<br>'):'외형 장착 없음'}</div><small style="opacity:.75">${when}</small></div>`;
   show(`<div class="shophead"><h2 style="font-size:24px">☁ 어느 데이터를 쓸까요?</h2><button class="btn" id="csNo">돌아가기</button></div>
   <p class="sub"><b>${esc(n)}</b> 이름으로 서버에 저장된 데이터와 지금 이 기기의 데이터가 달라요. 쓸 쪽을 골라 주세요. 고르지 않은 쪽은 덮어써져요.</p>
@@ -10427,7 +10430,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=138,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=139,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
