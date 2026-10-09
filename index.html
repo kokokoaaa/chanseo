@@ -3496,7 +3496,7 @@ const CARDS=[
   {src:()=>skelMax()>0,cls:'necro',n:'뼈 가루',g:'해골 병사',v:[[8,15,0]],t:v=>`해골 병사 피해 +${v[0]}%`,a:(p,v)=>{p.skD=(p.skD||0)+v[0]/100;}},
   {src:()=>skelMax()>0,cls:'necro',n:'영혼 사슬',g:'해골 병사',v:[[.5,1,1]],t:v=>`해골 병사 지속 +${v[0]}초`,a:(p,v)=>{p.skL=(p.skL||0)+v[0];}},
   {cls:'gunner',n:'탄두 가공',g:'총잡이 리볼버',v:[[8,15,0]],t:v=>`매그넘 탄 피해 +${v[0]}%`,a:(p,v)=>{p.lbD=(p.lbD||0)+v[0]/100;}},
-  {cls:'gunner',req:()=>(S.p.rlM||1)>.4,n:'빠른 장전',g:'총잡이 리볼버',v:[[5,10,0]],t:v=>`재장전 시간 −${v[0]}%`,a:(p,v)=>{p.rlM=(p.rlM||1)*(1-v[0]/100);}},
+  {cls:'gunner',req:()=>reloadRaw()>RL_MIN+.03,n:'빠른 장전',g:'총잡이 리볼버',v:[[5,10,0]],t:v=>`재장전 시간 −${v[0]}% (최소 ${RL_MIN}초)`,a:(p,v)=>{p.rlM=(p.rlM||1)*(1-v[0]/100);}},
   {src:()=>tag('elem')>=1||has('elemcoin'),cls:'elem',n:'원소 결정',g:'원소 효과',v:[[8,15,0]],t:v=>`화상·둔화·연쇄·원소 구슬 피해 +${v[0]}%`,a:(p,v)=>{p.elD=(p.elD||0)+v[0]/100;}},
   {src:()=>furyOn(),cls:'berserk',n:'피의 북',g:'광란',v:[[2,3,0]],t:v=>`광란 최대 중첩 +${v[0]}`,a:(p,v)=>{p.fyC=(p.fyC||0)+v[0];}},
   {src:()=>furyOn(),cls:'berserk',n:'끝없는 분노',g:'광란',v:[[4,8,0]],t:v=>`광란이 최대일 때 공격 속도 +${v[0]}%`,a:(p,v)=>{p.fyR=(p.fyR||0)+v[0]/100;}},
@@ -3533,10 +3533,10 @@ const CARDS=[
   {req:()=>orbitN()>0,n:'회전 부적 연마',g:'회전 부적',v:[[6,12,0],[2,4,0]],t:v=>`회전 부적 피해 +${v[0]}%, 회전 반경 +${v[1]}%`,a:(p,v)=>{p.orbM*=1+v[0]/100;p.orbR*=1+v[1]/100;}},
   {n:'유리 대포',v:[[6.5,10.5,1]],t:v=>`공격력 +${v[0]}%, 최대 체력 −8%`,a:(p,v)=>{p.dmgP=(p.dmgP||0)+v[0]/100;p.hpP=(p.hpP||0)-.08;}},
   {n:'무거운 갑옷',v:[[6,10,0]],t:v=>`방어력 +${v[0]}, 이동 속도 −4%`,a:(p,v)=>{p.armor+=v[0];p.speed*=.96;}},
-  {n:'광기',v:[[6.5,10.5,1]],t:v=>`공격 속도 +${v[0]}%, 받는 피해 +8%`,a:(p,v)=>{p.rateP=(p.rateP||0)+v[0]/100;p.vuln*=1.08;}},
+  {req:()=>rawRate()<RATE_CAP(),n:'광기',v:[[6.5,10.5,1]],t:v=>`공격 속도 +${v[0]}%, 받는 피해 +8%`,a:(p,v)=>{p.rateP=(p.rateP||0)+v[0]/100;p.vuln*=1.08;}},
   {n:'거인의 심장',v:[[8,14,0],[.3,.5,2]],t:v=>`최대 체력 +${v[0]}, 초당 체력 재생 +${v[1]}`,a:(p,v)=>{p.maxHp+=v[0];p.hp+=v[0];p.regen+=v[1];}},
   {n:'철벽 자세',v:[[2.5,4,1],[6,10,0]],t:v=>`방어력 +${v[0]}, 최대 체력 +${v[1]}`,a:(p,v)=>{p.armor+=v[0];p.maxHp+=v[1];p.hp+=v[1];}},
-  {n:'질주 본능',v:[[2,3.5,1],[3,5,1]],t:v=>dashCdRaw()>DASH_MIN+.03?`이동 속도 +${v[0]}%, 대시 재사용 −${v[1]}% (최소 ${DASH_MIN}초)`:`이동 속도 +${v[0]}%`,a:(p,v)=>{p.speed*=1+v[0]/100;p.dashMul*=1-v[1]/100;}},
+  {req:()=>moveSpd()<SPEED_CAP||dashCdRaw()>DASH_MIN+.03,n:'질주 본능',v:[[2,3.5,1],[3,5,1]],t:v=>dashCdRaw()>DASH_MIN+.03?`이동 속도 +${v[0]}%, 대시 재사용 −${v[1]}% (최소 ${DASH_MIN}초)`:`이동 속도 +${v[0]}%`,a:(p,v)=>{p.speed*=1+v[0]/100;p.dashMul*=1-v[1]/100;}},
   {fr:'r',n:'모험가의 주사위',get d(){const k=1;return `공격력 −${Math.round(15*k)}% ~ +${Math.round(25*k)}%, 굴려봐야 압니다`;},f:p=>{const m=Math.round((-15+Math.random()*40)*1);p.dmgP=(p.dmgP||0)+m/100;return `공격력 ${m>=0?'+':''}${m}%`;}},
   // 도박 카드: 후반에도 의미 있게 레벨·시간에 따라 커짐
   {fr:'r',n:'운명의 숫돌',get d(){const k=lvScale(),f=v=>Math.round(v*k*10)/10;return `공격력 −${f(1)} ~ +${f(3)}, 굴려봐야 압니다`;},f:p=>{const m=Math.round((-1+Math.random()*4)*lvScale()*10)/10;p.dmg=Math.max(1,p.dmg+m);return `공격력 ${m>=0?'+':''}${m}`;}},
@@ -5296,7 +5296,7 @@ function clsRows(row){const p=S.p,c=S.cls,r=[];
   if(skelMax()>0)r.push(row('해골 병사',`${(S.skel||[]).length} / ${skelMax()}기, 피해 +${Math.round((p.skD||0)*100)}%, 지속 ${12+(p.skL||0)+(has('deathnova')?4:0)}초`));
   if(c==='elem'&&!has('e_avatar')){const q=routePct(ELEM_TAGS);r.push(row('원소 비율',`화염 ${q[0]}% · 냉기 ${q[1]}% · 번개 ${q[2]}%`,'화염·냉기·번개 시너지를 모을수록 그 원소 공격이 더 자주 나감'));}
   if(c==='alch'||tag('alchemy')>=1){const q=routePct(POT_TAGS);r.push(row('물약 비율',`산성 ${q[0]}% · 폭발 ${q[1]}% · 얼음 ${q[2]}%`,'독·화염·냉기 시너지를 모을수록 그 물약이 더 자주 나옴 (기본 플라스크 포함)'));}
-  if(c==='gunner')r.push(row('탄창',`${magN()}발, 재장전 ${reloadT().toFixed(2)}초`,'재장전은 공격 속도와 무관 (빠른 장전·쌍권총·총기 숙련으로만 단축, 최소 0.35초)'));
+  if(c==='gunner')r.push(row('탄창',`${magN()}발, 재장전 ${reloadT().toFixed(2)}초${reloadRaw()<=RL_MIN+.001?' (최소치 도달)':` (최소 ${RL_MIN}초)`}`,'재장전은 공격 속도와 무관 (빠른 장전·쌍권총·총기 숙련으로만 단축, 최소 0.35초)'));
   if(c==='elem'||tag('elem')>=1||has('elemcoin'))r.push(row('원소 효과 피해','+'+Math.round((elM()-1)*100)+'%'));
   {const c=S.dcat||{};let t=0;for(const k in c)t+=c[k];if(t>0){const l=Object.entries(c).filter(([k,v])=>v/t>=.03).sort((a,b)=>b[1]-a[1]).map(([k,v])=>(DSRC_N[k]||k)+' '+Math.round(v/t*100)+'%');r.push(row('최근 피해 비중',`<span class="swrap">${l.join('<br>')}</span>`,'루트 스탯 카드는 이 비중이 클수록 자주 나옴'));}}
   if(p.cdR)r.push(row('주기형 효과 쿨타임','−'+Math.round(p.cdR*100)+'% <small>/ 40%</small>'));
@@ -5344,7 +5344,7 @@ function elemDrop(e){explode(e.x,e.y,70,pDmg()*2*elM(),'#c8a0ff');for(const o of
 // 리볼버: 탄창 6발 고정
 const magN=()=>6+(has('g_bigmag')?4:0);
 // 재장전: 공격 속도와 무관하게 기본 1초. 재장전 카드·쌍권총·총기 숙련으로만 줄고 최소 0.35초
-const reloadT=()=>Math.max(.35,.8*(has('g_twin')?.5:1)*(has('g_bigmag')?1.25:1)*(S.p.rlM||1)*(1-.05*mlv('m_rapid')));
+const RL_MIN=.35,reloadRaw=()=>.8*(has('g_twin')?.5:1)*(has('g_bigmag')?1.25:1)*(S.p.rlM||1)*(1-.05*mlv('m_rapid')),reloadT=()=>Math.max(RL_MIN,reloadRaw());
 function ricoShot(t,dm,n){const o=nearestE(t,220,new Set([t]));if(o)pBullet(t.x,t.y,Math.atan2(o.y-t.y,o.x-t.x),dm,{sub:'도탄',child:true,r:3,rc:n,hit:new Set([t]),sure:has('f_trickshot'),life:.6,pierce:0});}
 // 해골 최대 수: 실제로 나오는 해골은 30기까지, 넘는 만큼은 해골 피해 배율로 바뀜 (skelRaw/30)
 // 차트 마스터 칭호를 단 힘기범 전용: 사령술사 해골 최대 +10 (상한도 +10)
@@ -7440,7 +7440,11 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
-  {v:155,t:'🛡 보안 · 레이드·결투 정리',items:[
+  {v:156,t:'📊 상한 다 찬 카드는 그만',items:[
+    ['change','📊 총잡이 재장전도 최소 0.35초가 있어요. 최소치에 닿으면 「빠른 장전」 카드가 더 안 나오고, 스탯 창에 「최소치 도달」이 보여요','look'],
+    ['change','📊 「광기」는 공격 속도가 상한일 때, 「질주 본능」은 이동 속도·대시가 둘 다 상한일 때 더 안 나와요','look'],
+  ]},
+{v:155,t:'🛡 보안 · 레이드·결투 정리',items:[
     ['change','🛡 명예의 전당 기록·결투 코드에 이상한 코드가 섞여 들어와도 화면에서 실행되지 않게 막았어요','bug'],
     ['change','🐞 레이드·결투를 하면 저장해 둔 판(이어하기)이 지워지던 문제를 고쳤어요','bug'],
     ['change','🐞 결투에서 이긴 뒤 2초 안에 정산을 누르면 패배로 기록되던 문제, 궁수·강령술사·도박사 상대는 가만히 서 있으면 하나도 안 맞던 문제를 고쳤어요','bug'],
@@ -10620,7 +10624,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=155,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=156,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
