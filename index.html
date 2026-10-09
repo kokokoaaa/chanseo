@@ -4550,6 +4550,7 @@ const EVENTS={
   bounty:{g:'S',T:40,n:'현상수배',icon:'💀',col:'#ffd76a',d:'거대한 현상수배범이 나타남. 40초 안에 쓰러뜨리면 💎 프리즘 증강 + 큰 골드 + 🏅 메달 1',tip:'체력 9배·피해 1.6배의 거대 정예. 회복을 챙기며 싸우기'}
 };
 const evTier=k=>EV_TIER[EVENTS[k].g];
+const evProg=()=>S.ev.k==='hunt'?` 남은 ${S.en.filter(e=>e.alive&&e.hunt).length}`:S.ev.k==='shrine'&&S.ev.ch>0?` ${Math.round(S.ev.ch/2.5*100)}%`:S.ev.k==='chest'?(S.ev.open?' 수호자 처치':S.ev.ch>0?` 여는 중 ${Math.round(S.ev.ch/1.5*100)}%`:''):S.ev.k==='rift'?` ${S.ev.ch.toFixed(1)}/12초`:S.ev.k==='relic'?` ${S.ev.rel.filter(o=>o.got).length}/3`:S.ev.k==='horde'?` ${S.ev.kc}/${S.ev.need}`:S.ev.k==='meteor'?` 피격 ${S.ev.hits}/3`:S.ev.k==='bombs'?` ${S.ev.bombs.filter(o=>o.done).length}/3`:S.ev.k==='totem'?` 남은 ${S.en.filter(e=>e.alive&&e.evTot).length}`:S.ev.k==='altar'&&S.ev.bad?` 남은 ${S.en.filter(e=>e.alive&&e.altarE).length}`:S.ev.k==='fountain'&&S.ev.ch>0?` ${Math.round(S.ev.ch/4*100)}%`:'';
 function pickEvent(){const ks=Object.keys(EVENTS).filter(k=>k!==S.lastEv&&(S.gt||0)>=evTier(k).at);
   const tw=g=>EV_TIER[g].w*(g==='A'||g==='S'?1+.3*Math.min(3,S.chap||0):1),gs=[...new Set(ks.map(k=>EVENTS[k].g))];
   let t=gs.reduce((q,g)=>q+tw(g),0),x=Math.random()*t,g=gs[0];for(const q of gs){if((x-=tw(q))<0){g=q;break;}}
@@ -5122,16 +5123,20 @@ function drawBossGround(){
       for(let i=0;i<8;i++){const a=i*TAU/8;ctx.moveTo(0,0);ctx.lineTo(Math.cos(a)*h.r,Math.sin(a)*h.r);}for(const k of [.35,.65,.95]){for(let i=0;i<=8;i++){const a=i*TAU/8,rr=h.r*k*(i%2?.92:1);i?ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr):ctx.moveTo(Math.cos(a)*rr,Math.sin(a)*rr);}}ctx.strokeStyle='rgba(30,26,40,.55)';ctx.lineWidth=3.2;ctx.stroke();ctx.strokeStyle='#f4f6fc';ctx.lineWidth=1.4;ctx.stroke();ctx.restore();continue;}
     ctx.globalAlpha=Math.min(1,h.life)*.5;ctx.fillStyle=h.col||'#5aa83a';ctx.beginPath();ctx.arc(h.x,h.y,h.r,0,TAU);ctx.fill();ctx.globalAlpha=Math.min(1,h.life)*.7;ctx.strokeStyle=h.col?'#eaf8ff':'#9be86a';ctx.lineWidth=2;ctx.stroke();}ctx.globalAlpha=1;
   for(const t of S.tele){const k=1-t.t/t.T,c=t.col||'#ff4040';ctx.save();
-    if(t.k==='c'){ctx.globalAlpha=.16;ctx.fillStyle=c;ctx.beginPath();ctx.arc(t.x,t.y,t.r,0,TAU);ctx.fill();ctx.globalAlpha=.38;ctx.beginPath();ctx.arc(t.x,t.y,t.r*k,0,TAU);ctx.fill();ctx.globalAlpha=.9;ctx.strokeStyle=c;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(t.x,t.y,t.r,0,TAU);ctx.stroke();}
-    else{ctx.translate(t.x,t.y);ctx.rotate(t.a);ctx.globalAlpha=.16;ctx.fillStyle=c;ctx.fillRect(0,-t.w/2,t.len,t.w);ctx.globalAlpha=.38;ctx.fillRect(0,-t.w/2,t.len*k,t.w);ctx.globalAlpha=.9;ctx.strokeStyle=c;ctx.lineWidth=2.5;ctx.strokeRect(0,-t.w/2,t.len,t.w);}
+    // 예고 범위: 진한 바닥 + 검은 바깥 테두리(밝은 배경에서도 보이게) + 깜빡이는 색 테두리
+    const pu=.75+.25*Math.sin(S.t*(t.t<.5?30:12));
+    if(t.k==='c'){ctx.globalAlpha=.26;ctx.fillStyle=c;ctx.beginPath();ctx.arc(t.x,t.y,t.r,0,TAU);ctx.fill();ctx.globalAlpha=.5;ctx.beginPath();ctx.arc(t.x,t.y,t.r*k,0,TAU);ctx.fill();ctx.globalAlpha=.55;ctx.strokeStyle='#000';ctx.lineWidth=6.5;ctx.beginPath();ctx.arc(t.x,t.y,t.r,0,TAU);ctx.stroke();ctx.globalAlpha=pu;ctx.strokeStyle=c;ctx.lineWidth=3.5;ctx.stroke();}
+    else{ctx.translate(t.x,t.y);ctx.rotate(t.a);ctx.globalAlpha=.26;ctx.fillStyle=c;ctx.fillRect(0,-t.w/2,t.len,t.w);ctx.globalAlpha=.5;ctx.fillRect(0,-t.w/2,t.len*k,t.w);ctx.globalAlpha=.55;ctx.strokeStyle='#000';ctx.lineWidth=6.5;ctx.strokeRect(0,-t.w/2,t.len,t.w);ctx.globalAlpha=pu;ctx.strokeStyle=c;ctx.lineWidth=3.5;ctx.strokeRect(0,-t.w/2,t.len,t.w);}
     // 징조(악몽 후반 즉사급 예고): 깜빡이는 두꺼운 테두리 + 도는 점선 + 해골 표시, 터지기 직전엔 흰색으로 번쩍
     if(t.omen){const urg=t.t<.35,bl=.55+.45*Math.sin(S.t*(urg?40:16));ctx.globalAlpha=bl;ctx.strokeStyle=urg?'#ffffff':'#ff5af0';ctx.lineWidth=urg?6:4;ctx.shadowColor='#ff3ad8';ctx.shadowBlur=14;
       if(t.k==='c'){ctx.beginPath();ctx.arc(t.x,t.y,t.r+3,0,TAU);ctx.stroke();ctx.shadowBlur=0;ctx.setLineDash([10,8]);ctx.lineDashOffset=-S.t*60;ctx.lineWidth=2;ctx.beginPath();ctx.arc(t.x,t.y,t.r*.72,0,TAU);ctx.stroke();ctx.setLineDash([]);
         ctx.globalAlpha=.85;ctx.font=`${Math.round(t.r*.55)}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('☠',t.x,t.y);}
       else{ctx.strokeRect(-2,-t.w/2-2,t.len+4,t.w+4);ctx.shadowBlur=0;ctx.globalAlpha=.85;ctx.font=`${Math.round(t.w*.6)}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';for(let d=t.len*.15;d<t.len;d+=t.len*.3){ctx.save();ctx.translate(d,0);ctx.rotate(-t.a);ctx.fillText('☠',0,0);ctx.restore();}}}
     ctx.restore();}
-  // 징조가 내 발밑에 있으면 머리 위에 경고
-  {const p=S.p;if(p.alive&&S.tele.some(t=>t.omen&&t.t<1.1&&(t.k==='c'?d2(t,p)<(t.r+p.r)**2:(()=>{const ux=Math.cos(t.a),uy=Math.sin(t.a),px=p.x-t.x,py=p.y-t.y,u=clamp(px*ux+py*uy,0,t.len);return Math.hypot(px-ux*u,py-uy*u)<t.w/2+p.r;})()))){ctx.save();ctx.globalAlpha=.6+.4*Math.sin(S.t*25);ctx.font='bold 15px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='rgba(0,0,0,.8)';ctx.strokeText('☠ 피하세요!',p.x,p.y-p.r*3.2);ctx.fillStyle='#ff6af0';ctx.fillText('☠ 피하세요!',p.x,p.y-p.r*3.2);ctx.restore();}}
+  // 피해 있는 예고(징조·보스 패턴)가 내 발밑에 있으면: 머리 위 큰 경고 + 화면 가장자리 빨간 번쩍임(S.dangerT, 화면 위 그리기에서 사용)
+  {const p=S.p,hit=t=>t.dmg&&t.t<1.1&&(t.k==='c'?d2(t,p)<(t.r+p.r)**2:(()=>{const ux=Math.cos(t.a),uy=Math.sin(t.a),px=p.x-t.x,py=p.y-t.y,u=clamp(px*ux+py*uy,0,t.len);return Math.hypot(px-ux*u,py-uy*u)<t.w/2+p.r;})());
+   const D=p.alive?S.tele.filter(hit):[];S.dangerT=D.length?Math.min(...D.map(t=>t.t)):0;S.dangerOm=D.some(t=>t.omen);
+   if(D.length){const om=S.dangerOm,txt=om?'☠ 피하세요!':'⚠ 피하세요!';ctx.save();ctx.globalAlpha=.65+.35*Math.sin(S.t*25);ctx.font='bold 21px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.lineWidth=5;ctx.strokeStyle='rgba(0,0,0,.85)';ctx.strokeText(txt,p.x,p.y-p.r*3.4);ctx.fillStyle=om?'#ff6af0':'#ff5050';ctx.fillText(txt,p.x,p.y-p.r*3.4);ctx.restore();}}
 }
 function drawBeams(){
   const e=S.boss;if(!e||!e.alive||!e.beams)return;const B=e.beams;ctx.save();ctx.lineCap='round';
@@ -6738,13 +6743,29 @@ function draw(){
   ctx.setTransform(DPR*SC,0,0,DPR*SC,0,0);
   if(S.freezeT>0){ctx.fillStyle='rgba(159,211,255,.12)';ctx.fillRect(0,0,W,H);}
   if(evOn('moon')){ctx.fillStyle=`rgba(160,10,20,${.13+Math.sin(S.t*2)*.03})`;ctx.fillRect(0,0,W,H);}
-  {const tg=[];for(const e of S.en){if(!e.alive)continue;const T=ET[e.type];if(T.hid&&!(T.mimic&&!e.awake)&&!e.boss)tg.push([e.x,e.y,T.col,'★ '+T.n]);else if(T.thief&&e.stole)tg.push([e.x,e.y,'#ffb030','💰 소매치기']);}
+  if(S.dangerT>0&&S.p&&S.p.alive){const a=Math.min(.95,(.6+.3*Math.sin(S.t*24))*(S.dangerT<.4?1.25:1)),g=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.28,W/2,H/2,Math.max(W,H)*.6);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,S.dangerOm?`rgba(220,40,200,${a})`:`rgba(230,30,30,${a})`);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+  {const tg=[];for(const e of S.en){if(!e.alive)continue;const T=ET[e.type];if(T.hid&&!(T.mimic&&!e.awake)&&!e.boss)tg.push([e.x,e.y,T.col,'★ '+T.n]);else if(T.mimic&&!e.awake)tg.push([e.x,e.y,'#ffd76a','❓']);else if(T.thief&&e.stole)tg.push([e.x,e.y,'#ffb030','💰 소매치기']);}
    if(evOn('shrine'))tg.push([S.ev.x,S.ev.y,'#9fd3ff','✨ 제단']);if(evOn('chest')&&!S.ev.open)tg.push([S.ev.x,S.ev.y,'#c86aff','🎁 상자']);if(evOn('rift'))tg.push([S.ev.x,S.ev.y,'#7a8aff','🌀 균열']);if(evOn('relic'))for(const o of S.ev.rel)if(!o.got)tg.push([o.x,o.y,'#e0c070','🗿']);if(evOn('fountain'))tg.push([S.ev.x,S.ev.y,'#6ae0d0','⛲ 샘']);if(evOn('altar')&&!S.ev.rolled)tg.push([S.ev.x,S.ev.y,'#ffb347','🎲 제단']);if(evOn('bombs'))for(const o of S.ev.bombs)if(!o.done)tg.push([o.x,o.y,'#ff5a3a','💣']);for(const e of S.en)if(e.alive&&(e.hunt||e.type==='goblin'))tg.push([e.x,e.y,e.hunt?'#ffd76a':'#e8bb4f',e.hunt?'🎯':'💰']);
-   for(const [x,y,c,l] of tg){const sx=x-camX,sy=y-camY;if(sx>=0&&sx<=W&&sy>=0&&sy<=H)continue;const a=Math.atan2(sy-H/2,sx-W/2),ex=clamp(sx,30,W-30),ey=clamp(sy,70,H-40);
-     ctx.save();ctx.translate(ex,ey);ctx.rotate(a);ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(13,0);ctx.lineTo(-7,-8);ctx.lineTo(-7,8);ctx.closePath();ctx.fill();ctx.restore();
-     ctx.fillStyle=c;ctx.font='12px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(l,ex-Math.cos(a)*26,ey-Math.sin(a)*20);}}
-  for(const [B,y0] of [[S.evBanner,H*.18],[S.hidBanner,H*.18+(S.evBanner?76:0)]]){if(!B)continue;const a=Math.max(0,Math.min(1,B.t*2,((B.T||2.6)-B.t)*5));ctx.globalAlpha=a;ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,y0,W,68);ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillStyle=B.col;ctx.font=`${W<500?26:32}px "Do Hyeon",sans-serif`;ctx.fillText(B.s,W/2,y0+24);ctx.fillStyle='#f1e7cf';ctx.font=`${W<500?14:16}px "Gowun Dodum",sans-serif`;ctx.fillText(B.d,W/2,y0+52,W-16);ctx.globalAlpha=1;}
+   // 퀘스트 위치: 화면 밖이면 큰 화살표 + 거리, 화면 안이면 목표 위에 통통 튀는 ▼ (이벤트 목표만 빛기둥)
+   const pp=S.p,evK=S.ev?['✨ 제단','🎁 상자','🌀 균열','🗿','⛲ 샘','🎲 제단','💣','🎯']:[];
+   for(const [x,y,c,l] of tg){const sx=x-camX,sy=y-camY,isEv=evK.includes(l)||l==='💰'||l[0]==='★'||l==='❓';
+     if(sx>=0&&sx<=W&&sy>=0&&sy<=H){if(!isEv)continue;const bob=Math.abs(Math.sin(S.t*5))*10;ctx.save();
+       ctx.globalAlpha=.16+.06*Math.sin(S.t*4);const g=ctx.createLinearGradient(0,sy-220,0,sy);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,c);ctx.fillStyle=g;ctx.fillRect(sx-16,sy-220,32,220);
+       ctx.globalAlpha=1;ctx.translate(sx,sy-46-bob);ctx.fillStyle=c;ctx.strokeStyle='rgba(0,0,0,.85)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-11,-12);ctx.lineTo(11,-12);ctx.lineTo(0,4);ctx.closePath();ctx.stroke();ctx.fill();ctx.restore();continue;}
+     if(l==='❓')continue;const a=Math.atan2(sy-H/2,sx-W/2),ex=clamp(sx,34,W-34),ey=clamp(sy,74,H-44),pul=1+.18*Math.sin(S.t*7),big=isEv?1.5:1;
+     ctx.save();ctx.translate(ex,ey);ctx.rotate(a);ctx.scale(pul*big,pul*big);ctx.fillStyle=c;ctx.strokeStyle='rgba(0,0,0,.85)';ctx.lineWidth=3/big;ctx.beginPath();ctx.moveTo(14,0);ctx.lineTo(-8,-10);ctx.lineTo(-8,10);ctx.closePath();ctx.stroke();ctx.fill();ctx.restore();
+     const dm=Math.round(Math.hypot(x-pp.x,y-pp.y)/30),tx=ex-Math.cos(a)*(isEv?40:28),ty=ey-Math.sin(a)*(isEv?30:20);ctx.font=`bold ${isEv?16:13}px "Do Hyeon",sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=4;ctx.strokeStyle='rgba(0,0,0,.85)';
+     const lt=isEv?l+' '+dm+'m':l;ctx.strokeText(lt,tx,ty);ctx.fillStyle=c;ctx.fillText(lt,tx,ty);}}
+  // 퀘스트 알림판: 화면 위 가운데 (아이콘·이름·진행도·남은 시간 막대). 8초 남으면 깜빡
+  let evBot=H*.18-8;
+  if(S.ev&&EVENTS[S.ev.k]){const E=EVENTS[S.ev.k],TR=evTier(S.ev.k),left=Math.max(0,S.ev.T-S.ev.t),fr=Math.max(0,Math.min(1,left/S.ev.T)),y0=H-(W<500?50:56)-(W<500?96:70),bw=Math.min(W-24,W<500?W-24:440),bx=(W-bw)/2,bh=W<500?50:56,urg=left<8,fl=urg?.5+.5*Math.sin(S.t*12):0;
+    ctx.save();ctx.globalAlpha=.88;ctx.fillStyle='rgba(8,14,12,.82)';ctx.strokeStyle=urg?`rgba(255,${Math.round(90+120*fl)},90,1)`:TR.col;ctx.lineWidth=3;ctx.beginPath();ctx.roundRect?ctx.roundRect(bx,y0,bw,bh,12):ctx.rect(bx,y0,bw,bh);ctx.fill();ctx.stroke();ctx.globalAlpha=1;
+    ctx.textAlign='left';ctx.textBaseline='middle';ctx.font=`${W<500?22:26}px sans-serif`;ctx.fillText(E.icon,bx+12,y0+bh/2-3);
+    ctx.font=`bold ${W<500?16:19}px "Do Hyeon",sans-serif`;ctx.fillStyle=TR.col;const t1=`[${TR.n}] `;ctx.fillText(t1,bx+48,y0+18);const w1=ctx.measureText(t1).width;ctx.fillStyle=E.col;ctx.fillText(E.n+(evProg()||''),bx+48+w1,y0+18,bw-48-w1-60);
+    ctx.textAlign='right';ctx.fillStyle=urg?'#ff7070':'#f1e7cf';ctx.fillText(Math.ceil(left)+'초',bx+bw-12,y0+18);
+    ctx.fillStyle='rgba(255,255,255,.15)';ctx.fillRect(bx+48,y0+bh-15,bw-60,7);ctx.fillStyle=urg?'#ff5a5a':E.col;ctx.fillRect(bx+48,y0+bh-15,(bw-60)*fr,7);ctx.restore();}
+  {const by=Math.max(H*.18,evBot+8);for(const [B,y0] of [[S.evBanner,by],[S.hidBanner,by+(S.evBanner?76:0)]]){if(!B)continue;const a=Math.max(0,Math.min(1,B.t*2,((B.T||2.6)-B.t)*5));ctx.globalAlpha=a;ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,y0,W,68);ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillStyle=B.col;ctx.font=`${W<500?26:32}px "Do Hyeon",sans-serif`;ctx.fillText(B.s,W/2,y0+24);ctx.fillStyle='#f1e7cf';ctx.font=`${W<500?14:16}px "Gowun Dodum",sans-serif`;ctx.fillText(B.d,W/2,y0+52,W-16);ctx.globalAlpha=1;}}
   if(S.flash>0){ctx.fillStyle=`rgba(255,215,106,${S.flash})`;ctx.fillRect(0,0,W,H);}
   if(S.merch){const M=MERCH[S.merch.k],sx=S.merch.x-camX,sy=S.merch.y-camY;if(sx<0||sx>W||sy<0||sy>H){const a=Math.atan2(sy-H/2,sx-W/2),ex=clamp(sx,30,W-30),ey=clamp(sy,70,H-40);
     ctx.save();ctx.translate(ex,ey);ctx.rotate(a);ctx.fillStyle='#d6a94a';ctx.beginPath();ctx.moveTo(14,0);ctx.lineTo(-8,-9);ctx.lineTo(-8,9);ctx.closePath();ctx.fill();ctx.restore();
@@ -6875,7 +6896,7 @@ function hud(){
   else lv.classList.remove('on');
   const bf=[];if(endless()&&nmMin()>0)bf.push(`<span style="color:#ff4f6a">☠ 악몽 압박 · 적 피해 ×${nmDm().toFixed(1)} · 보스 체력 ×${nmBossHp().toFixed(1)} · 한 방 상한 ${Math.round(ocOf()*100)}%</span>`);if(endless()&&S.nmB)bf.push(`<span style="color:#ffd76a">✦ 악몽 축복 ${S.nmB}중첩 (공격력 +${S.nmB*15}%)</span>`);if(S.win&&S.winT==null){const n=S.en.filter(e=>e.alive&&!e.boss).length;bf.push(`<span style="color:#ffd76a">🧹 남은 적 ${n} · ${Math.max(0,45-Math.floor(S.clT||0))}초</span>`);}if(S.buffT.jack>0)bf.push(`<span style="color:#ffd76a">천운 ${S.buffT.jack.toFixed(1)}</span>`);if(S.buffT.atk>0)bf.push(`<span style="color:#ffb347">공격력 +30% ${S.buffT.atk.toFixed(1)}</span>`);
   if(S.buffT.vuln>0)bf.push(`<span style="color:#ff6060">받는 피해 +50% ${S.buffT.vuln.toFixed(1)}</span>`);if(S.buffT.slow>0)bf.push(`<span style="color:#9fd3ff">둔화 ${S.buffT.slow.toFixed(1)}</span>`);
-  if(S.ev){const E=EVENTS[S.ev.k],left=Math.max(0,S.ev.T-S.ev.t).toFixed(0);const ex=S.ev.k==='hunt'?` 남은 ${S.en.filter(e=>e.alive&&e.hunt).length}`:S.ev.k==='shrine'&&S.ev.ch>0?` ${Math.round(S.ev.ch/2.5*100)}%`:S.ev.k==='chest'?(S.ev.open?' 수호자 처치':S.ev.ch>0?` 여는 중 ${Math.round(S.ev.ch/1.5*100)}%`:''):S.ev.k==='rift'?` ${S.ev.ch.toFixed(1)}/12초`:S.ev.k==='relic'?` ${S.ev.rel.filter(o=>o.got).length}/3`:S.ev.k==='horde'?` ${S.ev.kc}/${S.ev.need}`:S.ev.k==='meteor'?` 피격 ${S.ev.hits}/3`:S.ev.k==='bombs'?` ${S.ev.bombs.filter(o=>o.done).length}/3`:S.ev.k==='totem'?` 남은 ${S.en.filter(e=>e.alive&&e.evTot).length}`:S.ev.k==='altar'&&S.ev.bad?` 남은 ${S.en.filter(e=>e.alive&&e.altarE).length}`:S.ev.k==='fountain'&&S.ev.ch>0?` ${Math.round(S.ev.ch/4*100)}%`:'';const TRc=evTier(S.ev.k);bf.push(`<span style="color:${E.col}"><b style="color:${TRc.col}">[${TRc.n}]</b> ${E.icon} ${E.n}${ex} ${left}</span>`);}
+  // 이벤트(퀘스트)는 화면 위 가운데 큰 알림판으로 (drawEvBoard)
   for(const e of S.en){if(!e.alive||e.boss)continue;const T=ET[e.type];if(!T.hid)continue;if(T.mimic&&!e.awake){bf.push(`<span style="color:${T.col}">★ 수상한 상자 · 근처를 살펴보세요</span>`);continue;}const hl=Math.max(0,e.hl??22);bf.push(`<span style="color:${hl<6?'#ff6060':T.col}">★ ${T.n} 도망까지 ${Math.ceil(hl)}초</span>`);}
   if(S.bless&&S.bless.t>0)bf.push(`<span style="color:#9fd3ff">${S.bless.n} ${S.bless.t.toFixed(0)}</span>`);
   if(S.thr&&S.thr.length)bf.push(`<span style="color:#7bff8a">👻 망령 부하 ${S.thr.length}/${THR_MAX}</span>`);
@@ -7351,6 +7372,12 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:120,t:'👀 잘 보이게',items:[
+    ['change','📋 진행 중인 이벤트(퀘스트)를 화면 위 가운데 <b>큰 알림판</b>으로 보여 줘요: 이름·진행도·남은 시간 막대 (8초 남으면 깜빡)','look'],
+    ['change','🧭 이벤트 목표·숨겨진 몬스터·보물 고블린이 화면 밖이면 <b>큰 화살표 + 거리(m)</b>, 화면 안이면 머리 위에 통통 튀는 ▼ 표시와 빛기둥. 수상한 상자도 화면 안에 오면 ▼로 알려 줘요','look'],
+    ['change','🟢 접속 중 인원이 왔다 갔다 하던 문제: 실시간 서버가 살아 있으면 그 목록만 쓰고, 예비 서버는 실시간 서버가 끊겼을 때만 써요','bug'],
+    ['change','⚠ 보스 패턴·징조 같은 <b>예고 공격 범위를 더 진하고 두껍게</b> (밝은 바닥에서도 보이게 검은 테두리). 내가 그 범위 안에 있으면 화면 가장자리가 빨갛게 번쩍이고 「피하세요!」가 크게 떠요','look'],
+  ]},
   {v:119,t:'🖱 창 닫힘 수정',items:[
     ['change','🖱 창 안에서 드래그하다가 창 바깥에서 손을 떼면 창이 닫혀 버리던 문제를 고쳤어요. 이제 바깥을 눌렀다 뗄 때만 닫혀요','bug'],
   ]},
@@ -9287,11 +9314,13 @@ function fbLoad(){return new Promise((res,rej)=>{if(window.firebase&&firebase.da
   const nx=()=>{if(i>=L.length)return res();const s=document.createElement('script');s.src=`https://www.gstatic.com/firebasejs/${FB_V}/firebase-${L[i++]}-compat.js`;s.onload=nx;s.onerror=()=>rej(new Error('load'));document.head.appendChild(s);};nx();});}
 async function fbInit(){try{await fbTO(fbLoad(),10000);if(!firebase.apps.length)firebase.initializeApp(FB_CFG);const cr=await fbTO(firebase.auth().signInAnonymously(),10000);
     const db=firebase.database();FB={db,uid:cr.user.uid};db.ref('.info/serverTimeOffset').on('value',s=>{FB_OFF=+s.val()||0;});fbStart();}catch(e){FB=null;}}
-function onlSet(){ONLINE=onlMerge([...ONL_FB,...ONL_AS]);onlPaint();}
+// 접속 목록: 실시간 서버(파이어베이스)가 살아 있으면 그 목록만 (예비 서버는 신호만 받아 둠). 실시간 서버가 끊겼을 때만 예비 서버 목록으로
+// (예전엔 둘을 합쳐서, 나간 사람을 예비 서버가 더 오래 기억하는 동안 인원이 왔다 갔다 했음)
+let FB_SEEN=0;function onlSet(){const fbOk=FB&&Date.now()-FB_SEEN<90000;ONLINE=onlMerge(fbOk?ONL_FB:ONL_AS);onlPaint();}
 function fbPres(){if(!FB)return;try{if(onlIdle()>=2){FB.db.ref('online/'+FB.uid).remove().catch(()=>{});return;}FB.db.ref('online/'+FB.uid).set({n:myNick()||'모험가',a:onlAct(),fx:myFx(),b:BUILD,d:onlId(),t:firebase.database.ServerValue.TIMESTAMP});}catch(e){}}
 function fbStart(){const db=FB.db,me=FB.uid;
   db.ref('online/'+me).onDisconnect().remove();fbPres();setInterval(()=>{if(!document.hidden)fbPres();},20000);
-  db.ref('online').on('value',s=>{const v=s.val()||{},now=fbNow();ONL_FB=Object.keys(v).filter(k=>v[k]&&now-(+v[k].t||0)<75000).map(k=>({n:String(v[k].n||'모험가').slice(0,12),a:String(v[k].a||'').slice(0,24),fx:String(v[k].fx||''),b:+v[k].b||0,u:k,f:1,s:Math.max(0,Math.round((now-(+v[k].t||0))/1000)),me:k===me?1:0}));onlSet();});
+  db.ref('online').on('value',s=>{FB_SEEN=Date.now();const v=s.val()||{},now=fbNow();ONL_FB=Object.keys(v).filter(k=>v[k]&&now-(+v[k].t||0)<75000).map(k=>({n:String(v[k].n||'모험가').slice(0,12),a:String(v[k].a||'').slice(0,24),fx:String(v[k].fx||''),b:+v[k].b||0,u:k,f:1,s:Math.max(0,Math.round((now-(+v[k].t||0))/1000)),me:k===me?1:0}));onlSet();});
   db.ref('chat').orderByChild('t').limitToLast(60).on('value',s=>{const L=[];s.forEach(c=>{const x=c.val();if(x&&x.m)L.push({t:+x.t||0,n:String(x.n||'모험가').slice(0,12),m:String(x.m).slice(0,80),fx:String(x.fx||''),u:x.u});});L.sort((a,b)=>a.t-b.t);CHAT=L;if(L.length)CHAT_CT=Math.max(CHAT_CT,L[L.length-1].t);if(CHAT_OPEN)chatPaint();else onlPaint();});
   setTimeout(()=>{try{db.ref('chat').orderByChild('t').endAt(fbNow()-86400000).limitToFirst(40).once('value',s=>s.forEach(c=>{c.ref.remove().catch(()=>{});}));}catch(e){}},8000);
   // 관전당하는 쪽: 누가 보기 시작하면 0.5초마다 내 상태를 올림 (보는 사람이 15초 넘게 신호가 없으면 멈춤)
@@ -10224,7 +10253,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=119,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=120,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
