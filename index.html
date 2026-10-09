@@ -7308,8 +7308,8 @@ function slotResolve(r){
 function gameOver(win){
   if(S&&S.goDone&&!duelOn())return;
   if(duelOn()){duelOver(S.duel&&S.duel.ko?'draw':win===true);return;}
+  if(raidOn()){if(win!==true&&!S.raidWon&&!S.quitEnd&&(S.raidTok||0)>0&&S.boss&&S.boss.alive){S.raidTok--;const p=S.p;p.alive=true;p.deadAt=null;hpSync();p.hp=p.maxHp*.5;p.inv=2.5;S.mode='play';hide();raidRoles();burst(p.x,p.y,'#7be08f',24);toast(`✨ 부활 기회를 써서 다시 일어났다! (남은 ${S.raidTok})`);return;}S.goDone=true;raidOver(win===true||!!S.raidWon);return;}
   S.goDone=true;
-  if(raidOn()){if(win!==true&&!S.raidWon&&(S.raidTok||0)>0&&S.boss&&S.boss.alive){S.raidTok--;const p=S.p;p.alive=true;p.deadAt=null;hpSync();p.hp=p.maxHp*.5;p.inv=2.5;S.mode='play';hide();raidRoles();burst(p.x,p.y,'#7be08f',24);toast(`✨ 부활 기회를 써서 다시 일어났다! (남은 ${S.raidTok})`);return;}raidOver(win===true);return;}
   win=win===true;S.mode='over';joy=null;clearSave();
   // 봉인 해제권은 아직 봉인된 직업이 남아 있을 때만 (이미 가진 해제권 수만큼은 빼고)
   const tkNeed=()=>Object.keys(CLASSES).filter(k=>CLASSES[k].lock&&!clsOpen(k)).length-(META.tk||0);
@@ -8270,7 +8270,7 @@ function beginDuel(meId,opp){const me=myHeroes().find(h=>h.id===meId);if(!me||!o
   const r=heroPow(opp.hero)/heroPow(me);
   // 예전 환산(보정 없음)으로 걸릴 시간 → 보정된 시간에 맞춰 내 피해 배율을 조정
   const tMe=duelTTK(me,opp.hero),tOpp=duelTTK(opp.hero,me),oldMe=DUEL_T*(heroEHP(opp.hero)/DUEL_HREF)/(heroD(me)/DUEL_DREF);
-  S.duel={me:me.id,opp,r,meScore:me.score||0,tMe,tOpp,meHero:me};S.raidK=1e6/(DUEL_DREF*DUEL_T)*(DUEL_HREF/heroEHP(opp.hero))*DUEL_SMALL*oldMe/tMe;
+  S.duel={me:me.id,opp,r,meScore:me.score||0,tMe,tOpp,meHero:me,at:performance.now()};S.raidK=1e6/(DUEL_DREF*DUEL_T)*(DUEL_HREF/heroEHP(opp.hero))*DUEL_SMALL*oldMe/tMe;
   const p=S.p;p.x=WW/2;p.y=WH/2+150;hpSync();p.hp=p.maxHp;p.inv=2;p.alive=true;p.barrier=barrierMax();
   S.arena={x:WW/2,y:WH/2,r:1100,tr:850};S.rushT=2.5;S.mode='play';hide();
   toast(`⚔ 결투! ${heroName(me)} vs ${opp.n} (${CLASSES[opp.c].n})`);}
@@ -8359,7 +8359,7 @@ function drawRival(e){const x=e.x,y=e.y,R=e.r;ctx.save();ctx.fillStyle='rgba(0,0
   ctx.restore();}
 function duelOver(win){if(S.duelDone)return;S.duelDone=1;S.mode='over';joy=null;clearSave();const draw=win==='draw';win=win===true;const D=S.duel||{},R=duelRec(),t=Math.round((S.bt||0)-(S.bStart||0)),me=myHeroes().find(h=>h.id===D.me);
   // 내 캐릭터(보관함·내 이름의 전당 기록)와의 결투는 연습: 전적·보상 없음
-  const selfD=!!(D.opp&&(D.opp.src==='🗃 내 캐릭터'||(D.opp.hof&&D.opp.hof.name&&D.opp.hof.name===myNick())||(D.opp.hero&&D.opp.hero.id&&myHeroes().some(x=>x.id===D.opp.hero.id)))),W=duelReward(D.r||1,D.opp),prac=W.prac||selfD,medals=prac?0:win?W.w:draw?W.d:W.l;
+  const selfD=!!(D.opp&&(D.opp.src==='🗃 내 캐릭터'||(D.opp.hof&&D.opp.hof.name&&D.opp.hof.name===myNick())||(D.opp.hero&&D.opp.hero.id&&myHeroes().some(x=>x.id===D.opp.hero.id)))),W=duelReward(D.r||1,D.opp),prac=W.prac||selfD,fought=!S.quitEnd&&(performance.now()-(D.at||0))>=10000,medals=prac?0:win?W.w:!fought?0:draw?W.d:W.l;
   if(!prac){if(win)R.w++;else if(draw)R.d=(R.d||0)+1;else R.l++;if(win&&D.opp)R.best=Math.max(R.best||0,D.opp.s||0);if(win)duelFarmAdd(D.opp);}
   duelLogAdd(me,D,win?'w':draw?'d':'l',t,prac);
   META.medals+=medals;META.total+=medals;saveMeta();if(!prac)duelPush();achCheck({duelW:R.w,upset:!prac&&win&&(D.r||1)>=2});
@@ -8485,8 +8485,14 @@ let CS_T=0,CS_LAST=0;
 // 이 기기가 그 이름 데이터를 처음 올리기 전에는 서버 데이터를 확인: 서버 쪽 메달이 더 많으면(더 진행된 데이터) 덮어쓰지 않고 불러오기를 권함
 const csFlag=n=>{try{return localStorage.getItem('chanseo_csok_'+n)==='1';}catch(e){return false;}},csFlagSet=n=>{try{localStorage.setItem('chanseo_csok_'+n,'1');}catch(e){}};
 async function csUpload(force,manual){if(!csOk())return false;clearTimeout(CS_T);const now=Date.now();if(!force&&now-CS_LAST<60000){CS_T=setTimeout(()=>csUpload(true),60000-(now-CS_LAST));return false;}CS_LAST=now;
-  const nm=myNick();if(!csFlag(nm)&&!manual){const j=await csLoad(nm,MYKEY);if(!j||!j.ok)return false;const sm=j.data?csMd(j.data):null,mm=Math.floor(META.medals||0);
-    if(j.data&&!j.none&&(sm||0)>mm){if(ov.classList.contains('home')&&!(S&&S.started&&S.mode!=='start'))csOffer(nm,MYKEY,startScreen);else toast(`☁ 서버에 「${nm}」의 더 진행된 데이터가 있어요 (메달 ${sm}). 💾 데이터 → ☁ 서버에서 불러오기로 가져오세요`);return false;}csFlagSet(nm);}
+  // 자동 저장 전 서버 데이터 확인: (처음) 서버 쪽이 더 진행됐으면, (그 뒤) 다른 기기가 내가 마지막으로 본 뒤에 올렸으면 덮어쓰지 않고 고르게 함. 덮어쓸 땐 서버 데이터를 이 기기에 백업
+  const nm=myNick();if(!manual){const j=await csLoad(nm,MYKEY);if(!j||!j.ok)return false;
+    if(j.data&&!j.none){let last=0;try{last=+localStorage.getItem('chanseo_csat')||0;}catch(e){}
+      const ask=msg=>{if(ov.classList.contains('home')&&!(S&&S.started&&S.mode!=='start'))csOffer(nm,MYKEY,startScreen);else toast(msg);return false;};
+      if(!csFlag(nm)&&csScore(csSumCode(j.data))>csScore(csSumLocal()))return ask(`☁ 서버에 「${nm}」의 더 진행된 데이터가 있어요. 💾 데이터 → ☁ 서버에서 불러오기로 가져오세요`);
+      if(csFlag(nm)&&last&&(+j.at||0)>last+5000)return ask(`☁ 다른 기기에서 「${nm}」 데이터를 더 나중에 저장했어요. 💾 데이터에서 어느 쪽을 쓸지 골라 주세요`);
+      bakSave('srv','자동 저장 전 서버 데이터 ('+nm+')',j.data);}
+    csFlagSet(nm);}
   try{await fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({csave:1,name:myNick(),k:MYKEY,at:now,md:Math.floor(META.medals||0),data:syncExport(true)})});try{localStorage.setItem('chanseo_csat',String(now));}catch(e){}csFlagSet(nm);return true;}catch(e){return false;}}
 const csSoon=()=>{if(!csOk())return;clearTimeout(CS_T);CS_T=setTimeout(()=>csUpload(),30000);};
 async function csLoad(n,k){const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),15000):0;
@@ -8501,6 +8507,7 @@ const csSum=d=>{try{const m=JSON.parse(d.chanseo_meta||'{}'),h=(()=>{try{return 
 const bakSave=(slot,label,code)=>{try{localStorage.setItem('chanseo_bak_'+slot,JSON.stringify({at:Date.now(),label,code}));}catch(e){}};
 const bakGet=slot=>{try{const b=JSON.parse(localStorage.getItem('chanseo_bak_'+slot)||'null');return b&&b.code?b:null;}catch(e){return null;}};
 const csSumCode=code=>{try{return csSum(JSON.parse(decodeURIComponent(escape(atob(String(code).slice(4))))).d);}catch(e){return null;}};
+const csScore=x=>x?(x.md||0)+(x.lv||0)*200+(x.cls||0)*500+(x.cos||0)*100+(x.hero||0)*50:0;
 const csSumLocal=()=>{let h=null,c='';try{h=localStorage.getItem('chanseo_heroes');c=localStorage.getItem('chipdungeon_cls')||'';}catch(e){}return csSum({chanseo_meta:JSON.stringify(META),chanseo_heroes:h,chipdungeon_cls:c});};
 // 데이터 고르기 창용 캐릭터 그림 (그 데이터의 마지막 직업 + 장착 외형·오라·날개·장비)
 const csAvImg=x=>{try{const a=x&&x.av;if(!a)return '';const u=hofAv(a.cls,a.skin,a.aura,a.gear,'');return u?`<img src="${u}" alt="" style="width:138px;height:138px;image-rendering:pixelated;display:block;margin:0 auto">`:'';}catch(e){return '';}};
@@ -8509,7 +8516,7 @@ const csMd=code=>{try{const o=JSON.parse(decodeURIComponent(escape(atob(String(c
 async function csOffer(n,k,after){if(SRV_V<56){after();return;}const j=await csLoad(n,k);
   if(!j||!j.ok){after();return;}if(j.none||!j.data){after();csFlagSet(n);setTimeout(()=>csUpload(true,true),500);return;}
   const dt=new Date(j.at||0),ds=`${dt.getMonth()+1}월 ${dt.getDate()}일 ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`,sm=csMd(j.data),mm=Math.floor(META.medals||0);
-  const A=csSumCode(j.data)||{md:sm||0,lv:0,cls:0,cos:0,hero:0,eq:[]},B=csSumLocal()||{md:mm,lv:0,cls:0,cos:0,hero:0},sc=x=>x.md+x.lv*200+x.cls*500+x.cos*100+x.hero*50,rec=sc(A)>=sc(B)?'A':'B';
+  const A=csSumCode(j.data)||{md:sm||0,lv:0,cls:0,cos:0,hero:0,eq:[]},B=csSumLocal()||{md:mm,lv:0,cls:0,cos:0,hero:0},sc=csScore,rec=sc(A)>=sc(B)?'A':'B';
   const box=(t,x,when,me)=>`<div style="padding:12px;border:2px solid ${rec===me?'var(--brass)':'rgba(255,255,255,.2)'};border-radius:12px;background:${rec===me?'rgba(255,215,106,.08)':'transparent'}"><b>${t}</b>${rec===me?' <span style="color:#ffd76a;font-size:12px">⭐ 추천 (더 많이 진행됨)</span>':''}<div style="margin:6px 0 2px;padding:4px;border-radius:10px;background:radial-gradient(circle at 50% 70%,rgba(255,215,106,.18),rgba(0,0,0,.25) 70%)">${csAvImg(x)}<div style="text-align:center;font-size:12px;opacity:.8">${x.av&&CLASSES[x.av.cls]?CLASSES[x.av.cls].n:''}${x.ti?' · 「'+esc(x.ti)+'」':''}</div></div><div style="margin-top:6px;line-height:1.7;font-size:14px">🏅 메달 ${x.md.toLocaleString()}개${x.tot?` <small style="opacity:.7">(지금까지 ${x.tot.toLocaleString()}개 획득)</small>`:''}<br>⚒ 영구 강화 합계 ${x.lv}<br>🔓 해금 직업 ${x.cls}개<br>🏆 도전과제 ${x.ach||0}개<br>👕 외형 ${x.cos}개 보유<br>🗃 내 캐릭터 ${x.hero}명</div>
     <div style="margin-top:6px;padding:6px 8px;border-radius:8px;background:rgba(0,0,0,.25);font-size:13px;line-height:1.6"><b style="color:#ffd76a">지금 장착</b><br>🏷 칭호: ${x.ti?'「'+esc(x.ti)+'」':'없음'}<br>${(x.eq&&x.eq.length)?x.eq.map(esc).join('<br>'):'외형 장착 없음'}</div><small style="opacity:.75">${when}</small></div>`;
   show(`<div class="shophead"><h2 style="font-size:24px">☁ 어느 데이터를 쓸까요?</h2><button class="btn" id="csNo">돌아가기</button></div>
@@ -8517,7 +8524,7 @@ async function csOffer(n,k,after){if(SRV_V<56){after();return;}const j=await csL
   <div class="two" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0">${box('☁ 서버 데이터',A,ds+' 저장','A')}${box('📱 지금 이 기기',B,'이 컴퓨터·폰','B')}</div>
   <div class="btnrow"><button class="btn ${rec==='A'?'primary':''}" id="csYes">☁ 서버 데이터 불러오기</button><button class="btn ${rec==='B'?'primary':''}" id="csKeep">📱 이 기기 데이터 쓰기 (서버에 덮어쓰기)</button></div>
   <p class="sub" style="margin-top:6px">불러오면 이 기기의 메달·강화·해금·외형·내 캐릭터가 서버 데이터로 바뀌어요. 바뀌기 전 데이터는 이 기기에 <b>자동 백업</b>돼서 💾 데이터 옮기기에서 되돌릴 수 있어요.</p><p class="sub" id="csMsg"></p>`);
-  $('csYes').onclick=()=>{try{bakSave('dev','불러오기 전 이 기기 데이터 ('+n+')',syncExport());syncImport(j.data);localStorage.setItem('chanseo_key',k);localStorage.setItem('chipdungeon_nick',n);csFlagSet(n);nKeySet(n,k);$('csMsg').textContent='불러왔어요! 다시 불러옵니다…';setTimeout(()=>location.reload(),600);}catch(e){$('csMsg').textContent='불러오기 실패: '+e.message;}};
+  $('csYes').onclick=()=>{try{bakSave('dev','불러오기 전 이 기기 데이터 ('+n+')',syncExport());syncImport(j.data);try{localStorage.setItem('chanseo_csat',String(+j.at||Date.now()));}catch(e){}localStorage.setItem('chanseo_key',k);localStorage.setItem('chipdungeon_nick',n);csFlagSet(n);nKeySet(n,k);$('csMsg').textContent='불러왔어요! 다시 불러옵니다…';setTimeout(()=>location.reload(),600);}catch(e){$('csMsg').textContent='불러오기 실패: '+e.message;}};
   $('csKeep').onclick=()=>{const b=$('csKeep');if(!b.dataset.ok){b.dataset.ok=1;b.textContent='한 번 더 누르면 서버 데이터를 덮어써요';return;}bakSave('srv','덮어쓰기 전 서버 데이터 ('+n+')',j.data);after();csFlagSet(n);setTimeout(()=>csUpload(true,true),300);};
   $('csNo').onclick=after;}
 function openSync(){const code=syncExport();
@@ -10139,13 +10146,13 @@ refreshAutoBtns();
 
 /* ---------- save ---------- */
 const SAVE_KEY='chipdungeon_save_v1';
-const PKEYS=['skM','fyR','dmgP','rateP','xpM','block','token','hp','maxHp','speed','dmg','rate','bspd','range','multi','pierce','crit','critM','luck','goldM','vuln','orbR','orbM','dashMul','armor','dodge','lifesteal','regen','magnet','shots','pkills','lastCd','soulN','fyO','skN','hpP','hpB','hpLM',
+const PKEYS=['ulCdM','ulDm','skM','fyR','dmgP','rateP','xpM','block','token','hp','maxHp','speed','dmg','rate','bspd','range','multi','pierce','crit','critM','luck','goldM','vuln','orbR','orbM','dashMul','armor','dodge','lifesteal','regen','magnet','shots','pkills','lastCd','soulN','fyO','skN','hpP','hpB','hpLM',
   // 스탯 카드·증강이 쌓는 계열별 보너스 (이어하기 때 사라지던 것들)
   'cdR','sumD','tuL','psD','fiD','thD','slD','hoD','shD','gvR','mkD','wvD','auraM','auraD','skD','skL','lbD','rlM','elD','fyC','fyD','vnR','vnD','ptR','ptD','hdP','hdD','rfN','snR','vpN','dashD'];
-const SKEYS=['shopPend','eggDone','eggK','altN','nmC','dragonPend','prismN','hidN','hidK','hbDone','arr','nmB','gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','takeAll','keys','vipStock','vipRoll','buys','cbuys','fused','potN','vineN','seals','banL','noAug','bossT','bioO','dlog','bStart','bHit','bHpF','boostN','boostB','bonusSt','curB','augN'];
+const SKEYS=['amT','dpsMax','maxGold','phoenixCd','shopPend','eggDone','eggK','altN','nmC','dragonPend','prismN','hidN','hidK','hbDone','arr','nmB','gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','takeAll','keys','vipStock','vipRoll','buys','cbuys','fused','potN','vineN','seals','banL','noAug','bossT','bioO','dlog','bStart','bHit','bHpF','boostN','boostB','bonusSt','curB','augN'];
 function saveGame(silent){
   if(S&&(dfM().raid||dfM().duel))return false;
-  if(!S||!S.started||!S.p.alive||S.mode==='over'||S.mode==='dying'||S.mode==='revive')return false;
+  if(!S||!S.started||!S.p.alive||S.win||S.mode==='over'||S.mode==='dying'||S.mode==='revive')return false;
   S.bHpF=S.boss&&S.boss.alive?S.boss.hp/S.boss.maxHp:0;
   const d={v:1,at:Date.now(),p:{},s:{},augs:S.augs.map(a=>[a.id,a.lv,a.q||1,a.pq||0,a.dl||null]),st:S.st};
   for(const k of PKEYS)d.p[k]=S.p[k];for(const k of SKEYS)d.s[k]=S[k];
@@ -10161,7 +10168,7 @@ function continueGame(d){
   for(const k of SKEYS)if(d.s[k]!==undefined)S[k]=d.s[k];
   if(d.s.augN===undefined)S.augN=Math.floor((S.picks||0)/4);// 예전 저장(4레벨마다): 받은 만큼으로 맞춰서 증강이 연달아 쏟아지지 않게
   S.st=d.st||S.st;
-  S.augs=d.augs.map(([id,lv,q,pq,dl])=>{const f=[...FUSIONS,...VFUSIONS].find(x=>x.id===id);if(f){const o=fusionObj(f);if(pq)o.pq=pq;return o;}const a=AUGS.find(x=>x.id===id)||VIPS.find(x=>x.id===id)||DRAGON.find(x=>x.id===id);return a?{...a,lv,q:q||1,dl:dl||undefined}:null;}).filter(Boolean);
+  S.augs=d.augs.map(([id,lv,q,pq,dl])=>{const f=[...FUSIONS,...VFUSIONS].find(x=>x.id===id);if(f){const o=fusionObj(f);if(pq)o.pq=pq;if(dl)o.dl=dl;return o;}const a=AUGS.find(x=>x.id===id)||VIPS.find(x=>x.id===id)||DRAGON.find(x=>x.id===id);return a?{...a,lv,q:q||1,dl:dl||undefined}:null;}).filter(Boolean);
   tagCount();S.round=diffAt(effT());
   S.started=true;const p=S.p;p.x=WW/2;p.y=WH/2;p.inv=2;p.alive=true;p.barrier=barrierMax();
   S.mode='play';hide();CH_PEND=true;toast('이어하기');
