@@ -3547,15 +3547,18 @@ const GRADE=u=>u>=.9?{n:'최상',col:'#ffd76a'}:u>=.6?{n:'상',col:'#7fc4f2'}:u>
 // %가 곧 실제 수치인 항목(치명타, 회피, 흡혈, 골드·경험치 획득 등)은 같은 숫자 반복이라 표시 안 함
 const sgn=(v,d)=>(v>=0?'+':'−')+Math.abs(v).toFixed(d).replace(/\.0+$/,'');
 // 증강의 최대 체력 % 감소도 실제로 깎이는 양을 괄호로 (n번 적용 기준)
-function hpLoss(f,d,n=1){if(!f||!S||!S.p||!/최대 체력 [−-][\d.]+%/.test(d||''))return '';const c={...S.p};try{for(let k=0;k<n;k++)f(c);}catch(e){return '';}const x=Math.round(c.maxHp-S.p.maxHp);return x?` <small style="opacity:.65">(최대 체력 ${sgn(x,0)})</small>`:'';}
+function hpLoss(f,d,n=1){if(!f||!S||!S.p||!/최대 체력 [−-][\d.]+%/.test(d||''))return '';const c={...S.p};try{for(let k=0;k<n;k++)f(c);}catch(e){return '';}const x=Math.round(c.maxHp-S.p.maxHp);return x?`<small style="display:block;opacity:.65">(최대 체력 ${sgn(x,0)})</small>`:'';}
 // 스탯 카드: 공격력·공격 속도·최대 체력·이동 속도 줄은 카드 글(+10% 등) 대신 처음부터 실제로 오르는 수치 + 지금 대비 몇 % 오르는지만 보여 줌 (숫자 카드와 % 카드를 바로 비교). 카드를 복사본에 적용해 최종 수치 차이를 계산
 const PV=[['공격력',()=>pDmg(),1],['공격 속도',()=>pRate(),2],['최대 체력',()=>(hpSync(),S.p.maxHp),0],['이동 속도',()=>moveSpd(),0]];
-function withActual(desc,f){const W=a=>a.map(l=>`<div>${l}</div>`).join(''),L=desc.split(', ');if(!S||!S.p||!f)return W(L);
+// 카드 설명: 쉼표로 줄을 나누되 괄호 안 쉼표는 그대로, 줄 끝 괄호 설명은 다음 줄에 작게
+const cardSplit=d=>{const o=[];let dep=0,cur='';for(let i=0;i<d.length;i++){const ch=d[i];if(ch==='('||ch==='（')dep++;else if((ch===')'||ch==='）')&&dep>0)dep--;if(!dep&&ch===','&&d[i+1]===' '){o.push(cur);cur='';i++;continue;}cur+=ch;}o.push(cur);return o;};
+const cardParen=l=>l.replace(/ \(([^()]*)\)$/,'<span style="display:block;opacity:.7;font-size:.85em">($1)</span>');
+function withActual(desc,f){const W=a=>a.map(l=>`<div>${cardParen(l)}</div>`).join(''),L=cardSplit(desc);if(!S||!S.p||!f)return W(L);
   const P0=S.p,c={...P0},v=g=>{try{return g();}catch(e){return null;}};
   return W(L.map(line=>{const m=PV.find(([k])=>line.startsWith(k));if(!m)return line;
     const a=v(m[1]);let b=null;S.p=c;try{if(!c.__ap){c.__ap=1;f(c);}b=v(m[1]);}catch(e){}finally{S.p=P0;}
     if(a==null||b==null||Math.abs(b-a)<Math.pow(10,-m[2])/2)return line;const d=b-a;
-    const pc=a>0?Math.abs(d/a*100):0;return `${m[0]} <span style="font-weight:700">${d>0?'+':'−'}${Math.abs(d).toFixed(m[2])}</span>${pc>=.1?` <span style="opacity:.7;font-size:.85em">(지금보다 ${d>0?'+':'−'}${pc.toFixed(pc<10?1:0)}%)</span>`:''}`;}));}
+    const pc=a>0?Math.abs(d/a*100):0;return `${m[0]} <span style="font-weight:700">${d>0?'+':'−'}${Math.abs(d).toFixed(m[2])}</span>${pc>=.1?`<span style="display:block;opacity:.7;font-size:.85em">(지금보다 ${d>0?'+':'−'}${pc.toFixed(pc<10?1:0)}%)</span>`:''}`;}));}
 // 증강 미리보기: 이 증강을 얻었을 때(★2) 주요 스탯이 얼마나 바뀌는지. 잠깐 적용해서 계산한 뒤 그대로 되돌림
 const PREV_ST=[['공격력',()=>pDmg(),1],['공격 속도',()=>pRate(),2,'/초'],['최대 체력',()=>(hpSync(),S.p.maxHp),0],['방어력',()=>armorEff(),0],['회피',()=>dodgeC()*100,1,'%'],['치명타 확률',()=>critC()*100,1,'%'],['치명타 피해',()=>critMul()*100,0,'%'],['이동 속도',()=>moveSpd(),0],['사거리',()=>pureMelee()?meleeR():S.p.range,0],['탄속',()=>pureMelee()?null:S.p.bspd,0],['관통',()=>pureMelee()?meleeCap():S.p.pierce,0],['탄환',()=>pureMelee()?meleeArc(S.p.multi):S.p.multi,0,'발'],['흡혈',()=>S.p.lifesteal*100,1,'%'],['초당 재생',()=>S.p.regen,1],['행운',()=>LK(),1],['골드 획득',()=>S.p.goldM*100,0,'%'],['대시 재사용',()=>dashCdVal(),2,'초']];
 function augPreview(a){
@@ -7416,7 +7419,10 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
-  {v:151,t:'🎨 이름과 테두리 나누기',items:[
+  {v:152,t:'🎨 카드 보기 편하게',items:[
+    ['change','👀 스탯 카드의 「(지금보다 +9.8%)」 같은 괄호 설명이 다음 줄에 작게 따로 나와요. 괄호 안 쉼표 때문에 줄이 이상하게 나뉘던 것도 고쳤어요','look'],
+  ]},
+{v:151,t:'🎨 이름과 테두리 나누기',items:[
     ['change','🎨 이름 꾸미기는 이제 이름 색·효과만, 테두리는 「테두리」에서 따로 골라요. 테두리가 붙어 있던 이름(네온·황제·은하·성스러운·용·눈꽃·기사·우주)을 가진 사람은 비슷한 테두리를 무료로 받고, 끼고 있던 이름에 맞춰 테두리도 함께 착용돼요','look'],
     ['new','✨ 새 테두리: 네온 테두리 · 은하 테두리 · 기사의 테두리','look'],
   ]},
@@ -10561,7 +10567,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=151,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=152,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
