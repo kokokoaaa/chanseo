@@ -1,6 +1,10 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v6.0
+// 찬서 명예의 전당 서버 (Google Apps Script) v6.1
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
+//
+// v6.0 → v6.1 바뀐 점
+// - 멘트는 기록을 처음 올리거나 더 좋은 기록으로 바뀔 때만 저장 (점수가 안 오른 기록을 다시 올려 멘트만 바꾸던 구멍 막음)
+// - 멘트 고치기(cmEdit)는 개발자 키가 있을 때만 (부적절한 멘트 정리용)
 //
 // v5.9 → v6.0 바뀐 점
 // - 모든 이름 주인 초기화 (개발자 키): ?unownall=1&dk= → 전당 기록·계정 시트의 주인 열쇠를 전부 지움. 그 뒤 각 이름으로 처음 올리는 기기가 새 주인
@@ -257,7 +261,7 @@ function ping_(q) {
   if (id && !q.bye) devLog_(id, str_(q.n, 12) || '모험가', str_(q.ua, 30));
   let w = 0;
   try { w = id && c.get('watch_' + id) ? 1 : 0; } catch (err) {}
-  return out_({ v: 60, ct, w, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 61, ct, w, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
 }
 
 // 전체 채팅 (최근 CHAT_MAX개만 보관)
@@ -488,6 +492,15 @@ function doPost(e) {
       return out_({ ok: true, result: 'sup' });
     }
     if (d.csave) return csave_(d);
+    // 멘트 고치기 (개발자 키만, 새 줄은 만들지 않음)
+    if (d.cmEdit) {
+      if (String(d.dk || '') !== DEV_KEY) return out_({ ok: false, err: 'key' });
+      const nm = str_(d.name, 12), df = String(d.diff || ''), last = s.getLastRow();
+      if (!nm || !df || last < 2) return out_({ ok: false });
+      const v = s.getRange(2, 1, last - 1, LIST_COLS).getValues(), cc = HEAD.indexOf('comment') + 1;let n = 0;
+      v.forEach((r, i) => { const o = Object.fromEntries(HEAD.slice(0, LIST_COLS).map((h, j) => [h, r[j]])); if (String(o.name) === nm && fixDiff_(o) === df) { s.getRange(i + 2, cc).setValue(str_(d.comment, 40)); n++; } });
+      return out_({ ok: !!n, result: 'cmEdit', n });
+    }
     // 이름 주인 확인: 주인이 있는 이름은 같은 열쇠로만. 주인이 없으면 열쇠와 함께 처음 올린 기기가 주인
     const nm0 = str_(d.name, 12) || '익명', my = kh_(d.k), own = nm0 === '익명' ? { rows: [], kh: '' } : owner_(s, nm0);
     if (!own.kh && nm0 !== '익명') own.kh = acctKh_(nm0);
@@ -504,14 +517,6 @@ function doPost(e) {
       acctSetKh_(nm0, nk);
       ownerSet_(nm0, nk);
       return out_({ ok: true, result: 'rekey', n: own.rows.length });
-    }
-    // 멘트 고치기 (주인 확인은 위에서 끝남, 새 줄은 만들지 않음)
-    if (d.cmEdit) {
-      const nm = str_(d.name, 12), df = String(d.diff || ''), last = s.getLastRow();
-      if (!nm || !df || last < 2) return out_({ ok: false });
-      const v = s.getRange(2, 1, last - 1, LIST_COLS).getValues(), cc = HEAD.indexOf('comment') + 1;let n = 0;
-      v.forEach((r, i) => { const o = Object.fromEntries(HEAD.slice(0, LIST_COLS).map((h, j) => [h, r[j]])); if (String(o.name) === nm && fixDiff_(o) === df) { s.getRange(i + 2, cc).setValue(str_(d.comment, 40)); n++; } });
-      return out_({ ok: !!n, result: 'cmEdit', n });
     }
     // 결투 전적만 갱신 (그 이름의 기록이 있을 때만, 새 줄은 만들지 않음)
     if (d.dwOnly) {
@@ -543,10 +548,6 @@ function doPost(e) {
     if (r.dw) s.getRange(row, HEAD.indexOf('dw') + 1).setValue(r.dw);
     // 점수는 그대로여도 캐릭터 정보가 비어 있으면 채워 둠
     if (r.hero && !String(s.getRange(row, HEAD.indexOf('hero') + 1).getValue() || '')) { s.getRange(row, HEAD.indexOf('hero') + 1).setValue(r.hero); s.getRange(row, HEAD.indexOf('hh') + 1).setValue(1); }
-    if (r.comment) {
-      s.getRange(row, HEAD.indexOf('comment') + 1).setValue(r.comment);
-      return out_({ ok: true, result: 'comment' });
-    }
     return out_({ ok: true, result: 'kept' });
   } finally {
     lock.releaseLock();

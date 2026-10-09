@@ -479,7 +479,7 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 /* 명예의 전당 */
 .home .hof{flex:1;position:relative;margin:0!important;padding:12px!important;border-radius:16px!important;border:2px solid rgba(232,196,110,.75)!important;background:linear-gradient(180deg,#22413a,#183029)!important;box-shadow:0 0 0 1px rgba(0,0,0,.4),0 6px 22px rgba(0,0,0,.35)}
 .home .hof h2{text-align:center;font-size:26px;letter-spacing:3px;margin:0 0 6px;background:linear-gradient(180deg,#fffbe0,#ffd76a 50%,#c88a1a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #3a2200)}
-.home .hof .hsub{margin:2px 0 6px}.home .hof .dtabs.hof3{grid-template-columns:repeat(6,1fr);gap:4px}.home .hof .dtabs.hof3 .btn{font-size:16px!important;padding:11px 2px!important;min-height:46px;white-space:nowrap;border-radius:12px!important}
+.home .hof .hsub{margin:2px 0 6px}.hof .hrecent{float:right;margin:0 0 -40px!important;padding:5px 10px!important;font-size:13px!important;border-color:#7be08f!important;color:#c8f5d0}.home .hof .hrecent{position:absolute;right:14px;top:14px;float:none;margin:0!important;z-index:2}.home .hof .dtabs.hof3{grid-template-columns:repeat(6,1fr);gap:4px}.home .hof .dtabs.hof3 .btn{font-size:16px!important;padding:11px 2px!important;min-height:46px;white-space:nowrap;border-radius:12px!important}
 .home .stagebg{position:relative;margin:4px -2px 8px;padding:64px 0 0;border-radius:12px;overflow:hidden;background:radial-gradient(ellipse at 50% 100%,rgba(255,200,120,.35),transparent 55%),linear-gradient(180deg,#1a0408 0%,#2a0810 45%,#3a1408 100%);box-shadow:inset 0 0 30px rgba(0,0,0,.7)}
 .home .stagebg .valance{position:absolute;left:0;right:0;top:0;height:22px;background:repeating-radial-gradient(circle at 18px -6px,#b01828 0 16px,#7a0a18 16px 18px,transparent 18px 36px),linear-gradient(180deg,#c01c2e,#7a0a18);background-size:36px 22px,100% 100%;box-shadow:0 4px 8px rgba(0,0,0,.6);z-index:3}
 .home .stagebg .valance::after{content:'';position:absolute;left:0;right:0;bottom:-3px;height:4px;background:linear-gradient(90deg,#ffd76a,#fff3c4,#ffd76a)}
@@ -7367,6 +7367,10 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:128,t:'💬 멘트는 한 번',items:[
+    ['change','💬 명예의 전당 멘트는 <b>기록을 올릴 때 한 번만</b> 쓸 수 있어요 (말풍선을 눌러 고치는 기능은 없앴어요). 점수가 안 오른 기록을 다시 올려 멘트만 바꾸는 것도 막았어요','play'],
+    ['change','📜 「내 최근 기록」 버튼을 명예의 전당 오른쪽 위로 옮겼어요. 깜빡하고 안 올린 판(지옥 이상, 최근 5판)을 나중에 멘트와 함께 등록할 수 있어요','look'],
+  ]},
   {v:127,t:'🟢 접속 목록 정리',items:[
     ['change','🟢 접속 목록에 같은 사람이 두 번씩 나오던 문제를 고쳤어요 (이름 끝 공백이나 기기마다 다른 한글 저장 방식 때문에 다른 사람으로 보던 것)','bug'],
   ]},
@@ -9635,8 +9639,8 @@ async function hofStatOpen(b){if(!b)return;let w=document.getElementById('hofSt'
 function hofTipHide(){const t=document.getElementById('hofTip');if(t)t.style.display='none';}
 function boardHtml(){
   const hd=HOF_KEYS.includes(HOF_DIFF)?HOF_DIFF:'nightmare';
-  const head=`<h2>🏆 명예의 전당</h2><div class="dtabs hof3">${HOF_KEYS.map(k=>`<button class="btn ${k===hd?'primary':''}" data-hd="${k}">${HOF_TAB[k]}</button>`).join('')}</div><p class="hsub">${hd==='raid'?'높은 단계 → 빠른 처치 순':hd==='duel'?'':DIFF[hd].n+' 난이도 순위'}</p>`;
-  const note=t=>head+`<p class="sub" style="text-align:center;margin:0">${t}</p>`+recentBtn();
+  const head=`${(()=>{const n=recentList().length;return n?`<button class="btn hrecent" id="hofRecent" title="깜빡하고 명예의 전당에 안 올린 판을 나중에 등록 (멘트도 그때 한 번)">📜 내 최근 기록 ${n}</button>`:'';})()}<h2>🏆 명예의 전당</h2><div class="dtabs hof3">${HOF_KEYS.map(k=>`<button class="btn ${k===hd?'primary':''}" data-hd="${k}">${HOF_TAB[k]}</button>`).join('')}</div><p class="hsub">${hd==='raid'?'높은 단계 → 빠른 처치 순':hd==='duel'?'':DIFF[hd].n+' 난이도 순위'}</p>`;
+  const note=t=>head+`<p class="sub" style="text-align:center;margin:0">${t}</p>`;
   if(RSTATE==='off')return note('랭킹 서버에 연결하지 못했어요. 인터넷 연결을 확인해주세요.');
   if(RSTATE==='loading')return note('랭킹 불러오는 중…');
   if(RSTATE==='err')return note('랭킹을 불러오지 못했어요.');
@@ -9657,20 +9661,20 @@ function boardHtml(){
     return `<span class="hteam">${me1}${b.team.map(q=>{const x=hofAv(q.cls,q.skin,'','',q.look);return x?`<img class="${c} mate" src="${x}" alt="" title="${CLASSES[q.cls].n}">`:'';}).join('')}</span>`;};
   HOF_B=B;const del=i=>DEV&&hd!=='duel'?`<button class="hdel" data-del="${i}" title="이 기록 삭제 (개발자)">🗑</button>`:'';// 시상식 무대: 같은 재질의 이어진 단상에 1~3등이 서고(왕관 금·은·동), 점수·칭호·한마디는 아래 순위 목록에
   const pod=[1,0,2].map(i=>{const b=B[i],k=['g','s','b'][i];if(!b)return `<div class="pc ${k} empty"><div class="blk"><span>${i+1}</span></div></div>`;
-    return `<div class="pc ${k}" data-hi="${i}"><div class="who">${(()=>{const cm=hd==='raid'?'':String(b.comment||'').slice(0,40),mine=me(b)&&SHEET&&SRV_V>=58;return cm||mine?`<span class="pbub ${cm?'':'empty'} ${mine?'mine':''}" ${mine?`data-cme="${i}" title="눌러서 내 멘트 고치기"`:''}>${cm?esc(cm):'💬 멘트 쓰기'}${mine&&cm?' <i>✏</i>':''}</span>`:'';})()}<span class="crown c${i}">👑</span>${avT(b,'hav','walk')}<span class="sh"></span></div><div class="blk"><span class="pnm">${nm(b).replace(/<small class="htt[^]*?<\/small>/,'')}</span><span>${i+1}</span></div></div>`;}).join('');
+    return `<div class="pc ${k}" data-hi="${i}"><div class="who">${(()=>{const cm=hd==='raid'?'':String(b.comment||'').slice(0,40),mine=DEV&&SHEET&&SRV_V>=61;return cm||mine?`<span class="pbub ${cm?'':'empty'} ${mine?'mine':''}" ${mine?`data-cme="${i}" title="(개발자) 눌러서 멘트 고치기"`:''}>${cm?esc(cm):'💬 멘트 쓰기'}${mine&&cm?' <i>✏</i>':''}</span>`:'';})()}<span class="crown c${i}">👑</span>${avT(b,'hav','walk')}<span class="sh"></span></div><div class="blk"><span class="pnm">${nm(b).replace(/<small class="htt[^]*?<\/small>/,'')}</span><span>${i+1}</span></div></div>`;}).join('');
   const top=`<div class="stagebg"><div class="curtL"></div><div class="curtR"></div><div class="valance"></div><div class="spot s1"></div><div class="spot s2"></div><div class="spot s3"></div><div class="conf"></div><div class="pod4"><div class="row">${pod}</div><div class="floor"></div></div><div class="carpet"></div></div>`;
   const rest=B.slice(0,HOF_ALL?30:7).map((b,i)=>`<div data-hi="${i}" class="ri r${i+1} ${me(b)?'me':''} ${b.frame?'fr-'+b.frame:''} ${b.fx?'hc-'+b.fx:''}">${del(i)}<em>${i<3?['🥇','🥈','🥉'][i]:i+1}</em>${avT(b,'hav s','idle')}<div class="mid">${nm(b)}${me(b)?' <small>(나)</small>':''}${cmT(b)?`<i>${cmT(b)}</i>`:''}<span class="rsub">${rcT(b).replace(/<br>/g,' · ')}</span></div><small class="rsc">${psT(b)}</small></div>`).join('');
   const more=B.length>7?`<button class="btn more" id="hofMore">${HOF_ALL?'접기':`전체 순위 보기 (${Math.min(B.length,30)}위까지)`}</button>`:'';
-  const rcB=recentBtn();
+  const rcB='';
   return head+top+`<div class="rlist">${rest}</div>${more}${rcB}`;
 }
 function refreshBoard(){const el=document.getElementById('board');hofTipHide();if(!el)return;el.innerHTML=boardHtml();hofTipBind(el);el.querySelectorAll('[data-hd]').forEach(b=>b.onclick=()=>{HOF_DIFF=b.dataset.hd;HOF_ALL=false;refreshBoard();});const m=document.getElementById('hofMore');if(m)m.onclick=()=>{HOF_ALL=!HOF_ALL;refreshBoard();};const rcb=document.getElementById('hofRecent');if(rcb)rcb.onclick=openRecent;
   el.querySelectorAll('[data-del]').forEach(x=>x.onclick=ev=>{ev.stopPropagation();const b=HOF_B[+x.dataset.del];if(b)hofDel(b);});
   el.querySelectorAll('[data-cme]').forEach(x=>x.onclick=ev=>{ev.stopPropagation();const b=HOF_B[+x.dataset.cme];if(b)cmEdit(b);});}
-// 내 명예의 전당 멘트 고치기 (서버 v5.8): 이름 주인 열쇠로 확인. 빈 칸이면 멘트 지움
-async function cmEdit(b){if(!b||b.name!==myNick()||!SHEET_URL||SRV_V<58)return;const v=prompt(`「${b.name}」 ${DIFF[b.diff]?DIFF[b.diff].n:b.diff} 기록의 멘트 (40자까지 · 비우면 지워요)`,b.comment||'');if(v==null)return;
+// 명예의 전당 멘트 고치기: 개발자만 (부적절한 멘트 정리용 · 서버 v6.1). 멘트는 기록 올릴 때 한 번만 쓰는 게 원칙
+async function cmEdit(b){if(!b||!DEV||!SHEET_URL||SRV_V<61)return;const v=prompt(`「${b.name}」 ${DIFF[b.diff]?DIFF[b.diff].n:b.diff} 기록의 멘트 (40자까지 · 비우면 지워요)`,b.comment||'');if(v==null)return;
   const c=String(v).replace(/\s+/g,' ').trim().slice(0,40);
-  try{await fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({cmEdit:1,name:b.name,diff:b.diff,k:MYKEY,comment:c})});}catch(e){toast('저장하지 못했어요. 인터넷 연결을 확인해 주세요');return;}
+  try{await fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({cmEdit:1,name:b.name,diff:b.diff,k:MYKEY,dk:DEV_K,comment:c})});}catch(e){toast('저장하지 못했어요. 인터넷 연결을 확인해 주세요');return;}
   for(const x of (BOARD||[]))if(x.name===b.name&&x.diff===b.diff)x.comment=c;try{const m=myRecs();if(m[b.diff]&&m[b.diff].name===b.name){m[b.diff].comment=c;localStorage.setItem('chanseo_myrec',JSON.stringify(m));}}catch(e){}
   refreshBoard();toast(c?'💬 멘트를 바꿨어요':'💬 멘트를 지웠어요');setTimeout(loadSheet,3000);}
 // 개발자 모드: 명예의 전당 기록 삭제 (서버 v5.3 + 개발자 키). 이 기기에 남은 같은 기록도 같이 지움
@@ -10292,7 +10296,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=127,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=128,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
