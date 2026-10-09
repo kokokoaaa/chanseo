@@ -1,6 +1,9 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v6.5
+// 찬서 명예의 전당 서버 (Google Apps Script) v6.6
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
+//
+// v6.5 → v6.6 바뀐 점
+// - 보안: 기록의 직업 칸(cls)에서 HTML 특수문자(< > " ' ` & \\)를 지움 (명예의 전당에 코드가 심어지는 것 방지)
 //
 // v6.4 → v6.5 바뀐 점
 // - 이름 비밀번호 맞히기 막기: 한 이름에 틀린 열쇠가 10분 구간에 40번 넘게 오면 잠시 확인을 멈춤 (?own · cload)
@@ -196,7 +199,7 @@ const timePts_ = (t, v2) => !v2 || t <= 600 ? t * 12 : 7200 + 12 * ((t - 600) + 
 function clean_(d, at) {
   const r = {
     name: str_(d.name, 12) || '익명',
-    cls: str_(d.cls, 120),
+    cls: str_(d.cls, 120).replace(/[<>"'`&\\]/g, ''), // 직업 칸에 HTML이 섞여 들어오지 않게
     time: num_(d.time, 360000),
     lvl: num_(d.lvl, 100000),
     kills: num_(d.kills, 10000000),
@@ -288,7 +291,7 @@ function ping_(q) {
   // 관리자 쪽지: 이 이름 앞으로 안 읽은 쪽지가 있다는 표시(캐시)가 있을 때만 시트를 읽음 → 평소 접속 신호는 가벼움
   let dm = [];
   try { const nm = dmKey_(q.n); if (nm && !q.bye && (c.get('dm_' + nm) || !c.get('dmc_' + nm))) { c.put('dmc_' + nm, '1', 21600); const own = ownerKh_(str_(q.n, 12)); if (!own || own === kh_(q.k)) { dm = dmFor_(nm); if (!dm.length) c.remove('dm_' + nm); } } } catch (err) {}
-  return out_({ v: 65, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 66, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
