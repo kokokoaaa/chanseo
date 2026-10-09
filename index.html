@@ -9628,7 +9628,7 @@ function openNick(){cosPreviewHide();const cur=myNick();
           else{const ok=await nameOwned3(n,nk);
             if(ok===false){setMyKey(nk);toast2='🔑 비밀번호 확인! 이 컴퓨터에서도 '+n+' 이름을 써요';offer=nk;}
             else if(ok===null){msg('랭킹 서버에 연결하지 못했어요. 인터넷 연결을 확인하고 다시 저장해 주세요.');return;}
-            else{msg(`'${n}'의 비밀번호가 맞지 않아요. 이름을 처음 쓴 컴퓨터·폰에서 👤 내 이름 → 같은 이름에 비밀번호를 넣고 「저장」을 한 번 더 눌러 저장한 뒤, 여기서 다시 해 주세요.`);return;}}}
+            else{msg(`'${n}'은(는) 다른 기기가 주인으로 등록돼 있어서 이 비밀번호로는 열 수 없어요. (그 기기에서 비밀번호 없이 먼저 쓰였거나, 다른 비밀번호예요) 내 이름이 맞으면 관리자에게 「${n}」 이름 주인 지우기를 부탁한 뒤 다시 해 주세요. 처음 보는 이름이면 다른 사람이 이미 쓰는 이름이에요.`);return;}}}
         else if(own&&n!==cur){msg(`'${n}'은(는) 다른 사람이 이미 쓰고 있는 이름이에요. 내 이름이면 이름 비밀번호를 같이 써 주세요.`);return;}
         else if(own){msg(`'${n}'은(는) 지금 이 컴퓨터에서 주인 확인이 안 돼요. 다른 컴퓨터에서 정한 이름 비밀번호를 같이 써 주세요.`);return;}
       }finally{$('nkSave').disabled=false;}}
