@@ -7367,6 +7367,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:123,t:'🟢 접속 인원 안정',items:[
+    ['change','🟢 접속 인원이 왔다 갔다 하던 문제를 한 번 더 고쳤어요: 인터넷이 잠깐 끊겼다 붙으면 바로 다시 접속으로 표시하고, 다른 탭을 보고 있어도 접속 중으로 유지해요 (5분 동안 손을 안 대면 💤 자리 비움)','bug'],
+  ]},
   {v:122,t:'💬 단상 말풍선',items:[
     ['new','💬 명예의 전당 1~3등 단상 위 캐릭터 머리 위에 <b>내 멘트 말풍선</b>이 떠요. 내 기록이면 말풍선을 눌러 <b>멘트를 언제든 고칠 수</b> 있어요 (40자까지 · 비우면 지워져요)','look'],
   ]},
@@ -9317,11 +9320,16 @@ async function fbInit(){try{await fbTO(fbLoad(),10000);if(!firebase.apps.length)
     const db=firebase.database();FB={db,uid:cr.user.uid};db.ref('.info/serverTimeOffset').on('value',s=>{FB_OFF=+s.val()||0;});fbStart();}catch(e){FB=null;}}
 // 접속 목록: 실시간 서버(파이어베이스)가 살아 있으면 그 목록만 (예비 서버는 신호만 받아 둠). 실시간 서버가 끊겼을 때만 예비 서버 목록으로
 // (예전엔 둘을 합쳐서, 나간 사람을 예비 서버가 더 오래 기억하는 동안 인원이 왔다 갔다 했음)
-let FB_SEEN=0;function onlSet(){const fbOk=FB&&Date.now()-FB_SEEN<90000;ONLINE=onlMerge(fbOk?ONL_FB:ONL_AS);onlPaint();}
+let FB_SEEN=0;const ONL_KEEP=new Map();
+// 목록에서 막 빠진 사람은 30초 동안 그대로 보여 줌 (잠깐 끊겼다 다시 붙는 동안 인원이 깜빡이지 않게)
+function onlSet(){const fbOk=FB&&Date.now()-FB_SEEN<90000,now=Date.now(),L=onlMerge(fbOk?ONL_FB:ONL_AS);for(const x of L)ONL_KEEP.set(x.n,{x,t:now});
+  for(const [k,o] of ONL_KEEP){if(now-o.t>30000){ONL_KEEP.delete(k);continue;}if(!L.some(y=>y.n===k))L.push({...o.x,me:0});}ONLINE=onlMerge(L);onlPaint();}
 function fbPres(){if(!FB)return;try{if(onlIdle()>=2){FB.db.ref('online/'+FB.uid).remove().catch(()=>{});return;}FB.db.ref('online/'+FB.uid).set({n:myNick()||'모험가',a:onlAct(),fx:myFx(),b:BUILD,d:onlId(),t:firebase.database.ServerValue.TIMESTAMP});}catch(e){}}
 function fbStart(){const db=FB.db,me=FB.uid;
-  db.ref('online/'+me).onDisconnect().remove();fbPres();setInterval(()=>{if(!document.hidden)fbPres();},20000);
-  db.ref('online').on('value',s=>{FB_SEEN=Date.now();const v=s.val()||{},now=fbNow();ONL_FB=Object.keys(v).filter(k=>v[k]&&now-(+v[k].t||0)<75000).map(k=>({n:String(v[k].n||'모험가').slice(0,12),a:String(v[k].a||'').slice(0,24),fx:String(v[k].fx||''),b:+v[k].b||0,u:k,f:1,s:Math.max(0,Math.round((now-(+v[k].t||0))/1000)),me:k===me?1:0}));onlSet();});
+  // 연결이 끊겼다 다시 붙으면 바로 다시 알리고 「나가면 지우기」 예약도 다시 걸어 둠 (예전엔 빠졌다가 20초 뒤에야 다시 생겨서 인원이 왔다 갔다 함)
+  db.ref('.info/connected').on('value',c=>{if(c.val()===true){try{db.ref('online/'+me).onDisconnect().remove();}catch(e){}fbPres();}});
+  db.ref('online/'+me).onDisconnect().remove();fbPres();setInterval(fbPres,20000); // 다른 탭에 있어도 신호 유지 (자리 비움은 5분 무입력으로 판단)
+  db.ref('online').on('value',s=>{FB_SEEN=Date.now();const v=s.val()||{},now=fbNow();ONL_FB=Object.keys(v).filter(k=>v[k]&&now-(+v[k].t||0)<100000).map(k=>({n:String(v[k].n||'모험가').slice(0,12),a:String(v[k].a||'').slice(0,24),fx:String(v[k].fx||''),b:+v[k].b||0,u:k,f:1,s:Math.max(0,Math.round((now-(+v[k].t||0))/1000)),me:k===me?1:0}));onlSet();});
   db.ref('chat').orderByChild('t').limitToLast(60).on('value',s=>{const L=[];s.forEach(c=>{const x=c.val();if(x&&x.m)L.push({t:+x.t||0,n:String(x.n||'모험가').slice(0,12),m:String(x.m).slice(0,80),fx:String(x.fx||''),u:x.u});});L.sort((a,b)=>a.t-b.t);CHAT=L;if(L.length)CHAT_CT=Math.max(CHAT_CT,L[L.length-1].t);if(CHAT_OPEN)chatPaint();else onlPaint();});
   setTimeout(()=>{try{db.ref('chat').orderByChild('t').endAt(fbNow()-86400000).limitToFirst(40).once('value',s=>s.forEach(c=>{c.ref.remove().catch(()=>{});}));}catch(e){}},8000);
   // 관전당하는 쪽: 누가 보기 시작하면 0.5초마다 내 상태를 올림 (보는 사람이 15초 넘게 신호가 없으면 멈춤)
@@ -10261,7 +10269,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=122,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=123,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
