@@ -7420,6 +7420,7 @@ const PATCH_NOTES=[
     ['change','🐞 이름을 바꾸려다 거절되면 내 이름 열쇠가 꼬여서 내 이름인데 「다른 사람 이름」이 되던 문제, 비밀번호로 이름을 되찾아도 채팅이 계속 막히던 문제를 고쳤어요','bug'],
     ['change','🐞 내 캐릭터로 만든 결투 코드로 나와 싸우면 연습 경기인데도 보상·「이변의 주인공」을 받던 문제, 강화 되돌리기(−)로 예전 싼값에 산 강화가 지금 값으로 환불되던 문제를 고쳤어요','bug'],
     ['change','🐞 마우스로 화면을 끌다가 버튼 위에서 놓으면 캐릭터가 계속 걸어가던 문제를 고쳤어요','bug'],
+    ['change','⚒ 대장간 「장비 기록 되살리기」는 강화 실패·파괴를 되돌리는 데 쓰일 수 있어서 관리자만 쓸 수 있게 바꿨어요. 장비가 이상하게 바뀌었으면 관리자에게 말해 주세요','play'],
   ]},
   {v:144,t:'🐞 엉뚱한 합체 알림',items:[
     ['change','🐞 알림이 여러 개 겹치면 뒤 알림이 <b>약 20분 뒤에</b> 떠서, 한참 전에 된 합체·시너지 알림이 상관없을 때 화면 위에 뜨던 문제를 고쳤어요. 이제 1.3초 간격으로 바로 차례대로 떠요','bug'],
@@ -8440,14 +8441,14 @@ function openForge(){cosPreviewHide();devGearBak();const card=k=>{const G=GEAR[k
   ${gearMsg?`<div class="gmsg">${gearMsg}</div>`:''}
   <div class="ggrid">${Object.keys(GEAR).map(card).join('')}</div>
   <div class="gprot">${[1,5,10].map(n=>`<button class="btn" data-gprot="${n}" ${!medOk(PROT_COST*n)?'disabled':''}>🛡 보호권 ${n}장 · 🏅 ${(PROT_COST*n).toLocaleString()}</button>`).join('')}</div><p class="sub" style="text-align:center;margin:2px 0 6px">🛡 보호권: 실패해도 단계가 내려가거나 부서지지 않아요 (+5 이상 강화에서 사용)</p>
-  <div class="btnrow"><button class="btn ghost" id="gHist">↩ 장비 기록 (최근 변경 되살리기)</button></div><div id="gHistL"></div>
+  ${DEV?'<div class="btnrow"><button class="btn ghost" id="gHist">↩ 장비 기록 (최근 변경 되살리기 · 관리자)</button></div><div id="gHistL"></div>':''}
   ${DEV?`<div class="btnrow"><button class="btn" id="gDevBack">🛠 테스트 전 장비로 되돌리기</button><button class="btn" id="gDevZero">🛠 장비 모두 초기화 (+0, 구입 전)</button></div>`:''}
   <p class="sub">강화 성공률: +1 90% · +2 80% · +3 70% · +4 60% · +5 50% · +6 45% · +7 38% · +8 30% · +9 22% · +10 15%. +5부터 실패하면 한 단계 내려가고, +6부터는 부서져서 +0이 될 수도 있어요 (+6 3% … +10 12%). 지금까지 강화 ${META.gearLog.tries||0}번 · 최고 +${META.gearLog.best||0} · 부서진 장비 ${META.gearLog.broke||0}개</p>`);
   {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}gearMsg='';gearLiveStart($('gLive'));
   $('gBack').onclick=startScreen;
   if($('gDevBack'))$('gDevBack').onclick=()=>{let b=null;try{b=JSON.parse(localStorage.getItem(GEAR_BAK)||'null');}catch(e){}if(!b){gearMsg='되돌릴 기록이 없어요';openForge();return;}
     if(!confirm('대장간을 처음 열었을 때의 장비 상태로 되돌릴까요?'))return;META.gear=b.gear||{};META.prot=b.prot||0;META.gearLog=b.gearLog||{};saveMeta();try{localStorage.removeItem(GEAR_BAK);}catch(e){}gearMsg='🛠 테스트 전 장비로 되돌렸어요';openForge();};
-  $('gHist').onclick=()=>{let L=[];try{L=JSON.parse(localStorage.getItem(GEAR_HIST)||'[]');}catch(e){}const el=$('gHistL');
+  if($('gHist'))$('gHist').onclick=()=>{let L=[];try{L=JSON.parse(localStorage.getItem(GEAR_HIST)||'[]');}catch(e){}const el=$('gHistL');
     const sum=g=>Object.keys(GEAR).filter(k=>g[k]&&g[k].own).map(k=>GEAR[k].ico+'+'+(g[k].lv||0)).join(' ')||'장비 없음';
     el.innerHTML=L.length?`<div class="sub" style="text-align:left;margin:6px 0">장비가 바뀔 때마다 남긴 기록이에요. 누르면 그때 장비로 되돌려요 (메달은 그대로)</div>`+L.map((h,i)=>{const d=new Date(h.t);return `<button class="btn ghost" data-gh="${i}" style="display:block;width:100%;margin:3px 0;text-align:left">${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')} · ${sum(h.gear)}</button>`;}).join(''):'<div class="sub">아직 남은 기록이 없어요</div>';
     el.querySelectorAll('[data-gh]').forEach(b=>b.onclick=()=>{const h=L[+b.dataset.gh];if(!h||!confirm('이 기록의 장비로 되돌릴까요?\n'+sum(h.gear)))return;META.gear=h.gear||{};META.prot=h.prot||0;META.gearLog=h.gearLog||{};saveMeta();gearMsg='↩ 장비를 되돌렸어요';openForge();});};
