@@ -270,6 +270,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 .icell.uq{box-shadow:0 0 0 2px #ff5a3c,0 0 12px rgba(255,90,60,.7)}.iset{position:absolute;left:3px;top:3px;width:8px;height:8px;border-radius:50%}.icw{position:absolute;left:2px;bottom:1px;font-size:9px;font-style:normal;color:#ffd76a}
 .lootsum{margin:0 0 10px;padding:8px 10px;border:2px solid var(--brass);border-radius:12px;background:rgba(0,0,0,.3);text-align:center}.lootsum div{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin:6px 0}.lootsum span{padding:3px 8px;border:2px solid var(--rc);border-radius:8px;color:var(--rc);font-size:13px;background:rgba(0,0,0,.3)}.lootsum small{color:var(--muted)}
 .dollg{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}.dollc{display:flex;flex-direction:column;align-items:center;padding:8px;border:2px solid var(--brass);border-radius:12px;background:radial-gradient(circle at 50% 45%,rgba(214,169,74,.2),rgba(0,0,0,.3) 70%)}.dollc canvas{width:160px;height:176px;image-rendering:pixelated}.dollc small{text-align:center;font-size:12px}
+.repPick{display:flex;flex-wrap:wrap;align-items:center;gap:6px;flex:1}.repPick select{flex:1 1 90px;padding:5px 8px;border-radius:8px;background:#0d2a20;color:var(--ivory);border:1px solid var(--brass);font:inherit;font-size:13px}.repPick .btn{margin:0;padding:5px 12px;font-size:13px;width:auto!important;flex:0 0 auto}.repPick small{width:100%;font-size:11px}.repPick small.ok{color:#7be08f}.repPick small.warn{color:#ffb070}
 .hoftip{position:fixed;z-index:9999;display:none;max-width:290px;padding:9px 12px;border-radius:10px;background:rgba(18,26,22,.96);border:1px solid var(--brass);color:var(--ivory);font-size:13px;line-height:1.55;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.5)}
 .hof .more{display:block;width:100%;margin-top:8px;font-size:15px;padding:7px}
 @media (max-width:520px){.podium{grid-template-columns:1fr 1fr;gap:6px}.pcard.p1{order:0;grid-column:1/-1}.pcard.p2,.pcard.p3{order:1;padding:8px 6px}.pcard .pn{font-size:17px}.pcard .ps{font-size:19px}.pcard .pq{font-size:12px}}
@@ -7573,6 +7574,7 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
   {v:167,t:'🔄 자동 업데이트 강화',items:[
+    ['new','⭐ 대표 캐릭터는 고른 뒤 「대표로 저장」을 눌러야 바뀌어요. 저장됐는지 바로 아래에 표시돼요 (내 캐릭터·대장간·외형)'],
     ['change','🔄 휴대폰 인터넷이 느려서 새 버전을 못 받던 문제를 고쳤어요. 받은 새 버전은 기기에 보관해서, 다음에 열 때 인터넷이 없어도 바로 최신 버전으로 열려요','bug'],
   ]},
   {v:166,t:'🐞 장비 저장 고침',items:[
@@ -8158,7 +8160,7 @@ function closePatch(){const d=document.getElementById('patchPop');if(d)d.remove(
 function bootPatch(){let seen=0;try{seen=+(localStorage.getItem('chanseo_seenv')||0);}catch(e){}if(seen<BUILD&&PATCH_NOTES.some(p=>p.v>seen))openPatch(false);}
 const $o=id=>document.getElementById(id)||{};
 const goLabel=()=>(pickDiff==='nightmare'?'☠ 무한의 악몽 · ':DIFF[pickDiff]?DIFF[pickDiff].n+' · ':'')+CLASSES[pickCls].n+'(으)로 시작';
-function startScreen(){try{frMig();}catch(e){}try{invMig();}catch(e){}
+function startScreen(){REP_PEND=null;try{frMig();}catch(e){}try{invMig();}catch(e){}
   // 판이 진행 중이면(레이드·결투 포함) 시작 화면을 그리지 않음: 다른 창을 닫다가 잘못 불려 게임 위에 덮이고 오류가 나던 문제 방지
   if(S&&S.started&&S.mode!=='start'&&S.mode!=='over'&&S.mode!=='spec'&&!S.win&&S.p&&S.p.alive)return;
   setTimeout(()=>{try{donorCheck();}catch(e){}},800);try{achRwSync();}catch(e){}
@@ -8418,7 +8420,7 @@ function openHeroes(){cosPreviewHide();const L=myHeroes().sort((a,b)=>(b.score||
   const rc=repCls(),P=myPower(),A=META.title&&ACH.find(a=>a.k===META.title),neq=GEAR_KEYS.filter(k=>eqItem(k)).length;
   show(`<div class="shophead"><h2>🗃 내 캐릭터</h2><button class="btn" id="hBack">돌아가기</button></div>
   <div class="repcard"><canvas id="repLive" width="170" height="200"></canvas><div class="repinfo"><small>⭐ 대표 캐릭터</small><b class="rn">${esc(myNick()||'모험가')}</b>${A?`<div style="color:#ffd76a">🏷 ${esc(A.n)}</div>`:''}
-    <label class="frep">직업 <select id="hRep">${Object.keys(CLASSES).filter(clsOpen).map(k=>`<option value="${k}"${k===rc?' selected':''}>${CLASSES[k].n}</option>`).join('')}</select></label>
+    ${repPickHtml('hr')}
     <div class="pstat"><span>⚔ 전투력<b style="color:#ffe27a">${P.all.toLocaleString()}</b></span><span>⏱ 플레이 시간<b>${ptTxt(META.pt||0)}</b></span><span>⚒ 장비<b>${neq}/14</b></span></div>
     <small style="color:var(--muted)">전투력 = 영구 강화 ${P.m.toLocaleString()} + 장비 ${P.g.toLocaleString()} + 최고 기록 ${P.r.toLocaleString()} · 접속 중인 친구들이 내 이름을 누르면 이 모습이 보여요</small>
     <div class="btnrow" style="margin:6px 0 0"><button class="btn" id="hForge">⚒ 대장간에서 장비 보기</button><button class="btn ghost" id="hCos">👕 외형 꾸미기</button></div></div></div>
@@ -8427,7 +8429,7 @@ function openHeroes(){cosPreviewHide();const L=myHeroes().sort((a,b)=>(b.score||
   ${L.length?`<div class="hgrid">${L.map(heroCard).join('')}</div>`:'<p class="sub" style="margin:18px 0;text-align:center">아직 저장한 캐릭터가 없어요. 악몽에서 잘 뜬 캐릭터를 저장해 보세요!</p>'}`);
   {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}
   $('hBack').onclick=startScreen;gearLiveStart($('repLive'));$('hForge').onclick=openForge;$('hCos').onclick=()=>openMeta(1);
-  $('hRep').onchange=e=>{META.rep=e.target.value;invTouch();saveMeta();openHeroes();};
+  repPickBind('hr',$('repLive'),openHeroes);
   ov.querySelectorAll('[data-hdel]').forEach(b=>b.onclick=()=>{const h=L[+b.dataset.hdel];if(!h||!confirm(`「${heroName(h)}」을(를) 보관함에서 지울까요? 되돌릴 수 없어요.`))return;saveHeroes(myHeroes().filter(x=>x.id!==h.id));openHeroes();});
   ov.querySelectorAll('[data-hcode]').forEach(b=>b.onclick=async()=>{const h=L[+b.dataset.hcode];if(!h)return;const c=await heroPack({...h,name:heroName(h),title:META.title||'',gear:gearCode(),aura:auraStr()});if(!c){toast('코드를 만들지 못했어요');return;}let ok=false;try{await navigator.clipboard.writeText(c);ok=true;}catch(e){}if(ok)toast('⚔ 대결 코드를 복사했어요! 친구에게 보내 주세요');else prompt('이 대결 코드를 복사해서 친구에게 보내 주세요',c);});
   ov.querySelectorAll('[data-hren]').forEach(b=>b.onclick=()=>{const h=L[+b.dataset.hren];if(!h)return;const n=prompt('새 이름 (12자까지)',heroName(h));if(n==null)return;const A=myHeroes(),x=A.find(q=>q.id===h.id);if(x){x.name=String(n).trim().slice(0,12);saveHeroes(A);}openHeroes();});}
@@ -8804,7 +8806,16 @@ const GEAR_LOOK=['sword','helm','cloak']; // 몸에 보이는 장비
 let GLIVE=0;
 // 대표 직업: 외형 꾸미기에서 고름 (안 골랐으면 마지막으로 고른 직업). 외형 미리보기·데이터 고르기 창 그림에 씀
 const repCls=()=>CLASSES[META.rep]?META.rep:CLASSES[pickCls]?pickCls:'knight';
-function gearLiveStart(cv){if(!cv)return;const id=++GLIVE,g=cv.getContext('2d'),cls=repCls(),x=cosEq('skin'),sk=x&&x.cat==='skin'?x:null,au=[cosEq('wing'),cosEq('aura')].filter(Boolean),parts=[],t0=performance.now();
+// 대표 캐릭터 고르기: 고르면 미리보기만 바뀌고 「대표로 저장」을 눌러야 저장 (어디서 골랐는지 헷갈리지 않게 저장 상태를 늘 보여줌)
+let REP_PEND=null;
+function repPickHtml(px){const cur=repCls(),v=REP_PEND&&CLASSES[REP_PEND]?REP_PEND:cur,dirty=v!==cur;
+  return `<div class="repPick"><select id="${px}Sel">${Object.keys(CLASSES).filter(clsOpen).map(k=>`<option value="${k}"${k===v?' selected':''}>${CLASSES[k].n}</option>`).join('')}</select><button class="btn ${dirty?'primary':''}" id="${px}Save" ${dirty?'':'disabled'}>⭐ 대표로 저장</button><small id="${px}St" class="${dirty?'warn':'ok'}">${dirty?`미리보기 중 · 지금 대표는 ${CLASSES[cur].n}`:`✔ 저장됨 · 대표 ${CLASSES[cur].n}`}</small></div>`;}
+function repPickBind(px,cv,after){const sel=$(px+'Sel'),bt=$(px+'Save'),st=$(px+'St');if(!sel)return;
+  const paint=()=>{const cur=repCls(),dirty=sel.value!==cur;bt.disabled=!dirty;bt.classList.toggle('primary',dirty);st.className=dirty?'warn':'ok';st.textContent=dirty?`미리보기 중 · 지금 대표는 ${CLASSES[cur].n}`:`✔ 저장됨 · 대표 ${CLASSES[cur].n}`;};
+  sel.onchange=()=>{REP_PEND=sel.value;if(cv)gearLiveStart(cv,sel.value);paint();};
+  bt.onclick=()=>{META.rep=sel.value;REP_PEND=null;invTouch();saveMeta();toast(`⭐ 대표 캐릭터를 ${CLASSES[META.rep].n}(으)로 저장했어요`);paint();if(after)after();};
+  if(cv&&REP_PEND&&REP_PEND!==repCls())gearLiveStart(cv,REP_PEND);}
+function gearLiveStart(cv,clsO){if(!cv)return;const id=++GLIVE,g=cv.getContext('2d'),cls=clsO&&CLASSES[clsO]?clsO:repCls(),x=cosEq('skin'),sk=x&&x.cat==='skin'?x:null,au=[cosEq('wing'),cosEq('aura')].filter(Boolean),parts=[],t0=performance.now();
   const frame=now=>{if(id!==GLIVE||!document.body.contains(cv))return;const T=(now-t0)/1000,face=Math.floor(T/2.2)%2?-1:1,W=cv.width,H=cv.height,cx=W/2,fy=H-24,oc=ctx;
     g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,W,H);g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(cx,fy+2,34,9,0,0,TAU);g.fill();
     const K=3.2/PXW,emit=q=>{if(parts.length<120)parts.push({...q,x:cx+q.x*K*face,y:fy+q.y*K,vx:(q.vx||0)*K*face,vy:(q.vy||-25)*K,life:q.life||.5,t:0});};
@@ -8916,7 +8927,7 @@ function openForge(){cosPreviewHide();devGearBak();invMig();invNorm();const I=in
    <div class="fcol">
     <div class="eqbox"><i class="eqc tl"></i><i class="eqc tr"></i><i class="eqc bl"></i><i class="eqc br"></i><div class="eqmid"><canvas id="gLive" width="170" height="210"></canvas></div>${GEAR_KEYS.map(slot).join('')}</div>
     <div class="ftot"><div class="fth"><b>장비 합산</b><span>⚔ 장비 전투력 <b>+${myPower().g.toLocaleString()}</b></span><button class="btn ghost" id="iOffAll">모두 벗기</button></div>${(()=>{const T=gearTotals(),ks=Object.keys(T).filter(k=>Math.abs(T[k])>1e-4);return ks.length?`<div class="ftl">${ks.map(k=>`<span>${stTxt(k,T[k])}</span>`).join('')}</div>`:'<small>아직 낀 장비가 없어요</small>';})()}</div>
-    <label class="frep">대표 캐릭터 <select id="fRep">${Object.keys(CLASSES).filter(clsOpen).map(k=>`<option value="${k}"${k===rc?' selected':''}>${CLASSES[k].n}</option>`).join('')}</select></label>
+    <div class="frep">대표 캐릭터 ${repPickHtml('fr')}</div>
     ${setRows?`<div class="fsets">${setRows}</div>`:''}${cws?`<div class="fcws"><small>직업 전용 무기</small>${cws}</div>`:''}
    </div>
    <div class="fcol fbag">
@@ -8936,7 +8947,7 @@ function openForge(){cosPreviewHide();devGearBak();invMig();invNorm();const I=in
   {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}gearMsg='';gearLiveStart($('gLive'));smithStart($('smithC'));
   $('gBack').onclick=startScreen;
   const re=()=>openForge(),find=id=>I.items.find(x=>x.id===+id),hit=()=>{SMITH_HIT=performance.now();};
-  $('fRep').onchange=e=>{META.rep=e.target.value;invTouch();saveMeta();gearMsg=`${CLASSES[META.rep].n}(으)로 바꿨어! 멋진데?`;re();};
+  repPickBind('fr',$('gLive'),()=>{gearMsg=`${CLASSES[META.rep].n}(으)로 정했구나! 멋진데?`;re();});
   ov.querySelectorAll('[data-iid]').forEach(el=>{el.onclick=()=>{INV_SEL=+el.dataset.iid;re();};el.ondblclick=()=>{const it=find(el.dataset.iid);if(!it)return;if(eqSlotOf(it))invUnequipIt(it,wh);else invEquip(it);INV_SEL=it.id;re();};
     el.ondragstart=e=>{e.dataTransfer.setData('text/plain',el.dataset.iid);};});
   ov.querySelectorAll('[data-slot]').forEach(el=>{el.ondragover=e=>e.preventDefault();el.ondrop=e=>{e.preventDefault();const it=find(e.dataTransfer.getData('text/plain'));if(!it)return;
@@ -9868,7 +9879,7 @@ function openMeta(cosOnly){cosPreviewHide();
     return `<button class="mtile sk ${own?'max':''} ${x.k==='uncap'?'ucsk':''}" data-mk="${x.k}" ${can?'':'disabled'}><b>${x.n}</b><span class="md">${x.d}</span><span class="mc">${own?'✔ 보유':'🏅 '+x.c}</span></button>`;}).join('');
   if(cosOnly){show(`<div class="shophead"><h2>👕 외형 꾸미기</h2><button class="btn" id="mBack">돌아가기</button></div>
   <div class="mbal">보유 메달 <b>🏅 ${META.medals}</b><small>능력치 영향 없음 · 눌러서 장착/해제 · 마우스를 올리면 미리보기</small></div>
-<div class="cosEqp"><div class="cosLiveB"><canvas id="cosLive" width="200" height="200"></canvas><small>지금 내 모습</small><label style="display:block;margin-top:4px;font-size:12px;color:#ffd76a">⭐ 대표 직업 <select id="repSel" style="font:inherit;font-size:13px;background:rgba(0,0,0,.4);color:var(--ivory);border:1px solid var(--brass);border-radius:6px;padding:2px 4px">${Object.keys(CLASSES).filter(k=>clsOpen(k)).map(k=>`<option value="${k}" ${repCls()===k?'selected':''}>${CLASSES[k].n}</option>`).join('')}</select></label></div><div class="cosSlots">${Object.keys(COS_CAT).map(cat=>{const e=cosEq(cat);return `<div class="cslot ${e?'on':''} ${cat===COS_TAB?'cur':''}" data-cslot="${cat}" title="${COS_CAT[cat]} · 누르면 이 종류 보기"><i>${COS_ICO[cat]}</i><b>${e?e.n:'비어 있음'}</b><small>${COS_CAT[cat]}</small>${e?`<span class="cx" data-cun="${cat}" title="해제">✕</span>`:''}</div>`;}).join('')}${(()=>{const t=META.title&&ACH.find(a=>a.k===META.title);return `<div class="cslot ${t?'on':''} ${COS_TAB==='title'?'cur':''}" data-cslot="title" title="칭호 · 누르면 칭호 보기"><i>🏷</i><b>${t?t.n:'비어 있음'}</b><small>칭호</small>${t?'<span class="cx" data-cun="title" title="해제">✕</span>':''}</div>`;})()}</div></div>
+<div class="cosEqp"><div class="cosLiveB"><canvas id="cosLive" width="200" height="200"></canvas><small>지금 내 모습</small>${repPickHtml('cr')}</div><div class="cosSlots">${Object.keys(COS_CAT).map(cat=>{const e=cosEq(cat);return `<div class="cslot ${e?'on':''} ${cat===COS_TAB?'cur':''}" data-cslot="${cat}" title="${COS_CAT[cat]} · 누르면 이 종류 보기"><i>${COS_ICO[cat]}</i><b>${e?e.n:'비어 있음'}</b><small>${COS_CAT[cat]}</small>${e?`<span class="cx" data-cun="${cat}" title="해제">✕</span>`:''}</div>`;}).join('')}${(()=>{const t=META.title&&ACH.find(a=>a.k===META.title);return `<div class="cslot ${t?'on':''} ${COS_TAB==='title'?'cur':''}" data-cslot="title" title="칭호 · 누르면 칭호 보기"><i>🏷</i><b>${t?t.n:'비어 있음'}</b><small>칭호</small>${t?'<span class="cx" data-cun="title" title="해제">✕</span>':''}</div>`;})()}</div></div>
 <div class="cosTabs">${Object.keys(COS_CAT).map(cat=>{const L=COS.filter(x=>x.cat===cat&&(!x.hid||cosOwn(x.k))),e=cosEq(cat);return `<button class="cosTab ${cat===COS_TAB?'on':''}" data-ct="${cat}"><b>${COS_ICO[cat]} ${COS_CAT[cat]}</b><small>${L.filter(x=>cosOwn(x.k)).length}/${L.length} 보유</small><small class="ce">${e?'✔ '+e.n:'장착 없음'}</small></button>`;}).join('')}${(()=>{const L=ACH.filter(a=>tOwn(a.k)),t=META.title&&ACH.find(a=>a.k===META.title);return `<button class="cosTab ${COS_TAB==='title'?'on':''}" data-ct="title"><b>🏷 칭호</b><small>${L.length}개 보유</small><small class="ce">${t?'✔ '+t.n:'장착 없음'}</small></button>`;})()}</div>
 <div class="mgrid ${COS_ANIM?'cosIn':''}">${COS_TAB==='title'?titleTiles():COS.filter(x=>x.cat===COS_TAB&&(!x.hid||cosOwn(x.k))).sort((p,q)=>(p.ach?1:0)-(q.ach?1:0)||p.c-q.c).map((x,i)=>{const own=cosOwn(x.k),eq=cosEq(COS_TAB)===x;return `<button class="mtile sk ${eq?'max':''} ${own||medOk(x.c)?'':'poor'}" data-cs="${x.k}" style="--i:${i}"><b>${x.n}</b><span class="md">${x.d}</span><span class="mc">${eq?'✔ 장착 중':own?'장착하기':x.ach?'🏆 '+(ACH.find(a=>a.k===x.ach)||{}).n+' 달성 보상':'🏅 '+x.c}</span></button>`;}).join('')}</div>
   <button class="btn ghost" id="cReset" ${cosSpent()?'':'disabled'}>↺ 산 외형 전체 환불 <small>🏅 ${cosSpent()} 환불 · 도전과제 보상 외형은 그대로</small></button>
@@ -9892,7 +9903,7 @@ function openMeta(cosOnly){cosPreviewHide();
   ov.querySelectorAll('[data-cslot]').forEach(b=>b.onclick=()=>{COS_TAB=b.dataset.cslot;COS_ANIM=1;const y=ov.scrollTop;openMeta(1);ov.scrollTop=y;});
   ov.querySelectorAll('[data-tt]').forEach(b=>b.onclick=()=>{const k=b.dataset.tt;if(!tOwn(k))return;META.title=META.title===k?'':k;saveMeta();keepY();});
   ov.querySelectorAll('[data-cun]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();if(b.dataset.cun==='title'){META.title='';saveMeta();const y=ov.scrollTop;openMeta(1);ov.scrollTop=y;return;}META.cos=META.cos||{own:{},eq:{}};META.cos.eq[b.dataset.cun]=null;saveMeta();const y=ov.scrollTop;openMeta(1);ov.scrollTop=y;});
-  if($('repSel'))$('repSel').onchange=e=>{META.rep=e.target.value;saveMeta();keepY();};
+  repPickBind('cr',$('cosLive'));
   if($('cosLive'))gearLiveStart($('cosLive'));if(cosOnly)COS_ANIM=0;
   ov.querySelectorAll('[data-cs]').forEach(b=>{const x=COS.find(q=>q.k===b.dataset.cs);b.addEventListener('mouseenter',()=>cosPreview(x,b));b.addEventListener('mouseleave',cosPreviewHide);
     b.addEventListener('touchstart',()=>{if(b.dataset.pv!=='1'){ov.querySelectorAll('[data-cs]').forEach(o=>o.dataset.pv='');b.dataset.pv='1';b.dataset.tap='1';cosPreview(x,b);}},{passive:true});});
