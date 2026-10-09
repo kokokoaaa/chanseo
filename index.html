@@ -4382,7 +4382,8 @@ function duelPop(x,y,s,col){S.tx.push({x,y,s,col,size:30,life:1});if(S.tx.length
 function burst(x,y,col,n=10){for(let i=0;i<n;i++){const a=Math.random()*TAU,v=rand(60,240);S.pa.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:rand(.25,.5),col});}if(S.pa.length>220)S.pa.splice(0,S.pa.length-220);}
 // 알림: 여러 개가 한꺼번에 와도 겹치지 않게 0.35초 간격으로 하나씩 아래로 쌓이고, 각각 2.4초 보인 뒤 천천히 사라짐 (최대 4줄)
 let toastNext=0;const toastQ=new Set();
-function toast(s){const now=performance.now();if(toastQ.has(s))return;for(const c of toastEl.children)if(c.textContent===s&&!c.classList.contains('off')){clearTimeout(c._t);c._t=setTimeout(()=>tstOff(c),2400);return;}
+let LAST_T='';
+function toast(s){LAST_T=s;const now=performance.now();if(toastQ.has(s))return;for(const c of toastEl.children)if(c.textContent===s&&!c.classList.contains('off')){clearTimeout(c._t);c._t=setTimeout(()=>tstOff(c),2400);return;}
   const at=Math.max(now,toastNext);toastNext=at+350;toastQ.add(s);setTimeout(()=>{toastQ.delete(s);const d=document.createElement('div');d.className='tst';d.textContent=s;toastEl.appendChild(d);
     const live=[...toastEl.children].filter(c=>!c.classList.contains('off'));if(live.length>4)tstOff(live[0],1);
     requestAnimationFrame(()=>d.classList.add('on'));d._t=setTimeout(()=>tstOff(d),2400);},at-now);}
@@ -4597,8 +4598,9 @@ function startEvent(){
   if(k==='bounty'){const [cx,cy]=ringPos(20);const e=spawnAt(bioPick(EV_TOUGH.slice(0,10)),cx,cy,false,true);e.hp*=9;e.maxHp*=9;e.r*=1.8;e.dmg*=1.6;e.hunt=true;e.bounty=true;}
   const TR=evTier(k);S.evBanner={s:`[${TR.n}] ${E.icon} ${E.n}`,d:E.d,col:TR.col,t:6,T:6};
 }
+// 돌발 이벤트 끝: 성공·실패를 화면 가운데 큰 띠로 (보상 문구는 그때 뜬 알림을 그대로 씀)
 function endEvent(win){
-  const ev=S.ev;if(!ev)return;S.ev=null;S.evT=rand(85,110);
+  const ev=S.ev;if(!ev)return;S.ev=null;S.evT=rand(85,110);const lt0=LAST_T;LAST_T='';
   if(win){const g=(EVENTS[ev.k]||{}).g||'C';addBonus('ev',BONUS_PTS['ev'+g]||BONUS_PTS.evC);}
   if(ev.k==='horde'){if(win){const g=price(70);S.gold+=g;bonusStat(1);toast(`대군 격파! ${g} 골드 + 고급 스탯 카드`);openNext();}else toast(`대군 처치 ${ev.kc}/${ev.need} — 실패`);}
   if(ev.k==='hunt'){for(const e of S.en)e.hunt=false;if(win){S.bonusAug++;toast('정예 사냥 성공! 증강 1개 선택');openNext();}else toast('정예 사냥 실패');}
@@ -4618,6 +4620,7 @@ function endEvent(win){
   if(ev.k==='bounty'){for(const e of S.en)if(e.bounty){if(!win){e.alive=false;burst(e.x,e.y,'#ffd76a',16);}e.bounty=false;e.hunt=false;}
     if(win){const g=price(200);S.gold+=g;META.medals=(META.medals||0)+1;saveMeta();toast(`현상수배범 처치! 💎 ${TIER[capTier('p')].n} 증강 + ${g} 골드 + 🏅 메달 1`);if(S.noAug){toast('증강 그만 받기 중 · '+giveAltStat(capTier('p'),true));openNext();}else if(AUTO.pick){autoAug(capTier('p'));openNext();}else{S.mode='aug';openAug(true,'현상수배 보상',null,'p');}}else toast('현상수배범이 달아났다');}
   if(ev.k==='relic'){if(win){const g=price(45),L=gainLuck(1);S.gold+=g;toast(L.ov?`유물을 모두 모았다! 행운 가득 → ${g+L.g} 골드`:`유물을 모두 모았다! 행운 +1, ${g} 골드`);}else toast(`유물 ${ev.rel.filter(o=>o.got).length}/3개만 모았다`);}
+  {const E=EVENTS[ev.k]||{},m=LAST_T||(win?(ev.k==='goblin'?'골드가 쏟아졌어요!':''):'');S.evBanner={s:`${win?'✔':'✖'} ${E.icon||''} ${E.n||''} ${win?'성공!':'실패'}`,d:m,col:win?'#7be08f':'#9aa3ad',t:4,T:4};if(!LAST_T)LAST_T=lt0;}
 }
 function updEvent(dt){
   if(S.bossI>=0||S.win||rushOn())return;
@@ -5134,7 +5137,11 @@ function drawBossGround(){
       for(let i=0;i<8;i++){const a=i*TAU/8;ctx.moveTo(0,0);ctx.lineTo(Math.cos(a)*h.r,Math.sin(a)*h.r);}for(const k of [.35,.65,.95]){for(let i=0;i<=8;i++){const a=i*TAU/8,rr=h.r*k*(i%2?.92:1);i?ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr):ctx.moveTo(Math.cos(a)*rr,Math.sin(a)*rr);}}ctx.strokeStyle='rgba(30,26,40,.55)';ctx.lineWidth=3.2;ctx.stroke();ctx.strokeStyle='#f4f6fc';ctx.lineWidth=1.4;ctx.stroke();ctx.restore();continue;}
     ctx.globalAlpha=Math.min(1,h.life)*.5;ctx.fillStyle=h.col||'#5aa83a';ctx.beginPath();ctx.arc(h.x,h.y,h.r,0,TAU);ctx.fill();ctx.globalAlpha=Math.min(1,h.life)*.7;ctx.strokeStyle=h.col?'#eaf8ff':'#9be86a';ctx.lineWidth=2;ctx.stroke();}ctx.globalAlpha=1;
   for(const t of S.tele){const k=1-t.t/t.T,c=t.col||'#ff4040';ctx.save();
-    // 예고 범위: 진한 바닥 + 검은 바깥 테두리(밝은 배경에서도 보이게) + 깜빡이는 색 테두리
+    // 일반 몹의 경로 표시(돌진선·순간이동 자리·저격 조준 등, 피해 없는 예고)는 예전처럼 옅게
+    if(!t.dmg){if(t.k==='c'){ctx.globalAlpha=.16;ctx.fillStyle=c;ctx.beginPath();ctx.arc(t.x,t.y,t.r,0,TAU);ctx.fill();ctx.globalAlpha=.38;ctx.beginPath();ctx.arc(t.x,t.y,t.r*k,0,TAU);ctx.fill();ctx.globalAlpha=.9;ctx.strokeStyle=c;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(t.x,t.y,t.r,0,TAU);ctx.stroke();}
+      else{ctx.translate(t.x,t.y);ctx.rotate(t.a);ctx.globalAlpha=.16;ctx.fillStyle=c;ctx.fillRect(0,-t.w/2,t.len,t.w);ctx.globalAlpha=.38;ctx.fillRect(0,-t.w/2,t.len*k,t.w);ctx.globalAlpha=.9;ctx.strokeStyle=c;ctx.lineWidth=2.5;ctx.strokeRect(0,-t.w/2,t.len,t.w);}
+      ctx.restore();continue;}
+    // 피해 있는 예고(보스 패턴·징조): 진한 바닥 + 검은 바깥 테두리(밝은 배경에서도 보이게) + 깜빡이는 색 테두리
     const pu=.75+.25*Math.sin(S.t*(t.t<.5?30:12));
     if(t.k==='c'){ctx.globalAlpha=.26;ctx.fillStyle=c;ctx.beginPath();ctx.arc(t.x,t.y,t.r,0,TAU);ctx.fill();ctx.globalAlpha=.5;ctx.beginPath();ctx.arc(t.x,t.y,t.r*k,0,TAU);ctx.fill();ctx.globalAlpha=.55;ctx.strokeStyle='#000';ctx.lineWidth=6.5;ctx.beginPath();ctx.arc(t.x,t.y,t.r,0,TAU);ctx.stroke();ctx.globalAlpha=pu;ctx.strokeStyle=c;ctx.lineWidth=3.5;ctx.stroke();}
     else{ctx.translate(t.x,t.y);ctx.rotate(t.a);ctx.globalAlpha=.26;ctx.fillStyle=c;ctx.fillRect(0,-t.w/2,t.len,t.w);ctx.globalAlpha=.5;ctx.fillRect(0,-t.w/2,t.len*k,t.w);ctx.globalAlpha=.55;ctx.strokeStyle='#000';ctx.lineWidth=6.5;ctx.strokeRect(0,-t.w/2,t.len,t.w);ctx.globalAlpha=pu;ctx.strokeStyle=c;ctx.lineWidth=3.5;ctx.strokeRect(0,-t.w/2,t.len,t.w);}
@@ -7393,6 +7400,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
 const PATCH_NOTES=[
   {v:132,t:'🎨 디버프 표시 · ⚠ 위험 표시',items:[
     ['change','🎨 화상·중독에 걸린 적이 계속 허옇게 번쩍이던 문제와 둔화·빙결의 허연 덮개를 없앴어요 (흰 번쩍임은 직접 맞을 때만). 이제 디버프에 걸리면 적의 <b>몸 색이 그 디버프 색으로 어둡게 물들며 깜빡여요</b> (빙결·둔화 파랑 · 화상 주황 · 중독 초록 · 감전 노랑, 여러 개면 번갈아)','look'],
+    ['change','🎨 일반 몹의 <b>돌진선·순간이동 자리·저격 조준선</b> 같은 경로 표시는 예전처럼 옅게 돌렸어요 (진한 표시는 보스 패턴·징조처럼 피해 있는 공격만)','look'],
+    ['change','⚡ <b>돌발 이벤트가 끝나면</b>(보물 고블린 처치 포함) 성공·실패와 받은 보상이 화면 가운데 큰 띠로 떠요','look'],
     ['change','🎁 <b>미믹을 잡으면</b> 다른 숨은 몬스터처럼 화면 가운데 띠로 크게 알려 줘요. 숨은 몬스터를 <b>놓쳐서 사라질 때</b>도 「사라졌다…」 띠가 떠요','look'],
     ['change','🃏 스탯 카드의 공격력·공격 속도·최대 체력·이동 속도는 「+10%」 같은 카드 수치와 「실적용」을 따로 쓰지 않고, <b>처음부터 실제로 오르는 수치</b>만 보여 줘요 (예: 공격력 +1.5 (지금보다 +8.7%))','look'],
     ['change','⚠ 「피하세요!」와 화면 가장자리 번쩍임이 <b>그 공격을 맞으면 쓰러지는 계산일 때만</b> 떠요. 버틸 수 있는 공격엔 뜨지 않으니 바닥 예고 표시를 보고 피하세요','play'],
