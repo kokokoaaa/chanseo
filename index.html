@@ -7367,6 +7367,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:124,t:'🔄 자동 업데이트',items:[
+    ['change','🔄 결과 화면에 둔 채 켜 두어도 새 버전이 나오면 바로 자동으로 적용돼요 (예전엔 시작 화면에서만 적용돼서, 켜 둔 컴퓨터가 옛 버전으로 계속 접속 중으로 남을 수 있었어요)','bug'],
+  ]},
   {v:123,t:'🟢 접속 인원 안정',items:[
     ['change','🟢 접속 인원이 왔다 갔다 하던 문제를 한 번 더 고쳤어요: 인터넷이 잠깐 끊겼다 붙으면 바로 다시 접속으로 표시하고, 다른 탭을 보고 있어도 접속 중으로 유지해요 (5분 동안 손을 안 대면 💤 자리 비움)','bug'],
   ]},
@@ -10269,7 +10272,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=123,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=124,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
@@ -10282,7 +10285,8 @@ function checkUpd(){if(UPD.ver>BUILD)return;const web=/^https?:$/.test(location.
   fetch(url,{cache:'no-store',signal:ctl?ctl.signal:undefined}).then(r=>r.ok?r.text():null).then(t=>{
     if(!t){UPD.st='fail';updPaint();return;}const m=t.match(/const BUILD=(\d+)/);UPD.st='ok';
     if(m&&+m[1]>BUILD){UPD.ver=+m[1];UPD.html=web?null:t;
-      if(!S||S.mode==='start'){updPaint();setTimeout(applyUpd,600);return;}
+      // 시작 화면·결과 화면·판이 진행 중이 아닐 때는 바로 적용 (예전엔 결과 화면에 둔 채 켜 두면 새 버전이 안 들어가서 자리 비움 같은 새 기능이 안 먹었음)
+      if(!S||S.mode==='start'||S.mode==='over'||!S.started){updPaint();setTimeout(applyUpd,600);return;}
       if(!UPD.told){UPD.told=true;toast(`🔄 새 패치(v${UPD.ver})가 나왔어요! 이번 판이 끝나면 자동 적용 (껐다 켜도 바로 적용)`);}}
     updPaint();}).catch(()=>{UPD.st='fail';updPaint();});}
 resize();newRun();startScreen();bootPatch();requestAnimationFrame(loop);
