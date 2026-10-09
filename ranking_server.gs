@@ -1,6 +1,10 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v6.2
+// 찬서 명예의 전당 서버 (Google Apps Script) v6.3
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
+//
+// v6.2 → v6.3 바뀐 점
+// - 관리자 개인 메시지(쪽지): 개발자 키로 이름에 쪽지를 보내면 「쪽지」 시트에 저장 → 그 이름이 접속 신호(ping)를 보낼 때 같이 받아 화면 가운데 팝업으로 봄
+//   POST {dm:1, dk, to, msg} · 받은 사람 확인 ?dmack=번호&n=이름 · 관리자 목록 ?dms=1&dk=
 //
 // v6.1 → v6.2 바뀐 점
 // - 관리자가 이름 비밀번호를 직접 정해 줌 (POST rekey + 개발자 키): 지금 주인과 상관없이 그 이름 열쇠를 이름+비밀번호 열쇠로 바꿈
@@ -265,8 +269,34 @@ function ping_(q) {
   if (id && !q.bye) devLog_(id, str_(q.n, 12) || '모험가', str_(q.ua, 30));
   let w = 0;
   try { w = id && c.get('watch_' + id) ? 1 : 0; } catch (err) {}
-  return out_({ v: 62, ct, w, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
+  // 관리자 쪽지: 이 이름 앞으로 안 읽은 쪽지가 있다는 표시(캐시)가 있을 때만 시트를 읽음 → 평소 접속 신호는 가벼움
+  let dm = [];
+  try { const nm = dmKey_(q.n); if (nm && !q.bye && c.get('dm_' + nm)) { dm = dmFor_(nm); if (!dm.length) c.remove('dm_' + nm); } } catch (err) {}
+  return out_({ v: 63, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
 }
+
+// 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
+const DM_SHEET = '쪽지';
+const dmKey_ = n => { try { return String(n || '').normalize('NFC').replace(/[\s\u200b-\u200f\ufeff]+/g, '').slice(0, 12); } catch (err) { return String(n || '').replace(/\s+/g, '').slice(0, 12); } };
+function dmSheet_() { const ss = book_(); let s = ss.getSheetByName(DM_SHEET); if (!s) { s = ss.insertSheet(DM_SHEET); s.getRange(1, 1, 1, 5).setValues([['id', 'to', 'msg', 'at', 'read']]); s.getRange('A:C').setNumberFormat('@'); } return s; }
+function dmFor_(nm) { const s = dmSheet_(), last = s.getLastRow(); if (last < 2) return []; const v = s.getRange(2, 1, last - 1, 5).getValues();
+  return v.filter(r => dmKey_(r[1]) === nm && !r[4]).map(r => ({ id: String(r[0]), m: String(r[2]), at: +r[3] || 0 })).slice(-10); }
+function dmSend_(d) {
+  if (String(d.dk || '') !== DEV_KEY) return { ok: false, err: 'key' };
+  const to = dmKey_(d.to), msg = String(d.msg || '').replace(/\s+/g, ' ').trim().slice(0, 300).replace(/^[=+\-@]+/, '');
+  if (!to || !msg) return { ok: false, err: 'bad' };
+  const s = dmSheet_(), id = String(Date.now()) + Math.floor(Math.random() * 1000);
+  s.appendRow([id, to, msg, Date.now(), '']);s.getRange(s.getLastRow(), 1, 1, 3).setNumberFormat('@');
+  if (s.getLastRow() > 501) s.deleteRows(2, s.getLastRow() - 501);
+  try { CacheService.getScriptCache().put('dm_' + to, '1', 21600); } catch (err) {}
+  return { ok: true, result: 'dm', id };
+}
+function dmAck_(q) { const id = String(q.dmack || ''), s = dmSheet_(), last = s.getLastRow(); if (!id || last < 2) return { ok: false };
+  const v = s.getRange(2, 1, last - 1, 1).getValues(), i = v.findIndex(r => String(r[0]) === id); if (i < 0) return { ok: false };
+  s.getRange(i + 2, 5).setValue(Date.now());return { ok: true }; }
+function dmList_(q) { if (String(q.dk || '') !== DEV_KEY) return { err: 'key' }; const s = dmSheet_(), last = s.getLastRow(); if (last < 2) return { dms: [] };
+  const n = Math.min(50, last - 1), v = s.getRange(last - n + 1, 1, n, 5).getValues();
+  return { dms: v.map(r => ({ id: String(r[0]), to: String(r[1]), m: String(r[2]), at: +r[3] || 0, rd: +r[4] || 0 })).reverse() }; }
 
 // 전체 채팅 (최근 CHAT_MAX개만 보관)
 const CHAT_KEY = 'chat_v45', CHAT_MAX = 60;
@@ -461,6 +491,8 @@ function doGet(e) {
   if (q.ping) return ping_(q);
   if (q.cload) return cload_(q);
   if (q.dels) return out_({ dels: delList_() });
+  if (q.dmack) return out_(dmAck_(q));
+  if (q.dms) return out_(dmList_(q));
   if (q.own) {
     const nm = str_(q.own, 12), kh = ownerKh_(nm);
     return out_({ owned: !!(nm !== '익명' && kh && kh !== kh_(q.k)) });
@@ -496,6 +528,7 @@ function doPost(e) {
       return out_({ ok: true, result: 'sup' });
     }
     if (d.csave) return csave_(d);
+    if (d.dm) return out_(dmSend_(d));
     // 멘트 고치기 (개발자 키만, 새 줄은 만들지 않음)
     if (d.cmEdit) {
       if (String(d.dk || '') !== DEV_KEY) return out_({ ok: false, err: 'key' });
