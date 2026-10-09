@@ -1,6 +1,12 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v6.4
+// 찬서 명예의 전당 서버 (Google Apps Script) v6.5
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
+//
+// v6.4 → v6.5 바뀐 점
+// - 이름 비밀번호 맞히기 막기: 한 이름에 틀린 열쇠가 10분에 30번 넘게 오면 잠시 확인을 멈춤 (?own · cload)
+// - 관리자가 기록을 지우면 이름 주인 정보도 바로 새로 고침, 지운 기록을 옛 기기가 다시 올려도 이름을 가져가지 않음
+// - 예전 서버에서 보통으로 저장된 보스 러시 기록이 새 기록과 따로 두 줄이 되던 문제
+// - 서버가 바쁠 때 채팅·접속 기록이 오류 대신 busy로 응답, 클라우드 저장·응원·쪽지는 전당 목록 캐시를 비우지 않음
 //
 // v6.3 → v6.4 바뀐 점
 // - 이름 주인 열쇠 칸(N열)을 글자 형식으로 고정: 열쇠가 +로 시작하면 시트가 수식으로 읽어 #ERROR!가 되어 진짜 주인도 「비밀번호가 맞지 않아요」로 막히던 문제. 이미 깨진 칸은 주인 없음으로 봄
@@ -282,7 +288,7 @@ function ping_(q) {
   // 관리자 쪽지: 이 이름 앞으로 안 읽은 쪽지가 있다는 표시(캐시)가 있을 때만 시트를 읽음 → 평소 접속 신호는 가벼움
   let dm = [];
   try { const nm = dmKey_(q.n); if (nm && !q.bye && (c.get('dm_' + nm) || !c.get('dmc_' + nm))) { c.put('dmc_' + nm, '1', 21600); const own = ownerKh_(str_(q.n, 12)); if (!own || own === kh_(q.k)) { dm = dmFor_(nm); if (!dm.length) c.remove('dm_' + nm); } } } catch (err) {}
-  return out_({ v: 64, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 65, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -330,7 +336,8 @@ function chat_(q) {
     if (!msg || !id) return out_({ ok: false, err: 'empty' });
     if (nm !== '모험가' && nm !== '익명') { const kh = ownerKh_(nm); if (kh && kh !== kh_(q.k)) return out_({ ok: false, err: 'owned' }); }
     const lock = LockService.getScriptLock();
-    lock.waitLock(5000);
+    let got = false; try { got = lock.tryLock(5000); } catch (err) {}
+    if (!got) return out_({ ok: false, err: 'busy' });
     try {
       const L = chatGet_(), now = Date.now();
       const last = L.filter(x => x.id === id).pop();
@@ -382,8 +389,9 @@ function csave_(d) {
 function cload_(q) {
   const nm = str_(q.cload, 12), my = kh_(q.k);
   if (!nm || !my) return out_({ ok: false, err: 'bad' });
+  if (failOver_(nm)) return out_({ ok: false, err: 'slow' });
   const own = ownerKh_(nm);
-  if (own && own !== my) return out_({ ok: false, err: 'key' });
+  if (own && own !== my) { failAdd_(nm); return out_({ ok: false, err: 'key' }); }
   const s = acctSheet_(), r = acctRow_(s, nm);
   if (!r) return out_({ ok: true, none: 1 });
   const v = s.getRange(r, 1, 1, 4 + ACCT_MAX).getValues()[0];
@@ -391,6 +399,10 @@ function cload_(q) {
   const data = v.slice(4).map(x => String(x || '')).join('');
   return out_({ ok: true, at: +v[2] || 0, md: +v[3] || 0, data: data || '', none: data ? 0 : 1 });
 }
+// 이름 비밀번호 무차별 대입 막기: 이름마다 10분 동안 틀린 열쇠 횟수
+const FAIL_MAX = 30;
+function failOver_(nm) { try { return +(CacheService.getScriptCache().get('kf_' + Utilities.base64EncodeWebSafe(nm)) || 0) >= FAIL_MAX; } catch (err) { return false; } }
+function failAdd_(nm) { try { const c = CacheService.getScriptCache(), k = 'kf_' + Utilities.base64EncodeWebSafe(nm); c.put(k, String(+(c.get(k) || 0) + 1), 600); } catch (err) {} }
 function ownerSet_(nm, kh) { try { CacheService.getScriptCache().put('own_' + Utilities.base64EncodeWebSafe(nm), kh || '-', 600); } catch (err) {} }
 
 // 기기별 접속 기록 ('기기' 시트: dev · name · ua · first · last · cnt). 개발자 키가 맞을 때만 목록을 줌
@@ -401,7 +413,8 @@ function devLog_(id, n, ua) {
   const c = CacheService.getScriptCache(), ck = 'dv_' + id + '|' + n;
   try { if (c.get(ck)) return; c.put(ck, '1', 1800); } catch (err) {}
   const lock = LockService.getScriptLock();
-  try { lock.waitLock(5000); } catch (err) { return; }
+  let got = false; try { got = lock.tryLock(1500); } catch (err) {}
+  if (!got) { try { c.remove(ck); } catch (err) {} return; }
   try {
     const s = devSheet_(), last = s.getLastRow(), now = Date.now();
     const v = last >= 2 ? s.getRange(2, 1, last - 1, 2).getValues() : [];
@@ -462,6 +475,7 @@ function delrec_(q) {
     v.forEach((r, i) => { const o = Object.fromEntries(HEAD.slice(0, LIST_COLS).map((h, j) => [h, r[j]])); if (String(o.name) === nm && fixDiff_(o) === df) rows.push(i + 2); });
     rows.reverse().forEach(rw => s.deleteRow(rw));
     delAdd_(nm, df);
+    ownerSet_(nm, owner_(s, nm).kh || acctKh_(nm) || '');
     try { CacheService.getScriptCache().remove(CACHE_KEY); } catch (err) {}
     return { ok: 1, n: rows.length };
   } finally { lock.releaseLock(); }
@@ -505,8 +519,11 @@ function doGet(e) {
   if (q.dmack) return out_(dmAck_(q));
   if (q.dms) return out_(dmList_(q));
   if (q.own) {
-    const nm = str_(q.own, 12), kh = ownerKh_(nm);
-    return out_({ owned: !!(nm !== '익명' && kh && kh !== kh_(q.k)) });
+    const nm = str_(q.own, 12);
+    if (failOver_(nm)) return out_({ err: 'slow' });
+    const kh = ownerKh_(nm), owned = !!(nm !== '익명' && kh && kh !== kh_(q.k));
+    if (owned && q.k) failAdd_(nm);
+    return out_({ owned });
   }
   if (q.hero) {
     // 이름·난이도로 줄만 찾고, 그 한 줄의 hero 칸만 읽음
@@ -529,7 +546,6 @@ function doPost(e) {
   try {
     const d = JSON.parse(e.postData.contents);
     const s = sheet_();
-    try { CacheService.getScriptCache().remove(CACHE_KEY); } catch (err) {}
     // 후원 응원 메시지 (이름 확인 없음, 120자까지)
     if (d.sup) {
       const msg = String(d.msg || '').replace(/\s+/g, ' ').trim().slice(0, 120);
@@ -541,6 +557,8 @@ function doPost(e) {
     }
     if (d.csave) return csave_(d);
     if (d.dm) return out_(dmSend_(d));
+    // 여기부터는 전당 목록이 바뀔 수 있는 요청만 → 목록 캐시 비움 (클라우드 저장·응원·쪽지는 목록과 무관)
+    try { CacheService.getScriptCache().remove(CACHE_KEY); } catch (err) {}
     // 멘트 고치기 (개발자 키만, 새 줄은 만들지 않음)
     if (d.cmEdit) {
       if (String(d.dk || '') !== DEV_KEY) return out_({ ok: false, err: 'key' });
@@ -561,6 +579,8 @@ function doPost(e) {
       acctSetKh_(nm, nk);ownerSet_(nm, nk);
       return out_({ ok: true, result: 'devrekey', n: o.rows.length });
     }
+    // 관리자가 지운 기록을 옛 기기가 다시 올리는 경우: 이름 주인을 새로 정하기 전에 먼저 거절
+    if (!d.rekey && !d.dwOnly) { const a0 = +d.at || 0, r0 = clean_(d, a0 > 1.7e12 && a0 <= Date.now() + 60000 ? a0 : 0); if (delBlocked_(r0.name, r0.diff, r0.at)) return out_({ ok: false, result: 'deleted' }); }
     // 이름 주인 확인: 주인이 있는 이름은 같은 열쇠로만. 주인이 없으면 열쇠와 함께 처음 올린 기기가 주인
     const nm0 = str_(d.name, 12) || '익명', my = kh_(d.k), own = nm0 === '익명' ? { rows: [], kh: '' } : owner_(s, nm0);
     if (!own.kh && nm0 !== '익명') own.kh = acctKh_(nm0);
@@ -591,7 +611,7 @@ function doPost(e) {
     const at0 = +d.at || 0, r = clean_(d, at0 > 1.7e12 && at0 <= Date.now() + 60000 ? at0 : 0);
     if (delBlocked_(r.name, r.diff, r.at)) return out_({ ok: false, result: 'deleted' });
     const last = s.getLastRow();
-    const keys = last > 1 ? s.getRange(2, 1, last - 1, 2).getValues().map(x => String(x[0]) + '\u0001' + String(x[1])) : [];
+    const keys = last > 1 ? s.getRange(2, 1, last - 1, 3).getValues().map(x => String(x[0]) + '\u0001' + fixDiff_({ diff: x[1], cls: x[2] })) : [];
     const i = keys.indexOf(r.name + '\u0001' + r.diff);
     if (i < 0) {
       s.appendRow(HEAD.map(h => r[h]));
