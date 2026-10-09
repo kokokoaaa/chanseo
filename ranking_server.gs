@@ -1,6 +1,9 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v5.9
+// 찬서 명예의 전당 서버 (Google Apps Script) v6.0
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
+//
+// v5.9 → v6.0 바뀐 점
+// - 모든 이름 주인 초기화 (개발자 키): ?unownall=1&dk= → 전당 기록·계정 시트의 주인 열쇠를 전부 지움. 그 뒤 각 이름으로 처음 올리는 기기가 새 주인
 //
 // v5.8 → v5.9 바뀐 점
 // - 이름 주인 초기화(개발자)가 「계정」 시트의 주인 열쇠도 같이 지움 (예전엔 계정 시트에 남아 초기화가 안 먹었음)
@@ -254,7 +257,7 @@ function ping_(q) {
   if (id && !q.bye) devLog_(id, str_(q.n, 12) || '모험가', str_(q.ua, 30));
   let w = 0;
   try { w = id && c.get('watch_' + id) ? 1 : 0; } catch (err) {}
-  return out_({ v: 59, ct, w, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 60, ct, w, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
 }
 
 // 전체 채팅 (최근 CHAT_MAX개만 보관)
@@ -370,6 +373,17 @@ function spec_(q) {
   return { d: c.get('snap_' + u) || '' };
 }
 // 이름 주인 초기화 (개발자 키): 그 이름 기록들의 kh 칸을 비움 → 다음에 그 이름으로 기록을 올리는 기기가 새 주인
+function unownAll_(q) {
+  if (String(q.dk || '') !== DEV_KEY) return { err: 'key' };
+  const lock = LockService.getScriptLock();try { lock.waitLock(10000); } catch (err) { return { err: 'busy' }; }
+  try { const s = sheet_(), last = s.getLastRow(), kc = HEAD.indexOf('kh') + 1, names = new Set();let n = 0;
+    if (last >= 2) { const v = s.getRange(2, 1, last - 1, 1).getValues();v.forEach(r => names.add(String(r[0])));s.getRange(2, kc, last - 1, 1).clearContent();n = last - 1; }
+    const as = acctSheet_(), al = as.getLastRow();
+    if (al >= 2) { as.getRange(2, 1, al - 1, 1).getValues().forEach(r => names.add(String(r[0])));as.getRange(2, 2, al - 1, 1).clearContent(); }
+    names.forEach(nm => ownerSet_(nm, ''));try { CacheService.getScriptCache().remove(CACHE_KEY); } catch (err) {}
+    return { ok: 1, rows: n, names: names.size };
+  } finally { lock.releaseLock(); }
+}
 function unown_(q) {
   if (String(q.dk || '') !== DEV_KEY) return { err: 'key' };
   const nm = str_(q.unown, 12);if (!nm) return { err: 'name' };
@@ -432,6 +446,7 @@ function doGet(e) {
   if (q.chat) return chat_(q);
   if (q.dv) return out_(devList_(q));
   if (q.spec) return out_(spec_(q));
+  if (q.unownall) return out_(unownAll_(q));
   if (q.unown) return out_(unown_(q));
   if (q.delrec) return out_(delrec_(q));
   if (q.snap) return out_(snap_(q));
