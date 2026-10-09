@@ -1,4 +1,8 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v6.7
+// 찬서 명예의 전당 서버 (Google Apps Script) v6.8
+//
+// v6.7 → v6.8 바뀐 점
+// - 계정 정보: 접속 신호(ping)에 실려 오는 프로필(대표 캐릭터·장비·전투력·플레이 시간)을 이름별로 캐시에 보관 (이름 주인만 갱신)
+// - ?prof=이름 으로 그 프로필을 돌려줌 (접속자 이름에 마우스를 올리거나 누르면 게임이 불러옴)
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
 //
@@ -293,9 +297,12 @@ function ping_(q) {
   let w = 0;
   try { w = id && c.get('watch_' + id) ? 1 : 0; } catch (err) {}
   // 관리자 쪽지: 이 이름 앞으로 안 읽은 쪽지가 있다는 표시(캐시)가 있을 때만 시트를 읽음 → 평소 접속 신호는 가벼움
+  // 프로필: 바뀐 경우에만 이름 주인 확인 후 저장 (6시간 캐시, 접속 중이면 계속 갱신됨)
+  try { const pf = String(q.pf || '').replace(/[^A-Za-z0-9_+.~:\-]/g, '').slice(0, 240), nm = dmKey_(q.n);
+    if (pf && nm && !q.bye && c.get('pf_' + nm) !== pf) { const own = ownerKh_(str_(q.n, 12)); if (!own || own === kh_(q.k)) c.put('pf_' + nm, pf, 21600); } } catch (err) {}
   let dm = [];
   try { const nm = dmKey_(q.n); if (nm && !q.bye && (c.get('dm_' + nm) || !c.get('dmc_' + nm))) { c.put('dmc_' + nm, '1', 21600); const own = ownerKh_(str_(q.n, 12)); if (!own || own === kh_(q.k)) { dm = dmFor_(nm); if (!dm.length) c.remove('dm_' + nm); } } } catch (err) {}
-  return out_({ v: 67, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 68, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -523,6 +530,7 @@ function doGet(e) {
   if (q.delrec) return out_(delrec_(q));
   if (q.snap) return out_(snap_(q));
   if (q.ping) return ping_(q);
+  if (q.prof) { let pf = ''; try { pf = CacheService.getScriptCache().get('pf_' + dmKey_(q.prof)) || ''; } catch (err) {} return out_({ pf }); }
   if (q.cload) return cload_(q);
   if (q.dels) return out_({ dels: delList_() });
   if (q.dmack) return out_(dmAck_(q));
