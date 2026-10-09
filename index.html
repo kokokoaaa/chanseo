@@ -7348,6 +7348,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:114,t:'🏆 빈 단상',items:[
+    ['change','🏆 명예의 전당에 아직 사람이 없는 순위 단상은 「비어 있음」 글씨 없이 비워 둬요','look'],
+  ]},
   {v:113,t:'🏆 단상 정리',items:[
     ['change','🏆 명예의 전당 3등 단상의 숫자가 아래 받침에 가려지던 문제를 고쳤어요','bug'],
   ]},
@@ -9537,7 +9540,7 @@ function boardHtml(){
   const avT=(b,c,mv)=>{const a=mv?hofAvS(b.cls,b.skin,b.aura,b.gear,recLook(b),mv):hofAv(b.cls,b.skin,b.aura,b.gear,recLook(b)),me1=a?(mv?`<span class="${c} avs ${mv}" style="background-image:url(${a})"></span>`:`<img class="${c}" src="${a}" alt="">`):'';if(hd!=='raid'||!(b.team||[]).length)return me1;
     return `<span class="hteam">${me1}${b.team.map(q=>{const x=hofAv(q.cls,q.skin,'','',q.look);return x?`<img class="${c} mate" src="${x}" alt="" title="${CLASSES[q.cls].n}">`:'';}).join('')}</span>`;};
   HOF_B=B;const del=i=>DEV&&hd!=='duel'?`<button class="hdel" data-del="${i}" title="이 기록 삭제 (개발자)">🗑</button>`:'';// 시상식 무대: 같은 재질의 이어진 단상에 1~3등이 서고(왕관 금·은·동), 점수·칭호·한마디는 아래 순위 목록에
-  const pod=[1,0,2].map(i=>{const b=B[i],k=['g','s','b'][i];if(!b)return `<div class="pc ${k} empty"><div class="blk"><span class="pnm">비어 있음</span><span>${i+1}</span></div></div>`;
+  const pod=[1,0,2].map(i=>{const b=B[i],k=['g','s','b'][i];if(!b)return `<div class="pc ${k} empty"><div class="blk"><span>${i+1}</span></div></div>`;
     return `<div class="pc ${k}" data-hi="${i}"><div class="who"><span class="crown c${i}">👑</span>${avT(b,'hav','walk')}<span class="sh"></span></div><div class="blk"><span class="pnm">${nm(b).replace(/<small class="htt[^]*?<\/small>/,'')}</span><span>${i+1}</span></div></div>`;}).join('');
   const top=`<div class="stagebg"><div class="curtL"></div><div class="curtR"></div><div class="valance"></div><div class="spot s1"></div><div class="spot s2"></div><div class="spot s3"></div><div class="conf"></div><div class="pod4"><div class="row">${pod}</div><div class="floor"></div></div><div class="carpet"></div></div>`;
   const rest=B.slice(0,HOF_ALL?30:7).map((b,i)=>`<div data-hi="${i}" class="ri r${i+1} ${me(b)?'me':''} ${b.frame?'fr-'+b.frame:''} ${b.fx?'hc-'+b.fx:''}">${del(i)}<em>${i<3?['🥇','🥈','🥉'][i]:i+1}</em>${avT(b,'hav s','idle')}<div class="mid">${nm(b)}${me(b)?' <small>(나)</small>':''}${cmT(b)?`<i>${cmT(b)}</i>`:''}<span class="rsub">${rcT(b).replace(/<br>/g,' · ')}</span></div><small class="rsc">${psT(b)}</small></div>`).join('');
@@ -10166,7 +10169,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=113,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=114,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
