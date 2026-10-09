@@ -166,6 +166,21 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 .cxrow .d{font-size:14px;color:#e8dcc0;margin-top:3px;line-height:1.45}
 .cxrow .s{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.45}
 .cxrow.uc{border-left-color:#ff6a00;box-shadow:inset 0 0 0 1px rgba(255,120,40,.35)}
+/* 도감: 이름 카드 격자로 한눈에 → 누르면 그 카드만 펼쳐서 자세한 설명 */
+#cxL{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;align-items:start}
+#cxL>:not(.cxrow),#cxL>.cxrow.open{grid-column:1/-1}
+#cxL>.cxrow{margin:0;cursor:pointer;transition:background .15s}
+#cxL>.cxrow:hover{background:rgba(214,169,74,.12)}
+#cxL>.cxrow:not(.open)>:not(.h){display:none}
+#cxL>.cxrow .h::after{content:'▸';margin-left:auto;color:var(--muted);font-size:13px}
+#cxL>.cxrow.open .h::after{content:'▾'}
+#cxL>.cxrow.open{background:rgba(214,169,74,.1);box-shadow:0 0 0 1px rgba(214,169,74,.5)}
+#cxL>.cxrow:not(.open) .h .tg{display:none}
+#cxL>.cxrow:not(.open) .h .tg.keep{display:inline}
+#cxL>.cxrow.mob:not(.open)>img,#cxL>.cxrow.mob:not(.open)>div{display:block}
+#cxL>.cxrow.mob:not(.open)>img{max-width:44px;max-height:44px}
+#cxL>.cxrow.mob:not(.open)>div>:not(.h){display:none}
+#cxL>.cxrow.mob>div{flex:1}
 .clsgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .lookT{position:absolute;top:3px;right:3px;font-size:10px;line-height:1;padding:3px 5px;border-radius:6px;background:rgba(123,224,143,.18);border:1px solid rgba(123,224,143,.55);color:#9ef0b0;cursor:pointer;z-index:1}.lookT.old{background:rgba(200,210,224,.16);border-color:#9aa6b8;color:#dfe6ee}.lookT:hover{filter:brightness(1.3)}
 .clscard{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;background:rgba(0,0,0,.25);border:2px solid rgba(214,169,74,.3);border-radius:10px;padding:6px 4px 9px;color:var(--ivory);font:inherit;cursor:pointer;text-align:center;opacity:.75;transition:opacity .15s,transform .15s}
@@ -7438,6 +7453,7 @@ const PATCH_NOTES=[
     ['change','📊 치명타 피해는 「500% / 500% + 증강 추가분」처럼 상한과 상한을 넘는 증강분을 나눠서 보여 줘요. 카드 미리보기의 이동 속도도 상한(230)까지만 보여요','look'],
     ['change','🥚 이스터에그를 깨면 알림에 「방법」도 함께 나와요','look'],
     ['change','⌨ 시야 넓이(멀리 보기) 단축키가 <b>Y</b>로 바뀌었어요 (Z도 계속 돼요)','look'],
+    ['change','📖 도감이 이름 카드로 한눈에 보이고, 누르면 그 카드만 펼쳐져서 자세한 설명이 나와요 (스크롤 훨씬 줄었어요)','look'],
     ['change','🐞 이름 없는 사람끼리 접속 목록에서 한 줄로 합쳐지던 문제, 메뉴에서 돌아올 때마다 명예의 전당을 통째로 다시 받던 문제를 고쳤어요','bug'],
   ]},
 {v:152,t:'🎨 카드 보기 편하게',items:[
@@ -9323,6 +9339,7 @@ function openCodex(o){Object.assign(CX,o||{});
   if($('cxTier'))$('cxTier').onchange=e=>{CX.tier=e.target.value;cxList();};
   if($('cxSort'))$('cxSort').onchange=e=>{CX.sort=e.target.value;cxList();};
   $('cxBack').onclick=cxClose;
+  $('cxL').onclick=e=>{if(e.target.closest('a,button,input,select,label,.patc'))return;const r=e.target.closest('.cxrow');if(r&&r.parentNode===$('cxL'))r.classList.toggle('open');};
   cxList();
 }
 function cxList(){
@@ -9335,7 +9352,7 @@ function cxList(){
   const ucOn=META.sk&&META.sk.uncap;let rows=[];
   const cxAugRow=a=>{const fz=[...FUSIONS.filter(f=>f.a===a.id||f.b===a.id).map(f=>`${f.n} (+${nm(f.a===a.id?f.b:f.a)})`),...VFUSIONS.filter(f=>f.b===a.id||f.a===a.id).map(f=>`${f.n} (+왕실 ${nm(f.a===a.id?f.b:f.a)})`)];
         const own=cxGame&&has(a.id),ban=cxGame&&isBanned(a.id);
-        return `<div class="cxrow ${a.uc?'uc':''}" style="--rc:${TIER[a.t].col}${ban?';opacity:.5':''}"><div class="h"><b>${a.n}</b>${own?'<span class="tg" style="background:#2f8f4e;color:#fff">✔ 보유</span>':''}${ban?'<span class="tg" style="background:#7a1f2a;color:#fff">🔒 봉인됨</span>':''}<span class="tg" style="background:${TIER[a.t].col};color:#fff">${TIER[a.t].n}</span>${tierOpen(a.t)?'':`<span class="tg" style="background:#3a2a2a;color:#ffb0b0">🔒 ${DIFF[TIER_UNLOCK[a.t]].n} 클리어 시 해금</span>`}${a.uc?`<span class="tg" style="background:#c4122f;color:#fff">♾ 고점 돌파${ucOn?'':' · 🔒 한계 돌파 해금 필요'}</span>`:''}${clsN(a.cls)}${tg(a.tags)}</div><div class="d">${a.d}</div>${fz.length?`<div class="s">합체: ${fz.join(' · ')}</div>`:a.t==='d'?'<div class="s">👑 히든 보스 황금 용을 잡으면 3개 중 하나 선택 · 슬롯 차지 안 함 · 강화·교체·합체 없음</div>':a.uc?'<div class="s">합체·교체 불가</div>':''}</div>`;};
+        return `<div class="cxrow ${a.uc?'uc':''}" style="--rc:${TIER[a.t].col}${ban?';opacity:.5':''}"><div class="h"><b>${a.n}</b>${own?'<span class="tg keep" style="background:#2f8f4e;color:#fff">✔ 보유</span>':''}${ban?'<span class="tg" style="background:#7a1f2a;color:#fff">🔒 봉인됨</span>':''}<span class="tg" style="background:${TIER[a.t].col};color:#fff">${TIER[a.t].n}</span>${tierOpen(a.t)?'':`<span class="tg" style="background:#3a2a2a;color:#ffb0b0">🔒 ${DIFF[TIER_UNLOCK[a.t]].n} 클리어 시 해금</span>`}${a.uc?`<span class="tg" style="background:#c4122f;color:#fff">♾ 고점 돌파${ucOn?'':' · 🔒 한계 돌파 해금 필요'}</span>`:''}${clsN(a.cls)}${tg(a.tags)}</div><div class="d">${a.d}</div>${fz.length?`<div class="s">합체: ${fz.join(' · ')}</div>`:a.t==='d'?'<div class="s">👑 히든 보스 황금 용을 잡으면 3개 중 하나 선택 · 슬롯 차지 안 함 · 강화·교체·합체 없음</div>':a.uc?'<div class="s">합체·교체 불가</div>':''}</div>`;};
   if(CX.tab==='aug'){
     rows=[...AUGS,...DRAGON].filter(a=>(!CX.cls||(CX.cls==='-'?!a.cls:a.cls===CX.cls))&&CX.tag.every(t=>(a.tags||[]).includes(t))&&(!CX.tier||(CX.tier==='uc'?a.uc:a.t===CX.tier&&!a.uc))&&hit(a.n,a.d,tagTxt(a.tags),a.cls?CLASSES[a.cls].n:'',a.uc?'고점 돌파':'',a.t==='d'?'황금 용 용의 보물 히든':''));
     // 정렬: 등급순이면 실버 → 골드 → 프리즘 → 고점 돌파 → 용의 보물 순으로 묶고 묶음마다 제목 줄
@@ -9351,7 +9368,7 @@ function cxList(){
     const vf=id=>VFUSIONS.filter(f=>f.a===id||f.b===id);
     rows=[`<div class="sub" style="margin:4px 0">💡 왕실 얻는 법: 보스를 잡으면 🔑 열쇠 → 상점 왕실 칸에서 구매 (최대 ${VIP_MAX}개, 일반 슬롯 차지 안 함). 붉은 달 이벤트로도 열쇠를 얻음.<br>왕실 합체: 왕실과 짝이 되는 일반 증강을 둘 다 가지면 바로 합체 (두 재료 효과는 그대로 + 합체 효과)</div>`].concat(
       VIPS.filter(v=>CX.tag.every(t=>(v.tags||[]).includes(t))&&hit(v.n,v.d,tagTxt(v.tags),vf(v.id).map(f=>f.n+' '+f.d+' '+nm(f.a===v.id?f.b:f.a)).join(' '))).map(v=>{const F=vf(v.id);
-        return `<div class="cxrow" style="--rc:${TIER.v.col}"><div class="h"><b>${v.n}</b><span class="tg" style="background:${TIER.v.col};color:#fff">왕실</span>${tg(v.tags)}${cxGame&&has(v.id)?'<span class="tg" style="background:#2f8f4e;color:#fff">✔ 보유</span>':''}</div><div class="d">${v.d}</div>${F.length?F.map(f=>`<div class="s" style="color:#ffb0c8">💥 왕실 합체 <b>${f.n}</b> = ${v.n} + ${nm(f.a===v.id?f.b:f.a)}${cxGame&&has(f.a===v.id?f.b:f.a)?' ✔':''} → ${f.d}</div>`).join(''):'<div class="s" style="opacity:.6">합체 짝 없음</div>'}</div>`;}));
+        return `<div class="cxrow" style="--rc:${TIER.v.col}"><div class="h"><b>${v.n}</b><span class="tg" style="background:${TIER.v.col};color:#fff">왕실</span>${tg(v.tags)}${cxGame&&has(v.id)?'<span class="tg keep" style="background:#2f8f4e;color:#fff">✔ 보유</span>':''}</div><div class="d">${v.d}</div>${F.length?F.map(f=>`<div class="s" style="color:#ffb0c8">💥 왕실 합체 <b>${f.n}</b> = ${v.n} + ${nm(f.a===v.id?f.b:f.a)}${cxGame&&has(f.a===v.id?f.b:f.a)?' ✔':''} → ${f.d}</div>`).join(''):'<div class="s" style="opacity:.6">합체 짝 없음</div>'}</div>`;}));
   }else if(CX.tab==='syn'){
     rows=Object.keys(TAGS).filter(t=>{const T=TAGS[t];return hit(T.n,T.t1,T.t2,T.t4,T.t6,T.ex);}).map(t=>{const T=TAGS[t],n=AUGS.filter(a=>(a.tags||[]).includes(t)).length,cl=Object.keys(CLASSES).filter(k=>CLASSES[k].fav.includes(t)).map(k=>CLASSES[k].n);
       return `<div class="cxrow" style="--rc:var(--brass)"><div class="h"><b>${TAG_ICO[t]||''} ${T.n}</b><span class="tg">증강 ${n}개</span>${cl.length?`<span class="tg">주력 직업: ${cl.join(', ')}</span>`:''}<button class="cxchip" data-cxj="${t}">증강 보기 →</button></div>${[[1,T.t1],[2,T.t2],[4,T.t4],[6,T.t6]].filter(x=>x[1]).map(([k,d])=>`<div class="d"><b style="font-size:14px;color:var(--brass)">${k}개</b> ${d}</div>`).join('')}<div class="s">5개부터 1개마다: ${T.ex}</div></div>`;});
@@ -9396,9 +9413,9 @@ function cxList(){
     rows=keys.filter(k=>{const T=ET[k],I=MOBINFO[k];return (DEV||META.mob[k])?hit(T.n,I[0],I[1],BTITLE[k]||'',(BW[k]||[]).join(' '),gOf(k)):!qs.length;}).map(k=>{const T=ET[k],I=MOBINFO[k],seen=(DEV||META.mob[k]),sz=T.boss?72:MDEF[k].sz,w=Math.round(sz*(T.boss?1.3:2.2));
       const g=gOf(k),hd=g!==lastG?`<div style="margin:14px 0 2px;padding:3px 10px;border-left:4px solid var(--brass);font-size:16px;color:#ffd76a;background:rgba(214,169,74,.12);border-radius:4px">${g}</div>`:'';lastG=g;
       const img=`<img src="${mobImg(k,!seen)}" style="width:${w}px;height:${w}px;image-rendering:pixelated;flex:none">`;
-      if(!seen)return hd+`<div class="cxrow" style="--rc:#555;display:flex;gap:10px;align-items:center">${img}<div><div class="h"><b>❓ ???</b>${T.boss?'<span class="tg">보스</span>':''}</div><div class="s">아직 만나지 못한 몬스터${T.hidb?' · 👑 히든 보스':T.hid?' · ✨ 히든 몹':T.boss?` · ${bossCh[k]||''} 보스 후보`:''}</div></div></div>`;
+      if(!seen)return hd+`<div class="cxrow mob" style="--rc:#555;display:flex;gap:10px;align-items:center">${img}<div><div class="h"><b>❓ ???</b>${T.boss?'<span class="tg">보스</span>':''}</div><div class="s">아직 만나지 못한 몬스터${T.hidb?' · 👑 히든 보스':T.hid?' · ✨ 히든 몹':T.boss?` · ${bossCh[k]||''} 보스 후보`:''}</div></div></div>`;
       const where=T.hidb?'히든 보스 · 6분 이후 드물게 출현':T.hid?'히든 몹 · 어디서나 아주 드물게 (행운이 높을수록 자주)':T.boss?`${bossCh[k]} 보스 후보 (2.5분 보스전 때 무작위 등장)`:[mobWhen(k),BW[k]?`자주 나오는 곳: ${BW[k].join(', ')}`:''].filter(Boolean).join(' · ')||'특수 (분열·이벤트)';
-      return hd+`<div class="cxrow" style="--rc:${T.col};display:flex;gap:10px;align-items:center">${img}<div style="min-width:0"><div class="h"><b>${T.n}</b>${T.hidb?'<span class="tg" style="background:#b8800f;color:#fff">👑 히든 보스</span>':T.boss?`<span class="tg" style="background:#7a1f2a;color:#fff">보스 · ${BTITLE[k]||''}</span>`:''}${T.hid?'<span class="tg" style="background:#1a6a8a;color:#fff">✨ 히든</span>':''}<span class="tg">❤ 체력 ${T.hp}</span><span class="tg">⚔ 공격력 ${T.dmg}</span><span class="tg">👟 이동 속도 ${T.spd}</span>${T.range?`<span class="tg">🎯 사거리 ${T.range}</span>`:''}</div>
+      return hd+`<div class="cxrow mob" style="--rc:${T.col};display:flex;gap:10px;align-items:center">${img}<div style="min-width:0"><div class="h"><b>${T.n}</b>${T.hidb?'<span class="tg" style="background:#b8800f;color:#fff">👑 히든 보스</span>':T.boss?`<span class="tg" style="background:#7a1f2a;color:#fff">보스 · ${BTITLE[k]||''}</span>`:''}${T.hid?'<span class="tg" style="background:#1a6a8a;color:#fff">✨ 히든</span>':''}<span class="tg">❤ 체력 ${T.hp}</span><span class="tg">⚔ 공격력 ${T.dmg}</span><span class="tg">👟 이동 속도 ${T.spd}</span>${T.range?`<span class="tg">🎯 사거리 ${T.range}</span>`:''}</div>
         ${BPAT[k]?`<div class="d"><b>공격 패턴</b> <small style="opacity:.7">(마우스를 올리거나 누르면 미리보기)</small></div><div class="h" style="margin:3px 0">${BPAT[k].map((q,i)=>`<span class="tg patc" data-pt="${k}" data-pi="${i}" style="cursor:help;background:rgba(255,215,106,.18);border:1px solid rgba(255,215,106,.5)">▶ ${q[0]}</span>`).join('')}</div>`:`<div class="d"><b>공격:</b> ${I[0]}</div>`}<div class="s">💡 팁: ${I[1]}</div><div class="s" style="opacity:.8">📍 ${where}</div></div></div>`;});
     if(mk==='e')rows=[`<div class="sub" style="margin:4px 0">정예(금색 테두리, 체력 4배·공격력 1.5배)에 붙는 특성. 약 2분부터.<br>여러 개 붙을 확률: 어려움 2개 15% · 지옥 2개 35% · 신 2개 55%, 3개 12% · 악몽 2개 60%, 3개 20%+ (1분마다 +1%)<br>2개면 각 특성 효과 70%, 3개면 55%만 적용</div>`].concat(Object.keys(AFFIX).map(k=>{const A=AFFIX[k],d=A.d||'';return hit(A.n,d)?`<div class="cxrow" style="--rc:${A.col}"><div class="h"><b style="color:${A.col}">${A.n}</b><span class="tg">정예 특성</span></div><div class="d">${d}</div></div>`:'';}).filter(Boolean));
     CX.mobHdr=mk!=='e'?`발견 ${seenN} / ${keys.length} · 체력·공격력은 일반 난이도 초반 기준 (시간·난이도에 따라 강해짐)`:'';
