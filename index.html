@@ -7200,9 +7200,10 @@ function gainAug(a){
 }
 // 큰 알림 띠: 여러 개가 한꺼번에 오면(증강 + 칭호 등) 1.3초 간격으로 차례로 띄우고, 아직 떠 있는 띠가 있으면 그 아래 줄에 띄움
 let AFX_NEXT=0;const AFX_ON=[];
+// delay는 초 단위. (예전엔 밀리초와 섞여서, 알림이 겹쳐 대기하면 1.3초가 아니라 약 20분 뒤에 떠서 한참 전 합체·시너지 알림이 엉뚱할 때 나왔음)
 function augFx(title,sub,col,big,delay=0){
-  const now=performance.now(),at=Math.max(now+delay,AFX_NEXT);AFX_NEXT=at+1300;delay=at-now;
-  setTimeout(()=>{
+  const now=performance.now(),at=Math.max(now+delay*1000,AFX_NEXT);AFX_NEXT=at+1300;const wait=at-now,run0=S;
+  setTimeout(()=>{if(S!==run0)return; // 그 사이 판이 바뀌었으면 지난 판 알림은 안 띄움
     const bn=document.createElement('div');bn.className='abanner';bn.style.color=col;bn.innerHTML=`<b>${title}</b>${sub?`<small>${sub}</small>`:''}`;
     let slot=0;while(AFX_ON.includes(slot))slot++;AFX_ON.push(slot);if(slot)bn.style.marginTop=(slot*78)+'px';
     document.body.appendChild(bn);setTimeout(()=>{bn.remove();const i=AFX_ON.indexOf(slot);if(i>=0)AFX_ON.splice(i,1);},2600);
@@ -7211,7 +7212,7 @@ function augFx(title,sub,col,big,delay=0){
     for(let i=0;i<N;i++){const d=document.createElement('i'),an=Math.random()*Math.PI*2,v=120+Math.random()*(big?240:150),sz=4+Math.random()*6;
       d.className='cf';d.style.cssText=`left:${cx}px;top:${cy}px;width:${sz}px;height:${sz*(.6+Math.random())}px;background:${i%3?col:'#fff3c4'};--dx:${Math.cos(an)*v}px;--dy:${Math.sin(an)*v+50}px;--r:${Math.random()*720-360}deg;--t:${1.1+Math.random()*.5}s`;
       document.body.appendChild(d);setTimeout(()=>d.remove(),1900);}
-    chime(big?[523,659,784,1047,1319]:[587,740,880],'triangle');},delay*1000);
+    chime(big?[523,659,784,1047,1319]:[587,740,880],'triangle');},wait);
 }
 function rarityFx(){
   const els=[...ov.querySelectorAll('.card.rar-e,.card.rar-l')];if(!els.length)return;
@@ -7402,6 +7403,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:144,t:'🐞 엉뚱한 합체 알림',items:[
+    ['change','🐞 알림이 여러 개 겹치면 뒤 알림이 <b>약 20분 뒤에</b> 떠서, 한참 전에 된 합체·시너지 알림이 상관없을 때 화면 위에 뜨던 문제를 고쳤어요. 이제 1.3초 간격으로 바로 차례대로 떠요','bug'],
+  ]},
   {v:141,t:'⭐ 대표 직업 · 🟢 접속 목록 안정',items:[
     ['change','🟢 「접속 중」 목록이 <b>신호가 올 때마다 순서가 뒤섞이던 것</b>을 고쳤어요. 이제 나 → 활동 중 → 자리 비움, 같은 무리는 이름순으로 고정돼요','bug'],
     ['change','🟢 실시간 서버가 잘 연결돼 있을 때 <b>예비 서버의 옛 정보</b>가 끼어들어 활동이 왔다 갔다 하던 문제, 잠깐 신호가 늦은 사람이 목록에서 들락날락하던 문제를 고쳤어요','bug'],
@@ -10456,7 +10460,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=143,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=144,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
