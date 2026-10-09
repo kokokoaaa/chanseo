@@ -506,6 +506,7 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 .home .pod4 .crown.c1{filter:grayscale(1) brightness(1.5) drop-shadow(0 0 6px #e8eef6);animation-delay:.4s}.home .pod4 .crown.c0{font-size:26px;filter:drop-shadow(0 0 12px #ffd76a)}.home .pod4 .crown.c2{filter:sepia(1) saturate(2.2) hue-rotate(-18deg) brightness(.85) drop-shadow(0 0 6px #e8a870);animation-delay:.8s}
 .home .pod4 .pnm{font-size:12px;white-space:nowrap;text-shadow:0 1px 2px #000;max-width:120%;overflow:hidden;text-overflow:ellipsis}.home .pod4 .g .pnm{font-size:14px}
 .home .pod4 .pnm small{display:none}
+.home .pod4 .blk .pnm [class*="hx-"]{background:none!important;-webkit-text-fill-color:#fff!important;color:#fff!important;filter:drop-shadow(0 0 3px rgba(255,215,106,.9))!important;animation:none!important} /* 단상 이름표: 이름 효과 글자가 어두운 이름표에 묻혀 안 보여서 선명한 흰 글씨 + 금빛 테로 */
 .home .pod4 .who{position:relative;z-index:2;margin:0 0 -20px}
 .avs{display:block;aspect-ratio:1;background-repeat:no-repeat;background-size:400% 100%;image-rendering:pixelated}.avs.walk{animation:avsW .48s steps(4) infinite}.avs.idle{animation:avsW 1.8s steps(4) infinite}@keyframes avsW{from{background-position:0 0}to{background-position:133.333% 0}}
 .home .pod4 .who .hav{display:block;height:auto;width:118px;height:auto;image-rendering:pixelated;filter:drop-shadow(0 5px 3px rgba(0,0,0,.6))}.home .pod4 .g .who .hav{width:140px}
@@ -7420,6 +7421,7 @@ const PATCH_NOTES=[
     ['change','🐞 이름을 바꾸려다 거절되면 내 이름 열쇠가 꼬여서 내 이름인데 「다른 사람 이름」이 되던 문제, 비밀번호로 이름을 되찾아도 채팅이 계속 막히던 문제를 고쳤어요','bug'],
     ['change','🐞 내 캐릭터로 만든 결투 코드로 나와 싸우면 연습 경기인데도 보상·「이변의 주인공」을 받던 문제, 강화 되돌리기(−)로 예전 싼값에 산 강화가 지금 값으로 환불되던 문제를 고쳤어요','bug'],
     ['change','🐞 마우스로 화면을 끌다가 버튼 위에서 놓으면 캐릭터가 계속 걸어가던 문제를 고쳤어요','bug'],
+    ['change','🏆 명예의 전당 단상의 캐릭터를 화면 해상도에 맞춰 <b>도트가 고르게</b> 그려요 (비율이 깨져 보이던 문제). 이름 효과가 있어도 단상 이름표 글자가 선명하게 보여요','look'],
     ['change','🗿 레이드·결투에서 각성한 캐릭터의 <b>최대 체력이 두 번 계산</b>되던 문제를 고쳤어요 (동료 체력, 보스가 때리는 세기, 결투 전투력이 정상 값으로)','bug'],
     ['change','⚒ 대장간 「장비 기록 되살리기」는 강화 실패·파괴를 되돌리는 데 쓰일 수 있어서 관리자만 쓸 수 있게 바꿨어요. 장비가 이상하게 바뀌었으면 관리자에게 말해 주세요','play'],
   ]},
@@ -9785,9 +9787,12 @@ function hofAv0(cls,skin,aura,gear,look){const key=cls+'|'+skin+'|'+(aura||'')+'
     hofAvDraw(g,0,cls,skin?COS.find(q=>q.k===skin):null,auraList(aura),gearDecode(gear),'idle',0,.6);
     return HOF_AV[key]=c.toDataURL();}catch(e){return '';}}
 // 움직이는 전당 아바타: 4칸 띠 그림 (walk = 제자리 걷기 · idle = 서서 숨쉬기). CSS steps로 넘김
-function hofAvS(cls,skin,aura,gear,look,anim){return withLook(look,()=>{const key='S'+anim+'|'+cls+'|'+skin+'|'+(aura||'')+'|'+(gear||'')+'|'+(look==null?'':look?'o':'n');if(HOF_AV[key])return HOF_AV[key];if(!CLASSES[cls]||typeof HERO==='undefined'||!HERO.canvas)return '';
-  try{const c=document.createElement('canvas');c.width=92*4;c.height=92;const g=c.getContext('2d');g.imageSmoothingEnabled=false;const x=skin?COS.find(q=>q.k===skin):null,au=auraList(aura),G=gearDecode(gear);
-    for(let i=0;i<4;i++)hofAvDraw(g,i*92,cls,x,au,G,anim,anim==='walk'?i/9+.01:i*.45,.6+i*.2);
+// 보여 줄 크기(px)에 맞춰 도트 한 칸이 화면의 정수 픽셀이 되게 직접 그림 (92px 그림을 1.28배 같은 소수 배율로 늘리면 도트 굵기가 들쭉날쭉해 비율이 깨져 보였음)
+// 화면 배율이 2 미만(보통 모니터)이면 2배로 그린 뒤 부드럽게 줄여 보여 줌 (크기는 그대로, 도트는 고르게)
+const avDim=px=>{const d=Math.min(3,Math.max(2,window.devicePixelRatio||1)),dot=Math.max(1,Math.round(1.9*px*d/92)),F=Math.round(92*dot/1.9);return {F,kf:dot/1.9,css:+(F/d).toFixed(2)};};
+function hofAvS(cls,skin,aura,gear,look,anim,px){return withLook(look,()=>{const D=px?avDim(px):{F:92,kf:1},key='S'+anim+'|'+D.F+'|'+cls+'|'+skin+'|'+(aura||'')+'|'+(gear||'')+'|'+(look==null?'':look?'o':'n');if(HOF_AV[key])return HOF_AV[key];if(!CLASSES[cls]||typeof HERO==='undefined'||!HERO.canvas)return '';
+  try{const c=document.createElement('canvas');c.width=D.F*4;c.height=D.F;const g=c.getContext('2d');g.imageSmoothingEnabled=false;const x=skin?COS.find(q=>q.k===skin):null,au=auraList(aura),G=gearDecode(gear);
+    for(let i=0;i<4;i++){g.save();g.translate(i*D.F,0);g.scale(D.kf,D.kf);g.beginPath();g.rect(0,0,92,92);g.clip();hofAvDraw(g,0,cls,x,au,G,anim,anim==='walk'?i/9+.01:i*.45,.6+i*.2);g.restore();}
     return HOF_AV[key]=c.toDataURL();}catch(e){return '';}});}
 // 명예의 전당: 마우스를 올리면(휴대폰은 누르면) 그 사람의 칭호·꾸미기·장비·결투 전적
 let HOF_B=[];
@@ -9838,13 +9843,13 @@ function boardHtml(){
   const rcT=b=>hd==='duel'?`${cn(b)}<br>${b.dw.w}승 ${b.dw.d}무 ${b.dw.l}패`:hd==='raid'?`🗿 ${b.lvl}단계<br>${cn(b)}`:`${DIFF[b.diff]&&DIFF[b.diff].rush?'⚔'+(+b.bosses||0)+'단계 ':DIFF[b.diff]&&DIFF[b.diff].endless?'☠'+((+b.bosses||0)+1)+'단계 ':b.bosses>=4?'👑 ':''}${cn(b)}<br>Lv ${b.lvl} · ${f(b.time)}`;
   const rtT=b=>hd==='duel'?`${b.dw.w}승 · ${Math.round(wr(b.dw)*100)}%`:hd==='raid'?`${Math.floor(b.time/60)}:${String(b.time%60).padStart(2,'0')}`:b.score.toLocaleString();
   const cmT=b=>hd==='raid'?(b.comment?'🤝 '+esc(b.comment.slice(0,40)):''):b.comment?'“'+esc(b.comment.slice(0,40))+'”':'';
-  const avT=(b,c,mv)=>{const a=mv?hofAvS(b.cls,b.skin,b.aura,b.gear,recLook(b),mv):hofAv(b.cls,b.skin,b.aura,b.gear,recLook(b)),me1=a?(mv?`<span class="${c} avs ${mv}" style="background-image:url(${a})"></span>`:`<img class="${c}" src="${a}" alt="">`):'';if(hd!=='raid'||!(b.team||[]).length)return me1;
+  const avT=(b,c,mv,px)=>{const a=mv?hofAvS(b.cls,b.skin,b.aura,b.gear,recLook(b),mv,px):hofAv(b.cls,b.skin,b.aura,b.gear,recLook(b)),dm=px?avDim(px).css:0,me1=a?(mv?`<span class="${c} avs ${mv}" style="background-image:url(${a})${dm?`;width:${dm}px;height:${dm}px;image-rendering:${(window.devicePixelRatio||1)<2?'auto':'pixelated'}`:''}"></span>`:`<img class="${c}" src="${a}" alt="">`):'';if(hd!=='raid'||!(b.team||[]).length)return me1;
     return `<span class="hteam">${me1}${b.team.map(q=>{const x=hofAv(q.cls,q.skin,'','',q.look);return x?`<img class="${c} mate" src="${x}" alt="" title="${CLASSES[q.cls].n}">`:'';}).join('')}</span>`;};
   HOF_B=B;const del=i=>DEV&&hd!=='duel'?`<button class="hdel" data-del="${i}" title="이 기록 삭제 (개발자)">🗑</button>`:'';// 시상식 무대: 같은 재질의 이어진 단상에 1~3등이 서고(왕관 금·은·동), 점수·칭호·한마디는 아래 순위 목록에
   const pod=[1,0,2].map(i=>{const b=B[i],k=['g','s','b'][i];if(!b)return `<div class="pc ${k} empty"><div class="blk"><span>${i+1}</span></div></div>`;
-    return `<div class="pc ${k}" data-hi="${i}"><div class="who">${(()=>{const cm=hd==='raid'?'':String(b.comment||'').slice(0,40),mine=DEV&&SHEET&&SRV_V>=61;return cm||mine?`<span class="pbub ${cm?'':'empty'} ${mine?'mine':''}" ${mine?`data-cme="${i}" title="(개발자) 눌러서 멘트 고치기"`:''}>${cm?esc(cm):'💬 멘트 쓰기'}${mine&&cm?' <i>✏</i>':''}</span>`:'';})()}<span class="crown c${i}">👑</span>${avT(b,'hav','walk')}<span class="sh"></span></div><div class="blk"><span class="pnm">${nm(b).replace(/<small class="htt[^]*?<\/small>/,'')}</span><span>${i+1}</span></div></div>`;}).join('');
+    return `<div class="pc ${k}" data-hi="${i}"><div class="who">${(()=>{const cm=hd==='raid'?'':String(b.comment||'').slice(0,40),mine=DEV&&SHEET&&SRV_V>=61;return cm||mine?`<span class="pbub ${cm?'':'empty'} ${mine?'mine':''}" ${mine?`data-cme="${i}" title="(개발자) 눌러서 멘트 고치기"`:''}>${cm?esc(cm):'💬 멘트 쓰기'}${mine&&cm?' <i>✏</i>':''}</span>`:'';})()}<span class="crown c${i}">👑</span>${avT(b,'hav','walk',k==='g'?140:118)}<span class="sh"></span></div><div class="blk"><span class="pnm">${nm(b).replace(/<small class="htt[^]*?<\/small>/,'')}</span><span>${i+1}</span></div></div>`;}).join('');
   const top=`<div class="stagebg"><div class="curtL"></div><div class="curtR"></div><div class="valance"></div><div class="spot s1"></div><div class="spot s2"></div><div class="spot s3"></div><div class="conf"></div><div class="pod4"><div class="row">${pod}</div><div class="floor"></div></div><div class="carpet"></div></div>`;
-  const rest=B.slice(0,HOF_ALL?30:7).map((b,i)=>`<div data-hi="${i}" class="ri r${i+1} ${me(b)?'me':''} ${b.frame?'fr-'+b.frame:''} ${b.fx?'hc-'+b.fx:''}">${del(i)}<em>${i<3?['🥇','🥈','🥉'][i]:i+1}</em>${avT(b,'hav s','idle')}<div class="mid">${nm(b)}${me(b)?' <small>(나)</small>':''}${cmT(b)?`<i>${cmT(b)}</i>`:''}<span class="rsub">${rcT(b).replace(/<br>/g,' · ')}</span></div><small class="rsc">${psT(b)}</small></div>`).join('');
+  const rest=B.slice(0,HOF_ALL?30:7).map((b,i)=>`<div data-hi="${i}" class="ri r${i+1} ${me(b)?'me':''} ${b.frame?'fr-'+b.frame:''} ${b.fx?'hc-'+b.fx:''}">${del(i)}<em>${i<3?['🥇','🥈','🥉'][i]:i+1}</em>${avT(b,'hav s','idle',48)}<div class="mid">${nm(b)}${me(b)?' <small>(나)</small>':''}${cmT(b)?`<i>${cmT(b)}</i>`:''}<span class="rsub">${rcT(b).replace(/<br>/g,' · ')}</span></div><small class="rsc">${psT(b)}</small></div>`).join('');
   const more=B.length>7?`<button class="btn more" id="hofMore">${HOF_ALL?'접기':`전체 순위 보기 (${Math.min(B.length,30)}위까지)`}</button>`:'';
   const rcB='';
   return head+top+`<div class="rlist">${rest}</div>${more}${rcB}`;
