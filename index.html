@@ -6994,9 +6994,9 @@ function openNext(){
   if(AUTO.pick&&S.started&&!S.backToCasino){autoProcess();if(S.shopPend){S.shopPend=false;autoShop();}resume();return;}
   S.curPick=null;
   if(S.bonusSt>0){S.bonusSt--;S.curPick={k:'st'};openStat();return;}
-  if(S.pendingLv>0){S.pendingLv--;S.picks++;const at=augTurn();S.curPick={k:'lv',an:at?1:0};if(at&&augReady())openAug(true,`레벨 ${S.lvl-S.pendingLv} 달성 · 레벨업 증강`);else{if(at)toast(giveAltStat(rollTier()));openStat();}return;}
+  if(S.pendingLv>0){S.pendingLv--;S.picks++;const at=augTurn();S.curPick={k:'lv',an:at?1:0};if(at&&augReady())openAug(true,`레벨 ${S.lvl-S.pendingLv} 달성 · 레벨업 증강`);else{if(at){toast(giveAltStat(rollTier()));S.curPick={k:'st'};}openStat();}return;} // 대신 받는 스탯을 이미 줬으면 저장 때 스탯 카드 한 장만 되돌림 (이어하기로 대신 스탯을 또 받던 문제)
   if(AUTO.pick&&!S.started&&S.bonusAug>0){S.bonusAug=0;autoAug();startGame();return;}
-  if(S.bonusAug>0){S.bonusAug--;S.curPick={k:'aug'};if(augReady())openAug(true,'보스 보상');else{let t=rollTier();if(t==='s')t=capTier('g');toast(giveAltStat(t));S.bossStat=true;openStat();}return;}
+  if(S.bonusAug>0){S.bonusAug--;S.curPick={k:'aug'};if(augReady())openAug(true,'보스 보상');else{let t=rollTier();if(t==='s')t=capTier('g');toast(giveAltStat(t));S.curPick={k:'st'};S.bossStat=true;openStat();}return;}
   if(S.backToCasino){S.backToCasino=false;S.mode='casino';renderCasino();return;}
   if(S.shopPend){S.shopPend=false;openHub();return;}
   if(!S.started){startGame();return;}
@@ -7414,6 +7414,12 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:147,t:'🐞 레이드 멈춤 · 저장 보호',items:[
+    ['change','🐞 레이드에서 부활 기회로 일어난 뒤 다시 쓰러지면 <b>게임이 멈추던</b> 문제, 「여기서 끝내고 정산」을 눌렀는데 부활해 버리던 문제, 거신을 잡자마자 쓰러지면 승리가 실패로 기록되던 문제를 고쳤어요','bug'],
+    ['change','☁ 다른 기기나 새 기기가 <b>더 진행된 클라우드 데이터를 자동으로 덮어쓰지 않게</b> 막았어요 (메달만이 아니라 강화·해금·외형·캐릭터까지 비교, 다른 기기가 더 나중에 저장했으면 고르게 함, 덮어쓰기 전 자동 백업)','bug'],
+    ['change','🐞 이어하기 뒤 궁극기 증강 효과가 사라지던 문제, 불사조 쿨타임이 초기화되던 문제, 마지막 보스를 잡은 직후 저장하면 클리어가 사라지던 문제를 고쳤어요','bug'],
+    ['change','⚔ 결투에서 시작하자마자 끝내 진 판 메달을 받던 문제를 막았어요 (진 판·비긴 판 메달은 10초 이상 싸웠을 때만)','bug'],
+  ]},
   {v:146,t:'🐞 옛날 화면이 끼어들던 문제',items:[
     ['change','🐞 파일로 연 게임이 자동 업데이트된 뒤, 뒤에 남아 있던 예전 버전이 명예의 전당 등을 <b>옛날 모양으로 다시 그리던</b> 문제를 고쳤어요. 이제 업데이트되면 예전 버전은 완전히 멈춰요','bug'],
   ]},
