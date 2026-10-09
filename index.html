@@ -7402,6 +7402,11 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:141,t:'⭐ 대표 직업 · 🟢 접속 목록 안정',items:[
+    ['change','🟢 「접속 중」 목록이 <b>신호가 올 때마다 순서가 뒤섞이던 것</b>을 고쳤어요. 이제 나 → 활동 중 → 자리 비움, 같은 무리는 이름순으로 고정돼요','bug'],
+    ['change','🟢 실시간 서버가 잘 연결돼 있을 때 <b>예비 서버의 옛 정보</b>가 끼어들어 활동이 왔다 갔다 하던 문제, 잠깐 신호가 늦은 사람이 목록에서 들락날락하던 문제를 고쳤어요','bug'],
+    ['new','⭐ 👕 외형 꾸미기 「지금 내 모습」 아래에서 <b>대표 직업</b>을 고를 수 있어요. 외형 미리보기와 ☁ 데이터 고르기 창의 캐릭터 그림이 최근에 한 직업 대신 대표 직업으로 나와요','look'],
+  ]},
   {v:139,t:'☁ 데이터 고르기 · 백업',items:[
     ['change','☁ 「어느 데이터를 쓸까요?」 창에 양쪽 데이터의 <b>캐릭터 모습</b>(마지막 직업 + 장착 외형·오라·날개·장비)을 그림으로 보여 주고, <b>장착 중인 칭호·외형</b>, 도전과제 수, 지금까지 받은 메달도 보여 줘요','look'],
     ['change','↺ 서버 데이터를 불러오거나 서버에 덮어쓸 때, 바뀌기 전 데이터를 이 기기에 <b>자동 백업</b>해요. 💾 데이터 옮기기 → 「이 백업으로 되돌리기」로 되돌릴 수 있어요','play'],
@@ -8386,7 +8391,9 @@ const GEAR_LOOK=['sword','helm','cloak']; // 몸에 보이는 장비
 function gearPrevHtml(k,l){if(!GEAR_LOOK.includes(k))return '<div class="gprev"><small style="color:var(--muted)">겉모습 없이 능력만 올라가요</small></div>';const cls=CLASSES[pickCls]?pickCls:'knight',sk=(cosEq('skin')||{}).k||'',a=hofAv(cls,sk,'',gearOneCode(k,Math.max(0,l))),n=l>=0&&l<GEAR_MAX?hofAv(cls,sk,'',gearOneCode(k,l+1)):'';
   return `<div class="gprev">${a?`<span><img src="${a}" alt=""><small>${l<0?'구입하면 +0':'지금 +'+l}</small></span>`:''}${n?`<i>→</i><span><img src="${n}" alt=""><small>+${l+1}</small></span>`:''}</div>`;}
 let GLIVE=0;
-function gearLiveStart(cv){if(!cv)return;const id=++GLIVE,g=cv.getContext('2d'),cls=CLASSES[pickCls]?pickCls:'knight',x=cosEq('skin'),sk=x&&x.cat==='skin'?x:null,au=[cosEq('wing'),cosEq('aura')].filter(Boolean),parts=[],t0=performance.now();
+// 대표 직업: 외형 꾸미기에서 고름 (안 골랐으면 마지막으로 고른 직업). 외형 미리보기·데이터 고르기 창 그림에 씀
+const repCls=()=>CLASSES[META.rep]?META.rep:CLASSES[pickCls]?pickCls:'knight';
+function gearLiveStart(cv){if(!cv)return;const id=++GLIVE,g=cv.getContext('2d'),cls=repCls(),x=cosEq('skin'),sk=x&&x.cat==='skin'?x:null,au=[cosEq('wing'),cosEq('aura')].filter(Boolean),parts=[],t0=performance.now();
   const frame=now=>{if(id!==GLIVE||!document.body.contains(cv))return;const T=(now-t0)/1000,face=Math.floor(T/2.2)%2?-1:1,W=cv.width,H=cv.height,cx=W/2,fy=H-24,oc=ctx;
     g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,W,H);g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(cx,fy+2,34,9,0,0,TAU);g.fill();
     const K=3.2/PXW,emit=q=>{if(parts.length<120)parts.push({...q,x:cx+q.x*K*face,y:fy+q.y*K,vx:(q.vx||0)*K*face,vy:(q.vy||-25)*K,life:q.life||.5,t:0});};
@@ -8456,7 +8463,7 @@ async function csLoad(n,k){const ac=window.AbortController?new AbortController()
 const csSum=d=>{try{const m=JSON.parse(d.chanseo_meta||'{}'),h=(()=>{try{return JSON.parse(d.chanseo_heroes||'[]');}catch(e){return [];}})();
   // 판단용: 장착한 외형·칭호·도전과제 수·누적 메달도 같이
   const eq=Object.entries((m.cos&&m.cos.eq)||{}).filter(([,k])=>k).map(([c,k])=>{const x=COS.find(q=>q.k===k);return x?(COS_ICO[c]||'')+' '+x.n:'';}).filter(Boolean),ti=m.title&&ACH.find(a=>a.k===m.title);
-  const ce=(m.cos&&m.cos.eq)||{},cl=CLASSES[d.chipdungeon_cls]?d.chipdungeon_cls:'knight',gc=GEAR_KEYS.map(k=>{const g=m.gear&&m.gear[k];return g&&g.own?(g.lv||0).toString(11):'-';}).join(''),av={cls:cl,skin:ce.skin||'',aura:[ce.wing,ce.aura].filter(Boolean).join('+'),gear:gc};
+  const ce=(m.cos&&m.cos.eq)||{},cl=CLASSES[m.rep]?m.rep:CLASSES[d.chipdungeon_cls]?d.chipdungeon_cls:'knight',gc=GEAR_KEYS.map(k=>{const g=m.gear&&m.gear[k];return g&&g.own?(g.lv||0).toString(11):'-';}).join(''),av={cls:cl,skin:ce.skin||'',aura:[ce.wing,ce.aura].filter(Boolean).join('+'),gear:gc};
   return {av,md:Math.floor(m.medals||0),tot:Math.floor(m.total||0),lv:Object.values(m.lv||{}).reduce((a,b)=>a+(+b||0),0),cls:(m.ucls||[]).length,cos:Object.keys((m.cos&&m.cos.own)||{}).length,hero:Array.isArray(h)?h.length:Object.keys(h||{}).length,eq,ti:ti?ti.n:'',ach:Object.keys(m.ach||{}).length};}catch(e){return null;}};
 // 덮어쓰기 전 자동 백업 (이 기기에만, 한 칸씩): dev = 불러오기 전 이 기기 데이터, srv = 이 기기 데이터로 덮어쓰기 전 서버 데이터
 const bakSave=(slot,label,code)=>{try{localStorage.setItem('chanseo_bak_'+slot,JSON.stringify({at:Date.now(),label,code}));}catch(e){}};
@@ -9304,7 +9311,7 @@ function openMeta(cosOnly){cosPreviewHide();
     return `<button class="mtile sk ${own?'max':''} ${x.k==='uncap'?'ucsk':''}" data-mk="${x.k}" ${can?'':'disabled'}><b>${x.n}</b><span class="md">${x.d}</span><span class="mc">${own?'✔ 보유':'🏅 '+x.c}</span></button>`;}).join('');
   if(cosOnly){show(`<div class="shophead"><h2>👕 외형 꾸미기</h2><button class="btn" id="mBack">돌아가기</button></div>
   <div class="mbal">보유 메달 <b>🏅 ${META.medals}</b><small>능력치 영향 없음 · 눌러서 장착/해제 · 마우스를 올리면 미리보기</small></div>
-<div class="cosEqp"><div class="cosLiveB"><canvas id="cosLive" width="200" height="200"></canvas><small>지금 내 모습</small></div><div class="cosSlots">${Object.keys(COS_CAT).map(cat=>{const e=cosEq(cat);return `<div class="cslot ${e?'on':''} ${cat===COS_TAB?'cur':''}" data-cslot="${cat}" title="${COS_CAT[cat]} · 누르면 이 종류 보기"><i>${COS_ICO[cat]}</i><b>${e?e.n:'비어 있음'}</b><small>${COS_CAT[cat]}</small>${e?`<span class="cx" data-cun="${cat}" title="해제">✕</span>`:''}</div>`;}).join('')}${(()=>{const t=META.title&&ACH.find(a=>a.k===META.title);return `<div class="cslot ${t?'on':''} ${COS_TAB==='title'?'cur':''}" data-cslot="title" title="칭호 · 누르면 칭호 보기"><i>🏷</i><b>${t?t.n:'비어 있음'}</b><small>칭호</small>${t?'<span class="cx" data-cun="title" title="해제">✕</span>':''}</div>`;})()}</div></div>
+<div class="cosEqp"><div class="cosLiveB"><canvas id="cosLive" width="200" height="200"></canvas><small>지금 내 모습</small><label style="display:block;margin-top:4px;font-size:12px;color:#ffd76a">⭐ 대표 직업 <select id="repSel" style="font:inherit;font-size:13px;background:rgba(0,0,0,.4);color:var(--ivory);border:1px solid var(--brass);border-radius:6px;padding:2px 4px">${Object.keys(CLASSES).filter(k=>clsOpen(k)).map(k=>`<option value="${k}" ${repCls()===k?'selected':''}>${CLASSES[k].n}</option>`).join('')}</select></label></div><div class="cosSlots">${Object.keys(COS_CAT).map(cat=>{const e=cosEq(cat);return `<div class="cslot ${e?'on':''} ${cat===COS_TAB?'cur':''}" data-cslot="${cat}" title="${COS_CAT[cat]} · 누르면 이 종류 보기"><i>${COS_ICO[cat]}</i><b>${e?e.n:'비어 있음'}</b><small>${COS_CAT[cat]}</small>${e?`<span class="cx" data-cun="${cat}" title="해제">✕</span>`:''}</div>`;}).join('')}${(()=>{const t=META.title&&ACH.find(a=>a.k===META.title);return `<div class="cslot ${t?'on':''} ${COS_TAB==='title'?'cur':''}" data-cslot="title" title="칭호 · 누르면 칭호 보기"><i>🏷</i><b>${t?t.n:'비어 있음'}</b><small>칭호</small>${t?'<span class="cx" data-cun="title" title="해제">✕</span>':''}</div>`;})()}</div></div>
 <div class="cosTabs">${Object.keys(COS_CAT).map(cat=>{const L=COS.filter(x=>x.cat===cat&&(!x.hid||cosOwn(x.k))),e=cosEq(cat);return `<button class="cosTab ${cat===COS_TAB?'on':''}" data-ct="${cat}"><b>${COS_ICO[cat]} ${COS_CAT[cat]}</b><small>${L.filter(x=>cosOwn(x.k)).length}/${L.length} 보유</small><small class="ce">${e?'✔ '+e.n:'장착 없음'}</small></button>`;}).join('')}${(()=>{const L=ACH.filter(a=>tOwn(a.k)),t=META.title&&ACH.find(a=>a.k===META.title);return `<button class="cosTab ${COS_TAB==='title'?'on':''}" data-ct="title"><b>🏷 칭호</b><small>${L.length}개 보유</small><small class="ce">${t?'✔ '+t.n:'장착 없음'}</small></button>`;})()}</div>
 <div class="mgrid ${COS_ANIM?'cosIn':''}">${COS_TAB==='title'?titleTiles():COS.filter(x=>x.cat===COS_TAB&&(!x.hid||cosOwn(x.k))).sort((p,q)=>(p.ach?1:0)-(q.ach?1:0)||p.c-q.c).map((x,i)=>{const own=cosOwn(x.k),eq=cosEq(COS_TAB)===x;return `<button class="mtile sk ${eq?'max':''} ${own||medOk(x.c)?'':'poor'}" data-cs="${x.k}" style="--i:${i}"><b>${x.n}</b><span class="md">${x.d}</span><span class="mc">${eq?'✔ 장착 중':own?'장착하기':x.ach?'🏆 '+(ACH.find(a=>a.k===x.ach)||{}).n+' 달성 보상':'🏅 '+x.c}</span></button>`;}).join('')}</div>
   <button class="btn ghost" id="cReset" ${cosSpent()?'':'disabled'}>↺ 산 외형 전체 환불 <small>🏅 ${cosSpent()} 환불 · 도전과제 보상 외형은 그대로</small></button>
@@ -9328,6 +9335,7 @@ function openMeta(cosOnly){cosPreviewHide();
   ov.querySelectorAll('[data-cslot]').forEach(b=>b.onclick=()=>{COS_TAB=b.dataset.cslot;COS_ANIM=1;const y=ov.scrollTop;openMeta(1);ov.scrollTop=y;});
   ov.querySelectorAll('[data-tt]').forEach(b=>b.onclick=()=>{const k=b.dataset.tt;if(!tOwn(k))return;META.title=META.title===k?'':k;saveMeta();keepY();});
   ov.querySelectorAll('[data-cun]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();if(b.dataset.cun==='title'){META.title='';saveMeta();const y=ov.scrollTop;openMeta(1);ov.scrollTop=y;return;}META.cos=META.cos||{own:{},eq:{}};META.cos.eq[b.dataset.cun]=null;saveMeta();const y=ov.scrollTop;openMeta(1);ov.scrollTop=y;});
+  if($('repSel'))$('repSel').onchange=e=>{META.rep=e.target.value;saveMeta();keepY();};
   if($('cosLive'))gearLiveStart($('cosLive'));if(cosOnly)COS_ANIM=0;
   ov.querySelectorAll('[data-cs]').forEach(b=>{const x=COS.find(q=>q.k===b.dataset.cs);b.addEventListener('mouseenter',()=>cosPreview(x,b));b.addEventListener('mouseleave',cosPreviewHide);
     b.addEventListener('touchstart',()=>{if(b.dataset.pv!=='1'){ov.querySelectorAll('[data-cs]').forEach(o=>o.dataset.pv='');b.dataset.pv='1';b.dataset.tap='1';cosPreview(x,b);}},{passive:true});});
@@ -9423,7 +9431,9 @@ function onlAct(){try{if(onlIdle())return '💤 자리 비움';if(!S||S.mode==='
 const devUa=()=>{const u=navigator.userAgent||'';const b=/Edg\//.test(u)?'엣지':/Whale/.test(u)?'웨일':/SamsungBrowser/.test(u)?'삼성':/KAKAOTALK/i.test(u)?'카톡':/Chrome|CriOS/.test(u)?'크롬':/Firefox|FxiOS/.test(u)?'파이어폭스':/Safari/.test(u)?'사파리':'기타';return (/Android|iPhone|iPad|iPod|Mobile/i.test(u)?'폰':'PC')+' '+b+' '+(location.protocol==='file:'?'파일':'주소');};
 // 같은 사람 판단: 공백·보이지 않는 글자·한글 조합 방식(기기마다 다를 수 있음)을 맞춘 뒤 비교
 const onlKey=n=>{try{return String(n||'').normalize('NFC').replace(/[\s\u200b-\u200f\ufeff]+/g,'');}catch(e){return String(n||'').replace(/\s+/g,'');}};
-function onlMerge(L){const m=new Map();for(const x of L){const k=onlKey(x.n);const o=m.get(k);if(!o){m.set(k,{...x});continue;}if(x.me)o.me=1;if(!o.fx&&x.fx)o.fx=x.fx;if(!o.f&&x.f){o.u=x.u;o.f=1;}if((x.s||0)<(o.s||0)){o.s=x.s;o.a=x.a;if(!o.f||x.f)o.u=x.u;o.b=x.b;}}return [...m.values()].sort((a,b)=>(b.me||0)-(a.me||0)||(a.s||0)-(b.s||0));}
+function onlMerge(L){const m=new Map();for(const x of L){const k=onlKey(x.n);const o=m.get(k);if(!o){m.set(k,{...x,fa:!!x.f});continue;}if(x.me)o.me=1;if(!o.fx&&x.fx)o.fx=x.fx;if(!o.f&&x.f){o.u=x.u;o.f=1;}if(x.f&&!o.fa||(!!x.f===!!o.fa&&(x.s||0)<(o.s||0))){o.s=x.s;o.a=x.a;o.fa=!!x.f;if(!o.f||x.f)o.u=x.u;o.b=x.b;}}
+  // 순서 고정: 나 → 활동 중 → 자리 비움, 같은 무리는 이름순 (예전엔 최근 신호 순이라 신호 올 때마다 순서가 뒤섞였음). 활동은 실시간 서버 쪽을 우선
+  return [...m.values()].sort((a,b)=>(b.me||0)-(a.me||0)||(onlAway(a)?1:0)-(onlAway(b)?1:0)||onlKey(a.n).localeCompare(onlKey(b.n)));}
 function onlHtml(sm){if(!SHEET_URL)return '';if(!ONLINE)return `<span class="onlb" style="opacity:.7;cursor:default">${ONL_FAIL>=2?'🟠':'🟢'} ${sm?'…':ONL_FAIL>=2?'서버 연결 재시도 중…':'접속 확인 중…'}</span> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}</button>`;let L=ONLINE;
   const nA=L.filter(onlAway).length,nOn=L.length-nA;L=[...L.filter(x=>!onlAway(x)),...L.filter(onlAway)];
   return `<button class="onlb" id="onlBtn" title="지금 접속 중">🟢 ${sm?`<b>${nOn}</b>`:`지금 <b>${nOn}</b>명 접속 중`}${nA?` <small style="opacity:.7">· 💤${nA}</small>`:''} ${ONL_OPEN?'▲':'▼'}</button> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}${chatUnread()?'<i class="cdot"></i>':''}</button>${ONL_OPEN?`<div class="onll">${DEV&&!sm?`<small style="opacity:.75">🛠 실시간 신호 ${FB?ONL_FB.length+'개':'연결 안 됨'} · 예비 서버 신호 ${ONL_AS.length}개 → 이름 ${L.length}명${ONL_FAIL?' (응답 실패 '+ONL_FAIL+'회)':''}</small>`:''}${L.map(x=>`<span${x.me?' class="me"':''}${onlAway(x)?' style="opacity:.55"':''}>${fxName(x.n,x.fx)}${x.me?' (나)':''} · ${esc(x.a||'')}${DEV&&x.b?` <small style="opacity:.7">v${x.b}</small>`:''}${DEV&&!x.me&&x.u&&(x.f||SRV_V>=51)?` <button class="cxchip" data-spec="${esc(x.u)}" data-sf="${x.f?1:''}" data-sn="${esc(x.n)}" title="관전">👁</button>`:''}</span>`).join('')}</div>`:''}`;}
@@ -9464,14 +9474,16 @@ async function fbInit(){try{await fbTO(fbLoad(),10000);if(!firebase.apps.length)
     const db=firebase.database();FB={db,uid:cr.user.uid};db.ref('.info/serverTimeOffset').on('value',s=>{FB_OFF=+s.val()||0;});fbStart();}catch(e){FB=null;}}
 // 접속 목록: 실시간 서버(파이어베이스)가 살아 있으면 그 목록만 (예비 서버는 신호만 받아 둠). 실시간 서버가 끊겼을 때만 예비 서버 목록으로
 // (예전엔 둘을 합쳐서, 나간 사람을 예비 서버가 더 오래 기억하는 동안 인원이 왔다 갔다 했음)
-let FB_SEEN=0;const ONL_KEEP=new Map();
+let FB_SEEN=0,FB_CONN=false;const ONL_KEEP=new Map();
 // 목록에서 막 빠진 사람은 30초 동안 그대로 보여 줌 (잠깐 끊겼다 다시 붙는 동안 인원이 깜빡이지 않게)
-function onlSet(){const fbOk=FB&&Date.now()-FB_SEEN<90000,now=Date.now(),L=onlMerge(fbOk?ONL_FB:ONL_AS);for(const x of L)ONL_KEEP.set(onlKey(x.n),{x,t:now});
-  for(const [k,o] of ONL_KEEP){if(now-o.t>30000){ONL_KEEP.delete(k);continue;}if(!L.some(y=>onlKey(y.n)===k))L.push({...o.x,me:0});}ONLINE=onlMerge(L);onlPaint();}
+// 실시간 서버(파이어베이스)에 연결돼 있으면 그 목록만 씀. 예비 서버 목록은 실시간 서버가 끊겼을 때만 (예전엔 90초 조용하면 예비 목록으로 바뀌어 옛 정보가 끼어들었음)
+// 목록에서 잠깐 빠진 사람은 2분 동안 그대로 보여 줌 (폰 화면 꺼짐·신호 지연으로 들락날락하지 않게)
+function onlSet(){const fbOk=FB&&FB_SEEN&&(FB_CONN||Date.now()-FB_SEEN<90000),now=Date.now(),L=onlMerge(fbOk?ONL_FB:ONL_AS);for(const x of L)ONL_KEEP.set(onlKey(x.n),{x,t:now,f:fbOk});
+  for(const [k,o] of ONL_KEEP){if(now-o.t>120000||(fbOk&&!o.f)){ONL_KEEP.delete(k);continue;}if(!L.some(y=>onlKey(y.n)===k))L.push({...o.x,me:0});}ONLINE=onlMerge(L);onlPaint();}
 function fbPres(){if(!FB)return;try{if(onlIdle()>=2){FB.db.ref('online/'+FB.uid).remove().catch(()=>{});return;}FB.db.ref('online/'+FB.uid).set({n:myNick()||'모험가',a:onlAct(),fx:myFx(),b:BUILD,d:onlId(),t:firebase.database.ServerValue.TIMESTAMP});}catch(e){}}
 function fbStart(){const db=FB.db,me=FB.uid;
   // 연결이 끊겼다 다시 붙으면 바로 다시 알리고 「나가면 지우기」 예약도 다시 걸어 둠 (예전엔 빠졌다가 20초 뒤에야 다시 생겨서 인원이 왔다 갔다 함)
-  db.ref('.info/connected').on('value',c=>{if(c.val()===true){try{db.ref('online/'+me).onDisconnect().remove();}catch(e){}fbPres();}});
+  db.ref('.info/connected').on('value',c=>{FB_CONN=c.val()===true;if(FB_CONN){try{db.ref('online/'+me).onDisconnect().remove();}catch(e){}fbPres();}});
   db.ref('online/'+me).onDisconnect().remove();fbPres();setInterval(fbPres,20000); // 다른 탭에 있어도 신호 유지 (자리 비움은 5분 무입력으로 판단)
   db.ref('online').on('value',s=>{FB_SEEN=Date.now();const v=s.val()||{},now=fbNow();ONL_FB=Object.keys(v).filter(k=>v[k]&&now-(+v[k].t||0)<100000).map(k=>({n:String(v[k].n||'모험가').slice(0,12),a:String(v[k].a||'').slice(0,24),fx:String(v[k].fx||''),b:+v[k].b||0,u:k,f:1,s:Math.max(0,Math.round((now-(+v[k].t||0))/1000)),me:k===me?1:0}));onlSet();});
   db.ref('chat').orderByChild('t').limitToLast(60).on('value',s=>{const L=[];s.forEach(c=>{const x=c.val();if(x&&x.m)L.push({t:+x.t||0,n:String(x.n||'모험가').slice(0,12),m:String(x.m).slice(0,80),fx:String(x.fx||''),u:x.u});});L.sort((a,b)=>a.t-b.t);CHAT=L;if(L.length)CHAT_CT=Math.max(CHAT_CT,L[L.length-1].t);if(CHAT_OPEN)chatPaint();else onlPaint();});
@@ -10430,7 +10442,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=139,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=141,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
