@@ -1,6 +1,9 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v5.4
+// 찬서 명예의 전당 서버 (Google Apps Script) v5.5
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
+//
+// v5.4 → v5.5 바뀐 점
+// - 무한의 악몽 새 규칙 기록(SC3_AT 이후)은 최종 점수 ×2.2 (NM_SM). 게임 화면과 같은 식
 //
 // v5.3 → v5.4 바뀐 점
 // - 기록 시각(at)을 게임이 보낸 값으로 저장 (이 기기에만 남았던 예전 기록을 다시 올릴 때 그 당시 점수식 적용)
@@ -141,7 +144,7 @@ const str_ = (v, n) => String(v || '').replace(/\s+/g, ' ').trim().replace(/^[=+
 const dw_ = v => { const m = String(v || '').match(/^(\d{1,6})-(\d{1,6})-(\d{1,6})$/); return m ? 'w' + m[1] + 'd' + m[2] + 'l' + m[3] : ''; };
 const softC_ = (x, c) => x <= c ? x : c * (1 + Math.log(x / c));
 // 점수 계산식 v2 (게임과 같음): 이 시각 이후 기록은 10분 이후 생존 점수가 커지고 보스 처치 800점
-const SC2_AT = 1791462600000, SC3_AT = 1791493000000, NM_TK = 1.5;
+const SC2_AT = 1791462600000, SC3_AT = 1791493000000, NM_TK = 1.5, NM_SM = 2.2;
 const timePts_ = (t, v2) => !v2 || t <= 600 ? t * 12 : 7200 + 12 * ((t - 600) + (t - 600) * (t - 600) / 240);
 
 function clean_(d, at) {
@@ -173,7 +176,8 @@ function score_(r) {
   const base = r.diff === 'bossrush'
     ? r.bosses * 2500 + r.lvl * 30 + r.time * 2
     : timePts_(r.diff === 'nightmare' && +r.at >= SC3_AT ? r.time * NM_TK : r.time, v2) + softC_(r.kills * 2, 4000) + r.lvl * 30 + r.bosses * (v2 ? 800 : 400) + (r.bosses >= 4 ? 3000 : 0);
-  return Math.round(Math.round((base + bonus) * (DIFFS[r.diff] || 1)) * (1 - 0.1 * ap));
+  const sm = r.diff === 'nightmare' && +r.at >= SC3_AT ? NM_SM : 1;
+  return Math.round(Math.round((base + bonus) * (DIFFS[r.diff] || 1)) * sm * (1 - 0.1 * ap));
 }
 function rows_(s) {
   const v = s.getDataRange().getValues();
@@ -235,7 +239,7 @@ function ping_(q) {
   if (id && !q.bye) devLog_(id, str_(q.n, 12) || '모험가', str_(q.ua, 30));
   let w = 0;
   try { w = id && c.get('watch_' + id) ? 1 : 0; } catch (err) {}
-  return out_({ v: 54, ct, w, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 55, ct, w, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
 }
 
 // 전체 채팅 (최근 CHAT_MAX개만 보관)
