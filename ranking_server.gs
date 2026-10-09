@@ -1,6 +1,9 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v6.6
+// 찬서 명예의 전당 서버 (Google Apps Script) v6.7
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
+//
+// v6.6 → v6.7 바뀐 점
+// - 보스 러시 새 규칙 기록(BR_AT 이후)은 최종 점수 ×2 (BR_SM). 게임 화면과 같은 식
 //
 // v6.5 → v6.6 바뀐 점
 // - 보안: 기록의 직업 칸(cls)에서 HTML 특수문자(< > " ' ` & \\)를 지움 (명예의 전당에 코드가 심어지는 것 방지)
@@ -194,6 +197,7 @@ const dw_ = v => { const m = String(v || '').match(/^(\d{1,6})-(\d{1,6})-(\d{1,6
 const softC_ = (x, c) => x <= c ? x : c * (1 + Math.log(x / c));
 // 점수 계산식 v2 (게임과 같음): 이 시각 이후 기록은 10분 이후 생존 점수가 커지고 보스 처치 800점
 const SC2_AT = 1791462600000, SC3_AT = 1791493000000, NM_TK = 1.5, NM_SM = 2;
+const BR_AT = 1791547600000, BR_SM = 2; // 보스 러시 새 규칙 기록은 최종 점수 ×BR_SM (게임과 같은 값)
 const timePts_ = (t, v2) => !v2 || t <= 600 ? t * 12 : 7200 + 12 * ((t - 600) + (t - 600) * (t - 600) / 240);
 
 function clean_(d, at) {
@@ -225,7 +229,7 @@ function score_(r) {
   const base = r.diff === 'bossrush'
     ? r.bosses * 2500 + r.lvl * 30 + r.time * 2
     : timePts_(r.diff === 'nightmare' && +r.at >= SC3_AT ? r.time * NM_TK : r.time, v2) + softC_(r.kills * 2, 4000) + r.lvl * 30 + r.bosses * (v2 ? 800 : 400) + (r.bosses >= 4 ? 3000 : 0);
-  const sm = r.diff === 'nightmare' && +r.at >= SC3_AT ? NM_SM : 1;
+  const sm = r.diff === 'nightmare' && +r.at >= SC3_AT ? NM_SM : r.diff === 'bossrush' && +r.at >= BR_AT ? BR_SM : 1;
   return Math.round(Math.round((base + bonus) * (DIFFS[r.diff] || 1)) * sm * (1 - 0.1 * ap));
 }
 function rows_(s) {
@@ -291,7 +295,7 @@ function ping_(q) {
   // 관리자 쪽지: 이 이름 앞으로 안 읽은 쪽지가 있다는 표시(캐시)가 있을 때만 시트를 읽음 → 평소 접속 신호는 가벼움
   let dm = [];
   try { const nm = dmKey_(q.n); if (nm && !q.bye && (c.get('dm_' + nm) || !c.get('dmc_' + nm))) { c.put('dmc_' + nm, '1', 21600); const own = ownerKh_(str_(q.n, 12)); if (!own || own === kh_(q.k)) { dm = dmFor_(nm); if (!dm.length) c.remove('dm_' + nm); } } } catch (err) {}
-  return out_({ v: 66, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 67, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
