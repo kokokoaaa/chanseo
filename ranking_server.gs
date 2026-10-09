@@ -1,4 +1,7 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v6.8
+// 찬서 명예의 전당 서버 (Google Apps Script) v6.9
+//
+// v6.8 → v6.9 바뀐 점
+// - 개발자 기기 기록: 마지막 접속 시각을 30분 → 2분마다 갱신 (누가 몇 분에 마지막으로 접속했는지)
 //
 // v6.7 → v6.8 바뀐 점
 // - 계정 정보: 접속 신호(ping)에 실려 오는 프로필(대표 캐릭터·장비·전투력·플레이 시간)을 이름별로 캐시에 보관 (이름 주인만 갱신)
@@ -302,7 +305,7 @@ function ping_(q) {
     if (pf && nm && !q.bye && c.get('pf_' + nm) !== pf) { const own = ownerKh_(str_(q.n, 12)); if (!own || own === kh_(q.k)) c.put('pf_' + nm, pf, 21600); } } catch (err) {}
   let dm = [];
   try { const nm = dmKey_(q.n); if (nm && !q.bye && (c.get('dm_' + nm) || !c.get('dmc_' + nm))) { c.put('dmc_' + nm, '1', 21600); const own = ownerKh_(str_(q.n, 12)); if (!own || own === kh_(q.k)) { dm = dmFor_(nm); if (!dm.length) c.remove('dm_' + nm); } } } catch (err) {}
-  return out_({ v: 68, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 69, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -427,7 +430,7 @@ function devSheet_() { const ss = book_(); let s = ss.getSheetByName(DEV_SHEET);
 function devLog_(id, n, ua) {
   if (!id || !n || n === '모험가') return;
   const c = CacheService.getScriptCache(), ck = 'dv_' + id + '|' + n;
-  try { if (c.get(ck)) return; c.put(ck, '1', 1800); } catch (err) {}
+  try { if (c.get(ck)) return; c.put(ck, '1', 120); } catch (err) {} // 2분마다 마지막 접속 시각 갱신 (개발자 접속 기록)
   const lock = LockService.getScriptLock();
   let got = false; try { got = lock.tryLock(1500); } catch (err) {}
   if (!got) { try { c.remove(ck); } catch (err) {} return; }
