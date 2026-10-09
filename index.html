@@ -7369,6 +7369,7 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
 const PATCH_NOTES=[
   {v:129,t:'☁ 데이터 불러오기 보호',items:[
     ['change','☁ 새 기기가 아직 불러오기 전에 빈 데이터로 서버의 내 데이터를 덮어쓸 수 있던 문제를 고쳤어요. 서버 쪽이 더 진행된 데이터면 덮어쓰지 않고 불러오기를 권해요','bug'],
+    ['change','☁ 데이터가 겹치면 <b>어느 쪽을 쓸지 고르는 창</b>이 떠요: 서버 데이터와 이 기기 데이터의 메달·영구 강화·해금 직업·외형·내 캐릭터를 나란히 보여 주고, 더 많이 진행된 쪽에 ⭐ 추천 표시','look'],
     ['new','☁ 💾 데이터 화면에 <b>「서버에서 불러오기」</b> 버튼이 생겼어요. 이름 비밀번호를 정한 이름이면 언제든 서버 데이터를 다시 불러올 수 있어요','play'],
   ]},
   {v:128,t:'💬 멘트는 한 번',items:[
@@ -8382,22 +8383,27 @@ let CS_T=0,CS_LAST=0;
 const csFlag=n=>{try{return localStorage.getItem('chanseo_csok_'+n)==='1';}catch(e){return false;}},csFlagSet=n=>{try{localStorage.setItem('chanseo_csok_'+n,'1');}catch(e){}};
 async function csUpload(force,manual){if(!csOk())return false;clearTimeout(CS_T);const now=Date.now();if(!force&&now-CS_LAST<60000){CS_T=setTimeout(()=>csUpload(true),60000-(now-CS_LAST));return false;}CS_LAST=now;
   const nm=myNick();if(!csFlag(nm)&&!manual){const j=await csLoad(nm,MYKEY);if(!j||!j.ok)return false;const sm=j.data?csMd(j.data):null,mm=Math.floor(META.medals||0);
-    if(j.data&&!j.none&&(sm||0)>mm){toast(`☁ 서버에 「${nm}」의 더 진행된 데이터가 있어요 (메달 ${sm}). 💾 데이터 → ☁ 서버에서 불러오기로 가져오세요`);return false;}csFlagSet(nm);}
+    if(j.data&&!j.none&&(sm||0)>mm){if(ov.classList.contains('home')&&!(S&&S.started&&S.mode!=='start'))csOffer(nm,MYKEY,startScreen);else toast(`☁ 서버에 「${nm}」의 더 진행된 데이터가 있어요 (메달 ${sm}). 💾 데이터 → ☁ 서버에서 불러오기로 가져오세요`);return false;}csFlagSet(nm);}
   try{await fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({csave:1,name:myNick(),k:MYKEY,at:now,md:Math.floor(META.medals||0),data:syncExport(true)})});try{localStorage.setItem('chanseo_csat',String(now));}catch(e){}csFlagSet(nm);return true;}catch(e){return false;}}
 const csSoon=()=>{if(!csOk())return;clearTimeout(CS_T);CS_T=setTimeout(()=>csUpload(),30000);};
 async function csLoad(n,k){const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),15000):0;
   try{const r=await fetch(SHEET_URL+'?cload='+encodeURIComponent(n)+'&k='+encodeURIComponent(k),{cache:'no-store',signal:ac?ac.signal:undefined});return await r.json();}catch(e){return null;}finally{clearTimeout(to);}}
+// 데이터 요약 (고르는 창에 나란히 보여 줄 것): 메달·영구 강화 합계·해금 직업·외형·내 캐릭터
+const csSum=d=>{try{const m=JSON.parse(d.chanseo_meta||'{}'),h=(()=>{try{return JSON.parse(d.chanseo_heroes||'[]');}catch(e){return [];}})();
+  return {md:Math.floor(m.medals||0),lv:Object.values(m.lv||{}).reduce((a,b)=>a+(+b||0),0),cls:(m.ucls||[]).length,cos:Object.keys((m.cos&&m.cos.own)||{}).length,hero:Array.isArray(h)?h.length:Object.keys(h||{}).length};}catch(e){return null;}};
+const csSumCode=code=>{try{return csSum(JSON.parse(decodeURIComponent(escape(atob(String(code).slice(4))))).d);}catch(e){return null;}};
+const csSumLocal=()=>{let h=null;try{h=localStorage.getItem('chanseo_heroes');}catch(e){}return csSum({chanseo_meta:JSON.stringify(META),chanseo_heroes:h});};
 const csMd=code=>{try{const o=JSON.parse(decodeURIComponent(escape(atob(String(code).slice(4)))));return Math.floor(JSON.parse(o.d.chanseo_meta).medals||0);}catch(e){return null;}};
 // 다른 기기에서 이름+비밀번호 확인 직후: 서버 데이터가 있으면 불러올지 고르게 함
 async function csOffer(n,k,after){if(SRV_V<56){after();return;}const j=await csLoad(n,k);
   if(!j||!j.ok){after();return;}if(j.none||!j.data){after();csFlagSet(n);setTimeout(()=>csUpload(true,true),500);return;}
   const dt=new Date(j.at||0),ds=`${dt.getMonth()+1}월 ${dt.getDate()}일 ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`,sm=csMd(j.data),mm=Math.floor(META.medals||0);
-  show(`<div class="shophead"><h2 style="font-size:24px">☁ 저장된 데이터가 있어요</h2><button class="btn" id="csNo">돌아가기</button></div>
-  <p class="sub"><b>${esc(n)}</b> 이름으로 서버에 저장된 데이터를 찾았어요. 어느 쪽을 쓸까요?</p>
-  <div class="two" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0">
-   <div style="padding:12px;border:2px solid var(--brass);border-radius:12px;background:rgba(255,215,106,.08)"><b>☁ 서버 데이터</b><br>🏅 메달 ${sm==null?'?':sm.toLocaleString()}개<br><small>${ds} 저장</small></div>
-   <div style="padding:12px;border:1px solid rgba(255,255,255,.25);border-radius:12px"><b>📱 지금 이 기기</b><br>🏅 메달 ${mm.toLocaleString()}개<br><small>&nbsp;</small></div></div>
-  <div class="btnrow"><button class="btn primary" id="csYes">☁ 서버 데이터 불러오기</button><button class="btn" id="csKeep">📱 이 기기 데이터 쓰기 (서버에 덮어쓰기)</button></div>
+  const A=csSumCode(j.data)||{md:sm||0,lv:0,cls:0,cos:0,hero:0},B=csSumLocal()||{md:mm,lv:0,cls:0,cos:0,hero:0},sc=x=>x.md+x.lv*200+x.cls*500+x.cos*100+x.hero*50,rec=sc(A)>=sc(B)?'A':'B';
+  const box=(t,x,when,me)=>`<div style="padding:12px;border:2px solid ${rec===me?'var(--brass)':'rgba(255,255,255,.2)'};border-radius:12px;background:${rec===me?'rgba(255,215,106,.08)':'transparent'}"><b>${t}</b>${rec===me?' <span style="color:#ffd76a;font-size:12px">⭐ 추천 (더 많이 진행됨)</span>':''}<div style="margin-top:6px;line-height:1.7;font-size:14px">🏅 메달 ${x.md.toLocaleString()}개<br>⚒ 영구 강화 합계 ${x.lv}<br>🔓 해금 직업 ${x.cls}개<br>👕 외형 ${x.cos}개<br>🗃 내 캐릭터 ${x.hero}명</div><small style="opacity:.75">${when}</small></div>`;
+  show(`<div class="shophead"><h2 style="font-size:24px">☁ 어느 데이터를 쓸까요?</h2><button class="btn" id="csNo">돌아가기</button></div>
+  <p class="sub"><b>${esc(n)}</b> 이름으로 서버에 저장된 데이터와 지금 이 기기의 데이터가 달라요. 쓸 쪽을 골라 주세요. 고르지 않은 쪽은 덮어써져요.</p>
+  <div class="two" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0">${box('☁ 서버 데이터',A,ds+' 저장','A')}${box('📱 지금 이 기기',B,'이 컴퓨터·폰','B')}</div>
+  <div class="btnrow"><button class="btn ${rec==='A'?'primary':''}" id="csYes">☁ 서버 데이터 불러오기</button><button class="btn ${rec==='B'?'primary':''}" id="csKeep">📱 이 기기 데이터 쓰기 (서버에 덮어쓰기)</button></div>
   <p class="sub" style="margin-top:6px">불러오면 이 기기의 메달·강화·해금·외형·내 캐릭터가 서버 데이터로 바뀌어요.</p><p class="sub" id="csMsg"></p>`);
   $('csYes').onclick=()=>{try{syncImport(j.data);localStorage.setItem('chanseo_key',k);localStorage.setItem('chipdungeon_nick',n);csFlagSet(n);nKeySet(n,k);$('csMsg').textContent='불러왔어요! 다시 불러옵니다…';setTimeout(()=>location.reload(),600);}catch(e){$('csMsg').textContent='불러오기 실패: '+e.message;}};
   $('csKeep').onclick=()=>{const b=$('csKeep');if(!b.dataset.ok){b.dataset.ok=1;b.textContent='한 번 더 누르면 서버 데이터를 덮어써요';return;}after();csFlagSet(n);setTimeout(()=>csUpload(true,true),300);};
