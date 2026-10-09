@@ -8647,7 +8647,8 @@ const ACH=[
   {k:'h_forge',hid:1,n:'전설의 대장장이',d:'장비를 +10까지 강화'},
   {k:'h_broke',hid:1,n:'산산조각',d:'강화하다가 장비가 부서지기'},
   {k:'h_wave',hid:1,n:'빛을 등진 자',d:'악몽의 파동에 휩쓸려 쓰러지기'},
-  {k:'h_fast',hid:1,n:'너무 성급했다',d:'시작하고 1분 안에 쓰러지기',c:R=>R&&!R.win&&R.t<60}
+  {k:'h_fast',hid:1,n:'너무 성급했다',d:'시작하고 1분 안에 쓰러지기',c:R=>R&&!R.win&&R.t<60},
+  {k:'h_chat',hid:1,n:'수다쟁이',d:'채팅을 100번 보내기',p:()=>[META.chatN||0,100],c:()=>(META.chatN||0)>=100}
 ];
 // 단계형 도전과제: 같은 줄기를 순서대로. 중간 단계는 메달만, 줄기를 끝까지 다 깨면 마지막 단계 이름이 칭호
 const ACH_CH=[
@@ -9661,7 +9662,7 @@ async function chatFetch(say){if(!SHEET_URL)return;const u=SHEET_URL+'?chat=1'+(
 let CHAT_SENDING=null;
 async function chatSend(){const i=$('chIn'),m=String(i.value||'').trim();if(!m)return;if(CHAT_SENDING===m){i.value='';return;}CHAT_SENDING=m;i.value='';$('chM').textContent='';
   const pm={t:Date.now(),n:myNick()||'모험가',m,p:1,fx:myFx()};CHAT_PEND.push(pm);const L=$('chL');chatPaint();if(L)L.scrollTop=L.scrollHeight;
-  const j=FB?await fbChatSend(m):await chatFetch(m);CHAT_SENDING=null;CHAT_PEND=CHAT_PEND.filter(x=>x!==pm);chatPaint();
+  const j=FB?await fbChatSend(m):await chatFetch(m);CHAT_SENDING=null;if(j&&j.ok!==false){META.chatN=(META.chatN||0)+1;saveMeta();if(META.chatN>=100)achCheck(null);}CHAT_PEND=CHAT_PEND.filter(x=>x!==pm);chatPaint();
   const M=$('chM');if(!M)return;M.textContent=!j?'보내지 못했어요. 인터넷 연결을 확인해 주세요.':j.ok===false?(j.err==='owned'?'이 이름의 주인은 다른 브라우저·컴퓨터예요. 내 이름이면 원래 쓰던 곳에서 👤 내 이름 → 이름 비밀번호를 정하고, 여기서도 같은 이름+비밀번호를 넣어 주세요.':j.err==='fast'?'조금 천천히 보내 주세요.':'보내지 못했어요.'):'';if(j&&j.ok===false&&j.err!=='empty')i.value=m;if(j&&j.err==='owned')nameHelp();}
 // 채팅이 이름 주인 때문에 막혔을 때: 이름 비밀번호로 여러 브라우저·기기에서 쓰는 방법 안내
 function nameHelp(){if(document.getElementById('nmHelp'))return;const n=myNick(),d=document.createElement('div');d.id='nmHelp';d.className='chartq';d.style.zIndex=9900;
@@ -10490,7 +10491,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=145,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=146,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
