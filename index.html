@@ -3986,7 +3986,7 @@ CH.knight={
  shield(x0,y0){for(let y=-5;y<=5;y++)for(let x=-5;x<=5;x++){const d=Math.hypot(x,y);if(d>5.2)continue;let c;
    if(d>4.1)c=(x+y>2)?'x':(x+y<-3?'s':'S');else{c=((x+7)%3===0)?'a':'A';if(x+y<-3&&d<4.1)c='c';}if(d<1.3)c=(x+y<0)?'s':'S';this.dot(c,x0+x,y0+y);}
    this.dot('x',x0+1,y0+1);},
- draw(st){if(HERO_DRESS&&DLOOK.knight)return DLOOK.knight.draw(st,HERO_DRESS);const U=st.U,A=st.atk,ay=st.ay||0;
+ draw(st){if(HERO_DRESS&&DLOOK.knight){DLOOK.knight.draw(st,HERO_DRESS);dNatEnd();return;}const U=st.U,A=st.atk,ay=st.ay||0;
   this.cl(this.scarf[st.cf&1],9,22+U);
   this.cl(this.leg,17,29+st.lL);this.cl(this.leg.map(r=>r.length>2?'.'+r.slice(0,2):r),21,29+st.rL);this.dot('b',23,34+st.rL);this.dot('b',22,34+st.rL);
   this.cl(this.torso,15,23+U);
@@ -4004,7 +4004,7 @@ CH.knight={
   if(st.hurt)hurtEyes(18+U);
  }};
 CH.mage={P:Object.assign({1:'#24124a',2:'#36207a',3:'#4c34a8',4:'#6a4ed0',5:'#9078f0',g:'#e8c45a',G:'#a87e22',h:'#b4b8ca',H:'#e6eaf4',w:'#ffffff',c:'#5ad0f0',z:'#2a1a10'},SKN),
- draw(st){if(HERO_DRESS&&DLOOK.mage)return DLOOK.mage.draw(st,HERO_DRESS);const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+ draw(st){if(HERO_DRESS&&DLOOK.mage){DLOOK.mage.draw(st,HERO_DRESS);dNatEnd();return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
   cl(P,['zz'],17,34+Math.min(0,st.lL));cl(P,['zz'],21,34+Math.min(0,st.rL));
   shp(P,20,17+U,[5,5,5,5,5,5,5,5,4.5,4],'hhHHw');
   shp(P,20,22+U,[3.5,4,4,4.5,4.5,4.5,5,5,5,5.5,5.5],'12345');for(let x=-5;x<=5;x++)dt(P,x<1?'g':'G',20+x,33+U);
@@ -4022,7 +4022,7 @@ CH.mage={P:Object.assign({1:'#24124a',2:'#36207a',3:'#4c34a8',4:'#6a4ed0',5:'#90
   if(st.hurt)hurtEyes(18+U);
  }};
 CH.archer={P:Object.assign({1:'#12301a',2:'#1f4a24',3:'#2f6a2e',4:'#46883a',5:'#68a850',b:'#4a2a14',B:'#7a4a24',L:'#7a4a24',l:'#4a2a12',z:'#2a1a0e',g:'#e8c45a',p:'#5a4a30',q:'#3a2e1e',f:'#e8e0c8'},SKN),
- draw(st){if(HERO_DRESS&&DLOOK.archer)return DLOOK.archer.draw(st,HERO_DRESS);const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+ draw(st){if(HERO_DRESS&&DLOOK.archer){DLOOK.archer.draw(st,HERO_DRESS);dNatEnd();return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
   shp(P,20,23+U,[4,4.5,5,5,5.5,5.5,5],'11223');for(let x=-5;x<=5;x++)if((x+st.cf)%3)dt(P,'1',20+x,30+U);
   cl(P,['f.f.','LfLf','LLl.','LLl.','LLl.','.Ll.'],23,17+U);
   cl(P,['pq','pq','pq','LL','zz','zzz'],17,29+st.lL);cl(P,['qp','qp','qp','LL','zz','zzz'],21,29+st.rL);
@@ -4041,7 +4041,7 @@ CH.archer={P:Object.assign({1:'#12301a',2:'#1f4a24',3:'#2f6a2e',4:'#46883a',5:'#
   if(st.hurt)hurtEyes(16+U);
  },swoosh:CH_OLD.archer.swoosh};
 CH.rogue={P:Object.assign({1:'#0e0c14',2:'#1c1824',3:'#2c2636',4:'#40384e',5:'#5a5068',r:'#8a1428',R:'#c8323a',q:'#ff6b5b',L:'#4a3424',l:'#2a1c12',z:'#141016',g:'#9a9aa6'},SKN),
- draw(st){if(HERO_DRESS&&DLOOK.rogue)return DLOOK.rogue.draw(st,HERO_DRESS);const P=this.P,U=st.U,A=st.atk,yo=st.ay||0;
+ draw(st){if(HERO_DRESS&&DLOOK.rogue){DLOOK.rogue.draw(st,HERO_DRESS);dNatEnd();return;}const P=this.P,U=st.U,A=st.atk,yo=st.ay||0;
   cl(P,st.cf?['.RR..','RRrR.','..rrR']:['.RR..','RRRr.','...rr'],24,21+U);
   cl(P,['32','32','32','11','zz','zzz'],17,29+st.lL);cl(P,['23','23','23','11','zz','zzz'],21,29+st.rL);
   shp(P,20,23+U,[4,4,4,4,4,3.5],'12345');for(let x=16;x<=24;x++)dt(P,'L',x,26+U);dt(P,'g',20,26+U);for(let i=0;i<4;i++)dt(P,'l',18+i,23+U+i);
@@ -4055,7 +4055,7 @@ CH.rogue={P:Object.assign({1:'#0e0c14',2:'#1c1824',3:'#2c2636',4:'#40384e',5:'#5
   if(A===1)dag(26,22+U,1,-1);else if(A===2)dag(24,27+U,-1,1);else dag(25,27+U-yo,0,1);
  },swoosh:[[[13,26],[11,24],[9,22],[8,20],[8,18],[9,16]],[[27,26],[29,24],[31,22],[32,20],[32,18],[31,16]],[[13,32],[16,33],[19,33],[22,33],[25,32]]]};
 CH.paladin={swoosh:CH.knight.swoosh,P:Object.assign({W:'#fbf8ef',w:'#e4e8f0',s:'#c4ccd8',S:'#98a2b4',x:'#6a7488',X:'#3e4556',g:'#f3cf4e',G:'#b88c22',v:'#141020',8:'#fff6b0',y:'#f2cf55',Y:'#c49a22',b:'#2b5d9a',L:'#8a5530',l:'#5a3420'},SKN),
- draw(st){if(HERO_DRESS&&DLOOK.paladin)return DLOOK.paladin.draw(st,HERO_DRESS);const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+ draw(st){if(HERO_DRESS&&DLOOK.paladin){DLOOK.paladin.draw(st,HERO_DRESS);dNatEnd();return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
   shp(P,20,23+U,[4,4.5,5,5.5,5.5,6,6,6,6],'xSsww');for(let x=-6;x<=6;x++)if((x+st.cf)%3===0)dt(P,'S',20+x,32+U);
   cl(P,['sS','sx','Sx','SS','xX','xXX'],17,29+st.lL);cl(P,['Ss','xs','xS','SS','Xx','XXx'],21,29+st.rL);
   shp(P,20,23+U,[4,4,4,4,4,4],'xSsww',{hl:1});
@@ -4076,7 +4076,7 @@ CH.paladin={swoosh:CH.knight.swoosh,P:Object.assign({W:'#fbf8ef',w:'#e4e8f0',s:'
   for(let x=16;x<=24;x++)dt(P,'8',x,6+U);dt(P,'8',15,7+U);dt(P,'8',25,7+U);
  }};
 CH.necro={P:{1:'#0e0b14',2:'#1c1726',3:'#2e2640',4:'#4a3e62',5:'#665a82',k:'#ddd6c8',K:'#aca291',e:'#5dff7a',E:'#f4f1e6',b:'#cfc6ae',B:'#8e866f',v:'#151018',8:'#d8ffd0',9:'#7dff8a'},
- draw(st){if(HERO_DRESS&&DLOOK.necro)return DLOOK.necro.draw(st,HERO_DRESS);const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+ draw(st){if(HERO_DRESS&&DLOOK.necro){DLOOK.necro.draw(st,HERO_DRESS);dNatEnd();return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
   shp(P,20,23+U,[4,4.5,5,5.5,5.5,6,6,6,6],'11223');for(let x=-6;x<=6;x++)if((x+st.cf)%2)dt(P,'1',20+x,32+U);
   shp(P,20,22+U,[3.5,4,4,4.5,4.5,4.5,5,5,5,5.5,5.5],'12345');for(let x=-5;x<=5;x++)if((x+st.cf)%2===0)dt(P,'2',20+x,33+U);
   for(let y=23;y<33;y+=2)dt(P,'b',20,y+U);for(let x=16;x<=24;x++)dt(P,'B',x,27+U);cl(P,['bEb','EvE'],19,26+U);
@@ -4090,7 +4090,7 @@ CH.necro={P:{1:'#0e0b14',2:'#1c1726',3:'#2e2640',4:'#4a3e62',5:'#665a82',k:'#ddd
   if(st.hurt)hurtEyes(16+U);
  }};
 CH.gunner={P:Object.assign({L:'#8a5a32',Y:'#b07a46',y:'#d09a5e',l:'#5a3820',z:'#3a2414',B:'#4a6ab0',b:'#2f4a86',d:'#1f305e',X:'#3e4452',s:'#c8ced8',R:'#c8323a',r:'#8a1428',q:'#ff6b5b',W:'#f4f0e6',g:'#e8c45a',c:'#5a3418'},SKN),
- draw(st){if(HERO_DRESS&&DLOOK.gunner)return DLOOK.gunner.draw(st,HERO_DRESS);const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+ draw(st){if(HERO_DRESS&&DLOOK.gunner){DLOOK.gunner.draw(st,HERO_DRESS);dNatEnd();return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
   cl(P,['Bb','Bb','bd','ll','zz','zzz'],17,29+st.lL);cl(P,['bB','bB','db','ll','zz','zzz'],21,29+st.rL);
   shp(P,20,22+U,[3.5,4,4,4.5,4.5,5,5],'zlLYy');for(let y=29;y<=30;y++){dt(P,'l',15,y+U);dt(P,'L',16,y+U);dt(P,'L',24,y+U);dt(P,'l',25,y+U);}
   for(let y=23;y<=26;y++)for(let x=19;x<=21;x++)dt(P,x<21?'W':'s',x,y+U);for(let x=16;x<=24;x++)dt(P,'z',x,27+U);dt(P,'g',20,27+U);
@@ -4104,7 +4104,7 @@ CH.gunner={P:Object.assign({L:'#8a5a32',Y:'#b07a46',y:'#d09a5e',l:'#5a3820',z:'#
   if(st.hurt)hurtEyes(16+U);
  }};
 CH.elem={P:Object.assign({1:'#0e4a5a',2:'#17607a',3:'#2482a4',4:'#38aed0',5:'#7ad8ec',h:'#38b8c8',H:'#7ae0e8',c:'#c8f8fa',W:'#f4f8ff',w:'#c8dce8',g:'#f0c840',G:'#b08a24',r:'#ff5a8a',p:'#ffa8c0',m:'#e06080'},SKN),
- draw(st){if(HERO_DRESS&&DLOOK.elem)return DLOOK.elem.draw(st,HERO_DRESS);const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+ draw(st){if(HERO_DRESS&&DLOOK.elem){DLOOK.elem.draw(st,HERO_DRESS);dNatEnd();return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
   shp(P,20,13+U,[5,5.5,6,6,6,6,6,6,6,6,5.5,5,4.5,4],'3hHHc');
   cl(P,['k','k','4','44'],18,31+st.lL);cl(P,['K','K','4','44'],21,31+st.rL);
   for(let y=21;y<=22;y++)for(let x=19;x<=21;x++)dt(P,x<21?'k':'K',x,y+U);dt(P,'g',20,22+U);
@@ -4121,7 +4121,7 @@ CH.elem={P:Object.assign({1:'#0e4a5a',2:'#17607a',3:'#2482a4',4:'#38aed0',5:'#7a
   if(st.hurt)hurtEyes(16+U);
  }};
 CH.berserk={P:Object.assign({a:'#4a2a08',b:'#7a4a14',c:'#b07a2a',d:'#d8a448',f:'#f4d080',r:'#6a0e0e',R:'#a81c1c',q:'#e04a3a',l:'#4a2c14',L:'#7a4a24',S:'#8e96a6',s:'#c3c9d4',x:'#4a5060',X:'#2e3240',w:'#e8ecf2',E:'#f4f0e6',z:'#2a1408',m:'#b8784c',O:'#d0782a',o:'#f0a050'},SKN),
- draw(st){if(HERO_DRESS&&DLOOK.berserk)return DLOOK.berserk.draw(st,HERO_DRESS);const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+ draw(st){if(HERO_DRESS&&DLOOK.berserk){DLOOK.berserk.draw(st,HERO_DRESS);dNatEnd();return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
   // 붉은 망토 (뒤)
   shp(P,20,21+U,[5.5,6,6,6,6,6.5,6.5,6.5,6.5,6],'rrRRq');for(let y=24;y<=30;y+=2){dt(P,'r',16,y+U);dt(P,'r',24,y+U);}for(let x=-6;x<=6;x++)if((x+st.cf)%3===0)dt(P,'r',20+x,31+U);
   // 다리: 청동 정강이받이 + 샌들
@@ -4145,7 +4145,7 @@ CH.berserk={P:Object.assign({a:'#4a2a08',b:'#7a4a14',c:'#b07a2a',d:'#d8a448',f:'
   if(st.hurt)hurtEyes(15+U);
  }};
 CH.druid={P:Object.assign({1:'#1a3a14',2:'#2f6a24',3:'#4a8a34',4:'#6aaa48',5:'#9ad85a',L:'#8a5a30',l:'#5a3820',t:'#6a4a2a',T:'#a07a4a',Y:'#c8a070',z:'#2a1a0e',9:'#c8ff7a',8:'#f0ffd0'},SKN),
- draw(st){if(HERO_DRESS&&DLOOK.druid)return DLOOK.druid.draw(st,HERO_DRESS);const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+ draw(st){if(HERO_DRESS&&DLOOK.druid){DLOOK.druid.draw(st,HERO_DRESS);dNatEnd();return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
   shp(P,20,23+U,[4,4.5,5,5.5,5.5,6,6,6],'12234');for(let x=-6;x<=6;x++)if((x+st.cf)%2)dt(P,'3',20+x,31+U);
   cl(P,['tL','tL','tL','zl','zz','zzz'],17,29+st.lL);cl(P,['Lt','Lt','Lt','lz','zz','zzz'],21,29+st.rL);
   shp(P,20,23+U,[4,4,4,4,4,4],'ltLTY');for(let x=16;x<=24;x++)dt(P,x%2?'3':'4',x,23+U);for(let x=16;x<=24;x++)dt(P,'z',x,26+U);dt(P,'5',20,26+U);
@@ -4161,7 +4161,7 @@ CH.druid={P:Object.assign({1:'#1a3a14',2:'#2f6a24',3:'#4a8a34',4:'#6aaa48',5:'#9
   if(st.hurt)hurtEyes(16+U);
  }};
 CH.alch={P:Object.assign({h:'#3a2214',H:'#6a3a20',j:'#9a5a30',X:'#8a6a2a',c:'#ffb347',W:'#f6f8fb',s:'#cfd6e0',S:'#9aa6b8',a:'#6a4a2e',A:'#8a6040',z:'#2a1a10',l:'#4a3020',E:'#ffffff',F:'#8ee06a',N:'#4aa83a',o:'#ff9a3a',b:'#4a9ad8'},SKN),
- draw(st){if(HERO_DRESS&&DLOOK.alch)return DLOOK.alch.draw(st,HERO_DRESS);const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+ draw(st){if(HERO_DRESS&&DLOOK.alch){DLOOK.alch.draw(st,HERO_DRESS);dNatEnd();return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
   cl(P,['zl','zl','zl','ll','ll','lll'],17,29+st.lL);cl(P,['lz','lz','lz','ll','ll','lll'],21,29+st.rL);
   shp(P,20,22+U,[3.5,4,4,4.5,4.5,5,5],'SsWWW');for(let y=29;y<=30;y++){dt(P,'s',15,y+U);dt(P,'W',16,y+U);dt(P,'W',24,y+U);dt(P,'S',25,y+U);}
   for(let y=24;y<=29;y++)for(let x=18;x<=22;x++)dt(P,x<20?'A':'a',x,y+U);dt(P,'a',18,23+U);dt(P,'a',22,23+U);
@@ -4177,7 +4177,7 @@ CH.alch={P:Object.assign({h:'#3a2214',H:'#6a3a20',j:'#9a5a30',X:'#8a6a2a',c:'#ff
   if(st.hurt)hurtEyes(16+U);
  }};
 CH.gambler={P:Object.assign({z:'#1e1a26',v:'#3a3448',V:'#5a5268',P:'#7a48b8',p:'#4a2678',W:'#f4f1e8',w:'#c8c4bc',R:'#d42c35',r:'#8a1428',g:'#f0c840',G:'#b08a24',c:'#16121a'},SKN),
- draw(st){if(HERO_DRESS&&DLOOK.gambler)return DLOOK.gambler.draw(st,HERO_DRESS);const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+ draw(st){if(HERO_DRESS&&DLOOK.gambler){DLOOK.gambler.draw(st,HERO_DRESS);dNatEnd();return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
   cl(P,['zv','zv','zv','zz','zz','zzz'],17,29+st.lL);cl(P,['vz','vz','vz','zz','zz','zzz'],21,29+st.rL);
   shp(P,20,23+U,[4,4,4,4,4,4],'zzvvV');for(let y=29;y<=30;y++){dt(P,'z',16,y+U);dt(P,'z',24,y+U);}
   for(let y=23;y<=27;y++)for(let x=18;x<=22;x++)dt(P,x<20?'P':'p',x,y+U);for(let x=19;x<=21;x++)dt(P,'W',x,23+U);dt(P,'w',20,24+U);dt(P,'g',20,25+U);dt(P,'g',20,27+U);
@@ -4244,7 +4244,7 @@ const DLOOK={
    if(D.wpn!=null&&(A===0||A===1)){for(let x=sx;x<=bx+5;x++)cp(x===bx+5?'s':'L',x,by+8);cp('q',sx,by+7);cp('q',sx,by+9);cp('W',bx+5,by+7);cp('W',bx+5,by+9);}
    // 두건 (모자 칸) · 얼굴
    const HAIR={1:'#2e1608',2:'#4a2a14',3:'#6a3e1e',4:'#8a5530',5:'#a8703f'};
-   if(D.hat==null){shp(HAIR,20,10+U,[3,4.5,5.5,6,6],'12345');for(let y=15;y<=19;y++){dt(HAIR,'3',15,y+U);dt(HAIR,'2',25,y+U);}}
+   if(D.hat==null)dNat(HAIR,U,15);
    else{const PH=D.hat==='def'?P:Object.assign({},P,this.sp(this.pal('hat',D.hat))),ht=D.hat==='def'?-1:D.hat.t,hv=D.hat==='def'?0:D.hat.v||0;
     shp(PH,20,9+U,ht===0?[0,2,3.5,4.5,5,5.5,6,6,6,6,5.5,5]:[2,3.5,4.5,5,5.5,6,6,6,6,6,5.5,5],'12345',{hl:3});dt(PH,'3',26,12+U);dt(PH,'2',27,13+U);
     const LF=D.hat==='def'?P:{5:'#ffe680',4:'#c7962e'};if(ht!==0&&ht!==1)cl(LF,st.pf?['.5','54','4.']:['5.','45','.4'],20,6+U);else if(D.hat==='def')cl(P,st.pf?['.5','54','4.']:['5.','45','.4'],20,6+U);
@@ -4276,7 +4276,7 @@ const DLOOK={
    shp(D.cape==null?PA:scP,20,21+U,[5,5.5],D.cape==null?'12345':'rrRRq');if(D.cape!=null)dt(scP,'q',17,21+U);
    // 두건 (모자 칸) · 얼굴 · 얼굴 가리개
    const HAIR={1:'#0e0c14',2:'#1c1824',3:'#2c2636',4:'#40384e',5:'#5a5068'};
-   if(D.hat==null){shp(HAIR,20,10+U,[3,4.5,5.5,6,6],'12345');for(let y=15;y<=18;y++){dt(HAIR,'3',15,y+U);dt(HAIR,'2',25,y+U);}}
+   if(D.hat==null)dNat(HAIR,U,15);
    else{const PH=D.hat==='def'?P:Object.assign({},P,this.sp(this.pal('hat',D.hat))),ht=D.hat==='def'?-1:D.hat.t,hv=D.hat==='def'?0:D.hat.v||0;
     shp(PH,20,9+U,[2,3.5,4.5,5,5.5,6,6,6,6,6,5.5],'12345',{hl:2});
     if(ht===2&&hv===1)for(const [x,y] of [[14,11],[13,10],[26,11],[27,10]])dpx(DCOL.shd,'A',x,y+U);
@@ -4323,7 +4323,7 @@ const DLOOK={
    else if(D.shd!=null)this.orb(25,28+U-ay,this.pal('shield',D.shd),A>=0||D.shd.t>=2,t);
    // 얼굴 · 모자
    cl(P,['HhHHhHHhH','kkkkkkkkK','kkekkkekK','kkekkkekK','kkkkkkkKK','.KKKKKKK.'],16,17+U);
-   if(D.hat==null){shp(P,20,12+U,[3,4.5,5,5.5,5.5],'hhHHw');}
+   if(D.hat==null)dNat(HAIRW,U,17);
    else{const H=D.hat==='def'?P:Object.assign({},P,this.sp(this.pal('hat',D.hat))),ht=D.hat==='def'?-1:D.hat.t,hv=D.hat==='def'?0:D.hat.v||0;
     const cone=[];for(let y=4;y<=13;y++){const i=13-y,hw=Math.max(.5,5-i*.5),off=(ht===0?i*.2:i*.35);cone.push([-hw+off,hw+off]);}shp(H,20,(ht===0?6:4)+U,ht===0?cone.slice(2):cone,'12345');
     if(ht!==0){dt(H,'4',24,3+U);dt(H,'3',25,3+U);dt(H,'2',26,4+U);}
@@ -4337,9 +4337,9 @@ const DLOOK={
    if(st.hurt)hurtEyes(18+U);}},
  knight:{
   head(U,hat,st){if(hat==='def'){CH.knight.helm(U);return;}
+   if(hat==null){dNat(HAIRC.blond,U,17);dpaint(['kkkkkkkkk','kkkkkkkkK','kkekkkekK','kkekkkekK','kkkkkkkKK','.KKKKKKK.'],16,17+U,{});return;}
    ddome(DCOL.hair,U,11,7,5.6,0);for(let y=17;y<=20;y++){dpx(DCOL.hair,'B',15,y+U);dpx(DCOL.hair,'C',25,y+U);}
-   dpaint(['.kkkkkkk.','kkkkkkkkK','kkekkkekK','kkekkkekK','kkkkkkkKK','.KKKKKKK.'],16,17+U,{});
-   if(hat==null)return;const M=dPal('hat',hat),t=hat.t,v=hat.v||0;
+   dpaint(['.kkkkkkk.','kkkkkkkkK','kkekkkekK','kkekkkekK','kkkkkkkKK','.KKKKKKK.'],16,17+U,{});const M=dPal('hat',hat),t=hat.t,v=hat.v||0;
    if(t===0){ddome(M,U,10,6,6.2,0);for(let x=14;x<=26;x++)dpx(M,x<20?'C':'D',x,16+U);dpx(M,'E',24,14+U);return;}
    ddome(M,U,10,8,5.8,1);for(let x=14;x<=26;x++)dpx(M,t>=2?'E':(x<20?'C':'D'),x,17+U);for(let y=18;y<=21;y++){dpx(M,'B',15,y+U);dpx(M,'D',25,y+U);}
    dpaint(['KKKKKKKKK'],16,18+U,{});
@@ -4411,7 +4411,14 @@ function dHatOrn(M,x,y,t,v,T){if(t===2&&v===1)for(const [dx,dy] of [[-6,1],[-7,0
 function dOrb(x,y,M,big,T){const r=big?2:1;for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.abs(dx)+Math.abs(dy)>r+(big?1:0))continue;dpx(M,dx+dy<0?'A':dx+dy>0?'C':'B',x+dx,y+dy);}if(Math.floor((T||0)*8)%3===0)dpx(M,'E',x-r,y-r);}
 function dCape(M,U,cf,y0,w0,h){for(let i=0;i<h;i++){const w=w0+Math.floor(i*.3);for(let x=-w;x<=w;x++){if(i===h-1&&((x+cf)%3===0))continue;dpx(M,x<-w+2?'A':x>w-2?'D':'C',20+x,y0+U+i);}}}
 const HAIRC={blond:{1:'#8a6a12',2:'#c49a22',3:'#f2cf55',4:'#f2cf55',5:'#ffe9a0'},dark:{1:'#0e0b14',2:'#1c1726',3:'#2e2640',4:'#4a3e62',5:'#665a82'},brown:{1:'#2e1608',2:'#4a2a14',3:'#6a3e1e',4:'#8a5530',5:'#a8703f'},ginger:{1:'#6a2a08',2:'#a04a14',3:'#d0782a',4:'#f0a050',5:'#ffc880'}};
-const dHair=(H,U,y0)=>shp(H,20,(y0||10)+U,[3,4.5,5.5,6,6],'12345');
+// 벗었을 때 머리: 바가지 머리 대신 삐친 머리·가르마·옆으로 쓸린 앞머리·귀가 보이는 보통 머리 (fy = 얼굴 첫 줄)
+let DNAT=null;
+function dNat(H,U,fy){const R=['....4...4....','...4454.44...','..345544443..','.23455444332.','.233454443321','1233344443321'];for(let i=0;i<6;i++){const r=R[i];for(let x=0;x<13;x++){const c=r[x];if(c!=='.'&&c!==' ')dt(H,c,14+x,fy-6+i+U);}}
+  for(let y=fy;y<=fy+1;y++){dt(H,'2',15,y+U);dt(H,'1',14,y+U);dt(H,'2',25,y+U);dt(H,'1',26,y+U);}DNAT={H,U,fy};}
+function dNatEnd(){if(!DNAT)return;const {H,U,fy}=DNAT;DNAT=null;const B='34554kkk3';for(let i=0;i<9;i++){const c=B[i];g.fillStyle=c==='k'?SKN.k:H[c];g.fillRect(16+i,fy+U,1,1);}
+  for(const [x,c] of [[15,'k'],[25,'K']])for(let y=fy+2;y<=fy+3;y++){g.fillStyle=SKN[c];g.fillRect(x,y+U,1,1);}}
+const HAIRW={1:'#6a6e80',2:'#8a8ea0',3:'#b4b8ca',4:'#d6dae6',5:'#ffffff'};
+const dHair=(H,U,y0)=>dNat(H,U,(y0||10)+5);
 Object.assign(DLOOK,{
  paladin:{draw(st,D0){const D=dSlot(D0),P=CH.paladin.P,U=st.U,A=st.atk,ay=st.ay||0;
    const AM={x:'D',S:'C',s:'B',w:'A',W:'A',X:'D',g:'E',G:'E'},PA=D.armor==='def'?P:DRM(P,AM,D.armor==null?DCOL.lin:dP8('armor',D.armor));
@@ -4424,7 +4431,7 @@ Object.assign(DLOOK,{
    const up=A>=0?-5:0,hx=25;cl(PA,['Sx','sS','Kk'],24,24+U+(A>=0?-2:-ay));
    if(D.wpn!=null){const PW=D.wpn==='def'?P:DRM(P,{L:'C',l:'D',g:'A',G:'B',8:'E'},dP8('wpn',D.wpn));for(let y=17+U+up;y<=27+U+(A>=0?-2:0);y++)dt(PW,y%3?'L':'l',hx+1,y);cl(PW,['.gG.','gGGG','GgGG','.GG.'],hx,13+U+up);dt(PW,'8',hx+1,12+U+up);}
    shp(PA,20,20+U,[4.5,5,5.5],'xSsww',{hl:1});if(D.armor!=null)for(let x=15;x<=25;x++)dt(PA,'g',x,22+U);
-   if(D.hat==null){dHair(HAIRC.blond,U,11);for(let y=16;y<=20;y++){dt(HAIRC.blond,'3',15,y+U);dt(HAIRC.blond,'2',25,y+U);}}
+   if(D.hat==null)dNat(HAIRC.blond,U,16);
    else{const PH=D.hat==='def'?P:DRM(P,{X:'D',x:'C',S:'B',s:'A',w:'A',g:'E',G:'E',W:'A'},dP8('hat',D.hat));shp(PH,20,9+U,[2.5,4,5,5.5,6,6,6],'XxSsw',{hl:3});for(let x=14;x<=26;x++)dt(PH,x<20?'g':'G',x,15+U);
     for(let y=10;y<=14;y++)dt(PH,'g',20,y+U);dt(PH,'g',19,12+U);dt(PH,'g',21,12+U);dt(PH,'8',20,10+U);for(let y=16;y<=20;y++){dt(PH,'s',15,y+U);dt(PH,'S',25,y+U);}cl(PH,['.W','WW','Ws'],13,10+U);cl(PH,['W.','WW','sW'],26,10+U);if(D.hat!=='def')dHatOrn(PH,20,8+U,D.hat.t,D.hat.v||0,st.t);}
    cl(P,['yYyyYyyYy','kkbkkkbkK','kkbkkkbkK','kkkkkkkKK','.KKKKKKK.'],16,16+U);if(st.hurt)hurtEyes(17+U);
@@ -4442,9 +4449,9 @@ Object.assign(DLOOK,{
    cl(PA,['.43','432','.kK'],13,23+U+(A>=0?-3:ay));cl(PA,['34.','321','kK.'],24,23+U-ay);
    if(D.shd!=null&&D.shd!=='def'){const M=dP8('shield',D.shd);dpaint(['.AA.','AvvA','AAAA'],24,26+U-ay,Object.assign({v:'#151018'},M));dpx(M,'E',25,25+U-ay);}
    if(D.cape!=null){const PC=D.cape==='def'?P:DRM(P,RM,dP8('cape',D.cape));shp(PC,20,20+U,[5,5.5,6],'12345',{hl:1});for(let x=-5;x<=5;x+=2)dt(PC,'b',20+x,22+U);}else shp(PA,20,21+U,[3.5,4.5],'12345');
-   if(D.hat==null){dHair(HAIRC.dark,U,10);for(let y=15;y<=19;y++){dt(HAIRC.dark,'3',15,y+U);dt(HAIRC.dark,'2',25,y+U);}}
+   if(D.hat==null)dNat(HAIRC.dark,U,15);
    else{const PH=D.hat==='def'?P:DRM(P,{1:'D',2:'C',3:'B',4:'A',5:'A'},dP8('hat',D.hat));shp(PH,20,9+U,[2,3.5,4.5,5,5.5,6,6,6,6,6,5.5,5],'12345',{hl:2});if(D.hat!=='def')dHatOrn(dP8('hat',D.hat),20,9+U,D.hat.t,D.hat.v||0,t);}
-   cl(D.hat==null?Object.assign({},P,{2:HAIRC.dark[3]}):P,['222222222','kkkkkkkkK','kkekkkekK','kkekkkekK','kkkkkkkKK','.KKKKKKK.'],16,15+U);if(st.hurt)hurtEyes(16+U);}},
+   cl(D.hat==null?Object.assign({},P,{2:HAIRC.dark[3],k:SKN.k,K:SKN.K,e:SKN.e}):P,['222222222','kkkkkkkkK','kkekkkekK','kkekkkekK','kkkkkkkKK','.KKKKKKK.'],16,15+U);/* 창백한 얼굴·초록 눈은 두건에 딸린 가면 → 벗으면 맨얼굴 */if(st.hurt)hurtEyes(16+U);}},
  gunner:{draw(st,D0){const D=dSlot(D0),P=CH.gunner.P,U=st.U,A=st.atk,ay=st.ay||0;
    dLegs(P,st,['Bb','Bb','bd','ll','zz','zzz'],['bB','bB','db','ll','zz','zzz'],D,{B:'B',b:'C',d:'D'},{l:'B',z:'D'});
    const AM={z:'D',l:'C',L:'B',Y:'A',y:'A'},PA=D.armor==='def'?P:DRM(P,AM,D.armor==null?DCOL.lin:dP8('armor',D.armor));
@@ -4457,7 +4464,7 @@ Object.assign(DLOOK,{
    if(D.wpn!=null){const PW=D.wpn==='def'?P:DRM(P,{X:'C',s:'A',l:'D'},dP8('wpn',D.wpn));cl(PW,['XXXXX','.Xs..','.l...'],25,25+U+up);if(D.wpn!=='def'&&(D.wpn==='uq'||D.wpn==='cw'||D.wpn.t>=2))dt(PW,'s',29,25+U+up);if(A===0)cg(['8.','98','8.'],30,24+U+up);}
    shp(P,20,14+U,[5,5,5,5,5],'zzccc');cl(P,['ccccccccc','kkkkkkkkK','kkekkkekK','kkekkkekK','kkkkkkkKK','.KKKKKKK.'],16,15+U);
    if(D.cape==='def')cl(P,['RqRRRRRrR','.RRRRRrr.'],16,21+U);else if(D.cape!=null)cl(DRM(P,{R:'B',q:'A',r:'C'},dP8('cape',D.cape)),['RqRRRRRrR','.RRRRRrr.'],16,21+U);
-   if(D.hat==null){shp(P,20,10+U,[3,4.5,5,5],'zzccc');}
+   if(D.hat==null)dNat(HAIRC.brown,U,15);
    else{const PH=D.hat==='def'?P:DRM(P,{z:'D',l:'C',L:'B',Y:'A',y:'A',r:'E'},dP8('hat',D.hat));shp(PH,20,8+U,[3,4,4.5,4.5,5],'zlLYy',{hl:2});dt(PH,'l',20,8+U);for(let x=15;x<=25;x++)dt(PH,'r',x,12+U);shp(PH,20,13+U,[9],'zlLYy');shp(PH,20,14+U,[7.5],'zzlll');dt(PH,'L',11,12+U);dt(PH,'l',29,12+U);if(D.hat!=='def')dHatOrn(dP8('hat',D.hat),20,8+U,D.hat.t,D.hat.v||0,st.t);}
    if(st.hurt)hurtEyes(16+U);}},
  elem:{draw(st,D0){const D=dSlot(D0),P=CH.elem.P,U=st.U,A=st.atk,ay=st.ay||0,t=st.t||0;
