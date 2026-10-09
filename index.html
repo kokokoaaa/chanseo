@@ -7420,6 +7420,7 @@ const PATCH_NOTES=[
     ['change','🐞 이름을 바꾸려다 거절되면 내 이름 열쇠가 꼬여서 내 이름인데 「다른 사람 이름」이 되던 문제, 비밀번호로 이름을 되찾아도 채팅이 계속 막히던 문제를 고쳤어요','bug'],
     ['change','🐞 내 캐릭터로 만든 결투 코드로 나와 싸우면 연습 경기인데도 보상·「이변의 주인공」을 받던 문제, 강화 되돌리기(−)로 예전 싼값에 산 강화가 지금 값으로 환불되던 문제를 고쳤어요','bug'],
     ['change','🐞 마우스로 화면을 끌다가 버튼 위에서 놓으면 캐릭터가 계속 걸어가던 문제를 고쳤어요','bug'],
+    ['change','🗿 레이드·결투에서 각성한 캐릭터의 <b>최대 체력이 두 번 계산</b>되던 문제를 고쳤어요 (동료 체력, 보스가 때리는 세기, 결투 전투력이 정상 값으로)','bug'],
     ['change','⚒ 대장간 「장비 기록 되살리기」는 강화 실패·파괴를 되돌리는 데 쓰일 수 있어서 관리자만 쓸 수 있게 바꿨어요. 장비가 이상하게 바뀌었으면 관리자에게 말해 주세요','play'],
   ]},
   {v:144,t:'🐞 엉뚱한 합체 알림',items:[
@@ -8072,7 +8073,7 @@ let DEV_RAID_TEST=false;
 const raidBest=()=>META.raid||(META.raid={});
 const raidOpenT=t=>t===0||!!raidBest()['c'+(t-1)];
 // 동료 하나 만들기: 저장된 능력치에서 체력·방어·초당 피해·사거리·이동 속도만 가져옴
-function allyOf(h,i){const P=h.p||{},sp=(P.speed||200),mel=MELEE_CLS.includes(h.cls),hp=Math.max(200,(P.maxHp||200)*(1+(h.aw||0)*awHp()));
+function allyOf(h,i){const P=h.p||{},sp=(P.speed||200),mel=MELEE_CLS.includes(h.cls),hp=Math.max(200,(P.maxHp||200));
   // 동료 초당 피해 = 저장 당시 최대 DPS × (그 직업을 직접 조작했을 때 거신에게 들어가는 비율, 측정값) × 0.65 → 손으로 하는 것의 60~70%
   const dps=Math.max(50,(RAID_HAND[h.cls]||.1)*.65*(h.dps||1e5));
   return {id:h.id,cls:h.cls,name:heroName(h),skin:h.skin||'',look:recLook(h),x:WW/2+(i?1:-1)*90,y:WH/2+100,r:14,hp,maxHp:hp,armor:Math.max(0,P.armor||0),dps,mel,rng:mel?0:Math.min(420,Math.max(220,P.range||300)),sp:Math.min(320,sp),alive:true,cd:rand(0,.4),mvT:0,tx:0,ty:0,inv:0,hurtT:0,atkT:0,face:1,orb:(i?1:-1)*1.2,revT:0,rv:0};}
@@ -8082,7 +8083,7 @@ function beginRaid(tier,ids){const L=myHeroes(),hs=ids.map(id=>L.find(h=>h.id===
   S.augs=(me.augs||[]).map(([id,lv,q,pq,dl])=>{const f=[...FUSIONS,...VFUSIONS].find(x=>x.id===id);if(f){const o=fusionObj(f);if(pq)o.pq=pq;return o;}const a=AUGS.find(x=>x.id===id)||VIPS.find(x=>x.id===id)||DRAGON.find(x=>x.id===id);return a?{...a,lv,q:q||1,dl:dl||undefined}:null;}).filter(Boolean);
   tagCount();S.noAug=true;S.started=true;S.raidMe=me.id;S.raidTok=RAID_TOK;S.raidIds=hs.map(h=>h.id);
   const p=S.p;p.x=WW/2;p.y=WH/2+60;hpSync();p.hp=p.maxHp;p.inv=2;p.alive=true;p.barrier=barrierMax();
-  S.allies=hs.slice(1).map(allyOf);S.raidPow={d:heroD(me)+S.allies.reduce((a,q)=>a+q.dps,0),h:[me,...hs.slice(1)].reduce((a,h)=>a+Math.max(200,((h.p||{}).maxHp||200)*(1+(h.aw||0)*awHp())),0)/hs.length};raidRoles();S.rushT=3;S.mode='play';hide();
+  S.allies=hs.slice(1).map(allyOf);S.raidPow={d:heroD(me)+S.allies.reduce((a,q)=>a+q.dps,0),h:[me,...hs.slice(1)].reduce((a,h)=>a+Math.max(200,((h.p||{}).maxHp||200)),0)/hs.length};raidRoles();S.rushT=3;S.mode='play';hide();
   S.arena={x:WW/2,y:WH/2-100,r:1400,tr:1100};
   toast(`⚔ 레이드 ${tier+1}단계 「${RAID_N[tier]}」 · 동료 ${S.allies.length}명과 함께!`);}
 function spawnRaidBoss(){const t=S.raidTier||0,A=S.arena;S.bossI=0;S.bossT=['raidboss'];S.tele=[];S.hz=[];S.bStart=S.bt||0;S.bHit=0;
@@ -8210,7 +8211,7 @@ async function heroUnpack(c){c=String(c||'').replace(/\s+/g,'');const m=c.match(
     else o=JSON.parse(decodeURIComponent(escape(atob(m[2]))));}catch(e){return null;}
   if(!o||!CLASSES[o.cls]||!o.p||!(o.p.maxHp>0))return null;o.augs=Array.isArray(o.augs)?o.augs:[];o.s=o.s||{};return o;}
 // 전투력: √(유효 체력 × 단일 대상 화력). 유효 체력은 각성 체력·방어력 반영
-const heroPow=h=>{const P=h.p||{},H=(P.maxHp||200)*(1+(h.aw||0)*awHp())*Math.sqrt(1+Math.max(0,P.armor||0)/100),D=Math.max(1e3,(h.dps||1e5)*(RAID_HAND[h.cls]||.1));return Math.sqrt(H*D);};
+const heroPow=h=>{const P=h.p||{},H=(P.maxHp||200)*Math.sqrt(1+Math.max(0,P.armor||0)/100),D=Math.max(1e3,(h.dps||1e5)*(RAID_HAND[h.cls]||.1));return Math.sqrt(H*D);};
 // 보정 없이 저장된 능력 그대로: 모든 캐릭터에 같은 환산 기준만 씀 (악몽 숫자 → 결투 숫자).
 // 기준: 단일 대상 화력 DUEL_DREF인 캐릭터가 체력 DUEL_HREF인 캐릭터를 DUEL_T초에 쓰러뜨림. DUEL_LIMIT초 안에 끝나지 않으면 무승부
 const DUEL_T=45,DUEL_DREF=2e5,DUEL_HREF=1000,DUEL_LIMIT=90;
@@ -8220,7 +8221,7 @@ const DUEL_SMALL=8;
 // 두 캐릭터를 서로 비교해서, 상대를 쓰러뜨리는 시간 = DUEL_TB × (상대 체력/내 체력)^0.5 × (상대 화력/내 화력)^0.25, 최소 DUEL_MIN초
 const DUEL_TB=40,DUEL_MIN=12,DUEL_CD=.25,DUEL_CH=.5,DUEL_HITR=.5; // DUEL_HITR: 상대 공격이 실제로 맞는 비율 (피하는 만큼 상대 피해를 올려 예상 시간에 맞춤)
 function duelTTK(a,b){return Math.max(DUEL_MIN,DUEL_TB*Math.pow(heroEHP(b)/heroEHP(a),DUEL_CH)*Math.pow(heroD(b)/heroD(a),DUEL_CD));}
-const heroEHP=h=>{const P=h.p||{};return (P.maxHp||200)*(1+(h.aw||0)*awHp())*Math.sqrt(1+Math.max(0,P.armor||0)/100);};
+const heroEHP=h=>{const P=h.p||{};return (P.maxHp||200)*Math.sqrt(1+Math.max(0,P.armor||0)/100);};
 const heroD=h=>Math.max(1e3,(h.dps||1e5)*(RAID_HAND[h.cls]||.1));
 const duelOn=()=>!!(S&&dfM().duel);
 const duelRec=()=>META.duel||(META.duel={w:0,l:0});
