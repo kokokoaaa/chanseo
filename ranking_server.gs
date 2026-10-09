@@ -1,6 +1,13 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v6.3
+// 찬서 명예의 전당 서버 (Google Apps Script) v6.4
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
+//
+// v6.3 → v6.4 바뀐 점
+// - 이름 주인 열쇠 칸(N열)을 글자 형식으로 고정: 열쇠가 +로 시작하면 시트가 수식으로 읽어 #ERROR!가 되어 진짜 주인도 「비밀번호가 맞지 않아요」로 막히던 문제. 이미 깨진 칸은 주인 없음으로 봄
+// - 이름 비교 통일 (한글 조합 방식 NFC · 보이지 않는 글자 제거)
+// - 쪽지: 6시간 넘게 안 들어와도 다음 접속 때 받음, 이름 주인 기기만 받고 읽음 처리 (접속 신호에 열쇠 k 필요)
+// - 서버가 바쁠 때 기록 요청이 오류로 사라지지 않고 busy로 응답
+// - 더 좋은 기록으로 바뀔 때 결투 전적·캐릭터 정보를 지우지 않음
 //
 // v6.2 → v6.3 바뀐 점
 // - 관리자 개인 메시지(쪽지): 개발자 키로 이름에 쪽지를 보내면 「쪽지」 시트에 저장 → 그 이름이 접속 신호(ping)를 보낼 때 같이 받아 화면 가운데 팝업으로 봄
@@ -141,12 +148,15 @@ function diffOf_(d, cls) {
 function sheet_() {
   const ss = book_();
   let s = ss.getSheetByName(SHEET_NAME);
+  // 주인 열쇠 칸(N열)은 글자 형식으로 고정 (한 번만). 열쇠가 +로 시작하면 시트가 수식으로 읽어 #ERROR!가 되어 진짜 주인도 막혔음
+  if (s) { try { const c = CacheService.getScriptCache(); if (!c.get('khfmt')) { s.getRange('N:N').setNumberFormat('@'); c.put('khfmt', '1', 21600); } } catch (err) {} }
   if (!s) {
     s = ss.insertSheet(SHEET_NAME);
     s.getRange(1, 1, 1, HEAD.length).setValues([HEAD]);
     s.getRange('A:A').setNumberFormat('@');
     s.getRange('C:C').setNumberFormat('@');
     s.getRange('I:I').setNumberFormat('@');
+    s.getRange('N:N').setNumberFormat('@');
     const old = ss.getSheetByName(OLD_SHEET);
     if (old && old.getLastRow() > 1) {
       const v = old.getDataRange().getValues();
@@ -168,7 +178,7 @@ function sheet_() {
 }
 
 const num_ = (v, max) => Math.max(0, Math.min(max, Math.floor(+v || 0)));
-const str_ = (v, n) => String(v || '').replace(/\s+/g, ' ').trim().replace(/^[=+\-@]+/, '').slice(0, n);
+const str_ = (v, n) => { let t = String(v || ''); try { t = t.normalize('NFC'); } catch (err) {} return t.replace(/[\u200b-\u200f\ufeff]/g, '').replace(/\s+/g, ' ').trim().replace(/^[=+\-@]+/, '').slice(0, n); };
 // 결투 전적 "승-무-패"
 // 시트가 날짜로 바꾸지 않게 "w3d1l2" 꼴로 저장
 const dw_ = v => { const m = String(v || '').match(/^(\d{1,6})-(\d{1,6})-(\d{1,6})$/); return m ? 'w' + m[1] + 'd' + m[2] + 'l' + m[3] : ''; };
@@ -244,7 +254,7 @@ function owner_(s, nm) {
   if (last < 2) return { rows, kh };
   const names = s.getRange(2, 1, last - 1, 1).getValues(), kc = HEAD.indexOf('kh') + 1;
   const ks = s.getLastColumn() >= kc ? s.getRange(2, kc, last - 1, 1).getValues() : [];
-  names.forEach((x, i) => { if (String(x[0]) === nm) { rows.push(i + 2); if (!kh && ks[i] && ks[i][0]) kh = String(ks[i][0]); } });
+  names.forEach((x, i) => { if (String(x[0]) === nm) { rows.push(i + 2); const v = ks[i] ? String(ks[i][0] || '') : ''; if (!kh && v && !/^#/.test(v)) kh = v; } });
   return { rows, kh };
 }
 
@@ -271,8 +281,8 @@ function ping_(q) {
   try { w = id && c.get('watch_' + id) ? 1 : 0; } catch (err) {}
   // 관리자 쪽지: 이 이름 앞으로 안 읽은 쪽지가 있다는 표시(캐시)가 있을 때만 시트를 읽음 → 평소 접속 신호는 가벼움
   let dm = [];
-  try { const nm = dmKey_(q.n); if (nm && !q.bye && c.get('dm_' + nm)) { dm = dmFor_(nm); if (!dm.length) c.remove('dm_' + nm); } } catch (err) {}
-  return out_({ v: 63, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
+  try { const nm = dmKey_(q.n); if (nm && !q.bye && (c.get('dm_' + nm) || !c.get('dmc_' + nm))) { c.put('dmc_' + nm, '1', 21600); const own = ownerKh_(str_(q.n, 12)); if (!own || own === kh_(q.k)) { dm = dmFor_(nm); if (!dm.length) c.remove('dm_' + nm); } } } catch (err) {}
+  return out_({ v: 64, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -292,7 +302,8 @@ function dmSend_(d) {
   return { ok: true, result: 'dm', id };
 }
 function dmAck_(q) { const id = String(q.dmack || ''), s = dmSheet_(), last = s.getLastRow(); if (!id || last < 2) return { ok: false };
-  const v = s.getRange(2, 1, last - 1, 1).getValues(), i = v.findIndex(r => String(r[0]) === id); if (i < 0) return { ok: false };
+  { const own = ownerKh_(str_(q.n, 12)); if (own && own !== kh_(q.k)) return { ok: false, err: 'owned' }; }
+  const v = s.getRange(2, 1, last - 1, 2).getValues(), i = v.findIndex(r => String(r[0]) === id && dmKey_(r[1]) === dmKey_(q.n)); if (i < 0) return { ok: false };
   s.getRange(i + 2, 5).setValue(Date.now());return { ok: true }; }
 function dmList_(q) { if (String(q.dk || '') !== DEV_KEY) return { err: 'key' }; const s = dmSheet_(), last = s.getLastRow(); if (last < 2) return { dms: [] };
   const n = Math.min(50, last - 1), v = s.getRange(last - n + 1, 1, n, 5).getValues();
@@ -513,7 +524,8 @@ function doGet(e) {
 
 function doPost(e) {
   const lock = LockService.getScriptLock();
-  lock.waitLock(10000);
+  let got = false; try { got = lock.tryLock(15000); } catch (err) {}
+  if (!got) return out_({ ok: false, err: 'busy' });
   try {
     const d = JSON.parse(e.postData.contents);
     const s = sheet_();
@@ -590,6 +602,7 @@ function doPost(e) {
     const ov = s.getRange(row, 1, 1, LIST_COLS).getValues()[0], oo = Object.fromEntries(HEAD.slice(0, LIST_COLS).map((h, j) => [h, ov[j]]));
     const oldScore = score_({ diff: fixDiff_(oo), cls: String(oo.cls), time: +oo.time || 0, lvl: +oo.lvl || 0, kills: +oo.kills || 0, bosses: +oo.bosses || 0, at: +oo.at || 0 });
     if (r.score > oldScore) {
+      { const full = s.getRange(row, 1, 1, HEAD.length).getValues()[0], at = h => full[HEAD.indexOf(h)]; if (!r.dw) r.dw = at('dw') || ''; if (!r.hero && at('hero')) { r.hero = at('hero'); r.hh = at('hh'); } }
       s.getRange(row, 1, 1, HEAD.length).setValues([HEAD.map(h => r[h])]);
       return out_({ ok: true, result: 'best' });
     }
