@@ -7367,6 +7367,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:126,t:'🔑 이름 비밀번호 정리',items:[
+    ['change','🔑 한 기기에서 여러 이름을 쓸 때 이름마다 열쇠를 따로 기억해요. 예전엔 이 기기에 남은 다른 이름의 기록을 지금 이름의 열쇠로 다시 올려서, 그 이름의 비밀번호가 안 맞게 되는 문제가 있었어요. 이름을 바꿔도 전에 비밀번호를 넣은 이름이면 다시 안 넣어도 돼요','bug'],
+  ]},
   {v:124,t:'🔄 자동 업데이트',items:[
     ['change','📱 이 기기에만 남아 명예의 전당에 안 올라가는 기록(📱 표시)이 있으면 이유를 알려 줘요 (이름 주인 확인이 안 될 때 → 👤 내 이름에서 비밀번호 다시 넣기)','bug'],
     ['change','🔄 결과 화면에 둔 채 켜 두어도 새 버전이 나오면 바로 자동으로 적용돼요 (예전엔 시작 화면에서만 적용돼서, 켜 둔 컴퓨터가 옛 버전으로 계속 접속 중으로 남을 수 있었어요)','bug'],
@@ -9231,6 +9234,11 @@ let MYKEY=(()=>{try{let k=localStorage.getItem('chanseo_key');if(k&&/^[a-z0-9-]{
 // 이름 비밀번호 → 열쇠: 같은 이름+비밀번호면 어느 컴퓨터에서든 같은 열쇠가 나옴 (비밀번호 자체는 저장·전송하지 않음)
 function pinKey(nm,pin){const src='chanseo|'+nm+'|'+pin;let out='';for(let s0=0;s0<4;s0++){let h=(2166136261^(s0*0x9e3779b1))>>>0;for(let i=0;i<src.length;i++){h^=src.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}for(let r=0;r<3;r++){h^=h>>>13;h=Math.imul(h,0x5bd1e995)>>>0;h^=h>>>15;}out+=h.toString(36).padStart(7,'0');}return 'p'+out;}
 function setMyKey(k){MYKEY=k;try{localStorage.setItem('chanseo_key',k);}catch(e){}}
+try{if(MYKEY&&!/^p/.test(MYKEY)&&!localStorage.getItem('chanseo_devkey'))localStorage.setItem('chanseo_devkey',MYKEY);}catch(e){}
+// 이름마다 열쇠를 따로 기억 (한 기기에서 여러 이름을 쓸 때, 남의 이름을 엉뚱한 열쇠로 가져가지 않게)
+const nKeys=()=>{try{return JSON.parse(localStorage.getItem('chanseo_nkeys')||'{}')||{};}catch(e){return {};}};
+const nKeySet=(n,k)=>{try{const m=nKeys();m[n]=k;localStorage.setItem('chanseo_nkeys',JSON.stringify(m));}catch(e){}};
+const keyFor=n=>n===myNick()?MYKEY:nKeys()[n]||'';
 async function nameOwned(nm,key){const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),10000):0;
   try{const r=await fetch(SHEET_URL+'?own='+encodeURIComponent(nm)+'&k='+encodeURIComponent(key||MYKEY),{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();return !!(j&&j.owned);}catch(e){return false;}finally{clearTimeout(to);}}
 async function nameOwned3(nm,key){const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),10000):0;
@@ -9493,6 +9501,7 @@ function openNick(){cosPreviewHide();const cur=myNick();
     const pin=String($('nkPin').value||'').trim();if(pin&&pin.length<4){msg('비밀번호는 4자 이상으로 써 주세요.');return;}
     if(pin&&SRV_V<48){msg('랭킹 서버가 아직 이름 비밀번호를 몰라요. 서버를 새 버전(v4.8)으로 바꾼 뒤 다시 해 주세요.');return;}
     let toast2='👤 이름: '+n,offer='';
+    if(!pin&&n!==cur){const ok0=nKeys()[n];if(ok0)setMyKey(ok0);else if(/^p/.test(MYKEY||'')){/* 다른 이름의 비밀번호 열쇠로 새 이름을 가져가지 않게 이 기기 기본 열쇠로 */let dk='';try{dk=localStorage.getItem('chanseo_devkey')||'';}catch(e){}if(!dk){const a=new Uint8Array(20);crypto.getRandomValues(a);dk=[...a].map(x=>x.toString(36).padStart(2,'0')).join('');}setMyKey(dk);}}
     if(SHEET){msg('이름 확인 중…');$('nkSave').disabled=true;
       try{const own=await nameOwned3(n);
         if(own===null){msg('랭킹 서버에 연결하지 못했어요. 인터넷 연결을 확인하고 다시 저장해 주세요.');return;}
@@ -9509,7 +9518,7 @@ function openNick(){cosPreviewHide();const cur=myNick();
         else if(own&&n!==cur){msg(`'${n}'은(는) 다른 사람이 이미 쓰고 있는 이름이에요. 내 이름이면 이름 비밀번호를 같이 써 주세요.`);return;}
         else if(own){msg(`'${n}'은(는) 지금 이 컴퓨터에서 주인 확인이 안 돼요. 다른 컴퓨터에서 정한 이름 비밀번호를 같이 써 주세요.`);return;}
       }finally{$('nkSave').disabled=false;}}
-    const fin=()=>{try{localStorage.setItem('chipdungeon_nick',n);}catch(e){}toast(toast2);onlPing();CH_PEND=true;startScreen();if(offer==='up')setTimeout(()=>csUpload(true),300);};
+    const fin=()=>{try{localStorage.setItem('chipdungeon_nick',n);}catch(e){}nKeySet(n,MYKEY);toast(toast2);onlPing();CH_PEND=true;startScreen();if(offer==='up')setTimeout(()=>csUpload(true),300);};
     if(offer&&offer!=='up')csOffer(n,offer,fin);else fin();};
   $('nkSave').onclick=save;['nkIn','nkPin'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.isComposing||e.keyCode===229)return;if(e.key==='Enter')save();}));$('nkBack').onclick=startScreen;setTimeout(()=>{try{$('nkIn').focus();}catch(e){}},50);}
 async function onlPing(bye){if(!SHEET_URL||!MYKEY)return;const u=SHEET_URL+'?ping=1&id='+onlId()+'&n='+encodeURIComponent(myNick()||'모험가')+'&a='+encodeURIComponent(onlAct())+'&fx='+myFx()+'&ua='+encodeURIComponent(devUa())+'&b='+BUILD+(bye?'&bye=1':'');
@@ -9546,8 +9555,9 @@ async function delSync(){if(!SHEET_URL||SRV_V<57)return;try{const r=await fetch(
 async function myRecSync(){if(MYREC_SYNCED||!SHEET_URL||SRV_V<54)return;MYREC_SYNCED=true;await delSync();const m=myRecs();
   for(const k in m){const r=m[k];if(!r||!r.name||r.name==='익명'||!HOF_KEYS.includes(k))continue;const at=+r.at||(SC3_AT-1),mine=scoreOf({...r,diff:k,at});
     const sv=(BOARD||[]).find(b=>b.name===r.name&&b.diff===k&&!b.local);if(sv&&sv.score>=mine-1)continue;
+    const rk=keyFor(r.name);if(!rk)continue; // 지금 이름이 아니고 그 이름 열쇠도 없으면 올리지 않음
     // 응답을 읽어서 「이름 주인이 달라서 거절」이면 알려 줌 (이 기기에만 남은 📱 기록이 계속 안 올라가던 원인)
-    fetch(SHEET_URL,{method:'POST',body:JSON.stringify({...r,diff:k,at,k:MYKEY})}).then(x=>x.json()).then(j=>{if(j&&j.result==='owned')toast(`📱 「${r.name}」 ${DIFF[k]?DIFF[k].n:k} 기록이 명예의 전당에 안 올라가요: 이 기기가 이름 주인으로 확인이 안 돼요. 👤 내 이름에서 이름 비밀번호를 다시 넣어 주세요`,9);}).catch(()=>{try{fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({...r,diff:k,at,k:MYKEY})});}catch(e){}});}
+    fetch(SHEET_URL,{method:'POST',body:JSON.stringify({...r,diff:k,at,k:rk})}).then(x=>x.json()).then(j=>{if(j&&j.result==='owned')toast(`📱 「${r.name}」 ${DIFF[k]?DIFF[k].n:k} 기록이 명예의 전당에 안 올라가요: 이 기기가 이름 주인으로 확인이 안 돼요. 👤 내 이름에서 이름 비밀번호를 다시 넣어 주세요`,9);}).catch(()=>{try{fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({...r,diff:k,at,k:rk})});}catch(e){}});}
   setTimeout(loadSheet,4000);}
 async function loadSheet(tries){tries=tries||0;
   if(!tries&&!SHEET){try{const c=JSON.parse(localStorage.getItem(BOARD_KEY)||'null');if(Array.isArray(c)&&c.length)setBoardFrom(c);}catch(e){}}
@@ -10277,7 +10287,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=125,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=126,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
