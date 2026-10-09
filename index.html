@@ -1500,7 +1500,7 @@ function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);
 const keys={};
 // 한글 입력 상태에서도 E·WASD 등이 먹히게: 글자 키는 e.code(물리 키 위치)로 판단
 const keyOf=e=>e.code&&/^Key[A-Z]$/.test(e.code)?e.code.slice(3).toLowerCase():String(e.key||'').toLowerCase();
-addEventListener('keydown',e=>{if(e.target&&(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'))return;const k=keyOf(e);if(k==='tab'||k==='i'){e.preventDefault();if(S&&S.mode!=='start'){if(cxGame)cxClose();toggleStats();}return;}if(k==='escape'&&cxGame){cxClose();return;}if(k==='escape'&&SPEC){specStop();return;}if(k==='t'&&S&&(S.mode==='play'||PAUSED)&&!statsOpen){e.preventDefault();togglePause();return;}if(k==='escape'&&PAUSED){togglePause(false);return;}if(k==='escape'&&statsOpen){toggleStats();return;}if(k==='e'&&S&&S.mode==='play'){useSkill();return;}if(k==='r'&&S&&S.mode==='play'){useUlt();return;}if(k==='x'&&S&&S.mode!=='start'){cycleSpeed();return;}if(k==='z'&&S&&S.mode!=='start'){cycleZoom();return;}if(DEV&&k==='p'&&S&&S.mode!=='start'){$('autoPickBtn').click();return;}if(k==='m'&&S&&S.mode!=='start'){$('autoMoveBtn').click();return;}if(k==='b'&&S&&S.mode==='shop'&&S.shopBack){S.shopBack();return;}if(k==='escape'&&S&&S.mode==='shop'&&S.shopBack){S.shopBack();return;}keys[k]=true;if((k===' '||k==='shift')&&S&&S.mode==='play'){e.preventDefault();dash();}});
+addEventListener('keydown',e=>{if(e.target&&(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'))return;if(document.getElementById('dmPop'))return;const k=keyOf(e);if(k==='tab'||k==='i'){e.preventDefault();if(S&&S.mode!=='start'){if(cxGame)cxClose();toggleStats();}return;}if(k==='escape'&&cxGame){cxClose();return;}if(k==='escape'&&SPEC){specStop();return;}if(k==='t'&&S&&(S.mode==='play'||PAUSED)&&!statsOpen){e.preventDefault();togglePause();return;}if(k==='escape'&&PAUSED){togglePause(false);return;}if(k==='escape'&&statsOpen){toggleStats();return;}if(k==='e'&&S&&S.mode==='play'){useSkill();return;}if(k==='r'&&S&&S.mode==='play'){useUlt();return;}if(k==='x'&&S&&S.mode!=='start'){cycleSpeed();return;}if(k==='z'&&S&&S.mode!=='start'){cycleZoom();return;}if(DEV&&k==='p'&&S&&S.mode!=='start'){$('autoPickBtn').click();return;}if(k==='m'&&S&&S.mode!=='start'){$('autoMoveBtn').click();return;}if(k==='b'&&S&&S.mode==='shop'&&S.shopBack&&!statsOpen){S.shopBack();return;}if(k==='escape'&&S&&S.mode==='shop'&&S.shopBack&&!statsOpen){S.shopBack();return;}keys[k]=true;if((k===' '||k==='shift')&&S&&S.mode==='play'){e.preventDefault();dash();}});
 addEventListener('keyup',e=>{keys[keyOf(e)]=false;keys[String(e.key||'').toLowerCase()]=false;});
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false;});
 let joy=null;
@@ -2736,7 +2736,7 @@ const AUGS=[
   // jackpot
   {id:'seventh',u:'7번째 공격마다 부채꼴로 추가 발사하는 탄환 수가 늘어나요. ★1은 4발, ★2는 6발, ★3은 8발.',t:'s',n:'일곱 번째 패',tags:['jackpot'],d:'7번째 공격마다 탄환 6발을 부채꼴로 추가'},
   {id:'lucky7',u:'7번째 처치마다 회복하는 체력이 늘어나요. ★1은 7, ★2는 14, ★3은 21.',t:'s',n:'일곱 번째 회복',tags:['jackpot'],d:'7번째 처치마다 체력 +14, 그 자리에 폭발 (공격력 100%)'},
-  {id:'boom',u:'처치한 적이 터지는 폭발의 범위와 피해가 커져요. 범위는 70 → 85 → 100, 피해는 공격력의 60% → 80% → 100%. 폭발로 죽은 적도 또 터져요.',t:'g',n:'폭발 부적',tags:['jackpot'],d:'처치한 적이 폭발 (범위 70, 공격력 55%). 최대 2번 연쇄'},
+  {id:'boom',u:'처치한 적이 터지는 폭발의 범위와 피해가 커져요. 범위는 60 → 70 → 80, 피해는 공격력의 40% → 55% → 70%. 폭발로 죽은 적도 또 터져요.',t:'g',n:'폭발 부적',tags:['jackpot'],d:'처치한 적이 폭발 (범위 70, 공격력 55%). 최대 2번 연쇄'},
   {id:'fever',u:'연속 처치로 쌓이는 공격 속도가 커져요. 처치당 6% → 8% → 10%씩 쌓이고, 최대치도 +120% → +160% → +200%로 올라가요.',t:'p',n:'피버 타임',tags:['jackpot'],d:'2초 안에 이어지는 처치마다 공격 속도 +8% 중첩 (최대 +160%)'},
   // blitz
   {id:'sprint',u:'강화할 때마다 이동 속도 +10%, 대시 재사용 −15%가 한 번 더 적용돼요. 대시 후 가속은 ★1 +20%, ★2 +30%, ★3 +40%.',t:'s',n:'스프린트',tags:['blitz'],d:'이동 속도 +21%, 대시 재사용 −28%. 대시 후 2초간 이동 속도 +30%',f:p=>{p.speed*=1.1;p.dashMul*=.85;}},
@@ -2783,11 +2783,11 @@ const AUGS=[
   {id:'b_hide',uc:1,cls:'berserk',u:'처치 수가 최대 체력으로 바뀌는 효율이 커져요. 100마리당 ★1은 +0.8%, ★2는 +1%, ★3은 +1.2%.',t:'s',n:'전쟁 군주',tags:['fury','guard'],d:'[광전사 전용] 이번 판 처치 100마리당 최대 체력 +1%, 상한 없음'},
   {id:'k_cleave',cls:'knight',u:'회전 베기가 더 자주, 더 세게 나가요. ★1은 3번째 공격마다 120%, ★2는 3번째마다 160%, ★3은 2번째마다 200%. 반경도 30% 넓어져요.',t:'s',n:'회오리 베기',tags:['blitz','card'],d:'[기사 전용] 회전 베기가 3번째 공격마다, 공격력 160%로 강화'},
   {id:'k_berserk',cls:'knight',u:'맞을 때 쌓이는 분노 중첩의 최대치가 늘어나요. ★1은 5중첩, ★2는 7중첩, ★3은 9중첩. 중첩당 공격력 +8%, 공격 속도 +6%.',t:'g',n:'분노의 기사',tags:['curse','jackpot'],d:'[기사 전용] 피격·막기 시 5초간 분노 1중첩 (공격력 +8%, 공격 속도 +6%, 최대 7중첩)'},
-  {id:'k_smite',cls:'knight',u:'심판의 빛기둥이 떨어지는 주기가 짧아져요. ★1은 6번째, ★2는 5번째, ★3은 4번째 공격마다. 피해는 공격력 4배 + 방어력 ×1.',t:'p',n:'심판',tags:['guard','jackpot'],d:'[기사 전용] 5번째 공격마다 대상에 빛기둥. 공격력 3배 + 방어력만큼 범위 피해'},
+  {id:'k_smite',cls:'knight',u:'심판의 빛기둥이 떨어지는 주기가 짧아져요. ★1은 6번째, ★2는 5번째, ★3은 4번째 공격마다. 피해는 공격력 3배 + 방어력만큼.',t:'p',n:'심판',tags:['guard','jackpot'],d:'[기사 전용] 5번째 공격마다 대상에 빛기둥. 공격력 3배 + 방어력만큼 범위 피해'},
   {id:'k_wall',cls:'knight',u:'막기 확률에 더해지는 값이 커져요. ★1은 +15%, ★2는 +20%, ★3은 +25%. 막을 때마다 주변에 충격파가 터져요.',t:'p',n:'철벽',tags:['guard','guard'],d:'[기사 전용] 막기 확률 +20%, 막을 때마다 주변 충격파. 가드 2개로 계산'},
   {id:'m_inferno',cls:'mage',u:'화염구가 터지는 범위가 넓어져요. ★1은 +60%, ★2는 +90%, ★3은 +120%. 폭발에 휩쓸린 적은 중독돼요.',t:'g',n:'화염 확산',tags:['fire','poison'],d:'[마법사 전용] 화염 폭발 범위 +90%, 폭발이 적을 중독시킴'},
   {id:'m_meteor',cls:'mage',u:'운석이 떨어지는 주기가 짧아져요. ★1은 10번째, ★2는 8번째, ★3은 6번째 공격마다 공격력 6배 대폭발.',t:'p',n:'운석 낙하',tags:['fire','jackpot'],d:'[마법사 전용] 8번째 공격마다 대상 위치에 운석. 공격력 6배 대폭발'},
-  {id:'m_ring',cls:'mage',u:'내 주변을 태우는 불꽃 장막의 피해가 커져요. 초당 공격력의 60% → 90% → 120%.',t:'s',n:'불꽃 장막',tags:['fire'],d:'[마법사 전용] 주변 110 안의 적에게 초당 공격력 150% 화염 피해'},
+  {id:'m_ring',cls:'mage',u:'내 주변을 태우는 불꽃 장막의 피해가 커져요. 초당 공격력의 120% → 150% → 180%.',t:'s',n:'불꽃 장막',tags:['fire'],d:'[마법사 전용] 주변 110 안의 적에게 초당 공격력 150% 화염 피해'},
   {id:'a_multi',cls:'archer',u:'강화할 때마다 화살이 1발씩 더 늘어나요.',t:'g',n:'부채꼴 사격',tags:['card'],d:'[궁수 전용] 화살 +2발',f:p=>{p.multi+=1;}},
   {id:'a_snipe',cls:'archer',u:'멀리 있는 적을 맞힐 때 받는 추가 피해의 최대치가 커져요. 거리 100당 +15%씩 오르고, 최대치가 ★1은 +150%, ★2는 +200%, ★3은 +250%.',t:'s',n:'저격수',tags:['sniper'],d:'[궁수 전용] 먼 적일수록 피해 증가 (거리 100당 +15%, 최대 +200%)'},
   {id:'a_still',cls:'archer',u:'멈춰 있을 때 오르는 공격 속도가 커져요. ★1은 +35%, ★2는 +50%, ★3은 +65%. 치명타 +10%는 그대로예요.',t:'s',n:'정조준',tags:['sniper','dice'],d:'[궁수 전용] 멈춰 있으면 공격 속도 +50%, 치명타 +10%'},
@@ -2796,7 +2796,7 @@ const AUGS=[
   {id:'r_assassin',cls:'rogue',u:'정예와 보스에게 주는 피해 배율이 커져요. ★1은 2배, ★2는 2.5배, ★3은 3배.',t:'p',n:'암살',tags:['curse','jackpot'],d:'[도적 전용] 정예와 보스에게 피해 2.5배, 처치하면 체력 2% 회복'},
   // new mechanics
   {id:'chainlt',u:'7번째 적중마다 튀는 번개가 이어지는 적 수가 늘어나요. ★1은 5명, ★2는 7명, ★3은 9명.',t:'g',n:'체인 라이트닝',tags:['thunder'],d:'7번째 적중마다 번개가 주변 적 7명에게 연쇄'},
-  {id:'blackhole',u:'블랙홀이 생기는 주기가 짧아지고 크기도 커져요. 주기는 8초 → 7초 → 6초.',t:'p',n:'블랙홀 부적',tags:['roulette','summon'],d:'9초마다 가까운 적 위치에 블랙홀. 적을 빨아들이며 피해. 공속이 오를수록 더 자주'},
+  {id:'blackhole',u:'블랙홀이 생기는 주기가 짧아지고 크기도 커져요. 주기는 10초 → 9초 → 8초.',t:'p',n:'블랙홀 부적',tags:['roulette','summon'],d:'9초마다 가까운 적 위치에 블랙홀. 적을 빨아들이며 피해. 공속이 오를수록 더 자주'},
   {id:'icecoin',u:'맞았을 때 주변 적이 느려지는 시간이 늘어나요. ★1은 2초, ★2는 2.5초, ★3은 3초.',t:'s',n:'얼음 동전',tags:['frost','guard'],d:'맞으면 주변에 냉기 폭발 (공격력 200%, 1초에 한 번), 주변 적이 2.5초간 크게 느려짐'},
   {id:'mirror',u:'적 탄환을 튕겨내는 확률이 올라가요. ★1은 20%, ★2는 30%, ★3은 40%. 튕긴 탄환은 공격력 2배로 적을 맞혀요.',t:'g',n:'거울 패',tags:['card','guard'],d:'적 탄환이 30% 확률로 튕겨 나가 적을 공격 (공격력 2배)'},
   {id:'revenge',u:'맞은 뒤 3초 안의 다음 공격 피해 배율이 커져요. ★1은 2배, ★2는 2.5배, ★3은 3배.',t:'s',n:'복수',tags:['curse'],d:'맞으면 3초 안의 다음 공격 피해 2.5배'},
@@ -2812,16 +2812,16 @@ const AUGS=[
   {id:'focus',u:'탄환이 1발일 때 받는 공격력 보너스가 커져요. ★1은 +35%, ★2는 +50%, ★3은 +65%. 2발 이상이면 +10%만 받아요.',t:'s',n:'집중 사격',tags:['sniper'],d:'탄환이 1발이면 공격력 +50%. 탄환이 많은 빌드엔 약함'},
   {id:'echo',u:'메아리 탄환의 피해가 커져요. ★1은 원래의 50%, ★2는 70%, ★3은 90%.',t:'p',n:'메아리',tags:['card','card'],d:'공격 0.25초 뒤 같은 방향으로 한 번 더 발사 (피해 70%). 카드 2개로 계산'},
   {id:'spiral',u:'4번째 공격마다 사방으로 퍼지는 탄환 수가 늘어나요. ★1은 8발, ★2는 10발, ★3은 12발.',t:'g',n:'소용돌이 패',tags:['card','roulette'],d:'4번째 공격마다 주변 원형으로 탄환 10발 (피해 60%)'},
-  {id:'combo',u:'같은 적을 계속 때릴 때 쌓이는 피해 중첩 최대치가 늘어나요. ★1은 10중첩, ★2는 15중첩, ★3은 20중첩. 중첩당 +4%.',t:'s',n:'연타',tags:['card'],d:'같은 적을 연속으로 맞히면 피해 +6%씩 중첩 (최대 +90%). 대상이 바뀌면 초기화'},
+  {id:'combo',u:'같은 적을 계속 때릴 때 쌓이는 피해 중첩 최대치가 늘어나요. ★1은 10중첩, ★2는 15중첩, ★3은 20중첩. 중첩당 +6%.',t:'s',n:'연타',tags:['card'],d:'같은 적을 연속으로 맞히면 피해 +6%씩 중첩 (최대 +90%). 대상이 바뀌면 초기화'},
   {id:'second',u:'치명타가 안 터졌을 때 한 번 더 굴릴 확률이 올라가요. ★1은 30%, ★2는 45%, ★3은 60%.',t:'s',n:'두 번째 주사위',tags:['dice'],d:'치명타가 실패하면 45% 확률로 한 번 더 굴림'},
   {id:'execute',u:'일반 적을 즉시 처치하는 체력 기준이 올라가요. ★1은 12%, ★2는 16%, ★3은 20%. 정예·보스는 그 체력 이하에서 피해 +50%.',t:'g',n:'처형',tags:['curse'],d:'체력 16% 이하 일반 적은 맞으면 즉사. 정예·보스는 그 구간에서 피해 +50%'},
   {id:'burn',u:'치명타로 붙는 화상의 초당 피해가 커져요. 공격력의 40% → 60% → 80%.',t:'g',n:'점화',tags:['fire'],d:'치명타가 적에게 3초 화상 (초당 공격력 60%). 독과 별개로 중첩'},
   {id:'frost',u:'적중 시 적을 둔화시킬 확률이 올라가요. ★1은 25%, ★2는 35%, ★3은 45%.',t:'s',n:'서리 탄',tags:['frost'],d:'적중 시 35% 확률로 1.5초간 크게 둔화'},
   {id:'contagion',u:'중독된 적이 죽을 때 터지는 폭발 피해가 커져요. 공격력의 120% → 160% → 200%.',t:'p',n:'감염 폭발',tags:['poison','poison'],d:'중독된 적이 죽으면 폭발 (공격력 160%), 맞은 적은 중독. 독 2개로 계산'},
-  {id:'venomcloud',u:'6초마다 떨어지는 독구름 개수가 늘어나요. ★1은 1개, ★2는 2개, ★3은 3개.',t:'g',n:'독구름',tags:['poison'],d:'8초마다 적이 가장 많은 곳에 4초짜리 독구름. 공속이 오를수록 더 자주'},
+  {id:'venomcloud',u:'8초마다 떨어지는 독구름 개수가 늘어나요. ★1·★2는 1개, ★3은 2개.',t:'g',n:'독구름',tags:['poison'],d:'8초마다 적이 가장 많은 곳에 4초짜리 독구름. 공속이 오를수록 더 자주'},
   {id:'drone',u:'함께 싸우는 부적 정령 수가 늘어나요. ★1은 1기, ★2는 2기, ★3은 3기.',t:'g',n:'부적 정령',tags:['summon','roulette'],d:'주변을 도는 드론 2기가 0.6초마다 가까운 적을 사격 (공격력 60%). 공속이 오를수록 더 자주'},
-  {id:'nova',u:'10초마다 터지는 노바의 피해가 커져요. 공격력의 5배 → 7배 → 9배, 반경 180.',t:'p',n:'노바',tags:['roulette','roulette'],d:'10초마다 내 주변에 대폭발 (공격력 9배). 공속이 오를수록 더 자주. 회전 2개로 계산'},
-  {id:'thunder',u:'5초마다 떨어지는 낙뢰 수가 늘어나요. ★1은 3발, ★2는 4발, ★3은 5발.',t:'p',n:'천둥',tags:['thunder','thunder'],d:'6초마다 화면 안 무작위 적 3명에게 낙뢰 (공격력 3.5배). 공속이 오를수록 더 자주. 번개 2개로 계산'},
+  {id:'nova',u:'10초마다 터지는 노바의 피해가 커져요. 공격력의 7배 → 9배 → 11배, 반경 180.',t:'p',n:'노바',tags:['roulette','roulette'],d:'10초마다 내 주변에 대폭발 (공격력 9배). 공속이 오를수록 더 자주. 회전 2개로 계산'},
+  {id:'thunder',u:'6초마다 떨어지는 낙뢰 수가 늘어나요. ★1은 2발, ★2는 3발, ★3은 4발.',t:'p',n:'천둥',tags:['thunder','thunder'],d:'6초마다 화면 안 무작위 적 3명에게 낙뢰 (공격력 3.5배). 공속이 오를수록 더 자주. 번개 2개로 계산'},
   {id:'mine',u:'지뢰를 까는 간격이 짧아져요. ★1은 2.5초, ★2는 2초, ★3은 1.5초.',t:'s',n:'지뢰',tags:['summon','blitz'],d:'2초마다 발밑에 지뢰. 적이 밟으면 폭발 (공격력 180%). 공속이 오를수록 더 자주'},
   {id:'adrenaline',u:'대시 후 3초간 오르는 공격력이 커져요. ★1은 +20%, ★2는 +30%, ★3은 +40%. 이동 속도 +20%는 그대로.',t:'s',n:'아드레날린',tags:['blitz'],d:'대시 후 3초간 공격력 +30%, 이동 속도 +20%'},
   {id:'bloodrage',u:'공격 속도가 더 올라요. ★1은 +30%, ★2는 +40%, ★3은 +50%.',t:'p',n:'피의 광란',tags:['curse','curse'],d:'공격 속도 +40%. 적중할 때마다 체력 0.3 회복. 저주 2개로 계산'},
@@ -2837,7 +2837,7 @@ const AUGS=[
   {id:'neuro',u:'중독된 적이 느려지는 정도가 커져요. ★1은 이동 속도 −40%, ★2는 −55%, ★3은 −70%.',t:'s',n:'마비 독',tags:['poison'],d:'중독된 적 이동 속도 −55%'},
   {id:'spill',u:'중독된 적이 죽으면서 남기는 독 웅덩이가 커지고 오래가요. 반경 50 → 65 → 80, 지속 3초 → 4초 → 5초.',t:'g',n:'독 웅덩이',tags:['poison'],d:'중독된 적이 죽으면 4초간 독 웅덩이 (반경 65)'},
   {id:'molotov',u:'불길 피해가 세져요. ★1은 초당 공격력 360%, ★2는 720%, ★3은 1080%.',t:'g',n:'불꽃 질주',tags:['fire','blitz'],d:'대시한 길에 2.5초간 불길이 남음 (불길 위의 적에게 초당 공격력 720%)'},
-  {id:'plague',u:'1초마다 중독이 번지는 적 수가 늘어나요. ★1은 1명, ★2는 2명, ★3은 3명.',t:'p',n:'역병',tags:['poison','poison'],d:'중독이 1.5초마다 가까운 적 1명에게 번집니다. 독 피해 +20%. 독 2개로 계산'},
+  {id:'plague',u:'1.5초마다 중독이 번지는 적 수가 늘어나요. ★1·★2는 1명, ★3은 2명.',t:'p',n:'역병',tags:['poison','poison'],d:'중독이 1.5초마다 가까운 적 1명에게 번집니다. 독 피해 +20%. 독 2개로 계산'},
   // 추가 증강
   {id:'soul',u:'',t:'p',n:'영혼 수확',tags:['curse','curse'],d:'일반 적을 처치할 때마다 공격력 +0.1% 영구 중첩 (최대 +50%). 저주 2개로 계산'},
   {id:'corrode',u:'',t:'g',n:'부식 독',tags:['poison','guard'],d:'중독된 적에게 받는 피해 −35%. 중독된 적을 처치하면 체력 +1'},
@@ -2884,8 +2884,8 @@ const AUGS=[
   {id:'umbra',u:'',t:'g',n:'그림자 칼날',tags:['shadow','blitz'],d:'분신이 3발씩 부채꼴로 사격'},
   {id:'nightveil',u:'분신당 피해 감소가 커져요. ★1은 3%, ★2는 4%, ★3은 5%.',t:'s',n:'밤의 장막',tags:['shadow','guard'],d:'분신 1기당 받는 피해 −4% (최대 −20%)'},
   // 귀한 생존기 증강: 생존기(E) 재사용 −25% + 쓰고 나서 3초간 받는 피해 −30%
-  {id:'ult_cd',u:'강화할 때마다 궁극기 쿨타임 −6%가 한 번 더 붙어요. ★3이면 약 −23%.',t:'s',n:'영웅의 맥박',tags:['blitz'],d:'궁극기(R) 쿨타임 −12%',f:p=>{p.ulCdM=(p.ulCdM||1)*.938;}},
-  {id:'ult_pow',u:'강화할 때마다 궁극기 피해 +17.5%가 한 번 더 붙어요. ★3이면 +70%.',t:'s',n:'필살의 일격',tags:['jackpot'],d:'궁극기(R) 피해 +35%',f:p=>{p.ulDm=(p.ulDm||1)+.175;}},
+  {id:'ult_cd',u:'강화할 때마다 궁극기 쿨타임 −6%가 한 번 더 붙어요. ★3이면 약 −17.5%.',t:'s',n:'영웅의 맥박',tags:['blitz'],d:'궁극기(R) 쿨타임 −12%',f:p=>{p.ulCdM=(p.ulCdM||1)*.938;}},
+  {id:'ult_pow',u:'강화할 때마다 궁극기 피해 +17.5%가 한 번 더 붙어요. ★3이면 +52.5%.',t:'s',n:'필살의 일격',tags:['jackpot'],d:'궁극기(R) 피해 +35%',f:p=>{p.ulDm=(p.ulDm||1)+.175;}},
   {id:'ult_echo',u:'궁극기 무적 시간이 늘어나요. ★1은 +1초, ★2는 +1.5초, ★3은 +2초.',t:'g',n:'영웅의 여운',tags:['guard'],d:'궁극기(R)를 쓰면 생존기(E) 쿨타임이 바로 돌아오고, 궁극기 무적 +1.5초'},
   {id:'ult_hunt',u:'처치할 때마다 줄어드는 쿨타임이 커져요. ★1은 0.05초(정예·보스 2초), ★2는 0.07초(3초), ★3은 0.1초(4초). 1초에 최대 1초까지.',t:'g',n:'영웅 서사',tags:['blitz'],d:'적을 처치할 때마다 궁극기(R) 쿨타임 −0.07초, 정예·보스는 −3초 (1초에 최대 1초까지)'},
   {id:'iron_will',u:'강화할 때마다 생존기 재사용 −13%가 한 번 더 붙어요.',t:'g',n:'불굴의 의지',tags:['guard'],d:'생존기(E) 재사용 −25%. 생존기를 쓰면 3초간 받는 피해 −30%',f:p=>{p.skM=(p.skM||1)*.866;}},
@@ -3515,7 +3515,7 @@ const CARDS=[
   {n:'붕대',v:[[.6,1.2,2]],t:v=>`초당 체력 재생 +${v[0]}`,a:(p,v)=>{p.regen+=v[0];}},
   {req:()=>(S.p.dashD||0)<DASH_MAX,n:'먼 도약',v:[[8,14,0]],t:v=>`대시 거리 +${v[0]} (기본 120, 최대 +${DASH_MAX})`,a:(p,v)=>{p.dashD=Math.min(DASH_MAX,(p.dashD||0)+v[0]);}},
   {req:()=>(S.p.skM||1)>.55,n:'숨 고르기',v:[[3,6,0]],t:v=>`생존기(E) 재사용 −${v[0]}%`,a:(p,v)=>{p.skM=(p.skM||1)*(1-v[0]/100);}},
-  {n:'순발력',v:[[7,12,0]],t:v=>`대시 재사용 −${v[0]}%`,a:(p,v)=>{p.dashMul*=1-v[0]/100;}},
+  {req:()=>dashCdVal()>.4,n:'순발력',v:[[7,12,0]],t:v=>`대시 재사용 −${v[0]}%`,a:(p,v)=>{p.dashMul*=1-v[0]/100;}},
   {n:'흡혈 송곳니',v:[[.3,.7,2]],t:v=>`흡혈 +${v[0]}%`,a:(p,v)=>{p.lifesteal+=v[0]/100;}},
   {req:()=>orbitN()>0,n:'회전 부적 연마',g:'회전 부적',v:[[6,12,0],[2,4,0]],t:v=>`회전 부적 피해 +${v[0]}%, 회전 반경 +${v[1]}%`,a:(p,v)=>{p.orbM*=1+v[0]/100;p.orbR*=1+v[1]/100;}},
   {n:'유리 대포',v:[[6.5,10.5,1]],t:v=>`공격력 +${v[0]}%, 최대 체력 −8%`,a:(p,v)=>{p.dmgP=(p.dmgP||0)+v[0]/100;p.hpP=(p.hpP||0)-.08;}},
@@ -4363,8 +4363,10 @@ const stackCapped=x=>(x.k==='crit'&&critFull())||(x.k==='critm'&&critMFull())||(
 const hitRec=(sec=2.5)=>S.t-(S.p.hitT??-99)<sec;
 const dodgeC=()=>Math.min(DODGE_CAP,S.p.dodge+gearM.dodge()+(has('f_ghoststep')&&S.p.ghT>0?.3:0))+(has('r_smoke')&&S.zones.some(z=>z.kind==='smoke'&&d2(z,S.p)<z.r*z.r)?lv3('r_smoke',.2,.3,.4):0);
 function armorEff(){const p=S.p;let a=(blessOn('guard')?60:0)+(has('bank')?Math.min(50,Math.floor(S.gold/300)*2):0)+p.armor+ex('guard')*8+Math.max(0,p.dodge-DODGE_CAP)*200+(has('bonewall')&&S.skel?S.skel.length*lv3('bonewall',3,4,5):0)+(has('d_bark')?(S.vineN||0)*lv3('d_bark',.2,.3,.4):0);if(has('iron'))a*=lv3('iron',1.35,1.5,1.65);if(has('ironclad'))a*=2;if(has('bastion')&&nearTurret())a+=lv3('bastion',20,30,40)*(has('f_citadel')?2:1);return a;}
+// 증강이 주는 임시 보호막: 기본 상한(barrierMax)보다 커도 그 증강의 상한까지는 유지
+const bxAdd=(cap,add)=>{const p=S.p;p.bxM=Math.max(p.bxM||0,cap);p.barrier=Math.max(p.barrier||0,Math.min(cap,(p.barrier||0)+add));};
 function barrierMax(){const p=S.p;return (tag('holy')>=4?p.maxHp*.15:0)+(has('blessing')?30:0)+(has('vampirelord')?p.maxHp*(has('f_bloodthrone')?.6:.3):0)+(has('f_juggernaut')?p.armor:0)+(has('f_vaultkeeper')?30:0)+(has('goldskin')?Math.min(p.maxHp*.5,S.gold*.01):0)+(tag('guard')>=4?p.maxHp*.2:0)+(has('gen')?40*L('gen')+Math.min(60,Math.floor(S.gold/100)*10):0);}
-const dashCdVal=()=>2.4*S.p.dashMul*(has('quicksilver')?.5:1)*(tag('blitz')>=2?.6:1)*Math.pow(.95,ex('blitz'));
+const dashCdVal=()=>Math.max(.35,2.4*S.p.dashMul*(has('quicksilver')?.5:1)*(tag('blitz')>=2?.6:1)*Math.pow(.95,ex('blitz')));
 // 회전 부적 기본 반경. 몸에 붙은 적이 아니라 다가오는 적을 먼저 갈도록 근접 범위 밖으로 넓힘 (48 → 82)
 const ORB_R=82;
 function orbitN(){return (has('bigwheel')?3:0)+Math.floor(ex('roulette')/2)+(has('f_blade')?3:0)+L('guardian')+(has('orbit')?1+L('orbit'):0)+(has('dealer')?1:0)+(has('spinner')?1:0)+L('wheel')+(has('lastcard')?2:0)+(tag('roulette')>=2?2:0)+(has('vault')?Math.min(4,Math.floor(S.gold/lv3('vault',100,80,60))):0);}
@@ -4377,7 +4379,7 @@ function ftext(x,y,s,col,size=14){S.tx.push({x,y,s:String(s),col,size,life:.7});
 const CHART_NICKS=['힘기범']; // 닉네임에 이 글자가 들어 있으면 (힘기범, 힘기범2 …)
 // 시작 화면에 올 때 물어봄: 게임을 켰을 때 한 번 + 판에 들어갔다 나올 때마다 다시 (중간에 나가도, 이름을 바꿨을 때도)
 let CH_PEND=true;
-function chartAsk(){const n=myNick();if(META.chDone||!n||!CHART_NICKS.some(k=>n.includes(k))||document.getElementById('chartQ'))return;
+function chartAsk(){const n=myNick();if((S&&S.mode!=='start')||META.chDone||!n||!CHART_NICKS.some(k=>n.includes(k))||document.getElementById('chartQ'))return;
   const d=document.createElement('div');d.id='chartQ';d.className='chartq';
   d.innerHTML=`<div class="cq"><b>📋 차트는 쓰고 게임 하시나요?</b><div class="cqb"><button class="btn primary" data-cq="1">YES</button><button class="btn" data-cq="0">NO</button></div><small id="cqMsg"></small></div>`;
   document.body.appendChild(d);
@@ -4491,7 +4493,7 @@ const endless=()=>!!dfM().endless;
 const hpPct=()=>{const p=S.p;return (p.hpP||0)+awakeN()*awHp()+(has('k_bulwark')?armorEff()/10*lv3('k_bulwark',.008,.01,.012):0)+(has('p_aegis')?tag('holy')*lv3('p_aegis',.06,.08,.1):0)+(has('b_hide')?(S.st.kills||0)/100*lv3('b_hide',.008,.01,.012):0);};
 function hpSync(){const p=S.p;if(!p)return;const m=Math.max(.2,1+hpPct())*(1+.02*mlv('hp'))*gearM.hp();if(p.hpB==null){p.hpB=p.maxHp;p.hpLM=p.maxHp;}
   if(p.maxHp!==p.hpLM)p.hpB=Math.max(1,p.hpB+(p.maxHp-p.hpLM));
-  const nm=Math.max(1,Math.round(p.hpB*m));if(nm!==p.maxHp){if(nm>p.maxHp)p.hp+=nm-p.maxHp;p.maxHp=nm;}p.hp=Math.min(p.hp,p.maxHp);p.hpLM=p.maxHp;}
+  const nm=Math.max(1,Math.round(p.hpB*m));if(nm!==p.maxHp){if(nm>(p.hpPk||0)){p.hp+=nm-Math.max(p.maxHp,p.hpPk||0);p.hpPk=nm;}p.maxHp=nm;}p.hp=Math.min(p.hp,p.maxHp);p.hpLM=p.maxHp;}
 // 한 방 상한 (최대 체력 대비). 악몽은 10분부터 1분마다 +3% (12분에 76%), 12분부터 1분마다 ×1.1로 점점 빠르게 풀림
 // (14분 92%, 15분 101%, 17분 122%, 20분 163%, 22분 197%). 상한에 걸린 공격도 방어력이 약하게 줄여서, 방어가 낮으면 17분 전후·높으면 21분 전후까지. 보호막·막기·회피로 조금 더 버틸 수 있지만 결국 끝나게
 // 한 방 상한(최대 체력 대비): 악몽은 10분부터 1분마다 ×NM_OCK로 빠르게 풀려 13~14분이면 잡몹 한 대가 치명상 → 맞으면서 버티기보다 피하는 실력 싸움
@@ -5224,7 +5226,7 @@ function doWave(){const p=S.p,R=130*(tag('wave')>=4?1.3:1)*(has('aftershock')?1.
     if(has('f_epicenter')){burnE(e,pDmg()*.3,3);if(!e.boss)e.slowT=Math.max(e.slowT||0,1.5);}
     if(has('frostwave')&&!e.boss)e.slowT=Math.max(e.slowT||0,2);dmgE(e,dm*(has('sonicboom')&&(e.elite||e.boss)?1.5:1)*(has('frostwave')?1.3:1),'#cfe3ff');
     if(has('resonance')&&e.alive&&(has('f_thunderclap')||rz<5)){rz++;elemChain(e,has('f_thunderclap')?3:1,pDmg()*.6);}}
-  if(has('tectonic')&&hitN)p.barrier=Math.min(Math.max(barrierMax(),20),(p.barrier||0)+(has('f_platetect')?4:2)*hitN);}
+  if(has('tectonic')&&hitN)bxAdd(Math.max(barrierMax(),20),(has('f_platetect')?4:2)*hitN);}
 // 피해 출처 표시: 이 함수들 안에서 나온 피해는 해당 루트로 집계
 {const w=(f,k)=>function(...a){const o=S.dsrc;S.dsrc=k;try{return f.apply(this,a);}finally{S.dsrc=o;}};doWave=w(doWave,'wave');potionHit=w(potionHit,'alchemy');elemChain=w(elemChain,'elem');lightning=w(lightning,'thunder');}
 function exL(lb,k,...a){const o=S.dsub;S.dsub=lb;try{exS(k,...a);}finally{S.dsub=o;}}
@@ -5254,7 +5256,7 @@ function fxAct(F,x,y){const p=S.p,[m,r]=F.g,o0=S.dsrc;S.dsrc='fusion';S.fxD=(S.f
   case 'potion':{const e=near();if(e)throwPotion(e.x,e.y,m||1);break;}
   case 'gold':addGold(m);explode(x,y,60,pDmg()*.8,'#ffd76a');break;
   case 'heal':if(p.alive)p.hp=Math.min(p.maxHp,p.hp+p.maxHp*m*healM());S.rings.push({x:p.x,y:p.y,r:6,max:50,life:.3,col:'#7be08f'});break;
-  case 'shield':p.barrier=Math.min(Math.max(barrierMax(),p.maxHp*m*2),(p.barrier||0)+p.maxHp*m);break;
+  case 'shield':bxAdd(Math.max(barrierMax(),p.maxHp*m*2),p.maxHp*m);break;
   case 'haste':p.fxR=Math.max(p.fxRT>0?p.fxR||0:0,m);p.fxRT=2;break;
   case 'rage':p.fxDm=Math.max(p.fxDT>0?p.fxDm||0:0,m);p.fxDT=3;break;}}
   finally{S.dsrc=o0;S.fxD--;}}
@@ -5294,7 +5296,7 @@ function throwPotion(tx,ty,m,ox,oy){const p=S.p;const f={x0:ox??p.x,y0:(oy??p.y)
   if(has('elixir')&&p.alive){p.hp=Math.min(p.maxHp,p.hp+(has('f_panacea')?5:2)*healM());if(has('f_panacea'))p.barrier=Math.min(barrierMax(),(p.barrier||0)+5);}}
 function potionHit(f){const r=70*(has('magnumopus')?1.3:1)*(1+(S.p.ptR||0))*(tag('alchemy')>=4?1.3:1)*(f.mag?2.2:1),dm=pDmg()*f.m*potM()*(f.mag?3:f.uns?.5:1),ks=(has('f_alkahest')||has('magnumopus')||f.uns||f.mag)?[0,1,2]:tag('alchemy')>=6?[f.k,(f.k+1+Math.floor(Math.random()*2))%3]:[f.k];
   if(f.mag){S.shake=Math.max(S.shake,.35);S.rings.push({x:f.x,y:f.y,r:10,max:r*1.3,life:.6,col:'#ffd76a'});}
-  {let nh=0;for(const o of S.en)if(o.alive&&d2(o,f)<(r+o.r)**2)nh++;const p=S.p;if(has('al_transfuse')&&nh>=4&&p.alive&&!(S.tfT>S.t)){S.tfT=S.t+1;const h=lv3('al_transfuse',.015,.02,.025);p.hp=Math.min(p.maxHp,p.hp+p.maxHp*h*healM());p.barrier=Math.min(Math.max(barrierMax(),p.maxHp*.2),(p.barrier||0)+p.maxHp*.015);}}
+  {let nh=0;for(const o of S.en)if(o.alive&&d2(o,f)<(r+o.r)**2)nh++;const p=S.p;if(has('al_transfuse')&&nh>=4&&p.alive&&!(S.tfT>S.t)){S.tfT=S.t+1;const h=lv3('al_transfuse',.015,.02,.025);p.hp=Math.min(p.maxHp,p.hp+p.maxHp*h*healM());bxAdd(Math.max(barrierMax(),p.maxHp*.2),p.maxHp*.015);}}
   for(const o of S.en)if(o.alive&&d2(o,f)<(r+o.r)**2){o.potT=S.t+3;if(ks.includes(0))poisonE(o,2);if((ks.includes(2)||has('frostflask'))&&!o.boss)o.slowT=Math.max(o.slowT||0,2);}
   for(const k of ks){explode(f.x,f.y,r,dm*[.6,1.5,.8][k],POTC[k]);S.rings.push({x:f.x,y:f.y,r:r*.3,max:r*1.1,life:.45,col:POTC[k]});burst(f.x,f.y,POTC[k],18);}
   // 물약 장판: 깨진 자리에 2.5초간 남아 초당 물약 피해의 20%, 밟은 적에게 물약 효과(중독·둔화) 재적용. 최대 10개
@@ -5325,7 +5327,7 @@ function ricoShot(t,dm,n){const o=nearestE(t,220,new Set([t]));if(o)pBullet(t.x,
 // 해골 최대 수: 실제로 나오는 해골은 30기까지, 넘는 만큼은 해골 피해 배율로 바뀜 (skelRaw/30)
 // 차트 마스터 칭호를 단 힘기범 전용: 사령술사 해골 최대 +10 (상한도 +10)
 const chartSk=()=>S&&S.cls==='necro'&&META.title==='h_chart'&&CHART_NICKS.some(k=>myNick().includes(k))?10:0;
-const SKEL_CAP=30,skelMax=()=>Math.min(SKEL_CAP+chartSk(),skelRaw()+chartSk()),skelRaw=()=>(S.cls==='necro'?5:0)+(S.p.skN||0)+(has('n_horde')?Math.max(0,tag('undead')+tag('summon')-5):0)+(tag('undead')>=1?1:0)+(tag('undead')>=4?2:0)+(has('raise')?2:0)+(has('n_legion')?lv3('n_legion',1,2,3):0)+(has('n_lich')?2:0)+(has('f_bonelord')?2:0);
+const SKEL_CAP=30,skelMax=()=>Math.min(SKEL_CAP+chartSk(),skelRaw()+chartSk()),skelRaw=()=>(S.cls==='necro'?5:0)+(S.p.skN||0)+(has('n_horde')?Math.max(0,tag('undead')+tag('summon')-5):0)+(tag('undead')>=1?1:0)+(tag('undead')>=4?2:0)+(has('raise')?2:0)+(has('n_legion')?lv3('n_legion',1,2,3):0)+(has('n_lich')?2:0)+(has('lichking')?3:0)+(has('f_bonelord')?2:0);
 const skelC=()=>(has('f_deathlord')?.1:0)+(S.cls==='necro'?.25:tag('undead')>=1?.08:0)+(tag('undead')>=4?.1:0)+(has('raise')?lv3('raise',.06,.08,.1):0)+(has('n_legion')?.1:0);
 const skelD=()=>Math.max(1,skelRaw()/SKEL_CAP)*pDmg()*(S.cls==='necro'?1:.6)*(1+(S.p.skD||0))*(1+.05*mlv('m_undead'))*sumM()/(1+(S.p.sumD||0))*undM()*(tag('undead')>=6?2:1)*(has('f_bonelord')?1+.03*(S.skel?S.skel.length:0):1);
 // 해골이 맞음: 받는 피해 절반 + 내 방어력 적용, 체력 0이면 사라짐 (사라질 때 효과 발동)
@@ -5596,7 +5598,7 @@ function patEst(t){const p=S.p,om=!!t.omen,PATK=(S.diff||'normal')==='normal'?1.
   {const bR=bossOn()&&!om?(S.boss.rage||0):-1,ar=armorEff()*(bR<0?1:1-Math.min(.8,(dfM().pen||.2)+.12*bR));amt*=100/(100+ar);}
   if(!(bossOn()&&(S.boss.rage||0)>=6)&&!(rushOn()&&S.bossI>=8)){let cap=p.maxHp*ocOf();if(endless()&&amt>cap&&!om)cap*=Math.max(.7,Math.pow(100/(100+Math.max(0,armorEff())),.25));if(!om)cap*=PATK===1.2?1.25:1.6;cap*=1-.015*gearLv('helm');amt=Math.min(amt,cap);}
   return amt*(1-.015*mlv('armor'))*gearM.taken()*(autoPen()?AUTO_DM:1)*(S.raidTk||1);}
-function hurtP(amt,src){
+function hurtP(amt,src,mob){
   const p=S.p;if(!p.alive||p.inv>0||p.skInvT>0)return;if(p.dashT>0){if(amt>=p.maxHp*.15&&(!src||src.boss||src.omen))perfectDodge();return;}
   if(src&&src.ps>0&&has('corrode'))amt*=.65;
   if(has('barkskin')&&inVine(p))amt*=.8;
@@ -5631,7 +5633,7 @@ function hurtP(amt,src){
   const raw=amt;
   // 보스전: 보스 공격은 방어력 일부를 무시 (일반 20%, 어려움 30%, 지옥 40%, 신 45%), 광폭화 단계마다 12%씩 더 무시
   // 잡몹의 근접 공격에는 적용하지 않음 (보스 몸·탄·장판만)
-  {const bR=bossOn()&&(!src||src===S.boss||(src.pat&&!src.omen))?(S.boss.rage||0):-1,ar=armorEff()*(bR<0?1:1-Math.min(.8,(dfM().pen||.2)+.12*bR));amt*=100/(100+ar);}
+  {const bR=bossOn()&&!mob&&(!src||src===S.boss||(src.pat&&!src.omen))?(S.boss.rage||0):-1,ar=armorEff()*(bR<0?1:1-Math.min(.8,(dfM().pen||.2)+.12*bR));amt*=100/(100+ar);}
   // 한 방 즉사 방지: 보스 몸통 공격을 뺀 모든 공격은 한 번에 최대 체력의 일정 비율까지만 (일반 35% · 어려움 45% · 지옥 55% · 신 65%)
   // 최종 광폭(6단계, 제한 시간 + 2분 30초) 이후에는 즉사 방지 해제 → 최소 딜 스펙이 있어야 클리어
   if((src!==S.boss||!src)&&!(bossOn()&&(S.boss.rage||0)>=6)&&!(pat&&rushOn()&&S.bossI>=8)){const oc=ocOf();let cap=p.maxHp*oc;
@@ -5753,7 +5755,7 @@ function playerFire(tg){
     else p.cfT=Math.min(3,(p.cfT||0)+1);
     if(hd){p.cfS=(p.cfS||0)+1;shock*=((tag('coin')>=6?3:2)+(has('allin')?1:0))*(1+(p.hdD||0)+(has('gb_allin')?Math.max(0,S.p.luck)*lv3('gb_allin',.02,.03,.04):0))*homeM('coin');if(has('gb_streak'))shock*=1+Math.min(has('f_streakrun')?20:10,p.cfS-1)*lv3('gb_streak',.1,.15,.2);
       if(tag('coin')>=2&&p.cfS%3===0)S.coinB=1;if(has('gb_jackpot')&&p.cfS%5===0)S.coinJ=1;if(has('coinshower')&&Math.random()<(has('f_goldrush')?.4:.15))S.coinS=1;}
-    else{p.cfS=0;shock*=has('f_twoface')?1:has('allin')?.25:.5;if(tag('coin')>=4)p.cfF=true;if(has('coinguard')){p.barrier=Math.min(Math.max(barrierMax(),20),(p.barrier||0)+lv3('coinguard',3,4,5));}}}
+    else{p.cfS=0;shock*=has('f_twoface')?1:has('allin')?.25:.5;if(tag('coin')>=4)p.cfF=true;if(has('coinguard')){bxAdd(Math.max(barrierMax(),20),lv3('coinguard',3,4,5));}}}
   if(tag('rapid')>=4){p.rpS=Math.min(20,(p.rpS||0)+1);p.rpT=1.5;}
   let n=p.multi+(tag('card')>=6?2:0)+(has('bulletstorm')?3:0)+(has('g_twin')?1:0);if(has('bulletstorm'))shock*=.85;
   if(has('focus'))shock*=n<=1?1+lv3('focus',.35,.5,.65):1.1;
@@ -5835,7 +5837,7 @@ function onPHit(b,t){
   const p=S.p;b.hit.add(t);if(!b.child)clsHit(t,b);
   let dmg=b.dmg,col=null,label=null;
   if(b.stun&&!t.boss){t.slowT=Math.max(t.slowT||0,b.stun);t.frozen=true;}
-  if(S.cls==='archer'&&!b.child){if(has('a_chain')){if(p.chT===t)p.chS=Math.min(Math.round(.6/lv3('a_chain',.06,.08,.1)),(p.chS||0)+1);else{p.chT=t;p.chS=0;}}
+  if(S.cls==='archer'&&!b.child){if(has('a_chain')){if(p.chT===t)p.chS=Math.min(Math.floor(.6/lv3('a_chain',.06,.08,.1)),(p.chS||0)+1);else{p.chT=t;p.chS=0;}}
     if(has('a_hawk')&&Math.hypot(t.x-p.x,t.y-p.y)>220)dmg*=1+lv3('a_hawk',.3,.4,.5);
     if(has('a_split')&&!b.spl){b.spl=1;const a0=Math.atan2(b.vy,b.vx);for(const da of [-.5,.5])pBullet(t.x,t.y,a0+da,b.dmg*.5,{child:true,sub:'갈래 화살',pierce:1,hit:new Set([t]),life:.6});}}
   if(t.rmk&&has('r_mark'))dmg*=1+lv3('r_mark',.4,.6,.8);
@@ -5847,7 +5849,6 @@ function onPHit(b,t){
   if(b.x7){dmg*=7;col='#ff4fd8';}
   if(has('a_snipe'))dmg*=1+Math.min(lv3('a_snipe',1.5,2,2.5),Math.hypot(t.x-S.p.x,t.y-S.p.y)/100*.15);
   if(has('r_assassin')&&(t.elite||t.boss))dmg*=lv3('r_assassin',2,2.5,3);
-  if(S.p.shadowT>0&&!col){dmg*=critMul();col='#ffd76a';}
   if(has('deck'))dmg*=1+.06*p.multi;
   if(has('scope')&&Math.hypot(t.x-p.x,t.y-p.y)>300)dmg*=1+lv3('scope',.12,.2,.28)*(has('f_longrange')?2:1);
   if(has('elembody')&&(t.burnT>0||chilled(t)))dmg*=1+lv3('elembody',.1,.15,.2)*(has('f_elemfire')?2:1);
@@ -5870,7 +5871,7 @@ function onPHit(b,t){
   if(has('f_seeker')&&Math.hypot(t.x-p.x,t.y-p.y)>300)dmg*=1.5;
   if(ex('sniper'))dmg*=1+ex('sniper')*.05;
   if(has('combo')&&!b.child){if(p.cmbE===t)p.cmbN=Math.min(lv3('combo',10,15,20),(p.cmbN||0)+1);else{p.cmbE=t;p.cmbN=0;}dmg*=1+(has('f_barrage')?.09:.06)*p.cmbN;}
-  {const far=Math.hypot(t.x-p.x,t.y-p.y)>300;let cr=!!b.sure||S.p.skCrT>0&&S.p.skInvT<=0||Math.random()<critC()+(tag('mark')>=6&&t.mkT>S.t?.25:0)+(has('glacier')&&chilled(t)?lv3('glacier',.2,.25,.3):0)+(has('marksman')&&far?lv3('marksman',.2,.3,.4):0);if(!cr&&has('second')&&Math.random()<lv3('second',.3,.45,.6))cr=true;
+  {const far=Math.hypot(t.x-p.x,t.y-p.y)>300;let cr=!!b.sure||S.p.shadowT>0||S.p.skCrT>0&&S.p.skInvT<=0||Math.random()<critC()+(tag('mark')>=6&&t.mkT>S.t?.25:0)+(has('glacier')&&chilled(t)?lv3('glacier',.2,.25,.3):0)+(has('marksman')&&far?lv3('marksman',.2,.3,.4):0);if(!cr&&has('second')&&Math.random()<lv3('second',.3,.45,.6))cr=true;
    if(has('bloodrage')&&p.alive)p.hp=Math.min(p.maxHp,p.hp+.3);
    if(cr&&tag('rapid')>=6&&!b.child)pBullet(p.x,p.y,Math.atan2(t.y-p.y,t.x-p.x)+rand(-.1,.1),pDmg()*.6*rpM(),{sub:'속사 시너지',child:true,r:3});
    if(cr){dmg*=critMul()*(has('glacier')&&chilled(t)?1.5:1)*(has('f_bullseye')&&Math.hypot(t.x-p.x,t.y-p.y)>300?1.6:1);col='#ffd76a';if(b.hollow&&!b.hb){b.hb=1;explode(t.x,t.y,70,pDmg()*lv3('g_hollow',1.2,1.5,1.8),'#ffd76a');}if(has('luckydie')&&Math.random()<lv3('luckydie',.05,.07,.09)*(has('f_jackdie')?2:1)){dmg*=has('f_jackdie')?4:3;label='대박 '+Math.round(dmg);}if(has('highbet')&&Math.random()<.1)dmg*=2;if(has('deadeye'))p.deT=1;fxRun('c',t);if(has('f_shatter')&&chilled(t))explode(t.x,t.y,70,pDmg(),'#9fe8ff');if(has('overload')&&Math.random()<lv3('overload',.15,.2,.25)*(has('f_tesla2')?2:1))lightning(t,3);if(has('stunner')&&!t.boss)t.slowT=Math.max(t.slowT||0,lv3('stunner',.6,.9,1.2));if(has('reroll2')&&!b.child)pBullet(p.x,p.y,Math.atan2(t.y-p.y,t.x-p.x),b.dmg*.7,{sub:'한 번 더',child:true});if(has('toxicburst')&&t.ps>0){explode(t.x,t.y,80,pDmg()*1.5,'#8ee06a');for(const o of S.en)if(o.alive&&d2(o,t)<80*80)poisonE(o);}if(has('burn')){t.burnT=3;t.burnD=Math.max(t.burnD||0,pDmg()*lv3('burn',.4,.6,.8));if(has('f_frostfire'))t.slowT=Math.max(t.slowT||0,1);}}}
@@ -6176,7 +6177,7 @@ function update(dt){
       // 결계는 몹에게도 벽: 밖에 있거나 밖에서 생긴 잡몹은 결계 안쪽 가장자리로 밀려 들어옴 (어두운 바깥에서 돌아다니지 않게)
       for(const e of S.en){if(!e.alive||e.boss)continue;const me=Math.max(10,A.r-e.r);if(e.x<A.x-me||e.x>A.x+me||e.y<A.y-me||e.y>A.y+me){e.x=clamp(e.x,A.x-me,A.x+me);e.y=clamp(e.y,A.y-me,A.y+me);}}}
     {const bR=p.maxHp*.0005*mlv('regen')+(tag('nature')>=2?1.5:0)+(has('yggdrasil')&&inVine(p)?p.maxHp*.02:0)+(has('warpaint')?(p.fy||0)*lv3('warpaint',.08,.1,.15):0)+(has('worldtree')?3:0)+(has('f_ancient')&&inVine(p)?p.maxHp*.02:0)+(has('bastion')&&nearTurret()?3*(has('f_citadel')?2:1):0)+(has('sanctuary')&&!p.moving?lv3('sanctuary',1.5,2,3):0);const rgM=has('f_hydra')?3:(has('thick')&&hitRec()?3:1)*(has('troll')&&p.noHitT>3?3:1);if(p.regen||bR||has('f_immortal'))p.hp=Math.min(p.maxHp,p.hp+(p.regen*rgM*(p.skRgT>0?5:1)*rgHpM()*(has('d_photo')&&!p.moving?2:1)*(season()===0?2:1)+bR+(has('f_immortal')?p.maxHp*.01:0))*dt*healM());}
-    p.noHitT+=dt;{const bm=barrierMax();if(p.barrier>bm)p.barrier=bm;if(p.noHitT>(has('f_insure')?1.5:3)&&p.barrier<bm)p.barrier=Math.min(bm,p.barrier+bm*.35*dt);}
+    p.noHitT+=dt;{const bm=barrierMax(),bc=Math.max(bm,p.bxM||0);if(p.barrier>bc)p.barrier=bc;if(!(p.barrier>0))p.bxM=0;if(p.noHitT>(has('f_insure')?1.5:3)&&p.barrier<bm)p.barrier=Math.min(bm,p.barrier+bm*.35*dt);}
     if(S.buffT.jack>0)p.inv=Math.max(p.inv,.05);
     p.hurtT=Math.max(0,(p.hurtT||0)-dt);p.atkT=Math.max(0,(p.atkT||0)-dt);p.shadowT=Math.max(0,(p.shadowT||0)-dt);p.swingT=Math.max(0,(p.swingT||0)-dt);if(p.rageT>0){p.rageT-=dt;if(p.rageT<=0)p.rage=0;}
     if(has('m_ring')){S.ringT=(S.ringT||0)-dt;if(S.ringT<=0){S.ringT=.25;for(const e of S.en)if(e.alive&&d2(e,p)<110*110)dmgEs('불꽃 장막',e,pDmg()*.25*(1.2+.3*(L('m_ring')-1)),null,null,true);}}
@@ -6258,15 +6259,15 @@ function update(dt){
     if(T.bomb&&d<e.r+p.r+4){e.alive=false;e.bombed=true;S.rings.push({x:e.x,y:e.y,r:6,max:55,life:.3,col:'#f0c419'});burst(e.x,e.y,'#f0c419',16);if(d<55+p.r)hurtP(e.dmg,null);onKill(e);continue;}
     if(T.mortar&&d<T.range&&e.cd<=0&&S.tele.length<60){e.cd=rand(3,4);tele({k:'c',x:p.x+(p.moving?(p.lmx||0)*45:0),y:p.y+(p.moving?(p.lmy||0)*45:0),r:70,T:1.2,dmg:e.dmg,col:'#ffb030',fx:t=>{burst(t.x,t.y,'#ffb030',14);S.shake=Math.max(S.shake,.08);}});}
     else if(T.snipe&&!(e.aim>0)&&d<T.range&&e.cd<=0&&S.ebN<EB_CAP){e.aim=1;e.aa=Math.atan2(dy,dx);e.cd=rand(3,4);tele({k:'l',x:e.x,y:e.y,a:e.aa,len:560,w:6,T:1,dmg:0,col:'#ff4040'});}
-    else if(T.web&&d<T.range&&e.cd<=0&&S.ebN<EB_CAP){S.ebN++;S.pr.push({x:e.x,y:e.y,vx:dx/d*260,vy:dy/d*260,mine:false,dmg:e.dmg,life:Math.min(1.1,d/260+.1),r:6,sh:'web',bc:'#e8e8f0',web:1});e.cd=rand(2.2,3);}
-    else if(T.range&&!T.snipe&&!T.web&&!T.mortar&&e.type!=='support'&&d<T.range&&e.cd<=0&&S.ebN<EB_CAP){S.ebN++;const a=Math.atan2(dy,dx);S.pr.push({x:e.x,y:e.y,vx:Math.cos(a)*300,vy:Math.sin(a)*300,mine:false,dmg:e.dmg,aoe:T.aoe||0,life:1.4,r:T.aoe?5:4,sh:T.aoe?'orb':(ESHM[e.type]||['orb'])[0],bc:T.aoe?'#c98af0':(ESHM[e.type]||[])[1]||null});if(e.type==='yeti'){const sb=S.pr[S.pr.length-1];sb.slw=1;sb.r=7;sb.vx*=.6;sb.vy*=.6;sb.life=2;}e.cd=rand(1.2,1.9);}
+    else if(T.web&&d<T.range&&e.cd<=0&&S.ebN<EB_CAP){S.ebN++;S.pr.push({x:e.x,y:e.y,vx:dx/d*260,vy:dy/d*260,mine:false,mb:1,dmg:e.dmg,life:Math.min(1.1,d/260+.1),r:6,sh:'web',bc:'#e8e8f0',web:1});e.cd=rand(2.2,3);}
+    else if(T.range&&!T.snipe&&!T.web&&!T.mortar&&e.type!=='support'&&d<T.range&&e.cd<=0&&S.ebN<EB_CAP){S.ebN++;const a=Math.atan2(dy,dx);S.pr.push({x:e.x,y:e.y,vx:Math.cos(a)*300,vy:Math.sin(a)*300,mine:false,mb:1,dmg:e.dmg,aoe:T.aoe||0,life:1.4,r:T.aoe?5:4,sh:T.aoe?'orb':(ESHM[e.type]||['orb'])[0],bc:T.aoe?'#c98af0':(ESHM[e.type]||[])[1]||null});if(e.type==='yeti'){const sb=S.pr[S.pr.length-1];sb.slw=1;sb.r=7;sb.vx*=.6;sb.vy*=.6;sb.life=2;}e.cd=rand(1.2,1.9);}
     else if(sk){if(d<e.r+11&&e.cd<=0){skHit(sk,e.dmg);e.cd=.9;}}
-    else if(!T.range&&!T.flee&&d<e.r+p.r+3&&e.cd<=0){hurtP(e.dmg,e);e.cd=.9;
+    else if(!T.range&&!T.flee&&d<e.r+p.r+3&&e.cd<=0){const h0=p.hp,b0=p.barrier||0,s0=p.shield||0;hurtP(e.dmg,e);e.cd=.9;if(p.hp<h0||(p.barrier||0)<b0||(p.shield||0)<s0){
       if(T.leech&&!e.latch){e.latch=1;e.la=Math.atan2(e.y-p.y,e.x-p.x);ftext(p.x,p.y-26,'거머리! 대시로 떼기','#ff6080',14);}
       if(T.thief&&!e.stole&&S.gold>0){const g=Math.min(S.gold,Math.max(5,Math.round(S.gold*.08)));S.gold-=g;e.stole=g;ftext(p.x,p.y-26,'-'+g+' 골드 도둑맞음!','#ffd76a',16);if(!S.thTold){S.thTold=1;toast('💰 소매치기! 15초 안에 잡으면 골드를 되찾아요 (화살표·미니맵에 표시)');}}
       if(e.affs){if(hasAf(e,'vamp'))e.hp=Math.min(e.maxHp,e.hp+e.maxHp*.12*e.ak);if(hasAf(e,'frost'))S.buffT.slow=Math.max(S.buffT.slow||0,1.5);}
       // 흡혈 박쥐: 나를 물면 보스 체력 0.4% 회복
-      if(e.type==='vbat'&&S.boss&&S.boss.alive&&S.boss.type==='bossV'){const B=S.boss;B.hp=Math.min(B.maxHp,B.hp+B.maxHp*.002);ftext(B.x,B.y-B.r-10,'흡혈','#ff6070',13);}}
+      if(e.type==='vbat'&&S.boss&&S.boss.alive&&S.boss.type==='bossV'){const B=S.boss;B.hp=Math.min(B.maxHp,B.hp+B.maxHp*.002);ftext(B.x,B.y-B.r-10,'흡혈','#ff6070',13);}}}
     if(e.type==='ghost'){e.phT=(e.phT??rand(0,4))-dt;if(e.phT<0)e.phT+=4;e.phase=e.phT<1.1;}
   }
   S.en=S.en.filter(e=>e.alive);
@@ -6333,7 +6334,7 @@ function update(dt){
       if(has('mirror')&&Math.random()<lv3('mirror',.2,.3,.4)+(has('f_glacier')?.25:0)+(has('f_mirrorshield')?.2:0)){b.mine=true;b.vx*=-1.3;b.vy*=-1.3;b.dmg=pDmg()*2;b.hit=new Set();b.pierce=1;b.child=true;b.life=1;continue;}
       if(b.aoe)S.rings.push({x:b.x,y:b.y,r:6,max:b.aoe,life:.3,col:'#c98af0'});
       if(b.slw)S.buffT.slow=Math.max(S.buffT.slow||0,1.2);
-      hurtP(b.dmg,null);b.life=0;
+      hurtP(b.dmg,null,b.mb);b.life=0;
     }
     // 거미줄 탄: 맞거나 멈춘 자리에 4초짜리 거미줄 (밟으면 이동 속도 -40%)
     if(b.web&&b.life<=0&&!b.wb){b.wb=1;S.hz.push({x:b.x,y:b.y,r:44,life:4,dmg:0,slow:1,web:1,col:'#d8d8e8'});}
@@ -6972,7 +6973,7 @@ function hud(){
 
 /* ---------- overlays ---------- */
 // 게임 중 오버레이(레벨업·증강·상점 등)는 왼쪽 위 정보창 높이만큼 아래에서 시작 → 정보창이 가려지거나 겹치지 않음
-function ovPad(){const h=$('hud'),bl=$('botLeft'),inG=S&&S.started&&S.mode!=='start',on=ov.classList.contains('on')&&inG,top=on?h.offsetHeight+'px':'',w=on&&bl?(bl.offsetHeight+16)+'px':'';
+function ovPad(){const h=$('hud'),bl=$('botLeft'),inG=S&&S.mode!=='start',on=ov.classList.contains('on')&&inG,top=on?h.offsetHeight+'px':'',w=on&&bl?(bl.offsetHeight+16)+'px':'';
   // 창(오버레이) 자체를 위쪽 정보창 아래에서 시작 → 스크롤해도 내용이 정보창 밑으로 들어가 가려지지 않음
   if(ov.style.top!==top){ov.style.top=top;ov.style.paddingTop=on?'10px':'';}h.classList.toggle('ovon',!!on);if(ov.style.paddingBottom!==w)ov.style.paddingBottom=w;
   const st=$('st');if(st){const so=st.classList.contains('on')&&inG,sv=so?h.offsetHeight+'px':'';if(st.style.top!==sv){st.style.top=sv;st.style.paddingTop=so?'10px':'';}}}
@@ -7210,9 +7211,9 @@ function gainAug(a){
 // 큰 알림 띠: 여러 개가 한꺼번에 오면(증강 + 칭호 등) 1.3초 간격으로 차례로 띄우고, 아직 떠 있는 띠가 있으면 그 아래 줄에 띄움
 let AFX_NEXT=0;const AFX_ON=[];
 // delay는 초 단위. (예전엔 밀리초와 섞여서, 알림이 겹쳐 대기하면 1.3초가 아니라 약 20분 뒤에 떠서 한참 전 합체·시너지 알림이 엉뚱할 때 나왔음)
-function augFx(title,sub,col,big,delay=0){
+function augFx(title,sub,col,big,delay=0,keep=false){
   const now=performance.now(),at=Math.max(now+delay*1000,AFX_NEXT);AFX_NEXT=at+1300;const wait=at-now,run0=S;
-  setTimeout(()=>{if(S!==run0)return; // 그 사이 판이 바뀌었으면 지난 판 알림은 안 띄움
+  setTimeout(()=>{if(S!==run0&&!keep)return; // 그 사이 판이 바뀌었으면 지난 판 알림은 안 띄움 (도전과제 알림은 판이 바뀌어도 띄움)
     const bn=document.createElement('div');bn.className='abanner';bn.style.color=col;bn.innerHTML=`<b>${title}</b>${sub?`<small>${sub}</small>`:''}`;
     let slot=0;while(AFX_ON.includes(slot))slot++;AFX_ON.push(slot);if(slot)bn.style.marginTop=(slot*78)+'px';
     document.body.appendChild(bn);setTimeout(()=>{bn.remove();const i=AFX_ON.indexOf(slot);if(i>=0)AFX_ON.splice(i,1);},2600);
@@ -7275,8 +7276,8 @@ function casinoAct(a){
   if(a==='aug'){if(slotCount()>=MAXA)return;S.gold-=augC();S.cbuys.aug=cb('aug')+1;S.backToCasino=true;openAug(true,'보물고에서 구매');return;}
   if(a==='box'){S.gold-=boxC();S.cbuys.box=cb('box')+1;const c=cardOf(rollRarity(3));const res=c.f(p);S.log=`<span style="color:${RAR[c.r].col};filter:brightness(1.5)">[${RAR[c.r].n}]</span> ${c.n}<br><small>${res||c.d}</small>`;renderCasino();return;}
   if(a==='double'){
-    const bet=S.gold,ch=.45+LK()*.005;S.busy=true;S.log='동전이 돌고 있습니다…';renderCasino();
-    setTimeout(()=>{if(Math.random()<ch){S.gold+=bet;S.log=`앞면. ${bet} 골드 따서 ${S.gold} 골드`;}else{S.gold=0;S.log=`뒷면. ${bet} 골드 전부 날렸습니다`;}S.busy=false;renderCasino();},800);
+    const bet=S.gold,ch=.45+LK()*.005,s0=S;S.busy=true;S.log='동전이 돌고 있습니다…';renderCasino();
+    setTimeout(()=>{if(S!==s0||S.mode!=='casino'){if(S===s0)S.busy=false;return;}if(Math.random()<ch){S.gold+=bet;S.log=`앞면. ${bet} 골드 따서 ${S.gold} 골드`;}else{S.gold=0;S.log=`뒷면. ${bet} 골드 전부 날렸습니다`;}S.busy=false;renderCasino();},800);
     return;
   }
   if(a==='slot'){
@@ -7414,7 +7415,18 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
-  {v:147,t:'🐞 레이드 멈춤 · 저장 보호',items:[
+  {v:148,t:'🐞 전투 계산 · 화면 겹침 정리',items:[
+    ['change','🐞 그림자 걸음(도적) 중 치명타가 두 번 곱해지던 문제, 리치 왕의 「해골 최대 +3」이 빠져 있던 문제, 연속 명중이 설명(+60%)보다 높게 쌓이던 문제를 고쳤어요','bug'],
+    ['change','🐞 대시·무적·회피로 안 맞았는데도 소매치기·거머리·흡혈 박쥐 효과가 들어오던 문제를 고쳤어요','bug'],
+    ['change','🐞 보스전에서 졸개 몬스터의 탄환까지 보스처럼 방어력을 뚫던 문제를 고쳤어요 (보스 본체·보스 공격만 뚫어요)','bug'],
+    ['change','🐞 뒷면 보험·지각 변동·합체 보호막처럼 보호막을 주는 증강이 기본 보호막이 없으면 바로 사라지던 문제를 고쳤어요','bug'],
+    ['change','🐞 최대 체력이 오르내릴 때마다 체력이 공짜로 차던 문제를 고쳤어요. 대시 재사용 대기는 최소 0.35초예요','bug'],
+    ['change','🐞 일시정지 중 스탯·도감을 열면 화면 뒤에 숨던 문제, 동전 던지기 중 나가면 탁자가 다시 뜨던 문제, 채팅·쪽지·후원 창이 떠 있는 동안 게임이 계속 흐르던 문제를 고쳤어요','bug'],
+    ['change','🐞 휴대폰에서 첫 증강 화면이 위 정보창·아래 슬롯에 가려지던 문제, 스탯 창을 연 채 B·Esc를 누르면 상점이 몰래 닫히던 문제를 고쳤어요','bug'],
+    ['change','🐞 판이 끝나자마자 메인으로 가면 도전과제 달성 알림이 안 뜨던 문제, 보스 러시 ✔ 표시가 안 뜨던 문제(이제 5단계 돌파 기준), 서버 연결이 안 될 때 등록이 된 것처럼 보이던 문제를 고쳤어요','bug'],
+    ['change','📘 증강 「강화하면」 설명의 수치를 실제 수치에 맞췄어요 (폭발 부적·불꽃 장막·블랙홀 부적·노바·천둥·독구름·역병·연타·심판·영웅의 맥박·필살의 일격)','bug'],
+  ]},
+{v:147,t:'🐞 레이드 멈춤 · 저장 보호',items:[
     ['change','🐞 레이드에서 부활 기회로 일어난 뒤 다시 쓰러지면 <b>게임이 멈추던</b> 문제, 「여기서 끝내고 정산」을 눌렀는데 부활해 버리던 문제, 거신을 잡자마자 쓰러지면 승리가 실패로 기록되던 문제를 고쳤어요','bug'],
     ['change','☁ 다른 기기나 새 기기가 <b>더 진행된 클라우드 데이터를 자동으로 덮어쓰지 않게</b> 막았어요 (메달만이 아니라 강화·해금·외형·캐릭터까지 비교, 다른 기기가 더 나중에 저장했으면 고르게 함, 덮어쓰기 전 자동 백업)','bug'],
     ['change','🐞 이어하기 뒤 궁극기 증강 효과가 사라지던 문제, 불사조 쿨타임이 초기화되던 문제, 마지막 보스를 잡은 직후 저장하면 클리어가 사라지던 문제를 고쳤어요','bug'],
@@ -7921,7 +7933,7 @@ function startScreen(){
     <div class="btnrow" id="dsel">${DKEYS.filter(k=>!DIFF[k].rush&&k!=='nightmare').map(dBtn).join('')}</div>
     <div class="hUnlock">증강 해금: <b style="color:${TIER.s.col}">실버 ✅</b> · ${['g','p','v'].map(t=>`<b style="color:${TIER[t].col}">${TIER[t].n} ${tierOpen(t)?'✅':'🔒'}</b>${tierOpen(t)?'':`<small>(${DIFF[TIER_UNLOCK[t]].n} 클리어)</small>`}`).join(' · ')}</div>
     <div class="hSect">엔드 컨텐츠</div>
-    <div class="btnrow" id="endc"><button class="btn nmBtn ${pickDiff==='nightmare'?'primary':''}" data-diff="nightmare" ${diffOpen('nightmare')?'':'disabled'}><span class="skull">☠</span><b>${diffOpen('nightmare')?'':'🔒 '}무한의 악몽</b><small>${diffOpen('nightmare')?'끝없이 조여 오는 결계 · 악몽의 파동':'신 클리어 시 열림'}</small><span class="pick">${diffOpen('nightmare')?'영웅 고르기 ▸':''}</span></button><button class="btn" id="rushBtn" ${diffOpen('bossrush')?'':'disabled'}><i>${diffOpen('bossrush')?'⚔':'🔒'}</i><b>보스 러시${(META.clears||{}).bossrush?' ✔':''}</b><small>${diffOpen('bossrush')?'보스만 연달아':'무한의 악몽이 열리면'}</small></button><button class="btn" id="raidBtn" ${myHeroes().length?'':'disabled'}><i>${myHeroes().length?'🗿':'🔒'}</i><b>레이드</b><small>${myHeroes().length?'3인 거신 토벌':'캐릭터 저장 시 열림'}</small></button><button class="btn" id="duelBtn" ${myHeroes().length?'':'disabled'}><i>${myHeroes().length?'⚔':'🔒'}</i><b>결투</b><small>${myHeroes().length?'전당 캐릭터와 1:1':'캐릭터 저장 시 열림'}</small></button></div>
+    <div class="btnrow" id="endc"><button class="btn nmBtn ${pickDiff==='nightmare'?'primary':''}" data-diff="nightmare" ${diffOpen('nightmare')?'':'disabled'}><span class="skull">☠</span><b>${diffOpen('nightmare')?'':'🔒 '}무한의 악몽</b><small>${diffOpen('nightmare')?'끝없이 조여 오는 결계 · 악몽의 파동':'신 클리어 시 열림'}</small><span class="pick">${diffOpen('nightmare')?'영웅 고르기 ▸':''}</span></button><button class="btn" id="rushBtn" ${diffOpen('bossrush')?'':'disabled'}><i>${diffOpen('bossrush')?'⚔':'🔒'}</i><b>보스 러시${(META.ach||{}).br_5?' ✔':''}</b><small>${diffOpen('bossrush')?'보스만 연달아':'무한의 악몽이 열리면'}</small></button><button class="btn" id="raidBtn" ${myHeroes().length?'':'disabled'}><i>${myHeroes().length?'🗿':'🔒'}</i><b>레이드</b><small>${myHeroes().length?'3인 거신 토벌':'캐릭터 저장 시 열림'}</small></button><button class="btn" id="duelBtn" ${myHeroes().length?'':'disabled'}><i>${myHeroes().length?'⚔':'🔒'}</i><b>결투</b><small>${myHeroes().length?'전당 캐릭터와 1:1':'캐릭터 저장 시 열림'}</small></button></div>
     ${DONATE_URL?`<button id="donBtn" class="hDon"><span class="hug"><canvas width="48" height="40" id="donArt"></canvas><span class="bub">배고파요…</span></span><span class="dt"><b>참붕이 밥 사주기</b><small>게임이 재밌었다면 밥 한 끼 응원해 주세요</small></span></button>`:''}
    </div>
   </div>
@@ -8510,7 +8522,7 @@ const csSum=d=>{try{const m=JSON.parse(d.chanseo_meta||'{}'),h=(()=>{try{return 
   const ce=(m.cos&&m.cos.eq)||{},cl=CLASSES[m.rep]?m.rep:CLASSES[d.chipdungeon_cls]?d.chipdungeon_cls:'knight',gc=GEAR_KEYS.map(k=>{const g=m.gear&&m.gear[k];return g&&g.own?(g.lv||0).toString(11):'-';}).join(''),av={cls:cl,skin:ce.skin||'',aura:[ce.wing,ce.aura].filter(Boolean).join('+'),gear:gc};
   return {av,md:Math.floor(m.medals||0),tot:Math.floor(m.total||0),lv:Object.values(m.lv||{}).reduce((a,b)=>a+(+b||0),0),cls:(m.ucls||[]).length,cos:Object.keys((m.cos&&m.cos.own)||{}).length,hero:Array.isArray(h)?h.length:Object.keys(h||{}).length,eq,ti:ti?ti.n:'',ach:Object.keys(m.ach||{}).length};}catch(e){return null;}};
 // 덮어쓰기 전 자동 백업 (이 기기에만, 한 칸씩): dev = 불러오기 전 이 기기 데이터, srv = 이 기기 데이터로 덮어쓰기 전 서버 데이터
-const bakSave=(slot,label,code)=>{try{localStorage.setItem('chanseo_bak_'+slot,JSON.stringify({at:Date.now(),label,code}));}catch(e){}};
+const bakSave=(slot,label,code)=>{try{localStorage.setItem('chanseo_bak_'+slot,JSON.stringify({at:Date.now(),label,code}));return true;}catch(e){return false;}};
 const bakGet=slot=>{try{const b=JSON.parse(localStorage.getItem('chanseo_bak_'+slot)||'null');return b&&b.code?b:null;}catch(e){return null;}};
 const csSumCode=code=>{try{return csSum(JSON.parse(decodeURIComponent(escape(atob(String(code).slice(4))))).d);}catch(e){return null;}};
 const csScore=x=>x?(x.md||0)+(x.lv||0)*200+(x.cls||0)*500+(x.cos||0)*100+(x.hero||0)*50:0;
@@ -8530,7 +8542,7 @@ async function csOffer(n,k,after){if(SRV_V<56){after();return;}const j=await csL
   <div class="two" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0">${box('☁ 서버 데이터',A,ds+' 저장','A')}${box('📱 지금 이 기기',B,'이 컴퓨터·폰','B')}</div>
   <div class="btnrow"><button class="btn ${rec==='A'?'primary':''}" id="csYes">☁ 서버 데이터 불러오기</button><button class="btn ${rec==='B'?'primary':''}" id="csKeep">📱 이 기기 데이터 쓰기 (서버에 덮어쓰기)</button></div>
   <p class="sub" style="margin-top:6px">불러오면 이 기기의 메달·강화·해금·외형·내 캐릭터가 서버 데이터로 바뀌어요. 바뀌기 전 데이터는 이 기기에 <b>자동 백업</b>돼서 💾 데이터 옮기기에서 되돌릴 수 있어요.</p><p class="sub" id="csMsg"></p>`);
-  $('csYes').onclick=()=>{try{bakSave('dev','불러오기 전 이 기기 데이터 ('+n+')',syncExport());syncImport(j.data);try{localStorage.setItem('chanseo_csat',String(+j.at||Date.now()));}catch(e){}localStorage.setItem('chanseo_key',k);localStorage.setItem('chipdungeon_nick',n);csFlagSet(n);nKeySet(n,k);$('csMsg').textContent='불러왔어요! 다시 불러옵니다…';setTimeout(()=>location.reload(),600);}catch(e){$('csMsg').textContent='불러오기 실패: '+e.message;}};
+  $('csYes').onclick=()=>{try{if(!bakSave('dev','불러오기 전 이 기기 데이터 ('+n+')',syncExport())){$('csMsg').textContent='기기 저장 공간이 부족해서 지금 데이터를 백업하지 못했어요. 안전을 위해 불러오기를 멈췄어요.';return;}syncImport(j.data);try{localStorage.setItem('chanseo_csat',String(+j.at||Date.now()));}catch(e){}localStorage.setItem('chanseo_key',k);localStorage.setItem('chipdungeon_nick',n);csFlagSet(n);nKeySet(n,k);$('csMsg').textContent='불러왔어요! 다시 불러옵니다…';setTimeout(()=>location.reload(),600);}catch(e){$('csMsg').textContent='불러오기 실패: '+e.message;}};
   $('csKeep').onclick=()=>{const b=$('csKeep');if(!b.dataset.ok){b.dataset.ok=1;b.textContent='한 번 더 누르면 서버 데이터를 덮어써요';return;}bakSave('srv','덮어쓰기 전 서버 데이터 ('+n+')',j.data);after();csFlagSet(n);setTimeout(()=>csUpload(true,true),300);};
   $('csNo').onclick=after;}
 function openSync(){const code=syncExport();
@@ -8684,7 +8696,7 @@ function tOwn(k){if(DEV)return !!ACH.find(a=>a.k===k);tMig();if(!achDone(k))retu
 function achUnlock(k){META.ach=META.ach||{};if(META.ach[k])return;const A=ACH.find(a=>a.k===k);if(!A)return;tMig();META.ach[k]=1;if(A.rw){META.cos=META.cos||{own:{},eq:{}};META.cos.own[A.rw]=1;}
   const c=chOf(k),fin=c&&chFull(c),m=c?(fin?CH_FIN:CH_MED[Math.min(c.ks.indexOf(k),CH_MED.length-1)]):0;if(m){META.medals=(META.medals||0)+m;META.total=(META.total||0)+m;}saveMeta();
   if(S)(S.newAch=S.newAch||[]).push(k);const rw=A.rw&&COS.find(x=>x.k===A.rw),tl=c?(fin?`칭호 「${ACH.find(a=>a.k===c.ks[c.ks.length-1]).n}」`:`${c.i} ${c.n} ${c.ks.filter(achDone).length}/${c.ks.length}단계`):`칭호 「${A.n}」`;
-  augFx(`🏆 도전과제 달성: ${A.n}`,`${tl}${m?' · 🏅 메달 '+m:''}${rw?' · 외형 「'+rw.n+'」':''} 획득`,'#ffd76a',true);}
+  augFx(`🏆 도전과제 달성: ${A.n}`,`${tl}${m?' · 🏅 메달 '+m:''}${rw?' · 외형 「'+rw.n+'」':''} 획득`,'#ffd76a',true,0,true);}
 // 예전에 달성한 도전과제에 나중에 보상이 생기면, 시작 화면을 열 때 보상 외형을 채워 줌
 function achRwSync(){tMig();let n=0;META.cos=META.cos||{own:{},eq:{}};META.cos.own=META.cos.own||{};for(const A of ACH)if(A.rw&&META.ach&&META.ach[A.k]&&!META.cos.own[A.rw]){META.cos.own[A.rw]=1;n++;}if(n){saveMeta();setTimeout(()=>toast(`🎁 예전에 달성한 도전과제 보상 외형 ${n}개를 받았어요`),600);}}
 function achCheck(R){for(const A of ACH){if(META.ach&&META.ach[A.k])continue;try{if(A.c&&A.c(R))achUnlock(A.k);}catch(e){}}}
@@ -9227,7 +9239,7 @@ function openAch(){const done=k=>DEV||achDone(k),AL=ACH.filter(a=>!a.sec||done(a
   // 보상 외형 미리보기: 마우스를 올리거나 (모바일) 눌러서 확인. 누를 땐 칭호 장착이 같이 눌리지 않게 막음
   ov.querySelectorAll('[data-cs]').forEach(b=>{const x=COS.find(q=>q.k===b.dataset.cs);if(!x)return;b.addEventListener('mouseenter',()=>cosPreview(x,b));b.addEventListener('mouseleave',cosPreviewHide);
     b.addEventListener('click',ev=>{ev.stopPropagation();if(b.dataset.pv==='1'){b.dataset.pv='';cosPreviewHide();}else{ov.querySelectorAll('[data-cs]').forEach(o=>o.dataset.pv='');b.dataset.pv='1';cosPreview(x,b);}});});}
-function openCodexGame(){if(!S||S.mode==='start')return;if(statsOpen&&!cxGame)toggleStats();cxGame=true;statsOpen=true;joy=null;openCodex();}
+function openCodexGame(){if(!S||S.mode==='start')return;if(PAUSED)togglePause(false);if(statsOpen&&!cxGame)toggleStats();cxGame=true;statsOpen=true;joy=null;openCodex();}
 function openCodex(o){Object.assign(CX,o||{});
   const tabs=[['aug','증강'],['fuse','합체'],['vip','왕실'],['syn','시너지'],['cls','직업'],['mob','몬스터'],['ev','돌발 이벤트'],['egg','🥚 이스터에그'],['help','❓ 도움말']].concat(DEV?[['score','🛠 점수 계산']]:[]);if(CX.tab==='score'&&!DEV)CX.tab='aug';
   const clsOpt=`<option value="">전체 직업</option><option value="-">공용</option>`+Object.keys(CLASSES).map(k=>`<option value="${k}" ${CX.cls===k?'selected':''}>${CLASSES[k].n}</option>`).join('');
@@ -9402,7 +9414,7 @@ function beginRunD(d,cls){const p=pickDiff;pickDiff=d;try{beginRun(cls);}finally
 // 보스 러시: 레이드·결투처럼 따로 여는 화면에서 직업을 골라 바로 시작
 function openRush(){cosPreviewHide();const ks=Object.keys(CLASSES);
   show(`<div class="shophead"><h2>⚔ 보스 러시</h2><button class="btn" id="brBack">돌아가기</button></div>
-  <p class="sub">잡몹 없이 보스만 연달아 나와요. 보스를 잡을 때마다 다음 단계, 더 강한 보스! 증강은 처음 ${3+(META.sk.extraAug?1:0)}개 + 보스를 잡을 때마다 골라요. 몇 단계까지 버티는지가 기록이에요.${(META.clears||{}).bossrush?' ✔ 클리어한 적 있음':''}</p>
+  <p class="sub">잡몹 없이 보스만 연달아 나와요. 보스를 잡을 때마다 다음 단계, 더 강한 보스! 증강은 처음 ${3+(META.sk.extraAug?1:0)}개 + 보스를 잡을 때마다 골라요. 몇 단계까지 버티는지가 기록이에요.${(META.ach||{}).br_5?' ✔ 5단계 돌파한 적 있음':''}</p>
   <h3>직업을 골라 바로 시작</h3><div class="rgrid">${ks.map(k=>{const op=clsOpen(k),av=op?hofAv(k,(cosEq('skin')||{}).k||''):'';return `<button class="rcard" data-rcls="${k}" ${op?'':'disabled style="opacity:.45"'}>${av?`<img src="${av}" alt="">`:''}<b>${op?'':'🔒 '}${CLASSES[k].n}</b><small>${op?(k===pickCls?'지금 고른 직업':''):'잠김'}</small></button>`;}).join('')}</div>`);
   {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}
   $('brBack').onclick=startScreen;ov.querySelectorAll('[data-rcls]').forEach(b=>b.onclick=()=>{const k=b.dataset.rcls;if(!clsOpen(k))return;pickCls=k;try{localStorage.setItem('chipdungeon_cls',k);}catch(e){}beginRunD('bossrush',k);});}
@@ -9440,7 +9452,8 @@ async function donorCheck(){const n=myNick().trim();if(!SHEET_URL||!DONORS.inclu
   try{const r=await fetch(SHEET_URL+'?own='+encodeURIComponent(n)+'&k='+encodeURIComponent(MYKEY),{cache:'no-store'});const j=await r.json();if(!j||j.owned!==false)return;}catch(e){DONOR_CK='';return;}
   META.ach=META.ach||{};META.ach.h_donor=1;META.cos=META.cos||{own:{},eq:{}};META.cos.own.hf_donor=1;if(!META.donorSet){META.donorSet=1;META.cos.eq.hof='hf_donor';META.title='h_donor';}saveMeta();try{onlPing();}catch(e){}
   const d=document.createElement('div');d.className='chartq';d.innerHTML=`<div class="cq" style="max-width:min(460px,92vw);text-align:center;box-shadow:0 0 30px rgba(255,215,106,.5)"><div style="font-size:44px;line-height:1">💛</div><b style="font-size:22px"><span class="hn hx-hf_donor">💛 ${esc(n)}</span> 님</b><div>참붕이에게 토큰값을 후원해 주셔서 정말 고마워요!<br>칭호 <b style="color:#ffd76a">「후원자 그저 빛」</b>(행운 +5)과<br><b>반짝반짝 빛나는 이름</b>을 드렸어요 ✨</div><button class="btn primary" id="dnrOk">고마워요!</button></div>`;
-  document.body.appendChild(d);$('dnrOk').onclick=()=>{d.remove();if(!S||S.mode==='start')startScreen();};}
+  const pz=S&&S.mode==='play'&&!PAUSED&&!statsOpen;if(pz)togglePause(true);
+  document.body.appendChild(d);$('dnrOk').onclick=()=>{d.remove();if(pz&&PAUSED)togglePause(false);if(!S||S.mode==='start')startScreen();};}
 // 난이도: diff 칸 우선, 없으면 직업 칸의 ':' 뒤. 예전 서버가 12자로 잘라 저장한 것('knight:night' 등)도 앞글자로 알아봄
 const clsS=b=>String(b.cls||'').split('~')[0].split('@')[0],skinOf=b=>(String(b.cls||'').split('~')[0].split('@')[1])||b.skin||'',bonusOf=b=>+b.bonus||+String(b.cls||'').split('~')[1]||0,apOf=b=>+b.ap||(+String(b.cls||'').split('~')[2]||0)/100,
   segOf=(b,i)=>String(b.cls||'').split('~')[i]||'',titleOf=b=>b.title||segOf(b,3),auraOf=b=>b.aura||segOf(b,4),gearOf=b=>b.gear||segOf(b,5),lookOf=b=>b.look||(segOf(b,6)==='o'?'old':segOf(b,6)==='n'?'new':''),frameOf=b=>b.frame||(/^fr_[a-z]+$/.test(segOf(b,7))?segOf(b,7):''),buildOf=b=>+b.build||+segOf(b,8)||0,teamOf=b=>segOf(b,9).split('.').filter(Boolean).map(x=>{const o=x.endsWith('!'),y=o?x.slice(0,-1):x,[c,k]=y.split('@');return {cls:c,skin:k||'',look:o?'old':'new'};}).filter(q=>CLASSES[q.cls]);
@@ -9519,7 +9532,7 @@ const FB_V='10.12.2';let FB=null,ONL_FB=[],ONL_AS=[],FB_OFF=0,FB_SNAP=null,FB_WA
 const fbNow=()=>Date.now()+FB_OFF,fbTO=(p,ms)=>Promise.race([p,new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),ms))]);
 function fbLoad(){return new Promise((res,rej)=>{if(window.firebase&&firebase.database&&firebase.auth)return res();const L=['app','auth','database'];let i=0;
   const nx=()=>{if(i>=L.length)return res();const s=document.createElement('script');s.src=`https://www.gstatic.com/firebasejs/${FB_V}/firebase-${L[i++]}-compat.js`;s.onload=nx;s.onerror=()=>rej(new Error('load'));document.head.appendChild(s);};nx();});}
-async function fbInit(){try{await fbTO(fbLoad(),10000);if(!firebase.apps.length)firebase.initializeApp(FB_CFG);const cr=await fbTO(firebase.auth().signInAnonymously(),10000);
+async function fbInit(){try{await fbTO(fbLoad(),10000);if(!firebase.apps.length)firebase.initializeApp(FB_CFG);else{try{firebase.database().goOnline();}catch(e){}}const cr=await fbTO(firebase.auth().signInAnonymously(),10000);
     const db=firebase.database();FB={db,uid:cr.user.uid};db.ref('.info/serverTimeOffset').on('value',s=>{FB_OFF=+s.val()||0;});fbStart();}catch(e){FB=null;}}
 // 접속 목록: 실시간 서버(파이어베이스)가 살아 있으면 그 목록만 (예비 서버는 신호만 받아 둠). 실시간 서버가 끊겼을 때만 예비 서버 목록으로
 // (예전엔 둘을 합쳐서, 나간 사람을 예비 서버가 더 오래 기억하는 동안 인원이 왔다 갔다 했음)
@@ -9662,7 +9675,7 @@ const FX_PRE={hf_crown:'👑 ',hf_donor:'💛 '};
   const st=document.createElement('style');st.textContent=css;document.head.appendChild(st);}
 function fxName(n,fx,me){const ok=fx&&COS.some(q=>q.k===fx&&q.cat==='hof');return `<b class="hn${ok?' hx-'+fx:''}${me&&!ok?' me':''}">${ok?(FX_PRE[fx]||''):''}${esc(n)}</b>`;}
 // 전체 채팅: 서버에 최근 60개만 남음. 창을 열어 두면 2초마다 새 메시지를 받음 (앞 요청이 안 끝났으면 건너뜀)
-let CHAT=[],CHAT_OPEN=false,CHAT_CT=0,CHAT_T=null,CHAT_PEND=[],CHAT_BUSY=0,CHAT_SEQ=0,CHAT_APPLIED=0;
+let CHAT_PZ=false,CHAT=[],CHAT_OPEN=false,CHAT_CT=0,CHAT_T=null,CHAT_PEND=[],CHAT_BUSY=0,CHAT_SEQ=0,CHAT_APPLIED=0;
 const chatSeen=()=>{try{return +(localStorage.getItem('chanseo_chat_seen')||0);}catch(e){return 0;}};
 const chatUnread=()=>!CHAT_OPEN&&CHAT_CT>chatSeen();
 function chatMark(){const t=Math.max(CHAT_CT,CHAT.length?CHAT[CHAT.length-1].t:0);try{localStorage.setItem('chanseo_chat_seen',String(t));}catch(e){}}
@@ -9691,7 +9704,7 @@ function nameHelp(){if(document.getElementById('nmHelp'))return;const n=myNick()
   <div style="font-size:14px;color:var(--muted)">내 이름이 아니라면 다른 이름으로 바꿔 주세요.</div>
   <div style="display:flex;gap:8px;justify-content:center"><button class="btn primary" id="nmGo" style="white-space:nowrap">👤 내 이름 열기</button><button class="btn" id="nmX" style="white-space:nowrap;min-width:80px;flex:none">닫기</button></div></div>`;
   document.body.appendChild(d);const cl=()=>d.remove();$('nmX').onclick=cl;d.onclick=e=>{if(bgHit(e,d))cl();};$('nmGo').onclick=()=>{cl();chatToggle(false);if(!S||S.mode==='start')openNick();else toast('메인 화면에서 👤 내 이름을 눌러 주세요');};}
-function chatToggle(on){CHAT_OPEN=on==null?!CHAT_OPEN:on;clearInterval(CHAT_T);CHAT_T=null;chatPaint();if(CHAT_OPEN){if(!FB){chatFetch();CHAT_T=setInterval(()=>{if(!document.hidden&&!CHAT_BUSY)chatFetch();},2000);}setTimeout(()=>{try{$('chIn').focus();}catch(e){}},50);}}
+function chatToggle(on){CHAT_OPEN=on==null?!CHAT_OPEN:on;if(CHAT_OPEN&&S&&S.mode==='play'&&!PAUSED&&!statsOpen){togglePause(true);CHAT_PZ=true;}else if(!CHAT_OPEN&&CHAT_PZ){CHAT_PZ=false;if(PAUSED)togglePause(false);}clearInterval(CHAT_T);CHAT_T=null;chatPaint();if(CHAT_OPEN){if(!FB){chatFetch();CHAT_T=setInterval(()=>{if(!document.hidden&&!CHAT_BUSY)chatFetch();},2000);}setTimeout(()=>{try{$('chIn').focus();}catch(e){}},50);}}
 // 내 이름: 한 번 정해 두면 접속 중 목록과 명예의 전당 등록에 그대로 쓰임
 function openNick(){cosPreviewHide();const cur=myNick();
   show(`<div class="shophead"><h2>👤 내 이름</h2><button class="btn" id="nkBack">돌아가기</button></div>
@@ -9911,7 +9924,9 @@ async function submitScore(nick,comment,run){
   try{
     if(sheet){
       // 이 기기에서 주인 확인이 안 되는 이름: 그 자리에서 이름 비밀번호로 확인하고 바로 등록할 수 있게 (이 판은 최근 기록에도 남아 있음)
-      if(nick!=='익명'&&await nameOwned(nick)){if(btn)btn.disabled=false;if(!msg)return;
+      const own=nick!=='익명'?await nameOwned3(nick,MYKEY):false;
+      if(own===null){if(btn)btn.disabled=false;say('서버에 연결하지 못했어요. 잠시 뒤 다시 등록해 주세요. (이 판은 📜 내 최근 기록에 남아 있어요)');return;}
+      if(own){if(btn)btn.disabled=false;if(!msg)return;
         msg.innerHTML=`'${esc(nick)}'은(는) 이 기기에서 주인 확인이 안 되는 이름이에요. <b>내 이름이면 이름 비밀번호</b>를 넣어 주세요.<div style="display:flex;gap:6px;margin:6px 0"><input id="rPin" type="password" autocomplete="off" placeholder="이름 비밀번호" style="flex:1;min-width:0;padding:6px 10px;border-radius:8px;border:1px solid var(--brass);background:rgba(0,0,0,.3);color:var(--ivory)"><button class="btn" id="rPinGo" style="white-space:nowrap">🔑 확인하고 등록</button></div><small style="opacity:.8">비밀번호를 정한 적이 없으면 이름을 처음 쓴 기기에서 👤 내 이름 → 비밀번호를 정해 주세요. 이 판은 🏆 명예의 전당 → 📜 내 최근 기록에 남아 있어서 나중에 등록할 수 있어요.</small>`;
         const go=async()=>{const pin=($('rPin').value||'').trim();if(!pin)return;$('rPinGo').disabled=true;const nk=pinKey(nick,pin),ok=await nameOwned3(nick,nk);
           if(ok===false){setMyKey(nk);nKeySet(nick,nk);toast('🔑 비밀번호 확인! 이 기기에서도 '+nick+' 이름을 써요');submitScore(nick,comment,run);}
@@ -10390,7 +10405,7 @@ stEl.addEventListener('pointerdown',e=>{const h=e.target.closest&&e.target.close
   h.addEventListener('pointermove',mv);h.addEventListener('pointerup',up);h.addEventListener('pointercancel',up);e.preventDefault();});
 new MutationObserver(stDragApply).observe(stEl,{childList:true});
 stEl.addEventListener('dblclick',e=>{if(e.target.closest&&e.target.closest('.panel>.shophead')&&!e.target.closest('button')){ST_OFF={x:0,y:0};stDragApply();}});
-function toggleStats(){statsOpen=!statsOpen;joy=null;{const pp=document.getElementById('stipPop');if(pp)pp.style.display='none';}if(statsOpen){renderStats();stEl.classList.add('on');}else{stEl.classList.remove('on');stEl.innerHTML='';}}
+function toggleStats(){if(!statsOpen&&PAUSED)togglePause(false);statsOpen=!statsOpen;joy=null;{const pp=document.getElementById('stipPop');if(pp)pp.style.display='none';}if(statsOpen){renderStats();stEl.classList.add('on');}else{stEl.classList.remove('on');stEl.innerHTML='';}}
 $('statBtn').addEventListener('click',()=>{if(S&&S.mode!=='start'){if(cxGame)cxClose();toggleStats();}});
 $('buffs').addEventListener('click',e=>{if(e.target.closest('[data-dpsbox]')){DPSBOX=!DPSBOX;try{localStorage.setItem('chanseo_dpsbox',DPSBOX?'1':'0');}catch(x){}if(S)S._dpH=null;}});
 $('cxBtn').addEventListener('click',()=>{if(cxGame)cxClose();else openCodexGame();});
@@ -10488,7 +10503,7 @@ function renderStats(){
   stEl.querySelectorAll('.sitem.sx>.srow').forEach(r=>r.onclick=()=>r.parentNode.classList.toggle('open'));
   $('stSave').onclick=()=>{saveGame(false);};
   // 아직 시작 전(첫 증강·카드 선택 화면)이면 저장할 게 없으니 그냥 메인으로
-  $('stQuit').onclick=()=>{if(!S.started||saveGame(false)){toggleStats();newRun();CH_PEND=true;startScreen();}};
+  $('stQuit').onclick=()=>{if(!S.started||S.mode==='over'||saveGame(false)){toggleStats();newRun();CH_PEND=true;startScreen();}};
   // 정산 종료: 쓰러진 것과 같게 처리(메달·명예의 전당 등록·악몽 10분 해제권). 실수 방지로 두 번 눌러야 함
   if($('stEnd'))$('stEnd').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.innerHTML='한 번 더 누르면 정산하고 끝냅니다';return;}toggleStats();S.quitEnd=true;gameOver(false);};
 }
@@ -10501,7 +10516,7 @@ function loop(now){
   if(STOPPED)return;
   const dt=Math.min(.033,(now-last)/1000);last=now;
   if(PAUSED&&S.mode!=='play')togglePause(false);
-  if(statsOpen||PAUSED){}else if(S.mode==='spec'){specTick(dt);fx(dt);}else if(S.mode==='play'||S.mode==='dying'){const n=AUTO.speed||1;for(let i=0;i<n;i++){if(S.mode!=='play'&&S.mode!=='dying')break;update(dt);}}else fx(dt);
+  if(statsOpen||PAUSED||document.getElementById('dmPop')){}else if(S.mode==='spec'){specTick(dt);fx(dt);}else if(S.mode==='play'||S.mode==='dying'){const n=AUTO.speed||1;for(let i=0;i<n;i++){if(S.mode!=='play'&&S.mode!=='dying')break;update(dt);}}else fx(dt);
   if(S.mode==='start')drawPreviews();
   if(S.mode==='play'&&!PAUSED){autoT+=dt;if(autoT>15){autoT=0;saveGame(true);}}
   draw();hud();requestAnimationFrame(loop);
@@ -10510,7 +10525,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=147,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=148,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
