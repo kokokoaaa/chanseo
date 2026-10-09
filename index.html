@@ -7599,6 +7599,8 @@ const PATCH_NOTES=[
     ['new','🛡 기사의 방패(왼손)도 장비로 보여요. 벗을 수 있고, 등급마다 모양이 달라요 (영웅·전설은 3가지)'],
     ['change','🎽 기본 장비(방패 포함 7종)는 일반보다 조금 약한 능력치가 있는 장비가 됐어요. 강화·판매·해체도 할 수 있어요'],
     ['up','🍀 행운이 높을수록 장비가 잘 떨어지고, 좋은 등급과 높은 능력치가 잘 나와요'],
+    ['change','🐞 휴대폰에서 내 캐릭터·대장간·외형 화면의 캐릭터 도트가 들쭉날쭉 깨져 보이던 문제를 고쳤어요 (눈·얼굴이 고르게 보여요)','bug'],
+    ['change','🐞 방패를 벗으면 왼팔이 사라지던 문제를 고쳤어요','bug'],
   ]},
   {v:168,t:'👕 장비가 몸에 보여요 (기사부터)',items:[
     ['new','👕 기사는 낀 장비가 몸에 그대로 보여요! 모자·갑옷·망토·바지·신발·무기가 등급마다 다른 모습이고, 영웅·전설은 디자인이 3가지씩 있어요 (다른 직업도 곧 추가)'],
@@ -8859,17 +8861,21 @@ function repPickBind(px,cv,after){const sel=$(px+'Sel'),bt=$(px+'Save'),st=$(px+
   sel.onchange=()=>{REP_PEND=sel.value;if(cv)gearLiveStart(cv,sel.value);paint();};
   bt.onclick=()=>{META.rep=sel.value;REP_PEND=null;invTouch();saveMeta();toast(`⭐ 대표 캐릭터를 ${CLASSES[META.rep].n}(으)로 저장했어요`);paint();if(after)after();};
   if(cv&&REP_PEND&&REP_PEND!==repCls())gearLiveStart(cv,REP_PEND);}
-function gearLiveStart(cv,clsO){if(!cv)return;const id=++GLIVE,g=cv.getContext('2d'),cls=clsO&&CLASSES[clsO]?clsO:repCls(),x=cosEq('skin'),sk=x&&x.cat==='skin'?x:null,au=[cosEq('wing'),cosEq('aura')].filter(Boolean),parts=[],t0=performance.now();
-  const frame=now=>{if(id!==GLIVE||!document.body.contains(cv))return;const T=(now-t0)/1000,face=Math.floor(T/2.2)%2?-1:1,W=cv.width,H=cv.height,cx=W/2,fy=H-24,oc=ctx;
-    g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,W,H);g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(cx,fy+2,34,9,0,0,TAU);g.fill();
-    const K=3.2/PXW,emit=q=>{if(parts.length<120)parts.push({...q,x:cx+q.x*K*face,y:fy+q.y*K,vx:(q.vx||0)*K*face,vy:(q.vy||-25)*K,life:q.life||.5,t:0});};
+// 도트가 고르게 보이게: 캔버스를 화면 실제 픽셀 크기로 맞춤 (휴대폰처럼 배율이 2.6배 같은 소수면 도트 한 칸 크기가 들쭉날쭉해짐)
+function crispCv(cv,base){const r=cv.getBoundingClientRect(),cw=r.width||(+cv.dataset.cw||cv.width),ch=r.height||(+cv.dataset.ch||cv.height),d=Math.min(4,window.devicePixelRatio||1);
+  if(!cv.dataset.cw){cv.dataset.cw=cv.width;cv.dataset.ch=cv.height;}const bw=+cv.dataset.cw,bh=+cv.dataset.ch;
+  cv.width=Math.round(cw*d);cv.height=Math.round(ch*d);cv.style.width=cw+'px';cv.style.height=ch+'px';return {d,k:Math.min(cw/bw,ch/bh)};}
+function gearLiveStart(cv,clsO){if(!cv)return;const id=++GLIVE,g=cv.getContext('2d'),cls=clsO&&CLASSES[clsO]?clsO:repCls(),x=cosEq('skin'),sk=x&&x.cat==='skin'?x:null,au=[cosEq('wing'),cosEq('aura')].filter(Boolean),parts=[],t0=performance.now(),dp=crispCv(cv),D=Math.max(2,Math.round(3.2*dp.d*dp.k));
+  const frame=now=>{if(id!==GLIVE||!document.body.contains(cv))return;const T=(now-t0)/1000,face=Math.floor(T/2.2)%2?-1:1,W=cv.width,H=cv.height,cx=Math.round(W/2),fy=H-Math.round(24*D/3.2),oc=ctx;
+    g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,W,H);g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(cx,fy+2*D/3.2,34*D/3.2,9*D/3.2,0,0,TAU);g.fill();
+    const K=D/PXW,emit=q=>{if(parts.length<120)parts.push({...q,x:cx+q.x*K*face,y:fy+q.y*K,vx:(q.vx||0)*K*face,vy:(q.vy||-25)*K,life:q.life||.5,t:0});};
     try{ctx=g;GFIT_CLS=cls;
-      auraAt(g,cx,fy,3.2,au,T);
-      HERO_DRESS=myDress(cls);try{HERO.draw(cls,'walk',T,0,false);}finally{HERO_DRESS=null;}const uo=(HERO.uOff||0)*3.2;
-      g.save();g.translate(cx,fy+uo);g.scale(face*3.2/PXW,3.2/PXW);const P={x:0,y:0,moving:true,lmx:face*.6};drawGearBack(P,0,T,emit);g.restore();g.save();g.imageSmoothingEnabled=HERO.hires;g.filter=(sk&&sk.f?sk.f+' ':'')+(gearRim(T)||'');if(g.filter==='')g.filter='none';if(sk&&sk.a)g.globalAlpha=sk.a;g.translate(cx,fy);g.scale(face*3.2,3.2);g.drawImage(HERO.canvas,...HERO.box);g.restore();g.filter='none';
-      g.save();g.translate(cx,fy+uo);g.scale(face*3.2/PXW,3.2/PXW);drawGearFront(P,0,T,emit);g.restore();
+      auraAt(g,cx,fy,D,au,T);
+      HERO_DRESS=myDress(cls);try{HERO.draw(cls,'walk',T,0,false);}finally{HERO_DRESS=null;}const uo=(HERO.uOff||0)*D;
+      g.save();g.translate(cx,fy+uo);g.scale(face*D/PXW,D/PXW);const P={x:0,y:0,moving:true,lmx:face*.6};drawGearBack(P,0,T,emit);g.restore();g.save();g.imageSmoothingEnabled=HERO.hires;g.filter=(sk&&sk.f?sk.f+' ':'')+(gearRim(T)||'');if(g.filter==='')g.filter='none';if(sk&&sk.a)g.globalAlpha=sk.a;g.translate(cx,fy);g.scale(face*D,D);g.drawImage(HERO.canvas,...HERO.box);g.restore();g.filter='none';
+      g.save();g.translate(cx,fy+uo);g.scale(face*D/PXW,D/PXW);drawGearFront(P,0,T,emit);g.restore();
     }catch(e){}finally{ctx=oc;GFIT_CLS=null;}
-    for(let i=parts.length-1;i>=0;i--){const q=parts[i];q.t+=1/60;if(q.t>q.life){parts.splice(i,1);continue;}q.x+=q.vx/60;q.y+=q.vy/60;g.globalAlpha=1-q.t/q.life;g.fillStyle=q.col||'#fff';g.fillRect(q.x-1.5,q.y-1.5,3,3);}g.globalAlpha=1;
+    for(let i=parts.length-1;i>=0;i--){const q=parts[i];q.t+=1/60;if(q.t>q.life){parts.splice(i,1);continue;}q.x+=q.vx/60;q.y+=q.vy/60;g.globalAlpha=1-q.t/q.life;g.fillStyle=q.col||'#fff';g.fillRect(q.x-D/2,q.y-D/2,D,D);}g.globalAlpha=1;
     requestAnimationFrame(frame);};
   requestAnimationFrame(frame);}
 // 대장간 = 대장장이 + 장비 인벤토리: 직사각형 장비창(대표 캐릭터 + 테두리 14칸) · 가방 60칸/창고 150칸(칸 자리 자유 이동·정렬) · 대장장이가 말풍선으로 안내
@@ -8907,10 +8913,10 @@ function itCell(it,pos){if(!it)return `<div class="icell empty"${pos!=null?` dat
 // 대장장이 도트 (몸·앞치마·망치·모루). 강화할 때 망치를 내려침
 const SMITH_IDLE=['어서 와! 오늘은 뭘 두드려 볼까?','보스를 쓰러뜨리면 장비가 떨어져. 빛기둥이 보이면 다가가 봐!','+5부터는 실패하면 한 단계 내려가. 보호권을 챙기라고!','안 쓰는 장비는 해체해 봐. 가루 20개면 보호권 한 장이야!','같은 세트를 2개, 4개 모으면 숨은 힘이 깨어나지.','직업 전용 무기는 그 직업으로 싸울 때만 손에 쥐어져.','고유 전설 무기라… 나도 평생 몇 번 못 봤어.','장비는 끌어다 놓거나 두 번 누르면 바로 껴져.'];
 let SMITH_ID=0;
-function smithStart(cv){if(!cv)return;const g=cv.getContext('2d'),id=++SMITH_ID,t0=performance.now(),sp=[];
+function smithStart(cv){if(!cv)return;const g=cv.getContext('2d'),id=++SMITH_ID,t0=performance.now(),sp=[],dp=crispCv(cv),Q=Math.max(2,Math.round(4*dp.d*dp.k));
   const R=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x*4,y*4,w*4,h*4);};
   const frame=now=>{if(id!==SMITH_ID||!document.body.contains(cv))return;const T=(now-t0)/1000,hk=Math.max(0,1-(now-SMITH_HIT)/450),sw=hk>0?(hk>.6?-1.1:.25):Math.sin(T*1.6)*.12-.5,br=Math.round(Math.sin(T*2)*.4);
-    g.clearRect(0,0,cv.width,cv.height);g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(64,148,46,7,0,0,TAU);g.fill();
+    g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,cv.width,cv.height);g.setTransform(Q/4,0,0,Q/4,0,0);g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(64,148,46,7,0,0,TAU);g.fill();
     // 모루
     R(19,31,11,2,'#5d6472');R(17,29,15,2,'#8a93a3');R(18,29,13,1,'#b4bccb');R(22,33,5,3,'#4a505c');R(20,36,9,1,'#3a3f49');
     // 다리·장화
@@ -8948,9 +8954,9 @@ function openDollPreview(){const id=++DOLL_ID;show(`<div class="shophead"><h2>�
   {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}$('dpBack').onclick=openForge;
   const cvs=[...ov.querySelectorAll('[data-doll]')],t0=performance.now();
   const fr=now=>{if(id!==DOLL_ID||!cvs[0]||!document.body.contains(cvs[0]))return;const T=(now-t0)/1000,ph=T%4,atk=ph>3,ap=atk?(ph-3):0;
-    for(const cv of cvs){const g2=cv.getContext('2d');g2.clearRect(0,0,cv.width,cv.height);g2.fillStyle='rgba(0,0,0,.3)';g2.beginPath();g2.ellipse(80,152,34,8,0,0,TAU);g2.fill();
+    for(const cv of cvs){if(!cv._dp){cv._dp=crispCv(cv);cv._D=Math.max(2,Math.round(4*cv._dp.d*cv._dp.k));}const g2=cv.getContext('2d'),D=cv._D,W=cv.width,H=cv.height;g2.clearRect(0,0,W,H);g2.fillStyle='rgba(0,0,0,.3)';g2.beginPath();g2.ellipse(W/2,H-6*D,8.5*D,2*D,0,0,TAU);g2.fill();
       HERO_DRESS=DOLL_DEMO[+cv.dataset.doll][1];try{HERO.draw('knight',atk?'attack':'walk',T,ap,false);}finally{HERO_DRESS=null;}
-      g2.imageSmoothingEnabled=false;g2.drawImage(HERO.canvas,0,0,40,40,0,12,160,160);}
+      g2.imageSmoothingEnabled=false;g2.drawImage(HERO.canvas,0,0,40,40,Math.round(W/2-20*D),H-40*D,40*D,40*D);}
     requestAnimationFrame(fr);};requestAnimationFrame(fr);}
 function openForge(){cosPreviewHide();devGearBak();invMig();invNorm();const I=inv(),EQ=eqIds();
   const sel=I.items.find(x=>x.id===INV_SEL)||null,rc=repCls();
