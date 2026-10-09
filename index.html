@@ -8576,7 +8576,7 @@ const ACH=[
   {k:'h_gob',hid:1,n:'고블린의 단골',d:'보물 고블린을 5번 놓치기',p:()=>[(META.hm||{}).goblin||0,5],c:()=>((META.hm||{}).goblin||0)>=5},
   {k:'h_drg',hid:1,n:'아깝다!',d:'황금 용 체력을 10% 미만으로 깎고도 놓치기'},
   {k:'h_blind',hid:1,n:'눈 뜬 장님',d:'한 판에 숨겨진 몬스터 3마리 놓치기'},
-  {k:'h_donor',sec:1,n:'후원자 그저 빛',d:'참붕이에게 토큰값을 후원해 준 고마운 모험가 💛 · 행운 +3'},
+  {k:'h_donor',sec:1,n:'후원자 그저 빛',d:'참붕이에게 토큰값을 후원해 준 고마운 모험가 💛 · 행운 +5'},
   {k:'h_chart',sec:1,n:'차트 마스터',d:'차트를 꼬박꼬박 쓰는 모범 진료인 · 칭호를 달면 사령술사 해골 최대 +10'},
   {k:'h_egg5',hid:1,n:'동네 단골손님',d:'한 판에 이스터에그 3곳 발견'},
   {k:'h_eggall',hid:1,n:'동네 마당발',d:'한 판에 이스터에그 5곳 발견'},
@@ -8763,7 +8763,7 @@ const metaSpent=()=>META.spent!=null?META.spent:Math.round((MSTAT.reduce((q,x)=>
 // 영구 공격력·공격 속도·최대 체력·방어·재생은 판 안 합계에 묻히지 않게 '최종값에 곱하기'로 따로 적용 (pDmg·rawRate·hpSync·hurtP·재생)
 function applyMeta(){const p=S.p;p.hp=p.maxHp;p.lifesteal+=.001*mlv('ls');
   p.crit+=.005*mlv('crit');p.critM+=.04*mlv('critm');p.range*=1+.02*mlv('range');p.speed*=1+.01*mlv('spd');p.dashMul*=1-.02*mlv('dash');p.magnet*=1+.08*mlv('magnet');
-  p.xpM=1+.03*mlv('xp');p.goldM+=.05*mlv('gold');S.gold+=25*mlv('sgold');p.luck+=mlv('luck')+(META.chLk||0)+(META.ach&&META.ach.h_donor?3:0);if(DEV&&DEV_LK)p.luck=Math.max(p.luck,30);if(META.sk.token)p.token=true;if(META.sk.key)S.keys=1;if(META.sk.startCard){bonusStat(2,14);}}
+  p.xpM=1+.03*mlv('xp');p.goldM+=.05*mlv('gold');S.gold+=25*mlv('sgold');p.luck+=mlv('luck')+(META.chLk||0)+(META.ach&&META.ach.h_donor?5:0);if(DEV&&DEV_LK)p.luck=Math.max(p.luck,30);if(META.sk.token)p.token=true;if(META.sk.key)S.keys=1;if(META.sk.startCard){bonusStat(2,14);}}
 // 보스 처치 속도 보너스: 보스마다 기준 시간보다 빨리 잡은 1초당 10점. 보스전 중엔 생존 시간이 멈추므로 실제 걸린 시간은 여기서만 반영
 const BOSS_PAR=[90,90,110,140],BOSS_DM=[.55,.75,1,1];
 const bossSpeedPts=()=>(S.st.btimes||[]).reduce((q,t,i)=>q+Math.round(Math.max(0,(BOSS_PAR[bossHome(i)]||120)-t)*10),0);
@@ -9317,13 +9317,13 @@ async function nameOwned3(nm,key){const ac=window.AbortController?new AbortContr
 const BUILD_AT=[[339464,2],[339689,3],[339998,4],[340233,5],[341524,6],[344191,7],[347478,8],[359468,9],[359867,10],[361917,11],[362237,12],[367440,13],[368584,14],[370091,15],[374613,16],[375742,17],[379539,18],[381722,19],[383512,20],[384757,21],[385054,22],[385423,23],[385724,24],[387694,25],[388384,26],[389114,27],[389689,28],[390004,29],[390416,30],[410725,31],[411274,32],[414292,33],[415053,34],[429735,35],[430942,36],[433707,38],[434562,39],[434643,40],[435612,41],[436078,42],[436475,43],[436614,44],[437417,45],[437470,46],[437948,47],[438396,48],[439410,49],[440981,50],[443769,51],[444186,52],[444449,53],[444846,54],[445352,55],[446021,56],[446660,57],[447060,58],[447459,59],[447677,60],[447839,61],[449847,62],[449967,63],[450055,64],[450832,66],[451364,67],[452069,68],[457582,69],[458404,70],[458835,71],[459738,72],[460371,73],[461108,74],[465967,75],[466787,76],[467738,77],[468207,78],[469021,79],[471199,80],[471386,81],[471615,82],[471813,83],[471972,84],[472174,85],[472364,86],[472501,87],[472657,88],[473000,89],[473101,90],[473359,91],[473601,92],[473786,93],[474319,94],[477467,95]];
 function recVer(b){if(b.build)return 'v'+b.build;const t=(+b.at||0)/1000-1791000000;if(!b.at)return '';if(t<BUILD_AT[0][0])return 'v2 이전';let v=BUILD_AT[0][1];for(const [s,n] of BUILD_AT){if(s<=t)v=n;else break;}return '~v'+v;}
 const myNick=()=>{try{return String(localStorage.getItem('chipdungeon_nick')||'').replace(/\s+/g,' ').trim();}catch(e){return '';}}; // 서버도 앞뒤 공백을 지우니 같게
-// 후원자 감사 표시: 이 이름의 「주인 컴퓨터」(이름을 처음 등록한 열쇠, 또는 같은 이름 비밀번호)에서만 칭호 「후원자 그저 빛」(행운 +3)과 반짝이는 이름을 줌
+// 후원자 감사 표시: 이 이름의 「주인 컴퓨터」(이름을 처음 등록한 열쇠, 또는 같은 이름 비밀번호)에서만 칭호 「후원자 그저 빛」(행운 +5)과 반짝이는 이름을 줌
 // 서버가 「이 열쇠가 주인 맞음」이라고 답할 때만 (연결 실패면 안 줌). 처음 받을 때 한 번 자동으로 달아 주고, 그 뒤 바꾸는 건 자유
 const DONORS=['김성록','병원망한청년'];let DONOR_CK='';
 async function donorCheck(){const n=myNick().trim();if(!SHEET_URL||!DONORS.includes(n)||DONOR_CK===n)return;if(META.ach&&META.ach.h_donor&&cosOwn('hf_donor'))return;DONOR_CK=n;
   try{const r=await fetch(SHEET_URL+'?own='+encodeURIComponent(n)+'&k='+encodeURIComponent(MYKEY),{cache:'no-store'});const j=await r.json();if(!j||j.owned!==false)return;}catch(e){DONOR_CK='';return;}
   META.ach=META.ach||{};META.ach.h_donor=1;META.cos=META.cos||{own:{},eq:{}};META.cos.own.hf_donor=1;if(!META.donorSet){META.donorSet=1;META.cos.eq.hof='hf_donor';META.title='h_donor';}saveMeta();try{onlPing();}catch(e){}
-  const d=document.createElement('div');d.className='chartq';d.innerHTML=`<div class="cq" style="max-width:min(460px,92vw);text-align:center;box-shadow:0 0 30px rgba(255,215,106,.5)"><div style="font-size:44px;line-height:1">💛</div><b style="font-size:22px"><span class="hn hx-hf_donor">💛 ${esc(n)}</span> 님</b><div>참붕이에게 토큰값을 후원해 주셔서 정말 고마워요!<br>칭호 <b style="color:#ffd76a">「후원자 그저 빛」</b>(행운 +3)과<br><b>반짝반짝 빛나는 이름</b>을 드렸어요 ✨</div><button class="btn primary" id="dnrOk">고마워요!</button></div>`;
+  const d=document.createElement('div');d.className='chartq';d.innerHTML=`<div class="cq" style="max-width:min(460px,92vw);text-align:center;box-shadow:0 0 30px rgba(255,215,106,.5)"><div style="font-size:44px;line-height:1">💛</div><b style="font-size:22px"><span class="hn hx-hf_donor">💛 ${esc(n)}</span> 님</b><div>참붕이에게 토큰값을 후원해 주셔서 정말 고마워요!<br>칭호 <b style="color:#ffd76a">「후원자 그저 빛」</b>(행운 +5)과<br><b>반짝반짝 빛나는 이름</b>을 드렸어요 ✨</div><button class="btn primary" id="dnrOk">고마워요!</button></div>`;
   document.body.appendChild(d);$('dnrOk').onclick=()=>{d.remove();if(!S||S.mode==='start')startScreen();};}
 // 난이도: diff 칸 우선, 없으면 직업 칸의 ':' 뒤. 예전 서버가 12자로 잘라 저장한 것('knight:night' 등)도 앞글자로 알아봄
 const clsS=b=>String(b.cls||'').split('~')[0].split('@')[0],skinOf=b=>(String(b.cls||'').split('~')[0].split('@')[1])||b.skin||'',bonusOf=b=>+b.bonus||+String(b.cls||'').split('~')[1]||0,apOf=b=>+b.ap||(+String(b.cls||'').split('~')[2]||0)/100,
@@ -10359,7 +10359,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=133,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=134,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
