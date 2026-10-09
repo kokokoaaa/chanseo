@@ -7402,6 +7402,10 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:138,t:'☁ 데이터 고르기 · 백업',items:[
+    ['change','☁ 「어느 데이터를 쓸까요?」 창에 양쪽의 <b>장착 중인 칭호·외형</b>, 도전과제 수, 지금까지 받은 메달도 보여 줘요','look'],
+    ['change','↺ 서버 데이터를 불러오거나 서버에 덮어쓸 때, 바뀌기 전 데이터를 이 기기에 <b>자동 백업</b>해요. 💾 데이터 옮기기 → 「이 백업으로 되돌리기」로 되돌릴 수 있어요','play'],
+  ]},
   {v:135,t:'🏆 단계형 도전과제 · 🏷 칭호는 외형에서',items:[
     ['change','🏆 도전과제를 <b>단계형</b>으로 묶었어요 (예: ⚔ 보스 러시 5 → 10 → 15단계, 🗿 레이드 1~5단계, ☠ 악몽 생존 10·13·15·18분 등 11줄기). 한 단계 깰 때마다 <b>🏅 메달</b>(20·40·70·100)을 주고, 줄기를 <b>끝까지 다 깨면 칭호</b> + 🏅 150','play'],
     ['change','🏷 칭호 장착은 이제 <b>👕 외형 → 🏷 칭호</b> 탭에서 해요. 아직 못 얻은 칭호는 얻는 방법이 같이 보여요','look'],
@@ -8450,7 +8454,12 @@ async function csLoad(n,k){const ac=window.AbortController?new AbortController()
   try{const r=await fetch(SHEET_URL+'?cload='+encodeURIComponent(n)+'&k='+encodeURIComponent(k),{cache:'no-store',signal:ac?ac.signal:undefined});return await r.json();}catch(e){return null;}finally{clearTimeout(to);}}
 // 데이터 요약 (고르는 창에 나란히 보여 줄 것): 메달·영구 강화 합계·해금 직업·외형·내 캐릭터
 const csSum=d=>{try{const m=JSON.parse(d.chanseo_meta||'{}'),h=(()=>{try{return JSON.parse(d.chanseo_heroes||'[]');}catch(e){return [];}})();
-  return {md:Math.floor(m.medals||0),lv:Object.values(m.lv||{}).reduce((a,b)=>a+(+b||0),0),cls:(m.ucls||[]).length,cos:Object.keys((m.cos&&m.cos.own)||{}).length,hero:Array.isArray(h)?h.length:Object.keys(h||{}).length};}catch(e){return null;}};
+  // 판단용: 장착한 외형·칭호·도전과제 수·누적 메달도 같이
+  const eq=Object.entries((m.cos&&m.cos.eq)||{}).filter(([,k])=>k).map(([c,k])=>{const x=COS.find(q=>q.k===k);return x?(COS_ICO[c]||'')+' '+x.n:'';}).filter(Boolean),ti=m.title&&ACH.find(a=>a.k===m.title);
+  return {md:Math.floor(m.medals||0),tot:Math.floor(m.total||0),lv:Object.values(m.lv||{}).reduce((a,b)=>a+(+b||0),0),cls:(m.ucls||[]).length,cos:Object.keys((m.cos&&m.cos.own)||{}).length,hero:Array.isArray(h)?h.length:Object.keys(h||{}).length,eq,ti:ti?ti.n:'',ach:Object.keys(m.ach||{}).length};}catch(e){return null;}};
+// 덮어쓰기 전 자동 백업 (이 기기에만, 한 칸씩): dev = 불러오기 전 이 기기 데이터, srv = 이 기기 데이터로 덮어쓰기 전 서버 데이터
+const bakSave=(slot,label,code)=>{try{localStorage.setItem('chanseo_bak_'+slot,JSON.stringify({at:Date.now(),label,code}));}catch(e){}};
+const bakGet=slot=>{try{const b=JSON.parse(localStorage.getItem('chanseo_bak_'+slot)||'null');return b&&b.code?b:null;}catch(e){return null;}};
 const csSumCode=code=>{try{return csSum(JSON.parse(decodeURIComponent(escape(atob(String(code).slice(4))))).d);}catch(e){return null;}};
 const csSumLocal=()=>{let h=null;try{h=localStorage.getItem('chanseo_heroes');}catch(e){}return csSum({chanseo_meta:JSON.stringify(META),chanseo_heroes:h});};
 const csMd=code=>{try{const o=JSON.parse(decodeURIComponent(escape(atob(String(code).slice(4)))));return Math.floor(JSON.parse(o.d.chanseo_meta).medals||0);}catch(e){return null;}};
@@ -8459,25 +8468,29 @@ async function csOffer(n,k,after){if(SRV_V<56){after();return;}const j=await csL
   if(!j||!j.ok){after();return;}if(j.none||!j.data){after();csFlagSet(n);setTimeout(()=>csUpload(true,true),500);return;}
   const dt=new Date(j.at||0),ds=`${dt.getMonth()+1}월 ${dt.getDate()}일 ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`,sm=csMd(j.data),mm=Math.floor(META.medals||0);
   const A=csSumCode(j.data)||{md:sm||0,lv:0,cls:0,cos:0,hero:0},B=csSumLocal()||{md:mm,lv:0,cls:0,cos:0,hero:0},sc=x=>x.md+x.lv*200+x.cls*500+x.cos*100+x.hero*50,rec=sc(A)>=sc(B)?'A':'B';
-  const box=(t,x,when,me)=>`<div style="padding:12px;border:2px solid ${rec===me?'var(--brass)':'rgba(255,255,255,.2)'};border-radius:12px;background:${rec===me?'rgba(255,215,106,.08)':'transparent'}"><b>${t}</b>${rec===me?' <span style="color:#ffd76a;font-size:12px">⭐ 추천 (더 많이 진행됨)</span>':''}<div style="margin-top:6px;line-height:1.7;font-size:14px">🏅 메달 ${x.md.toLocaleString()}개<br>⚒ 영구 강화 합계 ${x.lv}<br>🔓 해금 직업 ${x.cls}개<br>👕 외형 ${x.cos}개<br>🗃 내 캐릭터 ${x.hero}명</div><small style="opacity:.75">${when}</small></div>`;
+  const box=(t,x,when,me)=>`<div style="padding:12px;border:2px solid ${rec===me?'var(--brass)':'rgba(255,255,255,.2)'};border-radius:12px;background:${rec===me?'rgba(255,215,106,.08)':'transparent'}"><b>${t}</b>${rec===me?' <span style="color:#ffd76a;font-size:12px">⭐ 추천 (더 많이 진행됨)</span>':''}<div style="margin-top:6px;line-height:1.7;font-size:14px">🏅 메달 ${x.md.toLocaleString()}개${x.tot?` <small style="opacity:.7">(지금까지 ${x.tot.toLocaleString()}개 획득)</small>`:''}<br>⚒ 영구 강화 합계 ${x.lv}<br>🔓 해금 직업 ${x.cls}개<br>🏆 도전과제 ${x.ach||0}개<br>👕 외형 ${x.cos}개 보유<br>🗃 내 캐릭터 ${x.hero}명</div>
+    <div style="margin-top:6px;padding:6px 8px;border-radius:8px;background:rgba(0,0,0,.25);font-size:13px;line-height:1.6"><b style="color:#ffd76a">지금 장착</b><br>🏷 칭호: ${x.ti?'「'+esc(x.ti)+'」':'없음'}<br>${(x.eq&&x.eq.length)?x.eq.map(esc).join('<br>'):'외형 장착 없음'}</div><small style="opacity:.75">${when}</small></div>`;
   show(`<div class="shophead"><h2 style="font-size:24px">☁ 어느 데이터를 쓸까요?</h2><button class="btn" id="csNo">돌아가기</button></div>
   <p class="sub"><b>${esc(n)}</b> 이름으로 서버에 저장된 데이터와 지금 이 기기의 데이터가 달라요. 쓸 쪽을 골라 주세요. 고르지 않은 쪽은 덮어써져요.</p>
   <div class="two" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0">${box('☁ 서버 데이터',A,ds+' 저장','A')}${box('📱 지금 이 기기',B,'이 컴퓨터·폰','B')}</div>
   <div class="btnrow"><button class="btn ${rec==='A'?'primary':''}" id="csYes">☁ 서버 데이터 불러오기</button><button class="btn ${rec==='B'?'primary':''}" id="csKeep">📱 이 기기 데이터 쓰기 (서버에 덮어쓰기)</button></div>
-  <p class="sub" style="margin-top:6px">불러오면 이 기기의 메달·강화·해금·외형·내 캐릭터가 서버 데이터로 바뀌어요.</p><p class="sub" id="csMsg"></p>`);
-  $('csYes').onclick=()=>{try{syncImport(j.data);localStorage.setItem('chanseo_key',k);localStorage.setItem('chipdungeon_nick',n);csFlagSet(n);nKeySet(n,k);$('csMsg').textContent='불러왔어요! 다시 불러옵니다…';setTimeout(()=>location.reload(),600);}catch(e){$('csMsg').textContent='불러오기 실패: '+e.message;}};
-  $('csKeep').onclick=()=>{const b=$('csKeep');if(!b.dataset.ok){b.dataset.ok=1;b.textContent='한 번 더 누르면 서버 데이터를 덮어써요';return;}after();csFlagSet(n);setTimeout(()=>csUpload(true,true),300);};
+  <p class="sub" style="margin-top:6px">불러오면 이 기기의 메달·강화·해금·외형·내 캐릭터가 서버 데이터로 바뀌어요. 바뀌기 전 데이터는 이 기기에 <b>자동 백업</b>돼서 💾 데이터 옮기기에서 되돌릴 수 있어요.</p><p class="sub" id="csMsg"></p>`);
+  $('csYes').onclick=()=>{try{bakSave('dev','불러오기 전 이 기기 데이터 ('+n+')',syncExport());syncImport(j.data);localStorage.setItem('chanseo_key',k);localStorage.setItem('chipdungeon_nick',n);csFlagSet(n);nKeySet(n,k);$('csMsg').textContent='불러왔어요! 다시 불러옵니다…';setTimeout(()=>location.reload(),600);}catch(e){$('csMsg').textContent='불러오기 실패: '+e.message;}};
+  $('csKeep').onclick=()=>{const b=$('csKeep');if(!b.dataset.ok){b.dataset.ok=1;b.textContent='한 번 더 누르면 서버 데이터를 덮어써요';return;}bakSave('srv','덮어쓰기 전 서버 데이터 ('+n+')',j.data);after();csFlagSet(n);setTimeout(()=>csUpload(true,true),300);};
   $('csNo').onclick=after;}
 function openSync(){const code=syncExport();
   show(`<div class="shophead"><h2 style="font-size:24px">💾 데이터 옮기기</h2><button class="btn" id="syBack">돌아가기</button></div>
   <p class="sub">메달 상점 강화·메달·직업 해금·외형·설정·이어하기 저장, 명예의 전당 이름 주인 정보까지 통째로 옮겨요. 이 기기에서 <b>내보내기</b> → 다른 기기에서 <b>가져오기</b>.</p>
   <div style="padding:10px 12px;border:1px solid var(--brass);border-radius:12px;background:rgba(255,215,106,.07);margin:8px 0">☁ <b>더 쉬운 방법: 이름 비밀번호</b><br><small>👤 내 이름에서 <b>이름 비밀번호</b>를 정해 두면 판이 끝날 때마다 데이터가 서버에 자동 저장돼요. 다른 기기에서 👤 내 이름에 <b>같은 이름+비밀번호</b>를 넣으면 불러올 수 있어요.</small>${csOk()?`<div class="btnrow" style="margin-top:6px"><button class="btn" id="csGet">☁ 서버에서 불러오기</button><button class="btn" id="csNow">☁ 지금 서버에 저장</button></div>`:''}</div>
+  ${(()=>{const L=[['dev',bakGet('dev')],['srv',bakGet('srv')]].filter(x=>x[1]);if(!L.length)return '';const ft=t=>{const d=new Date(t);return `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;};
+    return `<h3>↺ 덮어쓰기 전 백업</h3>${L.map(([sl,b])=>{const x=csSumCode(b.code);return `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 10px;border:1px solid rgba(255,255,255,.2);border-radius:10px;margin:4px 0"><span style="flex:1;min-width:200px"><b>${esc(b.label)}</b> <small style="opacity:.7">${ft(b.at)}</small><br><small>${x?`🏅 ${x.md.toLocaleString()} · ⚒ ${x.lv} · 🔓 ${x.cls} · 👕 ${x.cos} · 🗃 ${x.hero}${x.ti?' · 🏷 「'+esc(x.ti)+'」':''}`:''}</small></span><button class="btn" data-bak="${sl}">이 백업으로 되돌리기</button></div>`;}).join('')}`;})()}
   <h3>내보내기</h3><textarea id="syOut" readonly style="width:100%;height:80px;font-size:11px;word-break:break-all;background:rgba(0,0,0,.35);color:var(--ivory);border:1px solid var(--brass);border-radius:8px;padding:6px">${code}</textarea>
   <div class="btnrow"><button class="btn primary" id="syCopy">코드 복사</button><button class="btn" id="syFile">파일로 저장</button></div>
   <h3>가져오기 <small style="color:#ff9a9a;font-size:13px">이 기기의 데이터는 덮어써져요</small></h3><textarea id="syIn" placeholder="CS1: 로 시작하는 코드를 붙여넣기" style="width:100%;height:80px;font-size:11px;background:rgba(0,0,0,.35);color:var(--ivory);border:1px solid var(--brass);border-radius:8px;padding:6px"></textarea>
   <div class="btnrow"><button class="btn primary" id="syLoad">코드로 가져오기</button><button class="btn" id="syPick">파일 불러오기</button><input type="file" id="syFileIn" accept=".txt,text/plain" style="display:none"></div>
   <p class="sub" id="syMsg"></p>`);
   const msg=t=>{$('syMsg').textContent=t;};
+  ov.querySelectorAll('[data-bak]').forEach(b=>b.onclick=()=>{const k=bakGet(b.dataset.bak);if(!k)return;if(!b.dataset.ok){b.dataset.ok=1;b.textContent='한 번 더 누르면 되돌려요';return;}try{bakSave(b.dataset.bak==='dev'?'srv':'dev','되돌리기 전 이 기기 데이터',syncExport());syncImport(k.code);msg('되돌렸어요! 다시 불러옵니다…');setTimeout(()=>location.reload(),600);}catch(e){msg('되돌리기 실패: '+e.message);}});
   $('syBack').onclick=startScreen;if($('csGet'))$('csGet').onclick=()=>csOffer(myNick(),MYKEY,openSync);if($('csNow'))$('csNow').onclick=async()=>{if(!confirm('이 기기 데이터로 서버에 저장된 「'+myNick()+'」 데이터를 덮어써요. 계속할까요?'))return;const ok=await csUpload(true,true);msg(ok?'서버에 저장했어요 ('+myNick()+')':'저장하지 못했어요. 인터넷 연결을 확인해 주세요.');};
   $('syCopy').onclick=async()=>{try{await navigator.clipboard.writeText(code);msg('복사했어요. 다른 기기의 가져오기 칸에 붙여넣으세요.');}catch(e){$('syOut').select();try{document.execCommand('copy');msg('복사했어요.');}catch(_){msg('자동 복사가 안 돼요. 위 칸을 길게 눌러 직접 복사하세요.');}}};
   $('syFile').onclick=()=>{try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([code],{type:'text/plain'}));a.download='찬서_세이브_'+new Date().toISOString().slice(0,10)+'.txt';document.body.appendChild(a);a.click();a.remove();msg('파일로 저장했어요.');}catch(e){msg('파일 저장이 안 돼요. 코드 복사를 이용하세요.');}};
@@ -10414,7 +10427,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=137,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=138,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
