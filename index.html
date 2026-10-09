@@ -3986,7 +3986,7 @@ CH.knight={
  shield(x0,y0){for(let y=-5;y<=5;y++)for(let x=-5;x<=5;x++){const d=Math.hypot(x,y);if(d>5.2)continue;let c;
    if(d>4.1)c=(x+y>2)?'x':(x+y<-3?'s':'S');else{c=((x+7)%3===0)?'a':'A';if(x+y<-3&&d<4.1)c='c';}if(d<1.3)c=(x+y<0)?'s':'S';this.dot(c,x0+x,y0+y);}
    this.dot('x',x0+1,y0+1);},
- draw(st){if(HERO_DRESS&&DLOOK.knight){DLOOK.knight.draw(st,HERO_DRESS);dNatEnd();return;}const U=st.U,A=st.atk,ay=st.ay||0;
+ draw(st){if(HERO_DRESS&&DLOOK.knight){DNAT=null;try{DLOOK.knight.draw(st,HERO_DRESS);}finally{dNatEnd();}return;}const U=st.U,A=st.atk,ay=st.ay||0;
   this.cl(this.scarf[st.cf&1],9,22+U);
   this.cl(this.leg,17,29+st.lL);this.cl(this.leg.map(r=>r.length>2?'.'+r.slice(0,2):r),21,29+st.rL);this.dot('b',23,34+st.rL);this.dot('b',22,34+st.rL);
   this.cl(this.torso,15,23+U);
@@ -4004,7 +4004,7 @@ CH.knight={
   if(st.hurt)hurtEyes(18+U);
  }};
 CH.mage={P:Object.assign({1:'#24124a',2:'#36207a',3:'#4c34a8',4:'#6a4ed0',5:'#9078f0',g:'#e8c45a',G:'#a87e22',h:'#b4b8ca',H:'#e6eaf4',w:'#ffffff',c:'#5ad0f0',z:'#2a1a10'},SKN),
- draw(st){if(HERO_DRESS&&DLOOK.mage){DLOOK.mage.draw(st,HERO_DRESS);dNatEnd();return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+ draw(st){if(HERO_DRESS&&DLOOK.mage){DNAT=null;try{DLOOK.mage.draw(st,HERO_DRESS);}finally{dNatEnd();}return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
   cl(P,['zz'],17,34+Math.min(0,st.lL));cl(P,['zz'],21,34+Math.min(0,st.rL));
   shp(P,20,17+U,[5,5,5,5,5,5,5,5,4.5,4],'hhHHw');
   shp(P,20,22+U,[3.5,4,4,4.5,4.5,4.5,5,5,5,5.5,5.5],'12345');for(let x=-5;x<=5;x++)dt(P,x<1?'g':'G',20+x,33+U);
@@ -4022,7 +4022,7 @@ CH.mage={P:Object.assign({1:'#24124a',2:'#36207a',3:'#4c34a8',4:'#6a4ed0',5:'#90
   if(st.hurt)hurtEyes(18+U);
  }};
 CH.archer={P:Object.assign({1:'#12301a',2:'#1f4a24',3:'#2f6a2e',4:'#46883a',5:'#68a850',b:'#4a2a14',B:'#7a4a24',L:'#7a4a24',l:'#4a2a12',z:'#2a1a0e',g:'#e8c45a',p:'#5a4a30',q:'#3a2e1e',f:'#e8e0c8'},SKN),
- draw(st){if(HERO_DRESS&&DLOOK.archer){DLOOK.archer.draw(st,HERO_DRESS);dNatEnd();return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+ draw(st){if(HERO_DRESS&&DLOOK.archer){DNAT=null;try{DLOOK.archer.draw(st,HERO_DRESS);}finally{dNatEnd();}return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
   shp(P,20,23+U,[4,4.5,5,5,5.5,5.5,5],'11223');for(let x=-5;x<=5;x++)if((x+st.cf)%3)dt(P,'1',20+x,30+U);
   cl(P,['f.f.','LfLf','LLl.','LLl.','LLl.','.Ll.'],23,17+U);
   cl(P,['pq','pq','pq','LL','zz','zzz'],17,29+st.lL);cl(P,['qp','qp','qp','LL','zz','zzz'],21,29+st.rL);
@@ -4041,7 +4041,7 @@ CH.archer={P:Object.assign({1:'#12301a',2:'#1f4a24',3:'#2f6a2e',4:'#46883a',5:'#
   if(st.hurt)hurtEyes(16+U);
  },swoosh:CH_OLD.archer.swoosh};
 CH.rogue={P:Object.assign({1:'#0e0c14',2:'#1c1824',3:'#2c2636',4:'#40384e',5:'#5a5068',r:'#8a1428',R:'#c8323a',q:'#ff6b5b',L:'#4a3424',l:'#2a1c12',z:'#141016',g:'#9a9aa6'},SKN),
- draw(st){if(HERO_DRESS&&DLOOK.rogue){DLOOK.rogue.draw(st,HERO_DRESS);dNatEnd();return;}const P=this.P,U=st.U,A=st.atk,yo=st.ay||0;
+ draw(st){if(HERO_DRESS&&DLOOK.rogue){DNAT=null;try{DLOOK.rogue.draw(st,HERO_DRESS);}finally{dNatEnd();}return;}const P=this.P,U=st.U,A=st.atk,yo=st.ay||0;
   cl(P,st.cf?['.RR..','RRrR.','..rrR']:['.RR..','RRRr.','...rr'],24,21+U);
   cl(P,['32','32','32','11','zz','zzz'],17,29+st.lL);cl(P,['23','23','23','11','zz','zzz'],21,29+st.rL);
   shp(P,20,23+U,[4,4,4,4,4,3.5],'12345');for(let x=16;x<=24;x++)dt(P,'L',x,26+U);dt(P,'g',20,26+U);for(let i=0;i<4;i++)dt(P,'l',18+i,23+U+i);
@@ -4055,7 +4055,7 @@ CH.rogue={P:Object.assign({1:'#0e0c14',2:'#1c1824',3:'#2c2636',4:'#40384e',5:'#5
   if(A===1)dag(26,22+U,1,-1);else if(A===2)dag(24,27+U,-1,1);else dag(25,27+U-yo,0,1);
  },swoosh:[[[13,26],[11,24],[9,22],[8,20],[8,18],[9,16]],[[27,26],[29,24],[31,22],[32,20],[32,18],[31,16]],[[13,32],[16,33],[19,33],[22,33],[25,32]]]};
 CH.paladin={swoosh:CH.knight.swoosh,P:Object.assign({W:'#fbf8ef',w:'#e4e8f0',s:'#c4ccd8',S:'#98a2b4',x:'#6a7488',X:'#3e4556',g:'#f3cf4e',G:'#b88c22',v:'#141020',8:'#fff6b0',y:'#f2cf55',Y:'#c49a22',b:'#2b5d9a',L:'#8a5530',l:'#5a3420'},SKN),
- draw(st){if(HERO_DRESS&&DLOOK.paladin){DLOOK.paladin.draw(st,HERO_DRESS);dNatEnd();return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+ draw(st){if(HERO_DRESS&&DLOOK.paladin){DNAT=null;try{DLOOK.paladin.draw(st,HERO_DRESS);}finally{dNatEnd();}return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
   shp(P,20,23+U,[4,4.5,5,5.5,5.5,6,6,6,6],'xSsww');for(let x=-6;x<=6;x++)if((x+st.cf)%3===0)dt(P,'S',20+x,32+U);
   cl(P,['sS','sx','Sx','SS','xX','xXX'],17,29+st.lL);cl(P,['Ss','xs','xS','SS','Xx','XXx'],21,29+st.rL);
   shp(P,20,23+U,[4,4,4,4,4,4],'xSsww',{hl:1});
@@ -4076,7 +4076,7 @@ CH.paladin={swoosh:CH.knight.swoosh,P:Object.assign({W:'#fbf8ef',w:'#e4e8f0',s:'
   for(let x=16;x<=24;x++)dt(P,'8',x,6+U);dt(P,'8',15,7+U);dt(P,'8',25,7+U);
  }};
 CH.necro={P:{1:'#0e0b14',2:'#1c1726',3:'#2e2640',4:'#4a3e62',5:'#665a82',k:'#ddd6c8',K:'#aca291',e:'#5dff7a',E:'#f4f1e6',b:'#cfc6ae',B:'#8e866f',v:'#151018',8:'#d8ffd0',9:'#7dff8a'},
- draw(st){if(HERO_DRESS&&DLOOK.necro){DLOOK.necro.draw(st,HERO_DRESS);dNatEnd();return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+ draw(st){if(HERO_DRESS&&DLOOK.necro){DNAT=null;try{DLOOK.necro.draw(st,HERO_DRESS);}finally{dNatEnd();}return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
   shp(P,20,23+U,[4,4.5,5,5.5,5.5,6,6,6,6],'11223');for(let x=-6;x<=6;x++)if((x+st.cf)%2)dt(P,'1',20+x,32+U);
   shp(P,20,22+U,[3.5,4,4,4.5,4.5,4.5,5,5,5,5.5,5.5],'12345');for(let x=-5;x<=5;x++)if((x+st.cf)%2===0)dt(P,'2',20+x,33+U);
   for(let y=23;y<33;y+=2)dt(P,'b',20,y+U);for(let x=16;x<=24;x++)dt(P,'B',x,27+U);cl(P,['bEb','EvE'],19,26+U);
@@ -4090,7 +4090,7 @@ CH.necro={P:{1:'#0e0b14',2:'#1c1726',3:'#2e2640',4:'#4a3e62',5:'#665a82',k:'#ddd
   if(st.hurt)hurtEyes(16+U);
  }};
 CH.gunner={P:Object.assign({L:'#8a5a32',Y:'#b07a46',y:'#d09a5e',l:'#5a3820',z:'#3a2414',B:'#4a6ab0',b:'#2f4a86',d:'#1f305e',X:'#3e4452',s:'#c8ced8',R:'#c8323a',r:'#8a1428',q:'#ff6b5b',W:'#f4f0e6',g:'#e8c45a',c:'#5a3418'},SKN),
- draw(st){if(HERO_DRESS&&DLOOK.gunner){DLOOK.gunner.draw(st,HERO_DRESS);dNatEnd();return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+ draw(st){if(HERO_DRESS&&DLOOK.gunner){DNAT=null;try{DLOOK.gunner.draw(st,HERO_DRESS);}finally{dNatEnd();}return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
   cl(P,['Bb','Bb','bd','ll','zz','zzz'],17,29+st.lL);cl(P,['bB','bB','db','ll','zz','zzz'],21,29+st.rL);
   shp(P,20,22+U,[3.5,4,4,4.5,4.5,5,5],'zlLYy');for(let y=29;y<=30;y++){dt(P,'l',15,y+U);dt(P,'L',16,y+U);dt(P,'L',24,y+U);dt(P,'l',25,y+U);}
   for(let y=23;y<=26;y++)for(let x=19;x<=21;x++)dt(P,x<21?'W':'s',x,y+U);for(let x=16;x<=24;x++)dt(P,'z',x,27+U);dt(P,'g',20,27+U);
@@ -4104,7 +4104,7 @@ CH.gunner={P:Object.assign({L:'#8a5a32',Y:'#b07a46',y:'#d09a5e',l:'#5a3820',z:'#
   if(st.hurt)hurtEyes(16+U);
  }};
 CH.elem={P:Object.assign({1:'#0e4a5a',2:'#17607a',3:'#2482a4',4:'#38aed0',5:'#7ad8ec',h:'#38b8c8',H:'#7ae0e8',c:'#c8f8fa',W:'#f4f8ff',w:'#c8dce8',g:'#f0c840',G:'#b08a24',r:'#ff5a8a',p:'#ffa8c0',m:'#e06080'},SKN),
- draw(st){if(HERO_DRESS&&DLOOK.elem){DLOOK.elem.draw(st,HERO_DRESS);dNatEnd();return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+ draw(st){if(HERO_DRESS&&DLOOK.elem){DNAT=null;try{DLOOK.elem.draw(st,HERO_DRESS);}finally{dNatEnd();}return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
   shp(P,20,13+U,[5,5.5,6,6,6,6,6,6,6,6,5.5,5,4.5,4],'3hHHc');
   cl(P,['k','k','4','44'],18,31+st.lL);cl(P,['K','K','4','44'],21,31+st.rL);
   for(let y=21;y<=22;y++)for(let x=19;x<=21;x++)dt(P,x<21?'k':'K',x,y+U);dt(P,'g',20,22+U);
@@ -4121,7 +4121,7 @@ CH.elem={P:Object.assign({1:'#0e4a5a',2:'#17607a',3:'#2482a4',4:'#38aed0',5:'#7a
   if(st.hurt)hurtEyes(16+U);
  }};
 CH.berserk={P:Object.assign({a:'#4a2a08',b:'#7a4a14',c:'#b07a2a',d:'#d8a448',f:'#f4d080',r:'#6a0e0e',R:'#a81c1c',q:'#e04a3a',l:'#4a2c14',L:'#7a4a24',S:'#8e96a6',s:'#c3c9d4',x:'#4a5060',X:'#2e3240',w:'#e8ecf2',E:'#f4f0e6',z:'#2a1408',m:'#b8784c',O:'#d0782a',o:'#f0a050'},SKN),
- draw(st){if(HERO_DRESS&&DLOOK.berserk){DLOOK.berserk.draw(st,HERO_DRESS);dNatEnd();return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+ draw(st){if(HERO_DRESS&&DLOOK.berserk){DNAT=null;try{DLOOK.berserk.draw(st,HERO_DRESS);}finally{dNatEnd();}return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
   // 붉은 망토 (뒤)
   shp(P,20,21+U,[5.5,6,6,6,6,6.5,6.5,6.5,6.5,6],'rrRRq');for(let y=24;y<=30;y+=2){dt(P,'r',16,y+U);dt(P,'r',24,y+U);}for(let x=-6;x<=6;x++)if((x+st.cf)%3===0)dt(P,'r',20+x,31+U);
   // 다리: 청동 정강이받이 + 샌들
@@ -4145,7 +4145,7 @@ CH.berserk={P:Object.assign({a:'#4a2a08',b:'#7a4a14',c:'#b07a2a',d:'#d8a448',f:'
   if(st.hurt)hurtEyes(15+U);
  }};
 CH.druid={P:Object.assign({1:'#1a3a14',2:'#2f6a24',3:'#4a8a34',4:'#6aaa48',5:'#9ad85a',L:'#8a5a30',l:'#5a3820',t:'#6a4a2a',T:'#a07a4a',Y:'#c8a070',z:'#2a1a0e',9:'#c8ff7a',8:'#f0ffd0'},SKN),
- draw(st){if(HERO_DRESS&&DLOOK.druid){DLOOK.druid.draw(st,HERO_DRESS);dNatEnd();return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+ draw(st){if(HERO_DRESS&&DLOOK.druid){DNAT=null;try{DLOOK.druid.draw(st,HERO_DRESS);}finally{dNatEnd();}return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
   shp(P,20,23+U,[4,4.5,5,5.5,5.5,6,6,6],'12234');for(let x=-6;x<=6;x++)if((x+st.cf)%2)dt(P,'3',20+x,31+U);
   cl(P,['tL','tL','tL','zl','zz','zzz'],17,29+st.lL);cl(P,['Lt','Lt','Lt','lz','zz','zzz'],21,29+st.rL);
   shp(P,20,23+U,[4,4,4,4,4,4],'ltLTY');for(let x=16;x<=24;x++)dt(P,x%2?'3':'4',x,23+U);for(let x=16;x<=24;x++)dt(P,'z',x,26+U);dt(P,'5',20,26+U);
@@ -4161,7 +4161,7 @@ CH.druid={P:Object.assign({1:'#1a3a14',2:'#2f6a24',3:'#4a8a34',4:'#6aaa48',5:'#9
   if(st.hurt)hurtEyes(16+U);
  }};
 CH.alch={P:Object.assign({h:'#3a2214',H:'#6a3a20',j:'#9a5a30',X:'#8a6a2a',c:'#ffb347',W:'#f6f8fb',s:'#cfd6e0',S:'#9aa6b8',a:'#6a4a2e',A:'#8a6040',z:'#2a1a10',l:'#4a3020',E:'#ffffff',F:'#8ee06a',N:'#4aa83a',o:'#ff9a3a',b:'#4a9ad8'},SKN),
- draw(st){if(HERO_DRESS&&DLOOK.alch){DLOOK.alch.draw(st,HERO_DRESS);dNatEnd();return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+ draw(st){if(HERO_DRESS&&DLOOK.alch){DNAT=null;try{DLOOK.alch.draw(st,HERO_DRESS);}finally{dNatEnd();}return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
   cl(P,['zl','zl','zl','ll','ll','lll'],17,29+st.lL);cl(P,['lz','lz','lz','ll','ll','lll'],21,29+st.rL);
   shp(P,20,22+U,[3.5,4,4,4.5,4.5,5,5],'SsWWW');for(let y=29;y<=30;y++){dt(P,'s',15,y+U);dt(P,'W',16,y+U);dt(P,'W',24,y+U);dt(P,'S',25,y+U);}
   for(let y=24;y<=29;y++)for(let x=18;x<=22;x++)dt(P,x<20?'A':'a',x,y+U);dt(P,'a',18,23+U);dt(P,'a',22,23+U);
@@ -4177,7 +4177,7 @@ CH.alch={P:Object.assign({h:'#3a2214',H:'#6a3a20',j:'#9a5a30',X:'#8a6a2a',c:'#ff
   if(st.hurt)hurtEyes(16+U);
  }};
 CH.gambler={P:Object.assign({z:'#1e1a26',v:'#3a3448',V:'#5a5268',P:'#7a48b8',p:'#4a2678',W:'#f4f1e8',w:'#c8c4bc',R:'#d42c35',r:'#8a1428',g:'#f0c840',G:'#b08a24',c:'#16121a'},SKN),
- draw(st){if(HERO_DRESS&&DLOOK.gambler){DLOOK.gambler.draw(st,HERO_DRESS);dNatEnd();return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
+ draw(st){if(HERO_DRESS&&DLOOK.gambler){DNAT=null;try{DLOOK.gambler.draw(st,HERO_DRESS);}finally{dNatEnd();}return;}const P=this.P,U=st.U,A=st.atk,ay=st.ay||0;
   cl(P,['zv','zv','zv','zz','zz','zzz'],17,29+st.lL);cl(P,['vz','vz','vz','zz','zz','zzz'],21,29+st.rL);
   shp(P,20,23+U,[4,4,4,4,4,4],'zzvvV');for(let y=29;y<=30;y++){dt(P,'z',16,y+U);dt(P,'z',24,y+U);}
   for(let y=23;y<=27;y++)for(let x=18;x<=22;x++)dt(P,x<20?'P':'p',x,y+U);for(let x=19;x<=21;x++)dt(P,'W',x,23+U);dt(P,'w',20,24+U);dt(P,'g',20,25+U);dt(P,'g',20,27+U);
@@ -7877,6 +7877,13 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:175,t:'🐞 장비 버그 정리',items:[
+    ['change','🐞 직업 전용 무기를 낀 채로 일반 무기를 끼면 무기가 사라지던 문제를 고쳤어요 (전용 무기는 가방으로 들어가요)','bug'],
+    ['change','🐞 가방이 꽉 찼을 때 장비를 벗으면 안 보이는 칸으로 사라지던 문제를 고쳤어요 (창고로 가거나, 둘 다 꽉 차면 알려줘요)','bug'],
+    ['change','🐞 귀걸이·반지·팔 보호대를 옆 칸으로 옮기면 서로 자리를 바꿔요','bug'],
+    ['change','🐞 한꺼번에 판매·해체할 때 기본 장비는 빠져요','bug'],
+    ['change','🐞 그 밖에 장비 번호가 겹치거나 메달 상점 환불 계산이 어긋날 수 있던 문제를 고쳤어요','bug'],
+  ]},
   {v:174,t:'👕 모든 직업 장비가 몸에 보여요',items:[
     ['new','👕 이제 12직업 모두 낀 장비가 몸에 보여요! 성기사(방패)·사령술사(해골 구슬)·총잡이(왼손 권총)·정령사(불·얼음 구슬)·광전사(팔 보호대)·드루이드(잎 구슬)·연금술사(작은 물약)·도박사(카드)처럼 직업마다 어울리는 모습으로 바뀌어요'],
     ['new','🏹 궁수: 두건·튜닉·등 망토와 어깨 덮개·바지·신발·활·화살통(방패 칸) / 🗡 도적: 두건·튜닉·빨간 목도리와 얼굴 가리개(망토 칸)·바지·신발·쌍단검(오른손=무기, 왼손=방패 칸)이 몸에 보여요'],
@@ -8655,6 +8662,7 @@ const itDust=it=>[1,3,8,20][it.r]+2*(it.lv||0);
 function dustAdd(n){META.dust=(META.dust||0)+n;let t=0;while(META.dust>=DUST_PER){META.dust-=DUST_PER;META.prot=(META.prot||0)+1;t++;}return t;}
 const inv=()=>{const I=META.inv||(META.inv={items:[],eq:{},n:1});I.items=I.items||[];I.eq=I.eq||{};I.eqc=I.eqc||{};I.n=I.n||1;return I;};
 const eqIds=()=>{const I=inv();return new Set([...Object.values(I.eq),...Object.values(I.eqc)]);};
+const eqItemC=(k,cls)=>{const I=inv();if(k==='sword'){const c=I.eqc[cls];if(c){const x=I.items.find(q=>q.id===c);if(x)return x;}}const id=I.eq[k];return id?I.items.find(x=>x.id===id)||null:null;};
 const eqItem=k=>{const I=inv();if(k==='sword'){const c=I.eqc[wCls()];if(c){const x=I.items.find(q=>q.id===c);if(x)return x;}}const id=I.eq[k];return id?I.items.find(x=>x.id===id)||null:null;};
 const gearLv=k=>{if(GEAR_OVR)return GEAR_OVR[k]>0?GEAR_OVR[k]-1:0;const it=eqItem(k);return it?it.lv||0:0;};
 const gearOwn=k=>GEAR_OVR?GEAR_OVR[k]>0:!!eqItem(k);
@@ -8701,14 +8709,13 @@ function gearDrop(e){if(raidOn()||duelOn()||!S)return;let ch,w;
   if(uq&&CW[S.cls]&&Math.random()<uq)it=rollUnique(S.cls);
   else{if((G.hd||0)>=8)w=[0,0,85,15];it=rollItem(w,lk);}
   G.hd=it.r>=2?0:(G.hd||0)+1;
-  const x=e&&isFinite(e.x)?e.x:S.p.x,y=e&&isFinite(e.y)?e.y:S.p.y;(S.gl=S.gl||[]).push({x,y,it,t:0});
+  const x=e&&isFinite(e.x)?e.x:S.p.x,y=e&&isFinite(e.y)?e.y:S.p.y;(S.gl=S.gl||[]).push({x,y,it,t:0});saveMeta();/* 장비 번호(I.n)가 저장돼야 이어하기 때 번호가 겹치지 않음 */
   if(it.r>=3)chime(it.u?[392,523,659,784,1047,1319]:[523,659,784,1047],'triangle');}
 // 지금 낀 장비로 정한 옷차림 (외형을 만든 직업만). 빈 칸 = 벗은 모습, 기본 장비 = 직업 기본 모습
 let DRESS_C=null,DRESS_K='';
 const DLOOK_ON=c=>HERO.hasDoll(c)&&!(typeof lookOld==='function'&&lookOld(c));
 function myDress(cls){if(!DLOOK_ON(cls))return null;if(DRESS_C&&DRESS_K===cls)return DRESS_C;const o={};
-  for(const [part,slot] of Object.entries({hat:'helm',armor:'armor',cape:'cloak',pants:'pants',boots:'boots',wpn:'sword',shd:'shield'})){const it=eqItem(slot);o[part]=!it?null:it.base?'def':it.u?'uq':it.cls?'cw':{t:it.r,v:it.v||0};}
-  if(o.wpn&&o.wpn!=='cw'&&o.wpn!=='uq'&&o.wpn!=='def'){const it=eqItem('sword');if(it&&it.cls&&it.cls!==cls)o.wpn='def';}
+  for(const [part,slot] of Object.entries({hat:'helm',armor:'armor',cape:'cloak',pants:'pants',boots:'boots',wpn:'sword',shd:'shield'})){const it=eqItemC(slot,cls);o[part]=!it?null:it.base?'def':it.u?'uq':it.cls?'cw':{t:it.r,v:it.v||0};}
   DRESS_C=o;DRESS_K=cls;return o;}
 function gearGive(it,quiet){const I=inv();if(bagN()>=INV_MAX&&whN()<WH_MAX)it.w=1;
   else if(bagN()>=INV_MAX){const m=itSell(it);META.medals+=m;META.total=(META.total||0)+m;saveMeta();if(!quiet)toast(`🎒 가방·창고가 가득 차서 ${GR[it.r].n} 장비를 팔았어요 · 🏅 +${m}`);return;}
@@ -9197,7 +9204,10 @@ function invEquip(it,slot){const I=inv();if(!it)return;const from={w:!!it.w,p:it
   if(it.cls){const o=I.eqc[it.cls],old=o&&o!==it.id?I.items.find(x=>x.id===o):null;I.eqc[it.cls]=it.id;if(old){old.w=from.w;old.p=from.p;}delete it.w;invTouch();saveMeta();return;}
   const ks=GEAR_KEYS.filter(k=>slotT(k)===it.s);if(!ks.length)return;
   if(!slot||!ks.includes(slot)){const pw=k=>{const x=I.eq[k]&&I.items.find(q=>q.id===I.eq[k]);return x?GR[x.r].b*(x.b||1)+(x.lv||0):-1;};slot=ks.find(k=>!I.eq[k])||ks.slice().sort((a,b)=>pw(a)-pw(b))[0];}
-  for(const k of ks)if(I.eq[k]===it.id)delete I.eq[k];const oid=I.eq[slot],old=oid&&I.items.find(x=>x.id===oid);I.eq[slot]=it.id;if(old){old.w=from.w;old.p=from.p;}delete it.w;invTouch();saveMeta();}
+  const k0=ks.find(k=>I.eq[k]===it.id);if(k0===slot)return;if(k0)delete I.eq[k0];const oid=I.eq[slot],old=oid&&I.items.find(x=>x.id===oid);I.eq[slot]=it.id;
+  if(old){if(k0)I.eq[k0]=old.id;/* 두 칸짜리(귀걸이·반지·팔)끼리는 자리만 바꿈 */else{old.w=from.w;old.p=from.p;}}
+  if(slot==='sword'){const c=repCls(),cw=I.eqc[c]&&I.items.find(x=>x.id===I.eqc[c]);if(cw){delete I.eqc[c];cw.w=bagN()>=INV_MAX?1:undefined;if(!cw.w)delete cw.w;cw.p=invFree(!!cw.w);}}/* 직업 전용 무기를 끼고 있으면 일반 무기가 가려지지 않게 전용 무기를 가방으로 */
+  delete it.w;invTouch();saveMeta();}
 function invUnequipIt(it,w){const I=inv();if(!it)return;for(const c in I.eqc)if(I.eqc[c]===it.id)delete I.eqc[c];for(const k in I.eq)if(I.eq[k]===it.id)delete I.eq[k];if(w)it.w=1;else delete it.w;it.p=invFree(!!w);invTouch();saveMeta();}
 function invGearCheck(){const L=GEAR_KEYS.map(k=>eqItem(k)?gearLv(k):0);const L5=L.slice(0,5);achCheck({gear:Math.max(...L),gearAll:GEAR_KEYS.slice(0,5).every(k=>eqItem(k))?Math.min(...L5):0});}
 function itEnhance(it,useProt){if(!it||(it.lv||0)>=GEAR_MAX)return null;const c=itCost(it);if(!medOk(c))return null;if(useProt&&(META.prot||0)<1)useProt=false;
@@ -9293,7 +9303,7 @@ function openForge(){cosPreviewHide();devGearBak();invMig();invNorm();const I=in
     <div class="invtabs"><button class="cxtab ${wh?'':'on'}" data-itab="bag">🎒 가방 ${bagN()}/${INV_MAX}</button><button class="cxtab ${wh?'on':''}" data-itab="wh">📦 창고 ${whN()}/${WH_MAX}</button></div>
     <div class="invgrid" id="invG">${cells.join('')}</div>
     <div class="ftool"><button class="btn" id="iSort">↕ 정렬</button><select id="bulkR"><option value="0"${BULK_R===0?' selected':''}>일반만</option><option value="1"${BULK_R===1?' selected':''}>희귀 이하</option><option value="2"${BULK_R===2?' selected':''}>영웅 이하</option></select><button class="btn ghost" data-bulk="dis">한꺼번에 해체</button><button class="btn ghost" data-bulk="sell">한꺼번에 판매</button></div>
-    <small class="fhint">강화한 장비·세트·전용 무기는 한꺼번에 정리에서 빠져요. 장비를 끌어서 원하는 칸으로 옮길 수 있어요.</small>
+    <small class="fhint">강화한 장비·세트·전용 무기·기본 장비는 한꺼번에 정리에서 빠져요. 장비를 끌어서 원하는 칸으로 옮길 수 있어요.</small>
    </div>
    <div class="fcol fsmith">
     <div class="smith"><canvas id="smithC" width="140" height="156"></canvas><div class="bubble">${say}</div></div>
@@ -9305,9 +9315,9 @@ function openForge(){cosPreviewHide();devGearBak();invMig();invNorm();const I=in
   ${DEV?`<div class="btnrow"><button class="btn" id="gDevGive">🛠 장비 받기</button><button class="btn" id="gDevUq">🛠 고유 받기</button><button class="btn" id="gDevBack">🛠 테스트 전으로</button><button class="btn" id="gDevZero">🛠 가방 비우기</button><button class="btn" id="gDevDoll">🛠 외형 시안</button></div>`:''}`);
   {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}gearMsg='';gearLiveStart($('gLive'));smithStart($('smithC'));
   $('gBack').onclick=startScreen;
-  const re=()=>openForge(),find=id=>I.items.find(x=>x.id===+id),hit=()=>{SMITH_HIT=performance.now();};
+  const re=()=>openForge(),find=id=>I.items.find(x=>x.id===+id),hit=()=>{SMITH_HIT=performance.now();},unTo=w=>{const full=x=>x?whN()>=WH_MAX:bagN()>=INV_MAX;return !full(w)?w:!full(!w)?!w:null;};
   repPickBind('fr',$('gLive'),()=>{gearMsg=`${CLASSES[META.rep].n}(으)로 정했구나! 멋진데?`;re();});
-  ov.querySelectorAll('[data-iid]').forEach(el=>{el.onclick=()=>{INV_SEL=+el.dataset.iid;re();};el.ondblclick=()=>{const it=find(el.dataset.iid);if(!it)return;if(eqSlotOf(it))invUnequipIt(it,wh);else invEquip(it);INV_SEL=it.id;re();};
+  ov.querySelectorAll('[data-iid]').forEach(el=>{el.onclick=()=>{INV_SEL=+el.dataset.iid;re();};el.ondblclick=()=>{const it=find(el.dataset.iid);if(!it)return;if(eqSlotOf(it)){const w=unTo(wh);if(w==null){gearMsg='가방과 창고가 꽉 찼어!';re();return;}invUnequipIt(it,w);}else invEquip(it);INV_SEL=it.id;re();};
     el.ondragstart=e=>{e.dataTransfer.setData('text/plain',el.dataset.iid);};});
   ov.querySelectorAll('[data-slot]').forEach(el=>{el.ondragover=e=>e.preventDefault();el.ondrop=e=>{e.preventDefault();const it=find(e.dataTransfer.getData('text/plain'));if(!it)return;
     if(it.s!==slotT(el.dataset.slot)){gearMsg=`그건 「${GEAR_KEYS.filter(k=>slotT(k)===it.s).map(k=>SLOT_N[k]).filter((v,i,a)=>a.indexOf(v)===i).join('·')}」 칸에 끼는 거야!`;re();return;}
@@ -9322,16 +9332,16 @@ function openForge(){cosPreviewHide();devGearBak();invMig();invNorm();const I=in
   $('iOffAll').onclick=()=>{const L=[...EQ].map(id=>I.items.find(x=>x.id===id)).filter(Boolean);if(!L.length){gearMsg='벗을 장비가 없어.';re();return;}if(!confirm(`낀 장비 ${L.length}개를 모두 벗을까요? (직업 전용 무기 포함)`))return;let n=0;for(const x of L){const toW=bagN()>=INV_MAX;if(toW&&whN()>=WH_MAX)break;invUnequipIt(x,toW);n++;}gearMsg=`${n}개 벗어서 넣어 뒀어.`;re();};
   $('iSort').onclick=()=>{invSort(wh);gearMsg=`${wh?'창고':'가방'} 정리 끝! 좋은 것부터 앞에 뒀어.`;re();};
   $('bulkR').onchange=e=>{BULK_R=+e.target.value;};
-  ov.querySelectorAll('[data-bulk]').forEach(b=>b.onclick=()=>{const dis=b.dataset.bulk==='dis',mr=BULK_R,L=I.items.filter(x=>!EQ.has(x.id)&&!!x.w===wh&&x.r<=mr&&!(x.lv>0)&&!x.set&&!x.cls);
+  ov.querySelectorAll('[data-bulk]').forEach(b=>b.onclick=()=>{const dis=b.dataset.bulk==='dis',mr=BULK_R,L=I.items.filter(x=>!EQ.has(x.id)&&!!x.w===wh&&x.r<=mr&&!(x.lv>0)&&!x.set&&!x.cls&&!x.base);
     if(!L.length){gearMsg='정리할 장비가 없는데?';re();return;}if(!confirm(`${L.length}개를 ${dis?'해체':'판매'}할까요?`))return;let m=0,d=0;for(const x of L){if(dis)d+=itDust(x);else m+=itSell(x);}
     I.items=I.items.filter(x=>!L.includes(x));INV_SEL=null;let t=0;if(dis)t=dustAdd(d);else{META.medals+=m;META.total=(META.total||0)+m;}invTouch();saveMeta();hit();gearMsg=dis?`${L.length}개 해체! 강화 가루 +${d}${t?` → 🛡 보호권 ${t}장 만들어 줬어!`:''}`:`${L.length}개 팔아서 🏅 ${m}!`;re();});
   if(sel){const it=sel;
-    $('iEq').onclick=()=>{if(eqSlotOf(it)){invUnequipIt(it,wh);gearMsg=`${esc(itName(it))}, 벗어 뒀어.`;}else{invEquip(it);gearMsg=`${itIco(it)} ${esc(itName(it))}, 잘 어울리는군!`;}re();};
+    $('iEq').onclick=()=>{if(eqSlotOf(it)){const w=unTo(wh);if(w==null){gearMsg='가방과 창고가 꽉 찼어!';re();return;}invUnequipIt(it,w);gearMsg=`${esc(itName(it))}, 벗어 뒀어.`;}else{invEquip(it);gearMsg=`${itIco(it)} ${esc(itName(it))}, 잘 어울리는군!`;}re();};
     const up=pr=>{const r=itEnhance(it,pr);if(!r)return;hit();gearMsg=r.ok?`<b style="color:#7be08f">✨ 성공! ${esc(itName(it))}</b>`:r.prot?`<b style="color:#9fd3ff">🛡 실패… 보호권 덕분에 그대로야.</b>`:r.broke?`<b style="color:#ff6a6a">💥 이런! 부서져서 +0이 됐어…</b>`:r.down?`<b style="color:#ffb070">💢 실패… 한 단계 내려갔어 (+${it.lv})</b>`:`<b style="color:#ffd76a">실패… 단계는 그대로야. 다시 해 볼까?</b>`;
       if(r.ok&&r.t>=7)chime([523,659,784,1047,1319],'triangle');if(r.ok&&r.t>=10)achUnlock('h_forge');if(r.broke)achUnlock('h_broke');if(r.ok)invGearCheck();re();};
     $('iUp').onclick=()=>up(false);$('iPr').onclick=()=>up(true);
     $('iMv').onclick=()=>{if(eqSlotOf(it))return;if(it.w){if(bagN()>=INV_MAX){gearMsg='가방이 꽉 찼어!';re();return;}delete it.w;it.p=invFree(false);gearMsg='🎒 가방에 넣어 뒀어.';}else{if(whN()>=WH_MAX){gearMsg='창고가 꽉 찼어!';re();return;}it.w=1;it.p=invFree(true);gearMsg='📦 창고에 넣어 뒀어.';}saveMeta();re();};
-    const risky=it.r>=2||it.lv>=3||!!eqSlotOf(it)||it.set||it.cls;
+    const risky=it.r>=2||it.lv>=3||!!eqSlotOf(it)||it.set||it.cls||it.base;
     $('iSell').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok&&risky){b.dataset.ok=1;b.textContent='한 번 더 누르면 판매';return;}
       if(eqSlotOf(it))invUnequipIt(it);const m=itSell(it);I.items=I.items.filter(x=>x!==it);META.medals+=m;META.total=(META.total||0)+m;INV_SEL=null;invTouch();saveMeta();gearMsg=`${esc(itName(it))}, 🏅 ${m}에 사 줄게!`;re();};
     $('iDis').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok&&risky){b.dataset.ok=1;b.textContent='한 번 더 누르면 해체';return;}
@@ -9429,7 +9439,7 @@ function gearHistPush(){try{const s=JSON.stringify(META.inv||{}),L=JSON.parse(lo
   L.unshift({t:Date.now(),inv:META.inv||{},prot:META.prot||0,gearLog:META.gearLog||{}});localStorage.setItem(GEAR_HIST,JSON.stringify(L.slice(0,12)));}catch(e){}}
 function saveMeta(){try{gearHistPush();localStorage.setItem('chanseo_meta',JSON.stringify(META));}catch(e){}try{csSoon();}catch(e){}}
 // 게임 창을 여러 개 띄웠을 때: 다른 창이 저장하면 이 창도 바로 그 내용으로 맞춤 (예전 내용을 들고 있던 창이 덮어쓰지 않게)
-addEventListener('storage',e=>{if(e.key!=='chanseo_meta'||!e.newValue)return;try{const m=JSON.parse(e.newValue);if(!m||typeof m!=='object')return;for(const k of Object.keys(META))if(!(k in m))delete META[k];Object.assign(META,m);gearLastS=JSON.stringify(META.inv||{});invTouch();}catch(er){}});
+addEventListener('storage',e=>{if(e.key!=='chanseo_meta'||!e.newValue)return;try{const m=JSON.parse(e.newValue);if(!m||typeof m!=='object')return;for(const k of Object.keys(META))if(!(k in m))delete META[k];Object.assign(META,m);gearLastS=JSON.stringify(META.inv||{});invTouch();if(document.getElementById('invG'))openForge();}catch(er){}});/* 다른 창에서 바뀌면 열린 대장간도 새로 그림 (옛 목록으로 팔아 메달이 복사되는 것 방지) */
 // 영구 강화: 단계당 효과는 작게, 항목과 단계는 많게 (오래 모으는 성장)
 const MSTAT=[
   // 기본 강화 = 판을 원활하게 하기 위한 기본 패시브 (단계 절반·1단계 효과 2배(mul) → 다 채운 힘은 예전과 같음. 가격은 지옥·신 20판(약 2,400메달) 기준)
@@ -9736,8 +9746,9 @@ function metaMig2(){if(META.mshop2&&!META.mshop3){META.mshop3=1;const C={atk:8,r
     back=Math.round(back);if(back>0){META.medals+=back;if(META.spent!=null)META.spent=Math.max(0,META.spent-back);setTimeout(()=>toast(`🏅 메달 상점 가격이 더 내려갔어요! 차액 🏅 ${back.toLocaleString()}을 돌려드렸어요`),1800);}saveMeta();}
   if(META.mshop2)return;META.mshop2=1;META.mshop3=1;const OLD={atk:[15,1],rate:[22,1],hp:[15,1],armor:[15,1],regen:[22],ls:[30],crit:[22],critm:[22],range:[15],spd:[15],dash:[22],magnet:[8],xp:[22],gold:[15],sgold:[8],luck:[30],seal:[40]};
   const SKO={extraAug:72,wave:48,token:60,reroll:48,startCard:60,bossHeal:72,discount:90,key:150,bossMedal:60};let back=0;META.lv=META.lv||{};META.sk=META.sk||{};
-  for(const x of MSTAT){const o=OLD[x.k];const L=META.lv[x.k]||0;if(!o||!L)continue;const n=Math.min(x.max,Math.ceil(L/(x.mul||1)));back+=Math.max(0,o[0]*L*(L+1)/2-x.c*n*(n+1)/2);META.lv[x.k]=n;}
-  for(const k in SKO){if(!META.sk[k])continue;const x=MSKILL.find(q=>q.k===k);back+=x?Math.max(0,SKO[k]-x.c):SKO[k];if(!x)delete META.sk[k];}
+  const dv=META.spent==null?3:1;/* 기록이 없는 옛 계정은 1/3 가격에 샀음 → 그만큼만 차액 계산 */
+  for(const x of MSTAT){const o=OLD[x.k];const L=META.lv[x.k]||0;if(!o||!L)continue;const n=Math.min(x.max,Math.ceil(L/(x.mul||1)));back+=Math.max(0,o[0]*L*(L+1)/2/dv-x.c*n*(n+1)/2);META.lv[x.k]=n;}
+  for(const k in SKO){if(!META.sk[k])continue;const x=MSKILL.find(q=>q.k===k);back+=x?Math.max(0,SKO[k]/dv-x.c):SKO[k]/dv;if(!x)delete META.sk[k];}
   back=Math.round(back);if(back>0){META.medals+=back;if(META.spent!=null)META.spent=Math.max(0,META.spent-back);setTimeout(()=>toast(`🏅 메달 상점이 가벼워졌어요! 차액 메달 🏅 ${back.toLocaleString()}을 돌려드렸어요`),1800);}saveMeta();}
 const mcost=x=>x.c*(mlvR(x.k)+1);
 // 영구 강화 가격은 3배로 올림. 환불은 실제로 쓴 메달만 (META.spent). 가격 인상 전 구매분은 예전 가격(1/3)으로 계산
@@ -10265,8 +10276,8 @@ function openMeta(cosOnly){cosPreviewHide();
   const buy1=x=>{const c=mcost(x);if(!medOk(c)||mlvR(x.k)>=x.max||(x.cls&&!clsOpen(x.cls))||(x.nm&&!diffOpen('nightmare')))return false;META.spent=metaSpent()+c;META.medals-=c;META.lv[x.k]=mlvR(x.k)+1;return true;};
   ov.querySelectorAll('[data-ms]').forEach(b=>b.onclick=()=>{if(buy1(MSTAT.find(q=>q.k===b.dataset.ms))){saveMeta();keepY();}});
   ov.querySelectorAll('[data-mx]').forEach(b=>b.onclick=()=>{const x=MSTAT.find(q=>q.k===b.dataset.mx);let n=0;while(buy1(x))n++;if(n){saveMeta();keepY();}});
-  ov.querySelectorAll('[data-mr]').forEach(b=>b.onclick=()=>{const x=MSTAT.find(q=>q.k===b.dataset.mr);let l=mlvR(x.k);while(l>0){const r=Math.min(x.c*l,metaSpent());META.lv[x.k]=l-1;META.medals+=r;META.spent=Math.max(0,metaSpent()-r);l--;}saveMeta();keepY();});
-  ov.querySelectorAll('[data-mm]').forEach(b=>b.onclick=()=>{const x=MSTAT.find(q=>q.k===b.dataset.mm),l=mlvR(x.k);if(!l)return;const r=Math.min(x.c*l,metaSpent());META.lv[x.k]=l-1;META.medals+=r;META.spent=Math.max(0,metaSpent()-r);saveMeta();keepY();});
+  ov.querySelectorAll('[data-mr]').forEach(b=>b.onclick=()=>{if(META.spent==null)META.spent=metaSpent();const x=MSTAT.find(q=>q.k===b.dataset.mr);let l=mlvR(x.k);while(l>0){const r=Math.min(x.c*l,metaSpent());META.lv[x.k]=l-1;META.medals+=r;META.spent=Math.max(0,metaSpent()-r);l--;}saveMeta();keepY();});
+  ov.querySelectorAll('[data-mm]').forEach(b=>b.onclick=()=>{if(META.spent==null)META.spent=metaSpent();const x=MSTAT.find(q=>q.k===b.dataset.mm),l=mlvR(x.k);if(!l)return;const r=Math.min(x.c*l,metaSpent());META.lv[x.k]=l-1;META.medals+=r;META.spent=Math.max(0,metaSpent()-r);saveMeta();keepY();});
   ov.querySelectorAll('[data-mk]').forEach(b=>b.onclick=()=>{const x=MSKILL.find(q=>q.k===b.dataset.mk);if(!medOk(x.c)||META.sk[x.k])return;META.spent=metaSpent()+x.c;META.medals-=x.c;META.sk[x.k]=1;saveMeta();keepY();});
   ov.querySelectorAll('[data-ct]').forEach(b=>b.onclick=()=>{COS_TAB=b.dataset.ct;COS_ANIM=1;const y=ov.scrollTop;openMeta(1);ov.scrollTop=y;});
   // 장비 칸: 누르면 그 종류 탭으로, ✕는 해제
@@ -10388,9 +10399,9 @@ const ptTxt=s=>{s=+s||0;const h=Math.floor(s/3600),m=Math.floor(s%3600/60);retur
 const HOF_PD=['hell','god','nightmare','bossrush'];
 function myBestSc(){const n=onlKey(myNick());let b=0;for(const r of (BOARD||[]))if(r&&HOF_PD.includes(r.diff)&&onlKey(r.name)===n)b=Math.max(b,scoreOf(r));return b;}
 // 전투력 = 영구 강화 단계 합 × 20 + 착용 장비(세기 × 150 + 추가 옵션 수 × 40) + 최고 기록 점수 ÷ 50
-function myPower(){let m=0;for(const k in (META.lv||{}))m+=mlv(k);let g=0;for(const k of GEAR_KEYS){const it=eqItem(k);if(it)g+=gearE(k)*150+(it.a||[]).length*40;}const r=myBestSc()/50;return {all:Math.round(m*20+g+r),m:Math.round(m*20),g:Math.round(g),r:Math.round(r)};}
+function myPower(){let m=0;for(const k in (META.lv||{}))m+=mlv(k);let g=0;const rc=repCls();for(const k of GEAR_KEYS){const it=eqItemC(k,rc);if(it)g+=(GR[it.r].b*(it.b||1)+(it.lv||0))*150+(it.a||[]).length*40;}const r=myBestSc()/50;return {all:Math.round(m*20+g+r),m:Math.round(m*20),g:Math.round(g),r:Math.round(r)};}
 // 프로필 문자열 (영문·숫자만): 직업~외형~오라~모습~칭호~장비(칸마다 등급+강화 2글자)~전투력~플레이 초~도전과제 수~강화·장비·기록 전투력
-function myProf(){const P=myPower(),I=inv(),ge=GEAR_KEYS.map(k=>{const it=eqItem(k);return it?String(it.r)+Math.min(10,it.lv||0).toString(11):'--';}).join('');const x=cosEq('skin');
+function myProf(){const P=myPower(),I=inv(),rc=repCls(),ge=GEAR_KEYS.map(k=>{const it=eqItemC(k,rc);return it?String(it.r)+Math.min(10,it.lv||0).toString(11):'--';}).join('');const x=cosEq('skin');
   return [repCls(),x&&x.cat==='skin'?x.k:'',auraStr(),lookOld(repCls())?'o':'n',META.title||'',ge,P.all,Math.round(META.pt||0),Object.keys(META.ach||{}).length,[P.m,P.g,P.r].join('.')].join('~').replace(/[^A-Za-z0-9_+.~:\-]/g,'');}
 function profParse(p){const a=String(p||'').split('~');if(a.length<8)return null;const ge=a[5]||'',G={},eq={};GEAR_KEYS.forEach((k,i)=>{const c=ge.substr(i*2,2);if(c&&c[0]!=='-'){const r=Math.min(3,+c[0]||0),lv=parseInt(c[1],11)||0;eq[k]={r,lv};G[k]=lv+1;}});
   const pp=String(a[9]||'').split('.');return {cls:CLASSES[a[0]]?a[0]:'knight',skin:a[1]||'',aura:a[2]||'',look:a[3]==='o',title:a[4]||'',eq,gear:GEAR_KEYS.map(k=>G[k]?Math.min(10,G[k]-1).toString(11):'-').join('').replace(/-+$/,''),pw:+a[6]||0,pt:+a[7]||0,ach:+a[8]||0,pm:+pp[0]||0,pg:+pp[1]||0,pr:+pp[2]||0};}
@@ -11470,7 +11481,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=174,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=175,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
