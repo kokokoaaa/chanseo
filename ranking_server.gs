@@ -1,6 +1,10 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v6.1
+// 찬서 명예의 전당 서버 (Google Apps Script) v6.2
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
+//
+// v6.1 → v6.2 바뀐 점
+// - 관리자가 이름 비밀번호를 직접 정해 줌 (POST rekey + 개발자 키): 지금 주인과 상관없이 그 이름 열쇠를 이름+비밀번호 열쇠로 바꿈
+//   (주인을 지운 사이에 그 사람의 다른 기기가 자동 저장으로 이름을 다시 가져가 비밀번호가 계속 틀리던 문제 해결용)
 //
 // v6.0 → v6.1 바뀐 점
 // - 멘트는 기록을 처음 올리거나 더 좋은 기록으로 바뀔 때만 저장 (점수가 안 오른 기록을 다시 올려 멘트만 바꾸던 구멍 막음)
@@ -261,7 +265,7 @@ function ping_(q) {
   if (id && !q.bye) devLog_(id, str_(q.n, 12) || '모험가', str_(q.ua, 30));
   let w = 0;
   try { w = id && c.get('watch_' + id) ? 1 : 0; } catch (err) {}
-  return out_({ v: 61, ct, w, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 62, ct, w, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
 }
 
 // 전체 채팅 (최근 CHAT_MAX개만 보관)
@@ -500,6 +504,17 @@ function doPost(e) {
       const v = s.getRange(2, 1, last - 1, LIST_COLS).getValues(), cc = HEAD.indexOf('comment') + 1;let n = 0;
       v.forEach((r, i) => { const o = Object.fromEntries(HEAD.slice(0, LIST_COLS).map((h, j) => [h, r[j]])); if (String(o.name) === nm && fixDiff_(o) === df) { s.getRange(i + 2, cc).setValue(str_(d.comment, 40)); n++; } });
       return out_({ ok: !!n, result: 'cmEdit', n });
+    }
+    // 관리자가 이름 비밀번호를 직접 정함 (개발자 키): 지금 주인과 상관없이 그 이름의 열쇠를 이름+비밀번호 열쇠로 바꿈
+    // (주인을 지운 사이에 그 사람의 다른 기기가 자동 저장으로 이름을 다시 가져가 버리는 경우를 막기 위해)
+    if (d.rekey && d.dk) {
+      if (String(d.dk) !== DEV_KEY) return out_({ ok: false, err: 'key' });
+      const nm = str_(d.name, 12), nk = kh_(d.nk);
+      if (!nm || nm === '익명' || !nk) return out_({ ok: false, err: 'bad' });
+      const o = owner_(s, nm), kc = HEAD.indexOf('kh') + 1;
+      o.rows.forEach(rw => s.getRange(rw, kc).setValue(nk));
+      acctSetKh_(nm, nk);ownerSet_(nm, nk);
+      return out_({ ok: true, result: 'devrekey', n: o.rows.length });
     }
     // 이름 주인 확인: 주인이 있는 이름은 같은 열쇠로만. 주인이 없으면 열쇠와 함께 처음 올린 기기가 주인
     const nm0 = str_(d.name, 12) || '익명', my = kh_(d.k), own = nm0 === '익명' ? { rows: [], kh: '' } : owner_(s, nm0);
