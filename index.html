@@ -269,6 +269,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 .frate{font-size:12px;color:var(--muted)}.frate summary{cursor:pointer}
 .icell.uq{box-shadow:0 0 0 2px #ff5a3c,0 0 12px rgba(255,90,60,.7)}.iset{position:absolute;left:3px;top:3px;width:8px;height:8px;border-radius:50%}.icw{position:absolute;left:2px;bottom:1px;font-size:9px;font-style:normal;color:#ffd76a}
 .lootsum{margin:0 0 10px;padding:8px 10px;border:2px solid var(--brass);border-radius:12px;background:rgba(0,0,0,.3);text-align:center}.lootsum div{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin:6px 0}.lootsum span{padding:3px 8px;border:2px solid var(--rc);border-radius:8px;color:var(--rc);font-size:13px;background:rgba(0,0,0,.3)}.lootsum small{color:var(--muted)}
+.dollg{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}.dollc{display:flex;flex-direction:column;align-items:center;padding:8px;border:2px solid var(--brass);border-radius:12px;background:radial-gradient(circle at 50% 45%,rgba(214,169,74,.2),rgba(0,0,0,.3) 70%)}.dollc canvas{width:160px;height:176px;image-rendering:pixelated}.dollc small{text-align:center;font-size:12px}
 .hoftip{position:fixed;z-index:9999;display:none;max-width:290px;padding:9px 12px;border-radius:10px;background:rgba(18,26,22,.96);border:1px solid var(--brass);color:var(--ivory);font-size:13px;line-height:1.55;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.5)}
 .hof .more{display:block;width:100%;margin-top:8px;font-size:15px;padding:7px}
 @media (max-width:520px){.podium{grid-template-columns:1fr 1fr;gap:6px}.pcard.p1{order:0;grid-column:1/-1}.pcard.p2,.pcard.p3{order:1;padding:8px 6px}.pcard .pn{font-size:17px}.pcard .ps{font-size:19px}.pcard .pq{font-size:12px}}
@@ -3704,6 +3705,8 @@ function tagCount(){const c={},o={},oq={};for(const a of S.augs){for(const t of 
   // 가드 2: 최대 체력 +40 (조건이 바뀌면 더하거나 뺌)
   if(S.p){const sw=tag('sniper')>=2?1.2:1,sh=S.p.snR||1;if(sw!==sh){S.p.range*=sw/sh;S.p.snR=sw;}}
   if(S.p){const want=0,have=S.p.g2hp||0;if(want!==have){S.p.maxHp+=want-have;S.p.hp=Math.max(1,Math.min(S.p.maxHp,S.p.hp+(want-have)));S.p.g2hp=want;}}}
+// 장비 외형: 그리기 직전에 정해 두면 그 옷차림으로 그림 (null이면 직업 기본 모습)
+var HERO_DRESS=null;
 const HERO=(()=>{
 const sc=document.createElement('canvas');sc.width=40;sc.height=40;const g=sc.getContext('2d',{willReadFrequently:true});
 function px(c,col,x,y,w=1,h=1){c.fillStyle=col;c.fillRect(x|0,y|0,w,h);}
@@ -3981,7 +3984,7 @@ CH.knight={
  shield(x0,y0){for(let y=-5;y<=5;y++)for(let x=-5;x<=5;x++){const d=Math.hypot(x,y);if(d>5.2)continue;let c;
    if(d>4.1)c=(x+y>2)?'x':(x+y<-3?'s':'S');else{c=((x+7)%3===0)?'a':'A';if(x+y<-3&&d<4.1)c='c';}if(d<1.3)c=(x+y<0)?'s':'S';this.dot(c,x0+x,y0+y);}
    this.dot('x',x0+1,y0+1);},
- draw(st){const U=st.U,A=st.atk,ay=st.ay||0;
+ draw(st){if(HERO_DRESS&&DLOOK.knight)return DLOOK.knight.draw(st,HERO_DRESS);const U=st.U,A=st.atk,ay=st.ay||0;
   this.cl(this.scarf[st.cf&1],9,22+U);
   this.cl(this.leg,17,29+st.lL);this.cl(this.leg.map(r=>r.length>2?'.'+r.slice(0,2):r),21,29+st.rL);this.dot('b',23,34+st.rL);this.dot('b',22,34+st.rL);
   this.cl(this.torso,15,23+U);
@@ -4187,6 +4190,62 @@ CH.gambler={P:Object.assign({z:'#1e1a26',v:'#3a3448',V:'#5a5268',P:'#7a48b8',p:'
   if(st.hurt)hurtEyes(16+U);
   cl(P,w?['.gg.','gGGg','.gg.']:['.g.','.G.','.g.'],w?25:26,cy);
  }};
+// ===== 장비 외형 (종이 인형): 기본 몸 위에 모자·갑옷·망토·바지·신발·무기를 덧입힘. 칸이 비면 직업 기본 모습 =====
+// 등급별 색 묶음 (A 밝음 → D 어두움, E 장식)
+const DCOL={lin:{A:'#efe6cf',B:'#d6c8a6',C:'#a8977a',D:'#6a5a44',E:'#c7962e'},lea:{A:'#c98a52',B:'#8a5530',C:'#5a3420',D:'#3a2014',E:'#e8c45a'},stl:{A:'#f4f8ff',B:'#c8d2e0',C:'#8e9bb0',D:'#5a6478',E:'#9aa6b8'},
+  kni:{A:'#e6ecf4',B:'#a8b4c6',C:'#6a768a',D:'#3a4252',E:'#e8c45a',F:'#34508a',G:'#4c6cac'},drg:{A:'#ff6b5b',B:'#d42c35',C:'#8a1428',D:'#4a0a14',E:'#ffd866'},gld:{A:'#fff1a8',B:'#ffd866',C:'#c7962e',D:'#8a6420',E:'#d42c35'},
+  shd:{A:'#b28cff',B:'#7b4fe0',C:'#5230a8',D:'#2e1a6b',E:'#9fe6ff'},wnd:{A:'#c8f4ff',B:'#4fb8d8',C:'#2a7a9a',D:'#14465a',E:'#ffffff'},phx:{A:'#ffe680',B:'#ff9a2a',C:'#e0451f',D:'#8a1a10',E:'#fff6c0'},wgd:{A:'#ffffff',B:'#e6ecf4',C:'#b4c0d0',D:'#8a96a8',E:'#ffd866'},
+  hair:{A:'#ffe9a0',B:'#f2cf55',C:'#c49a22',D:'#8a6a12',E:'#fff'}};
+const DTIER={hat:['lea','stl','kni','gld'],armor:['lea','stl','kni','drg'],cape:['lea','stl','shd','phx'],pants:['lea','stl','kni','drg'],boots:['lea','stl','wnd','wgd']};
+function dpaint(rows,x0,y0,M){for(let y=0;y<rows.length;y++){const r=rows[y];for(let x=0;x<r.length;x++){const c=r[x];if(c==='.')continue;const v=M[c]||SKN[c];if(!v)continue;g.fillStyle=v;g.fillRect(x0+x,y0+y,1,1);}}}
+const dpx=(M,c,x,y)=>{const v=M[c]||SKN[c];if(v){g.fillStyle=v;g.fillRect(x,y,1,1);}};
+// 둥근 머리 덮개(머리카락·투구 공통): 왼쪽 위가 밝음
+function ddome(M,U,top,h,rad,ridge){for(let y=0;y<h;y++){const w=Math.round(rad*Math.sqrt(Math.max(0,1-((h-.4-y)/h)**2)));for(let x=-w;x<=w;x++){const u=x/(w||1);let c=u<-.15?'A':u<.35?'B':u<.7?'C':'D';if(y<2&&u<.3)c='A';if(ridge&&x===0)c=y<h-3?'E':'B';if(Math.abs(x)===w)c=u<0?'B':'D';dpx(M,c,20+x,top+y+U);}}}
+const DLOOK={
+ knight:{
+  head(U,hat){if(hat==='def'){CH.knight.helm(U);return 1;}
+   ddome(DCOL.hair,U,11,7,5.6,0);for(let y=17;y<=20;y++){dpx(DCOL.hair,'B',15,y+U);dpx(DCOL.hair,'C',25,y+U);}
+   dpaint(['.kkkkkkk.','kkkkkkkkK','kkekkkekK','kkekkkekK','kkkkkkkKK','.KKKKKKK.'],16,17+U,{});
+   if(hat==null)return 0;const M=DCOL[DTIER.hat[hat]];
+   if(hat===0){ddome(M,U,10,6,6.2,0);for(let x=14;x<=26;x++)dpx(M,x<20?'C':'D',x,16+U);dpx(M,'E',24,14+U);}
+   else{ddome(M,U,10,8,5.8,1);for(let x=14;x<=26;x++)dpx(M,hat>=2?'E':(x<20?'C':'D'),x,17+U);for(let y=18;y<=21;y++){dpx(M,'B',15,y+U);dpx(M,'D',25,y+U);}
+    dpaint(['KKKKKKKKK'],16,18+U,{});
+    if(hat===2){const P=[[21,10],[20,9],[19,8],[18,7],[17,7],[16,6],[15,6]];for(const [x,y] of P){dpx(DCOL.kni,'G',x,y+U);dpx(DCOL.kni,'F',x+1,y+1+U);}}
+    if(hat===3){for(const x of [15,18,20,22,25]){dpx(M,'A',x,9+U);dpx(M,'B',x,8+U);}dpx(M,'E',20,7+U);dpx(M,'E',17,13+U);dpx(M,'E',23,13+U);dpx(DCOL.drg,'A',20,12+U);}}
+   return 1;},
+  torso(U,t){const T=t==null?['.ABBBBBBC..','.ABBBBBBBC.','.ABBBBBBBC.','.ABBBBBBCC.','.DDDDEDDDD.','.ABBBCBBBC.','..CC...CC..']:
+    [['.ABBBBBBC..','.ABCBBCBBC.','.ABBBBBBBC.','.ABCBBCBCC.','.DDDDEDDDD.','.ABBBCBBBC.','..CC...CC..'],
+     ['.ABABABAC..','.BABABABAC.','.ABABABABC.','.BABABABCC.','.DDDDEDDDD.','.ABABCBABC.','..CC...CC..'],
+     ['.AFFFFFFG..','.AFFEEFFFG.','.AFGEEGFFG.','.AFFEEFFGG.','.DDDDEDDDD.','.AAABCAABC.','..CC...CC..'],
+     ['.ABACABAC..','.BACABACAC.','.ACABACABC.','.BACABACCC.','.EEEEDEEEE.','.ABACCABAC.','..CC...CC..']][t];
+   dpaint(T,15,23+U,t==null?DCOL.lin:DCOL[DTIER.armor[t]]);},
+  pauldron(U,t,dy){if(t==null)return;const M=DCOL[DTIER.armor[t]];dpaint(t>=2?['.AAB','AABC','ABCD','.DD.']:['.AB.','ABBC','.CC.'],12,23+U+dy,M);if(t===2)dpx(M,'E',14,24+U+dy);if(t===3){dpx(M,'E',13,24+U+dy);dpx(M,'E',15,25+U+dy);}},
+  sleeve(t){return t==null?{rows:['kk','kK','kK','kk','kK'],M:{}}:{rows:['AB','BC','CC','AB','BC'],M:DCOL[DTIER.armor[t]]};},
+  cape(U,t,cf){if(t==null)return;const M=DCOL[DTIER.cape[t]],f=cf&1;
+   const L=[[['....ABB','.ABBBBC','BBCC...'],['.....AB','..ABBBC','.BBCC..']],[['...AABB','.ABBBBC','ABBCC..','BCC....'],['....AAB','..ABBBC','.ABBCC.','.BCC...']],
+     [['...AABB','.ABBBBC','ABBBCC.','BBCC...','BC.....'],['....AAB','..ABBBC','.ABBBCC','.BBCC..','..BC...']],
+     [['...AABB','.ABBBBC','ABBBCC.','BBCCD..','BCD.D..','D.....E'],['....AAB','..ABBBC','.ABBBCC','.BBCCD.','.BCD.D.','E.D....']]][t][f];
+   dpaint(L,8,22+U,M);},
+  legs(st,pt,bt){const P=pt==null?['AB','AB','kK']:[['AB','AB','BC'],['AB','BA','AB'],['AB','AC','BC'],['AB','BA','EC']][pt],B=bt==null?['kK','kK','kKk']:[['AB','AB','ABC'],['AB','BC','ABC'],['AE','AB','ABC'],['AE','AB','BBC']][bt];
+   const MP=pt==null?DCOL.lin:DCOL[DTIER.pants[pt]],MB=bt==null?{}:DCOL[DTIER.boots[bt]];
+   for(const [x,L,right] of [[17,st.lL,0],[21,st.rL,1]]){dpaint(P,x,29+L,MP);dpaint(B.map((r,i)=>right&&i===2?'.'+r.slice(0,2):r),x,32+L,MB);if(right)dpx(MB,bt==null?'K':'C',23,34+L);}
+   if(bt===3){dpx(MB,'E',16,31+st.lL);dpx(MB,'A',15,30+st.lL);dpx(MB,'E',24,31+st.rL);dpx(MB,'A',25,30+st.rL);}},
+  wpn(w){return w==='def'?['W','S','s','g','G',0]:w==='cw'?['W','S','c','B','b',2]:w==='uq'?['8','g','E','R','r',3]:[['s','x','S','L','l',-1],['W','S','s','S','x',0],['W','S','W','g','G',1],['q','R','8','g','n',2]][w];},
+  draw(st,D){const C=CH.knight,U=st.U,A=st.atk,ay=st.ay||0,W=this.wpn(D.wpn==null?'def':D.wpn),bl=(x,y,dx,dy,n)=>{guard(x,y,dx,dy,1,W[3],W[4]);blade(x,y,dx,dy,n+W[5],W[0],W[1],W[2]);};
+   if(D.cape==='def')C.cl(C.scarf[st.cf&1],9,22+U);else this.cape(U,D.cape,st.cf);
+   if(D.pants==='def'&&D.boots==='def'){C.cl(C.leg,17,29+st.lL);C.cl(C.leg.map(r=>r.length>2?'.'+r.slice(0,2):r),21,29+st.rL);C.dot('b',23,34+st.rL);C.dot('b',22,34+st.rL);}
+   else{const LP=D.pants==='def'?2:D.pants,LB=D.boots==='def'?0:D.boots;this.legs(st,LP,LB);}
+   if(D.armor==='def')C.cl(C.torso,15,23+U);else this.torso(U,D.armor);
+   const SL=D.armor==='def'?{rows:['TT','Tt','tt','ss','sS'],M:null}:this.sleeve(D.armor),slv=(rows,x,y)=>SL.M?dpaint(rows,x,y,SL.M):C.cl(rows,x,y);
+   if(A===0){slv(SL.rows,12,19+U);bl(13,18+U,0,-1,8);}else{const yy=A<0?ay:0;slv(SL.rows.slice(1),14,25+U+yy);}
+   if(D.armor==='def')C.cl(C.pauldron,12,23+U+(A===0?-1:0));else this.pauldron(U,D.armor,A===0?-1:0);
+   if(A<0)bl(14,28+U+ay,-1,-1,7);else if(A===1)bl(16,28+U,1,1,8);
+   C.shield(26+(A===1?1:0),27+U+st.sh);
+   if(A===2)bl(16,28+U,1,0,11);
+   const hd=this.head(U,D.hat);
+   if(D.hat==='def'){const f=st.pf?[[21,10],[20,9],[19,8],[18,7],[17,7],[16,6]]:[[21,10],[20,9],[19,8],[18,7],[17,6],[16,6]];for(const [x,y] of f){C.dot('W',x,y+U);C.dot('w',x+1,y+1+U);}}
+   if(D.wpn==='uq'&&Math.floor(st.t*6)%3===0){g.fillStyle='#fff6c0';g.fillRect(A===0?13:12,A===0?10+U:24+U,1,1);}
+   if(st.hurt)hurtEyes(hd||D.hat==='def'?18+U:18+U);}}};
 function hurtEyes(y){g.fillStyle=CP.k;g.fillRect(17,y,6,3);cg(['e.','.e','e.'],17,y);cg(['.e','e.','.e'],21,y);}
 function drawChar(cls,a,t,ap,flash){
   const C=(typeof lookOld==='function'&&lookOld(cls)&&CH_OLD[cls])||CH[cls];g.clearRect(0,0,40,40);g.save();
@@ -7513,6 +7572,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:166,t:'🐞 장비 저장 고침',items:[
+    ['change','🐞 판을 저장했다가 이어하면 바닥에 떨어져 있던 장비가 사라지던 문제를 고쳤어요','bug'],
+  ]},
   {v:165,t:'⚒ 새 대장간 · 진짜로 떨어지는 장비',items:[
     ['new','🎁 보스가 장비를 진짜로 떨어뜨려요! 등급 색 빛기둥이 솟고, 다가가면 날아와서 주워져요. 판이 끝나면 결과 화면에 이번 판 획득 장비가 나와요'],
     ['new','🧔 대장간에 대장장이가 생겼어요. 강화·해체할 때 망치를 내려치고, 말풍선으로 결과와 꿀팁을 알려줘요. 화면도 깔끔하게 다시 정리했어요'],
@@ -8807,6 +8869,21 @@ function smithStart(cv){if(!cv)return;const g=cv.getContext('2d'),id=++SMITH_ID,
     if(hk>.55&&hk<.62&&sp.length<40)for(let i=0;i<14;i++)sp.push({x:96,y:116,vx:(Math.random()-.3)*160,vy:-60-Math.random()*140,l:.5+Math.random()*.4});
     for(const p of sp){p.l-=1/60;p.x+=p.vx/60;p.y+=p.vy/60;p.vy+=380/60;g.fillStyle=p.l>.3?'#ffe27a':'#ff8a2a';g.fillRect(p.x,p.y,3,3);}for(let i=sp.length-1;i>=0;i--)if(sp[i].l<=0)sp.splice(i,1);
     requestAnimationFrame(frame);};requestAnimationFrame(frame);}
+// 🛠 외형 시안 (개발자 전용): 기사 종이 인형 미리보기
+const DOLL_DEMO=[['맨몸 (기본 몸)',{hat:null,armor:null,cape:null,pants:null,boots:null,wpn:0}],['지금 기사 (장비 없음)',{hat:'def',armor:'def',cape:'def',pants:'def',boots:'def',wpn:'def'}],
+ ['일반 한 벌',{hat:0,armor:0,cape:0,pants:0,boots:0,wpn:0}],['희귀 한 벌',{hat:1,armor:1,cape:1,pants:1,boots:1,wpn:1}],['영웅 한 벌',{hat:2,armor:2,cape:2,pants:2,boots:2,wpn:2}],['전설 한 벌',{hat:3,armor:3,cape:3,pants:3,boots:3,wpn:3}],
+ ['섞어 입기 (모자 전설·갑옷 희귀·망토 없음칸=기본)',{hat:3,armor:1,cape:'def',pants:2,boots:0,wpn:'cw'}],['전설 + ★고유 무기',{hat:3,armor:3,cape:3,pants:3,boots:3,wpn:'uq'}]];
+let DOLL_ID=0;
+function openDollPreview(){const id=++DOLL_ID;show(`<div class="shophead"><h2>🛠 외형 시안 · 기사</h2><button class="btn" id="dpBack">돌아가기</button></div>
+  <p class="sub">걷기 3초 → 공격 1초 반복. 칸이 빈 부위는 직업 기본 모습(지금 모습)으로 보여요.</p>
+  <div class="dollg">${DOLL_DEMO.map((d,i)=>`<div class="dollc"><canvas data-doll="${i}" width="160" height="176"></canvas><small>${d[0]}</small></div>`).join('')}</div>`);
+  {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}$('dpBack').onclick=openForge;
+  const cvs=[...ov.querySelectorAll('[data-doll]')],t0=performance.now();
+  const fr=now=>{if(id!==DOLL_ID||!cvs[0]||!document.body.contains(cvs[0]))return;const T=(now-t0)/1000,ph=T%4,atk=ph>3,ap=atk?(ph-3):0;
+    for(const cv of cvs){const g2=cv.getContext('2d');g2.clearRect(0,0,cv.width,cv.height);g2.fillStyle='rgba(0,0,0,.3)';g2.beginPath();g2.ellipse(80,152,34,8,0,0,TAU);g2.fill();
+      HERO_DRESS=DOLL_DEMO[+cv.dataset.doll][1];try{HERO.draw('knight',atk?'attack':'walk',T,ap,false);}finally{HERO_DRESS=null;}
+      g2.imageSmoothingEnabled=false;g2.drawImage(HERO.canvas,0,0,40,40,0,12,160,160);}
+    requestAnimationFrame(fr);};requestAnimationFrame(fr);}
 function openForge(){cosPreviewHide();devGearBak();invMig();invNorm();const I=inv(),EQ=eqIds();
   const sel=I.items.find(x=>x.id===INV_SEL)||null,rc=repCls();
   const slot=k=>{const it=eqItem(k);return `<div class="eslot" data-slot="${k}" style="grid-area:${SLOT_POS[k]}">${it?itCell(it):`<div class="icell empty"><span class="iph">${k==='sword'&&CW[rc]?CW[rc][0]:GEAR[slotT(k)].ico}</span></div>`}<small>${SLOT_N[k]}</small></div>`;};
@@ -8852,7 +8929,7 @@ function openForge(){cosPreviewHide();devGearBak();invMig();invNorm();const I=in
     <details class="frate"><summary>강화 확률 보기</summary>+1 90% · +2 80% · +3 70% · +4 60% · +5 50% · +6 45% · +7 38% · +8 30% · +9 22% · +10 15%<br>+6부터 실패하면 한 단계 내려가고, 파괴되면 +0이 돼요. 보호권을 쓰면 실패해도 그대로예요.</details>
    </div>
   </div>
-  ${DEV?`<div class="btnrow"><button class="btn" id="gDevGive">🛠 장비 받기</button><button class="btn" id="gDevUq">🛠 고유 받기</button><button class="btn" id="gDevBack">🛠 테스트 전으로</button><button class="btn" id="gDevZero">🛠 가방 비우기</button></div>`:''}`);
+  ${DEV?`<div class="btnrow"><button class="btn" id="gDevGive">🛠 장비 받기</button><button class="btn" id="gDevUq">🛠 고유 받기</button><button class="btn" id="gDevBack">🛠 테스트 전으로</button><button class="btn" id="gDevZero">🛠 가방 비우기</button><button class="btn" id="gDevDoll">🛠 외형 시안</button></div>`:''}`);
   {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}gearMsg='';gearLiveStart($('gLive'));smithStart($('smithC'));
   $('gBack').onclick=startScreen;
   const re=()=>openForge(),find=id=>I.items.find(x=>x.id===+id),hit=()=>{SMITH_HIT=performance.now();};
@@ -8890,6 +8967,7 @@ function openForge(){cosPreviewHide();devGearBak();invMig();invNorm();const I=in
   if($('gDevGive'))$('gDevGive').onclick=()=>{for(const r of [3,3,2,2,2,1,1,1]){if(bagN()>=INV_MAX)break;const w=[0,0,0,0];w[r]=1;const x=rollItem(w);x.p=invFree(false);I.items.push(x);}saveMeta();gearMsg='🛠 테스트 장비를 받았어요';re();};
   if($('gDevUq'))$('gDevUq').onclick=()=>{const x=rollUnique(rc);x.p=invFree(false);I.items.push(x);saveMeta();gearMsg='🛠 고유 무기를 받았어요';re();};
   if($('gDevBack'))$('gDevBack').onclick=()=>{let b=null;try{b=JSON.parse(localStorage.getItem(GEAR_BAK)||'null');}catch(e){}if(!b||!b.inv){gearMsg='되돌릴 기록이 없어요';re();return;}if(!confirm('대장간을 처음 열었을 때 상태로 되돌릴까요?'))return;META.inv=b.inv;META.prot=b.prot||0;META.gearLog=b.gearLog||{};invTouch();saveMeta();try{localStorage.removeItem(GEAR_BAK);}catch(e){}gearMsg='🛠 되돌렸어요';re();};
+  if($('gDevDoll'))$('gDevDoll').onclick=openDollPreview;
   if($('gDevZero'))$('gDevZero').onclick=()=>{if(!confirm('가방과 착용 장비를 모두 비울까요?'))return;META.inv={items:[],eq:{},eqc:{},n:1};INV_SEL=null;invTouch();saveMeta();gearMsg='🛠 가방을 비웠어요';re();};}
 // 직업 언록: 지옥·신 난이도를 깰 때마다 언록권 1장, 잠긴 직업 하나를 골라 엶
 function unlockInfo(k){const C=CLASSES[k],t=C.fav[0],T=TAGS[t],aug=AUGS.filter(a=>!a.cls&&a.tags.includes(t)),own=AUGS.filter(a=>a.cls===k),vip=VIPS.filter(v=>v.tags.includes(t)),cd=Object.keys(CARD_TAG).filter(n=>CARD_TAG[n].length&&CARD_TAG[n].every(x=>x===t));
@@ -10646,7 +10724,7 @@ const SAVE_KEY='chipdungeon_save_v1';
 const PKEYS=['skCd','ulCd','oathCd','cfS','cfT','hpPk','ulCdM','ulDm','skM','fyR','dmgP','rateP','xpM','block','token','hp','maxHp','speed','dmg','rate','bspd','range','multi','pierce','crit','critM','luck','goldM','vuln','orbR','orbM','dashMul','armor','dodge','lifesteal','regen','magnet','shots','pkills','lastCd','soulN','fyO','skN','hpP','hpB','hpLM',
   // 스탯 카드·증강이 쌓는 계열별 보너스 (이어하기 때 사라지던 것들)
   'cdR','sumD','tuL','psD','fiD','thD','slD','hoD','shD','gvR','mkD','wvD','auraM','auraD','skD','skL','lbD','rlM','elD','fyC','fyD','vnR','vnD','ptR','ptD','hdP','hdD','rfN','snR','vpN','dashD'];
-const SKEYS=['chip','hub','amT','dpsMax','maxGold','phoenixCd','shopPend','eggDone','eggK','altN','nmC','dragonPend','prismN','hidN','hidK','hbDone','arr','nmB','gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','takeAll','keys','vipStock','vipRoll','buys','cbuys','fused','potN','vineN','seals','banL','noAug','bossT','bioO','dlog','bStart','bHit','bHpF','boostN','boostB','bonusSt','curB','augN'];
+const SKEYS=['gl','lootGot','chip','hub','amT','dpsMax','maxGold','phoenixCd','shopPend','eggDone','eggK','altN','nmC','dragonPend','prismN','hidN','hidK','hbDone','arr','nmB','gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','takeAll','keys','vipStock','vipRoll','buys','cbuys','fused','potN','vineN','seals','banL','noAug','bossT','bioO','dlog','bStart','bHit','bHpF','boostN','boostB','bonusSt','curB','augN'];
 function saveGame(silent){
   if(S&&(dfM().raid||dfM().duel))return false;
   if(!S||!S.started||!S.p.alive||S.win||S.mode==='over'||S.mode==='dying'||S.mode==='revive')return false;
@@ -11008,7 +11086,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=165,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=166,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
