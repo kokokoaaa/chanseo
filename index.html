@@ -7368,6 +7368,7 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
   {v:124,t:'🔄 자동 업데이트',items:[
+    ['change','📱 이 기기에만 남아 명예의 전당에 안 올라가는 기록(📱 표시)이 있으면 이유를 알려 줘요 (이름 주인 확인이 안 될 때 → 👤 내 이름에서 비밀번호 다시 넣기)','bug'],
     ['change','🔄 결과 화면에 둔 채 켜 두어도 새 버전이 나오면 바로 자동으로 적용돼요 (예전엔 시작 화면에서만 적용돼서, 켜 둔 컴퓨터가 옛 버전으로 계속 접속 중으로 남을 수 있었어요)','bug'],
   ]},
   {v:123,t:'🟢 접속 인원 안정',items:[
@@ -9542,7 +9543,8 @@ async function delSync(){if(!SHEET_URL||SRV_V<57)return;try{const r=await fetch(
 async function myRecSync(){if(MYREC_SYNCED||!SHEET_URL||SRV_V<54)return;MYREC_SYNCED=true;await delSync();const m=myRecs();
   for(const k in m){const r=m[k];if(!r||!r.name||r.name==='익명'||!HOF_KEYS.includes(k))continue;const at=+r.at||(SC3_AT-1),mine=scoreOf({...r,diff:k,at});
     const sv=(BOARD||[]).find(b=>b.name===r.name&&b.diff===k&&!b.local);if(sv&&sv.score>=mine-1)continue;
-    try{fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({...r,diff:k,at,k:MYKEY})});}catch(e){}}
+    // 응답을 읽어서 「이름 주인이 달라서 거절」이면 알려 줌 (이 기기에만 남은 📱 기록이 계속 안 올라가던 원인)
+    fetch(SHEET_URL,{method:'POST',body:JSON.stringify({...r,diff:k,at,k:MYKEY})}).then(x=>x.json()).then(j=>{if(j&&j.result==='owned')toast(`📱 「${r.name}」 ${DIFF[k]?DIFF[k].n:k} 기록이 명예의 전당에 안 올라가요: 이 기기가 이름 주인으로 확인이 안 돼요. 👤 내 이름에서 이름 비밀번호를 다시 넣어 주세요`,9);}).catch(()=>{try{fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({...r,diff:k,at,k:MYKEY})});}catch(e){}});}
   setTimeout(loadSheet,4000);}
 async function loadSheet(tries){tries=tries||0;
   if(!tries&&!SHEET){try{const c=JSON.parse(localStorage.getItem(BOARD_KEY)||'null');if(Array.isArray(c)&&c.length)setBoardFrom(c);}catch(e){}}

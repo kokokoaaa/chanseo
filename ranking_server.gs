@@ -1,6 +1,9 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v5.8
+// 찬서 명예의 전당 서버 (Google Apps Script) v5.9
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
+//
+// v5.8 → v5.9 바뀐 점
+// - 이름 주인 초기화(개발자)가 「계정」 시트의 주인 열쇠도 같이 지움 (예전엔 계정 시트에 남아 초기화가 안 먹었음)
 //
 // v5.7 → v5.8 바뀐 점
 // - 멘트 고치기: POST {cmEdit:1, name, diff, k, comment} → 이름 주인 열쇠가 맞으면 그 기록의 멘트만 바꿈 (빈 칸이면 지움)
@@ -251,7 +254,7 @@ function ping_(q) {
   if (id && !q.bye) devLog_(id, str_(q.n, 12) || '모험가', str_(q.ua, 30));
   let w = 0;
   try { w = id && c.get('watch_' + id) ? 1 : 0; } catch (err) {}
-  return out_({ v: 58, ct, w, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 59, ct, w, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
 }
 
 // 전체 채팅 (최근 CHAT_MAX개만 보관)
@@ -373,6 +376,7 @@ function unown_(q) {
   const lock = LockService.getScriptLock();try { lock.waitLock(8000); } catch (err) { return { err: 'busy' }; }
   try { const s = sheet_(), own = owner_(s, nm), kc = HEAD.indexOf('kh') + 1;
     for (const r of own.rows) s.getRange(r, kc).setValue('');
+    try { const as = acctSheet_(), ar = acctRow_(as, nm); if (ar) as.getRange(ar, 2).setValue(''); } catch (err) {}
     ownerSet_(nm, '');try { CacheService.getScriptCache().remove(CACHE_KEY); } catch (err) {}
     return { ok: 1, n: own.rows.length, had: own.kh ? 1 : 0 };
   } finally { lock.releaseLock(); }
