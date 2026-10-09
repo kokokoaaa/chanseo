@@ -465,6 +465,7 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 .home .hDon .hug{position:relative;flex:0 0 144px;height:120px;margin-top:16px}
 .home .hDon .hug canvas{position:absolute;inset:0;width:144px;height:120px;image-rendering:pixelated}
 .home .hDon .bub{position:absolute;left:108px;top:-4px;padding:4px 10px;border-radius:12px;background:#fff8e6;color:#5a3410;font-size:13px;font-weight:bold;white-space:nowrap;box-shadow:0 2px 4px rgba(0,0,0,.35)}
+@media (max-height:800px) and (min-width:761px){.home .hDon .hug{flex-basis:96px;height:80px;margin-top:12px}.home .hDon .hug canvas{width:96px;height:80px}.home .hDon .bub{left:64px;top:-28px}.home .hDon .dt b{font-size:16px}}
 .home .hDon .bub::after{content:'';position:absolute;left:10px;bottom:-6px;border:6px solid transparent;border-top-color:#fff8e6;border-bottom:0}
 .home .hDon .dt b{display:block;font-size:18px;color:#ffe2a0}.home .hDon .dt small{display:block;font-size:12px;color:#c9b08a;margin-top:2px}
 @keyframes spk{30%{opacity:1;transform:scale(1.3)}60%{opacity:0}}
@@ -7348,6 +7349,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:116,t:'💤 자리 비움',items:[
+    ['new','💤 컴퓨터를 켜 두고 자리를 비우면: 5분 동안 아무 입력이 없으면 접속 목록에 <b>💤 자리 비움</b>으로 보이고 접속 인원 수에서 빠져요. 30분이 지나면 목록에서 사라지고, 다시 마우스·키보드를 만지면 바로 돌아와요','look'],
+  ]},
   {v:115,t:'📱 휴대폰 화면',items:[
     ['change','📱 휴대폰에서 시작 화면을 스크롤할 때 아래 메뉴가 움직이거나 사라지던 문제를 고쳤어요. 메뉴가 화면 맨 아래에 단단히 고정돼요','bug'],
     ['change','🏆 명예의 전당에 아직 사람이 없는 순위 단상은 「비어 있음」 글씨 없이 비워 둬요','look'],
@@ -7779,10 +7783,14 @@ function startScreen(){
   $o('selBack').onclick=()=>$('selWin').classList.remove('on');$o('selWin').onclick=e=>{if(e.target===$('selWin'))$('selWin').classList.remove('on');};if($('quickGo'))$o('quickGo').onclick=()=>beginRun(pickCls);$o('cosBtn2').onclick=()=>openMeta(1);
   if(sv)$o('cont').onclick=()=>continueGame(sv);
   $o('go').onclick=()=>beginRun(pickCls);
-  $o('meta').onclick=()=>openMeta();$o('cosBtn').onclick=()=>openMeta(1);onlPaint();if($('donBtn'))$o('donBtn').onclick=openDonate;if($('donArt'))drawDonArt($('donArt'));if($('supBox'))$o('supBox').onclick=openSupBox;if($('devLog'))$o('devLog').onclick=()=>openDevLog();if($('nickBtn'))$o('nickBtn').onclick=openNick;$o('forgeBtn').onclick=openForge;$o('heroBtn').onclick=openHeroes;if($('raidBtn'))$o('raidBtn').onclick=openRaid;if($('rushBtn'))$o('rushBtn').onclick=openRush;if($('duelBtn'))$o('duelBtn').onclick=openDuel;$o('sync').onclick=openSync;if($('guideBtn'))$o('guideBtn').onclick=()=>openGuide('a');if($('patchBtn'))$o('patchBtn').onclick=()=>openPatch(true);if($('verLbl')){$o('verLbl').onclick=devTapVer;$('verLbl').style.userSelect='none';}$o('codex').onclick=()=>openCodex();$o('achBtn').onclick=openAch;
+  $o('meta').onclick=()=>openMeta();$o('cosBtn').onclick=()=>openMeta(1);onlPaint();if($('donBtn'))$o('donBtn').onclick=openDonate;if($('donArt'))drawDonArt($('donArt'));donPlace();if($('supBox'))$o('supBox').onclick=openSupBox;if($('devLog'))$o('devLog').onclick=()=>openDevLog();if($('nickBtn'))$o('nickBtn').onclick=openNick;$o('forgeBtn').onclick=openForge;$o('heroBtn').onclick=openHeroes;if($('raidBtn'))$o('raidBtn').onclick=openRaid;if($('rushBtn'))$o('rushBtn').onclick=openRush;if($('duelBtn'))$o('duelBtn').onclick=openDuel;$o('sync').onclick=openSync;if($('guideBtn'))$o('guideBtn').onclick=()=>openGuide('a');if($('patchBtn'))$o('patchBtn').onclick=()=>openPatch(true);if($('verLbl')){$o('verLbl').onclick=devTapVer;$('verLbl').style.userSelect='none';}$o('codex').onclick=()=>openCodex();$o('achBtn').onclick=openAch;
   refreshBoard();
 }
 // 참붕이: 검·방패 내려놓고 밥그릇 드는 기사 (48x40 도트)
+// 참붕이 밥 사주기: 엔드 컨텐츠 아래로 조금(최대 120px) 띄우되, 첫 화면에서 아래 메뉴에 가리지 않게 (화면 크기가 바뀌면 다시)
+function donPlace(){const d=document.getElementById('donBtn'),e=document.getElementById('endc'),k=document.querySelector('.home .hDock');if(!d||!e||!ov.classList.contains('home'))return;
+  if(innerWidth<=760){d.style.marginTop='';return;}const eb=e.getBoundingClientRect().bottom,bot=k?k.getBoundingClientRect().top:innerHeight,r=d.getBoundingClientRect(),cm=parseFloat(getComputedStyle(d).marginTop)||0,extra=r.top-eb-cm;const room=bot-eb-r.height-extra-14;d.style.marginTop=Math.round(Math.max(16,Math.min(120,room)))+'px';}
+addEventListener('resize',()=>{try{donPlace();}catch(e){}});
 function drawDonArt(cv){const W=48,H=40;cv.width=W;cv.height=H;const g=cv.getContext('2d');g.clearRect(0,0,W,H);
  const px=(x,y,c)=>{g.fillStyle=c;g.fillRect(x,y,1,1);},rect=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x,y,w,h);},
  ell=(cx,cy,rx,ry,c,f)=>{for(let y=Math.floor(cy-ry);y<=cy+ry;y++)for(let x=Math.floor(cx-rx);x<=cx+rx;x++){const d=((x+.5-cx)/rx)**2+((y+.5-cy)/ry)**2;if(d<=1&&(!f||f(x,y)))px(x,y,c);}};
@@ -9194,14 +9202,19 @@ document.addEventListener('click',e=>{if(!ONL_OPEN||!ov.classList.contains('home
 // 접속·채팅용 기기 번호: 이름 열쇠와 따로 (같은 이름 비밀번호를 쓰는 두 컴퓨터도 따로 보임)
 const DEVID=(()=>{try{let d=localStorage.getItem('chanseo_dev_id');if(!d){d=Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);localStorage.setItem('chanseo_dev_id',d);}return d;}catch(e){return Math.random().toString(36).slice(2,12);}})();
 const onlId=()=>{let h=2166136261;for(const c of 'on|'+DEVID){h^=c.charCodeAt(0);h=Math.imul(h,16777619)>>>0;}return h.toString(36)+DEVID.length.toString(36);};
-function onlAct(){try{if(!S||S.mode==='start'||!S.started)return '시작 화면';if(duelOn())return '⚔ 결투 중';if(raidOn())return '🗿 레이드 중';
+// 자리 비움: 5분 동안 입력(마우스·키보드·터치)이 없으면 「💤 자리 비움」(접속 인원 수에서는 뺌), 30분이면 접속 목록에서 빠짐. 다시 손대면 바로 돌아옴
+let ONL_IN=Date.now();const onlIdle=()=>{const d=Date.now()-ONL_IN;return d>=1800000?2:d>=300000?1:0;};
+['pointerdown','pointermove','keydown','wheel','touchstart'].forEach(ev=>addEventListener(ev,()=>{const was=onlIdle();ONL_IN=Date.now();if(was>0){try{fbPres();}catch(e){}onlPing();}},{passive:true,capture:true}));
+const onlAway=x=>/^💤/.test(String(x&&x.a||''));
+function onlAct(){try{if(onlIdle())return '💤 자리 비움';if(!S||S.mode==='start'||!S.started)return '시작 화면';if(duelOn())return '⚔ 결투 중';if(raidOn())return '🗿 레이드 중';
   const D=DIFF[S.diff]||{};if(D.rush)return '⚔ 보스 러시 '+((S.bossI>=0?S.bossI:0)+1)+'단계';return (D.n||'모험')+' '+Math.floor((S.gt||0)/60)+'분째';}catch(e){return '';}}
 // 같은 이름이 여러 창·브라우저(파일로 연 것과 주소로 연 것 등)에서 동시에 켜져 있으면 한 사람으로 묶어 보여 줌 (이름 효과는 있는 쪽, 활동은 최근 것)
 // 기기 종류 (개발자 기기 기록용): 폰/PC · 브라우저 · 파일로 열었는지 주소로 열었는지
 const devUa=()=>{const u=navigator.userAgent||'';const b=/Edg\//.test(u)?'엣지':/Whale/.test(u)?'웨일':/SamsungBrowser/.test(u)?'삼성':/KAKAOTALK/i.test(u)?'카톡':/Chrome|CriOS/.test(u)?'크롬':/Firefox|FxiOS/.test(u)?'파이어폭스':/Safari/.test(u)?'사파리':'기타';return (/Android|iPhone|iPad|iPod|Mobile/i.test(u)?'폰':'PC')+' '+b+' '+(location.protocol==='file:'?'파일':'주소');};
 function onlMerge(L){const m=new Map();for(const x of L){const k=String(x.n||'');const o=m.get(k);if(!o){m.set(k,{...x});continue;}if(x.me)o.me=1;if(!o.fx&&x.fx)o.fx=x.fx;if(!o.f&&x.f){o.u=x.u;o.f=1;}if((x.s||0)<(o.s||0)){o.s=x.s;o.a=x.a;if(!o.f||x.f)o.u=x.u;o.b=x.b;}}return [...m.values()].sort((a,b)=>(b.me||0)-(a.me||0)||(a.s||0)-(b.s||0));}
-function onlHtml(sm){if(!SHEET_URL)return '';if(!ONLINE)return `<span class="onlb" style="opacity:.7;cursor:default">${ONL_FAIL>=2?'🟠':'🟢'} ${sm?'…':ONL_FAIL>=2?'서버 연결 재시도 중…':'접속 확인 중…'}</span> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}</button>`;const L=ONLINE;
-  return `<button class="onlb" id="onlBtn" title="지금 접속 중">🟢 ${sm?`<b>${L.length}</b>`:`지금 <b>${L.length}</b>명 접속 중`} ${ONL_OPEN?'▲':'▼'}</button> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}${chatUnread()?'<i class="cdot"></i>':''}</button>${ONL_OPEN?`<div class="onll">${DEV&&!sm?`<small style="opacity:.75">🛠 실시간 신호 ${FB?ONL_FB.length+'개':'연결 안 됨'} · 예비 서버 신호 ${ONL_AS.length}개 → 이름 ${L.length}명${ONL_FAIL?' (응답 실패 '+ONL_FAIL+'회)':''}</small>`:''}${L.map(x=>`<span${x.me?' class="me"':''}>${fxName(x.n,x.fx)}${x.me?' (나)':''} · ${esc(x.a||'')}${DEV&&x.b?` <small style="opacity:.7">v${x.b}</small>`:''}${DEV&&!x.me&&x.u&&(x.f||SRV_V>=51)?` <button class="cxchip" data-spec="${esc(x.u)}" data-sf="${x.f?1:''}" data-sn="${esc(x.n)}" title="관전">👁</button>`:''}</span>`).join('')}</div>`:''}`;}
+function onlHtml(sm){if(!SHEET_URL)return '';if(!ONLINE)return `<span class="onlb" style="opacity:.7;cursor:default">${ONL_FAIL>=2?'🟠':'🟢'} ${sm?'…':ONL_FAIL>=2?'서버 연결 재시도 중…':'접속 확인 중…'}</span> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}</button>`;let L=ONLINE;
+  const nA=L.filter(onlAway).length,nOn=L.length-nA;L=[...L.filter(x=>!onlAway(x)),...L.filter(onlAway)];
+  return `<button class="onlb" id="onlBtn" title="지금 접속 중">🟢 ${sm?`<b>${nOn}</b>`:`지금 <b>${nOn}</b>명 접속 중`}${nA?` <small style="opacity:.7">· 💤${nA}</small>`:''} ${ONL_OPEN?'▲':'▼'}</button> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}${chatUnread()?'<i class="cdot"></i>':''}</button>${ONL_OPEN?`<div class="onll">${DEV&&!sm?`<small style="opacity:.75">🛠 실시간 신호 ${FB?ONL_FB.length+'개':'연결 안 됨'} · 예비 서버 신호 ${ONL_AS.length}개 → 이름 ${L.length}명${ONL_FAIL?' (응답 실패 '+ONL_FAIL+'회)':''}</small>`:''}${L.map(x=>`<span${x.me?' class="me"':''}${onlAway(x)?' style="opacity:.55"':''}>${fxName(x.n,x.fx)}${x.me?' (나)':''} · ${esc(x.a||'')}${DEV&&x.b?` <small style="opacity:.7">v${x.b}</small>`:''}${DEV&&!x.me&&x.u&&(x.f||SRV_V>=51)?` <button class="cxchip" data-spec="${esc(x.u)}" data-sf="${x.f?1:''}" data-sn="${esc(x.n)}" title="관전">👁</button>`:''}</span>`).join('')}</div>`:''}`;}
 function onlPaint(){const el=document.getElementById('onl');if(el){el.innerHTML=onlHtml();const b=document.getElementById('onlBtn');if(b)b.onclick=onlToggle;}
   const h=document.getElementById('onlHud');if(h){h.innerHTML=onlHtml(1).replace('id="onlBtn"','id="onlHudBtn"');const hb=document.getElementById('onlHudBtn');if(hb)hb.onclick=e=>{e.stopPropagation();onlToggle();};}
   document.querySelectorAll('[data-chat]').forEach(b=>b.onclick=e=>{e.stopPropagation();chatToggle();});
@@ -9238,7 +9251,7 @@ function fbLoad(){return new Promise((res,rej)=>{if(window.firebase&&firebase.da
 async function fbInit(){try{await fbTO(fbLoad(),10000);if(!firebase.apps.length)firebase.initializeApp(FB_CFG);const cr=await fbTO(firebase.auth().signInAnonymously(),10000);
     const db=firebase.database();FB={db,uid:cr.user.uid};db.ref('.info/serverTimeOffset').on('value',s=>{FB_OFF=+s.val()||0;});fbStart();}catch(e){FB=null;}}
 function onlSet(){ONLINE=onlMerge([...ONL_FB,...ONL_AS]);onlPaint();}
-function fbPres(){if(!FB)return;try{FB.db.ref('online/'+FB.uid).set({n:myNick()||'모험가',a:onlAct(),fx:myFx(),b:BUILD,d:onlId(),t:firebase.database.ServerValue.TIMESTAMP});}catch(e){}}
+function fbPres(){if(!FB)return;try{if(onlIdle()>=2){FB.db.ref('online/'+FB.uid).remove().catch(()=>{});return;}FB.db.ref('online/'+FB.uid).set({n:myNick()||'모험가',a:onlAct(),fx:myFx(),b:BUILD,d:onlId(),t:firebase.database.ServerValue.TIMESTAMP});}catch(e){}}
 function fbStart(){const db=FB.db,me=FB.uid;
   db.ref('online/'+me).onDisconnect().remove();fbPres();setInterval(()=>{if(!document.hidden)fbPres();},20000);
   db.ref('online').on('value',s=>{const v=s.val()||{},now=fbNow();ONL_FB=Object.keys(v).filter(k=>v[k]&&now-(+v[k].t||0)<75000).map(k=>({n:String(v[k].n||'모험가').slice(0,12),a:String(v[k].a||'').slice(0,24),fx:String(v[k].fx||''),b:+v[k].b||0,u:k,f:1,s:Math.max(0,Math.round((now-(+v[k].t||0))/1000)),me:k===me?1:0}));onlSet();});
@@ -9422,7 +9435,7 @@ async function onlPing(bye){if(!SHEET_URL||!MYKEY)return;const u=SHEET_URL+'?pin
   let ok=false;try{const r=await fetch(u,{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();if(j&&Array.isArray(j.on)){ok=true;ONL_FAIL=0;SRV_V=+j.v||0;ONL_AS=j.on.filter(x=>x.me||(x.s||0)<((x.b||0)>=54?70:130));onlSet();if(j.w)snapLoop();fbPres();if(j.ct)CHAT_CT=Math.max(CHAT_CT,+j.ct||0);onlPaint();try{supCheck();}catch(e){}}}catch(e){}finally{clearTimeout(to);}
   if(!ok){ONL_FAIL++;if(!ONLINE)onlPaint();clearTimeout(ONL_RT);ONL_RT=setTimeout(()=>{if(!document.hidden)onlPing();},Math.min(30000,4000*ONL_FAIL));}}
 setTimeout(()=>{onlPaint();onlPing();},300);// 예비 서버 신호: 실시간 서버에 연결돼 있으면 50초마다(예비 서버 부담 줄이기), 아니면 25초마다
-let ONL_LP=0;setInterval(()=>{if(document.hidden)return;const now=Date.now();if(FB&&now-ONL_LP<49000)return;ONL_LP=now;onlPing();},25000);
+let ONL_LP=0,ONL_BYE=0;setInterval(()=>{if(document.hidden)return;if(onlIdle()>=2){if(!ONL_BYE){ONL_BYE=1;onlPing(true);}return;}ONL_BYE=0;const now=Date.now();if(FB&&now-ONL_LP<49000)return;ONL_LP=now;onlPing();},25000);
 addEventListener('pagehide',()=>onlPing(true));
 // 이 기기에만 남은 내 최고 기록 다시 올리기: 예전 서버(v5.2 이하)는 보너스를 뺀 점수로 비교해서, 보너스가 큰 기록이
 // 서버에 안 올라가고 이 기기에만 남은 경우가 있음 → 서버 v5.3 v5.4(기록 시각 저장) 이상이면 서버 기록보다 높은 내 기록을 한 번 다시 보냄
@@ -10170,7 +10183,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=115,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=116,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
