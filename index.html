@@ -7367,6 +7367,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:127,t:'🟢 접속 목록 정리',items:[
+    ['change','🟢 접속 목록에 같은 사람이 두 번씩 나오던 문제를 고쳤어요 (이름 끝 공백이나 기기마다 다른 한글 저장 방식 때문에 다른 사람으로 보던 것)','bug'],
+  ]},
   {v:126,t:'🔑 이름 비밀번호 정리',items:[
     ['change','🔑 한 기기에서 여러 이름을 쓸 때 이름마다 열쇠를 따로 기억해요. 예전엔 이 기기에 남은 다른 이름의 기록을 지금 이름의 열쇠로 다시 올려서, 그 이름의 비밀번호가 안 맞게 되는 문제가 있었어요. 이름을 바꿔도 전에 비밀번호를 넣은 이름이면 다시 안 넣어도 돼요','bug'],
   ]},
@@ -9246,7 +9249,7 @@ async function nameOwned3(nm,key){const ac=window.AbortController?new AbortContr
 // 개발자 모드: 명예의 전당 기록이 몇 번째 버전에서 나왔는지. v100부터는 기록에 저장, 그 전은 기록 시각 ↔ 배포 시각(초 − 1791000000, BUILD) 표로 추정
 const BUILD_AT=[[339464,2],[339689,3],[339998,4],[340233,5],[341524,6],[344191,7],[347478,8],[359468,9],[359867,10],[361917,11],[362237,12],[367440,13],[368584,14],[370091,15],[374613,16],[375742,17],[379539,18],[381722,19],[383512,20],[384757,21],[385054,22],[385423,23],[385724,24],[387694,25],[388384,26],[389114,27],[389689,28],[390004,29],[390416,30],[410725,31],[411274,32],[414292,33],[415053,34],[429735,35],[430942,36],[433707,38],[434562,39],[434643,40],[435612,41],[436078,42],[436475,43],[436614,44],[437417,45],[437470,46],[437948,47],[438396,48],[439410,49],[440981,50],[443769,51],[444186,52],[444449,53],[444846,54],[445352,55],[446021,56],[446660,57],[447060,58],[447459,59],[447677,60],[447839,61],[449847,62],[449967,63],[450055,64],[450832,66],[451364,67],[452069,68],[457582,69],[458404,70],[458835,71],[459738,72],[460371,73],[461108,74],[465967,75],[466787,76],[467738,77],[468207,78],[469021,79],[471199,80],[471386,81],[471615,82],[471813,83],[471972,84],[472174,85],[472364,86],[472501,87],[472657,88],[473000,89],[473101,90],[473359,91],[473601,92],[473786,93],[474319,94],[477467,95]];
 function recVer(b){if(b.build)return 'v'+b.build;const t=(+b.at||0)/1000-1791000000;if(!b.at)return '';if(t<BUILD_AT[0][0])return 'v2 이전';let v=BUILD_AT[0][1];for(const [s,n] of BUILD_AT){if(s<=t)v=n;else break;}return '~v'+v;}
-const myNick=()=>{try{return localStorage.getItem('chipdungeon_nick')||'';}catch(e){return '';}};
+const myNick=()=>{try{return String(localStorage.getItem('chipdungeon_nick')||'').replace(/\s+/g,' ').trim();}catch(e){return '';}}; // 서버도 앞뒤 공백을 지우니 같게
 // 후원자 감사 표시: 이 이름의 「주인 컴퓨터」(이름을 처음 등록한 열쇠, 또는 같은 이름 비밀번호)에서만 칭호 「후원자 그저 빛」(행운 +3)과 반짝이는 이름을 줌
 // 서버가 「이 열쇠가 주인 맞음」이라고 답할 때만 (연결 실패면 안 줌). 처음 받을 때 한 번 자동으로 달아 주고, 그 뒤 바꾸는 건 자유
 const DONORS=['김성록'];let DONOR_CK='';
@@ -9291,7 +9294,9 @@ function onlAct(){try{if(onlIdle())return '💤 자리 비움';if(!S||S.mode==='
 // 같은 이름이 여러 창·브라우저(파일로 연 것과 주소로 연 것 등)에서 동시에 켜져 있으면 한 사람으로 묶어 보여 줌 (이름 효과는 있는 쪽, 활동은 최근 것)
 // 기기 종류 (개발자 기기 기록용): 폰/PC · 브라우저 · 파일로 열었는지 주소로 열었는지
 const devUa=()=>{const u=navigator.userAgent||'';const b=/Edg\//.test(u)?'엣지':/Whale/.test(u)?'웨일':/SamsungBrowser/.test(u)?'삼성':/KAKAOTALK/i.test(u)?'카톡':/Chrome|CriOS/.test(u)?'크롬':/Firefox|FxiOS/.test(u)?'파이어폭스':/Safari/.test(u)?'사파리':'기타';return (/Android|iPhone|iPad|iPod|Mobile/i.test(u)?'폰':'PC')+' '+b+' '+(location.protocol==='file:'?'파일':'주소');};
-function onlMerge(L){const m=new Map();for(const x of L){const k=String(x.n||'');const o=m.get(k);if(!o){m.set(k,{...x});continue;}if(x.me)o.me=1;if(!o.fx&&x.fx)o.fx=x.fx;if(!o.f&&x.f){o.u=x.u;o.f=1;}if((x.s||0)<(o.s||0)){o.s=x.s;o.a=x.a;if(!o.f||x.f)o.u=x.u;o.b=x.b;}}return [...m.values()].sort((a,b)=>(b.me||0)-(a.me||0)||(a.s||0)-(b.s||0));}
+// 같은 사람 판단: 공백·보이지 않는 글자·한글 조합 방식(기기마다 다를 수 있음)을 맞춘 뒤 비교
+const onlKey=n=>{try{return String(n||'').normalize('NFC').replace(/[\s\u200b-\u200f\ufeff]+/g,'');}catch(e){return String(n||'').replace(/\s+/g,'');}};
+function onlMerge(L){const m=new Map();for(const x of L){const k=onlKey(x.n);const o=m.get(k);if(!o){m.set(k,{...x});continue;}if(x.me)o.me=1;if(!o.fx&&x.fx)o.fx=x.fx;if(!o.f&&x.f){o.u=x.u;o.f=1;}if((x.s||0)<(o.s||0)){o.s=x.s;o.a=x.a;if(!o.f||x.f)o.u=x.u;o.b=x.b;}}return [...m.values()].sort((a,b)=>(b.me||0)-(a.me||0)||(a.s||0)-(b.s||0));}
 function onlHtml(sm){if(!SHEET_URL)return '';if(!ONLINE)return `<span class="onlb" style="opacity:.7;cursor:default">${ONL_FAIL>=2?'🟠':'🟢'} ${sm?'…':ONL_FAIL>=2?'서버 연결 재시도 중…':'접속 확인 중…'}</span> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}</button>`;let L=ONLINE;
   const nA=L.filter(onlAway).length,nOn=L.length-nA;L=[...L.filter(x=>!onlAway(x)),...L.filter(onlAway)];
   return `<button class="onlb" id="onlBtn" title="지금 접속 중">🟢 ${sm?`<b>${nOn}</b>`:`지금 <b>${nOn}</b>명 접속 중`}${nA?` <small style="opacity:.7">· 💤${nA}</small>`:''} ${ONL_OPEN?'▲':'▼'}</button> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}${chatUnread()?'<i class="cdot"></i>':''}</button>${ONL_OPEN?`<div class="onll">${DEV&&!sm?`<small style="opacity:.75">🛠 실시간 신호 ${FB?ONL_FB.length+'개':'연결 안 됨'} · 예비 서버 신호 ${ONL_AS.length}개 → 이름 ${L.length}명${ONL_FAIL?' (응답 실패 '+ONL_FAIL+'회)':''}</small>`:''}${L.map(x=>`<span${x.me?' class="me"':''}${onlAway(x)?' style="opacity:.55"':''}>${fxName(x.n,x.fx)}${x.me?' (나)':''} · ${esc(x.a||'')}${DEV&&x.b?` <small style="opacity:.7">v${x.b}</small>`:''}${DEV&&!x.me&&x.u&&(x.f||SRV_V>=51)?` <button class="cxchip" data-spec="${esc(x.u)}" data-sf="${x.f?1:''}" data-sn="${esc(x.n)}" title="관전">👁</button>`:''}</span>`).join('')}</div>`:''}`;}
@@ -9334,8 +9339,8 @@ async function fbInit(){try{await fbTO(fbLoad(),10000);if(!firebase.apps.length)
 // (예전엔 둘을 합쳐서, 나간 사람을 예비 서버가 더 오래 기억하는 동안 인원이 왔다 갔다 했음)
 let FB_SEEN=0;const ONL_KEEP=new Map();
 // 목록에서 막 빠진 사람은 30초 동안 그대로 보여 줌 (잠깐 끊겼다 다시 붙는 동안 인원이 깜빡이지 않게)
-function onlSet(){const fbOk=FB&&Date.now()-FB_SEEN<90000,now=Date.now(),L=onlMerge(fbOk?ONL_FB:ONL_AS);for(const x of L)ONL_KEEP.set(x.n,{x,t:now});
-  for(const [k,o] of ONL_KEEP){if(now-o.t>30000){ONL_KEEP.delete(k);continue;}if(!L.some(y=>y.n===k))L.push({...o.x,me:0});}ONLINE=onlMerge(L);onlPaint();}
+function onlSet(){const fbOk=FB&&Date.now()-FB_SEEN<90000,now=Date.now(),L=onlMerge(fbOk?ONL_FB:ONL_AS);for(const x of L)ONL_KEEP.set(onlKey(x.n),{x,t:now});
+  for(const [k,o] of ONL_KEEP){if(now-o.t>30000){ONL_KEEP.delete(k);continue;}if(!L.some(y=>onlKey(y.n)===k))L.push({...o.x,me:0});}ONLINE=onlMerge(L);onlPaint();}
 function fbPres(){if(!FB)return;try{if(onlIdle()>=2){FB.db.ref('online/'+FB.uid).remove().catch(()=>{});return;}FB.db.ref('online/'+FB.uid).set({n:myNick()||'모험가',a:onlAct(),fx:myFx(),b:BUILD,d:onlId(),t:firebase.database.ServerValue.TIMESTAMP});}catch(e){}}
 function fbStart(){const db=FB.db,me=FB.uid;
   // 연결이 끊겼다 다시 붙으면 바로 다시 알리고 「나가면 지우기」 예약도 다시 걸어 둠 (예전엔 빠졌다가 20초 뒤에야 다시 생겨서 인원이 왔다 갔다 함)
@@ -10287,7 +10292,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=126,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=127,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
