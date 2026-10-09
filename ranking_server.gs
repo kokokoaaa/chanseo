@@ -1,6 +1,11 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v5.5
+// 찬서 명예의 전당 서버 (Google Apps Script) v5.6
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
+//
+// v5.5 → v5.6 바뀐 점
+// - 「계정」 시트: 이름 비밀번호(주인 열쇠)를 명예의 전당 기록과 따로 오래 보관 → 전당 기록이 없는 이름도 비밀번호가 계속 유지됨
+// - 이름+비밀번호 데이터 저장: 판이 끝날 때 게임이 데이터(코드 복붙과 같은 내용)를 올리고, 다른 기기에서 이름+비밀번호로 불러옴
+//   POST {csave:1, name, k, at, md, data} · GET ?cload=이름&k=열쇠 (주인 열쇠가 맞을 때만)
 //
 // v5.4 → v5.5 바뀐 점
 // - 무한의 악몽 새 규칙 기록(SC3_AT 이후)은 최종 점수 ×2 (NM_SM). 게임 화면과 같은 식
@@ -239,7 +244,7 @@ function ping_(q) {
   if (id && !q.bye) devLog_(id, str_(q.n, 12) || '모험가', str_(q.ua, 30));
   let w = 0;
   try { w = id && c.get('watch_' + id) ? 1 : 0; } catch (err) {}
-  return out_({ v: 55, ct, w, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 56, ct, w, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
 }
 
 // 전체 채팅 (최근 CHAT_MAX개만 보관)
@@ -288,8 +293,41 @@ function ownerKh_(nm) {
   const c = CacheService.getScriptCache(), k = 'own_' + Utilities.base64EncodeWebSafe(nm);
   let v = null;
   try { v = c.get(k); } catch (err) {}
-  if (v == null) { v = owner_(sheet_(), nm).kh || '-'; try { c.put(k, v, 600); } catch (err) {} }
+  if (v == null) { v = owner_(sheet_(), nm).kh || acctKh_(nm) || '-'; try { c.put(k, v, 600); } catch (err) {} }
   return v === '-' ? '' : v;
+}
+// 계정 시트 (name · kh · at · md · data1 · data2 …): 이름 주인 열쇠값과 저장 데이터. 데이터는 칸 하나에 4만 자씩 나눠 담음
+const ACCT_SHEET = '계정', ACCT_CHUNK = 40000, ACCT_MAX = 12;
+function acctSheet_() { const ss = book_(); let s = ss.getSheetByName(ACCT_SHEET); if (!s) { s = ss.insertSheet(ACCT_SHEET); s.getRange(1, 1, 1, 4).setValues([['name', 'kh', 'at', 'md']]); s.getRange('A:B').setNumberFormat('@'); } return s; }
+function acctRow_(s, nm) { const last = s.getLastRow(); if (last < 2) return 0; const v = s.getRange(2, 1, last - 1, 1).getValues(); const i = v.findIndex(r => String(r[0]) === nm); return i < 0 ? 0 : i + 2; }
+function acctKh_(nm) { try { const s = acctSheet_(), r = acctRow_(s, nm); return r ? String(s.getRange(r, 2).getValue() || '') : ''; } catch (err) { return ''; } }
+function acctSetKh_(nm, kh) { const s = acctSheet_(); let r = acctRow_(s, nm); if (!r) { s.appendRow([nm, kh, 0, 0]); r = s.getLastRow(); s.getRange(r, 1, 1, 2).setNumberFormat('@'); } s.getRange(r, 1, 1, 2).setValues([[nm, kh]]); return r; }
+function csave_(d) {
+  const nm = str_(d.name, 12), my = kh_(d.k);
+  if (!nm || nm === '익명' || nm === '모험가' || !my) return out_({ ok: false, err: 'bad' });
+  const own = ownerKh_(nm);
+  if (own && own !== my) return out_({ ok: false, err: 'owned' });
+  const data = String(d.data || '');
+  if (!/^CS1:[A-Za-z0-9+/=]+$/.test(data) || data.length > ACCT_CHUNK * ACCT_MAX) return out_({ ok: false, err: 'data' });
+  const s = acctSheet_(), r = acctSetKh_(nm, my), parts = [];
+  for (let i = 0; i < data.length; i += ACCT_CHUNK) parts.push(data.slice(i, i + ACCT_CHUNK));
+  const row = [num_(d.at, 9e15), num_(d.md, 1e12)].concat(parts);
+  while (row.length < 2 + ACCT_MAX) row.push('');
+  s.getRange(r, 3, 1, row.length).setNumberFormat('@').setValues([row.map(String)]);
+  ownerSet_(nm, my);
+  return out_({ ok: true, result: 'csave', n: parts.length });
+}
+function cload_(q) {
+  const nm = str_(q.cload, 12), my = kh_(q.k);
+  if (!nm || !my) return out_({ ok: false, err: 'bad' });
+  const own = ownerKh_(nm);
+  if (own && own !== my) return out_({ ok: false, err: 'key' });
+  const s = acctSheet_(), r = acctRow_(s, nm);
+  if (!r) return out_({ ok: true, none: 1 });
+  const v = s.getRange(r, 1, 1, 4 + ACCT_MAX).getValues()[0];
+  if (String(v[1]) !== my) return out_({ ok: false, err: 'key' });
+  const data = v.slice(4).map(x => String(x || '')).join('');
+  return out_({ ok: true, at: +v[2] || 0, md: +v[3] || 0, data: data || '', none: data ? 0 : 1 });
 }
 function ownerSet_(nm, kh) { try { CacheService.getScriptCache().put('own_' + Utilities.base64EncodeWebSafe(nm), kh || '-', 600); } catch (err) {} }
 
@@ -378,6 +416,7 @@ function doGet(e) {
   if (q.delrec) return out_(delrec_(q));
   if (q.snap) return out_(snap_(q));
   if (q.ping) return ping_(q);
+  if (q.cload) return cload_(q);
   if (q.own) {
     const nm = str_(q.own, 12), kh = ownerKh_(nm);
     return out_({ owned: !!(nm !== '익명' && kh && kh !== kh_(q.k)) });
@@ -412,8 +451,10 @@ function doPost(e) {
       if (ss.getLastRow() > 301) ss.deleteRows(2, ss.getLastRow() - 301);
       return out_({ ok: true, result: 'sup' });
     }
+    if (d.csave) return csave_(d);
     // 이름 주인 확인: 주인이 있는 이름은 같은 열쇠로만. 주인이 없으면 열쇠와 함께 처음 올린 기기가 주인
     const nm0 = str_(d.name, 12) || '익명', my = kh_(d.k), own = nm0 === '익명' ? { rows: [], kh: '' } : owner_(s, nm0);
+    if (!own.kh && nm0 !== '익명') own.kh = acctKh_(nm0);
     if (own.kh && own.kh !== my) return out_({ ok: false, result: 'owned' });
     const claim = !own.kh && my && nm0 !== '익명';
     if (claim) own.rows.forEach(rw => s.getRange(rw, HEAD.indexOf('kh') + 1).setValue(my));
@@ -424,6 +465,7 @@ function doPost(e) {
       const nk = kh_(d.nk);
       if (!nk || nm0 === '익명') return out_({ ok: false });
       own.rows.forEach(rw => s.getRange(rw, HEAD.indexOf('kh') + 1).setValue(nk));
+      acctSetKh_(nm0, nk);
       ownerSet_(nm0, nk);
       return out_({ ok: true, result: 'rekey', n: own.rows.length });
     }
