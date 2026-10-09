@@ -9353,7 +9353,9 @@ const nKeySet=(n,k)=>{try{const m=nKeys();m[n]=k;localStorage.setItem('chanseo_n
 const keyFor=n=>n===myNick()?MYKEY:nKeys()[n]||'';
 async function nameOwned(nm,key){const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),10000):0;
   try{const r=await fetch(SHEET_URL+'?own='+encodeURIComponent(nm)+'&k='+encodeURIComponent(key||MYKEY),{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();return !!(j&&j.owned);}catch(e){return false;}finally{clearTimeout(to);}}
-async function nameOwned3(nm,key){const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),10000):0;
+// 서버가 바쁠 때(동시 요청이 몰림) 한 번 실패해도 바로 「연결 못 함」이 뜨지 않게 1.5초 뒤 한 번 더 물어봄
+async function nameOwned3(nm,key){const r=await nameOwned3a(nm,key);if(r!==null)return r;await new Promise(z=>setTimeout(z,1500));return nameOwned3a(nm,key);}
+async function nameOwned3a(nm,key){const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),10000):0;
   try{const r=await fetch(SHEET_URL+'?own='+encodeURIComponent(nm)+'&k='+encodeURIComponent(key||MYKEY),{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();return j&&'owned' in j?!!j.owned:null;}catch(e){return null;}finally{clearTimeout(to);}}
 // 개발자 모드: 명예의 전당 기록이 몇 번째 버전에서 나왔는지. v100부터는 기록에 저장, 그 전은 기록 시각 ↔ 배포 시각(초 − 1791000000, BUILD) 표로 추정
 const BUILD_AT=[[339464,2],[339689,3],[339998,4],[340233,5],[341524,6],[344191,7],[347478,8],[359468,9],[359867,10],[361917,11],[362237,12],[367440,13],[368584,14],[370091,15],[374613,16],[375742,17],[379539,18],[381722,19],[383512,20],[384757,21],[385054,22],[385423,23],[385724,24],[387694,25],[388384,26],[389114,27],[389689,28],[390004,29],[390416,30],[410725,31],[411274,32],[414292,33],[415053,34],[429735,35],[430942,36],[433707,38],[434562,39],[434643,40],[435612,41],[436078,42],[436475,43],[436614,44],[437417,45],[437470,46],[437948,47],[438396,48],[439410,49],[440981,50],[443769,51],[444186,52],[444449,53],[444846,54],[445352,55],[446021,56],[446660,57],[447060,58],[447459,59],[447677,60],[447839,61],[449847,62],[449967,63],[450055,64],[450832,66],[451364,67],[452069,68],[457582,69],[458404,70],[458835,71],[459738,72],[460371,73],[461108,74],[465967,75],[466787,76],[467738,77],[468207,78],[469021,79],[471199,80],[471386,81],[471615,82],[471813,83],[471972,84],[472174,85],[472364,86],[472501,87],[472657,88],[473000,89],[473101,90],[473359,91],[473601,92],[473786,93],[474319,94],[477467,95]];
@@ -10412,7 +10414,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=136,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=137,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
