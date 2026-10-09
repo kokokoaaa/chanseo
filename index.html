@@ -6744,26 +6744,20 @@ function draw(){
   if(S.freezeT>0){ctx.fillStyle='rgba(159,211,255,.12)';ctx.fillRect(0,0,W,H);}
   if(evOn('moon')){ctx.fillStyle=`rgba(160,10,20,${.13+Math.sin(S.t*2)*.03})`;ctx.fillRect(0,0,W,H);}
   if(S.dangerT>0&&S.p&&S.p.alive){const a=Math.min(.95,(.6+.3*Math.sin(S.t*24))*(S.dangerT<.4?1.25:1)),g=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.28,W/2,H/2,Math.max(W,H)*.6);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,S.dangerOm?`rgba(220,40,200,${a})`:`rgba(230,30,30,${a})`);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
-  {const tg=[];for(const e of S.en){if(!e.alive)continue;const T=ET[e.type];if(T.hid&&!(T.mimic&&!e.awake)&&!e.boss)tg.push([e.x,e.y,T.col,'★ '+T.n]);else if(T.mimic&&!e.awake)tg.push([e.x,e.y,'#ffd76a','❓']);else if(T.thief&&e.stole)tg.push([e.x,e.y,'#ffb030','💰 소매치기']);}
+  {const tg=[];for(const e of S.en){if(!e.alive)continue;const T=ET[e.type];if(T.hid&&!(T.mimic&&!e.awake)&&!e.boss)tg.push([e.x,e.y,T.col,'★ '+T.n]);else if(T.thief&&e.stole)tg.push([e.x,e.y,'#ffb030','💰 소매치기']);}
    if(evOn('shrine'))tg.push([S.ev.x,S.ev.y,'#9fd3ff','✨ 제단']);if(evOn('chest')&&!S.ev.open)tg.push([S.ev.x,S.ev.y,'#c86aff','🎁 상자']);if(evOn('rift'))tg.push([S.ev.x,S.ev.y,'#7a8aff','🌀 균열']);if(evOn('relic'))for(const o of S.ev.rel)if(!o.got)tg.push([o.x,o.y,'#e0c070','🗿']);if(evOn('fountain'))tg.push([S.ev.x,S.ev.y,'#6ae0d0','⛲ 샘']);if(evOn('altar')&&!S.ev.rolled)tg.push([S.ev.x,S.ev.y,'#ffb347','🎲 제단']);if(evOn('bombs'))for(const o of S.ev.bombs)if(!o.done)tg.push([o.x,o.y,'#ff5a3a','💣']);for(const e of S.en)if(e.alive&&(e.hunt||e.type==='goblin'))tg.push([e.x,e.y,e.hunt?'#ffd76a':'#e8bb4f',e.hunt?'🎯':'💰']);
-   // 퀘스트 위치: 화면 밖이면 큰 화살표 + 거리, 화면 안이면 목표 위에 통통 튀는 ▼ (이벤트 목표만 빛기둥)
-   const pp=S.p,evK=S.ev?['✨ 제단','🎁 상자','🌀 균열','🗿','⛲ 샘','🎲 제단','💣','🎯']:[];
-   for(const [x,y,c,l] of tg){const sx=x-camX,sy=y-camY,isEv=evK.includes(l)||l==='💰'||l[0]==='★'||l==='❓';
-     if(sx>=0&&sx<=W&&sy>=0&&sy<=H){if(!isEv)continue;const bob=Math.abs(Math.sin(S.t*5))*10;ctx.save();
-       ctx.globalAlpha=.16+.06*Math.sin(S.t*4);const g=ctx.createLinearGradient(0,sy-220,0,sy);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,c);ctx.fillStyle=g;ctx.fillRect(sx-16,sy-220,32,220);
-       ctx.globalAlpha=1;ctx.translate(sx,sy-46-bob);ctx.fillStyle=c;ctx.strokeStyle='rgba(0,0,0,.85)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-11,-12);ctx.lineTo(11,-12);ctx.lineTo(0,4);ctx.closePath();ctx.stroke();ctx.fill();ctx.restore();continue;}
-     if(l==='❓')continue;const a=Math.atan2(sy-H/2,sx-W/2),ex=clamp(sx,34,W-34),ey=clamp(sy,74,H-44),pul=1+.18*Math.sin(S.t*7),big=isEv?1.5:1;
-     ctx.save();ctx.translate(ex,ey);ctx.rotate(a);ctx.scale(pul*big,pul*big);ctx.fillStyle=c;ctx.strokeStyle='rgba(0,0,0,.85)';ctx.lineWidth=3/big;ctx.beginPath();ctx.moveTo(14,0);ctx.lineTo(-8,-10);ctx.lineTo(-8,10);ctx.closePath();ctx.stroke();ctx.fill();ctx.restore();
-     const dm=Math.round(Math.hypot(x-pp.x,y-pp.y)/30),tx=ex-Math.cos(a)*(isEv?40:28),ty=ey-Math.sin(a)*(isEv?30:20);ctx.font=`bold ${isEv?16:13}px "Do Hyeon",sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=4;ctx.strokeStyle='rgba(0,0,0,.85)';
-     const lt=isEv?l+' '+dm+'m':l;ctx.strokeText(lt,tx,ty);ctx.fillStyle=c;ctx.fillText(lt,tx,ty);}}
+   // 화면 밖 목표는 작은 화살표만 (숨겨진 몬스터·퀘스트는 직접 찾는 재미가 있게 거리·표시는 안 붙임)
+   for(const [x,y,c,l] of tg){const sx=x-camX,sy=y-camY;if(sx>=0&&sx<=W&&sy>=0&&sy<=H)continue;const a=Math.atan2(sy-H/2,sx-W/2),ex=clamp(sx,30,W-30),ey=clamp(sy,70,H-40);
+     ctx.save();ctx.translate(ex,ey);ctx.rotate(a);ctx.fillStyle=c;ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(13,0);ctx.lineTo(-7,-8);ctx.lineTo(-7,8);ctx.closePath();ctx.stroke();ctx.fill();ctx.restore();
+     ctx.font='13px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.7)';ctx.strokeText(l,ex-Math.cos(a)*26,ey-Math.sin(a)*20);ctx.fillStyle=c;ctx.fillText(l,ex-Math.cos(a)*26,ey-Math.sin(a)*20);}}
   // 퀘스트 알림판: 화면 위 가운데 (아이콘·이름·진행도·남은 시간 막대). 8초 남으면 깜빡
   let evBot=H*.18-8;
-  if(S.ev&&EVENTS[S.ev.k]){const E=EVENTS[S.ev.k],TR=evTier(S.ev.k),left=Math.max(0,S.ev.T-S.ev.t),fr=Math.max(0,Math.min(1,left/S.ev.T)),y0=H-(W<500?50:56)-(W<500?96:70),bw=Math.min(W-24,W<500?W-24:440),bx=(W-bw)/2,bh=W<500?50:56,urg=left<8,fl=urg?.5+.5*Math.sin(S.t*12):0;
-    ctx.save();ctx.globalAlpha=.88;ctx.fillStyle='rgba(8,14,12,.82)';ctx.strokeStyle=urg?`rgba(255,${Math.round(90+120*fl)},90,1)`:TR.col;ctx.lineWidth=3;ctx.beginPath();ctx.roundRect?ctx.roundRect(bx,y0,bw,bh,12):ctx.rect(bx,y0,bw,bh);ctx.fill();ctx.stroke();ctx.globalAlpha=1;
+  if(S.ev&&EVENTS[S.ev.k]){const E=EVENTS[S.ev.k],TR=evTier(S.ev.k),left=Math.max(0,S.ev.T-S.ev.t),fr=Math.max(0,Math.min(1,left/S.ev.T)),y0=H-(W<500?50:56)-(W<500?96:70),bw=Math.min(W-24,W<500?W-24:440),bx=(W-bw)/2,bh=W<500?50:56,urg=left<8;
+    ctx.save();ctx.globalAlpha=.88;ctx.fillStyle='rgba(8,14,12,.82)';ctx.strokeStyle=TR.col;ctx.lineWidth=2;ctx.beginPath();ctx.roundRect?ctx.roundRect(bx,y0,bw,bh,12):ctx.rect(bx,y0,bw,bh);ctx.fill();ctx.stroke();ctx.globalAlpha=1;
     ctx.textAlign='left';ctx.textBaseline='middle';ctx.font=`${W<500?22:26}px sans-serif`;ctx.fillText(E.icon,bx+12,y0+bh/2-3);
     ctx.font=`bold ${W<500?16:19}px "Do Hyeon",sans-serif`;ctx.fillStyle=TR.col;const t1=`[${TR.n}] `;ctx.fillText(t1,bx+48,y0+18);const w1=ctx.measureText(t1).width;ctx.fillStyle=E.col;ctx.fillText(E.n+(evProg()||''),bx+48+w1,y0+18,bw-48-w1-60);
     ctx.textAlign='right';ctx.fillStyle=urg?'#ff7070':'#f1e7cf';ctx.fillText(Math.ceil(left)+'초',bx+bw-12,y0+18);
-    ctx.fillStyle='rgba(255,255,255,.15)';ctx.fillRect(bx+48,y0+bh-15,bw-60,7);ctx.fillStyle=urg?'#ff5a5a':E.col;ctx.fillRect(bx+48,y0+bh-15,(bw-60)*fr,7);ctx.restore();}
+    ctx.fillStyle='rgba(255,255,255,.15)';ctx.fillRect(bx+48,y0+bh-15,bw-60,7);ctx.fillStyle=E.col;ctx.fillRect(bx+48,y0+bh-15,(bw-60)*fr,7);ctx.restore();}
   {const by=Math.max(H*.18,evBot+8);for(const [B,y0] of [[S.evBanner,by],[S.hidBanner,by+(S.evBanner?76:0)]]){if(!B)continue;const a=Math.max(0,Math.min(1,B.t*2,((B.T||2.6)-B.t)*5));ctx.globalAlpha=a;ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,y0,W,68);ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillStyle=B.col;ctx.font=`${W<500?26:32}px "Do Hyeon",sans-serif`;ctx.fillText(B.s,W/2,y0+24);ctx.fillStyle='#f1e7cf';ctx.font=`${W<500?14:16}px "Gowun Dodum",sans-serif`;ctx.fillText(B.d,W/2,y0+52,W-16);ctx.globalAlpha=1;}}
   if(S.flash>0){ctx.fillStyle=`rgba(255,215,106,${S.flash})`;ctx.fillRect(0,0,W,H);}
@@ -7372,6 +7366,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:121,t:'🔎 찾는 재미',items:[
+    ['change','🔎 숨겨진 몬스터·이벤트 목표 안내를 다시 줄였어요: 화면 밖이면 작은 화살표만 (거리·▼·빛기둥 없음), 수상한 상자는 직접 찾아야 해요. 이벤트 알림판은 진행 상황만 차분하게 보여 줘요 (위험 예고 강조는 그대로)','look'],
+  ]},
   {v:120,t:'👀 잘 보이게',items:[
     ['change','📋 진행 중인 이벤트(퀘스트)를 화면 위 가운데 <b>큰 알림판</b>으로 보여 줘요: 이름·진행도·남은 시간 막대 (8초 남으면 깜빡)','look'],
     ['change','🧭 이벤트 목표·숨겨진 몬스터·보물 고블린이 화면 밖이면 <b>큰 화살표 + 거리(m)</b>, 화면 안이면 머리 위에 통통 튀는 ▼ 표시와 빛기둥. 수상한 상자도 화면 안에 오면 ▼로 알려 줘요','look'],
@@ -10253,7 +10250,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=120,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=121,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false};
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?'<span style="color:#7be08f">✅ 최신 버전</span>':'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
 function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
