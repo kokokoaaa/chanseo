@@ -1,6 +1,10 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v5.6
+// 찬서 명예의 전당 서버 (Google Apps Script) v5.7
 // 기존 Apps Script 프로젝트의 코드를 전부 지우고 이걸 붙여넣은 뒤
 // 배포 > 배포 관리 > 연필(수정) > 버전: 새 버전 > 배포  (URL은 그대로 유지됨)
+//
+// v5.6 → v5.7 바뀐 점
+// - 기록 삭제(개발자)를 「삭제」 시트에 남김: 삭제한 시각 이전에 세운 기록은 기기가 다시 올려도 받지 않음 (삭제 뒤 새로 세운 기록은 정상)
+// - ?dels=1 → 삭제 목록. 게임이 켤 때 받아서 그 기기에 남은 사본(내 최고 기록)도 지움
 //
 // v5.5 → v5.6 바뀐 점
 // - 「계정」 시트: 이름 비밀번호(주인 열쇠)를 명예의 전당 기록과 따로 오래 보관 → 전당 기록이 없는 이름도 비밀번호가 계속 유지됨
@@ -244,7 +248,7 @@ function ping_(q) {
   if (id && !q.bye) devLog_(id, str_(q.n, 12) || '모험가', str_(q.ua, 30));
   let w = 0;
   try { w = id && c.get('watch_' + id) ? 1 : 0; } catch (err) {}
-  return out_({ v: 56, ct, w, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 57, ct, w, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
 }
 
 // 전체 채팅 (최근 CHAT_MAX개만 보관)
@@ -371,6 +375,14 @@ function unown_(q) {
   } finally { lock.releaseLock(); }
 }
 // 기록 삭제 (개발자 키): 이름·난이도가 같은 줄을 모두 지움 (아래 줄부터 지워야 줄 번호가 안 밀림)
+// 삭제 목록 ('삭제' 시트: name · diff · t)
+const DEL_SHEET = '삭제', DEL_CACHE = 'dels_v57';
+function delSheet_() { const ss = book_(); let s = ss.getSheetByName(DEL_SHEET); if (!s) { s = ss.insertSheet(DEL_SHEET); s.getRange(1, 1, 1, 3).setValues([['name', 'diff', 't']]); s.getRange('A:B').setNumberFormat('@'); } return s; }
+function delList_() { const c = CacheService.getScriptCache(); let j = null; try { j = c.get(DEL_CACHE); } catch (err) {} if (j) return JSON.parse(j);
+  const s = delSheet_(), last = s.getLastRow(), L = last < 2 ? [] : s.getRange(2, 1, last - 1, 3).getValues().map(r => ({ n: String(r[0]), d: String(r[1]), t: +r[2] || 0 }));
+  try { c.put(DEL_CACHE, JSON.stringify(L), 300); } catch (err) {} return L; }
+function delAdd_(nm, df) { delSheet_().appendRow([nm, df, Date.now()]); try { CacheService.getScriptCache().remove(DEL_CACHE); } catch (err) {} }
+const delBlocked_ = (nm, df, at) => delList_().some(x => x.n === nm && x.d === df && (+at || 0) <= x.t);
 function delrec_(q) {
   if (String(q.dk || '') !== DEV_KEY) return { err: 'key' };
   const nm = str_(q.delrec, 12), df = String(q.diff || '');if (!nm || !df) return { err: 'name' };
@@ -379,6 +391,7 @@ function delrec_(q) {
     const v = s.getRange(2, 1, last - 1, LIST_COLS).getValues(), rows = [];
     v.forEach((r, i) => { const o = Object.fromEntries(HEAD.slice(0, LIST_COLS).map((h, j) => [h, r[j]])); if (String(o.name) === nm && fixDiff_(o) === df) rows.push(i + 2); });
     rows.reverse().forEach(rw => s.deleteRow(rw));
+    delAdd_(nm, df);
     try { CacheService.getScriptCache().remove(CACHE_KEY); } catch (err) {}
     return { ok: 1, n: rows.length };
   } finally { lock.releaseLock(); }
@@ -417,6 +430,7 @@ function doGet(e) {
   if (q.snap) return out_(snap_(q));
   if (q.ping) return ping_(q);
   if (q.cload) return cload_(q);
+  if (q.dels) return out_({ dels: delList_() });
   if (q.own) {
     const nm = str_(q.own, 12), kh = ownerKh_(nm);
     return out_({ owned: !!(nm !== '익명' && kh && kh !== kh_(q.k)) });
@@ -480,6 +494,7 @@ function doPost(e) {
     }
     // 기록 시각: 게임이 보낸 값(그 판을 한 시각)을 씀. 지금보다 미래거나 너무 옛날이면 서버 시각
     const at0 = +d.at || 0, r = clean_(d, at0 > 1.7e12 && at0 <= Date.now() + 60000 ? at0 : 0);
+    if (delBlocked_(r.name, r.diff, r.at)) return out_({ ok: false, result: 'deleted' });
     const last = s.getLastRow();
     const keys = last > 1 ? s.getRange(2, 1, last - 1, 2).getValues().map(x => String(x[0]) + '\u0001' + String(x[1])) : [];
     const i = keys.indexOf(r.name + '\u0001' + r.diff);
