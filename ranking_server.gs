@@ -1,4 +1,7 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v7.1
+// 찬서 명예의 전당 서버 (Google Apps Script) v7.2
+//
+// v7.1 → v7.2 바뀐 점
+// - 점수식을 게임(v207)과 맞춤: 생존 시간 점수 ×1.5, 처치 점수는 2000점부터 완만하게, 레벨 점수는 v197 이후 기록 ×1.6
 //
 // v7.0 → v7.1 바뀐 점
 // - 프로필(pf) 길이 240 → 800자: 장비 상세(옵션·세트)를 같이 실어 다른 사람 장비에 마우스를 올리면 설명·합산 효과가 보임
@@ -209,6 +212,7 @@ const str_ = (v, n) => { let t = String(v || ''); try { t = t.normalize('NFC'); 
 const dw_ = v => { const m = String(v || '').match(/^(\d{1,6})-(\d{1,6})-(\d{1,6})$/); return m ? 'w' + m[1] + 'd' + m[2] + 'l' + m[3] : ''; };
 const softC_ = (x, c) => x <= c ? x : c * (1 + Math.log(x / c));
 // 점수 계산식 v2 (게임과 같음): 이 시각 이후 기록은 10분 이후 생존 점수가 커지고 보스 처치 800점
+const SC_TW = 1.5, SC_KC = 2000, LV_AT = 1791609893000, lvPts_ = r => (+r.lvl || 0) * 30 * ((+r.at || 0) >= LV_AT ? 1.6 : 1);
 const SC2_AT = 1791462600000, SC3_AT = 1791493000000, NM_TK = 1.5, NM_SM = 2;
 const BR_AT = 1791547600000, BR_SM = 2; // 보스 러시 새 규칙 기록은 최종 점수 ×BR_SM (게임과 같은 값)
 const timePts_ = (t, v2) => !v2 || t <= 600 ? t * 12 : 7200 + 12 * ((t - 600) + (t - 600) * (t - 600) / 240);
@@ -240,8 +244,8 @@ function score_(r) {
   if (r.diff === 'raid') return Math.max(0, r.lvl * 1000000 - Math.min(999999, r.time));
   const seg = String(r.cls || '').split('~'), bonus = Math.max(0, +seg[1] || 0), ap = Math.min(1, Math.max(0, (+seg[2] || 0) / 100)), v2 = false; // v2(제곱 시간 점수)는 v5.3에서 폐지: 게임 화면과 같게 모든 기록 v1 식
   const base = r.diff === 'bossrush'
-    ? r.bosses * 2500 + r.lvl * 30 + r.time * 2
-    : timePts_(r.diff === 'nightmare' && +r.at >= SC3_AT ? r.time * NM_TK : r.time, v2) + softC_(r.kills * 2, 4000) + r.lvl * 30 + r.bosses * (v2 ? 800 : 400) + (r.bosses >= 4 ? 3000 : 0);
+    ? r.bosses * 2500 + lvPts_(r) + r.time * 2
+    : timePts_(r.diff === 'nightmare' && +r.at >= SC3_AT ? r.time * NM_TK : r.time, v2) * SC_TW + softC_(r.kills * 2, SC_KC) + lvPts_(r) + r.bosses * (v2 ? 800 : 400) + (r.bosses >= 4 ? 3000 : 0);
   const sm = r.diff === 'nightmare' && +r.at >= SC3_AT ? NM_SM : r.diff === 'bossrush' && +r.at >= BR_AT ? BR_SM : 1;
   return Math.round(Math.round((base + bonus) * (DIFFS[r.diff] || 1)) * sm * (1 - 0.1 * ap));
 }
@@ -314,7 +318,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 71, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 72, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
