@@ -8768,11 +8768,14 @@ function devExplain(c){const an=id=>{const a=(typeof augDef==='function'&&augDef
    .replace(/Math\.pow\(([^,]+),([^)]+)\)/g,'($1의 $2제곱)').replace(/Math\.floor\(/g,'내림(').replace(/Math\.round\(/g,'반올림(').replace(/Math\.min\(/g,'최소값(').replace(/Math\.max\(/g,'최대값(').replace(/&&/g,' 이고 ').replace(/\|\|/g,' 또는 ').replace(/\bif\(/g,'만약 (').replace(/\belse\b/g,' 아니면 ').replace(/===|==/g,' = ').replace(/!==/g,' ≠ ')
    .replace(/\*\*2/g,'²').replace(/(?<![\w.])\.(\d)/g,'0.$1').replace(/\*/g,' × ').replace(/\b(\w+)\.(x|y)\b/g,'').replace(/\(([^()?]+)\?([^:()]+):([^()]+)\)/g,(m,a,b,d)=>`(${a.trim()}이면 ${b}, 아니면 ${d})`).replace(/([「」\w\s]+보유)\?([\d.]+):([\d.]+)/g,(m,a,b,d)=>`(${a.trim()}이면 ${b}, 아니면 ${d})`).replace(/lightning\(\w+,/g,'번개 튕김(').replace(/\bconst |\blet /g,'').replace(/\bbt\b/g,'대상').replace(/[{};]+/g,' · ').replace(/\s+/g,' ').replace(/(· )+/g,'· ').trim().replace(/^·|·$/g,'').trim();
   return t;}
-function devFx(pats,max=5){if(!DEV)return '';const S0=dsrc(),out=[];for(const pt of pats){let i=-1;while((i=S0.indexOf(pt,i+1))>=0&&out.length<max){const t=srcStmt(S0,i,pt.length);if(t&&!/^\s*\{id:/.test(t)&&!/bf\.push|<span|innerHTML|\.n\+'|toFixed/.test(t)&&!out.some(o=>o.includes(t)||t.includes(o)))out.push(t);}}
+// 🛠 계산식 보기 스위치(도감에서 켜고 끔): 끄면 개발자 모드여도 계산식 줄을 숨김
+let DEV_FX=(()=>{try{return localStorage.getItem('chanseo_devfx')!=='0';}catch(e){return true;}})();
+const devFxOn=()=>DEV&&DEV_FX;
+function devFx(pats,max=5){if(!devFxOn())return '';const S0=dsrc(),out=[];for(const pt of pats){let i=-1;while((i=S0.indexOf(pt,i+1))>=0&&out.length<max){const t=srcStmt(S0,i,pt.length);if(t&&!/^\s*\{id:/.test(t)&&!/bf\.push|<span|innerHTML|\.n\+'|toFixed/.test(t)&&!out.some(o=>o.includes(t)||t.includes(o)))out.push(t);}}
   return out.length?`<div class="dfx"><b>🛠 계산식</b>${out.map(t=>`<code>${esc(t)}</code><div class="dxp">💬 ${esc(devExplain(t))}</div>`).join('')}</div>`:'<div class="dfx"><b>🛠 계산식</b><code>(능력치 카드: 획득 시 바로 적용)</code></div>';}
 const augDevFx=id=>devFx([`has('${id}')`,`L('${id}')`,`lv3('${id}'`,`ex('${id}')`]);
 // 마스터리 핵심 능력: 그 직업 이름 바로 뒤에 나오는 mk(b)/mky(b) 줄
-function mstFx(c,b,s0){if(!DEV)return '';const S0=dsrc(),fn=(s0?'mky':'mk')+'('+b+')',cl=Object.keys(CLASSES),out=[];let i=-1;while((i=S0.indexOf(fn,i+1))>=0&&out.length<4){const pre=S0.slice(Math.max(0,i-500),i);let best=-1,bc=null;for(const k of cl){const j=pre.lastIndexOf("'"+k+"'");if(j>best){best=j;bc=k;}}if(bc!==c)continue;const t=srcStmt(S0,i,fn.length);if(!out.includes(t))out.push(t);}
+function mstFx(c,b,s0){if(!devFxOn())return '';const S0=dsrc(),fn=(s0?'mky':'mk')+'('+b+')',cl=Object.keys(CLASSES),out=[];let i=-1;while((i=S0.indexOf(fn,i+1))>=0&&out.length<4){const pre=S0.slice(Math.max(0,i-500),i);let best=-1,bc=null;for(const k of cl){const j=pre.lastIndexOf("'"+k+"'");if(j>best){best=j;bc=k;}}if(bc!==c)continue;const t=srcStmt(S0,i,fn.length);if(!out.includes(t))out.push(t);}
   return out.length?`<div class="dfx"><b>🛠 계산식</b>${out.map(t=>`<code>${esc(t)}</code><div class="dxp">💬 ${esc(devExplain(t))}</div>`).join('')}</div>`:'';}
 // 마우스 옆 설명창: 올리면 커서 옆에 뜨고 따라다님 (화면 밖으로 안 나가게)
 function ftipShow(html,e,col){let t=document.getElementById('ftip');if(!t){t=document.createElement('div');t.id='ftip';document.body.appendChild(t);}t.innerHTML=html;t.style.setProperty('--rc',col||'#d6a94a');t.style.display='block';ftipMove(e);}
@@ -10332,7 +10335,7 @@ function openCodex(o){Object.assign(CX,o||{});
   const tabs=[['aug','증강'],['fuse','합체'],['vip','왕실'],['syn','시너지'],['cls','직업'],['mob','몬스터'],['ev','돌발 이벤트'],['egg','🥚 이스터에그'],['help','❓ 도움말']].concat(DEV?[['score','🛠 점수 계산']]:[]);if(CX.tab==='score'&&!DEV)CX.tab='aug';
   const clsOpt=`<option value="">전체 직업</option><option value="-">공용</option>`+Object.keys(CLASSES).map(k=>`<option value="${k}" ${CX.cls===k?'selected':''}>${CLASSES[k].n}</option>`).join('');
   const tierOpt=`<option value="">전체 등급</option>`+['s','g','p'].map(k=>`<option value="${k}" ${CX.tier===k?'selected':''}>${TIER[k].n}</option>`).join('')+`<option value="uc" ${CX.tier==='uc'?'selected':''}>♾ 고점 돌파</option><option value="d" ${CX.tier==='d'?'selected':''}>🐉 용의 보물</option>`;
-  cxShow(`<div class="shophead"><h2>📖 도감</h2><button class="btn" id="cxBack">${cxGame?'닫기 (게임으로)':'돌아가기'}</button></div>
+  cxShow(`<div class="shophead"><h2>📖 도감</h2>${DEV?`<button class="btn ghost devmf" id="cxFx" style="margin:0 auto 0 12px!important">🛠 계산식 ${DEV_FX?'보기':'숨김'}</button>`:''}<button class="btn" id="cxBack">${cxGame?'닫기 (게임으로)':'돌아가기'}</button></div>
   <div class="cxbar">${tabs.map(([k,n])=>`<button class="cxtab ${CX.tab===k?'on':''}" data-cxt="${k}">${n}</button>`).join('')}</div>
   <div class="cxbar"><input id="cxQ" placeholder="이름·내용 검색 (예: 보호막 / 해골 공격력)" value="${CX.q.replace(/"/g,'&quot;')}">
   ${CX.tab==='aug'||CX.tab==='fuse'?`<select id="cxCls">${clsOpt}</select>`:''}${CX.tab==='aug'?`<select id="cxTier">${tierOpt}</select><select id="cxSort">${[['tier','등급순 (실버→프리즘)'],['tierd','등급순 (프리즘→실버)'],['name','이름순 (가나다)'],['','기본순']].map(([k,n])=>`<option value="${k}" ${CX.sort===k?'selected':''}>↕ ${n}</option>`).join('')}</select>`:''}</div>
@@ -10347,7 +10350,7 @@ function openCodex(o){Object.assign(CX,o||{});
   if($('cxCls'))$('cxCls').onchange=e=>{CX.cls=e.target.value;cxList();};
   if($('cxTier'))$('cxTier').onchange=e=>{CX.tier=e.target.value;cxList();};
   if($('cxSort'))$('cxSort').onchange=e=>{CX.sort=e.target.value;cxList();};
-  $('cxBack').onclick=cxClose;
+  $('cxBack').onclick=cxClose;if($('cxFx'))$('cxFx').onclick=()=>{DEV_FX=!DEV_FX;try{localStorage.setItem('chanseo_devfx',DEV_FX?'1':'0');}catch(e){}toast(DEV_FX?'🛠 계산식 보기 켬':'🛠 계산식 숨김');openCodex();};
   $('cxL').onclick=e=>{if(e.target.closest('a,button,input,select,label,.patc'))return;const r=e.target.closest('.cxrow');if(r&&r.parentNode===$('cxL')){r.classList.toggle('open');ftipHide();}};
   /* 마우스를 올리면 접힌 카드의 자세한 설명을 마우스 옆에 (누르면 펼쳐서 고정) */
   if(!matchMedia('(hover:none)').matches){const L=$('cxL');let cur=null;
@@ -11709,7 +11712,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=205,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=206,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
