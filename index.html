@@ -6641,7 +6641,8 @@ function playerFire(tg){
   if(has('velocity')&&!meleeOn())shock*=1+Math.min(has('f_accel')?1.5:1,p.bspd/100*lv3('velocity',.035,.05,.065)*(has('f_accel')?2:1));
   if(p.ocN>0){shock*=lv3('overcharge',1.8,2.2,2.6);p.ocN--;}
   if(has('goldbullet'))shock*=1+Math.min(lv3('goldbullet',.3,.45,.6)*(has('f_compound')?2:1),Math.floor(S.gold/100)*.03);
-  const base=Math.atan2(tg.y-p.y,tg.x-p.x),d=pDmg()*mult*shock;p.aimA=base;p.atkT=CLASSES[S.cls].atk;p.face=Math.cos(base)>=0?1:-1;
+  let ax=tg.x,ay=tg.y;if(duelOn()&&tg===S.boss&&tg.mvx!=null){const t=Math.hypot(tg.x-p.x,tg.y-p.y)/Math.max(200,p.bspd||400);ax+=tg.mvx*t;ay+=tg.mvy*t;} // 결투: 상대가 움직이는 쪽을 예측해서 조준 (상대도 나를 예측해서 쏨)
+  const base=Math.atan2(ay-p.y,ax-p.x),d=pDmg()*mult*shock;p.aimA=base;p.atkT=CLASSES[S.cls].atk;p.face=Math.cos(base)>=0?1:-1;
   const blife=S.cls==='knight'||S.cls==='rogue'||S.cls==='paladin'||S.cls==='berserk'?Math.max(.3,p.range*1.15/p.bspd):1.2;
   if(has('m_mana')&&p.shots%10===0)pBullet(p.x,p.y,base,pDmg()*5,{pierce:999,r:18,big:true,life:1.3,child:true,sub:'마나 폭주',mbomb:1,fball:false});
   if(has('m_meteor')&&p.shots%lv3('m_meteor',10,8,6)===0&&has('m_shower'))for(let i=0;i<2;i++){const a=Math.random()*TAU;exL('유성우',null,tg.x+Math.cos(a)*90,tg.y+Math.sin(a)*90,90,pDmg()*6*.6,'#ff7a2a');}
@@ -9159,11 +9160,10 @@ function raidItem(k,st){const sk=RSET(k);if(sk&&Math.random()<Math.min(.8,.45+.0
     for(let i=0;i<120;i++){const x=rollItem([0,0,0,1]);if(x.s===part){it=x;break;}}
     if(it){it.r=3;delete it.ui;delete it.th;delete it.sp;delete it.my;delete it.cls;it.set=sk;it.b=Math.max(it.b||1,1.05);return it;}}
   const it=rollItem([0,0,0,1]);it.r=3;return it;}
-const setAugN=T=>{const a=T&&T.aug&&AUGS.find(x=>x.id===T.aug);return a?` · 판 시작 시 증강 ${augRef(a)}`:'';};
 // 증강 이름 표시: 마우스를 올리면(모바일은 톡) 그 증강 설명이 뜸 (augRefTip)
 const augRef=a=>`<span class="augref" data-aref="${a.id}">「${a.n}」</span>`;
 // 세트 효과 줄: 지금 낀 같은 세트 개수(n)가 2·4에 닿은 단계는 세트 색 + ✔, 아직이면 흐린 글씨
-const setLines=(T,n,sep)=>setTiers(T).map(([k,b])=>[k,b,k===4?setAugN(T):'']).map(([k,b,x])=>`<span class="${n>=k?'son':'soff'}"${n>=k?` style="color:${T.col}"`:''}>${k}세트: ${fxTxt(b)}${x}${n>=k?' ✔':''}</span>`).join(sep||'<br>');
+const setLines=(T,n,sep)=>{const a=T&&T.aug&&AUGS.find(x=>x.id===T.aug),on=k=>`class="${n>=k?'son':'soff'}"${n>=k?` style="color:${T.col}"`:''}`;return setTiers(T).map(([k,b])=>`<span ${on(k)}>${k}세트: ${fxTxt(b)}${n>=k?' ✔':''}</span>`).concat(a?[`<span ${on(4)}>✦ 4세트 증강 ${augRef(a)}${n>=4?' ✔':''}</span>`]:[]).join(sep||'<br>');};
 // 장비 특수 효과: 판을 시작할 때 증강 하나를 받음 (영웅 4% · 전설 10% · 고유 무기는 그 직업 증강 확정). 직업 증강이면 그 직업일 때만 켜짐
 const SP_BAN=new Set(['piggy','tip','insure','king','rush']);
 const spPool=(t,c)=>AUGS.filter(a=>(c?a.cls===c:!a.cls)&&t.includes(a.t)&&!SP_BAN.has(a.id)&&!(a.tags||[]).includes('house'));
@@ -9539,7 +9539,7 @@ function ftipShow(html,e,col){let t=document.getElementById('ftip');if(!t){t=doc
 function ftipMove(e){const t=document.getElementById('ftip');if(!t||t.style.display!=='block'||!e)return;const r=t.getBoundingClientRect(),W=innerWidth,H=innerHeight;let x=e.clientX+18,y=e.clientY+14;if(x+r.width>W-6)x=Math.max(6,e.clientX-r.width-14);if(y+r.height>H-6)y=Math.max(6,H-r.height-6);t.style.left=x+'px';t.style.top=y+'px';}
 function ftipHide(){const t=document.getElementById('ftip');if(t)t.style.display='none';}
 // 증강 이름(augRef) 위에 마우스를 올리면 그 증강 설명 (모바일은 톡하면 2.5초 동안)
-{let arT=0;const arEl=e=>e.target&&e.target.closest&&e.target.closest('[data-aref],[data-ttip]'),arShow=(el,e)=>{if(el.dataset.ttip!=null){const L=el.dataset.ttip.split('\n');ftipShow(`<b style="color:#9fe8b0">${esc(L[0])}</b><div style="font-size:12.5px;margin-top:3px;line-height:1.5">${L.slice(1).map(esc).join('<br>')}</div>`,e,'#7bd36a');return;}const a=augDef(el.dataset.aref);if(!a)return;ftipShow(`<b style="color:#ffd76a">${a.n}</b><div style="font-size:12.5px;margin-top:3px;line-height:1.45">${augD(a)}</div>`,e,(TIER[a.t]||{}).col);};
+{let arT=0;const arEl=e=>e.target&&e.target.closest&&e.target.closest('[data-aref],[data-ttip],[data-sref]'),arShow=(el,e)=>{if(el.dataset.sref!=null){const T=SETS[el.dataset.sref];if(!T)return;const a=T.aug&&AUGS.find(x=>x.id===T.aug);ftipShow(`<b style="color:${T.col}">「${T.n}」${T.rd?' 전용 풀세트':' 세트'}</b>${T.rd?'<div style="font-size:11.5px;color:var(--muted)">무기부터 반지까지 모든 부위 14칸</div>':''}<div style="font-size:12.5px;margin-top:4px;line-height:1.55">${setTiers(T).map(([k,b])=>`<b>${k}세트</b> ${fxTxt(b)}`).join('<br>')}</div>${a?`<div style="font-size:12.5px;margin-top:6px;padding-top:5px;border-top:1px solid rgba(255,255,255,.15);line-height:1.45"><b style="color:#ffd76a">✦ 4세트 증강 「${a.n}」</b><br>${augD(a)}</div>`:''}`,e,T.col);return;}if(el.dataset.ttip!=null){const L=el.dataset.ttip.split('\n');ftipShow(`<b style="color:#9fe8b0">${esc(L[0])}</b><div style="font-size:12.5px;margin-top:3px;line-height:1.5">${L.slice(1).map(esc).join('<br>')}</div>`,e,'#7bd36a');return;}const a=augDef(el.dataset.aref);if(!a)return;ftipShow(`<b style="color:#ffd76a">${a.n}</b><div style="font-size:12.5px;margin-top:3px;line-height:1.45">${augD(a)}</div>`,e,(TIER[a.t]||{}).col);};
   document.addEventListener('mouseover',e=>{const el=arEl(e);if(el)arShow(el,e);});
   document.addEventListener('mousemove',e=>{if(arEl(e))ftipMove(e);});
   document.addEventListener('mouseout',e=>{const el=arEl(e);if(el&&!(e.relatedTarget&&el.contains(e.relatedTarget)))ftipHide();});
@@ -9767,8 +9767,8 @@ let DEV_RAID_TEST=false;
 function allyOf(h,i){const P=h.p||{},sp=(P.speed||200),mel=MELEE_CLS.includes(h.cls),hp=Math.max(200,(P.maxHp||200));
   // 동료 초당 피해 = 저장 당시 최대 DPS × (그 직업을 직접 조작했을 때 거신에게 들어가는 비율, 측정값) × 0.65 → 손으로 하는 것의 60~70%
   const dps=Math.max(50,RAID_ALLY*(h.da||(h.dps||1e5)*.15));
-  return {id:h.id,cls:h.cls,name:heroName(h),skin:h.skin||'',look:recLook(h),x:WW/2+(i?1:-1)*90,y:WH/2+100,r:14,hp,maxHp:hp,armor:Math.max(0,P.armor||0),dps,mel,rng:mel?0:Math.min(420,Math.max(220,P.range||300)),sp:Math.min(320,sp),alive:true,cd:rand(0,.4),mvT:0,tx:0,ty:0,inv:0,hurtT:0,atkT:0,face:1,orb:(i?1:-1)*1.2,revT:0,rv:0};}
-function beginRaid(bi,st,ids){const L=myHeroes(),hs=ids.map(id=>L.find(h=>h.id===id)).filter(Boolean);if(!hs.length)return;const me=hs[0],R=RAIDS[bi];
+  return {id:h.id,cls:h.cls,name:heroName(h),skin:h.skin||'',look:recLook(h),dr:/^[0-9a-z\-]{14}$/.test(h.dr||'')?dressDec(h.dr):null,x:WW/2+(i?1:-1)*90,y:WH/2+100,r:14,hp,maxHp:hp,armor:Math.max(0,P.armor||0),dps,mel,rng:mel?0:Math.min(420,Math.max(220,P.range||300)),sp:Math.min(320,sp),alive:true,cd:rand(0,.4),mvT:0,tx:0,ty:0,inv:0,hurtT:0,atkT:0,face:1,orb:(i?1:-1)*1.2,revT:0,rv:0};}
+function beginRaid(bi,st,ids){const L=myHeroes(),hs=ids.map(id=>L.find(h=>h.id===id)).filter(Boolean).filter((h,i,a)=>a.findIndex(x=>x.cls===h.cls)===i);if(!hs.length)return;const me=hs[0],R=RAIDS[bi];
   newRun();S.diff='raid';S.raidB=bi;S.raidS=st;S.raidAw=me.aw||0;S.st.kills=me.kills||0; // 처치 수로 커지는 증강(수확·두꺼운 가죽)이 그대로
   for(const k of PKEYS)if(me.p[k]!==undefined)S.p[k]=me.p[k];for(const k in (me.s||{}))if(me.s[k]!==undefined&&k!=='diff')S[k]=me.s[k];S.cls=me.cls;S.diff='raid';
   S.augs=(me.augs||[]).map(augDes).filter(Boolean);
@@ -10231,10 +10231,10 @@ function raidTeleHit(t){if(!S.allies||!t.dmg)return;for(const a of S.allies){if(
 function raidBulletHit(b){if(!S.allies)return false;for(const a of S.allies)if(a.alive&&d2(b,a)<(a.r+b.r)**2){allyHurt(a,b.dmg,'탄');b.life=0;return true;}return false;}
 function drawAlly(a){const x=a.x,y=a.y,R=a.r;ctx.save();
   ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(x,y+R+3,R*.95,R*.36,0,0,TAU);ctx.fill();
-  if(!a.alive){ctx.globalAlpha=.55;withLook(a.look,()=>HERO.draw(a.cls,'dead',3,0,false));ctx.imageSmoothingEnabled=false;heroBlit(HERO.canvas,x,y+R+3,1,true);ctx.globalAlpha=1;
+  if(!a.alive){ctx.globalAlpha=.55;withLook(a.look,()=>{HERO_DRESS=a.dr&&DLOOK_ON(a.cls)?a.dr:null;try{HERO.draw(a.cls,'dead',3,0,false);}finally{HERO_DRESS=null;}});ctx.imageSmoothingEnabled=false;heroBlit(HERO.canvas,x,y+R+3,1,true);ctx.globalAlpha=1;
     if(a.rv>0){const need=raidMembers().some(m=>m.o.alive&&roleOf(m.cls).mend)?1.5:3;ctx.strokeStyle='#7be08f';ctx.lineWidth=4;ctx.beginPath();ctx.arc(x,y-6,26,-Math.PI/2,-Math.PI/2+TAU*Math.min(1,a.rv/need));ctx.stroke();}
     ctx.font='12px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.fillStyle='#ff9a9a';ctx.fillText((S.raidTok||0)>0?'쓰러짐 · 곁에 서 있으면 부활':'쓰러짐 · 부활 기회 없음',x,y-40);ctx.restore();return;}
-  withLook(a.look,()=>HERO.draw(a.cls,a.atkT>0?'attack':a.moving?'walk':'idle',S.t+a.orb,a.atkT>0?1-a.atkT/.25:0,a.hurtT>.15));ctx.imageSmoothingEnabled=HERO.hires;
+  withLook(a.look,()=>{HERO_DRESS=a.dr&&DLOOK_ON(a.cls)?a.dr:null;try{HERO.draw(a.cls,a.atkT>0?'attack':a.moving?'walk':'idle',S.t+a.orb,a.atkT>0?1-a.atkT/.25:0,a.hurtT>.15);}finally{HERO_DRESS=null;}});ctx.imageSmoothingEnabled=HERO.hires;
   const sk=a.skin?COS.find(q=>q.k===a.skin):null;if(sk&&sk.cat==='skin'){ctx.filter=sk.f||'none';if(sk.a)ctx.globalAlpha=sk.a;}
   if(a.inv>0&&Math.floor(S.t*14)%2)ctx.globalAlpha=.4;heroBlit(HERO.canvas,x,y+R+3,1,true);ctx.filter='none';ctx.globalAlpha=1;
   const w=40,f=Math.max(0,a.hp/a.maxHp);ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(x-w/2,y-46,w,5);ctx.fillStyle=f>.5?'#7be08f':f>.25?'#ffd76a':'#ff6a6a';ctx.fillRect(x-w/2,y-46,w*f,5);
@@ -10269,22 +10269,22 @@ function raidOver(win){S.mode='over';joy=null;const bi=S.raidB||0,st=S.raidS||1,
   {const P=ov.querySelector('.panel');if(P)P.classList.add('rdres');}try{toastQ.clear();for(const c of [...toastEl.children])c.remove();}catch(er){}
   $('rdAgain').onclick=()=>beginRaid(bi,nx?st+1:st,S.raidIds);$('rdBack').onclick=()=>{newRun();openRaid();};$('rdHome').onclick=()=>{newRun();startScreen();};}
 let RAID_SEL=[],RAID_B=0,RAID_STG={};
-function openRaid(){cosPreviewHide();const L=myHeroes().sort((a,b)=>(b.score||0)-(a.score||0));RAID_SEL=RAID_SEL.filter(id=>L.some(h=>h.id===id));
+function openRaid(){cosPreviewHide();const L=myHeroes().sort((a,b)=>(b.score||0)-(a.score||0));RAID_SEL=RAID_SEL.filter(id=>L.some(h=>h.id===id)).filter((id,i,a)=>{const c=(L.find(h=>h.id===id)||{}).cls;return a.findIndex(x=>(L.find(h=>h.id===x)||{}).cls===c)===i;});
   const RD=RAIDS[RAID_B]||RAIDS[0],RC=raidRec()[RD.k],top=raidTop(RD.k);let st=RAID_STG[RD.k]||Math.min(RAID_ST,top+1);if(!raidOpenS(RD.k,st))st=1;RAID_STG[RD.k]=st;
-  const card=h=>{const i=RAID_SEL.indexOf(h.id),av=hofAv(h.cls,h.skin,'',heroDrG(h),recLook(h));return `<button class="rcard ${i>=0?'on':''}" data-rsel="${h.id}">${i>=0?`<span class="rbadge">${i===0?'🎮 나':'🤝 동료'}</span>`:''}${av?`<img src="${av}" alt="">`:''}<b>${esc(heroName(h))}</b><small class="rrole">${roleOf(h.cls).ico} ${roleOf(h.cls).n}</small><small>${CLASSES[h.cls]?CLASSES[h.cls].n:''} · 점수 ${(h.score||0).toLocaleString()} · 각성 ${h.aw||0}</small><small>공격력 ${h.st&&h.st['공격력']||'-'} · 체력 ${h.st&&h.st['최대 체력']||'-'}</small></button>`;};
+  const card=h=>{const i=RAID_SEL.indexOf(h.id),av=hofAv(h.cls,h.skin,'',heroDrG(h),recLook(h)),tk=i<0&&RAID_SEL.some(x=>{const o=L.find(q=>q.id===x);return o&&o.cls===h.cls;});return `<button class="rcard ${i>=0?'on':''}" data-rsel="${h.id}"${tk?' style="opacity:.5" title="같은 직업이 이미 출전 중 (누르면 바꿈)"':''}>${i>=0?`<span class="rbadge">${i===0?'🎮 나':'🤝 동료'}</span>`:''}${av?`<img src="${av}" alt="">`:''}<b>${esc(heroName(h))}</b><small class="rrole">${roleOf(h.cls).ico} ${roleOf(h.cls).n}</small><small>${CLASSES[h.cls]?CLASSES[h.cls].n:''} · 점수 ${(h.score||0).toLocaleString()} · 각성 ${h.aw||0}</small><small>공격력 ${h.st&&h.st['공격력']||'-'} · 체력 ${h.st&&h.st['최대 체력']||'-'}</small></button>`;};
   const bc=(r,i)=>{const t=raidTop(r.k);return `<button class="rboss${i===RAID_B?' on':''}" data-rb="${i}" style="--rc:${r.col}"><span class="rbi">${r.ico}</span><b>${r.n}</b><small>${r.t}</small><em>${t?`최고 ${t}단계`:'첫 도전'}</em></button>`;};
   show(`<div class="shophead"><h2>🗿 레이드</h2><button class="btn" id="rdBack2">돌아가기</button></div>
   <p class="sub">보스마다 따로 <b>1~${RAID_ST}단계</b>에 도전해요. 보관한 캐릭터를 최대 <b>3명</b> 골라 출전 — 처음 고른 캐릭터를 <b>내가 조작</b>하고, 나머지는 동료로 함께 싸워요. 판 중 성장은 없어요. 쓰러진 동료는 곁에 서 있으면 일으켜요 (<b>부활 기회 ${RAID_TOK}번</b>, 내가 쓰러져도 1번 씀).</p>
   <div class="rbosses">${RAIDS.map(bc).join('')}</div>
-  <div class="rbinfo" style="--rc:${RD.col}"><b>${RD.ico} ${RD.n}</b> <small>— ${RD.t}</small><div>${RD.d}</div><div class="rmech">${RD.mech}</div><div class="rmech" style="color:#ffb0b0">☠ 등장하는 자리(빨간 원) 안에 있으면 즉사 · 🩸 보스에게서 흡혈은 1초에 최대 체력 ${RAID_LS*100}%까지</div>${(()=>{const sk=RSET(RD.k),T=sk&&SETS[sk];return T?`<div class="rmech" style="color:${T.col}">🎁 전용 풀세트 <b>「${T.n}」</b> (무기부터 반지까지 모든 부위 14칸) · 이 보스 전리품 상자에서만 나와요 (높은 단계일수록 잘 나옴)<br><small>${setTiers(T).map(([k,b])=>`${k}세트: ${fxTxt(b)}${k===4?setAugN(T):''}`).join(' · ')}</small></div>`:'';})()}</div>
+  <div class="rbinfo" style="--rc:${RD.col}"><b>${RD.ico} ${RD.n}</b> <small>— ${RD.t}</small><div>${RD.d}</div><div class="rmech">${RD.mech}</div><div class="rmech" style="color:#ffb0b0">☠ 등장하는 자리(빨간 원) 안에 있으면 즉사 · 🩸 보스에게서 흡혈은 1초에 최대 체력 ${RAID_LS*100}%까지</div>${(()=>{const sk=RSET(RD.k),T=sk&&SETS[sk];const a=T&&T.aug&&AUGS.find(x=>x.id===T.aug);return T?`<div class="rmech" style="color:${T.col}">🎁 전용 풀세트 <span class="augref" data-sref="${sk}"><b>「${T.n}」</b></span>${a?` · 세트 증강 ${augRef(a)}`:''} · 이 보스 상자에서만 나와요</div>`:'';})()}</div>
   <h3>단계</h3><div class="rstg">${Array.from({length:RAID_ST},(_,k)=>{const s=k+1,op=raidOpenS(RD.k,s),c=RC.c[s];return `<button class="btn${s===st?' primary':''}" data-rs="${s}" ${op?'':'disabled'}>${op?'':'🔒'}${s}${c?' ✔':''}</button>`;}).join('')}</div>
   <div class="rsinfo">${RD.n} ${st}단계 · 체력 <b>${fmtN(raidHpOf(RAID_B,st))}</b> · 공격력 <b>${fmtN(raidDmOf(RAID_B,st))}</b> · 보상: 🏅 ${raidMedal(st).toLocaleString()} · 🎁 전설 상자 ${raidBoxN(st,false)}개 · 🌟 마스터리 +${raidXp(st)}${RC.c[st]?'':' <b style="color:#ffd76a">(첫 클리어: 메달·경험치 2배 + 상자 1개 더)</b>'}${RC.b[st]?` · 최고 ${Math.floor(RC.b[st]/60)}:${String(RC.b[st]%60).padStart(2,'0')}`:''}</div>
   <div class="rroles">${[...new Set(Object.values(RAID_ROLE).map(r=>r.n))].map(n=>{const r=Object.values(RAID_ROLE).find(x=>x.n===n),cs=Object.keys(RAID_ROLE).filter(k=>RAID_ROLE[k].n===n).map(k=>CLASSES[k].n).join('·');return `<span><b>${r.ico} ${n}</b> ${cs} — ${r.d}</span>`;}).join('')}<span><b>${RAID_DPS.ico} 딜러</b> 그 밖의 직업 — ${RAID_DPS.d}</span></div>
-  <h3>출전 캐릭터 (${RAID_SEL.length}/3)</h3>${L.length?`<div class="rgrid">${L.map(card).join('')}</div>`:'<p class="sub">보관한 캐릭터가 없어요. 악몽·보스 러시가 끝나면 결과 화면(또는 📜 내 최근 기록)에서 💾 캐릭터 저장!</p>'}
+  <h3>출전 캐릭터 (${RAID_SEL.length}/3) <small style="color:var(--muted);font-weight:normal">직업당 한 명</small></h3>${L.length?`<div class="rgrid">${L.map(card).join('')}</div>`:'<p class="sub">보관한 캐릭터가 없어요. 악몽·보스 러시가 끝나면 결과 화면(또는 📜 내 최근 기록)에서 💾 캐릭터 저장!</p>'}
   <button class="btn primary" id="rdGo" ${RAID_SEL.length?'':'disabled'}>⚔ ${RD.n} ${st}단계 출전 ${RAID_SEL.length?`(${RAID_SEL.length}명${RAID_SEL.length<3?' · 3명이면 더 쉬워요':''})`:''}</button>`);
   {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}
   $('rdBack2').onclick=startScreen;ov.querySelectorAll('[data-rb]').forEach(b=>b.onclick=()=>{RAID_B=+b.dataset.rb;openRaid();});ov.querySelectorAll('[data-rs]').forEach(b=>b.onclick=()=>{RAID_STG[RD.k]=+b.dataset.rs;openRaid();});
-  ov.querySelectorAll('[data-rsel]').forEach(b=>b.onclick=()=>{const id=b.dataset.rsel,i=RAID_SEL.indexOf(id);if(i>=0)RAID_SEL.splice(i,1);else if(RAID_SEL.length<3)RAID_SEL.push(id);else toast('최대 3명까지');openRaid();});
+  ov.querySelectorAll('[data-rsel]').forEach(b=>b.onclick=()=>{const id=b.dataset.rsel,i=RAID_SEL.indexOf(id);if(i>=0)RAID_SEL.splice(i,1);else{/* 직업당 한 명: 같은 직업이 이미 있으면 그 자리를 바꿈 */const L2=myHeroes(),c=(L2.find(h=>h.id===id)||{}).cls,j=RAID_SEL.findIndex(x=>(L2.find(h=>h.id===x)||{}).cls===c);if(j>=0){RAID_SEL[j]=id;toast(`같은 직업(${CLASSES[c]?CLASSES[c].n:''})은 한 명만 출전할 수 있어요 — 바꿨어요`);}else if(RAID_SEL.length<3)RAID_SEL.push(id);else toast('최대 3명까지');}openRaid();});
   if($('rdGo'))$('rdGo').onclick=()=>{if(RAID_SEL.length)beginRaid(RAID_B,st,RAID_SEL.slice());};}
 // ⚔ 결투(PVP): 보관함의 내 캐릭터로, 명예의 전당에 올라간 '실제 캐릭터'(서버에 함께 저장)·내 다른 캐릭터·친구의 대결 코드와 1:1.
 // 상대는 그 캐릭터의 실제 체력·방어력·화력·각성으로 강약이 정해지는 AI. 강약 비율 = (상대 전투력 ÷ 내 전투력)^0.5, 전투력 = √(유효 체력 × 단일 대상 화력)
@@ -10392,29 +10392,35 @@ function rivalRate(e){const st=e.hero&&e.hero.st,r=st?parseFloat(String(st['공�
 const DUEL_K={knight:1.8,mage:2,archer:1.7,rogue:.9,paladin:1.25,necro:2.2,gunner:.33,elem:1.2,berserk:1.1,druid:1.5,alch:2.4,gambler:1.45};
 BAI.rival=function(e,dt,o){const {p,d}=o,c=e.cls,A=DUEL_ATK[c]||DUEL_ATK.archer,B=e.B||(e.B=e.bd/.9*(DUEL_K[c]||1)),el=(S.bt||0)-(S.duel.t0||0);
   e.acd-=dt;e.scd=(e.scd??1)-dt;
-  if(e.bst==='wait'){e.face=p.x>e.x?1:-1;return;} // 카운트다운 동안 반대편에서 대기
+  {const lim=e.spd*1.3;if(e.lx!=null&&dt>0){e.mvx=clamp((e.x-e.lx)/dt,-lim,lim);e.mvy=clamp((e.y-e.ly)/dt,-lim,lim);}e.lx=e.x;e.ly=e.y;}
+  if(e.bst==='wait'){e.face=p.x>e.x?1:-1; // 카운트다운 동안 반대편에서 대기
+    // 사령술사: 기다리는 동안 해골 병사 3을 미리 세워 둠 (시작 전엔 제자리에 서 있음)
+    if(A.skel){e.wsk=e.wsk||[];if(e.wsk.length<3&&(e.wskT=(e.wskT??.6)-dt)<=0){e.wskT=.9;const i=e.wsk.length,aa=Math.atan2(e.y-p.y,e.x-p.x)+(i-1)*.95,x=e.x+Math.cos(aa)*58,y=e.y+Math.sin(aa)*58,m=spawnAt('grunt',x,y,true);m.spr='ranger';m.rSkel=1;m.maxHp=m.hp=Math.max(30,S.p.maxHp*.4);m.dmg=B*.35;m.spd=p.speed*.8;m.hold=[x,y];e.wsk.push(m);S.rings.push({x,y,r:4,max:30,life:.35,col:'#9cff9a'});}
+      for(const m of e.wsk)if(m.alive&&m.hold){m.x=m.hold[0];m.y=m.hold[1];}}
+    return;}
+  if(e.wsk){for(const m of e.wsk)delete m.hold;e.wsk=null;}
   if(e.bst==='intro'){if(e.bt>1.2)go(e,'fight');return;}
   if(e.dashT>0){e.dashT-=dt;e.x+=e.dvx*dt;e.y+=e.dvy*dt;return;}
   if(e.frzT>0){e.frzT-=dt;return;}
-  // 탄 읽기: 날아오는 내 탄이 언제·얼마나 가깝게 지나갈지 계산 → 맞을 탄이면 옆으로 비켜섬, 곧 맞으면 대시. 강한 상대일수록 잘 피함
+  // 탄 읽기: 날아오는 내 탄이 언제·얼마나 가깝게 지나갈지 계산 → 맞을 탄이면 옆으로 비켜섬, 곧 맞으면 대시. 탄마다 한 번만 피할지 정함(확률 sk), 강한 상대일수록 잘 피함
   const rr0=(S.duel&&S.duel.r)||1,sk=clamp(.32+.2*(rr0-1),.22,.65);let evx=0,evy=0,soon=9;
   for(const b of S.pr){if(!b.mine)continue;const rx=e.x-b.x,ry=e.y-b.y;if(rx*rx+ry*ry>280*280)continue;const vv=b.vx*b.vx+b.vy*b.vy;if(vv<1)continue;const tc=(rx*b.vx+ry*b.vy)/vv;if(tc<=0||tc>.45)continue;
-    const mx=rx-b.vx*tc,my=ry-b.vy*tc,md=Math.hypot(mx,my);if(md>e.r+(b.r||6)+14)continue;const w=1-tc/.45;let nx=mx,ny=my;if(md<1){nx=-b.vy;ny=b.vx;}const nl=Math.hypot(nx,ny)||1;evx+=nx/nl*w;evy+=ny/nl*w;soon=Math.min(soon,tc);}
-  e.evT=(e.evT||0)-dt;if((evx||evy)&&e.evT<=0&&Math.random()<sk)e.evT=.35;e.ev=e.evT>0&&(evx||evy)?[evx,evy]:null;
+    const mx=rx-b.vx*tc,my=ry-b.vy*tc,md=Math.hypot(mx,my);if(md>e.r+(b.r||6)+14)continue;if(b.rdg==null)b.rdg=Math.random()<sk;if(!b.rdg)continue;const w=1-tc/.45;let nx=mx,ny=my;if(md<1){nx=-b.vy;ny=b.vx;}const nl=Math.hypot(nx,ny)||1;evx+=nx/nl*w;evy+=ny/nl*w;soon=Math.min(soon,tc);}
+  e.evT=(e.evT||0)-dt;if((evx||evy)&&e.evT<=0)e.evT=.35;e.ev=e.evT>0&&(evx||evy)?[evx,evy]:null;
   // 회피: 곧 맞을 탄이 있으면 옆으로 대시 (잠깐 무적) — 플레이어 대시와 같은 느낌
-  if((e.dcd=(e.dcd??3)-dt)<=0&&(soon<.18&&Math.random()<sk+.1||S.pr.some(b=>b.mine&&d2(b,e)<70*70))){const rr=(S.duel&&S.duel.r)||1;e.dcd=rr>=1.5?rand(1.3,2.4):rr>=1?rand(1.8,3.2):rand(2.6,4.2);/* 강한 상대일수록 자주 피함 */const a=Math.atan2(p.y-e.y,p.x-e.x)+(Math.random()<.5?1:-1)*Math.PI/2;e.dvx=Math.cos(a)*700;e.dvy=Math.sin(a)*700;e.dashT=.2;e.ivT=Math.max(e.ivT||0,S.t+.25);S.rings.push({x:e.x,y:e.y,r:6,max:26,life:.2,col:'#ffffff'});return;}
+  if((e.dcd=(e.dcd??3)-dt)<=0&&(soon<.18||S.pr.some(b=>b.mine&&b.rdg&&d2(b,e)<70*70))){const rr=(S.duel&&S.duel.r)||1;e.dcd=rr>=1.5?rand(1.3,2.4):rr>=1?rand(1.8,3.2):rand(2.6,4.2);/* 강한 상대일수록 자주 피함 */const a=Math.atan2(p.y-e.y,p.x-e.x)+(Math.random()<.5?1:-1)*Math.PI/2;e.dvx=Math.cos(a)*700;e.dvy=Math.sin(a)*700;e.dashT=.2;e.ivT=Math.max(e.ivT||0,S.t+.25);S.rings.push({x:e.x,y:e.y,r:6,max:26,life:.2,col:'#ffffff'});return;}
   // 이동: 근접은 붙고, 원거리는 거리 유지하며 옆으로 돌기
-  const fury=c==='berserk'?1+Math.min(.6,el/60):1,want=A.mel?40:290;e.dir=e.dir||1;if(Math.random()<dt*.4)e.dir*=-1;
-  {const dx=p.x-e.x,dy=p.y-e.y,dd=Math.hypot(dx,dy)||1,sp=e.spd*(A.mel?1.1:1)*(fury>1?1+(fury-1)*.5:1);let vx=0,vy=0;if(dd>want+40){vx=dx/dd;vy=dy/dd;}else if(dd<want-40&&!A.mel){vx=-dx/dd;vy=-dy/dd;}vx+=-dy/dd*e.dir*(A.mel?.35:.8);vy+=dx/dd*e.dir*(A.mel?.35:.8);if(e.ev){const el2=Math.hypot(e.ev[0],e.ev[1])||1;vx+=e.ev[0]/el2*1.3;vy+=e.ev[1]/el2*1.3;}/* 탄 피하기가 우선 */
+  const fury=c==='berserk'?1+Math.min(.6,el/60):1,want=A.mel?40:clamp(Math.min(p.range||300,(e.hero&&e.hero.p&&e.hero.p.range)||300)*.7,150,240);/* 원거리: 내 사거리 안쪽에 섬 (예전 290은 사거리 260~320 직업이 못 맞힘) */e.dir=e.dir||1;if(Math.random()<dt*.4)e.dir*=-1;
+  {const dx=p.x-e.x,dy=p.y-e.y,dd=Math.hypot(dx,dy)||1,sp=e.spd*(A.mel?1.1:1)*(fury>1?1+(fury-1)*.5:1);let vx=0,vy=0;if(dd>want+40){vx=dx/dd;vy=dy/dd;}else if(dd<want-40&&!A.mel){vx=-dx/dd;vy=-dy/dd;}e.apT=(e.apT||0)-dt;const orb=(A.mel?.35:.5)*(e.apT>0?.3:1);vx+=-dy/dd*e.dir*orb;vy+=dx/dd*e.dir*orb;if(e.ev){const el2=Math.hypot(e.ev[0],e.ev[1])||1;vx+=e.ev[0]/el2*1.3;vy+=e.ev[1]/el2*1.3;}/* 탄 피하기가 우선 */
     // 결투장 벽에 붙지 않게 (가운데 쪽으로 살짝)
     {const Ar=S.arena;if(Ar){const ox=e.x-Ar.x,oy=e.y-Ar.y,od=Math.hypot(ox,oy);if(od>Ar.r*.72){vx-=ox/od*1.2;vy-=oy/od*1.2;}}}const l=Math.hypot(vx,vy)||1;e.x+=vx/l*sp*dt;e.y+=vy/l*sp*dt;e.face=dx>0?1:-1;}
   // 성기사 고유 능력: 신성 오라 (주변 110, 0.5초마다)
   if(c==='paladin'){e.auT=(e.auT||0)-dt;if(e.auT<=0){e.auT=.5;if(d<110+p.r)hurtP(B*.18,e);}}
-  // 사령술사 고유 능력: 해골 병사 소환 (최대 3)
-  if(A.skel){e.skT=(e.skT??3)-dt;if(e.skT<=0){e.skT=6;const n=S.en.filter(x=>x.alive&&x.rSkel).length;if(n<3){const m=spawnAt('grunt',e.x+rand(-40,40),e.y+rand(-40,40),true);m.spr='ranger';m.rSkel=1;m.maxHp=m.hp=Math.max(30,S.p.maxHp*.4);m.dmg=B*.35;m.spd=p.speed*.8;S.rings.push({x:m.x,y:m.y,r:4,max:30,life:.35,col:'#9cff9a'});}}}
+  // 사령술사 고유 능력: 해골 병사 소환 (5초마다, 최대 4. 시작 전에 3 미리)
+  if(A.skel){e.skT=(e.skT??3)-dt;if(e.skT<=0){e.skT=5;const n=S.en.filter(x=>x.alive&&x.rSkel).length;if(n<4){const m=spawnAt('grunt',e.x+rand(-40,40),e.y+rand(-40,40),true);m.spr='ranger';m.rSkel=1;m.maxHp=m.hp=Math.max(30,S.p.maxHp*.4);m.dmg=B*.35;m.spd=p.speed*.8;S.rings.push({x:m.x,y:m.y,r:4,max:30,life:.35,col:'#9cff9a'});}}}
   // 평타 (실제 공격 속도를 읽기 쉬운 범위로)
   const rate=rivalRate(e),iv=clamp(1.5/rate,.32,1.1)/fury;
-  if(e.acd<=0){e.atkT=.25;e.shots=(e.shots||0)+1;const per=B*iv;
+  if(e.acd<=0){e.atkT=.25;e.apT=.3;e.shots=(e.shots||0)+1;const per=B*iv;
     const lead=p.moving?moveSpd()*.5:0,tt=Math.hypot(p.x-e.x,p.y-e.y)/(A.spd||400),a=Math.atan2(p.y+(p.lmy||0)*lead*tt-e.y,p.x+(p.lmx||0)*lead*tt-e.x);
     if(A.mel){e.acd=iv;if(d<e.r+p.r+110){const ax=e.x+(p.x-e.x)*.45,ay=e.y+(p.y-e.y)*.45;tele({k:'c',x:ax,y:ay,r:70,T:.24,dmg:per*1.1,col:c==='berserk'?'#ff7050':'#cfe3ff',fk:'slash'});
         if(c==='knight'&&e.shots%4===0)tele({k:'c',x:e.x,y:e.y,r:105,T:.35,dmg:per*1.3,col:'#cfe3ff',fk:'spin'});}else e.acd=.15;}
@@ -10702,7 +10708,7 @@ function openForge(){cosPreviewHide();ftipHide();devGearBak();invMig();if(!FCLS|
   const tc=INV_TAB==='wh'?'wh':INV_TAB==='cls'?rc:'bag',wh=tc==='wh',MX=cMax(tc),byP=[];for(const x of I.items)if(!EQ.has(x.id)&&cOf(x)===tc&&x.p<MX)byP[x.p]=x;
   const cells=[];for(let n=0;n<MX;n++)cells.push(itCell(byP[n],n));
   // 장비 합산의 세트 목록: 효과가 켜진 세트(2개 이상)의 켜진 단계만 (1개뿐인 세트·아직 안 켜진 4세트 줄은 안 보임 · 장비 설명창에는 그대로 다 나옴)
-  const sc=setCnt(),setRows=Object.keys(sc).filter(k=>SETS[k]&&sc[k]>=2).map(k=>{const T=SETS[k],n=sc[k];return `<div class="setrow"><b style="color:${T.col}">${T.n} 세트 ${n}/${setMax(T)}</b>${setTiers(T).filter(([k])=>n>=k).map(([k,b])=>`<span class="on">${k}: ${fxTxt(b)}${k===4?setAugN(T):''}</span>`).join('')}</div>`;}).join('');
+  const sc=setCnt(),setRows=Object.keys(sc).filter(k=>SETS[k]&&sc[k]>=2).map(k=>{const T=SETS[k],n=sc[k];const a=n>=4&&T.aug&&AUGS.find(x=>x.id===T.aug);return `<div class="setrow"><b style="color:${T.col}"><span class="augref" data-sref="${k}">${T.n}</span> 세트 ${n}/${setMax(T)}</b>${setTiers(T).filter(([k])=>n>=k).map(([k,b])=>`<span class="on">${k}: ${fxTxt(b)}</span>`).join('')}${a?`<span class="on">✦ 증강 ${augRef(a)}</span>`:''}</div>`;}).join('');
   const say=gearMsg||SMITH_IDLE[Math.floor(Date.now()/9000)%SMITH_IDLE.length];
   const det=!sel?`<div class="idet empty"><p>장비를 누르면 여기에 자세한 정보가 나와요.</p></div>`:(()=>{const it=sel,on=!!eqSlotOf(it),ks2=GEAR_KEYS.filter(k=>slotT(k)===it.s),cur=on?null:(k=>k&&eqRaw(k))(cmpK),oth=!on&&ks2.length>1?ks2.find(k=>k!==cmpK):null,mx=(it.lv||0)>=GEAR_MAX,t=(it.lv||0)+1,c=itCost(it),rate=Math.round(itRate(it,t)*100),brk=Math.round(gearBreak(t)*100),col=itCol(it);
     const ST=it.set&&SETS[it.set];
@@ -13111,7 +13117,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=231,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=232,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
