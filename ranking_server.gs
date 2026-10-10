@@ -1,4 +1,8 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v7.4
+// 찬서 명예의 전당 서버 (Google Apps Script) v7.5
+//
+// v7.4 → v7.5 바뀐 점
+// - 레이드가 보스 5종으로 나뉨: 보스마다 따로 기록 (raid_golem · raid_frost · raid_storm · raid_brood · raid_void).
+//   점수는 예전 레이드와 같은 식(단계 × 100만 − 처치 시간). 예전 레이드(raid) 기록은 그대로 남음
 //
 // v7.3 → v7.4 바뀐 점
 // - 예전 기록의 빈 외모 칸 채우기(fill): 그 이름의 주인 기기만, 기록의 옷차림(장비 외형)·장비 상세 칸이 비어 있을 때만 채움.
@@ -158,7 +162,7 @@ const OLD_SHEET = 'ranking_v2';
 const HEAD = ['name', 'diff', 'cls', 'time', 'lvl', 'kills', 'bosses', 'score', 'comment', 'at', 'hero', 'hh', 'dw', 'kh'];
 const LIST_COLS = 10; // 목록에 필요한 칸 (name ~ at)
 const CACHE_KEY = 'list_v43';
-const DIFFS = { normal: 1, hard: 1.5, hell: 2.2, god: 3.2, nightmare: 4, bossrush: 4, raid: 1 };
+const DIFFS = { normal: 1, hard: 1.5, hell: 2.2, god: 3.2, nightmare: 4, bossrush: 4, raid: 1, raid_golem: 1, raid_frost: 1, raid_storm: 1, raid_brood: 1, raid_void: 1 };
 
 function book_() {
   const a = SpreadsheetApp.getActiveSpreadsheet();
@@ -248,7 +252,7 @@ function clean_(d, at) {
 
 // 게임과 같은 최종 점수: (기본 + 플레이 보너스) × 난이도 배율 × (1 − 0.1 × 자동 비율). 보너스·자동 비율은 cls의 ~칸에 들어 있음
 function score_(r) {
-  if (r.diff === 'raid') return Math.max(0, r.lvl * 1000000 - Math.min(999999, r.time));
+  if (String(r.diff).indexOf('raid') === 0) return Math.max(0, r.lvl * 1000000 - Math.min(999999, r.time));
   const seg = String(r.cls || '').split('~'), bonus = Math.max(0, +seg[1] || 0), ap = Math.min(1, Math.max(0, (+seg[2] || 0) / 100)), v2 = false; // v2(제곱 시간 점수)는 v5.3에서 폐지: 게임 화면과 같게 모든 기록 v1 식
   const base = r.diff === 'bossrush'
     ? r.bosses * 2500 + lvPts_(r) + r.time * 2
@@ -325,7 +329,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 74, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 75, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
