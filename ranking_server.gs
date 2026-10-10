@@ -1,4 +1,7 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v7.0
+// 찬서 명예의 전당 서버 (Google Apps Script) v7.1
+//
+// v7.0 → v7.1 바뀐 점
+// - 프로필(pf) 길이 240 → 800자: 장비 상세(옵션·세트)를 같이 실어 다른 사람 장비에 마우스를 올리면 설명·합산 효과가 보임
 //
 // v6.9 → v7.0 바뀐 점
 // - 접속 신호 응답의 접속자 목록에 각자의 프로필(pf)을 같이 실어 보냄 → 접속자 이름에 마우스를 올리면 바로 캐릭터 정보가 보임
@@ -304,14 +307,14 @@ function ping_(q) {
   try { w = id && c.get('watch_' + id) ? 1 : 0; } catch (err) {}
   // 관리자 쪽지: 이 이름 앞으로 안 읽은 쪽지가 있다는 표시(캐시)가 있을 때만 시트를 읽음 → 평소 접속 신호는 가벼움
   // 프로필: 바뀐 경우에만 이름 주인 확인 후 저장 (6시간 캐시, 접속 중이면 계속 갱신됨)
-  try { const pf = String(q.pf || '').replace(/[^A-Za-z0-9_+.~:\-]/g, '').slice(0, 240), nm = dmKey_(q.n);
+  try { const pf = String(q.pf || '').replace(/[^A-Za-z0-9_+.~:\-]/g, '').slice(0, 800), nm = dmKey_(q.n);
     if (pf && nm && !q.bye && c.get('pf_' + nm) !== pf) { const own = ownerKh_(str_(q.n, 12)); if (!own || own === kh_(q.k)) c.put('pf_' + nm, pf, 21600); } } catch (err) {}
   let dm = [];
   try { const nm = dmKey_(q.n); if (nm && !q.bye && (c.get('dm_' + nm) || !c.get('dmc_' + nm))) { c.put('dmc_' + nm, '1', 21600); const own = ownerKh_(str_(q.n, 12)); if (!own || own === kh_(q.k)) { dm = dmFor_(nm); if (!dm.length) c.remove('dm_' + nm); } } } catch (err) {}
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 70, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 71, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
