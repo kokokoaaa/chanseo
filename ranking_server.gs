@@ -1,4 +1,8 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v7.3
+// 찬서 명예의 전당 서버 (Google Apps Script) v7.4
+//
+// v7.3 → v7.4 바뀐 점
+// - 예전 기록의 빈 외모 칸 채우기(fill): 그 이름의 주인 기기만, 기록의 옷차림(장비 외형)·장비 상세 칸이 비어 있을 때만 채움.
+//   점수·시각·다른 칸은 그대로. 다른 사람 화면의 명예의 전당에도 그 캐릭터의 모습이 보이게
 //
 // v7.2 → v7.3 바뀐 점
 // - 기록의 직업 칸(cls) 길이 120 → 700자: 클리어 당시 장비 상세를 같이 저장해 명예의 전당에서 장비 설명·합산 효과가 보임
@@ -321,7 +325,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 73, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 74, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -621,6 +625,29 @@ function doPost(e) {
     const nm0 = str_(d.name, 12) || '익명', my = kh_(d.k), own = nm0 === '익명' ? { rows: [], kh: '' } : owner_(s, nm0);
     if (!own.kh && nm0 !== '익명') own.kh = acctKh_(nm0);
     if (own.kh && own.kh !== my) return out_({ ok: false, result: 'owned' });
+    // 예전 기록의 빈 외모 칸 채우기: 주인이 정해진 이름의 주인 열쇠로만, 비어 있는 칸만 (새 줄은 만들지 않음)
+    if (d.fill) {
+      if (!own.kh || own.kh !== my || nm0 === '익명') return out_({ ok: false, result: 'owned' });
+      const df = String(d.diff || ''), last = s.getLastRow();
+      const dr = /^[0-9a-z\-]{14}$/.test(String(d.dr || '')) ? String(d.dr) : '';
+      const gd = String(d.gd || '').replace(/[^A-Za-z0-9_+.:\-]/g, '').slice(0, 560);
+      if (!df || last < 2 || (!dr && !gd)) return out_({ ok: false });
+      const v = s.getRange(2, 1, last - 1, 3).getValues(), cc = HEAD.indexOf('cls') + 1;
+      let n = 0;
+      v.forEach((x, i) => {
+        if (String(x[0]) !== nm0 || fixDiff_({ diff: x[1], cls: x[2] }) !== df) return;
+        const sg = String(x[2]).split('~');
+        while (sg.length < 12) sg.push('');
+        let ch = false;
+        if (dr && !sg[10]) { sg[10] = dr; ch = true; }
+        if (gd && !sg[11]) { sg[11] = gd; ch = true; }
+        if (!ch) return;
+        while (sg.length > 1 && sg[sg.length - 1] === '') sg.pop();
+        s.getRange(i + 2, cc).setValue(sg.join('~').slice(0, 700));
+        n++;
+      });
+      return out_({ ok: true, result: 'fill', n });
+    }
     const claim = !own.kh && my && nm0 !== '익명';
     if (claim) own.rows.forEach(rw => s.getRange(rw, HEAD.indexOf('kh') + 1).setValue(my));
     if (nm0 !== '익명' && (own.kh || my)) ownerSet_(nm0, own.kh || my);
