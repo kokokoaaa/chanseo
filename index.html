@@ -7941,6 +7941,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:190,t:'🥾 신발 아이콘',items:[
+    ['change','🥾 신발 아이콘을 굽 있는 부츠에서 <b>모험가용 신발</b>로 바꿨어요','look'],
+  ]},
   {v:188,t:'🧙 마법사 로브 한 벌 · 장비칸 배치',items:[
     ['new','🧙 <b>마법사는 갑옷이 로브 한 벌</b>이에요. 양손 무기처럼 갑옷 칸이 바지 칸까지 차지하고, 대신 갑옷 기본 능력치가 <b>1.5배</b>. 로브 아랫자락도 같은 색으로 보여요. 예전에 끼고 있던 마법사 바지는 가방으로 옮겨 뒀어요'],
     ['change','🎽 장비칸 배치: 오른쪽 위에서 아래로 <b>갑옷 → 바지 → 신발</b>, 무기(오른손·왼손)는 아래 가운데로','look'],
@@ -8788,7 +8791,7 @@ const GEAR={sword:{ico:'🗡',n:'무기',fx:[['dmg',.04]]},
   shield:{ico:'🛡',n:'방패',fx:[['taken',.01],['dmg',.01]]},
   ear:{ico:'💠',n:'귀걸이',fx:[['crit',.008]]},
   ring:{ico:'💍',n:'반지',fx:[['dmg',.015]]},
-  boots:{ico:'👢',n:'신발',fx:[['spd',.015]]},
+  boots:{ico:'🥾',n:'신발',fx:[['spd',.015]]},
   pants:{ico:'👖',n:'바지',fx:[['hp',.02]]},
   arm:{ico:'🧤',n:'팔 보호대',fx:[['rate',.01]]}};
 for(const k in GEAR)GEAR[k].fmtE=gfmt(GEAR[k].fx);
@@ -12080,7 +12083,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=189,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=190,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
