@@ -1,4 +1,7 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v7.2
+// 찬서 명예의 전당 서버 (Google Apps Script) v7.3
+//
+// v7.2 → v7.3 바뀐 점
+// - 기록의 직업 칸(cls) 길이 120 → 700자: 클리어 당시 장비 상세를 같이 저장해 명예의 전당에서 장비 설명·합산 효과가 보임
 //
 // v7.1 → v7.2 바뀐 점
 // - 점수식을 게임(v207)과 맞춤: 생존 시간 점수 ×1.5, 처치 점수는 2000점부터 완만하게, 레벨 점수는 v197 이후 기록 ×1.6
@@ -220,7 +223,7 @@ const timePts_ = (t, v2) => !v2 || t <= 600 ? t * 12 : 7200 + 12 * ((t - 600) + 
 function clean_(d, at) {
   const r = {
     name: str_(d.name, 12) || '익명',
-    cls: str_(d.cls, 120).replace(/[<>"'`&\\]/g, ''), // 직업 칸에 HTML이 섞여 들어오지 않게
+    cls: str_(d.cls, 700).replace(/[<>"'`&\\]/g, ''), // 직업 칸에 HTML이 섞여 들어오지 않게
     time: num_(d.time, 360000),
     lvl: num_(d.lvl, 100000),
     kills: num_(d.kills, 10000000),
@@ -318,7 +321,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 72, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 73, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교

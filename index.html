@@ -7881,7 +7881,7 @@ function gameOver(win){
   ${hsnap?`<div class="btnrow"><button class="btn" id="heroSv">💾 캐릭터 저장 <small>이 판의 증강·능력치 그대로 🗃 내 캐릭터에 보관</small></button></div>`:''}
   <div class="btnrow"><button class="btn primary" id="again">${CLASSES[S.cls].n}(으)로 다시</button><button class="btn primary" id="tosel" style="background:transparent;color:var(--ivory)">캐릭터 선택</button></div>`);
   if($('heroSv'))$('heroSv').onclick=async()=>{if(await heroSave(hsnap)){$('heroSv').disabled=true;$('heroSv').innerHTML='✔ 저장했어요 <small>시작 화면 🗃 내 캐릭터에서 볼 수 있어요</small>';}};
-  const run={diff:S.diff||'normal',sec,score,cls:S.cls,lvl:S.lvl,kills:S.st.kills,bosses:S.st.bosses||0,gold:S.win?S.gold:0,bonus:playBonus(),ap:autoFr(),snap:hsnap,at:Date.now(),build:BUILD,dr:(()=>{try{return dressEnc(myDress(S.cls));}catch(e){return '';}})()};recentAdd(run);
+  const run={diff:S.diff||'normal',sec,score,cls:S.cls,lvl:S.lvl,kills:S.st.kills,bosses:S.st.bosses||0,gold:S.win?S.gold:0,bonus:playBonus(),ap:autoFr(),snap:hsnap,at:Date.now(),build:BUILD,dr:(()=>{try{return dressEnc(myDress(S.cls));}catch(e){return '';}})(),gd:(()=>{try{return gearDetEnc(S.cls);}catch(e){return '';}})()};recentAdd(run);
   const bindReg=()=>{if($('rRetry'))$('rRetry').onclick=async()=>{$('rRetry').textContent='연결 중…';await loadSheet();if(SHEET){toast('랭킹 서버 연결됨');$('rreg').innerHTML=regForm();bindReg();}else{$('rRetry').textContent='↻ 다시 연결 (실패)';}};
     if($('rsub')){const go=()=>submitScore($('nickIn').value,$('cmtIn').value,run);$('rsub').onclick=go;['nickIn','cmtIn'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.isComposing||e.keyCode===229)return;if(e.key==='Enter'&&!($('rsub')||{}).disabled)go();}));}};bindReg();
   const pc=S.cls,pd=S.diff;$('again').onclick=()=>beginRunD(pd,pc);$('tosel').onclick=()=>{newRun();startScreen();};
@@ -7945,6 +7945,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:210,t:'🏆 명예의 전당에서 장비 보기',items:[
+    ['new','🏆 명예의 전당 기록을 누르면 <b>클리어 당시 장비</b>와 장비 합산 효과가 보이고, 장비에 마우스를 올리면 설명이 나와요 (이번 버전부터 올린 기록. 예전 기록은 그 사람이 최근 접속했으면 지금 장비를 보여줘요)'],
+  ]},
   {v:209,t:'🐞 다른 사람 장비 설명창',items:[
     ['change','👤 다른 사람 계정 정보에서 장비에 마우스를 올려도 설명창이 창 뒤에 가려 안 보이던 문제','bug'],
   ]},
@@ -10599,7 +10602,7 @@ const calcScore=b=>scoreOf({...b,diff:dOf(b),bonus:bonusOf(b),ap:apOf(b)});
 const dwOf=v=>{if(v&&typeof v==='object')return v;const m=String(v||'').match(/^w(\d+)d(\d+)l(\d+)$/);return m?{w:+m[1],d:+m[2],l:+m[3]}:null;};
 const dwStr=()=>{const R=META.duel;return R&&(R.w||R.l||R.d)?`${R.w||0}-${R.d||0}-${R.l||0}`:'';};
 let BOARD_DW=false; // 서버가 결투 전적 칸을 아는지 (v4.2 이상)
-function normBoard(list){return list.map(b=>({...b,dw:dwOf(b.dw),diff:dOf(b),fx:fxOk(clsS(b).split('#')[1]||b.fx||''),bonus:bonusOf(b),ap:apOf(b),title:titleOf(b),aura:auraOf(b),gear:(g=>String(g).includes('!')||!segOf(b,10)?g:g+'!'+segOf(b,10))(gearOf(b)),look:lookOf(b),frame:frameOf(b),build:buildOf(b),team:teamOf(b),skin:skinOf(b),cls:clsS(b).split('#')[0].split(':')[0],name:String(b.name||''),time:+b.time||0,lvl:+b.lvl||0,kills:+b.kills||0,bosses:+b.bosses||0,comment:String(b.comment||''),score:calcScore(b)})).sort((a,b)=>b.score-a.score);}
+function normBoard(list){return list.map(b=>({...b,dw:dwOf(b.dw),diff:dOf(b),fx:fxOk(clsS(b).split('#')[1]||b.fx||''),bonus:bonusOf(b),ap:apOf(b),title:titleOf(b),aura:auraOf(b),gear:(g=>String(g).includes('!')||!segOf(b,10)?g:g+'!'+segOf(b,10))(gearOf(b)),look:lookOf(b),frame:frameOf(b),build:buildOf(b),team:teamOf(b),gd:b.gd||segOf(b,11),skin:skinOf(b),cls:clsS(b).split('#')[0].split(':')[0],name:String(b.name||''),time:+b.time||0,lvl:+b.lvl||0,kills:+b.kills||0,bosses:+b.bosses||0,comment:String(b.comment||''),score:calcScore(b)})).sort((a,b)=>b.score-a.score);}
 // 내 등록 기록 백업: 서버가 어떤 기록(예: 새 난이도)을 반영하지 못해도 내 화면에서는 사라지지 않게. 서버에 더 높은 기록이 있으면 서버 것을 씀
 const myRecs=()=>{try{return JSON.parse(localStorage.getItem('chanseo_myrec')||'{}');}catch(e){return {};}};
 const saveMyRec=r=>{try{const m=myRecs();const old=m[r.diff];if(!old||scoreOf({...r})>=scoreOf({...old}))m[r.diff]=r;localStorage.setItem('chanseo_myrec',JSON.stringify(m));}catch(e){}};
@@ -10681,24 +10684,29 @@ async function profGet(n){const k=onlKey(n);if(k===onlKey(myNick()))return profP
 function profBest(n){const k=onlKey(n),o={};for(const r of (BOARD||[]))if(r&&onlKey(r.name)===k){const sc=scoreOf(r);if(!o[r.diff]||sc>o[r.diff])o[r.diff]=sc;}return o;}
 function profTip(n,p,done){const av=p?profAv(p,64):null,A=p&&p.title&&ACH.find(a=>a.k===p.title);
   return `<div style="display:flex;gap:10px;align-items:center">${av?`<img src="${av.src}" style="width:${av.css}px;height:${av.css}px;image-rendering:pixelated">`:''}<div><b>${esc(n)}</b>${A?`<div style="color:#ffd76a;font-size:12px">🏷 ${esc(A.n)}</div>`:''}${p?`<div>${CLASSES[p.cls].n} · ⚔ 전투력 <b style="color:#ffe27a">${p.pw.toLocaleString()}</b></div><div>⏱ 플레이 ${ptTxt(p.pt)} · ⚒ 장비 ${Object.keys(p.eq).length}/14 · 🏆 ${p.achs?p.achs.length:p.ach}/${ACH.length}</div><small style="color:var(--muted)">눌러서 계정 정보 보기</small>`:done?'<small style="color:var(--muted)">계정 정보가 아직 없어요<br>(그 사람이 접속한 뒤 1~2분 지나면 보여요)</small>':'<small style="color:var(--muted)"><span class="ldspin"></span>계정 정보를 불러오는 중… (몇 초 걸릴 수 있어요)</small>'}</div></div>`;}
+// 장비 칸 + 마우스 올림 설명 + 장비 합산 효과 (계정 정보 · 명예의 전당 공용). det = 장비 상세(부위→아이템), eq = 등급·강화만 있는 예전 정보
+function gearPanel(cls,det,eq,av,note){det=det||{};eq=eq||{};const p={cls};if(!Object.keys(eq).length)for(const k in det)eq[k]={r:det[k].r,lv:det[k].lv};p.eq=eq;p.det=det;
+  const PI={};for(const k of GEAR_KEYS){const e=p.eq[k];if(!e)continue;PI[k]=p.det[k]||{s:slotT(k),r:e.r,lv:e.lv,b:1,a:[],est:1};}
+  const cell=k=>{const e=p.eq[k],it=PI[k];return `<div class="pslot${e?'':' em'}${egC(it)}" ${it?`data-pk="${k}"`:''} style="grid-area:${SLOT_POS[k]};--rc:${e?(it&&it.u?UNQ_COL:GR[e.r].col):'#555'}"><span>${it?itIcoH(it,p.cls):GEAR[slotT(k)].ico}</span>${e&&e.lv?`<b>+${e.lv}</b>`:''}<small>${SLOT_N[k]}</small></div>`;};
+  const TOT=gearTotalsOf(PI,p.cls),tks=Object.keys(TOT).filter(k=>Math.abs(TOT[k])>1e-4),est=Object.values(PI).some(x=>x.est);
+  const totH=tks.length?`<div class="ptot"><b>📊 장비 합산 효과</b>${tks.map(k=>{const nm=(ST_N[k]||[k])[0];return `<div class="strow"><span>${nm}</span><b>${stTxt(k,TOT[k]).replace(nm+' ','')}</b></div>`;}).join('')}${est?'<small>옵션·세트 정보가 없는 예전 프로필이라 주 능력치만 계산했어요</small>':''}</div>`:'';
+  const html=`<div class="pwrap"><div class="pgrid">${GEAR_KEYS.map(cell).join('')}<div class="pmid">${av?`<img src="${av.src}" style="width:${av.css}px;height:${av.css}px;image-rendering:pixelated">`:''}</div></div>${totH}</div>${note?`<small style="color:var(--muted);display:block;text-align:center">${note}</small>`:''}`;
+  const bind=w=>w.querySelectorAll('[data-pk]').forEach(el=>ftipBind(el,()=>{const it=PI[el.dataset.pk];if(!it)return null;const t=itTip(it);return [t[0].replace(/<div class="ftc[^"]*">[\s\S]*?<\/div>/,'')+(it.est?'<small style="color:var(--muted)">(예전 정보: 옵션 정보 없음)</small>':''),t[1]];}));
+  return {html,bind,n:Object.keys(PI).length};}
 async function profOpen(n){let w=document.getElementById('hofSt');if(!w){w=document.createElement('div');w.id='hofSt';w.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:12px';document.body.appendChild(w);w.onclick=e=>{if(bgHit(e,w))w.remove();};}
   const box=x=>`<div class="profbox">${x}<div style="text-align:center;margin-top:10px"><button class="btn" id="hsX">닫기</button></div></div>`,paint=x=>{w.innerHTML=box(x);$('hsX').onclick=()=>w.remove();};
   paint(`<b>${esc(n)}</b><div style="color:var(--muted)">계정 정보 불러오는 중…</div>`);const p=await profGet(n);if(!document.body.contains(w))return;
   if(!p){paint(`<b>${esc(n)}</b><div style="color:var(--muted);margin-top:6px">계정 정보가 없어요<br><small>(새 버전으로 접속 중인 사람만 볼 수 있어요)</small></div>`);return;}
   const av=profAv(p,150),A=p.title&&ACH.find(a=>a.k===p.title),B=profBest(n),bd=['nightmare','bossrush','god','hell','raid'].filter(d=>B[d]);
-  // 장비 상세가 있으면(새 버전) 그대로, 없으면 등급·강화로 주 능력치만 추정
-  const PI={};for(const k of GEAR_KEYS){const e=p.eq[k];if(!e)continue;PI[k]=p.det[k]||{s:slotT(k),r:e.r,lv:e.lv,b:1,a:[],est:1};}
-  const cell=k=>{const e=p.eq[k],it=PI[k];return `<div class="pslot${e?'':' em'}${egC(it)}" ${it?`data-pk="${k}"`:''} style="grid-area:${SLOT_POS[k]};--rc:${e?(it&&it.u?UNQ_COL:GR[e.r].col):'#555'}"><span>${it?itIcoH(it,p.cls):GEAR[slotT(k)].ico}</span>${e&&e.lv?`<b>+${e.lv}</b>`:''}<small>${SLOT_N[k]}</small></div>`;};
-  const TOT=gearTotalsOf(PI,p.cls),tks=Object.keys(TOT).filter(k=>Math.abs(TOT[k])>1e-4),est=Object.values(PI).some(x=>x.est);
-  const totH=tks.length?`<div class="ptot"><b>📊 장비 합산 효과</b>${tks.map(k=>{const nm=(ST_N[k]||[k])[0];return `<div class="strow"><span>${nm}</span><b>${stTxt(k,TOT[k]).replace(nm+' ','')}</b></div>`;}).join('')}${est?'<small>옵션·세트 정보가 없는 예전 프로필이라 주 능력치만 계산했어요</small>':''}</div>`:'';
+  const GP=gearPanel(p.cls,p.det,p.eq,av);
   paint(`<div class="profh"><div><b style="font-size:18px">${esc(n)}</b>${A?`<div style="color:#ffd76a">🏷 ${esc(A.n)}</div>`:''}<div>${CLASSES[p.cls].ico||''} 대표 캐릭터 · ${CLASSES[p.cls].n}</div></div></div>
-  <div class="pwrap"><div class="pgrid">${GEAR_KEYS.map(cell).join('')}<div class="pmid">${av?`<img src="${av.src}" style="width:${av.css}px;height:${av.css}px;image-rendering:pixelated">`:''}</div></div>${totH}</div>
+  ${GP.html}
   <div class="pstat"><span>⚔ 전투력<b style="color:#ffe27a">${p.pw.toLocaleString()}</b></span><span>⏱ 플레이 시간<b>${ptTxt(p.pt)}</b></span><span>🏆 도전과제<b>${p.achs?p.achs.length:p.ach}/${ACH.length}</b></span></div>
   ${p.pm||p.pg||p.pr?`<small style="color:var(--muted)">전투력 = 영구 강화 ${p.pm.toLocaleString()} + 장비 ${p.pg.toLocaleString()} + 최고 기록 ${p.pr.toLocaleString()}</small>`:''}
   ${bd.length?`<h3 style="margin:10px 0 4px;font-size:15px">📜 명예의 전당 최고 점수</h3><div class="pstat">${bd.map(d=>`<span>${DIFF[d].n}<b>${B[d].toLocaleString()}</b></span>`).join('')}</div>`:''}
   ${(()=>{const L=p.achs;if(!L)return '';const n=L.length,T=ACH.length,pc=Math.round(n/T*100);return `<h3 style="margin:10px 0 4px;font-size:15px">🏆 완료한 도전과제 <small style="color:var(--muted);font-weight:normal">${n}/${T} · ${pc}%</small></h3><div class="achbar"><i style="width:${pc}%"></i></div>${n?`<div class="achchips">${L.map(a=>`<span class="${a.hard?'hard':''}" data-achd="${esc(a.d)}" data-achn="${esc((a.hard?'★ ':'')+a.n)}">${a.hard?'★ ':''}${esc(a.n)}</span>`).join('')}</div>`:'<small style="color:var(--muted)">아직 완료한 도전과제가 없어요</small>'}`;})()}
   <small style="color:var(--muted);display:block;margin-top:6px">플레이 시간은 게임을 직접 하는 시간만 세요 (자리 비움 제외)</small>`);achTipBind(w);
-  w.querySelectorAll('[data-pk]').forEach(el=>ftipBind(el,()=>{const it=PI[el.dataset.pk];if(!it)return null;const t=itTip(it);return [t[0].replace(/<div class="ftc[^"]*">[\s\S]*?<\/div>/,'')+(it.est?'<small style="color:var(--muted)">(예전 프로필: 옵션 정보 없음)</small>':''),t[1]];}));}
+  GP.bind(w);}
 // 도전과제 칩에 마우스를 올리면(휴대폰은 누르면) 이름·설명 말풍선
 function achTipBind(root){let t=document.getElementById('achTip');if(!t){t=document.createElement('div');t.id='achTip';t.className='achtip';document.body.appendChild(t);}t.style.display='none';
   const show=(el,ev)=>{t.innerHTML=`<b>${el.dataset.achn}</b><div>${el.dataset.achd}</div>`;t.style.display='block';const r=el.getBoundingClientRect(),tw=t.offsetWidth,th=t.offsetHeight;let x=r.left+r.width/2-tw/2,y=r.top-th-8;if(y<8)y=r.bottom+8;x=Math.max(8,Math.min(innerWidth-tw-8,x));t.style.left=x+'px';t.style.top=y+'px';};
@@ -11063,9 +11071,13 @@ function hofTipBind(el){let tip=document.getElementById('hofTip');if(!tip){tip=d
     c.onclick=()=>{tip.style.display='none';hofStatOpen(HOF_B[+c.dataset.hi]);};c.style.cursor='pointer';});}
 // 명예의 전당 기록을 누르면: 그 캐릭터의 최종 능력치·증강 (결투 데이터가 있는 기록만 능력치가 있음)
 async function hofStatOpen(b){if(!b)return;let w=document.getElementById('hofSt');if(!w){w=document.createElement('div');w.id='hofSt';w.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:12px';document.body.appendChild(w);w.onclick=e=>{if(bgHit(e,w))w.remove();};}
-  const box=x=>`<div style="background:#0d2a20;border:2px solid var(--brass);border-radius:14px;padding:14px 16px;max-width:420px;width:100%;max-height:86vh;overflow:auto;color:var(--ivory);font-size:14px;line-height:1.55">${x}<div style="text-align:center;margin-top:10px"><button class="btn" id="hsX">닫기</button></div></div>`;
+  const box=x=>`<div style="background:#0d2a20;border:2px solid var(--brass);border-radius:14px;padding:14px 16px;max-width:640px;width:100%;max-height:86vh;overflow:auto;color:var(--ivory);font-size:14px;line-height:1.55">${x}<div style="text-align:center;margin-top:10px"><button class="btn" id="hsX">닫기</button></div></div>`;
   const av=hofAv(b.cls,b.skin,b.aura,b.gear,recLook(b)),top=`<div style="display:flex;gap:10px;align-items:center;margin-bottom:6px">${av?`<img src="${av}" style="width:72px;height:72px;image-rendering:pixelated">`:''}<div>${hofTipHtml(b)}</div></div>`;
-  const paint=x=>{w.innerHTML=box(top+x);$('hsX').onclick=()=>w.remove();};
+  // 장비: 기록에 클리어 당시 장비 상세가 있으면 그것, 없으면(예전 기록) 그 사람의 지금 장비(접속 기록이 있을 때)
+  let G=null;const paint=x=>{w.innerHTML=box(top+(G&&G.n?G.html:'')+x);$('hsX').onclick=()=>w.remove();if(G)G.bind(w);};
+  {const det={};String(b.gd||'').split(':').forEach((x,i)=>{const k=GEAR_KEYS[i];if(k){const it=itDec(k,x);if(it)det[k]=it;}});
+   if(Object.keys(det).length)G=gearPanel(b.cls,det,null,av?{src:av,css:120}:null,'🎒 클리어 당시 장비 · 마우스를 올리면 설명');
+   else{paint('<div style="color:var(--muted);text-align:center">불러오는 중…</div>');const pf=await profGet(b.name).catch(()=>null);if(!document.body.contains(w))return;if(pf&&pf.det&&Object.keys(pf.det).length)G=gearPanel(pf.cls,pf.det,pf.eq,profAv(pf,120),`🎒 ${CLASSES[pf.cls].n}의 <b>지금 장비</b> (예전 기록이라 클리어 당시 장비 정보는 없어요)`);}}
   if(!b.h){paint('<div style="color:var(--muted);text-align:center;margin-top:6px">📊 이 기록에는 능력치 정보가 없어요<br><small>(능력치는 무한의 악몽·보스 러시 기록에만 함께 저장돼요)</small></div>');return;}
   paint('<div style="color:var(--muted);text-align:center">📊 능력치 불러오는 중…</div>');
   const h=await hofHero({hof:b,n:b.name});if(!document.body.contains(w))return;
@@ -11136,7 +11148,7 @@ async function submitScore(nick,comment,run){
   const cur=(BOARD||[]).find(b=>b.diff===dk&&(sheet?b.name===nick:b.id===docId));
   const better=!cur||run.score>cur.score;
   if(!better){say(`'${nick}'의 이전 최고 점수(${cur.score.toLocaleString()}점)가 더 높아서 그대로 둘게요. (한마디는 기록을 처음 올리거나 더 좋은 기록으로 바꿀 때만 바뀌어요)`);return;}
-  const hf=cosEq('hof');const rec={name:nick,cls:run.cls+(dk==='normal'?'':':'+dk)+(hf?'#'+hf.k:'')+(cosEq('skin')?'@'+cosEq('skin').k:'')+(()=>{const sg=[run.bonus||0,run.ap?Math.round(run.ap*100):'',META.title||'',auraStr(),gearCode(),lookOld(run.cls)?'o':'n',(cosEq('frame')||{}).k||'',run.build||BUILD,'',run.dr||(()=>{try{return dressEnc(myDress(run.cls));}catch(e){return '';}})()];while(sg.length&&(sg[sg.length-1]===''||/^-+$/.test(String(sg[sg.length-1]))||sg[sg.length-1]===0))sg.pop();return sg.length?'~'+sg.join('~'):'';})(),bonus:run.bonus||0,ap:run.ap||0,diff:dk,time:run.sec,lvl:run.lvl,kills:run.kills,bosses:run.bosses,gold:run.gold||0,score:run.score,comment,k:MYKEY,at:run.at||Date.now()};if(rec.cls.length>120)rec.cls=rec.cls.replace(/~\d+$/,'');if(dwStr())rec.dw=dwStr();
+  const hf=cosEq('hof');const rec={name:nick,cls:run.cls+(dk==='normal'?'':':'+dk)+(hf?'#'+hf.k:'')+(cosEq('skin')?'@'+cosEq('skin').k:'')+(()=>{const sg=[run.bonus||0,run.ap?Math.round(run.ap*100):'',META.title||'',auraStr(),gearCode(),lookOld(run.cls)?'o':'n',(cosEq('frame')||{}).k||'',run.build||BUILD,'',run.dr||(()=>{try{return dressEnc(myDress(run.cls));}catch(e){return '';}})(),run.gd||''];while(sg.length&&(sg[sg.length-1]===''||/^-+$/.test(String(sg[sg.length-1]))||sg[sg.length-1]===0))sg.pop();return sg.length?'~'+sg.join('~'):'';})(),bonus:run.bonus||0,ap:run.ap||0,diff:dk,time:run.sec,lvl:run.lvl,kills:run.kills,bosses:run.bosses,gold:run.gold||0,score:run.score,comment,k:MYKEY,at:run.at||Date.now()};if(rec.cls.length>120)rec.cls=rec.cls.replace(/~\d+$/,'');if(dwStr())rec.dw=dwStr();
   const done=better?`명예의 전당에 ${run.score.toLocaleString()}점으로 등록했어요!`:`이전 최고 점수(${cur.score.toLocaleString()}점)가 더 높아서 점수는 그대로 두고 한마디만 바꿨어요.`;
   if(run.snap&&better){try{rec.hero=await heroPack({...run.snap,name:nick});}catch(e){}}
   say('등록 중…');if(btn)btn.disabled=true;
@@ -11758,7 +11770,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=209,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=210,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
