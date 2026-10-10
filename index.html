@@ -2743,7 +2743,7 @@ const TAGS={
   holy:    {n:'신성',  t2:'맞으면 주변에 빛 폭발 (범위 90, 공격력 80%, 2초에 한 번)',t4:'보호막 +최대 체력 15%, 보호막이 있으면 공격력 +20%',t6:'정예·보스에게 피해 +40%, 처치 시 체력 1% 회복',ex:'빛 피해 +10%'},
   frost:   {n:'냉기',  t2:'적중 시 20% 확률로 적 1.5초 둔화. 보스는 둔화 대신 얼어붙은 상태로 취급해 냉기 보너스를 받음',t4:'둔화된 적이 받는 피해 +30%',t6:'둔화된 적이 죽으면 얼음 파편 8발 (공격력 60%)',ex:'둔화된 적 피해 +6%'},
   summon:  {n:'소환',  t2:'부적 정령 1기 지급',t4:'소환물 피해 2배',t6:'소환물 공격 속도 2배',ex:'소환물 피해 +15%'},
-  sniper:  {n:'원거리',t2:'사거리 +20%',t4:'먼 적일수록 피해 증가 (거리 100당 +10%, 최대 +60%)',t6:'탄환이 적을 뚫을 때마다 피해 +30% 누적 (최대 +150%)',ex:'원거리 피해 +5%'},
+  sniper:  {n:'원거리',t2:'사거리 +20%',t4:'사거리 100당 피해 +4% (사거리 550이면 +22%)',t6:'탄환이 적을 뚫을 때마다 피해 +30% 누적 (최대 +150%)',ex:'원거리 피해 +5%'},
   thunder: {n:'번개',  t2:'10번째 공격마다 연쇄 번개 (적 4명)',t4:'번개 연쇄 대상 +3, 번개 피해 +50%',t6:'번개 맞은 일반 적 0.8초 기절',ex:'번개 피해 +15%'},
   fire:    {n:'화염',  t2:'적중 시 화상 (3초, 초당 공격력 20%)',t4:'화상 입은 적이 죽으면 불길 폭발 (범위 70, 공격력 120%)',t6:'화상 피해 2배, 화상이 1초마다 주변 적에게 번짐',ex:'화상 피해 +15%'},
   shadow:  {n:'그림자',t1:'6초마다 그림자 분신 소환 (4초, 0.5초마다 공격력 40% 사격, 최대 2기)',t2:'대시할 때도 분신 소환, 분신 최대 +1',t4:'분신이 사라질 때 그림자 폭발 (범위 80, 공격력 150%)',t6:'분신 탄환 30%는 반드시 치명타, 분신 최대 +2',ex:'분신 피해 +15%'},
@@ -2845,7 +2845,7 @@ const AUGS=[
   {id:'m_meteor',cls:'mage',t:'p',n:'운석 낙하',tags:['fire','jackpot'],d:'[마법사 전용] 8번째 공격마다 대상 위치에 운석. 공격력 6배 대폭발'},
   {id:'m_ring',cls:'mage',t:'s',n:'불꽃 장막',tags:['fire'],d:'[마법사 전용] 주변 110 안의 적에게 초당 공격력 150% 화염 피해'},
   {id:'a_multi',cls:'archer',t:'g',n:'부채꼴 사격',tags:['card'],d:'[궁수 전용] 화살 +2발',f:p=>{p.multi+=1;}},
-  {id:'a_snipe',cls:'archer',t:'s',n:'저격수',tags:['sniper'],d:'[궁수 전용] 먼 적일수록 피해 증가 (거리 100당 +15%, 최대 +200%)'},
+  {id:'a_snipe',cls:'archer',t:'s',n:'저격수',tags:['sniper'],d:'[궁수 전용] 사거리 100당 피해 +6.5%'},
   {id:'a_still',cls:'archer',t:'s',n:'정조준',tags:['sniper','dice'],d:'[궁수 전용] 멈춰 있으면 공격 속도 +50%, 치명타 +10%'},
   {id:'r_shadow',cls:'rogue',t:'g',n:'그림자 걸음',tags:['blitz','curse'],d:'[도적 전용] 대시 후 2초간 모든 공격이 치명타'},
   {id:'r_venom',cls:'rogue',t:'s',n:'독 바른 단검',tags:['poison'],d:'[도적 전용] 단검이 적을 중독시킴 (독 피해 +50%)'},
@@ -2920,7 +2920,7 @@ const AUGS=[
   {id:'rifling',t:'s',n:'강선',tags:['sniper'],d:'탄속 +50%, 사거리 +12%. 탄환 관통 +1',f:p=>{p.bspd*=1.22;p.range*=1.06;p.rfN=(p.rfN||0)+1;if(p.rfN%2)p.pierce+=1;}},
   {id:'velocity',t:'g',n:'질풍탄',tags:['sniper','card'],d:'탄속 100당 탄환 피해 +5% (최대 +100%)'},
   {id:'railgun',t:'p',n:'천공탄',tags:['sniper','sniper'],d:'탄속 +80%, 관통 +2. 원거리 2개로 계산',f:p=>{p.bspd*=1.34;p.pierce+=1;}},
-  {id:'scope',t:'s',n:'조준경',tags:['sniper'],d:'사거리 +25%. 300보다 먼 적에게 피해 +20%',f:p=>{p.range*=1.12;}},
+  {id:'scope',t:'s',n:'조준경',tags:['sniper'],d:'사거리 +25%. 사거리 100당 피해 +1.6%',f:p=>{p.range*=1.12;}},
   {id:'longshot',t:'g',n:'원거리 숙련',tags:['sniper'],d:'사거리 100당 공격력 +6%'},
   {id:'heart',t:'g',n:'거인의 심장',tags:['guard'],d:'최대 체력 +20%. 1.5초 동안 크게 안 맞았으면 다음 피격 피해 −40%',f:p=>{p.hpP=(p.hpP||0)+.1;}},
   {id:'troll',t:'s',n:'트롤의 피',tags:['guard'],d:'초당 체력 재생 +3. 3초간 맞지 않으면 체력 재생 3배',f:p=>{p.regen+=1.5;}},
@@ -3056,7 +3056,7 @@ const AUGS=[
   {id:'a_rain',cls:'archer',t:'g',n:'화살비',tags:['card','sniper'],d:'[궁수 전용] 6초마다 적이 가장 많은 곳에 1.5초간 화살비 (반경 130, 0.25초마다 공격력 50%)'},
   {id:'a_blast',cls:'archer',t:'g',n:'폭발 화살',tags:['card','fire'],d:'[궁수 전용] 화살이 관통을 다 쓰거나 사거리 끝에 닿으면 폭발 (반경 60, 공격력 120%)'},
   {id:'a_chain',cls:'archer',t:'s',n:'연속 명중',tags:['sniper','rapid'],d:'[궁수 전용] 같은 적을 연속으로 맞힐 때마다 공격 속도 +8% (최대 +60%), 대상이 바뀌면 초기화'},
-  {id:'a_hawk',cls:'archer',t:'s',n:'매의 눈',tags:['sniper'],d:'[궁수 전용] 거리 220 넘는 적에게 피해 +40%'},
+  {id:'a_hawk',cls:'archer',t:'s',n:'매의 눈',tags:['sniper'],d:'[궁수 전용] 사거리 100당 피해 +3.6%'},
   {id:'a_split',cls:'archer',t:'p',n:'갈래 화살',tags:['card','card'],d:'[궁수 전용] 화살이 처음 맞힌 적에서 좌우로 2발 갈라짐 (각 공격력 50%, 관통 1). 카드 2개로 계산'},
   // 도적 루트: 연막탄 / 죽음의 표적 / 독 폭발 / 그림자 분신
   {id:'r_smoke',cls:'rogue',t:'g',n:'연막탄',tags:['blitz','guard'],d:'[도적 전용] 대시한 자리에 3초간 연막 (반경 90). 연막 안에서 회피 +30% (상한 무시), 연막 안 적 둔화'},
@@ -3092,7 +3092,7 @@ const AUGS=[
   {id:'wisp',t:'s',n:'도깨비불',tags:['summon','fire'],d:'도깨비불 1기가 따라다니며 1초마다 화염구 (공격력 80%, 화상)'},
   {id:'legion',t:'p',n:'드론 군단',tags:['summon','summon'],d:'부적 정령 +2기. 소환 2개로 계산'},
   {id:'piercer',t:'s',n:'꿰뚫는 탄',tags:['sniper'],d:'관통 +2',f:p=>{p.pierce+=1;}},
-  {id:'marksman',t:'g',n:'명중 표식',tags:['sniper','dice'],d:'300보다 먼 적에게 치명타 확률 +30%'},
+  {id:'marksman',t:'g',n:'명중 표식',tags:['sniper','dice'],d:'사거리 100당 치명타 확률 +1.7%'},
   {id:'artillery',t:'p',n:'포격',tags:['sniper','sniper'],d:'탄환이 사라지는 자리에서 폭발 (범위 70, 공격력 100%). 원거리 2개로 계산'},
   {id:'tesla',t:'g',n:'번개 토템',tags:['thunder'],d:'3초마다 주변 200 안의 적에게 연쇄 번개 (3명)'},
   {id:'overload',t:'s',n:'과부하',tags:['thunder','dice'],d:'치명타가 터지면 20% 확률로 연쇄 번개 (3명)'},
@@ -3156,7 +3156,7 @@ const FUSIONS=[
   {id:'f_shatter',a:'stunner',b:'frost',n:'산산조각',d:'둔화된 적에게 치명타가 터지면 얼음 폭발 (범위 70, 공격력 100%)'},
   {id:'f_overclock',a:'turret',b:'mine',n:'방어 진지',d:'마법 포탑 8초 → 4초마다 설치, 지뢰 피해 2배'},
   {id:'f_willo',a:'wisp',b:'kindle',n:'도깨비 불꽃',d:'도깨비불 화염구 1초 → 0.5초마다, 화상 피해 +30%'},
-  {id:'f_seeker',a:'marksman',b:'scope',n:'추적자의 눈',d:'300보다 먼 적에게 피해 +50%'},
+  {id:'f_seeker',a:'marksman',b:'scope',n:'추적자의 눈',d:'사거리 100당 피해 +3%'},
   {id:'f_siege',a:'artillery',b:'bigshot',n:'공성포',d:'포격 폭발 범위 2배, 대포알 5번째 → 3번째 공격마다'},
   {id:'f_tesla2',a:'tesla',b:'overload',n:'번개 왕관',d:'번개 토템 3초 → 1.5초마다, 과부하 확률 2배'},
   {id:'f_hellfire',a:'fireball',b:'burn',n:'지옥불',d:'화염구 6번째 → 3번째 공격마다, 폭발 범위 1.5배'},
@@ -3210,7 +3210,7 @@ const FUSIONS=[
   {id:'f_colossus',a:'heart',b:'fortress',n:'거신',d:'최대 체력 +25%, 안 맞다가 맞는 첫 피격 피해 감소 −40% → −60%',f:p=>{p.hpP=(p.hpP||0)+.25;}},
   {id:'f_hydra',a:'troll',b:'thick',n:'재생 괴물',d:'체력 재생 3배가 조건 없이 항상 적용'},
   {id:'f_bloodsport',a:'vamp',b:'madblade',n:'혈투',d:'광기의 칼날이 켜져 있는 동안 흡혈 +5%'},
-  {id:'f_longrange',a:'scope',b:'rifling',n:'장거리 저격',d:'사거리 +20%, 먼 적 추가 피해 2배',f:p=>{p.range*=1.2;}},
+  {id:'f_longrange',a:'scope',b:'rifling',n:'장거리 저격',d:'사거리 +20%, 조준경의 사거리 비례 피해 2배',f:p=>{p.range*=1.2;}},
   {id:'f_gunrun',a:'quickdraw',b:'sprint',n:'질주 사격',d:'대시가 끝날 때 탄환 3발 → 6발'},
   {id:'f_goldclover',a:'luckycoin',b:'clover',n:'황금 클로버',d:'행운 +3, 행운 폭발 확률 4% → 10%',f:p=>{p.luck=Math.min(LUCK_CAP_F(),p.luck+3);}},
   {id:'f_goldmag',a:'magnet2',b:'piggy',n:'황금 자석',d:'골드 획득 +30%, 경험치 회복 2배',f:p=>{p.goldM+=.3;}},
@@ -3430,7 +3430,7 @@ const VFUSIONS=[
   {id:'f_lightspeed',vip:1,a:'quicksilver',b:'sprint',n:'광속',d:'이동 속도 +15%, 대시하면 2초간 공격 속도 +25%',f:p=>{p.speed*=1.15;}},
   {id:'f_bloodthrone',vip:1,a:'vampirelord',b:'vamp',n:'피의 왕좌',d:'흡혈 +4%, 넘치는 회복 보호막 상한 최대 체력 30% → 60%',f:p=>{p.lifesteal+=.04;}},
   {id:'f_highnoon',vip:1,a:'gunslinger',b:'quickdraw',n:'황야의 결투',d:'움직일 때 공격 속도 +50%와 멈췄을 때 공격력 +50%가 항상 둘 다 적용'},
-  {id:'f_bullseye',vip:1,a:'sharpshot',b:'scope',n:'백발백중',d:'치명타 확률 +12%, 300보다 먼 적에게 치명타 피해 +60%',f:p=>{p.crit+=.12;}},
+  {id:'f_bullseye',vip:1,a:'sharpshot',b:'scope',n:'백발백중',d:'치명타 확률 +12%, 사거리 100당 치명타 피해 +3.3%',f:p=>{p.crit+=.12;}},
   {id:'f_phoenixfire',vip:1,a:'phoenix',b:'molotov',n:'불사조의 불꽃',d:'부활 대기 180초 → 110초. 대시 불길 피해 2배'}
 ];
 const augDef=id=>AUGS.find(x=>x.id===id)||VIPS.find(x=>x.id===id);
@@ -4308,7 +4308,8 @@ const DLOOK={
   orb(x,y,M,big,t){const r=big?2:1;for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.abs(dx)+Math.abs(dy)>r+(big?1:0))continue;const c=dx+dy<0?'A':dx+dy>0?'C':'B';dpx(M,c,x+dx,y+dy);}if(Math.floor((t||0)*8)%3===0)dpx(M,'E',x-r,y-r);},
   draw(st,D0){const D={},C=CH.mage,P=C.P,U=st.U,A=st.atk,ay=st.ay||0,t=st.t||0;for(const k in DSLOT)D[k]=dNorm(D0[k]);
    // 망토 (등 뒤): 기본은 없음
-   if(D.cape&&D.cape!=='def'){const M=this.pal('cape',D.cape),f=st.cf&1,h=D.cape.t>=2?11:9;for(let i=0;i<h;i++){const w=6+Math.floor(i*.3);for(let x=-w;x<=w;x++){if(i===h-1&&((x+f)%3===0))continue;const c=x<-w+2?'A':x>w-2?'D':'C';dpx(M,c,20+x,22+U+i);}}if(D.cape.t===3)for(const x of [16,20,24])dpx(M,'E',x+f,22+U+h);}
+   // 망토 (등 뒤): 아래로 갈수록 넓게 퍼져 로브 양옆으로 드러남 (예전엔 로브와 폭이 같아 거의 안 보였음)
+   if(D.cape&&D.cape!=='def'){const M=this.pal('cape',D.cape),f=st.cf&1,h=D.cape.t>=2?12:11;for(let i=0;i<h;i++){const w=6+Math.floor(i*.6);for(let x=-w;x<=w;x++){if(i===h-1&&((x+f)%3===0))continue;const c=x<-w+2?'A':x>w-2?'D':'C';dpx(M,c,20+x,22+U+i);}}if(D.cape.t===3)for(const x of [12,16,20,24,28])dpx(M,'E',x+f,22+U+h);}
    // 신발
    if(D.boots==='def'){cl(P,['zz'],17,34+Math.min(0,st.lL));cl(P,['zz'],21,34+Math.min(0,st.rL));}
    else if(D.boots==null){dpaint(['kK'],17,34+Math.min(0,st.lL),{});dpaint(['kK'],21,34+Math.min(0,st.rL),{});}
@@ -4330,7 +4331,8 @@ const DLOOK={
     if(wt>=2){dpx(WP,'E',11+sx,top+U+sy);dpx(WP,'E',14+sx,top+U+sy);}if(D.wpn==='uq'&&Math.floor(t*6)%2)dpx({A:'#fff'},'A',10+sx,top-4+U+sy);}
    // 소매 (갑옷 칸 색)
    cl(PA,['.43','543','432','.kK'],13,23+U+(A>=0?-3:ay));cl(PA,['43.','432','321','kK.'],24,23+U-ay);
-   if(D.cape&&D.cape!=='def'){const M=this.pal('cape',D.cape);dpaint(['..AABBBCC..','.ABBBBBBBC.'],15,21+U,M);dpx(M,'E',20,22+U);}
+   // 어깨 망토(앞): 어깨를 덮는 짧은 망토 · 양 어깨 끝이 팔 위로 늘어짐
+   if(D.cape&&D.cape!=='def'){const M=this.pal('cape',D.cape);dpaint(['...AABBBCC...','.AABBBBBBBCC.','AAB.......CCD','AB.........CD'],14,21+U,M);dpx(M,'E',20,22+U);if(D.cape.t>=2){dpx(M,'E',15,22+U);dpx(M,'E',25,22+U);}}
    // 왼손 마법 구슬 (방패 칸): 기본은 불꽃
    if(D.shd==='def')cg(A>=0?['.8.','898','909','.0.']:fl?['.9.','898','.0.']:['.8.','.9.','909'],24,27+U-ay);
    else if(D.shd!=null)this.orb(25,28+U-ay,this.pal('shield',D.shd),A>=0||D.shd.t>=2,t);
@@ -4422,7 +4424,8 @@ function dHatOrn(M,x,y,t,v,T){if(t===2&&v===1)for(const [dx,dy] of [[-6,1],[-7,0
   if(t===3&&v===0)for(const dx of [-4,0,4]){dpx(DCOL.gld,'A',x+dx,y-1);dpx(DCOL.gld,'B',x+dx,y);}if(t===3&&v===1){const f=Math.floor((T||0)*8)%2;for(let i=0;i<2+f;i++)dpx(DCOL.phx,i?'B':'A',x,y-1-i);}
   if(t===3&&v===2)for(const [dx,dy,c] of [[0,-2,'A'],[-1,-1,'B'],[1,-1,'B']])dpx(DCOL.frs,c,x+dx,y+dy);}
 function dOrb(x,y,M,big,T){const r=big?2:1;for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.abs(dx)+Math.abs(dy)>r+(big?1:0))continue;dpx(M,dx+dy<0?'A':dx+dy>0?'C':'B',x+dx,y+dy);}if(Math.floor((T||0)*8)%3===0)dpx(M,'E',x-r,y-r);}
-function dCape(M,U,cf,y0,w0,h){for(let i=0;i<h;i++){const w=w0+Math.floor(i*.3);for(let x=-w;x<=w;x++){if(i===h-1&&((x+cf)%3===0))continue;dpx(M,x<-w+2?'A':x>w-2?'D':'C',20+x,y0+U+i);}}}
+// 등 망토(로브형 직업 공용): 아래로 갈수록 넓게 퍼져 몸 양옆으로 드러남
+function dCape(M,U,cf,y0,w0,h){for(let i=0;i<h;i++){const w=w0+Math.floor(i*.55);for(let x=-w;x<=w;x++){if(i===h-1&&((x+cf)%3===0))continue;dpx(M,x<-w+2?'A':x>w-2?'D':'C',20+x,y0+U+i);}}}
 const HAIRC={blond:{1:'#8a6a12',2:'#c49a22',3:'#f2cf55',4:'#f2cf55',5:'#ffe9a0'},dark:{1:'#0e0b14',2:'#1c1726',3:'#2e2640',4:'#4a3e62',5:'#665a82'},brown:{1:'#2e1608',2:'#4a2a14',3:'#6a3e1e',4:'#8a5530',5:'#a8703f'},ginger:{1:'#6a2a08',2:'#a04a14',3:'#d0782a',4:'#f0a050',5:'#ffc880'}};
 // 벗었을 때 머리: 바가지 머리 대신 삐친 머리·가르마·옆으로 쓸린 앞머리·귀가 보이는 보통 머리 (fy = 얼굴 첫 줄)
 let DNAT=null;
@@ -6347,7 +6350,7 @@ function onPHit(b,t){
   let dmg=b.dmg,col=null,label=null;
   if(b.stun&&!t.boss){t.slowT=Math.max(t.slowT||0,b.stun);t.frozen=true;}
   if(S.cls==='archer'&&!b.child){if(has('a_chain')){if(p.chT===t)p.chS=Math.min(Math.floor(.6/lv3('a_chain',.06,.08,.1)+1e-6),(p.chS||0)+1);else{p.chT=t;p.chS=0;}}
-    if(has('a_hawk')&&Math.hypot(t.x-p.x,t.y-p.y)>220)dmg*=1+lv3('a_hawk',.3,.4,.5);
+    if(has('a_hawk'))dmg*=1+rangeE()/100*lv3('a_hawk',.027,.036,.045);
     if(has('a_split')&&!b.spl){b.spl=1;const a0=Math.atan2(b.vy,b.vx);for(const da of [-.5,.5])pBullet(t.x,t.y,a0+da,b.dmg*.5,{child:true,sub:'갈래 화살',pierce:1,hit:new Set([t]),life:.6});}}
   if(t.rmk&&has('r_mark'))dmg*=1+lv3('r_mark',.4,.6,.8);
   if(S.cls==='gunner'&&has('g_ap')&&!b.child){dmg*=1+(b.pcN||0)*lv3('g_ap',.1,.15,.2);b.pcN=(b.pcN||0)+1;}
@@ -6358,7 +6361,7 @@ function onPHit(b,t){
   if(S.cls==='archer'&&!b.child&&mky(0)&&t.boss)dmg*=1.35;
   if(S.cls==='archer'&&!b.child&&mky(2)&&!b.mspl&&Math.random()<.3){b.mspl=1;const a0=Math.atan2(b.vy,b.vx);for(const da of [-.45,.45])pBullet(t.x,t.y,a0+da,b.dmg*.5,{child:true,sub:'갈래 화살',pierce:1,hit:new Set([t]),life:.6});}
   if(S.cls==='rogue'&&!b.child&&mky(1)&&t.alive)poisonE(t,1);
-  if(S.cls==='archer'&&!b.child){if(mk(0))dmg*=1+Math.min(.6,Math.hypot(t.x-p.x,t.y-p.y)/Math.max(1,p.range)*.6);if(mk(2)){dmg*=1+.15*(b.pk||0);b.pk=(b.pk||0)+1;}}
+  if(S.cls==='archer'&&!b.child){if(mk(0))dmg*=1+Math.min(.6,rangeE()/100*.05);if(mk(2)){dmg*=1+.15*(b.pk||0);b.pk=(b.pk||0)+1;}}
   if(!b.child){const C=S.cls;
     if(C==='necro'){if(mky(1)&&p.hp>=p.maxHp*.9)dmg*=1.3;if(mk(2)&&t.alive)poisonE(t,1);}
     if(C==='gunner'){if(mky(0)){if(t.elite||t.boss)dmg*=1.3;else{const a=Math.atan2(t.y-p.y,t.x-p.x);t.x+=Math.cos(a)*18;t.y+=Math.sin(a)*18;t.slowT=Math.max(t.slowT||0,.4);t.frozen=true;}}if(mk(2)){S.dsub='작렬탄';explode(t.x,t.y,55,pDmg()*.4,'#ffb347');S.dsub=null;}if(mky(2))burnE(t,pDmg()*.3,3);}
@@ -6366,10 +6369,10 @@ function onPHit(b,t){
     if(C==='berserk'&&mk(2))dmg*=1+.5*Math.min(1,Math.max(0,1-p.hp/p.maxHp)/.7);
     if(C==='alch'&&mk(1)&&t.ps>0)dmg*=1.2;}
   if(b.x7){dmg*=7;col='#ff4fd8';}
-  if(has('a_snipe'))dmg*=1+Math.min(lv3('a_snipe',1.5,2,2.5),Math.hypot(t.x-S.p.x,t.y-S.p.y)/100*.15);
+  if(has('a_snipe'))dmg*=1+rangeE()/100*lv3('a_snipe',.055,.065,.075);
   if(has('r_assassin')&&(t.elite||t.boss))dmg*=lv3('r_assassin',2,2.5,3);
   if(has('deck'))dmg*=1+.06*p.multi;
-  if(has('scope')&&Math.hypot(t.x-p.x,t.y-p.y)>300)dmg*=1+lv3('scope',.12,.2,.28)*(has('f_longrange')?2:1);
+  if(has('scope'))dmg*=1+rangeE()/100*lv3('scope',.012,.016,.02)*(has('f_longrange')?2:1);
   if(has('elembody')&&(t.burnT>0||chilled(t)))dmg*=1+lv3('elembody',.1,.15,.2)*(has('f_elemfire')?2:1);
   if(has('deathmark')&&t.hp<t.maxHp*.3)dmg*=2;
   if(has('slipstream'))dmg*=1+.6*Math.max(0,moveSpd()/(CLASSES[S.cls].stats.speed||195)-1);
@@ -6385,16 +6388,16 @@ function onPHit(b,t){
   if(S.cls==='gunner'&&has('g_extmag')&&!b.child&&!b.ex6){b.ex6=1;explode(t.x,t.y,55,pDmg()*lv3('g_extmag',.4,.5,.6)*(1+(p.lbD||0)),'#ffb347');}
   if(b.ghost&&has('soulburst'))exS('undead',t.x,t.y,70*(has('f_wraith')?1.5:1),pDmg()*lv3('soulburst',.6,.8,1)*undM(),'#8cff9a');
   if(chilled(t)&&tag('frost')>=4)dmg*=1.3*(1+ex('frost')*.06);
-  if(tag('sniper')>=4){const ds=Math.hypot(t.x-p.x,t.y-p.y);dmg*=1+Math.min(.6,ds/100*.1);}
+  if(tag('sniper')>=4)dmg*=1+rangeE()/100*.04;
   if(tag('sniper')>=6)dmg*=1+Math.min(1.5,.3*(b.hit.size-1));
-  if(has('f_seeker')&&Math.hypot(t.x-p.x,t.y-p.y)>300)dmg*=1.5;
+  if(has('f_seeker'))dmg*=1+rangeE()/100*.03;
   if(ex('sniper'))dmg*=1+ex('sniper')*.05;
   if(has('combo')&&!b.child){if(p.cmbE===t)p.cmbN=Math.min(lv3('combo',10,15,20),(p.cmbN||0)+1);else{p.cmbE=t;p.cmbN=0;}dmg*=1+(has('f_barrage')?.09:.06)*p.cmbN;}
-  {const far=Math.hypot(t.x-p.x,t.y-p.y)>300;let cr=!!b.sure||S.p.shadowT>0||S.p.skCrT>0&&S.p.skInvT<=0||Math.random()<critC()+(S.cls==='elem'&&mky(1)&&chilled(t)?.2:0)+(tag('mark')>=6&&t.mkT>S.t?.25:0)+(has('glacier')&&chilled(t)?lv3('glacier',.2,.25,.3):0)+(has('marksman')&&far?lv3('marksman',.2,.3,.4):0);if(!cr&&has('second')&&Math.random()<lv3('second',.3,.45,.6))cr=true;
+  {let cr=!!b.sure||S.p.shadowT>0||S.p.skCrT>0&&S.p.skInvT<=0||Math.random()<critC()+(S.cls==='elem'&&mky(1)&&chilled(t)?.2:0)+(tag('mark')>=6&&t.mkT>S.t?.25:0)+(has('glacier')&&chilled(t)?lv3('glacier',.2,.25,.3):0)+(has('marksman')?rangeE()/100*lv3('marksman',.012,.017,.022):0);if(!cr&&has('second')&&Math.random()<lv3('second',.3,.45,.6))cr=true;
    if(has('bloodrage')&&p.alive)p.hp=Math.min(p.maxHp,p.hp+.3);
    if(cr&&tag('rapid')>=6&&!b.child)pBullet(p.x,p.y,Math.atan2(t.y-p.y,t.x-p.x)+rand(-.1,.1),pDmg()*.6*rpM(),{sub:'속사 시너지',child:true,r:3});
    if(cr&&!b.child){if(S.cls==='knight'&&mky(1)){S.dsub='처단의 일격';explode(t.x,t.y,70,pDmg(),'#ffd0a0');S.dsub=null;}if(S.cls==='mage'&&mky(1)&&!t.boss){t.slowT=Math.max(t.slowT||0,1.5);t.frozen=true;}if(S.cls==='paladin'&&mky(0))exL('심판의 낙인','holy',t.x,t.y,60,pDmg()*.8*holyM(),'#fff3a0');if(S.cls==='gambler'&&mky(1)){dmg*=1.4;if(Math.random()<.1){const a0=Math.atan2(b.vy,b.vx);for(const da of [-.5,0,.5])pBullet(t.x,t.y,a0+da,pDmg()*.7,{child:true,sub:'에이스',card:true,hit:new Set([t]),life:.7,r:5});}}}
-   if(cr){dmg*=critMul()*(has('glacier')&&chilled(t)?1.5:1)*(has('f_bullseye')&&Math.hypot(t.x-p.x,t.y-p.y)>300?1.6:1);col='#ffd76a';if(b.hollow&&!b.hb){b.hb=1;explode(t.x,t.y,70,pDmg()*lv3('g_hollow',1.2,1.5,1.8),'#ffd76a');}if(has('luckydie')&&Math.random()<lv3('luckydie',.05,.07,.09)*(has('f_jackdie')?2:1)){dmg*=has('f_jackdie')?4:3;label='대박 '+Math.round(dmg);}if(has('highbet')&&Math.random()<.1)dmg*=2;if(has('deadeye'))p.deT=1;fxRun('c',t);if(has('f_shatter')&&chilled(t))explode(t.x,t.y,70,pDmg(),'#9fe8ff');if(has('overload')&&Math.random()<lv3('overload',.15,.2,.25)*(has('f_tesla2')?2:1))lightning(t,3);if(has('stunner')&&!t.boss)t.slowT=Math.max(t.slowT||0,lv3('stunner',.6,.9,1.2));if(has('reroll2')&&!b.child)pBullet(p.x,p.y,Math.atan2(t.y-p.y,t.x-p.x),b.dmg*.7,{sub:'한 번 더',child:true});if(has('toxicburst')&&t.ps>0){explode(t.x,t.y,80,pDmg()*1.5,'#8ee06a');for(const o of S.en)if(o.alive&&d2(o,t)<80*80)poisonE(o);}if(has('burn')){t.burnT=3;t.burnD=Math.max(t.burnD||0,pDmg()*lv3('burn',.4,.6,.8));if(has('f_frostfire'))t.slowT=Math.max(t.slowT||0,1);}}}
+   if(cr){dmg*=critMul()*(has('glacier')&&chilled(t)?1.5:1)*(has('f_bullseye')?1+rangeE()/100*.033:1);col='#ffd76a';if(b.hollow&&!b.hb){b.hb=1;explode(t.x,t.y,70,pDmg()*lv3('g_hollow',1.2,1.5,1.8),'#ffd76a');}if(has('luckydie')&&Math.random()<lv3('luckydie',.05,.07,.09)*(has('f_jackdie')?2:1)){dmg*=has('f_jackdie')?4:3;label='대박 '+Math.round(dmg);}if(has('highbet')&&Math.random()<.1)dmg*=2;if(has('deadeye'))p.deT=1;fxRun('c',t);if(has('f_shatter')&&chilled(t))explode(t.x,t.y,70,pDmg(),'#9fe8ff');if(has('overload')&&Math.random()<lv3('overload',.15,.2,.25)*(has('f_tesla2')?2:1))lightning(t,3);if(has('stunner')&&!t.boss)t.slowT=Math.max(t.slowT||0,lv3('stunner',.6,.9,1.2));if(has('reroll2')&&!b.child)pBullet(p.x,p.y,Math.atan2(t.y-p.y,t.x-p.x),b.dmg*.7,{sub:'한 번 더',child:true});if(has('toxicburst')&&t.ps>0){explode(t.x,t.y,80,pDmg()*1.5,'#8ee06a');for(const o of S.en)if(o.alive&&d2(o,t)<80*80)poisonE(o);}if(has('burn')){t.burnT=3;t.burnD=Math.max(t.burnD||0,pDmg()*lv3('burn',.4,.6,.8));if(has('f_frostfire'))t.slowT=Math.max(t.slowT||0,1);}}}
   if(has('frost')&&Math.random()<lv3('frost',.25,.35,.45)&&!t.boss)t.slowT=Math.max(t.slowT||0,1.5);
   if(has('execute')){const th=lv3('execute',.12,.16,.2)+(has('f_reaper')?.08:0)+(has('f_beheader')?.05:0);if(t.hp<=t.maxHp*th||t.hp-dmg<=t.maxHp*th){if(!t.boss&&!t.elite){dmg=Math.max(dmg,t.hp+1);label='처형';col='#c0392b';if(has('f_reaper')&&(p.soulN||0)<500){p.soulN=(p.soulN||0)+1;p.dmgP=(p.dmgP||0)+.001;}}else if(t.hp<=t.maxHp*th)dmg*=1.5;}}
   if(has('triple7')&&!b.child&&Math.random()<lv3('triple7',.07,.1,.14)){dmg*=7;col='#ff4fd8';label='×7 '+Math.round(dmg);}
@@ -7947,6 +7950,12 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:213,t:'🎯 원거리 효과는 사거리 비례 · 망토가 잘 보여요',items:[
+    ['change','🎯 「먼 적에게 피해」 효과가 모두 <b>사거리 100당 피해</b>로 바뀌었어요 (적이 계속 몰려와 거리를 벌리기 어려워서). 원거리 시너지 4단계 +4% · 저격수 +6.5% · 매의 눈 +3.6% · 조준경 +1.6% · 명중 표식 치명타 확률 +1.7% · 추적자의 눈 +3% · 백발백중 치명타 피해 +3.3% · 궁수 마스터리 +5% (모두 사거리 100당)'],
+    ['change','🧥 마법사·정령사·연금술사·도박사·총잡이의 <b>망토가 몸 양옆으로 크게 펼쳐져</b> 잘 보여요 (예전엔 로브 뒤에 거의 가려졌어요). 마법사는 어깨 망토도 생겼어요','look'],
+    ['change','👁 겉모습에 안 보이는 장비(기본 망토, 로브에 가린 신발 등)는 외형 켜기/끄기 버튼이 안 나오고 「이 직업은 겉모습에 안 보여요」라고 알려줘요'],
+    ['change','🏆 명예의 전당 기록 창의 캐릭터 그림이 깨져 보이던 문제 (도트가 정수 배율로 보여요)','bug'],
+  ]},
   {v:212,t:'⚔ 보스 러시 증강 정리',items:[
     ['change','⚔ 보스 러시에서는 보스 한 마리 상대로 의미 없는 <b>처치 시 효과 · 관통 · 튕김</b> 증강(꿰뚫는 탄·관통 패·피버 타임·폭발 부적·영혼 수확 등 27종)과 「관통 탄」 스탯 카드가 안 나와요'],
   ]},
@@ -8517,7 +8526,7 @@ const MST={
       {n:'순환',td:'사거리 +6%',tf:p=>{p.range*=1.06;},cn:'마나 순환',cd:'10번째 공격마다 3초간 공격 속도 +40%'}]}]},
   archer:{root:{td:'공격력 +2%, 공격 속도 +2%',tf:p=>{p.dmgP=(p.dmgP||0)+.02;p.rateP=(p.rateP||0)+.02;}},br:[
     {n:'저격',ico:'🎯',col:'#ffd76a',td:'치명타 피해 +10%, 사거리 +4%',tf:p=>{p.critM+=.1;p.range*=1.04;},sub:[
-      {n:'원거리',td:'치명타 피해 +10%',tf:p=>{p.critM+=.1;},cn:'원거리 저격',cd:'멀리 있는 적일수록 피해 증가 (사거리 끝에서 +60%)'},
+      {n:'원거리',td:'치명타 피해 +10%',tf:p=>{p.critM+=.1;},cn:'원거리 저격',cd:'사거리 100당 피해 +5% (최대 +60%)'},
       {n:'급소',td:'치명타 확률 +4%',tf:p=>{p.crit+=.04;},cn:'거인 사냥',cd:'보스에게 주는 피해 +35%'}]},
     {n:'속사',ico:'🏹',col:'#9fe8b0',td:'공격 속도 +4%',tf:p=>{p.rateP=(p.rateP||0)+.04;},sub:[
       {n:'일제',td:'공격 속도 +4%',tf:p=>{p.rateP=(p.rateP||0)+.04;},cn:'일제 사격',cd:'3번째 공격마다 양옆으로 화살 2발 더 (피해 70%)'},
@@ -8840,7 +8849,7 @@ const icoCls=(it,c)=>{if(it.wt&&!it.cls&&!it.bc){const L=wtCls(it.wt);if(L.lengt
 const itIcoH=(it,cls,big)=>{const u=itLook(it,icoCls(it,cls||eqCls()));return u?`<img class="ipx${big?' big':''}" src="${u}" alt="">`:itIco(it);};
 const itIco0=it=>it.cls?CW[it.cls][0]:it.s==='sword'?wlook()[it.th?3:1]:it.s==='shield'?wlook()[5]:GEAR[it.s].ico;
 const itCol=it=>it.u?UNQ_COL:GR[it.r].col;
-const itTag=it=>(it.s==='armor'&&robeC(eqCls())?'<b style="color:#c8a8ff">🧙 마법사는 로브 한 벌 · 바지 칸까지 · 기본 능력 ×1.5</b> ':'')+(it.wt?`<b style="color:#ffcf8a">${WT_ICO[it.wt]} ${WT_N[it.wt]} · ${wtCls(it.wt).map(c=>CLASSES[c].n).join('·')}</b> `:'')+(isTH(it)?'<b style="color:#9fd3ff">양손 무기 · 왼손(방패)과 같이 못 껴요</b> ':'')+itTag0(it);
+const itTag=it=>(ICO_PART[it.s]&&!lookVis(it)?'<b style="color:#a8a8a8">👁 이 직업은 겉모습에 안 보여요</b> ':'')+(it.s==='armor'&&robeC(eqCls())?'<b style="color:#c8a8ff">🧙 마법사는 로브 한 벌 · 바지 칸까지 · 기본 능력 ×1.5</b> ':'')+(it.wt?`<b style="color:#ffcf8a">${WT_ICO[it.wt]} ${WT_N[it.wt]} · ${wtCls(it.wt).map(c=>CLASSES[c].n).join('·')}</b> `:'')+(isTH(it)?'<b style="color:#9fd3ff">양손 무기 · 왼손(방패)과 같이 못 껴요</b> ':'')+itTag0(it);
 const itTag0=it=>it.base?`<b style="color:#c8c8c8">${it.bc&&CLASSES[it.bc]?CLASSES[it.bc].n+' ':''}기본 장비 · ${it.bc&&CLASSES[it.bc]?CLASSES[it.bc].n+'만 낄 수 있어요':'직업 기본 모습'}</b>`:it.u?`<b style="color:${UNQ_COL}">★ ${CLASSES[it.cls].n} 고유 무기</b>`:it.cls?`<b style="color:#ffd76a">${CLASSES[it.cls].n} 전용</b>`:it.set?`<b style="color:${SETS[it.set].col}">${SETS[it.set].u?'★ 유니크 · ':''}${SETS[it.set].n} 세트</b>`:'';
 const affTxt=([a,v])=>{const F=GAFX[a];return F?`${F.n} ${F.neg?'−':'+'}${v}${F.u}`:'';};
 const itMain=it=>{if(it.base)return '능력치 없음 (모습만)';const E=GR[it.r].b*(it.b||1)+(it.lv||0);return GEAR[it.s]?fxTxt(itFx(it).map(([k,p])=>[k,p*E])):'';};
@@ -9437,7 +9446,9 @@ function itEnhance(it,useProt){if(!it||(it.lv||0)>=GEAR_MAX)return null;const c=
   invTouch();saveMeta();return res;}
 // 강화 단계 테두리: +4 은은한 빛 · +7 맥동 · +10 금빛 무지개가 도는 테두리
 const egC=it=>{const l=it&&!it.base?it.lv||0:0;return l>=10?' eg3':l>=7?' eg2':l>=4?' eg1':'';};
-function itCell(it,pos,eq){if(!it)return `<div class="icell empty"${pos!=null?` data-pos="${pos}"`:''}></div>`;const c=itCol(it);const nf=it.cls&&it.cls!==eqCls()||it.bc&&it.bc!==eqCls()||!wtOk(it,eqCls());return `<div class="icell r${it.r}${it.u?' uq':''}${nf?' nofit':''}${egC(it)}${INV_SEL===it.id?' sel':''}" draggable="true" data-iid="${it.id}"${pos!=null?` data-pos="${pos}"`:''} style="--rc:${c}" title="${esc(itName(it))}"><span class="iico">${itIcoH(it)}</span>${it.lv?`<b class="ilv">+${it.lv}</b>`:''}${it.set?`<i class="iset" style="background:${SETS[it.set].col}"></i>`:''}${it.sp?'<i class="isp">✦</i>':''}${eq&&ICO_PART[it.s]?`<b class="ieye${it.hide?' off':''}" data-eye="${it.id}" title="${it.hide?'외형 숨김 중 · 눌러서 보이기':'외형 보이는 중 · 눌러서 숨기기 (능력치는 그대로)'}">${it.hide?'🙈':'👁'}</b>`:''}${it.cls&&!it.u?'<i class="icw">전용</i>':''}${isTH(it)?'<i class="ith">양손</i>':''}</div>`;}
+// 이 직업 모습에 실제로 보이는 장비인지 (기본 망토·로브에 가린 신발처럼 안 보이면 외형 켜기/끄기 버튼을 숨김)
+const lookVis=it=>{try{const c=eqCls();return !DLOOK_ON(it.cls||it.bc||c)||!!itLook(it,c);}catch(e){return true;}};
+function itCell(it,pos,eq){if(!it)return `<div class="icell empty"${pos!=null?` data-pos="${pos}"`:''}></div>`;const c=itCol(it);const nf=it.cls&&it.cls!==eqCls()||it.bc&&it.bc!==eqCls()||!wtOk(it,eqCls());return `<div class="icell r${it.r}${it.u?' uq':''}${nf?' nofit':''}${egC(it)}${INV_SEL===it.id?' sel':''}" draggable="true" data-iid="${it.id}"${pos!=null?` data-pos="${pos}"`:''} style="--rc:${c}" title="${esc(itName(it))}"><span class="iico">${itIcoH(it)}</span>${it.lv?`<b class="ilv">+${it.lv}</b>`:''}${it.set?`<i class="iset" style="background:${SETS[it.set].col}"></i>`:''}${it.sp?'<i class="isp">✦</i>':''}${eq&&ICO_PART[it.s]&&lookVis(it)?`<b class="ieye${it.hide?' off':''}" data-eye="${it.id}" title="${it.hide?'외형 숨김 중 · 눌러서 보이기':'외형 보이는 중 · 눌러서 숨기기 (능력치는 그대로)'}">${it.hide?'🙈':'👁'}</b>`:''}${it.cls&&!it.u?'<i class="icw">전용</i>':''}${isTH(it)?'<i class="ith">양손</i>':''}</div>`;}
 // 대장장이 도트 (몸·앞치마·망치·모루). 강화할 때 망치를 내려침
 const SMITH_IDLE=['어서 와! 오늘은 뭘 두드려 볼까?','보스를 쓰러뜨리면 장비가 떨어져. 빛기둥이 보이면 다가가 봐!','+5부터는 실패하면 한 단계 내려가. 축복을 챙기라고!','안 쓰는 장비는 해체해 봐. 가루 20개면 축복 한 장이야!','같은 세트를 2개, 4개 모으면 숨은 힘이 깨어나지.','직업 전용 무기는 그 직업 장비창에만 낄 수 있어.','위에서 직업을 고르면 그 직업 장비창이 열려. 직업마다 따로 껴!','양손 무기는 세지만 방패를 내려놔야 해.','고유 전설 무기라… 나도 평생 몇 번 못 봤어.','장비는 끌어다 놓거나 두 번 누르면 바로 껴져.'];
 let SMITH_ID=0;
@@ -11065,12 +11076,12 @@ function hofAvS(cls,skin,aura,gear,look,anim,px){return withLook(look,()=>{const
 // 명예의 전당: 마우스를 올리면(휴대폰은 누르면) 그 사람의 칭호·꾸미기·장비·결투 전적
 let HOF_B=[];
 function hofTipHtml(b){const A=b.title&&ACH.find(a=>a.k===b.title),cn=k=>{const x=k&&COS.find(q=>q.k===k);return x?x.n:'';},G=gearDecode(b.gear),D=b.dw,f=x=>`${Math.floor(x/60)}분 ${Math.floor(x%60)}초`;
-  const gl=G?GEAR_KEYS.filter(k=>G[k]).map(k=>`${GEAR[slotT(k)].ico}+${G[k]-1}`).join(' '):'';
+  const gl=G?GEAR_KEYS.filter(k=>G[k]>1).map(k=>`${GEAR[slotT(k)].ico}+${G[k]-1}`).join(' '):'';
   return `<b>${esc(b.name||'이름 없음')}</b>${A?` <span style="color:#ffd76a">「${A.n}」</span>`:''}
   <div>${CLASSES[b.cls]?CLASSES[b.cls].n:'?'} · ${DIFF[b.diff]?DIFF[b.diff].n:''} · ${b.score.toLocaleString()}점</div>
   <div>Lv ${b.lvl} · ${f(b.time)} · 처치 ${(+b.kills||0).toLocaleString()} · 보스 ${+b.bosses||0}</div>
   <div>⚔ 결투 ${D?`<b>${D.w}승 ${D.d}무 ${D.l}패</b>`:'기록 없음'}${b.h?' · <span style="color:#7be08f">결투 상대 가능</span>':''}</div>
-  <div>⚒ 장비 ${gl||'없음'}</div>
+  ${gl?`<div>⚒ 강화 ${gl}</div>`:''}
   ${[['🎨 코스튬',cn(b.skin)],['✨ 오라·날개',auraList(b.aura).map(x=>x.n).join(' · ')],['🏷 이름 효과',cn(b.fx)]].filter(x=>x[1]).map(x=>`<div>${x[0]} ${x[1]}</div>`).join('')}`;}
 function hofTipBind(el){let tip=document.getElementById('hofTip');if(!tip){tip=document.createElement('div');tip.id='hofTip';tip.className='hoftip';document.body.appendChild(tip);}
   const place=(ev)=>{const w=tip.offsetWidth,h=tip.offsetHeight;let x=ev.clientX+14,y=ev.clientY+14;if(x+w>innerWidth-8)x=Math.max(8,ev.clientX-w-14);if(y+h>innerHeight-8)y=Math.max(8,ev.clientY-h-14);tip.style.left=x+'px';tip.style.top=y+'px';};
@@ -11078,13 +11089,16 @@ function hofTipBind(el){let tip=document.getElementById('hofTip');if(!tip){tip=d
   el.querySelectorAll('[data-hi]').forEach(c=>{c.onmouseenter=ev=>open(c,ev);c.onmousemove=place;c.onmouseleave=()=>{tip.style.display='none';};
     c.onclick=()=>{tip.style.display='none';hofStatOpen(HOF_B[+c.dataset.hi]);};c.style.cursor='pointer';});}
 // 명예의 전당 기록을 누르면: 그 캐릭터의 최종 능력치·증강 (결투 데이터가 있는 기록만 능력치가 있음)
+// 명예의 전당 기록 → 프로필 그림용 정보 (장비 외형은 gear 뒤 '!' 부분)
+const recP=b=>{const g=String(b.gear||''),d=g.split('!')[1]||'';return {cls:b.cls,skin:b.skin||'',aura:b.aura||'',dr:d,dress:d?dressDec(d):null,gear:g.split('!')[0],look:recLook(b)};};
 async function hofStatOpen(b){if(!b)return;let w=document.getElementById('hofSt');if(!w){w=document.createElement('div');w.id='hofSt';w.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:12px';document.body.appendChild(w);w.onclick=e=>{if(bgHit(e,w))w.remove();};}
   const box=x=>`<div style="background:#0d2a20;border:2px solid var(--brass);border-radius:14px;padding:14px 16px;max-width:640px;width:100%;max-height:86vh;overflow:auto;color:var(--ivory);font-size:14px;line-height:1.55">${x}<div style="text-align:center;margin-top:10px"><button class="btn" id="hsX">닫기</button></div></div>`;
-  const av=hofAv(b.cls,b.skin,b.aura,b.gear,recLook(b)),top=`<div style="display:flex;gap:10px;align-items:center;margin-bottom:6px">${av?`<img src="${av}" style="width:72px;height:72px;image-rendering:pixelated">`:''}<div>${hofTipHtml(b)}</div></div>`;
+  // 그림은 도트 한 칸이 화면의 정수 픽셀이 되게 (92px 그림을 72·120px로 늘리면 도트가 깨져 보였음)
+  const RP=recP(b),av=profAv(RP,72),top=`<div style="display:flex;gap:10px;align-items:center;margin-bottom:6px">${av?`<img src="${av.src}" style="width:${av.css}px;height:${av.css}px;image-rendering:pixelated">`:''}<div>${hofTipHtml(b)}</div></div>`;
   // 장비: 기록에 클리어 당시 장비 상세가 있으면 그것, 없으면(예전 기록) 그 사람의 지금 장비(접속 기록이 있을 때)
   let G=null;const paint=x=>{w.innerHTML=box(top+(G&&G.n?G.html:'')+x);$('hsX').onclick=()=>w.remove();if(G)G.bind(w);};
   {const det={};String(b.gd||'').split(':').forEach((x,i)=>{const k=GEAR_KEYS[i];if(k){const it=itDec(k,x);if(it)det[k]=it;}});
-   if(Object.keys(det).length)G=gearPanel(b.cls,det,null,av?{src:av,css:120}:null,'🎒 클리어 당시 장비 · 마우스를 올리면 설명');
+   if(Object.keys(det).length)G=gearPanel(b.cls,det,null,profAv(RP,120),'🎒 클리어 당시 장비 · 마우스를 올리면 설명');
    else{paint('<div style="color:var(--muted);text-align:center">불러오는 중…</div>');const pf=await profGet(b.name).catch(()=>null);if(!document.body.contains(w))return;if(pf&&pf.det&&Object.keys(pf.det).length)G=gearPanel(pf.cls,pf.det,pf.eq,profAv(pf,120),`🎒 ${CLASSES[pf.cls].n}의 <b>지금 장비</b> (예전 기록이라 클리어 당시 장비 정보는 없어요)`);}}
   if(!b.h){paint('<div style="color:var(--muted);text-align:center;margin-top:6px">📊 이 기록에는 능력치 정보가 없어요<br><small>(능력치는 무한의 악몽·보스 러시 기록에만 함께 저장돼요)</small></div>');return;}
   paint('<div style="color:var(--muted);text-align:center">📊 능력치 불러오는 중…</div>');
@@ -11733,7 +11747,7 @@ function renderStats(){
     row('탄속','—','근접 직업은 적용 안 됨','근접 공격은 탄환이 없어 탄속이 쓰이지 않음. 탄속 카드는 나오지 않음')]:[
     row('탄환 수',n+'발'),
     row('관통',p.pierce>PIERCE_CAP?PIERCE_CAP+' (최대)':p.pierce),
-    row('사거리',Math.round(p.range),'',`적이 다가오기 전에 먼저 공격하는 안전 거리. 딜을 직접 올리지는 않고, 원거리 시너지(원거리 숙련: 사거리 100당 공격력, 먼 적 추가 피해)와 소환물의 탐지 범위에 쓰임`),
+    row('사거리',Math.round(p.range),'',`적이 다가오기 전에 먼저 공격하는 안전 거리. 딜을 직접 올리지는 않고, 원거리 시너지(원거리 숙련·저격수·조준경 등: 사거리 100당 피해)와 소환물의 탐지 범위에 쓰임`),
     row('탄속',Math.round(p.bspd),bspdB()>0?`기본보다 빠른 만큼 탄환 피해 +${Math.round(bspdB()*100)}%${has('a_gale')?' (질풍 화살: 상한 없음)':bspdB()>=.99?' · 최대치 도달 (가속 탄 카드 안 나옴)':' / 최대 +100%'}`:'기본 탄속보다 빠르면 1%당 탄환 피해 +0.5% (최대 +100%)')]),
     ...clsRows(row),
     row('기대 초당 피해',Math.round(pureMelee()?pDmg()*rate*MELEE_DM*(1+critC()*(critMul()-1)):dps),pureMelee()?'적 1마리 기준 근접 피해 (×1.6 근접 보정 포함). 회전 베기, 폭발, 독 제외':'탄환 기본 피해 기준. 회전 부적, 폭발, 독 제외')
@@ -11795,7 +11809,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=212,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=213,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
