@@ -8426,6 +8426,10 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:233,t:'⚔ 결투 미세 조정',items:[
+    ['nerf','🪓 광전사 결투 상대 공격력을 조금 낮췄어요 (지난 조정이 너무 셌음)'],
+    ['change','🌪 정령사의 결투 피해 환산을 조금 낮췄어요 (지난 조정으로 너무 쉽게 이김)'],
+  ]},
   {v:232,t:'⚔ 결투 상대 바로잡기 · 🤝 레이드 동료',items:[
     ['change','⚔ 결투 상대가 내 탄을 <b>거의 다 피하던 문제</b>를 고쳤어요. 이제 탄마다 한 번만 피할지 정해요 (강한 상대일수록 잘 피함)','bug'],
     ['change','⚔ 원거리 결투 상대가 <b>내 사거리 밖</b>에 서서 마법사·도적 같은 직업의 탄이 닿지 않던 문제를 고쳤어요. 이제 내 사거리 안에서 싸워요','bug'],
@@ -10400,9 +10404,9 @@ const DUEL_ULT={knight:'nova',paladin:'pillars',berserk:'nova',rogue:'barrage',a
 function rivalSay(e,t){toast(`${S.duel?S.duel.opp.n:'상대'}: ${t}`);}
 function rivalRate(e){const st=e.hero&&e.hero.st,r=st?parseFloat(String(st['공격 속도']||'').replace(/[^0-9.]/g,''))||1.2:1.2;return r;}
 // 직업별 피해 보정: 맞히기 쉬운 정도가 달라서, 예상 시간(tOpp)에 맞춰 측정한 값
-const DUEL_K={knight:2.3,mage:3.5,archer:3.7,rogue:2.7,paladin:3.3,necro:4.5,gunner:3.3,elem:2.3,berserk:2.8,druid:3,alch:4,gambler:2.6}; // v232: 같은 캐릭터끼리 결투(탄 피하는 자동 조작) 실측으로 다시 맞춤
+const DUEL_K={knight:2.3,mage:3.5,archer:3.7,rogue:2.7,paladin:3.3,necro:4.5,gunner:3.3,elem:2.3,berserk:2.3,druid:3,alch:4,gambler:2.6}; // v232: 같은 캐릭터끼리 결투(탄 피하는 자동 조작) 실측으로 다시 맞춤
 // 내 피해 보정(내 직업): 작고 피하는 상대에게 원거리 탄이 덜 맞는 만큼 (근접은 1). 실측
-const DUEL_PK={knight:1.04,mage:2.4,archer:2.5,rogue:2.5,gunner:3,elem:3.5,druid:3,alch:3.5,gambler:2.6};
+const DUEL_PK={knight:1.04,mage:2.4,archer:2.5,rogue:2.5,gunner:3,elem:3,druid:3,alch:3.5,gambler:2.6};
 BAI.rival=function(e,dt,o){const {p,d}=o,c=e.cls,A=DUEL_ATK[c]||DUEL_ATK.archer,B=e.B||(e.B=e.bd/.9*(DUEL_K[c]||1)),el=(S.bt||0)-(S.duel.t0||0);
   e.acd-=dt;e.scd=(e.scd??1)-dt;
   {const lim=e.spd*1.3;if(e.lx!=null&&dt>0){e.mvx=clamp((e.x-e.lx)/dt,-lim,lim);e.mvy=clamp((e.y-e.ly)/dt,-lim,lim);}e.lx=e.x;e.ly=e.y;}
@@ -13130,7 +13134,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=232,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=233,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
