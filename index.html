@@ -7945,6 +7945,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:211,t:'🐞 스탯 창 오류',items:[
+    ['change','📊 게임 중 스탯 창(Tab)을 열면 오류가 나던 문제','bug'],
+  ]},
   {v:210,t:'🏆 명예의 전당에서 장비 보기',items:[
     ['new','🏆 명예의 전당 기록을 누르면 <b>클리어 당시 장비</b>와 장비 합산 효과가 보이고, 장비에 마우스를 올리면 설명이 나와요 (이번 버전부터 올린 기록. 예전 기록은 그 사람이 최근 접속했으면 지금 장비를 보여줘요)'],
   ]},
@@ -11685,6 +11688,23 @@ const STAT_TIP={
   '선호 시너지':'이 태그가 붙은 증강이 선택지에 더 자주 나옵니다 (×2.5). 비선호 태그는 덜 나옵니다 (×0.3).',
   '전용 증강':'이 직업만 얻을 수 있는 증강. 일반 증강보다 잘 나옵니다. ✔는 보유 중.'
 };
+const routePct=ts=>{const w=ts.map(t=>1+1.5*Math.min(6,tag(t))),T=w.reduce((a,b)=>a+b,0);return w.map(v=>Math.round(v/T*100));};
+function clsRows(row){const p=S.p,c=S.cls,r=[];
+  if(c==='paladin')r.push(row('신성 오라',`범위 ${Math.round(110*(1+(p.auraM||0)))}, 피해 +${Math.round((p.auraD||0)*100)}%`));
+  if(skelMax()>0)r.push(row('해골 병사',`${(S.skel||[]).length} / ${skelMax()}기, 피해 +${Math.round((p.skD||0)*100)}%, 지속 ${12+(p.skL||0)+(has('deathnova')?4:0)}초`));
+  if(c==='elem'&&!has('e_avatar')){const q=routePct(ELEM_TAGS);r.push(row('원소 비율',`화염 ${q[0]}% · 냉기 ${q[1]}% · 번개 ${q[2]}%`,'화염·냉기·번개 시너지를 모을수록 그 원소 공격이 더 자주 나감'));}
+  if(c==='alch'||tag('alchemy')>=1){const q=routePct(POT_TAGS);r.push(row('물약 비율',`산성 ${q[0]}% · 폭발 ${q[1]}% · 얼음 ${q[2]}%`,'독·화염·냉기 시너지를 모을수록 그 물약이 더 자주 나옴 (기본 플라스크 포함)'));}
+  if(c==='gunner')r.push(row('탄창',`${magN()}발, 재장전 ${reloadT().toFixed(2)}초${reloadRaw()<=RL_MIN_F()+.001?' (최소치 도달)':` (최소 ${RL_MIN_F()}초)`}`,'재장전은 공격 속도와 무관 (빠른 장전·쌍권총·총기 숙련으로만 단축, 최소 0.35초)'));
+  if(c==='elem'||tag('elem')>=1||has('elemcoin'))r.push(row('원소 효과 피해','+'+Math.round((elM()-1)*100)+'%'));
+  {const c=S.dcat||{};let t=0;for(const k in c)t+=c[k];if(t>0){const l=Object.entries(c).filter(([k,v])=>v/t>=.03).sort((a,b)=>b[1]-a[1]).map(([k,v])=>(DSRC_N[k]||k)+' '+Math.round(v/t*100)+'%');r.push(row('최근 피해 비중',`<span class="swrap">${l.join('<br>')}</span>`,'루트 스탯 카드는 이 비중이 클수록 자주 나옴'));}}
+  if(p.cdR)r.push(row('주기형 효과 쿨타임','−'+Math.round(p.cdR*100)+'% <small>/ 40%</small>'));
+  {const gs=GEAR_KEYS.filter(k=>eqItem(k));if(gs.length)r.push(row('⚒ 장비',gs.map(k=>itIco(eqItem(k))+(gearLv(k)?'+'+gearLv(k):'')).join(' '),gs.map(k=>{const it=eqItem(k);return itName(it)+': '+itMain(it)+(!it.base&&(it.a||[]).length?' · '+it.a.map(affTxt).join(' · '):'');}).join('<br>')));}
+  if(awakeN())r.push(row('🔥 각성',`${awakeN()}단계`,`공격 배율 최소 ×${awakeF().toFixed(1)} 보장 · 최대 체력 +${Math.round(awakeN()*awHp()*100)}%`));
+  if(furyOn())r.push(row('광란',`${p.fy||0} / ${furyCap()}${(p.fy||0)>=furyCap()?' (최대)':''}`));
+  if(c==='druid'||has('thornseed')||tag('nature')>=1||has('gravebloom')||has('gravvine'))r.push(row('덩굴 지대',`범위 +${Math.round((p.vnR||0)*100)}%, 피해 +${Math.round((p.vnD||0)*100)}%`));
+  if(c==='alch'||tag('alchemy')>=1)r.push(row('물약',`범위 +${Math.round((p.ptR||0)*100)}%, 피해 +${Math.round((potM()-1)*100)}%`));
+  if(coinOn())r.push(row('동전 앞면',Math.round(headP()*100)+'%',`앞면 피해 +${Math.round((p.hdD||0)*100)}%, 연속 ${p.cfS||0}회`));
+  return r;}
 function renderStats(){
   const p=S.p,raw=rawRate(),rate=pRate(),ar=armorEff(),red_=ar/(ar+100),n=p.multi+(tag('card')>=6?2:0);
   const pct=v=>(v*100).toFixed(v<.1&&v>0?1:0)+'%';
@@ -11770,7 +11790,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=210,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=211,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
