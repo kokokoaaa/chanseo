@@ -7941,6 +7941,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:187,t:'🎒 장비 아이콘 크기 정리',items:[
+    ['change','🎒 가방·장비칸의 장비 그림을 억지로 키우지 않고 <b>캐릭터에 낀 크기 그대로</b> 보여 줘요. 다른 장비에 가려 거의 안 보이는 부위는 원래 아이콘으로 나와요','look'],
+  ]},
   {v:186,t:'⚡ 접속자 정보 바로 보기 · 도감 설명창',items:[
     ['change','👥 접속 중 목록에서 이름에 마우스를 올리면 캐릭터 정보가 <b>바로</b> 떠요 (서버가 미리 같이 보내 줘요)'],
     ['new','📖 도감에도 마우스를 올리면 옆에 설명이 떠요. 누르면 펼쳐서 고정'],
@@ -9115,9 +9118,10 @@ function itLook(it,cls){try{const part=ICO_PART[it.s];cls=it.cls||cls;if(!part||
   const v=it.base?'def':it.u?'uq':it.cls?'cw':{t:it.r,v:it.v||0,th:it.th?1:0},key=cls+'|'+part+'|'+JSON.stringify(v);if(key in ICO_C)return ICO_C[key];
   const nul={hat:null,armor:null,cape:null,pants:null,boots:null,wpn:null,shd:null},A=ICO_NK[cls]||(ICO_NK[cls]=heroPix(cls,nul)),B=heroPix(cls,{...nul,[part]:v}),W=B.width,H=B.height;
   let x0=W,y0=H,x1=-1,y1=-1;for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=(y*W+x)*4;if(B.data[i+3]&&(A.data[i]!==B.data[i]||A.data[i+1]!==B.data[i+1]||A.data[i+2]!==B.data[i+2]||A.data[i+3]!==B.data[i+3])){if(x<x0)x0=x;if(y<y0)y0=y;if(x>x1)x1=x;if(y>y1)y1=y;}}
-  if(x1<0)return ICO_C[key]='';const w=x1-x0+1,h=y1-y0+1,S0=36,k=Math.max(1,Math.floor(S0/Math.max(w,h))),c=document.createElement('canvas');c.width=c.height=S0;const g=c.getContext('2d');g.imageSmoothingEnabled=false;
+  {let n=0;for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=(y*W+x)*4;if(B.data[i+3]&&(A.data[i]!==B.data[i]||A.data[i+1]!==B.data[i+1]||A.data[i+2]!==B.data[i+2]))n++;}if(x1<0||n<14*(W/40)*(W/40))return ICO_C[key]='';}/* 거의 안 보이는 부위(다른 장비에 가려짐)는 원래 아이콘 */
+  const w=x1-x0+1,h=y1-y0+1,S0=36,k=Math.min(80/W,34/Math.max(w,h)),/* 확대하지 않고 캐릭터에 낀 크기 그대로 (기본 도트 1칸 = 2px), 칸보다 크면만 줄임 */c=document.createElement('canvas');c.width=c.height=S0;const g=c.getContext('2d');g.imageSmoothingEnabled=false;
   const t=document.createElement('canvas');t.width=W;t.height=H;const tg=t.getContext('2d');const D=tg.createImageData(W,H);for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=(y*W+x)*4;if(B.data[i+3]&&(A.data[i]!==B.data[i]||A.data[i+1]!==B.data[i+1]||A.data[i+2]!==B.data[i+2]||A.data[i+3]!==B.data[i+3])){D.data[i]=B.data[i];D.data[i+1]=B.data[i+1];D.data[i+2]=B.data[i+2];D.data[i+3]=B.data[i+3];}}tg.putImageData(D,0,0);
-  g.drawImage(t,x0,y0,w,h,Math.floor((S0-w*k)/2),Math.floor((S0-h*k)/2),w*k,h*k);return ICO_C[key]=c.toDataURL();}catch(e){return '';}}
+  g.drawImage(t,x0,y0,w,h,Math.floor((S0-w*k)/2),Math.floor((S0-h*k)/2),Math.round(w*k),Math.round(h*k));return ICO_C[key]=c.toDataURL();}catch(e){return '';}}
 // 개발자 모드: 증강·마스터리 효과가 실제로 계산되는 코드 줄을 게임 소스에서 찾아 보여 줌 (딜 계산식)
 let DSRC=null;const dsrc=()=>DSRC||(DSRC=[...document.scripts].map(x=>x.textContent).sort((a,b)=>b.length-a.length)[0]||'');
 // 패턴이 나온 문장 하나를 잘라 냄: 문장 시작(; { 줄바꿈 뒤)부터, 바로 뒤에 블록 {…}이 있으면 그 블록 끝까지, 아니면 다음 ; 까지 (최대 320자)
@@ -12041,7 +12045,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=186,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=187,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
