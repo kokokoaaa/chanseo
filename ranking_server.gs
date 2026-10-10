@@ -1,4 +1,7 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v6.9
+// 찬서 명예의 전당 서버 (Google Apps Script) v7.0
+//
+// v6.9 → v7.0 바뀐 점
+// - 접속 신호 응답의 접속자 목록에 각자의 프로필(pf)을 같이 실어 보냄 → 접속자 이름에 마우스를 올리면 바로 캐릭터 정보가 보임
 //
 // v6.8 → v6.9 바뀐 점
 // - 개발자 기기 기록: 마지막 접속 시각을 30분 → 2분마다 갱신 (누가 몇 분에 마지막으로 접속했는지)
@@ -305,7 +308,10 @@ function ping_(q) {
     if (pf && nm && !q.bye && c.get('pf_' + nm) !== pf) { const own = ownerKh_(str_(q.n, 12)); if (!own || own === kh_(q.k)) c.put('pf_' + nm, pf, 21600); } } catch (err) {}
   let dm = [];
   try { const nm = dmKey_(q.n); if (nm && !q.bye && (c.get('dm_' + nm) || !c.get('dmc_' + nm))) { c.put('dmc_' + nm, '1', 21600); const own = ownerKh_(str_(q.n, 12)); if (!own || own === kh_(q.k)) { dm = dmFor_(nm); if (!dm.length) c.remove('dm_' + nm); } } } catch (err) {}
-  return out_({ v: 69, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0 })).sort((a, b) => a.s - b.s) });
+  // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
+  let pfm = {};
+  try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
+  return out_({ v: 70, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
