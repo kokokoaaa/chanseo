@@ -6494,6 +6494,7 @@ function dmgE(e,amt,col,label,quiet){
   if(!e.alive)return;
   if(e.ivT>S.t){if(duelOn()&&!(e.popT>S.t)){e.popT=S.t+.45;duelPop(e.x,e.y-(e.r||14)-24,'회피!','#ff9ad0');}return;} // 결투 상대가 대시로 피하는 순간
   if(e.boss&&S.raidK)amt*=S.raidK;
+  if(e.raidK&&e.entT>0)return; // 레이드 보스 등장 연출 중엔 무적
   if(e.raidK&&e.vulnT>S.t)amt*=1.5; // 레이드: 기 모으기를 막아 기절한 동안 받는 피해 +50%
   if(e.tbT>S.t)amt*=.7;
   if((e.boss||e.elite)&&has('x_hero')){amt*=1+lv3('x_hero',.12,.18,.24);const q=S.p;if(q&&q.alive&&!(q.xhCd>S.t)){q.xhCd=S.t+1;q.hp=Math.min(q.maxHp,q.hp+q.maxHp*.01);}}
@@ -7280,6 +7281,29 @@ function tintSpr(spr,col){let m=TINTC.get(spr);if(!m){m={};TINTC.set(spr,m);}let
 // 걸린 디버프 색 (여러 개면 번갈아): 빙결·둔화 파랑 · 화상 주황 · 중독 초록 · 감전 노랑
 const debCol=e=>{const L=[];if(e.slowT>0)L.push(e.frozen?'#2f7dff':'#4a9cff');if(e.burnT>0)L.push('#ff5a1a');if(e.ps>0)L.push('#3fc23a');if(e.shkT>S.t)L.push('#ffd21a');return L.length?L[Math.floor(S.t*2.5+e.rot)%L.length]:null;};
 // 레이드 보스 전용 외형: 기존 보스 그림을 크게·색을 바꾸고 그 위에 보스마다 다른 장식 (뒤: 오라·마법진, 앞: 왕관·눈빛·떠다니는 것)
+// ---------- 레이드 보스 등장 연출 (3.2초, 무적·공격 없음, 화면 흔들림) ----------
+// 거신: 땅이 갈라지며 솟아오름 · 서리 여왕: 얼음 기둥이 자라났다 깨짐 · 폭풍의 핵: 번개가 연달아 내리치며 나타남 · 둥지 여왕: 바닥 그림자가 커지고 거미줄 타고 내려옴 · 끝없는 어둠: 차원문이 열리며 나옴
+function raidEntTick(e,dt){const k0=1-e.entT/e.entT0;e.entT-=dt;const k=1-e.entT/e.entT0,K=e.raidK;S.shake=Math.max(S.shake,.18+.3*k);
+  if(K==='storm'&&Math.floor(k*9)!==Math.floor(k0*9)){S.bolts.push({x1:e.x+rand(-60,60),y1:e.y-1000,x2:e.x+rand(-30,30),y2:e.y,life:.22});S.flash=.18;}
+  if(K==='golem'&&Math.random()<dt*14)burst(e.x+rand(-e.r,e.r),e.y+e.r*.8,'#6a4a3a',3);
+  if(K==='frost'&&Math.random()<dt*20)S.rings.push({x:e.x+rand(-60,60),y:e.y+rand(-40,40),r:2,max:14,life:.4,col:'#dff6ff'});
+  if(e.entT<=0){e.entT=0;const R=raidCur();S.shake=1;S.flash=.35;burst(e.x,e.y,R.col,46);for(let i=0;i<3;i++)S.rings.push({x:e.x,y:e.y+e.r*.6,r:e.r*.5,max:e.r+160+i*90,life:.5+i*.15,col:R.col});
+    if(K==='frost')for(let i=0;i<20;i++){const a=i*TAU/20;eShot(e.x,e.y,a,240,0,7,'#d8f0ff',.6,'ice');}
+    toast(`${R.ico} ${R.n} 등장! ${R.mech}`);}}
+function drawRaidEnt(e){const k=1-e.entT/e.entT0,K=e.raidK,x=e.x,y=e.y,R=e.r,t=S.t,ez=q=>1-Math.pow(1-q,3);ctx.save();
+  const body=(dx,dy,sc)=>{ctx.save();ctx.translate(x+dx,y+dy);ctx.scale(sc,sc);ctx.translate(-x,-y);e._ent=1;try{drawChip(e);}finally{e._ent=0;}ctx.restore();};
+  if(K==='brood'){ctx.fillStyle=`rgba(0,0,0,${.15+.45*k})`;ctx.beginPath();ctx.ellipse(x,y+R*.85,R*(.4+1.1*k),R*(.15+.4*k),0,0,TAU);ctx.fill();
+    const dy=-(1-ez(Math.max(0,(k-.35)/.65)))*900;if(k>.35){ctx.strokeStyle='rgba(235,245,230,.8)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,y+dy-1200);ctx.lineTo(x,y+dy-R);ctx.stroke();body(0,dy,1);}}
+  else if(K==='golem'){ctx.strokeStyle='#ff7a2a';ctx.lineWidth=4;for(let i=0;i<8;i++){const a=i*TAU/8+.3,l=R*(.6+1.6*k);ctx.beginPath();ctx.moveTo(x,y+R*.8);ctx.lineTo(x+Math.cos(a)*l,y+R*.8+Math.sin(a)*l*.45);ctx.stroke();}
+    ctx.fillStyle='rgba(20,10,10,.75)';ctx.beginPath();ctx.ellipse(x,y+R*.85,R*1.3*Math.min(1,k*2),R*.45*Math.min(1,k*2),0,0,TAU);ctx.fill();
+    if(k>.25){const q=ez((k-.25)/.75);ctx.save();ctx.beginPath();ctx.rect(x-R*4,y-R*6,R*8,R*6.85);ctx.clip();body(0,(1-q)*R*3.2,1);ctx.restore();}}
+  else if(K==='frost'){const q=Math.min(1,k/.75),h=R*3.2*ez(q);if(k<.78){gpoly(ctx,[[x-R*.9,y+R*.9],[x+R*.9,y+R*.9],[x+R*.5,y+R*.9-h],[x,y+R*.9-h*1.15],[x-R*.55,y+R*.9-h*.9]],'rgba(210,240,255,.85)','#5ab8ff',3);}
+    else{body(0,0,1);const f=(k-.78)/.22;ctx.fillStyle='#eaf8ff';for(let i=0;i<14;i++){const a=i*TAU/14,d=R*(.5+2*f);ctx.globalAlpha=1-f;ctx.fillRect(x+Math.cos(a)*d-5,y-R+Math.sin(a)*d*.8-5,10,10);}}}
+  else if(K==='storm'){const fl=k>.3&&(Math.sin(t*60)>(.6-k)||k>.85);if(fl)body(0,0,1);ctx.globalAlpha=.3+.3*Math.sin(t*30);ctx.fillStyle='#ffe066';ctx.beginPath();ctx.arc(x,y,R*(.3+1.2*k),0,TAU);ctx.fill();}
+  else{const q=ez(Math.min(1,k/.5));ctx.translate(x,y+R*.85);ctx.scale(1,.38);for(let i=0;i<4;i++){ctx.rotate(t*1.5);ctx.strokeStyle=['#c06aff','#7a3ad0','#e8c0ff','#4a1a8a'][i];ctx.lineWidth=8-i;ctx.beginPath();ctx.arc(0,0,Math.max(1,R*1.6*q-i*14),0,Math.PI*1.5);ctx.stroke();}ctx.fillStyle='#05000a';ctx.beginPath();ctx.arc(0,0,Math.max(1,R*1.2*q),0,TAU);ctx.fill();ctx.setTransform(ctx.getTransform());
+    ctx.restore();ctx.save();if(k>.4){const sc=ez((k-.4)/.6);body(0,R*(1-sc)*.8,Math.max(.05,sc));}}
+  ctx.restore();
+}
 function raidDecoB(e){const k=e.raidK||'void',x=e.x,y=e.y,R=e.r,t=S.t,c=(RAIDS.find(r=>r.k===k)||RAIDS[0]).col;ctx.save();
   const g=ctx.createRadialGradient(x,y,R*.3,x,y,R*1.9);g.addColorStop(0,c+'55');g.addColorStop(1,c+'00');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,R*1.9,0,TAU);ctx.fill();
   ctx.translate(x,y+R*.85);ctx.scale(1,.38);ctx.rotate(t*.6);ctx.strokeStyle=c;ctx.globalAlpha=.55;ctx.lineWidth=4;ctx.beginPath();ctx.arc(0,0,R*1.45,0,TAU);ctx.stroke();ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,R*1.15,0,TAU);ctx.stroke();
@@ -7306,6 +7330,7 @@ function drawEgg(e){const x=e.x,y=e.y,R=e.r,k=Math.max(0,e.hatchT/9),t=S.t;ctx.s
   ctx.restore();}
 function drawChip(e){
   if(e.type==='rival'){drawRival(e);return;}
+  if(e.raidK&&e.entT>0&&!e._ent){drawRaidEnt(e);return;}
   const R=e.r,x=e.x,y=e.y,big=e.boss,air=(e.air||0)*28;
   if(e.egg){drawEgg(e);return;}if(e.raidK||e.cln)raidDecoB(e);
   if(e.rage){ctx.fillStyle=`rgba(255,40,40,${.18+Math.sin(S.t*10)*.08})`;ctx.beginPath();ctx.arc(x,y,R+18,0,TAU);ctx.fill();}
@@ -8346,6 +8371,10 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:225,t:'🎬 레이드 보스 등장 연출',items:[
+    ['new','🎬 레이드 보스가 <b>보스마다 다른 연출</b>로 등장해요: 🕷 바닥에 그림자가 먼저 커지고 거미줄을 타고 천장에서 내려옴 · 🗿 땅이 갈라지며 솟아오름 · ❄ 얼음 기둥이 자라났다 깨짐 · ⚡ 번개가 연달아 내리치며 나타남 · 🌑 차원문이 열리며 나옴','look'],
+    ['change','🎬 등장하는 동안 화면이 흔들리고 보스 이름·칭호가 크게 떠요. 등장 중인 보스는 공격하지 않고 피해도 받지 않아요','look'],
+  ]},
   {v:224,t:'🧩 세트 전설 · 유니크 장비 · 고유 무기 능력',items:[
     ['change','🧩 <b>세트는 전설에서만</b> 나와요 (세트 전설: 전설의 55%). 이미 가진 영웅 세트 장비도 그대로 세트로 쳐요'],
     ['new','🎨 <b>같은 세트는 겉모습 색이 똑같아요</b> (용사 초록 · 질풍 청록 · 현자 연두 · 수호자 금색). 다른 사람에게도 그렇게 보여요','look'],
@@ -9594,8 +9623,8 @@ function beginRaid(bi,st,ids){const L=myHeroes(),hs=ids.map(id=>L.find(h=>h.id==
   for(const k of PKEYS)if(me.p[k]!==undefined)S.p[k]=me.p[k];for(const k in (me.s||{}))if(me.s[k]!==undefined&&k!=='diff')S[k]=me.s[k];S.cls=me.cls;S.diff='raid';
   S.augs=(me.augs||[]).map(([id,lv,q,pq,dl])=>{const f=[...FUSIONS,...VFUSIONS].find(x=>x.id===id);if(f){const o=fusionObj(f);if(pq)o.pq=pq;return o;}const a=AUGS.find(x=>x.id===id)||VIPS.find(x=>x.id===id)||DRAGON.find(x=>x.id===id);return a?{...a,lv,q:q||1,dl:dl||undefined}:null;}).filter(Boolean);
   tagCount();S.noAug=true;S.started=true;S.raidMe=me.id;S.raidTok=RAID_TOK;S.raidIds=hs.map(h=>h.id);
-  const p=S.p;p.x=WW/2;p.y=WH/2+260;hpSync();p.hp=p.maxHp;p.inv=2;p.alive=true;p.barrier=barrierMax();
-  S.allies=hs.slice(1).map(allyOf);for(const a of S.allies)a.y=WH/2+260;raidRoles();S.rushT=3;S.mode='play';hide();
+  const p=S.p;p.x=WW/2;p.y=WH/2+40;hpSync();p.hp=p.maxHp;p.inv=2;p.alive=true;p.barrier=barrierMax();
+  S.allies=hs.slice(1).map(allyOf);for(const a of S.allies)a.y=WH/2+60;raidRoles();S.rushT=1.5;S.mode='play';hide();
   S.arena={x:WW/2,y:WH/2-100,r:1100,tr:1100};raidMapInit(R.map);
   toast(`${R.ico} 레이드 「${R.n}」 ${st}단계 · 동료 ${S.allies.length}명과 함께!`);}
 // 지형물: 사람·동료가 못 지나가고 적 탄환을 막음 (보스는 통과). 얼음 기둥은 숨결에 맞을 때마다 금이 가다 부서짐
@@ -9609,8 +9638,7 @@ function raidMapInit(m){const A=S.arena,L=[],at=(dx,dy,r,o)=>L.push({x:A.x+dx,y:
 function spawnRaidBoss(){const bi=S.raidB||0,st=S.raidS||1,R=RAIDS[bi],A=S.arena;S.bossI=0;S.bossT=['raidboss'];S.tele=[];S.hz=[];S.bStart=S.bt||0;S.bHit=0;
   ET.raidboss.n=R.n;ET.raidboss.col=R.col;BTITLE.raidboss=R.t; // 이름표·체력바는 이 보스 이름으로
   spawnAt('raidboss',A.x,A.y-160,true);const b=S.en[S.en.length-1];b.spr=R.spr;b.bsc=R.bsc;b.flt=R.flt;b.noFlash=1;b.r=ET.raidboss.r;b.raidK=R.k;
-  b.maxHp=b.hp=Math.round(raidHpOf(bi,st));b.dmg=b.baseDmg=Math.round(raidDmOf(bi,st));b.bk=0;go(b,'intro');S.boss=b;S.shake=.6;S.flash=.3;S.bannerT=0;
-  toast(`${R.ico} ${R.n} 등장! ${R.mech}`);}
+  b.maxHp=b.hp=Math.round(raidHpOf(bi,st));b.dmg=b.baseDmg=Math.round(raidDmOf(bi,st));b.bk=0;go(b,'intro');S.boss=b;S.bannerT=0;b.entT=b.entT0=3.2;S.shake=.3;}
 // 거신이 노릴 대상: 나와 살아 있는 동료 중 하나 (나를 조금 더 자주)
 function raidTargets(){const L=[S.p].filter(q=>q.alive);for(const a of S.allies||[])if(a.alive)L.push(a);return L;}
 // 팀 구성원 (나 + 동료) 의 직업. 역할 효과는 살아 있는 구성원 것만
@@ -9833,7 +9861,10 @@ function drawRaidObj(o){if(o.k==='deco')return;const x=o.x,y=o.y,r=o.r,t=S.t;ctx
     ctx.strokeStyle='rgba(235,245,230,.55)';ctx.lineWidth=1.2;for(let i=0;i<6;i++){const a=i*TAU/6;ctx.beginPath();ctx.moveTo(x,y-r*.6);ctx.lineTo(x+Math.cos(a)*r*1.3,y-r*.6+Math.sin(a)*r*1.3);ctx.stroke();}}
   else{ctx.translate(x,y-r*1.6+Math.sin(t*2+x)*6);ctx.rotate(t*.5);ctx.fillStyle='#3a1a5a';ctx.strokeStyle='#d08aff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,-r*1.3);ctx.lineTo(r*.8,0);ctx.lineTo(0,r*1.3);ctx.lineTo(-r*.8,0);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle='#e8c0ff';ctx.globalAlpha=.5+.4*Math.sin(t*4);ctx.fillRect(-3,-3,6,6);}
   ctx.restore();}
-function drawRDark(){if(S&&S.rob&&raidOn()){const m=raidCur().map,t=S.t;ctx.save();
+function drawRDark(){if(S&&S.boss&&S.boss.raidK&&S.boss.entT>0){ // 보스 등장: 이름·칭호 (화면 가운데 위)
+    const e=S.boss,k=1-e.entT/e.entT0,R0=raidCur(),a=Math.min(1,k*3)*Math.min(1,(1-k)*6+.2);ctx.save();ctx.globalAlpha=a;ctx.textAlign='center';ctx.font='bold 46px "Do Hyeon",sans-serif';ctx.lineWidth=7;ctx.strokeStyle='rgba(0,0,0,.85)';const tx=camX+W/2,ty=camY+H*.66;ctx.strokeText(`${R0.ico} ${R0.n}`,tx,ty);ctx.fillStyle=R0.col;ctx.fillText(`${R0.ico} ${R0.n}`,tx,ty);
+  ctx.font='22px "Do Hyeon",sans-serif';ctx.lineWidth=5;ctx.strokeText(`— ${R0.t} · ${S.raidS||1}단계 —`,tx,ty+34);ctx.fillStyle='#f4ecd8';ctx.fillText(`— ${R0.t} · ${S.raidS||1}단계 —`,tx,ty+34);ctx.restore();}
+  if(S&&S.rob&&raidOn()){const m=raidCur().map,t=S.t;ctx.save();
     for(let i=0;i<46;i++){const sp=40+hash(i,3)*60,ph=hash(i,7)*1000;let x,y,c,sz=3;
       if(m==='lava'){x=camX+hash(i,1)*W+Math.sin(t+i)*20;y=camY+H-((t*sp+ph)%(H+40));c=i%3?'#ff8a2a':'#ffd04a';ctx.globalAlpha=.7;}
       else if(m==='ice'){x=camX+((hash(i,1)*W+t*20+Math.sin(t*.8+i)*30)%W+W)%W;y=camY+((t*sp*.8+ph)%(H+40))-20;c='#ffffff';ctx.globalAlpha=.85;sz=2+hash(i,5)*3;}
@@ -9923,7 +9954,7 @@ function raidGrgTick(dt){const e=S.boss;if(!e||!e.alive||!e.raidK||e.stunT>0||(e
   const n=(e.slowT>0)+(e.burnT>0)+(e.ps>0)+((e.shkT||0)>S.t)+((e.rootT||0)>S.t)+((e.tbT||0)>S.t)+((e.drT||0)>S.t),a=(S.allies||[]).filter(q=>q.alive).length;
   e.grg=(e.grg||0)+dt*(n+a*.25+.15);const need=RAID_GRG*Math.pow(RAID_GRGG,e.grgN||0);
   if(e.grg>=need){e.grg=0;e.grgN=(e.grgN||0)+1;e.stunT=4;e.vulnT=S.t+4.5;e.grgL=S.t+12;S.shake=.4;burst(e.x,e.y,'#ffe066',30);S.rings.push({x:e.x,y:e.y,r:e.r,max:e.r+120,life:.5,col:'#ffe066'});toast(`💫 ${raidCur().n} 그로기! 4초 동안 공격을 멈추고 받는 피해 +50%`,3);}}
-BAI.raidboss=function(e,dt,o){const RD=raidCur(),st=S.raidS||1,ph2=o.ph2,ph3=e.hp<e.maxHp*.3,k=(ph3?.66:ph2?.78:.9)/(1+.04*(st-1)),dm=e.dmg;
+BAI.raidboss=function(e,dt,o){if(e.entT>0){raidEntTick(e,dt);return;}const RD=raidCur(),st=S.raidS||1,ph2=o.ph2,ph3=e.hp<e.maxHp*.3,k=(ph3?.66:ph2?.78:.9)/(1+.04*(st-1)),dm=e.dmg;
   if(e.stunT>0){e.stunT-=dt;if(Math.random()<dt*6)ftext(e.x+rand(-30,30),e.y-e.r*1.6,'★','#ffe066',16);return;} // 기 모으기를 막으면 기절
   if(!S.rdoom&&!S.robj&&e.bst==='walk')e.chT=(e.chT??rand(22,28))-dt;
   e.tgt=e.tgt&&e.tgt.alive?e.tgt:raidPick();const T=e.tgt;
@@ -10001,7 +10032,7 @@ function allyTick(a,dt){const p=S.p;a.inv=Math.max(0,a.inv-dt);if(a.alive){a.cal
     if(tg&&Math.sqrt(bd)<=(a.mel?tg.r+a.r+60:a.rng+tg.r)){const dm=a.dps*.4;a.atkT=.25;a.face=tg.x>a.x?1:-1;
       if(a.mel){S.rings.push({x:a.x+(tg.x-a.x)*.5,y:a.y+(tg.y-a.y)*.5,r:8,max:34,life:.18,col:'#ffe6b0'});raidHit(tg,dm,a);}
       else(S.abul=S.abul||[]).push({x:a.x,y:a.y-14,tg,dm,a,col:CLASSES[a.cls]&&a.cls==='mage'?'#8ab0ff':a.cls==='necro'?'#9cff9a':'#ffe6a0',life:1.2});}}}
-function raidHit(e,dm,a){if(!e.alive)return;dm*=(S.raidTeam||1)*(a?roleOf(a.cls).dm||1:1)*(e.raidK&&e.vulnT>S.t?1.5:1);e.hp-=dm;S.st.ally=(S.st.ally||0)+dm;if(Math.random()<.25)ftext(e.x+rand(-30,30),e.y-e.r-10,fmtN(dm),'#bfe8ff',12);if(e.hp<=0){e.alive=false;onKill(e);}}
+function raidHit(e,dm,a){if(!e.alive||e.entT>0)return;dm*=(S.raidTeam||1)*(a?roleOf(a.cls).dm||1:1)*(e.raidK&&e.vulnT>S.t?1.5:1);e.hp-=dm;S.st.ally=(S.st.ally||0)+dm;if(Math.random()<.25)ftext(e.x+rand(-30,30),e.y-e.r-10,fmtN(dm),'#bfe8ff',12);if(e.hp<=0){e.alive=false;onKill(e);}}
 function raidTick(dt){raidDoomTick(dt);raidAddsTick(dt);raidObjTick(dt);raidWaveTick(dt);raidGrgTick(dt);if(!S.raidSpawned&&S.bossI<0&&!S.raidEnd){S.rushT=(S.rushT??3)-dt;if(S.rushT<=0){S.raidSpawned=1;spawnRaidBoss();}}
   for(const a of S.allies||[])allyTick(a,dt);
   // 수호자·치유사 회복 (살아 있을 때만)
@@ -12861,7 +12892,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=224,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=225,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
