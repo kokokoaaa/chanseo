@@ -10400,9 +10400,9 @@ const DUEL_ULT={knight:'nova',paladin:'pillars',berserk:'nova',rogue:'barrage',a
 function rivalSay(e,t){toast(`${S.duel?S.duel.opp.n:'상대'}: ${t}`);}
 function rivalRate(e){const st=e.hero&&e.hero.st,r=st?parseFloat(String(st['공격 속도']||'').replace(/[^0-9.]/g,''))||1.2:1.2;return r;}
 // 직업별 피해 보정: 맞히기 쉬운 정도가 달라서, 예상 시간(tOpp)에 맞춰 측정한 값
-const DUEL_K={knight:2.6,mage:3.5,archer:3.7,rogue:2.7,paladin:2.7,necro:3.2,gunner:2.5,elem:2.6,berserk:1.9,druid:3,alch:4.5,gambler:2.9}; // v232: 같은 캐릭터끼리 결투(탄 피하는 자동 조작) 실측으로 다시 맞춤
+const DUEL_K={knight:2.3,mage:3.5,archer:3.7,rogue:2.7,paladin:3.3,necro:4.5,gunner:3.3,elem:2.3,berserk:2.8,druid:3,alch:4,gambler:2.6}; // v232: 같은 캐릭터끼리 결투(탄 피하는 자동 조작) 실측으로 다시 맞춤
 // 내 피해 보정(내 직업): 작고 피하는 상대에게 원거리 탄이 덜 맞는 만큼 (근접은 1). 실측
-const DUEL_PK={knight:1.04,mage:2.4,archer:2.5,rogue:2.5,gunner:3,elem:2.5,druid:3,alch:3,gambler:1.6};
+const DUEL_PK={knight:1.04,mage:2.4,archer:2.5,rogue:2.5,gunner:3,elem:3.5,druid:3,alch:3.5,gambler:2.6};
 BAI.rival=function(e,dt,o){const {p,d}=o,c=e.cls,A=DUEL_ATK[c]||DUEL_ATK.archer,B=e.B||(e.B=e.bd/.9*(DUEL_K[c]||1)),el=(S.bt||0)-(S.duel.t0||0);
   e.acd-=dt;e.scd=(e.scd??1)-dt;
   {const lim=e.spd*1.3;if(e.lx!=null&&dt>0){e.mvx=clamp((e.x-e.lx)/dt,-lim,lim);e.mvy=clamp((e.y-e.ly)/dt,-lim,lim);}e.lx=e.x;e.ly=e.y;}
