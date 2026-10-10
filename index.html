@@ -4710,6 +4710,7 @@ const CLASSES={
 };
 function applyClass(cls){S.cls=cls;Object.assign(S.p,CLASSES[cls].stats);S.p.face=1;}
 const ex=t=>Math.max(0,tag(t)-4);
+let EG_ST=0;
 const CHILD_CAP=180,TS=1.2,effT=()=>(S.gt||0)*TS;
 const econ=()=>1+effT()/90+Math.pow(effT()/240,2);
 const price=v=>Math.round(v*econ());
@@ -4744,7 +4745,7 @@ function pDmg(){const p=S.p;let d=effDmg(p);
   if(has('k_charger'))d*=1+Math.max(0,moveSpd()-150)/10*lv3('k_charger',.015,.02,.025);
   if(has('m_overload'))d*=1+rawRate()*lv3('m_overload',.04,.05,.06);
   if(has('g_fan'))d*=1+rawRate()*lv3('g_fan',.04,.05,.06);
-  if(has('a_pierce'))d*=1+p.pierce*lv3('a_pierce',.06,.08,.1);
+  if(has('a_pierce'))d*=1+pierceE()*lv3('a_pierce',.06,.08,.1);
   if(has('r_phantom'))d*=1+p.dodge*100*lv3('r_phantom',.01,.015,.02);
   if(has('n_horde'))d*=1+skelRaw()*lv3('n_horde',.04,.05,.06);
   if(has('b_carnage'))d*=1+(p.fyO||0)/100*lv3('b_carnage',.015,.02,.025);
@@ -6169,7 +6170,7 @@ function dmgE(e,amt,col,label,quiet){
 }
 function poisonE(e,st=1){const cap=(tag('poison')>=6?10:1)+(has('f_plaguebullet')?3:0)+(has('virulence')?3:0);e.ps=Math.min(cap,Math.max(e.ps,0)+(e.ps>=cap?0:st));if(e.ps<1)e.ps=1;e.pt=3;}
 const bspdB=()=>{const b=Math.max(0,S.p.bspd/(CLASSES[S.cls].stats.bspd||560)-1)*.5;return has('a_gale')?b*lv3('a_gale',1.3,1.6,2):Math.min(1,b);};
-function pBullet(x,y,ang,dmg,o={}){const p=S.p;if(o.child&&(S.chN2||0)>=CHILD_CAP)return;if(o.child)S.chN2=(S.chN2||0)+1;S.pr.push(Object.assign({x,y,vx:Math.cos(ang)*p.bspd,vy:Math.sin(ang)*p.bspd,mine:true,dmg,life:1.2,pierce:p.pierce,hit:new Set(),r:3,roll:0},o));}
+function pBullet(x,y,ang,dmg,o={}){const p=S.p;if(o.child&&(S.chN2||0)>=CHILD_CAP)return;if(o.child)S.chN2=(S.chN2||0)+1;S.pr.push(Object.assign({x,y,vx:Math.cos(ang)*p.bspd,vy:Math.sin(ang)*p.bspd,mine:true,dmg,life:1.2,pierce:pierceE(),hit:new Set(),r:3,roll:0},o));}
 function explode(x,y,rad,dmg,col='#ffb347'){if(has('catalyst'))rad*=1+lv3('catalyst',.15,.2,.25);
   S.rings.push({x,y,r:6,max:rad,life:.3,col});burst(x,y,col,12);
   for(const e of S.en)if(e.alive&&(e.x-x)**2+(e.y-y)**2<(rad+e.r)**2)dmgE(e,dmg,col);
@@ -6204,10 +6205,12 @@ const dLines=d=>{const t=String(d);if(/<[a-z]/i.test(t))return t;const out=[];le
 const meleeTxt=d=>{try{if(!S||!S.cls||!pureMelee())return d;return String(d).replace(/관통[ \u00a0]\+(\d+)/g,(m,n)=>`${m} <small class="mlt">(근접: 한 번에 베는 적 +${2*n})</small>`).replace(/탄환[ \u00a0]\+(\d+)발?/g,(m,n)=>`${m} <small class="mlt">(근접: 베기 각도 +${40*n}°)</small>`);}catch(e){return d;}};
 const meleeCap=n=>(S.cls==='berserk'?2:3)+2*Math.max(0,S.p.pierce);
 const meleeArc=n=>Math.round(Math.min(360,2*(55+(n-1)*20)));
-const meleeR=()=>(S.cls==='druid'?Math.min(S.p.range,200):S.p.range)*.65;
+// 관통·사거리 상한: 관통 10 이상, 원거리 사거리 550(화면 좌우 끝) · 근접 300 이상은 화면에서 의미가 없고 계산만 늘어남 → 상한에 닿으면 관련 카드·증강도 안 나옴
+const PIERCE_CAP=10,pierceE=()=>Math.min(S.p.pierce||0,PIERCE_CAP),RANGE_CAP=()=>pureMelee()?300:550,rangeE=()=>Math.min(S.p.range,RANGE_CAP());
+const meleeR=()=>(S.cls==='druid'?Math.min(rangeE(),200):rangeE())*.65;
 // 근접 피해 보정 ×1.6 (탄속 보너스를 못 받는 대신 0.1 더)
 const MELEE_DM=1.6;
-function meleeSwing(base,dmg,n,o){dmg*=MELEE_DM;const p=S.p,R=meleeR(),half=Math.min(Math.PI,(55+(n-1)*20)*Math.PI/180),cap=(S.cls==='berserk'?2:3)+2*Math.max(0,p.pierce+(o.big?3:0));
+function meleeSwing(base,dmg,n,o){dmg*=MELEE_DM;const p=S.p,R=meleeR(),half=Math.min(Math.PI,(55+(n-1)*20)*Math.PI/180),cap=(S.cls==='berserk'?2:3)+2*Math.max(0,pierceE()+(o.big?3:0));
   const hits=S.en.filter(e=>{if(!e.alive||e.phase)return false;const dx=e.x-p.x,dy=e.y-p.y,dd=Math.hypot(dx,dy);if(dd>R+e.r)return false;let da=Math.abs(Math.atan2(dy,dx)-base)%TAU;if(da>Math.PI)da=TAU-da;return da<=half+Math.atan2(e.r,Math.max(1,dd));}).sort((a,b)=>d2(a,p)-d2(b,p)).slice(0,cap);
   const bear=S.cls==='druid';(S.slashes=S.slashes||[]).push({x:p.x,y:p.y,a:base,half,R,life:.26,dir:(p.swD=-(p.swD||1)),big:!!o.big,col:bear?'#e0a060':o.big?'#ffd76a':S.cls==='berserk'?'#ff8a6a':S.cls==='knight'?'#8fd0ff':'#fff0a0',bear,cls:S.cls});
   for(const t of hits){const sp=p.bspd,b=Object.assign({x:t.x,y:t.y,vx:Math.cos(base)*sp,vy:Math.sin(base)*sp,mine:true,dmg,life:.5,pierce:0,hit:new Set(),r:4,roll:0,melee:true},o);
@@ -6263,21 +6266,21 @@ function playerFire(tg){
   if(S.cls==='archer'&&mky(1)){if(!(p.fxRT>0))p.fxR=0;p.fxR=Math.min(.4,(p.fxR||0)+.02);p.fxRT=2;}
   if(S.cls==='mage'&&mk(2)&&p.shots%5===0)pBullet(p.x,p.y,base,pDmg()*4,{pierce:999,r:16,big:true,life:1.3,child:true,sub:'비전 구체'});
   if(S.cls==='paladin'&&mk(0)&&p.shots%6===0){exL('심판의 빛기둥','holy',tg.x,tg.y,80,pDmg()*2.5*holyM(),'#fff3a0');S.bolts.push({x1:tg.x,y1:tg.y-240,x2:tg.x,y2:tg.y,life:.18});}
-  if(S.cls==='gunner'&&mky(1)&&Math.random()<.25)pBullet(p.x,p.y,base+rand(-.12,.12),d*.7,{child:true,sub:'난사',pierce:p.pierce+1,life:blife});
+  if(S.cls==='gunner'&&mky(1)&&Math.random()<.25)pBullet(p.x,p.y,base+rand(-.12,.12),d*.7,{child:true,sub:'난사',pierce:pierceE()+1,life:blife});
   if(S.cls==='elem'&&mky(2)&&p.shots%8===0){const c=S.en.filter(e=>e.alive&&!e.phase&&Math.abs(e.x-p.x)<GW/2&&Math.abs(e.y-p.y)<GH/2);for(let i=0;i<4&&c.length;i++){const e=c.splice(Math.floor(Math.random()*c.length),1)[0];S.bolts.push({x1:e.x,y1:e.y-220,x2:e.x,y2:e.y,life:.18});dmgEs('뇌운',e,pDmg()*2,'#fff08a');}}
   if(S.cls==='berserk'){if(mky(0)&&(p.fy||0)>=furyCap()){p.fxR=Math.max(p.fxRT>0?p.fxR||0:0,.3);p.fxRT=.6;}if(mk(1)&&p.shots%6===0){S.dsub='피의 회오리';try{spinHit(120,pDmg()*1.5,'#ff5a4a');}finally{S.dsub=null;}}}
   if(S.cls==='druid'&&mky(2)&&p.shots%5===0){exL('야성의 발톱',null,tg.x,tg.y,80,pDmg()*2.5,'#e0a060');}
   if(S.cls==='gambler'&&mk(1)&&p.shots%4===0)for(let i=0;i<5;i++)pBullet(p.x,p.y,base+(i-2)*.16,pDmg()*.7,{child:true,sub:'카드 부채',card:true,pierce:2,r:5,life:1});
   if(S.mkGold){S.mkGold=0;S.gold+=5;exL('황금 비',null,tg.x,tg.y,120,pDmg()*3,'#ffd76a');}
-  if(S.cls==='archer'&&mk(1)&&p.shots%3===0)for(const da of [-.2,.2])pBullet(p.x,p.y,base+da,d*.7,{child:true,sub:'일제 사격',pierce:p.pierce,life:blife});
+  if(S.cls==='archer'&&mk(1)&&p.shots%3===0)for(const da of [-.2,.2])pBullet(p.x,p.y,base+da,d*.7,{child:true,sub:'일제 사격',pierce:pierceE(),life:blife});
   if(S.cls==='knight'){const ev=has('k_cleave')?lv3('k_cleave',3,3,2):4;if(p.shots%ev===0){const rad=95*(has('k_cleave')?1.3:1),k=has('k_cleave')?lv3('k_cleave',1.2,1.6,2):.5;p.swingT=.25;S.rings.push({x:p.x,y:p.y,r:20,max:rad,life:.25,col:'#cfe3ff'});for(const e of S.en)if(e.alive&&!e.phase&&d2(e,p)<(rad+e.r)**2)dmgEs('기사 회전 베기',e,pDmg()*mult*shock*k*(mk(1)?2:1),'#cfe3ff');if(mk(1))for(let i=0;i<8;i++)pBullet(p.x,p.y,i*TAU/8,pDmg()*.8,{child:true,sub:'검기 폭풍',pierce:2,life:.6,r:6});}
     if(has('k_smite')&&p.shots%lv3('k_smite',6,5,4)===0){explode(tg.x,tg.y,100,pDmg()*3+armorEff(),'#fff3c4');S.rings.push({x:tg.x,y:tg.y,r:4,max:30,life:.4,col:'#ffffff'});S.shake=Math.max(S.shake,.12);}}
   const x7=has('f_lucky777')&&p.shots%J()===0;
   if(meleeOn()&&has('b_twin')&&(p.fy||0)>=furyCap())(S.twinQ=S.twinQ||[]).push({t:.12,base,d:d*(big?3:1)*.7,n});
   if(has('d_maul')&&p.bearT>0&&tg){exL('곰의 일격',null,tg.x,tg.y,80,pDmg()*lv3('d_maul',.7,.9,1.1),'#c98a52');for(const e of S.en)if(e.alive&&!e.boss&&d2(e,tg)<90*90)e.rootT=Math.max(e.rootT||0,S.t+1);S.shake=Math.max(S.shake,.08);}
   if(meleeOn())meleeSwing(base,d*(big?3:1),n,{roll,big,x7,coin,el:el??null});else
-  for(let i=0;i<n;i++){const an=base+(i-(n-1)/2)*.13;pBullet(p.x,p.y,an,d*(big?3:1),{roll,big,x7,el:el??(coin>0&&has('elemcoin')?Math.floor(Math.random()*3):null),coin,hollow:S.cls==='gunner'&&has('g_hollow'),life:blife,pierce:p.pierce+(big?3:0)+(S.cls==='gunner'?1:0)+(coin>0&&has('luckyshot')?2:0),r:(big||(shock>1.5&&S.cls!=='gambler')||x7?6:(S.cls==='gambler'?4:S.cls==='knight'||S.cls==='berserk'?7:S.cls==='mage'||S.cls==='alch'?5:3))*(has('giant')?1+lv3('giant',.6,.9,1.2):1)});
-    if(has('clone')&&Math.random()<lv3('clone',.2,.3,.4))pBullet(p.x,p.y,an+rand(-.08,.08),d,{roll,pierce:p.pierce});}
+  for(let i=0;i<n;i++){const an=base+(i-(n-1)/2)*.13;pBullet(p.x,p.y,an,d*(big?3:1),{roll,big,x7,el:el??(coin>0&&has('elemcoin')?Math.floor(Math.random()*3):null),coin,hollow:S.cls==='gunner'&&has('g_hollow'),life:blife,pierce:pierceE()+(big?3:0)+(S.cls==='gunner'?1:0)+(coin>0&&has('luckyshot')?2:0),r:(big||(shock>1.5&&S.cls!=='gambler')||x7?6:(S.cls==='gambler'?4:S.cls==='knight'||S.cls==='berserk'?7:S.cls==='mage'||S.cls==='alch'?5:3))*(has('giant')?1+lv3('giant',.6,.9,1.2):1)});
+    if(has('clone')&&Math.random()<lv3('clone',.2,.3,.4))pBullet(p.x,p.y,an+rand(-.08,.08),d,{roll,pierce:pierceE()});}
   if(has('blackjack')&&p.shots%21===0){const rf=has('f_royal'),nb=rf?6:3;for(let i=0;i<nb;i++)pBullet(p.x,p.y,base+(i-(nb-1)/2)*.12,pDmg()*(rf?8:5),{pierce:999,r:9,life:1.6,sub:'스물하나의 비술',child:true,card:true});ftext(p.x,p.y-30,'21','#ffd76a',20);}
   if(has('shower')&&p.shots%7===0){const vis=S.en.filter(e=>e.alive&&!e.phase&&Math.abs(e.x-p.x)<GW/2&&Math.abs(e.y-p.y)<GH/2);for(let i=0;i<4&&vis.length;i++){const e=vis.splice(Math.floor(Math.random()*vis.length),1)[0];S.bolts.push({x1:e.x,y1:e.y-200,x2:e.x,y2:e.y,life:.15});explode(e.x,e.y,40,pDmg()*1.2,'#f1e7cf');}}
   if(has('gold7')&&p.shots%J()===0)pBullet(p.x,p.y,base,pDmg()*5,{pierce:7,r:8,sub:'골든 세븐',child:true,big:true});
@@ -6707,7 +6710,7 @@ function update(dt){
     p.inv=Math.max(0,p.inv-dt);p.all6=Math.max(0,p.all6-dt);p.dashCd=Math.max(0,p.dashCd-dt);p.blitzT=Math.max(0,p.blitzT-dt);p.shockT=Math.max(0,p.shockT-dt);
     if(p.comboT>0){p.comboT-=dt;if(p.comboT<=0){if(has('f_frenzy')&&p.combo>1){p.combo=Math.floor(p.combo/2);p.comboT=2;}else p.combo=0;}}
     p.cd-=dt;
-    if(p.cd<=0){const fr=meleeOn()?meleeR():p.range,bo=S.boss&&S.boss.alive&&!S.boss.air&&!S.boss.phase&&d2(S.boss,p)<(fr+S.boss.r)**2?S.boss:null,tg=bo||evTarget(fr)||nearestE(p,fr);if(tg){playerFire(tg);if(S.cls==='gunner'&&p.mag<=0){p.mag=magN();p.cd=reloadT();p.rlT=p.cd;p.rlMax=p.cd;if(mk(1)){p.fxR=Math.max(p.fxRT>0?p.fxR||0:0,.4);p.fxRT=p.cd+2;}if(has('g_rshot'))for(let i=0;i<8;i++)pBullet(p.x,p.y,i*TAU/8,pDmg()*lv3('g_rshot',.6,.8,1),{child:true,sub:'장전 사격',pierce:1});}else p.cd=1/pRate();}}
+    if(p.cd<=0){const fr=meleeOn()?meleeR():rangeE(),bo=S.boss&&S.boss.alive&&!S.boss.air&&!S.boss.phase&&d2(S.boss,p)<(fr+S.boss.r)**2?S.boss:null,tg=bo||evTarget(fr)||nearestE(p,fr);if(tg){playerFire(tg);if(S.cls==='gunner'&&p.mag<=0){p.mag=magN();p.cd=reloadT();p.rlT=p.cd;p.rlMax=p.cd;if(mk(1)){p.fxR=Math.max(p.fxRT>0?p.fxR||0:0,.4);p.fxRT=p.cd+2;}if(has('g_rshot'))for(let i=0;i<8;i++)pBullet(p.x,p.y,i*TAU/8,pDmg()*lv3('g_rshot',.6,.8,1),{child:true,sub:'장전 사격',pierce:1});}else p.cd=1/pRate();}}
     const n=orbitN();
     if(n){const sp=2.8*(has('spinner')?1.5:1),rad=ORB_R*p.orbR,big=tag('roulette')>=6,orr=big?13:9;
       for(let i=0;i<n;i++){const a=S.t*sp+i*TAU/n,ox=p.x+Math.cos(a)*rad,oy=p.y+Math.sin(a)*rad;
@@ -6801,7 +6804,7 @@ function update(dt){
   // 사령술사 해골 궁수대: 해골 3기 중 1기가 1초마다 뼈 화살
   if(has('n_archers')&&S.skel&&p.alive){S.naT=(S.naT??1)-dt;if(S.naT<=0){S.naT=1;S.skel.forEach((k,i)=>{if(i%3!==0||k.life<=0)return;const e=nearestE(k,p.range);if(e)pBullet(k.x,k.y,Math.atan2(e.y-k.y,e.x-k.x),pDmg()*lv3('n_archers',.5,.6,.8)*undM(),{child:true,sub:'해골 궁수대',pierce:1,r:3,life:.9,bone:true,src:'undead'});});}}
   // 궁수 화살비: 6초마다 적이 가장 몰린 곳
-  if(has('a_rain')&&p.alive){S.arT=(S.arT??3)-dt;if(S.arT<=0){S.arT=6;let best=null,bn=0;const near=S.en.filter(e=>e.alive&&!e.boss&&d2(e,p)<p.range*p.range*1.4);for(let k=0;k<8&&near.length;k++){const c=near[Math.floor(Math.random()*near.length)];let n=0;for(const o of near)if(d2(o,c)<130*130)n++;if(n>bn){bn=n;best=c;}}if(best)S.zones.push({x:best.x,y:best.y,r:130,life:1.5,kind:'arrows'});}}
+  if(has('a_rain')&&p.alive){S.arT=(S.arT??3)-dt;if(S.arT<=0){S.arT=6;let best=null,bn=0;const near=S.en.filter(e=>e.alive&&!e.boss&&d2(e,p)<rangeE()*rangeE()*1.4);for(let k=0;k<8&&near.length;k++){const c=near[Math.floor(Math.random()*near.length)];let n=0;for(const o of near)if(d2(o,c)<130*130)n++;if(n>bn){bn=n;best=c;}}if(best)S.zones.push({x:best.x,y:best.y,r:130,life:1.5,kind:'arrows'});}}
   // 도적 죽음의 표적: 근처에서 체력이 가장 높은 적
   if(has('r_mark')&&p.alive&&!(S.rmT&&S.rmT.alive&&d2(S.rmT,p)<600*600)){let bt=null;for(const e of S.en)if(e.alive&&!e.phase&&d2(e,p)<400*400&&(!bt||e.hp>bt.hp))bt=e;if(S.rmT)S.rmT.rmk=0;S.rmT=bt;if(bt)bt.rmk=1;}
   // 광전사 쌍격: 0.12초 뒤 두 번째 베기
@@ -6843,12 +6846,16 @@ function update(dt){
     else{z.tick-=dt;if(z.tick<=0){z.tick=.5;for(const e of S.en)if(e.alive&&d2(e,z)<(z.r+e.r)**2)poisonE(e);}}}
   S.zones=S.zones.filter(z=>z.life>0);if(S.zones.length>70)S.zones.splice(0,S.zones.length-70);
   // projectiles
+  // 탄환↔적 판정용 격자: 탄환마다 모든 적을 보지 않고 지나간 칸 근처 적만 봄 (탄환·적이 많을 때 배속 렉 방지). 판정 순서는 예전과 같게(적 목록 순서)
+  const EG=new Map(),GC=80;{let gi=0;for(const e of S.en){if(!e.alive||e.phase)continue;e._gi=gi++;const x0=Math.floor((e.x-e.r)/GC),x1=Math.floor((e.x+e.r)/GC),y0=Math.floor((e.y-e.r)/GC),y1=Math.floor((e.y+e.r)/GC);for(let cx=x0;cx<=x1;cx++)for(let cy=y0;cy<=y1;cy++){const k=(cx+2000)*8192+(cy+2000);let L=EG.get(k);if(!L)EG.set(k,L=[]);L.push(e);}}}
+  const egNear=(ox,oy,x,y,r)=>{const st=++EG_ST,out=[],x0=Math.floor((Math.min(ox,x)-r)/GC),x1=Math.floor((Math.max(ox,x)+r)/GC),y0=Math.floor((Math.min(oy,y)-r)/GC),y1=Math.floor((Math.max(oy,y)+r)/GC);
+    for(let cx=x0;cx<=x1;cx++)for(let cy=y0;cy<=y1;cy++){const L=EG.get((cx+2000)*8192+(cy+2000));if(L)for(const e of L)if(e._gs!==st){e._gs=st;out.push(e);}}if(out.length>1)out.sort((a,b)=>a._gi-b._gi);return out;};
   for(const b of S.pr){
     if(b.life<=0)continue;
     if(b.mine&&has('dealer')){const e=nearestE(b,lv3('dealer',170,230,300)+(has('f_sharpshooter')?120:0),b.hit);if(e){const cur=Math.atan2(b.vy,b.vx),want=Math.atan2(e.y-b.y,e.x-b.x);let df=want-cur;while(df>Math.PI)df-=TAU;while(df<-Math.PI)df+=TAU;const na=cur+clamp(df,-6*dt,6*dt),sp=Math.hypot(b.vx,b.vy);b.vx=Math.cos(na)*sp;b.vy=Math.sin(na)*sp;}}
     if(!b.mine&&S.freezeT>0)continue;
     b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;
-    if(b.mine){const ox=b.x-b.vx*dt,oy=b.y-b.vy*dt,sl=b.vx*b.vx*dt*dt+b.vy*b.vy*dt*dt;/* 빠른 탄환이 한 프레임에 적을 건너뛰지 않게 지나온 선분으로 판정 */for(const e of S.en){if(!e.alive||e.phase||b.hit.has(e))continue;let q=sl>0?((e.x-ox)*(b.x-ox)+(e.y-oy)*(b.y-oy))/sl:1;q=q<0?0:q>1?1:q;const cx=ox+(b.x-ox)*q-e.x,cy=oy+(b.y-oy)*q-e.y;if(cx*cx+cy*cy<(e.r+b.r)**2){onPHit(b,e);if(b.life<=0)break;}}
+    if(b.mine){const ox=b.x-b.vx*dt,oy=b.y-b.vy*dt,sl=b.vx*b.vx*dt*dt+b.vy*b.vy*dt*dt;/* 빠른 탄환이 한 프레임에 적을 건너뛰지 않게 지나온 선분으로 판정 */for(const e of egNear(ox,oy,b.x,b.y,b.r||0)){if(!e.alive||e.phase||b.hit.has(e))continue;let q=sl>0?((e.x-ox)*(b.x-ox)+(e.y-oy)*(b.y-oy))/sl:1;q=q<0?0:q>1?1:q;const cx=ox+(b.x-ox)*q-e.x,cy=oy+(b.y-oy)*q-e.y;if(cx*cx+cy*cy<(e.r+b.r)**2){onPHit(b,e);if(b.life<=0)break;}}
       if(b.life<=0&&!b.boomed){b.boomed=1;if(b.bone&&b.sub==='뼈창'&&has('n_spearstorm'))for(let i=0;i<8;i++)pBullet(b.x,b.y,i*TAU/8,pDmg()*.4*undM(),{child:true,sub:'뼈 파편',pierce:1,life:.5,bone:true,src:'undead'});if(b.mbomb){exL('마나 폭주',null,b.x,b.y,150,pDmg()*5,'#ff7a2a');S.shake=Math.max(S.shake,.25);}
         if(S.cls==='archer'&&has('a_blast')&&!b.child)exL('폭발 화살',null,b.x,b.y,60,pDmg()*lv3('a_blast',1,1.2,1.5),'#ffb030');if(b.hret===1)pBullet(b.x,b.y,Math.atan2(p.y-b.y,p.x-b.x),b.dmg,{pierce:5,r:9,big:true,sub:'심판의 망치',child:true,life:1,hret:2,stun:b.stun});if(b.fball){const fr=has('f_hellfire')?120:80;explode(b.x,b.y,fr,pDmg()*lv3('fireball',1.8,2.2,2.6),'#ff7a3a');for(const o of S.en)if(o.alive&&d2(o,b)<fr*fr)burnE(o,pDmg()*.3,3);if(has('f_ember'))S.zones.push({x:b.x,y:b.y,r:60,life:3,kind:'fire',m:1});}else if(has('artillery')&&!b.child)explode(b.x,b.y,has('f_siege')?140:70,b.dmg,'#ffe08a');}}
     else if(S.allies&&raidBulletHit(b)){}
@@ -7518,7 +7525,7 @@ const DEF_AUGS=new Set(['regenarmor','gravity','luckycoin','frost','piggy','tip'
 const isOff=a=>!a.up&&!DEF_AUGS.has(a.id);
 // 선행 조건: 효과가 다른 무언가를 강화만 하는 증강은 그 대상이 있을 때만 등장 (회전 부적 없는데 회전 부적 강화 등 방지)
 const poisonSrc=()=>canPoison()||['wheel','m_inferno','fog','venomcloud','f_napalm','f_gas','f_plaguebullet'].some(has);
-const AUG_REQ={d_maul:()=>has('d_bear'),agony:()=>canPoison()&&(tag('fire')>0||S.cls==='mage'),n_spearstorm:()=>has('n_bone'),m_shower:()=>has('m_meteor'),p_hret:()=>has('p_hammer'),p_hstorm:()=>has('p_hammer'),b_whirl:()=>has('b_cleave'),
+const AUG_REQ={ghost:()=>S.p.pierce<PIERCE_CAP,piercer:()=>S.p.pierce<PIERCE_CAP,scope:()=>S.p.range<RANGE_CAP(),d_maul:()=>has('d_bear'),agony:()=>canPoison()&&(tag('fire')>0||S.cls==='mage'),n_spearstorm:()=>has('n_bone'),m_shower:()=>has('m_meteor'),p_hret:()=>has('p_hammer'),p_hstorm:()=>has('p_hammer'),b_whirl:()=>has('b_cleave'),
   turret2:()=>has('turret'),boltturret:()=>has('turret'),overwatch:()=>has('turret'),bastion:()=>has('turret'),selfdestruct:()=>has('turret'),
   clover:()=>S.p.luck<LUCK_CAP_F()-1,fortune:()=>!critFull(),trigger:()=>rawRate()<RATE_CAP(),
   evade:()=>S.p.dodge<DODGE_CAP_F(),luckydie:()=>!critFull(),
@@ -7733,7 +7740,7 @@ function rarityFx(){
 function rollRarity(bonus=0){const L=LK(bonus);const w=[['c',66],['r',26+.33*L],['e',4.5+.09*L],['l',.55+.03*L]];let t=w.reduce((a,b)=>a+b[1],0),x=Math.random()*t;for(const [k,v] of w){if((x-=v)<0)return k;}return 'c';}
 // 공격 속도가 상한에 닿으면 공격 속도만 올리는 카드는 안 나옴 (받아도 0%)
 const RATE_ONLY=new Set(['손목 단련','날랜 손놀림','광기']);
-const cardOk=c=>!(RATE_ONLY.has(c.n)&&rawRate()>=RATE_CAP()*.98)&&!(PCT_CARDS.has(c.n)&&!pctOpen())&&!(MELEE_CLS.includes(S.cls)&&c.n==='가속 탄')&&!(c.cc&&critFull())&&!(c.cm&&critMFull())&&(!c.req||c.req());
+const cardOk=c=>!(RATE_ONLY.has(c.n)&&rawRate()>=RATE_CAP()*.98)&&!(PCT_CARDS.has(c.n)&&!pctOpen())&&!(MELEE_CLS.includes(S.cls)&&c.n==='가속 탄')&&!(c.cc&&critFull())&&!(c.cm&&critMFull())&&!(c.n==='관통 탄'&&S.p.pierce>=PIERCE_CAP)&&!(c.n==='조준경'&&S.p.range>=RANGE_CAP())&&(!c.req||c.req());
 // 직업 선호 카드는 ×1.6, 최근 9장 안에 나온 카드는 ×0.3 (같은 카드 반복 방지)
 // 루트 스탯 카드: 열렸다고 계속 뜨지 않고, 그 루트가 최근 내 피해에서 차지하는 비중만큼 자주 뜸 (비중 0이면 드물게)
 const CARD_SRC={'정비 키트':['summon'],'포탑 개조':['summon'],'뼈 가루':['summon','undead'],'영혼 사슬':['summon','undead'],'독샘':['poison'],'연료':['fire'],'축전지':['thunder','elem'],'원소 결정':['elem','fire','thunder'],'정령 공명':['elem'],'씨앗 주머니':['nature'],'가시 독':['nature'],'큰 병':['alchemy'],'농축액':['alchemy'],'진동판':['wave'],'그림자 정수':['shadow'],'중력자':['grav'],'성수':['holy'],'성유':['holy'],'성가':['holy'],'시계 태엽':['grav','nature','wave','shadow','summon','elem']};
@@ -7911,6 +7918,10 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:204,t:'⚡ 배속 렉 줄이기 · 관통·사거리 상한',items:[
+    ['change','⚡ 탄환이 많을 때(분열 탄·관통 빌드) 배속에서 생기던 렉을 크게 줄였어요 (탄환이 근처 적만 검사)'],
+    ['change','🎯 <b>관통은 최대 10</b>, <b>사거리는 원거리 550 · 근접 300까지</b>만 효과가 있어요. 그 이상은 화면 밖이라 의미가 없어서, 상한에 닿으면 관통·사거리 카드와 증강은 더 안 나와요'],
+  ]},
   {v:203,t:'🧹 정리 · 렉 줄이기',items:[
     ['change','🗺 난이도 버튼이 더 잘 보여요: 이름을 크게, 클리어한 난이도는 「✔ 클리어」, 지금 도전할 난이도는 「도전!」 (메달 배율 표시는 뺐어요)'],
     ['change','⚡ 화면 위쪽 정보창 위치를 매 프레임 다시 재던 것을 줄여 렉을 덜었어요'],
@@ -11618,7 +11629,7 @@ function renderStats(){
     row('근접 거리',Math.round(meleeR()),`사거리 ${Math.round(p.range)}의 65%`,'칼이 닿는 거리. 사거리를 올리면 같이 늘어남'),
     row('탄속','—','근접 직업은 적용 안 됨','근접 공격은 탄환이 없어 탄속이 쓰이지 않음. 탄속 카드는 나오지 않음')]:[
     row('탄환 수',n+'발'),
-    row('관통',p.pierce),
+    row('관통',p.pierce>PIERCE_CAP?PIERCE_CAP+' (최대)':p.pierce),
     row('사거리',Math.round(p.range),'',`적이 다가오기 전에 먼저 공격하는 안전 거리. 딜을 직접 올리지는 않고, 원거리 시너지(원거리 숙련: 사거리 100당 공격력, 먼 적 추가 피해)와 소환물의 탐지 범위에 쓰임`),
     row('탄속',Math.round(p.bspd),bspdB()>0?`기본보다 빠른 만큼 탄환 피해 +${Math.round(bspdB()*100)}%${has('a_gale')?' (질풍 화살: 상한 없음)':bspdB()>=.99?' · 최대치 도달 (가속 탄 카드 안 나옴)':' / 최대 +100%'}`:'기본 탄속보다 빠르면 1%당 탄환 피해 +0.5% (최대 +100%)')]),
     ...clsRows(row),
@@ -11681,7 +11692,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=203,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=204,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
