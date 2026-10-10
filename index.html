@@ -4206,6 +4206,8 @@ CH.gambler={P:Object.assign({z:'#1e1a26',v:'#3a3448',V:'#5a5268',P:'#7a48b8',p:'
 // ===== 장비 외형 (종이 인형): 맨몸 위에 모자·갑옷·망토·바지·신발·무기를 덧입힘 =====
 // 칸 값: null = 벗음(맨몸) · 'def' = 기본 장비(직업 기본 모습) · {t:등급, v:디자인} · 무기는 'cw'(직업 전용)·'uq'(고유)도
 // 색 묶음 (A 밝음 → D 어두움, E 장식, F·G 천 색)
+// 로브형 직업의 기본 망토 색 (예전엔 기본 망토가 안 보여 어깨 칸이 의미 없었음)
+const DEF_CAPE={mage:'nav',elem:'wnd',alch:'lea',gambler:'drg'};
 const DCOL={lin:{A:'#efe6cf',B:'#d6c8a6',C:'#a8977a',D:'#6a5a44',E:'#c7962e'},lea:{A:'#c98a52',B:'#8a5530',C:'#5a3420',D:'#3a2014',E:'#e8c45a'},stl:{A:'#f4f8ff',B:'#c8d2e0',C:'#8e9bb0',D:'#5a6478',E:'#9aa6b8'},
   kni:{A:'#e6ecf4',B:'#a8b4c6',C:'#6a768a',D:'#3a4252',E:'#e8c45a',F:'#34508a',G:'#4c6cac'},slv:{A:'#ffffff',B:'#dde4ee',C:'#aab6c8',D:'#6a768a',E:'#d42c35',F:'#f4f8ff',G:'#ffffff'},drk:{A:'#8a93a3',B:'#5d6472',C:'#3a3f49',D:'#22262e',E:'#e8c45a'},
   drg:{A:'#ff6b5b',B:'#d42c35',C:'#8a1428',D:'#4a0a14',E:'#ffd866'},gld:{A:'#fff1a8',B:'#ffd866',C:'#c7962e',D:'#8a6420',E:'#d42c35'},shd:{A:'#b28cff',B:'#7b4fe0',C:'#5230a8',D:'#2e1a6b',E:'#9fe6ff'},
@@ -4309,7 +4311,7 @@ const DLOOK={
   draw(st,D0){const D={},C=CH.mage,P=C.P,U=st.U,A=st.atk,ay=st.ay||0,t=st.t||0;for(const k in DSLOT)D[k]=dNorm(D0[k]);
    // 망토 (등 뒤): 기본은 없음
    // 망토 (등 뒤): 아래로 갈수록 넓게 퍼져 로브 양옆으로 드러남 (예전엔 로브와 폭이 같아 거의 안 보였음)
-   if(D.cape&&D.cape!=='def'){const M=this.pal('cape',D.cape),f=st.cf&1,h=D.cape.t>=2?12:11;for(let i=0;i<h;i++){const w=6+Math.floor(i*.6);for(let x=-w;x<=w;x++){if(i===h-1&&((x+f)%3===0))continue;const c=x<-w+2?'A':x>w-2?'D':'C';dpx(M,c,20+x,22+U+i);}}if(D.cape.t===3)for(const x of [12,16,20,24,28])dpx(M,'E',x+f,22+U+h);}
+   if(D.cape){const M=D.cape==='def'?DCOL[DEF_CAPE.mage]:this.pal('cape',D.cape),f=st.cf&1,h=D.cape.t>=2?12:11;for(let i=0;i<h;i++){const w=6+Math.floor(i*.6);for(let x=-w;x<=w;x++){if(i===h-1&&((x+f)%3===0))continue;const c=x<-w+2?'A':x>w-2?'D':'C';dpx(M,c,20+x,22+U+i);}}if(D.cape.t===3)for(const x of [12,16,20,24,28])dpx(M,'E',x+f,22+U+h);}
    // 신발
    if(D.boots==='def'){cl(P,['zz'],17,34+Math.min(0,st.lL));cl(P,['zz'],21,34+Math.min(0,st.rL));}
    else if(D.boots==null){dpaint(['kK'],17,34+Math.min(0,st.lL),{});dpaint(['kK'],21,34+Math.min(0,st.rL),{});}
@@ -4485,7 +4487,7 @@ Object.assign(DLOOK,{
    else{const PH=D.hat==='def'?P:DRM(P,{z:'D',l:'C',L:'B',Y:'A',y:'A',r:'E'},dP8('hat',D.hat));shp(PH,20,8+U,[3,4,4.5,4.5,5],'zlLYy',{hl:2});dt(PH,'l',20,8+U);for(let x=15;x<=25;x++)dt(PH,'r',x,12+U);shp(PH,20,13+U,[9],'zlLYy');shp(PH,20,14+U,[7.5],'zzlll');dt(PH,'L',11,12+U);dt(PH,'l',29,12+U);if(D.hat!=='def')dHatOrn(dP8('hat',D.hat),20,8+U,D.hat.t,D.hat.v||0,st.t);}
    if(st.hurt)hurtEyes(16+U);}},
  elem:{draw(st,D0){const D=dSlot(D0),P=CH.elem.P,U=st.U,A=st.atk,ay=st.ay||0,t=st.t||0;
-   if(D.cape!=null&&D.cape!=='def')dCape(dP8('cape',D.cape),U,st.cf,22,5,10);
+   if(D.cape!=null)dCape(D.cape==='def'?DCOL[DEF_CAPE.elem]:dP8('cape',D.cape),U,st.cf,22,5,10);
    shp(P,20,13+U,[5,5.5,6,6,6,6,6,6,6,6,5.5,5,4.5,4],'3hHHc');
    if(D.boots==='def'){cl(P,['k','k','4','44'],18,31+st.lL);cl(P,['K','K','4','44'],21,31+st.rL);}
    else{cl(P,['k','k'],18,31+st.lL);cl(P,['K','K'],21,31+st.rL);if(D.boots==null){dpaint(['k','kK'],18,33+st.lL,{});dpaint(['K','KK'],21,33+st.rL,{});}else{const M=dP8('boots',D.boots);dpaint(['B','BC'],18,33+st.lL,M);dpaint(['B','BC'],21,33+st.rL,M);}}
@@ -4537,7 +4539,7 @@ Object.assign(DLOOK,{
     for(const [xx,y] of [[16,10],[15,9],[14,8],[13,7],[15,7],[13,6]])dt(PH,'Y',xx,y+U);for(const [xx,y] of [[24,10],[25,9],[26,8],[27,7],[25,7],[27,6]])dt(PH,'Y',xx,y+U);dt(PH,'T',15,10+U);dt(PH,'T',25,10+U);}
    cl(P,['TTTTTTTTT','kkkkkkkkK','kkekkkekK','kkekkkekK','kkkkkkkKK','.KKKKKKK.'],16,15+U);if(st.hurt)hurtEyes(16+U);}},
  alch:{draw(st,D0){const D=dSlot(D0),P=CH.alch.P,U=st.U,A=st.atk,ay=st.ay||0,t=st.t||0;
-   if(D.cape!=null&&D.cape!=='def')dCape(dP8('cape',D.cape),U,st.cf,22,5,10);
+   if(D.cape!=null)dCape(D.cape==='def'?DCOL[DEF_CAPE.alch]:dP8('cape',D.cape),U,st.cf,22,5,10);
    dLegs(P,st,['zl','zl','zl','ll','ll','lll'],['lz','lz','lz','ll','ll','lll'],D,{z:'D',l:'B'},{l:'C'});
    const AM={S:'C',s:'B',W:'A',A:'B',a:'C',l:'D'},PA=D.armor==='def'?P:DRM(P,AM,D.armor==null?DCOL.lin:dP8('armor',D.armor));
    shp(PA,20,22+U,[3.5,4,4,4.5,4.5,5,5],'SsWWW');if(D.armor!=null){for(let y=29;y<=30;y++){dt(PA,'s',15,y+U);dt(PA,'W',16,y+U);dt(PA,'W',24,y+U);dt(PA,'S',25,y+U);}
@@ -4553,7 +4555,7 @@ Object.assign(DLOOK,{
    if(D.hat!=null){const PH=D.hat==='def'?P:DRM(P,{X:'C',c:'A'},dP8('hat',D.hat));for(let x=14;x<=26;x++)dt(PH,'X',x,11+U);cl(PH,['XccX','XcEX'],15,10+U);cl(PH,['XccX','XcEX'],22,10+U);if(D.hat!=='def')dHatOrn(dP8('hat',D.hat),20,9+U,D.hat.t,D.hat.v||0,t);}
    if(st.hurt)hurtEyes(16+U);}},
  gambler:{draw(st,D0){const D=dSlot(D0),P=CH.gambler.P,U=st.U,A=st.atk,ay=st.ay||0;
-   if(D.cape!=null&&D.cape!=='def')dCape(dP8('cape',D.cape),U,st.cf,22,5,10);
+   if(D.cape!=null)dCape(D.cape==='def'?DCOL[DEF_CAPE.gambler]:dP8('cape',D.cape),U,st.cf,22,5,10);
    dLegs(P,st,['zv','zv','zv','zz','zz','zzz'],['vz','vz','vz','zz','zz','zzz'],D,{z:'D',v:'B'},{z:'D'});
    const AM={z:'D',v:'C',V:'B',P:'A',p:'B',g:'E'},PA=D.armor==='def'?P:DRM(P,AM,D.armor==null?DCOL.lin:dP8('armor',D.armor));
    shp(PA,20,23+U,[4,4,4,4,4,4],'zzvvV');if(D.armor!=null){for(let y=29;y<=30;y++){dt(PA,'z',16,y+U);dt(PA,'z',24,y+U);}for(let y=23;y<=27;y++)for(let x=18;x<=22;x++)dt(PA,x<20?'P':'p',x,y+U);}
@@ -7950,6 +7952,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:214,t:'🧥 로브 직업도 기본 망토',items:[
+    ['change','🧥 마법사(남색) · 정령사(하늘색) · 연금술사(가죽색) · 도박사(붉은색)도 <b>기본 망토가 보여요</b>. 어깨 칸 👁 버튼으로 숨기면 예전 모습이에요','look'],
+  ]},
   {v:213,t:'🎯 원거리 효과는 사거리 비례 · 망토가 잘 보여요',items:[
     ['change','🎯 「먼 적에게 피해」 효과가 모두 <b>사거리 100당 피해</b>로 바뀌었어요 (적이 계속 몰려와 거리를 벌리기 어려워서). 원거리 시너지 4단계 +4% · 저격수 +6.5% · 매의 눈 +3.6% · 조준경 +1.6% · 명중 표식 치명타 확률 +1.7% · 추적자의 눈 +3% · 백발백중 치명타 피해 +3.3% · 궁수 마스터리 +5% (모두 사거리 100당)'],
     ['change','🧥 마법사·정령사·연금술사·도박사·총잡이의 <b>망토가 몸 양옆으로 크게 펼쳐져</b> 잘 보여요 (예전엔 로브 뒤에 거의 가려졌어요). 마법사는 어깨 망토도 생겼어요','look'],
@@ -11809,7 +11814,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=213,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=214,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
