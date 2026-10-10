@@ -7952,6 +7952,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:215,t:'🏆 명예의 전당 장비 표시',items:[
+    ['change','🏆 명예의 전당에서 클리어 당시 장비 정보가 없는 예전 기록은 지금 장비를 대신 보여 주지 않고 「정보가 없어요」라고 알려줘요'],
+  ]},
   {v:214,t:'🧥 로브 직업도 기본 망토',items:[
     ['change','🧥 마법사(남색) · 정령사(하늘색) · 연금술사(가죽색) · 도박사(붉은색)도 <b>기본 망토가 보여요</b>. 어깨 칸 👁 버튼으로 숨기면 예전 모습이에요','look'],
   ]},
@@ -7968,7 +7971,7 @@ const PATCH_NOTES=[
     ['change','📊 게임 중 스탯 창(Tab)을 열면 오류가 나던 문제','bug'],
   ]},
   {v:210,t:'🏆 명예의 전당에서 장비 보기',items:[
-    ['new','🏆 명예의 전당 기록을 누르면 <b>클리어 당시 장비</b>와 장비 합산 효과가 보이고, 장비에 마우스를 올리면 설명이 나와요 (이번 버전부터 올린 기록. 예전 기록은 그 사람이 최근 접속했으면 지금 장비를 보여줘요)'],
+    ['new','🏆 명예의 전당 기록을 누르면 <b>클리어 당시 장비</b>와 장비 합산 효과가 보이고, 장비에 마우스를 올리면 설명이 나와요 (이번 버전부터 올린 기록)'],
   ]},
   {v:209,t:'🐞 다른 사람 장비 설명창',items:[
     ['change','👤 다른 사람 계정 정보에서 장비에 마우스를 올려도 설명창이 창 뒤에 가려 안 보이던 문제','bug'],
@@ -11100,11 +11103,11 @@ async function hofStatOpen(b){if(!b)return;let w=document.getElementById('hofSt'
   const box=x=>`<div style="background:#0d2a20;border:2px solid var(--brass);border-radius:14px;padding:14px 16px;max-width:640px;width:100%;max-height:86vh;overflow:auto;color:var(--ivory);font-size:14px;line-height:1.55">${x}<div style="text-align:center;margin-top:10px"><button class="btn" id="hsX">닫기</button></div></div>`;
   // 그림은 도트 한 칸이 화면의 정수 픽셀이 되게 (92px 그림을 72·120px로 늘리면 도트가 깨져 보였음)
   const RP=recP(b),av=profAv(RP,72),top=`<div style="display:flex;gap:10px;align-items:center;margin-bottom:6px">${av?`<img src="${av.src}" style="width:${av.css}px;height:${av.css}px;image-rendering:pixelated">`:''}<div>${hofTipHtml(b)}</div></div>`;
-  // 장비: 기록에 클리어 당시 장비 상세가 있으면 그것, 없으면(예전 기록) 그 사람의 지금 장비(접속 기록이 있을 때)
+  // 장비: 기록에 클리어 당시 장비 상세가 있을 때만 (없으면 「정보 없음」. 지금 장비를 대신 보여 주지 않음)
   let G=null;const paint=x=>{w.innerHTML=box(top+(G&&G.n?G.html:'')+x);$('hsX').onclick=()=>w.remove();if(G)G.bind(w);};
   {const det={};String(b.gd||'').split(':').forEach((x,i)=>{const k=GEAR_KEYS[i];if(k){const it=itDec(k,x);if(it)det[k]=it;}});
    if(Object.keys(det).length)G=gearPanel(b.cls,det,null,profAv(RP,120),'🎒 클리어 당시 장비 · 마우스를 올리면 설명');
-   else{paint('<div style="color:var(--muted);text-align:center">불러오는 중…</div>');const pf=await profGet(b.name).catch(()=>null);if(!document.body.contains(w))return;if(pf&&pf.det&&Object.keys(pf.det).length)G=gearPanel(pf.cls,pf.det,pf.eq,profAv(pf,120),`🎒 ${CLASSES[pf.cls].n}의 <b>지금 장비</b> (예전 기록이라 클리어 당시 장비 정보는 없어요)`);}}
+   else G={n:1,html:'<div style="color:var(--muted);text-align:center;margin:8px 0">🎒 이 기록에는 클리어 당시 장비 정보가 없어요</div>',bind:()=>{}};}
   if(!b.h){paint('<div style="color:var(--muted);text-align:center;margin-top:6px">📊 이 기록에는 능력치 정보가 없어요<br><small>(능력치는 무한의 악몽·보스 러시 기록에만 함께 저장돼요)</small></div>');return;}
   paint('<div style="color:var(--muted);text-align:center">📊 능력치 불러오는 중…</div>');
   const h=await hofHero({hof:b,n:b.name});if(!document.body.contains(w))return;
@@ -11814,7 +11817,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=214,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=215,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
