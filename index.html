@@ -3486,7 +3486,7 @@ const DRAGON=[
   {id:'drg_hoard',t:'d',n:'용의 보물',tags:[],d:'행운 +10, 골드 획득 +100%',f:p=>{p.luck+=10;p.goldM+=1;}},
   {id:'drg_wing',t:'d',n:'용의 날개',tags:[],d:'이동 속도 +30%, 대시 재사용 −40%',f:p=>{p.speed*=1.3;p.dashMul*=.6;}}
 ];
-function openDragon(){const pool=DRAGON.filter(d=>!has(d.id)).sort(()=>Math.random()-.5).slice(0,3);if(!pool.length){S.mode='play';return;}S.curPick={k:'drg'};
+function openDragon(){const pool=DRAGON.filter(d=>!has(d.id)&&!(d.id==='drg_hoard'&&luckFull())).sort(()=>Math.random()-.5).slice(0,3);if(!pool.length){S.mode='play';return;}S.curPick={k:'drg'};
   achUnlock('a_dragonaug');
   if(AUTO.pick){gainAug({...pool[0],q:1});return;}
   S.mode='aug';show(`<h2 style="color:#ffd040">🐉 황금 용의 보물</h2><p class="sub">하나를 골라 가져가세요 · 슬롯을 차지하지 않는 전용 증강</p><div class="cards">${pool.map((a,i)=>augHtml({...a,q:1},i)).join('')}</div>`);
@@ -3568,7 +3568,7 @@ const CARDS=[
   {req:()=>tag('sniper')>0||S.cls==='archer'||has('longshot'),n:'조준경',v:[[6,11,0]],t:v=>`사거리 +${v[0]}%`,a:(p,v)=>{p.range*=1+v[0]/100;}},
   // 보스 러시·레이드엔 잡몹이 없어서 흡수 범위·경험치·골드 획득 카드는 안 나옴
   {req:()=>!rushOn()&&S.p.magnet<MAGNET_CAP,n:'자석',v:[[15,28,0]],t:v=>`경험치·골드 흡수 범위 +${v[0]}%`,a:(p,v)=>{p.magnet*=1+v[0]/100;}},
-  {req:()=>S.p.luck<LUCK_CAP_F(),n:'네잎클로버',v:[[.8,1.6,1]],t:v=>`행운 +${v[0]}. 높은 등급과 좋은 수치가 잘 나옵니다`,a:(p,v)=>{p.luck=Math.min(LUCK_CAP_F(),Math.round((p.luck+v[0])*10)/10);}},
+  {req:()=>!luckFull(),n:'네잎클로버',v:[[.8,1.6,1]],t:v=>`행운 +${v[0]}. 높은 등급과 좋은 수치가 잘 나옵니다`,a:(p,v)=>{p.luck=Math.min(LUCK_CAP_F(),Math.round((p.luck+v[0])*10)/10);}},
   {cc:1,n:'급소 노리기',v:[[4,7,1]],t:v=>`치명타 확률 +${v[0]}%`,a:(p,v)=>{p.crit+=v[0]/100;}},
   {cm:1,n:'치명상',v:[[30,50,0]],t:v=>`치명타 피해 +${v[0]}%`,a:(p,v)=>{p.critM+=v[0]/100;}},
   {req:()=>!pureMelee()&&(has('a_gale')||bspdB()<.99),n:'가속 탄',v:[[10,18,0]],t:v=>`탄속 +${v[0]}%`,a:(p,v)=>{p.bspd*=1+v[0]/100;}},
@@ -3598,11 +3598,13 @@ const CARDS=[
   {n:'불사의 맹세',v:[[.15,.3,2],[.3,.6,2]],t:v=>`흡혈 +${v[0]}%, 초당 체력 재생 +${v[1]}`,a:(p,v)=>{p.lifesteal+=v[0]/100;p.regen+=v[1];}},
   {fr:'l',n:'다연발',d:'탄환 +1발',f:p=>{p.multi+=1;}},
   {fr:'l',n:'결사',v:[[18,28,0]],t:v=>`공격력 +${v[0]}%, 받는 피해 +50%`,a:(p,v)=>{p.dmgP=(p.dmgP||0)+v[0]/100;p.vuln*=1.5;}},
-  {fr:'l',req:()=>S.p.luck<LUCK_CAP_F(),n:'럭키 세븐',v:[[1.5,3,1]],t:v=>`행운 +${v[0]}`,a:(p,v)=>{p.luck=Math.min(LUCK_CAP_F(),Math.round((p.luck+v[0])*10)/10);}},
+  {fr:'l',req:()=>!luckFull(),n:'럭키 세븐',v:[[1.5,3,1]],t:v=>`행운 +${v[0]}`,a:(p,v)=>{p.luck=Math.min(LUCK_CAP_F(),Math.round((p.luck+v[0])*10)/10);}},
 ];
 // 0~1 굴림. 행운이 높을수록 1 쪽으로 치우침 (행운 5면 평균 0.5 → 0.62, 행운 10이면 0.69)
 // 행운 상한 50 (v185에서 30 → 50, 행운 1당 효과는 약 0.6배). 모든 행운 효과는 0~상한 구간에 고르게 퍼져 있고 상한을 넘는 행운은 무시됨
 const LUCK_CAP_B=50,LK=(b=0)=>Math.min(LUCK_CAP_F(),Math.max(0,S.p.luck+b+gearA('luck')));
+// 행운이 최대인지 (장비 행운 포함). 도박사 「판돈 올리기」·「운명의 주사위」는 넘친 행운도 계산하므로 그때는 최대로 보지 않음 → 행운 카드·증강이 계속 나옴
+const luckUse=()=>has('gb_allin')||has('gb_dice'),luckFull=()=>!luckUse()&&S.p.luck+gearA('luck')>=LUCK_CAP_F();
 // 행운은 '높게 나올 확률'만 올림: 행운이 상한이면 35% 확률로 범위 위쪽 절반에서 굴리고, 나머지는 행운 없는 것과 같음
 // 보상으로 받는 행운(행운 고양이·유물): 상한을 넘는 만큼은 버리지 않고 골드로 바꿔 줌. 1당 상점 행운 +1의 기본값(처음 살 때 값, 많이 살수록 오르는 몫은 뺌)
 function gainLuck(v){const p=S.p,add=Math.max(0,Math.min(v,LUCK_CAP_F()-p.luck)),ov=Math.round((v-add)*10)/10;p.luck=Math.round((p.luck+add)*10)/10;const g=ov>0?Math.round(ov*180*Math.sqrt(econ())):0;if(g){S.gold+=g;ftext(p.x,p.y-60,`행운 초과 → +${g} 골드`,'#ffd76a',16);}return {add,ov,g};}
@@ -4816,7 +4818,7 @@ const CRIT_DMG_CAP_F=()=>(has('sharpshot')?8:5)+ccap('critD');
 const critMBase=()=>Math.min(CRIT_DMG_CAP_F(),S.p.critM+ex('dice')*.15+Math.max(0,critRaw()-CRIT_CAP)*.5),critMExtra=()=>(has('sharpshot')?1:0)+(has('f_luckstar')?LK()*.012:0)+(has('r_vital')?critRaw()*100*lv3('r_vital',.01,.015,.02):0)+(has('gb_dice')?Math.max(0,S.p.luck)*lv3('gb_dice',.012,.018,.024):0);
 const critMul=()=>critMExtra()+critMBase();
 const critFull=()=>critRaw()>=CRIT_CAP,critMFull=()=>critMBase()>=CRIT_DMG_CAP_F()-1e-9;
-const stackCapped=x=>(x.k==='crit'&&critFull())||(x.k==='critm'&&critMFull())||(x.k==='luck'&&S.p.luck>=LUCK_CAP_F())||(x.k==='dodge'&&S.p.dodge>=DODGE_CAP_F())||(x.k==='rate'&&rawRate()>=RATE_CAP());
+const stackCapped=x=>(x.k==='crit'&&critFull())||(x.k==='critm'&&critMFull())||(x.k==='luck'&&luckFull())||(x.k==='dodge'&&S.p.dodge>=DODGE_CAP_F())||(x.k==='rate'&&rawRate()>=RATE_CAP());
 // 피격 기준 조건: 흡혈·재생 때문에 '체력 ○% 이하'는 거의 안 켜져서, '맞은 뒤 ○초' / '최근 받은 피해량'으로 판정
 const hitRec=(sec=2.5)=>S.t-(S.p.hitT??-99)<sec;
 const dodgeC=()=>Math.min(DODGE_CAP_F(),S.p.dodge+gearM.dodge()+(has('f_ghoststep')&&S.p.ghT>0?.3:0))+(has('r_smoke')&&S.zones.some(z=>z.kind==='smoke'&&d2(z,S.p)<z.r*z.r)?lv3('r_smoke',.2,.3,.4):0);
@@ -7426,7 +7428,7 @@ function renderAugBar(){const el=$('augBar');const k=!S||S.mode==='start'?'':S.a
   document.addEventListener('click',e=>{const el=e.target.closest&&e.target.closest('[data-ft],[data-ff]');if(!el){if(cur&&pType!=='mouse'){cur=null;tip.style.display='none';}return;}if(pType==='mouse')return;e.preventDefault();e.stopPropagation();if(cur===el){cur=null;tip.style.display='none';}else fzShow(el);},true);}
 {const bar=document.getElementById('augBar'),tip=document.getElementById('augTip');
   const show=(t)=>{const a=S&&(S.augs.find(x=>x.id===t.dataset.aid)||S.augs[+t.dataset.ai]);if(!a)return;const T=TIER[a.t]||{n:'',col:'#d6a94a'};tip.style.setProperty('--ac',T.col);
-    tip.innerHTML=`<b>${a.uc?"♾ ":""}${a.n}</b><small>${a.uc?"<span style=\"color:#ff9a3c\">고점 돌파</span> · ":""}${T.n}${a.tags.length?' · '+[...new Set(a.tags)].map(t=>TAGS[t].n+(a.tags.filter(x=>x===t).length>1?'×2':'')).join(', '):''}</small>${a.d}${a.t==='v'?(()=>{const v=VFUSIONS.find(f=>f.a===a.id);return v?`<small style="color:#ffd76a;margin-top:4px">👑 ${augDef(v.b).n}와 왕실 합체 가능 (함께 가지면 다음 증강 때 합체) → ${v.n}</small>`:'';})():''}${a.t!=='v'&&vipCan()?(()=>{const v=VFUSIONS.find(f=>f.b===a.id);return v?`<small style="color:#ffd76a;margin-top:4px">👑 왕실 ${augDef(v.a).n}와 합체 가능 → ${v.n}${has(v.a)?' (다음 증강 때 합체)':' (상점에서 왕실을 사면)'}</small>`:'';})():''}${DEV?augDevFx(a.id):''}`;
+    tip.innerHTML=`<b>${a.uc?"♾ ":""}${a.n}</b><small>${a.uc?"<span style=\"color:#ff9a3c\">고점 돌파</span> · ":""}${T.n}${a.tags.length?' · '+[...new Set(a.tags)].map(t=>TAGS[t].n+(a.tags.filter(x=>x===t).length>1?'×2':'')).join(', '):''}</small>${augD(a)}${a.t==='v'?(()=>{const v=VFUSIONS.find(f=>f.a===a.id);return v?`<small style="color:#ffd76a;margin-top:4px">👑 ${augDef(v.b).n}와 왕실 합체 가능 (함께 가지면 다음 증강 때 합체) → ${v.n}</small>`:'';})():''}${a.t!=='v'&&vipCan()?(()=>{const v=VFUSIONS.find(f=>f.b===a.id);return v?`<small style="color:#ffd76a;margin-top:4px">👑 왕실 ${augDef(v.a).n}와 합체 가능 → ${v.n}${has(v.a)?' (다음 증강 때 합체)':' (상점에서 왕실을 사면)'}</small>`:'';})():''}${DEV?augDevFx(a.id):''}`;
     tip.style.display='block';const r=t.getBoundingClientRect();tip.style.left=Math.min(innerWidth-tip.offsetWidth-8,Math.max(8,r.left))+'px';tip.style.top=Math.max(8,r.top-tip.offsetHeight-8)+'px';};
   const hideT=()=>{tip.style.display='none';};
   // 시너지 알약: 단계별 효과, 현재 단계는 ✔ 표시
@@ -7588,7 +7590,7 @@ const DEF_AUGS=new Set(['regenarmor','gravity','luckycoin','frost','piggy','tip'
 const isOff=a=>!a.up&&!DEF_AUGS.has(a.id);
 // 선행 조건: 효과가 다른 무언가를 강화만 하는 증강은 그 대상이 있을 때만 등장 (회전 부적 없는데 회전 부적 강화 등 방지)
 const poisonSrc=()=>canPoison()||['wheel','m_inferno','fog','venomcloud','f_napalm','f_gas','f_plaguebullet'].some(has);
-const AUG_REQ={ghost:()=>S.p.pierce<PIERCE_CAP,piercer:()=>S.p.pierce<PIERCE_CAP,scope:()=>S.p.range<RANGE_CAP(),d_maul:()=>has('d_bear'),agony:()=>canPoison()&&(tag('fire')>0||S.cls==='mage'),n_spearstorm:()=>has('n_bone'),m_shower:()=>has('m_meteor'),p_hret:()=>has('p_hammer'),p_hstorm:()=>has('p_hammer'),b_whirl:()=>has('b_cleave'),
+const AUG_REQ={luckycoin:()=>!luckFull(),clover:()=>!luckFull(),gb_lucky:()=>!luckFull(),ghost:()=>S.p.pierce<PIERCE_CAP,piercer:()=>S.p.pierce<PIERCE_CAP,scope:()=>S.p.range<RANGE_CAP(),d_maul:()=>has('d_bear'),agony:()=>canPoison()&&(tag('fire')>0||S.cls==='mage'),n_spearstorm:()=>has('n_bone'),m_shower:()=>has('m_meteor'),p_hret:()=>has('p_hammer'),p_hstorm:()=>has('p_hammer'),b_whirl:()=>has('b_cleave'),
   turret2:()=>has('turret'),boltturret:()=>has('turret'),overwatch:()=>has('turret'),bastion:()=>has('turret'),selfdestruct:()=>has('turret'),
   clover:()=>S.p.luck<LUCK_CAP_F()-1,fortune:()=>!critFull(),trigger:()=>rawRate()<RATE_CAP(),
   evade:()=>S.p.dodge<DODGE_CAP_F(),luckydie:()=>!critFull(),
@@ -7609,7 +7611,20 @@ const isBanned=id=>!!(S&&S.banL&&S.banL.includes(id));
 // 보스 러시: 골드·처치·관통·튕김이 핵심인 증강은 보스 한 마리 상대로 의미가 없어서 안 나옴
 const RUSH_BAN=new Set(['piggy','king','tip','rush','lottery','goldrain','magnet2','highroll','vault','goldbullet','interest','bank','goldbomb','midas','split','a_split',
   'ghost','piercer','railgun','rifling','luckyshot','g_ap','deathwish','lucky7','boom','fever','engine','soul','madblade','cascade','stormfury','raise','soulburst','markburst','contagion','spill','al_chain','e_shatter','m_ignite','r_toxin','b_roar','ricochet','ricoshot',
-  /* 처치해야 쌓이거나 관통에 기대는 것: 보스만 나오면 거의 효과 없음 */'ult_hunt','n_harvest','b_carnage','b_hide','transmute','n_drain','a_pierce','a_blast']);
+  /* 처치해야 쌓이거나 관통에 기대는 것: 보스만 나오면 거의 효과 없음 */'ult_hunt','n_harvest','b_carnage','b_hide','transmute','n_drain','a_pierce','a_blast',
+  /* 골드를 거의 못 모으는 모드라 골드에 기대는 것 */'luckycoin','clover']);
+// 보스 러시 증강 설명: 「처치」 효과가 보스 3번 맞힐 때마다(처치 1회로 침) 발동하는 것은 그렇게 쓰고, 보스 러시에서 생기지 않는 처치 효과는 설명에서 뺌
+const RUSH_D={
+  r_assassin:'[도적 전용] 정예와 보스에게 피해 2.5배, 보스를 3번 맞힐 때마다 체력 2% 회복',
+  bloodlust:'광란이 최대일 때 흡혈 +2%, 보스를 3번 맞힐 때마다 체력 +1.5',
+  d_maul:'[드루이드 전용] 곰 변신 중 공격마다 대상에 내려찍기 (반경 80, 공격력 90%, 1초 기절). 곰 상태에서 보스를 3번 맞힐 때마다 변신 +0.5초 (한 번에 최대 8초)',
+  st_fury:'새 능력: 보스를 3번 맞힐 때마다 광란 +1 (4초, 중첩당 공격력 +2%, 최대 5)',
+  st_undead:'새 능력: 보스를 3번 맞힐 때마다 8% 확률로 해골 병사 소환 (최대 1기)',
+  vamp:'흡혈 +5% (입힌 피해만큼 체력 회복)',
+  corrode:'중독된 적에게 받는 피해 −35%',
+  stigma:'표식된 적에게 빛 피해 +20%',
+  r_mark:'[도적 전용] 근처에서 체력이 가장 높은 적(보스)에게 표적. 표적은 받는 피해 +60%'};
+const augD=a=>!a?'':bRush()&&RUSH_D[a.id]||a.d;
 const augReq=a=>!(rushOn()&&RUSH_BAN.has(a.id))&&!isBanned(a.id)&&!(MELEE_CLS.includes(S.cls)&&MELEE_BAN.has(a.id))&&!tagLocked(a)&&mechOk(a)&&(!AUG_REQ[a.id]||AUG_REQ[a.id]());
 // 태그 중복(가드 2개 등)으로 선호 가중치가 겹쳐 쌓이지 않게: 선호 태그가 하나라도 있으면 ×2.5, 비선호는 ×0.3
 // 이미 가진 증강의 합체 짝은 행운에 비례해 더 잘 나옴 (행운 0: ×1.3, 행운 상한: ×3)
@@ -7659,7 +7674,7 @@ function augHtml(a,i){
   const fz=pfs.length>1?`<span class="fzbox"><span class="fzh">💥 합체 가능 · 짝을 골라 누르세요</span>${pfs.map(f=>`<span class="fzopt" data-fz="${f.id}"><span class="fzn2"><b data-ft="${pOf(f).id}">${pOf(f).n}</b>${wa(pOf(f).n)} 합체 → <b class="fzn" data-ff="${f.id}">${f.n}</b></span>${bon(f)}</span>`).join('')}<span class="fzd" style="opacity:.6">고르지 않은 짝은 그대로 남아요</span></span>`
     :pf?`<span class="fzbox"><span class="fzh">💥 <b data-ft="${pOf(pf).id}">${pOf(pf).n}</b>${wa(pOf(pf).n)} 합체 → <b class="fzn" data-ff="${pf.id}">${pf.n}</b></span>${bon(pf)}</span>`:'';
   const emb=a.up?'⬆':a.t==='v'?'👑':a.t==='f'?'💞':a.cls&&WLOOK[a.cls]?WLOOK[a.cls][1]:(TAG_ICO[(a.tags||[])[0]]||'✨');
-  return `<button class="card aug tier-${a.t} ${pf?'canfuse':''} ${a.uc?'ucard':''}" data-i="${i}" style="--rc:${T.col};--k:${i}"><span class="anum">${i+1}</span><span class="aemb">${emb}</span><span class="rr">${T.n}${a.swap?' · <span style="color:#ff9ad0">교체</span>':''}${routeAug(a)?` · <span style="color:#7be08f">⭐ ${CLASSES[S.cls].n} 추천</span>`:''}</span><b>${a.n}</b><span class="ad">${meleeTxt(dLines(a.d))}${hpLoss(a.f,a.d,a.t==='v'||a.t==='f'||a.t==='d'?1:2)}</span><span class="chips">${chips}</span>${lines?`<span class="al">${lines}</span>`:''}${augPreview(a)}${fz}${a.up?'':VFUSIONS.filter(f=>f.b===a.id&&has(f.a)).map(f=>`<span class="fzbox" style="border-color:#ffd76a"><span class="fzh" style="color:#ffd76a">👑 보유 왕실 <b data-ft="${f.a}">${augDef(f.a).n}</b>와 합체 가능 → <b class="fzn" data-ff="${f.id}">${f.n}</b></span><span class="fzd">${f.d} (고르면 바로 합체)</span></span>`).join('')}${a.up||!vipCan()?'':VFUSIONS.filter(f=>f.b===a.id&&!has(f.a)).map(f=>`<span class="vtag">👑 왕실 「<span class="fzt" data-ft="${f.a}">${augDef(f.a).n}</span>」${wa(augDef(f.a).n)} 합체 → <span class="fzt" data-ff="${f.id}">${f.n}</span></span>`).join('')}</button>`;
+  return `<button class="card aug tier-${a.t} ${pf?'canfuse':''} ${a.uc?'ucard':''}" data-i="${i}" style="--rc:${T.col};--k:${i}"><span class="anum">${i+1}</span><span class="aemb">${emb}</span><span class="rr">${T.n}${a.swap?' · <span style="color:#ff9ad0">교체</span>':''}${routeAug(a)?` · <span style="color:#7be08f">⭐ ${CLASSES[S.cls].n} 추천</span>`:''}</span><b>${a.n}</b><span class="ad">${meleeTxt(dLines(augD(a)))}${hpLoss(a.f,a.d,a.t==='v'||a.t==='f'||a.t==='d'?1:2)}</span><span class="chips">${chips}</span>${lines?`<span class="al">${lines}</span>`:''}${augPreview(a)}${fz}${a.up?'':VFUSIONS.filter(f=>f.b===a.id&&has(f.a)).map(f=>`<span class="fzbox" style="border-color:#ffd76a"><span class="fzh" style="color:#ffd76a">👑 보유 왕실 <b data-ft="${f.a}">${augDef(f.a).n}</b>와 합체 가능 → <b class="fzn" data-ff="${f.id}">${f.n}</b></span><span class="fzd">${f.d} (고르면 바로 합체)</span></span>`).join('')}${a.up||!vipCan()?'':VFUSIONS.filter(f=>f.b===a.id&&!has(f.a)).map(f=>`<span class="vtag">👑 왕실 「<span class="fzt" data-ft="${f.a}">${augDef(f.a).n}</span>」${wa(augDef(f.a).n)} 합체 → <span class="fzt" data-ff="${f.id}">${f.n}</span></span>`).join('')}</button>`;
 }
 function bindPeek(){
   ov.querySelectorAll('.card').forEach(c=>{let t=null;
@@ -7984,6 +7999,11 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:219,t:'⚔ 보스 러시 증강 정리 · 행운 최대',items:[
+    ['change','⚔ 보스 러시에서 골드에 기대는 증강(행운의 동전 · 네잎클로버)도 안 나와요 (골드 획득·자석·경험치 카드는 원래 안 나와요)'],
+    ['change','⚔ 보스 러시 증강 설명에 「처치」가 안 나와요: 보스를 3번 맞힐 때마다 처치 1회로 쳐서 발동하는 효과(암살 · 피의 굶주림 · 곰의 일격 · 광란의 시작 · 해골 소환)는 「보스를 3번 맞힐 때마다」로 쓰고, 보스 러시에서 생기지 않는 처치 효과(흡혈귀 · 부식 독 · 성흔 · 죽음의 표적)는 설명에서 뺐어요'],
+    ['change','🍀 행운이 최대면 행운을 올려 주는 증강(행운의 동전 · 네잎클로버 · 타짜의 동전 · 용의 보물)도 안 나와요. 스탯 창의 행운은 장비 행운까지 합쳐 보여요. 도박사가 「판돈 올리기」·「운명의 주사위」를 가지면 넘친 행운도 쓰여서 계속 나와요'],
+  ]},
   {v:218,t:'⚔ 보스 러시 엇박 · 장비 값 · 귀걸이·반지',items:[
     ['enemy','⚔ 보스 러시가 더 어려워졌어요: 보스가 <b>2배 크기</b>, 다음 패턴까지의 간격·패턴 순서·예고가 터지는 박자가 <b>매번 달라져요(엇박)</b>. 한꺼번에 뜬 예고도 조금씩 어긋나게 터져요'],
     ['enemy','⚔ 보스 러시 예고는 테두리 없이 <b>옅게</b> 보이고 터지기 직전에만 가는 테두리가 보여요. 일부 공격은 터진 직후 같은 자리(광선은 살짝 꺾여서)에 <b>한 번 더</b> 떨어져요 (단계가 오를수록 자주)'],
@@ -11871,7 +11891,7 @@ function renderStats(){
     ...(SKILLS[S.cls]?[row('생존기(E) 재사용','−'+Math.round((1-Math.max(.5,p.skM||1))*100)+'% <small>/ −50%</small>',(p.skM||1)<=.55?'최대치 근처. 숨 고르기 카드가 더 안 나와요':'')]:[]),
     row('회전 부적',orbitN()+'개'),
     row('흡수 범위',Math.round(magE())+` <small>/ ${MAGNET_CAP}</small>`,p.magnet>MAGNET_CAP?`초과 ${Math.round(p.magnet-MAGNET_CAP)}은 효과 없음`:p.magnet>=MAGNET_CAP?'최대치. 자석 카드가 더 안 나와요':''),
-    row('행운',(+Math.min(p.luck,LUCK_CAP_F()).toFixed(1))+` <small>/ ${LUCK_CAP_F()}</small>`,p.luck>LUCK_CAP_F()?`초과 ${(p.luck-LUCK_CAP_F()).toFixed(1)}은 효과 없음`:''),
+    (()=>{const lt=p.luck+gearA('luck'),cap=LUCK_CAP_F();return row('행운',(+Math.min(lt,cap).toFixed(1))+` <small>/ ${cap}</small>`,lt>cap?(luckUse()?`초과 ${(lt-cap).toFixed(1)}도 판돈 올리기·운명의 주사위에 계산`:`초과 ${(lt-cap).toFixed(1)}은 효과 없음`):luckFull()?'최대치. 행운 카드·증강이 더 안 나와요':'');})(),
     row('부활 비용',reviveCost()+'골드'),
     row('골드 획득','×'+p.goldM.toFixed(2))
   ].join('');
@@ -11883,7 +11903,7 @@ function renderStats(){
   ${row('고유 능력',' ',CLASSES[S.cls].passive)}${row('레벨당 상승',`${S.lvl-1}회 누적`,CLASSES[S.cls].lvd)}
   <div class="sgrid"><div class="sgrp"><h3>공격</h3>${atk}</div><div class="sgrp"><h3>방어</h3>${def}<h3>유틸</h3>${util}</div></div>
   <h3>시너지</h3>${syn}
-  <h3 title="일반 증강은 최대 ${MAXA}개.${rushOn()?'':' 왕실 증강·용의 보물은 슬롯을 차지하지 않습니다.'} 슬롯이 가득 차면 합체 짝이 되는 증강만 나옵니다">증강 슬롯 ${slotCount()}/${MAXA}${S.augs.length>slotCount()?` (+왕실 ${S.augs.length-slotCount()})`:''}</h3>${S.augs.map(a=>row(a.n,(a.t==='v'?'왕실':a.t==='f'?'합체':''),'',`<b style="color:${(TIER[a.t]||{}).col||'var(--brass)'};filter:brightness(1.4)">${(TIER[a.t]||{n:''}).n}</b> · ${a.tags.map(t=>TAGS[t].n).join(', ')}<br>${a.d}`)).join('')||'<p class="sub">없음</p>'}
+  <h3 title="일반 증강은 최대 ${MAXA}개.${rushOn()?'':' 왕실 증강·용의 보물은 슬롯을 차지하지 않습니다.'} 슬롯이 가득 차면 합체 짝이 되는 증강만 나옵니다">증강 슬롯 ${slotCount()}/${MAXA}${S.augs.length>slotCount()?` (+왕실 ${S.augs.length-slotCount()})`:''}</h3>${S.augs.map(a=>row(a.n,(a.t==='v'?'왕실':a.t==='f'?'합체':''),'',`<b style="color:${(TIER[a.t]||{}).col||'var(--brass)'};filter:brightness(1.4)">${(TIER[a.t]||{n:''}).n}</b> · ${a.tags.map(t=>TAGS[t].n).join(', ')}<br>${augD(a)}`)).join('')||'<p class="sub">없음</p>'}
   <div class="btnrow"><button class="btn" id="stSave">저장</button><button class="btn" id="stQuit">저장하고 메인으로</button></div>
   ${S.started&&!S.goDone&&S.mode!=='over'&&S.mode!=='dying'?`<button class="btn ghost" id="stEnd" style="width:100%">🏁 여기서 끝내고 정산 <small>${endless()?'지금까지 점수로 메달·기록 확정':'포기 처리 · 지금까지 점수로 메달 지급'}</small></button>`:''}
   <button class="btn primary" id="stClose">닫기</button></div>`;
@@ -11914,7 +11934,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=218,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=219,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
