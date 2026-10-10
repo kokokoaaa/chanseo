@@ -7941,6 +7941,13 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:186,t:'⚡ 접속자 정보 바로 보기 · 도감 설명창',items:[
+    ['change','👥 접속 중 목록에서 이름에 마우스를 올리면 캐릭터 정보가 <b>바로</b> 떠요 (서버가 미리 같이 보내 줘요)'],
+    ['new','📖 도감에도 마우스를 올리면 옆에 설명이 떠요. 누르면 펼쳐서 고정'],
+    ['change','💬 설명창은 꼭 필요한 내용만 짧게 보여 줘요'],
+    ['change','📱 휴대폰에서 마스터리 직업 탭 글자가 넘치던 것, 영웅 선택 창에서 설명창이 화면을 가리던 것을 고쳤어요','bug'],
+    ['change','👥 접속자 정보를 못 받아왔을 때 「불러오는 중」에 멈춰 있던 표시를 고쳤어요','bug'],
+  ]},
   {v:185,t:'🍀 행운 상한 50 · 마우스 옆 설명창 · 보스 러시 영웅 선택',items:[
     ['change','🍀 <b>행운 상한 30 → 50</b>. 대신 행운 1당 효과는 약 0.6배라, 행운을 끝까지 모아야 예전 최대 효과가 나와요 (증강 등급·장비 등급·스탯 카드·동전·합체 확률 등)'],
     ['nerf','🍀 행운 비례 증강도 1당 수치를 0.6배로: 대박의 기운 공격력 +1.8% · 행운의 여신 치명타 +0.5% · 행운의 별 치명타 피해 +1.2% · 네잎클로버 골드 +1.2% · 운명의 주사위·판돈 올리기 +1.8%'],
@@ -12034,7 +12041,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=185,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=186,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
