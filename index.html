@@ -400,8 +400,8 @@ h3{font-family:'Do Hyeon',sans-serif;font-weight:400;font-size:19px;margin:18px 
 .panel.wide .card.aug{justify-content:flex-start;padding:14px 12px;gap:7px}
 .card.aug .ad{display:block;width:100%;font-size:15.5px;line-height:1.55;text-align:left;color:var(--ink);word-break:keep-all}
 .card.aug .al{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left}
-.card.aug .al .ta{font-size:13.5px;line-height:1.45;color:#7a4f00;word-break:keep-all}.card.aug .al .ta b{display:inline;font-size:inherit;margin:0;color:#5a3400;text-shadow:none}.card.aug .chip b,.card.aug .chip small{display:inline;font-size:inherit;margin:0;color:inherit;text-shadow:none}
-.card .dl{display:block;padding-left:12px;text-indent:-12px;word-break:keep-all}.card .dl::before{content:'· ';opacity:.55}.card .dl:only-child{padding-left:0;text-indent:0}.card .dl:only-child::before{content:none}.card .sd{display:block;width:100%;text-align:left}
+.card.aug .al .ta{font-size:13.5px;line-height:1.45;color:#7a4f00;word-break:keep-all}.card.aug .al .ta b{display:block;font-size:inherit;margin:0;color:#5a3400;text-shadow:none}.card.aug .chip b,.card.aug .chip small{display:inline;font-size:inherit;margin:0;color:inherit;text-shadow:none}
+.card .dl{display:block;padding-left:12px;text-indent:-12px;word-break:keep-all}.card .dl::before{content:'· ';opacity:.55}.card .pg,.card .ta .pg{display:inline-block;text-indent:0;max-width:100%}.card .dl:only-child{padding-left:0;text-indent:0}.card .dl:only-child::before{content:none}.card .sd{display:block;width:100%;text-align:left}
 .chip.ico{display:inline-flex;align-items:center;gap:2px;font-size:14px;padding:2px 8px 2px 4px;font-weight:700}.chip.ico i{font-style:normal;font-size:18px;line-height:1;margin-right:2px}.chip.ico small{opacity:.55;font-size:11px}.chip.ico.on{box-shadow:0 0 0 2px #ffd76a inset}
 .pill .pi{font-style:normal;margin-right:3px}
 .card.aug.ucard .ad,.card.aug.tier-p .ad{color:#2a1530}
@@ -2762,7 +2762,7 @@ const ESPR=(()=>{
 /* ---------- synergies ---------- */
 const TAGS={
   card:    {n:'카드',  t2:'처치 시 탄환 2발 분열',t4:'탄환이 다른 적에게 1회 튕김',t6:'기본 탄환 +2발',ex:'공격력 +8%'},
-  dice:    {n:'주사위',t1:'발사마다 1~6 눈금, 피해 배율 (평균 1배)',t2:'6이 나오면 폭발',t4:'같은 눈 3연속 시 3초간 전부 6',t6:'눈금 최소 3',ex:'치명타 확률 +4%, 치명타 피해 +15%'},
+  dice:    {n:'주사위',t1:'공격마다 주사위를 굴려 피해 ×0.3~1.7 (높은 눈일수록 셈)',t2:'6이 나오면 폭발',t4:'같은 눈 3연속 시 3초간 전부 6',t6:'눈금 최소 3',ex:'치명타 확률 +4%, 치명타 피해 +15%'},
   roulette:{n:'회전',  t2:'회전 부적 +2',t4:'회전 부적 적중 시 25% 확률로 탄환 발사',t6:'회전 부적 크기, 피해 2배',ex:'회전 부적 피해 +20%, 2개마다 회전 부적 +1'},
   house:   {n:'보물',t2:'골드를 주우면 25% 확률로 동전 폭발 (공격력 80%)',t4:'보유 골드 50당 공격력 +4% (최대 +120%)',t6:'처치마다 골드 +1, 30초마다 보유 골드 10% 이자 (최대 150)',ex:'골드 획득 +12%'},
   curse:   {n:'저주',  t2:'처치하면 2초간 공격 속도 +35%',t4:'처치 시 체력 3% 회복, 해골 탄 6발',t6:'처치한 적이 저주 폭발 (그 적 최대 체력 25% 범위 피해), 흡혈 2배',ex:'흡혈 +1%, 공격력 +5%'},
@@ -6221,6 +6221,7 @@ const meleeOn=()=>MELEE_CLS.includes(S.cls)||(S.cls==='druid'&&S.p.bearT>0);
 const pureMelee=()=>MELEE_CLS.includes(S.cls);
 // 근접 직업 카드·증강 글: 관통·탄환이 근접에서 무엇으로 바뀌는지 같이 보여 줌 (관통 1 = 한 번에 베는 적 +2, 탄환 1 = 베기 각도 +40°)
 // 설명 줄넘김: 문장·항목(괄호 밖의 '. ', ' · ', ', ')마다 한 줄. 숫자는 앞 단어에 붙여 '+7'만 따로 넘어가지 않게
+const dGlue=x=>x.replace(/ (?=[+\-−×x]?\d[\d.,]*(?:%|배|초|개|발|기|°|단계|칸|레벨)?(?:[),.]|$| ))/g,'\u00a0').replace(/\(([^()]{1,60})\)([.,]?)/g,(m,x,e)=>`<span class="pg">(${x})${e}</span>`).replace(/ ([^ ]{1,3})$/,'\u00a0$1');
 const dLines=d=>{const t=String(d);if(/<[a-z]/i.test(t))return t;const out=[];let cur='',dep=0;
   for(let i=0;i<t.length;i++){const ch=t[i];if(ch==='('||ch==='[')dep++;else if(ch===')'||ch===']')dep=Math.max(0,dep-1);
     if(!dep&&ch==='.'&&t[i+1]===' '){out.push(cur+'.');cur='';i++;continue;}
@@ -6230,10 +6231,9 @@ const dLines=d=>{const t=String(d);if(/<[a-z]/i.test(t))return t;const out=[];le
     cur+=ch;}
   if(cur.trim())out.push(cur);
   const L=[];for(const x0 of out){const x=x0.trim();if(!x)continue;if(L.length&&x.replace(/[^가-힣a-z0-9]/gi,'').length<5)L[L.length-1]+=' '+x;else L.push(x);}
-  const glue=x=>x.replace(/ (?=[+\-−×x]?\d[\d.,]*(?:%|배|초|개|발|기|°|단계|칸|레벨)?(?:[),.]|$| ))/g,'\u00a0').replace(/\(([^()]{1,16})\)/g,m=>m.replace(/ /g,'\u00a0')).replace(/ ([^ ]{1,3})$/,'\u00a0$1');
   // [직업 전용] 머리말은 첫 줄에 따로
   if(L.length&&/^\[[^\]]+\] /.test(L[0])){const m=L[0].match(/^(\[[^\]]+\]) (.*)$/);L.splice(0,1,m[1],m[2]);}
-  return L.map(x=>`<span class="dl">${glue(x)}</span>`).join('');};
+  return L.map(x=>`<span class="dl">${dGlue(x)}</span>`).join('');};
 const meleeTxt=d=>{try{if(!S||!S.cls||!pureMelee())return d;return String(d).replace(/관통[ \u00a0]\+(\d+)/g,(m,n)=>`${m} <small class="mlt">(근접: 한 번에 베는 적 +${2*n})</small>`).replace(/탄환[ \u00a0]\+(\d+)발?/g,(m,n)=>`${m} <small class="mlt">(근접: 베기 각도 +${40*n}°)</small>`);}catch(e){return d;}};
 const meleeCap=n=>(S.cls==='berserk'?2:3)+2*Math.max(0,S.p.pierce);
 const meleeArc=n=>Math.round(Math.min(360,2*(55+(n-1)*20)));
@@ -7640,10 +7640,10 @@ function augHtml(a,i){
   let lines='';
   const chips=Object.keys(cnt).map(t=>{const cur=tag(t),aft=cur+cnt[t],D=TAGS[t];let up='';
     // 처음 집는 시너지면 1단계(이 증강만으로 켜지는 기본 효과)를 먼저 보여줌
-    if(cur<1&&D.t1)lines+=`<span class="ta">${TAG_ICO[t]||'▲'} <b>${D.n} 1단계</b> ${D.t1}</span>`;
+    if(cur<1&&D.t1)lines+=`<span class="ta"><b>${TAG_ICO[t]||'▲'} ${D.n} 1단계</b>${dGlue(D.t1)}</span>`;
     for(const n of [6,4,2])if(cur<n&&aft>=n){up=`${n}단계: ${D['t'+n]}`;break;}
     if(!up&&aft>=5)up=`초과 +${aft-Math.max(4,cur)}: ${D.ex}`;
-    if(up)lines+=`<span class="ta">${TAG_ICO[t]||'▲'} <b>${D.n} ${up.replace(/:\s*/,'</b> ')}</span>`;
+    if(up)lines+=`<span class="ta"><b>${TAG_ICO[t]||'▲'} ${D.n} ${up.replace(/:\s*/,'</b> ').replace(/<\/b> (.*)$/,(m,x)=>'</b> '+dGlue(x))}</span>`;
     return `<span class="chip ico ${up?'on':''}" title="${D.n}"><i>${TAG_ICO[t]||'✨'}</i>${cur}<small>→</small><b>${aft}</b></span>`;}).join('');
   const pfs=a.up?[]:partnersOf(a.id),pf=pfs[0]||null,pOf=f=>augDef(f.a===a.id?f.b:f.a),tot=f=>[a.d,pOf(f).d,f.d].map(x=>x.replace(/[.\s]+$/,'')).join('. ');
   // 짝이 있으면 카드 앞면에 합체 안내를 크게 표시 (마우스를 안 올려도 보임)
@@ -7986,6 +7986,10 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:198,t:'📝 증강 설명 더 읽기 쉽게',items:[
+    ['change','📝 괄호 속 설명은 줄이 모자라면 <b>괄호째로</b> 다음 줄로 넘어가요. 시너지 단계 설명은 제목 한 줄 + 설명으로 나눴어요'],
+    ['change','🎲 주사위 1단계 설명을 알기 쉽게: 「공격마다 주사위를 굴려 피해 ×0.3~1.7 (높은 눈일수록 셈)」'],
+  ]},
   {v:197,t:'🎴 증강 고르기가 카드처럼! · 레벨업은 덜 자주, 더 크게',items:[
     ['change','📈 <b>레벨업이 덜 자주</b> 떠요: 레벨 1칸이 예전 1.6칸만큼이에요. 대신 <b>스탯 카드 수치·직업 레벨 성장·레벨업 회복이 1.6배</b>라 강해지는 정도는 같아요. 증강은 3~4레벨마다(예전과 같은 개수)'],
     ['change','🏁 일반·어려움·지옥·신은 <b>마지막 보스(1·2·3·4번째)를 잡으면 바로 클리어</b>! 남은 적 정리 시간이 없어졌어요'],
@@ -12183,7 +12187,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=197,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=198,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
