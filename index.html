@@ -67,7 +67,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 .cosTab.on{background:rgba(214,169,74,.28);border-color:#ffd76a;box-shadow:0 0 12px rgba(255,215,106,.45)}
 .cosIn>.mtile{animation:cosDrop .32s ease-out both;animation-delay:calc(var(--i)*28ms)}
 @keyframes ldspin{to{transform:rotate(360deg)}}.ldspin{display:inline-block;width:14px;height:14px;border:3px solid rgba(255,215,106,.3);border-top-color:#ffd76a;border-radius:50%;animation:ldspin .8s linear infinite;vertical-align:-2px;margin-right:4px}
-#ftip{position:fixed;z-index:9999;pointer-events:none;display:none;max-width:320px;padding:9px 11px;border-radius:10px;border:2px solid var(--rc);background:rgba(12,28,20,.97);color:var(--ivory);font-size:13px;line-height:1.45;box-shadow:0 6px 22px rgba(0,0,0,.6)}#ftip .fth{display:flex;gap:8px;align-items:center;margin-bottom:4px}#ftip .fth small{display:block;color:var(--muted)}#ftip .faf{color:#cfe3ff}#ftip .fsp{color:#ff9ae8}#ftip .ftc.up{color:#7be08f}#ftip .ftc.dn{color:#ff8a8a}#ftip .fhn{display:block;margin-top:4px;color:var(--muted)}#ftip .cxft{border:0;background:none;padding:0;margin:0;max-width:380px}#ftip:has(.cxft){max-width:400px}#ftip .dfx{margin-top:6px;padding-top:5px;border-top:1px dashed rgba(255,255,255,.25)}.dfx{margin-top:6px;padding-top:5px;border-top:1px dashed rgba(255,255,255,.25);text-align:left}.dfx code{display:block;font:11px/1.35 ui-monospace,Menlo,Consolas,monospace;color:#bfe8ff;white-space:pre-wrap;word-break:break-all;margin-top:3px;background:rgba(0,0,0,.35);padding:3px 5px;border-radius:4px}.dxp{font-size:12px;color:#ffe9a8;margin:2px 0 4px;line-height:1.4}#ftip .dxp{font-size:12px;color:#ffe9a8;margin:2px 0 4px;line-height:1.4}#ftip .dfx code{display:block;font:11px/1.35 ui-monospace,Menlo,Consolas,monospace;color:#bfe8ff;white-space:pre-wrap;word-break:break-all;margin-top:3px;background:rgba(0,0,0,.35);padding:3px 5px;border-radius:4px}#ftip:has(.dfx){max-width:520px}#ftip .mtt{font-weight:700;margin-bottom:3px}#ftip .mst{margin-top:4px;font-size:12px}
+#ftip{position:fixed;z-index:30500;pointer-events:none;display:none;max-width:320px;padding:9px 11px;border-radius:10px;border:2px solid var(--rc);background:rgba(12,28,20,.97);color:var(--ivory);font-size:13px;line-height:1.45;box-shadow:0 6px 22px rgba(0,0,0,.6)}#ftip .fth{display:flex;gap:8px;align-items:center;margin-bottom:4px}#ftip .fth small{display:block;color:var(--muted)}#ftip .faf{color:#cfe3ff}#ftip .fsp{color:#ff9ae8}#ftip .ftc.up{color:#7be08f}#ftip .ftc.dn{color:#ff8a8a}#ftip .fhn{display:block;margin-top:4px;color:var(--muted)}#ftip .cxft{border:0;background:none;padding:0;margin:0;max-width:380px}#ftip:has(.cxft){max-width:400px}#ftip .dfx{margin-top:6px;padding-top:5px;border-top:1px dashed rgba(255,255,255,.25)}.dfx{margin-top:6px;padding-top:5px;border-top:1px dashed rgba(255,255,255,.25);text-align:left}.dfx code{display:block;font:11px/1.35 ui-monospace,Menlo,Consolas,monospace;color:#bfe8ff;white-space:pre-wrap;word-break:break-all;margin-top:3px;background:rgba(0,0,0,.35);padding:3px 5px;border-radius:4px}.dxp{font-size:12px;color:#ffe9a8;margin:2px 0 4px;line-height:1.4}#ftip .dxp{font-size:12px;color:#ffe9a8;margin:2px 0 4px;line-height:1.4}#ftip .dfx code{display:block;font:11px/1.35 ui-monospace,Menlo,Consolas,monospace;color:#bfe8ff;white-space:pre-wrap;word-break:break-all;margin-top:3px;background:rgba(0,0,0,.35);padding:3px 5px;border-radius:4px}#ftip:has(.dfx){max-width:520px}#ftip .mtt{font-weight:700;margin-bottom:3px}#ftip .mst{margin-top:4px;font-size:12px}
 @keyframes cosDrop{from{opacity:0;transform:translateY(-14px) scale(.96)}to{opacity:1;transform:none}}
 @media (max-width:520px){.cosTabs{grid-template-columns:repeat(3,1fr)}}
 
@@ -7945,6 +7945,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:209,t:'🐞 다른 사람 장비 설명창',items:[
+    ['change','👤 다른 사람 계정 정보에서 장비에 마우스를 올려도 설명창이 창 뒤에 가려 안 보이던 문제','bug'],
+  ]},
   {v:208,t:'✨ 강화하면 빛나요 · 장비가 더 많이',items:[
     ['new','✨ <b>강화한 장비가 빛나요</b>: 장비 칸 테두리가 +4 은은하게 · +7 맥동 · +10 무지개로 돌고, 게임 속 캐릭터도 <b>낀 부위 둘레가 빛나요</b> (+7부터 가끔 번쩍, 장비 색은 그대로). 무기 +7부터 무기에 반짝임, +10은 금빛 고리. 강화 합계 30부터 발밑에 빛 알갱이'],
     ['change','🎁 보스가 <b>장비를 여러 개</b> 떨어뜨릴 수 있어요: 보스 한 마리당 평균 일반 0.5개 · 어려움 0.6개 · 지옥 0.8개 · 신 1개 · <b>무한의 악몽 1.3개</b> · 보스 러시 0.5개. 어려울수록 좋은 등급 비율도 올라가요'],
@@ -11755,7 +11758,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=208,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=209,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
