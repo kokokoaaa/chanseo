@@ -13384,7 +13384,14 @@ function campVec(v){const p=S.p;if(!S.camp||!stillAug()||evGoal())return v;
   if(Math.abs(dx)>Math.abs(dy)){tx=cx+Math.sign(dx||1)*half;ty=clamp(p.y,cy-half,cy+half);}else{ty=cy+Math.sign(dy||1)*half;tx=clamp(p.x,cx-half,cx+half);}
   const ex=tx-p.x,ey=ty-p.y,d=Math.hypot(ex,ey);return d<24?[0,0]:[ex/d,ey/d];}
 // 악몽의 파동 중 자동 이동: 가장 가까운 빛의 원으로 (멀면 대시)
-function nwVec(){const p=S.p;let q=null,bd=1e18;for(const c of S.nw.safe){const d=d2(c,p);if(d<bd){bd=d;q=c;}}if(!q)return [0,0];const dx=q.x-p.x,dy=q.y-p.y,l=Math.hypot(dx,dy);if(l<q.r*.35)return [0,0];if(p.dashCd<=0&&l>200&&S.nw.t<1.2){p.lmx=dx/l;p.lmy=dy/l;dash();}return [dx/l,dy/l];}
+// 악몽의 파동: 막히지 않고 시간 안에 닿는 빛의 원을 고르고, 벽에 막히면 돌아가고, 늦을 것 같으면 바로 대시
+function nwVec0(){const p=S.p;let q=null,bd=1e18;for(const c of S.nw.safe){const d=d2(c,p);if(d<bd){bd=d;q=c;}}if(!q)return [0,0];const dx=q.x-p.x,dy=q.y-p.y,l=Math.hypot(dx,dy);if(l<q.r*.35)return [0,0];if(p.dashCd<=0&&l>200&&S.nw.t<1.2){p.lmx=dx/l;p.lmy=dy/l;dash();}return [dx/l,dy/l];}
+function nwVec(){if(!(DEV&&AUTO.hi))return nwVec0();const p=S.p,w=S.nw,sp=Math.max(60,typeof moveSpd==='function'?moveSpd():200);
+  const clear=(x0,y0,x1,y1)=>{const L=Math.hypot(x1-x0,y1-y0),n=Math.max(1,Math.ceil(L/18));for(let i=1;i<=n;i++){const t=i/n;if(inSolid(x0+(x1-x0)*t,y0+(y1-y0)*t,p.r))return false;}return true;};
+  let q=null,bs=1e18;for(const c of w.safe){const d=Math.max(0,Math.hypot(c.x-p.x,c.y-p.y)-c.r*.5),ok=clear(p.x,p.y,c.x,c.y),tm=d/sp,sc=tm+(ok?0:1.5)+(tm>w.t?5:0);if(sc<bs){bs=sc;q=c;}}
+  if(!q)return [0,0];const dx=q.x-p.x,dy=q.y-p.y,l=Math.hypot(dx,dy);if(l<q.r*.4)return [0,0];
+  let a=Math.atan2(dy,dx);if(!clear(p.x,p.y,p.x+Math.cos(a)*60,p.y+Math.sin(a)*60)){for(const da of [.3,-.3,.6,-.6,.9,-.9,1.2,-1.2,1.57,-1.57]){const b=a+da;if(clear(p.x,p.y,p.x+Math.cos(b)*60,p.y+Math.sin(b)*60)){a=b;break;}}}
+  const vx=Math.cos(a),vy=Math.sin(a);if(p.dashCd<=0&&(l-q.r*.5)/sp>w.t*.75&&l>q.r){p.lmx=vx;p.lmy=vy;dash();}return [vx,vy];}
 function autoMoveVec(){
   const v=campVec(autoMoveVec0()),p=S.p,g=evGoal();
   if(!g&&DEV&&!S.easyAI){const pl=aiEggPlan();if(pl){let hot=false;for(const t of S.tele){if(!t.dmg)continue;if(t.k==='c'?d2(t,p)<(t.r+p.r+20)**2:true){hot=true;break;}}
@@ -13422,8 +13429,8 @@ function aiDefend(dt){const p=S.p;if(!p.alive||S.mode!=='play')return;
     if(skR&&hit<.2&&(p.dashCd>0||hit<.04)){useSkill();return;}
     if(ulR&&lethal&&hit<.25&&p.dashCd>0&&!skR){useUlt();return;}}
   if(!safe){let nb=0;for(const e of S.en)if(e.alive&&d2(e,p)<130*130)nb++;
-    if(p.hp<p.maxHp*.35&&skR&&(nb>=2||hit!=null)){useSkill();return;}
-    if(p.hp<p.maxHp*.2&&ulR&&(nb>=3||lethal)){useUlt();return;}}
+    if(skR&&((p.hp<p.maxHp*.35&&(nb>=2||hit!=null))||(p.hp<p.maxHp*.55&&nb>=6))){useSkill();return;}
+    if(ulR&&((p.hp<p.maxHp*.2&&(nb>=3||lethal))||(p.hp<p.maxHp*.4&&nb>=8))){useUlt();return;}}
   if(ulR&&S.ulHeld>25&&!lethal&&(bossOn()||S.en.filter(e=>e.alive).length>30))useUlt();}
 function aiDodge(){const p=S.p;if(!AI_W.pd||p.dashCd>0||p.dashT>0)return;for(const t of S.tele){if(!t.dmg||t.t>.08)continue;let inn;if(t.k==='c')inn=d2(t,p)<(t.r+p.r)**2;else{const ux=Math.cos(t.a),uy=Math.sin(t.a),px=p.x-t.x,py=p.y-t.y,u=clamp(px*ux+py*uy,0,t.len);inn=Math.hypot(px-ux*u,py-uy*u)<t.w/2+p.r;}if(inn){dash();return;}}}
 function autoMoveVec0(){
@@ -13460,14 +13467,14 @@ function autoMoveVec0(){
     sc+=Math.min(mn,bossOn&&!mel?Math.max(desired,160):desired)*(bossOn?2.9:2.2);
     // 개발자 자동(점수 위주): 도착 지점 주변이 붐비면 감점, 한 걸음 더 간 곳(막다른 길)도 확인
     if(!S.easyAI){let cn=0,mn2=420;const fx=p.x+cx*STEP*2,fy=p.y+cy*STEP*2;for(const e of near){const d=Math.hypot(e.x-tx,e.y-ty);if(d<140)cn+=e.elite?2:1;const d2b=Math.hypot(e.x-fx,e.y-fy);if(d2b<mn2)mn2=d2b;}
-      sc-=cn*AI_W.crowd;sc+=Math.min(mn2,desired)*AI_W.far;}
+      sc-=cn*AI_W.crowd*(DEV&&AUTO.hi?1.4:1);sc+=Math.min(mn2,desired)*AI_W.far;}
     if(wide.length){let dn=1e9;for(const e of wide){const d=Math.hypot(e.x-tx,e.y-ty);if(d<dn)dn=d;}if(!bossOn){if(dn>reach)sc-=(dn-reach)*(danger>=3||low?1.2:2.6);else sc+=25;}}
     // 탄환은 현재 위치가 아니라 앞으로 0.6초간 날아갈 경로 기준으로 회피
     for(const b of shots){const ex=b.vx*.6,ey=b.vy*.6,L2=ex*ex+ey*ey||1,u=clamp(((tx-b.x)*ex+(ty-b.y)*ey)/L2,0,1),d=Math.hypot(b.x+ex*u-tx,b.y+ey*u-ty),R0=(b.r||5)+p.r+22;if(d<R0)sc-=(R0-d)*(S.easyAI?3:6);}
     // 보스전: 보스를 사거리의 50~95% 안에 두면 됨 (사거리가 길수록 움직일 여유가 커짐). 체력이 낮으면 70% 이상 거리 유지
     // 주변에 잡몹이 붙어 있으면 보스 거리보다 잡몹 회피를 우선. 보스 몸통 가까이는 언제나 크게 감점
     if(bossOn){const e=S.boss,cl=(auR||mel)&&!low,minW=e.r+p.r+(cl?(mel?20:40):90),lo=cl?minW:Math.max(minW,p.range*(low?.7:.5)),hi=mel&&!low?Math.max(minW+15,e.r+pr*.8):auR&&!low?Math.max(minW+20,auR+e.r*.8):p.range*.95,db=Math.hypot(e.x-tx,e.y-ty),k=danger>=3?.45:danger>=1?.7:1;
-      sc-=k*(db<lo?(lo-db)*2.4:db>hi?(db-hi)*3:0);if(db<minW)sc-=(minW-db)*4;}
+      sc-=k*(db<lo?(lo-db)*2.4:db>hi?(db-hi)*3:0);if(db<minW)sc-=(minW-db)*(DEV&&AUTO.hi?9:4);}
     // 보스 예고 공격·장판 회피
     for(const t of S.tele){if(!t.dmg&&t.k==='c')continue;
       const tk=S.easyAI?.5:(AI_W.pdf&&t.omen&&p.dashCd<=0&&p.hp>p.maxHp*.5&&(S.st.pd||0)<20&&!S.tele.some(o=>o!==t&&o.dmg&&Math.abs(o.t-t.t)<.4)?.15:1);
@@ -13486,7 +13493,7 @@ function autoMoveVec0(){
   if(bStay&&(wide.length||shots.length||S.tele.length))return [0,0];
   p.amA=ba;
   const vx=Math.cos(ba),vy=Math.sin(ba);
-  if(p.dashCd<=0&&S.en.some(e=>e.alive&&d2(e,p)<(e.r+p.r+26)**2)){p.lmx=vx;p.lmy=vy;dash();}
+  if(p.dashCd<=0&&(S.en.some(e=>e.alive&&d2(e,p)<(e.r+p.r+26)**2)||(DEV&&AUTO.hi&&danger>=5))){p.lmx=vx;p.lmy=vy;dash();}
   return [vx,vy];
 }
 function cycleZoom(){ZOOM=(ZOOM+1)%ZOOM_N;try{localStorage.setItem('chanseo_zoom',ZOOM);}catch(e){}resize();refreshAutoBtns();toast(`시야 ${ZOOM+1}단계 (${[1,1.25,1.5,1.75,2][ZOOM]}배 넓게)`);}
@@ -13922,7 +13929,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=267,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=268,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
