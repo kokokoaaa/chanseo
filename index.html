@@ -2904,17 +2904,17 @@ const AUGS=[
   {id:'b_hide',uc:1,cls:'berserk',t:'s',n:'피의 갑주',tags:['fury','guard'],d:'[광전사 전용] 이번 판 처치 100마리당 최대 체력 +1%, 상한 없음'},
   {id:'k_cleave',cls:'knight',t:'s',n:'회오리 베기',tags:['blitz','guard'],d:'[기사 전용] 회전 베기가 3번째 공격마다, 공격력 160%로 강화'},
   {id:'k_berserk',cls:'knight',t:'g',n:'분노의 기사',tags:['guard','fury'],d:'[기사 전용] 피격·막기 시 5초간 분노 1중첩 (공격력 +8%, 공격 속도 +6%, 최대 7중첩)'},
-  {id:'k_smite',cls:'knight',t:'p',n:'심판',tags:['guard','jackpot'],d:'[기사 전용] 5번째 공격마다 대상에 빛기둥. 공격력 3배 × (1 + 방어력÷100) 범위 피해'},
+  {id:'k_smite',cls:'knight',t:'p',n:'심판',tags:['guard','guard'],d:'[기사 전용] 5번째 공격마다 대상에 빛기둥. 공격력 3배 × (1 + 방어력÷100) 범위 피해. 가드 2개로 계산'},
   {id:'k_wall',cls:'knight',t:'p',n:'강철 장벽',tags:['guard','guard'],d:'[기사 전용] 막기 확률 +20%, 막을 때마다 주변 충격파. 가드 2개로 계산'},
   {id:'m_inferno',cls:'mage',t:'g',n:'화염 확산',tags:['fire','poison'],d:'[마법사 전용] 주문 폭발 범위 +90%, 폭발이 적을 중독시킴'},
-  {id:'m_meteor',cls:'mage',t:'p',n:'운석 낙하',tags:['fire','jackpot'],d:'[마법사 전용] 3번째 시전마다 대상 위치에 운석. 공격력 6배 대폭발'},
+  {id:'m_meteor',cls:'mage',t:'p',n:'운석 낙하',tags:['fire','fire'],d:'[마법사 전용] 3번째 시전마다 대상 위치에 운석. 공격력 6배 대폭발. 화염 2개로 계산'},
   {id:'m_nova',cls:'mage',t:'g',n:'프로스트 노바',tags:['frost','frost'],d:'[마법사 전용] 2초마다 내 주변으로 얼음 파동이 퍼짐 (범위 170, 공격력 100%). 맞은 적에게 냉기 1중첩 (5초, 중첩당 이동 속도 −20%). 3중첩이 되면 1.2초 얼어붙음 (정예는 절반, 보스는 피해만). 냉기 2개로 계산. 공격 속도가 오를수록 더 자주'},
   {id:'a_multi',cls:'archer',t:'g',n:'부채꼴 사격',tags:['card'],d:'[궁수 전용] 화살 +2발',f:p=>{p.multi+=1;}},
   {id:'a_snipe',cls:'archer',t:'s',n:'저격수',tags:['sniper'],d:'[궁수 전용] 사거리 100당 피해 +6.5%'},
-  {id:'a_still',cls:'archer',t:'s',n:'바람 사수',tags:['sniper','dice'],d:'[궁수 전용] 움직이는 동안 공격 속도 +40%, 치명타 +8%'},
+  {id:'a_still',cls:'archer',t:'s',n:'바람 사수',tags:['sniper','blitz'],d:'[궁수 전용] 움직이는 동안 공격 속도 +40%, 치명타 +8%'},
   {id:'r_shadow',cls:'rogue',t:'g',n:'그림자 걸음',tags:['blitz','curse'],d:'[도적 전용] 대시 후 2초간 모든 공격이 치명타'},
   {id:'r_venom',cls:'rogue',t:'s',n:'독 바른 단검',tags:['poison'],d:'[도적 전용] 단검이 적을 중독시킴 (독 피해 +50%)'},
-  {id:'r_assassin',cls:'rogue',t:'p',n:'암살',tags:['curse','jackpot'],d:'[도적 전용] 정예와 보스에게 피해 2.5배, 처치하면 체력 2% 회복'},
+  {id:'r_assassin',cls:'rogue',t:'p',n:'암살',tags:['curse','blitz'],d:'[도적 전용] 정예와 보스에게 피해 2.5배, 처치하면 체력 2% 회복'},
   // new mechanics
   {id:'chainlt',t:'g',n:'체인 라이트닝',tags:['thunder'],d:'7번째 적중마다 번개가 주변 적 7명에게 연쇄'},
   {id:'blackhole',t:'p',n:'블랙홀 부적',tags:['roulette','summon'],d:'9초마다 가까운 적 위치에 블랙홀. 적을 빨아들이며 피해. 공속이 오를수록 더 자주'},
@@ -3058,7 +3058,7 @@ const AUGS=[
   {id:'al_flask',cls:'alch',t:'s',n:'대형 플라스크',tags:['alchemy'],d:'[연금술사 전용] 기본 플라스크 폭발 범위 +30%, 피해 +20%'},
   {id:'al_chain',cls:'alch',t:'g',n:'연쇄 반응',tags:['alchemy','fire'],d:'[연금술사 전용] 물약 맞은 적이 죽으면 그 자리에서 폭발 (범위 60, 공격력 80%)'},
   {id:'al_cauldron',cls:'alch',t:'g',n:'가마솥',tags:['alchemy','poison'],d:'[연금술사 전용] 물약이 기존 물약 장판 위에 떨어지면 새로 만들지 않고 합쳐짐: 장판이 25% 커지고(최대 2배) 물약 피해의 50%가 초당 피해로 쌓이며 지속 시간 4초로 갱신. 최대 4단계'},
-  {id:'al_volatile',cls:'alch',t:'s',n:'불안정한 혼합물',tags:['alchemy','jackpot'],d:'[연금술사 전용] 물약이 20% 확률로 불안정: 산성·폭발·얼음 효과를 한 번에 모두 냄 (각각 피해 50%)'},
+  {id:'al_volatile',cls:'alch',t:'s',n:'불안정한 혼합물',tags:['alchemy','fire'],d:'[연금술사 전용] 물약이 20% 확률로 불안정: 산성·폭발·얼음 효과를 한 번에 모두 냄 (각각 피해 50%)'},
   {id:'al_homun',cls:'alch',t:'g',n:'호문쿨루스',tags:['alchemy','summon'],d:'[연금술사 전용] 나를 따라다니는 호문쿨루스가 2.5초마다 가까운 적에게 물약을 던짐 (물약 피해 70%)'},
   {id:'al_transfuse',cls:'alch',t:'s',n:'체액 연성',tags:['alchemy','guard'],d:'[연금술사 전용] 물약 한 번에 적 4마리 이상을 맞히면 최대 체력 2% 회복 + 보호막 +최대 체력 1.5% (1초에 한 번)'},
   {id:'al_magnum',cls:'alch',t:'p',n:'매그넘 플라스크',tags:['alchemy','alchemy'],d:'[연금술사 전용] 10번째 물약마다 거대 플라스크: 범위 2.2배, 산성·폭발·얼음 모두, 피해 3배. 연금 2개로 계산'},
@@ -3105,7 +3105,7 @@ const AUGS=[
   {id:'n_spearstorm',cls:'necro',t:'p',n:'뼈창 폭풍',tags:['undead','undead'],d:'[사령술사 전용] 뼈창을 3방향으로 던지고, 뼈창이 끝에서 뼈 파편 8발로 터짐 (각 공격력 40%). 망자 2개로 계산'},
   // 총잡이 루트: 대형 탄창 / 마지막 한 발 / 장전 사격 / 철갑탄
   {id:'g_bigmag',cls:'gunner',t:'s',n:'대형 탄창',tags:['rapid'],d:'[총잡이 전용] 탄창 +4발 (6 → 10), 재장전 시간 +25%'},
-  {id:'g_last',cls:'gunner',t:'g',n:'마지막 한 발',tags:['sniper','jackpot'],d:'[총잡이 전용] 탄창의 마지막 탄 피해 ×3'},
+  {id:'g_last',cls:'gunner',t:'g',n:'마지막 한 발',tags:['sniper','rapid'],d:'[총잡이 전용] 탄창의 마지막 탄 피해 ×3'},
   {id:'g_rshot',cls:'gunner',t:'g',n:'장전 사격',tags:['rapid','blitz'],d:'[총잡이 전용] 재장전할 때 사방으로 8발 사격 (각 공격력 80%, 관통 1)'},
   {id:'g_ap',cls:'gunner',t:'s',n:'철갑탄',tags:['sniper','card'],d:'[총잡이 전용] 관통 +2. 탄이 적을 하나 뚫을 때마다 피해 +15% (누적)',f:p=>{p.pierce+=1;}},
   // 정령사 루트: 원소 정렬 / 빙결 파쇄 / 폭풍 사슬 / 프리즘 폭발
@@ -3115,21 +3115,21 @@ const AUGS=[
   {id:'e_thunderbird',cls:'elem',t:'g',n:'뇌조',tags:['thunder','elem'],d:'[정령사 전용] 번개 정령 공격 속도 +60%, 번개 정령 탄 관통 +2'},
   {id:'e_shatter',cls:'elem',t:'s',n:'빙결 파쇄',tags:['frost','elem'],d:'[정령사 전용] 둔화·빙결된 적이 죽으면 얼음 파편 6발 (각 공격력 60%)'},
   {id:'e_storm',cls:'elem',t:'s',n:'폭풍 사슬',tags:['thunder','elem'],d:'[정령사 전용] 번개 정령 탄이 맞힐 때마다 3연쇄 번개'},
-  {id:'e_prism',cls:'elem',t:'p',n:'프리즘 폭발',tags:['elem','jackpot'],d:'[정령사 전용] 6초마다 세 정령이 힘을 모아 대상에 프리즘 폭발 (반경 140, 공격력 400%, 화상·빙결)'},
+  {id:'e_prism',cls:'elem',t:'p',n:'프리즘 폭발',tags:['elem','elem'],d:'[정령사 전용] 6초마다 세 정령이 힘을 모아 대상에 프리즘 폭발 (반경 140, 공격력 400%, 화상·빙결). 원소 2개로 계산'},
   // 마법사 루트: 화염 지대 / 마나 폭주 / 연소 전염 / 정신 집중 / 분열 운석
   {id:'m_napalm',cls:'mage',t:'g',n:'화염 지대',tags:['fire','fire'],d:'[마법사 전용] 주문 폭발 자리에 2초간 불 장판 (초당 공격력 60%). 화염 2개로 계산'},
-  {id:'m_mana',cls:'mage',t:'p',n:'마나 폭주',tags:['jackpot'],d:'[마법사 전용] 4번째 시전마다 모든 적을 꿰뚫는 거대 마력구 (공격력 700%), 끝에서 대폭발 (반경 170, 공격력 700%)'},
+  {id:'m_mana',cls:'mage',t:'p',n:'마나 폭주',tags:[],d:'[마법사 전용] 4번째 시전마다 모든 적을 꿰뚫는 거대 마력구 (공격력 700%), 끝에서 대폭발 (반경 170, 공격력 700%)'},
   {id:'m_ignite',cls:'mage',t:'s',n:'연소 전염',tags:['fire','poison'],d:'[마법사 전용] 화상 걸린 적이 죽으면 50% 확률로 주변 90에 작은 폭발 (공격력 80%)과 화상 전염'},
   {id:'m_focus',cls:'mage',t:'s',n:'정신 집중',tags:['sniper'],d:'[마법사 전용] 2번째 시전마다 집중 주문: 주문 폭발 범위 +80%, 폭발 피해 +80%'},
   {id:'m_steam',cls:'mage',t:'p',n:'열충격',tags:[],d:'[마법사 전용 · 화염/얼음 특화] 주문 폭발이 화상과 냉기 1중첩을 함께 걸고, 불타면서 냉기가 걸린 적은 열충격 폭발 (범위 110, 공격력 250%, 적마다 2초에 한 번)'},
   {id:'m_superc',cls:'mage',t:'p',n:'초전도',tags:[],d:'[마법사 전용 · 얼음/번개 특화] 냉기가 걸린 적에게 마법사 번개 피해 2배 + 냉기 1중첩. 서리 폭발은 주변 2명에게 번개도, 번개 폭발은 냉기 1중첩도 냄'},
   {id:'m_frostbite',cls:'mage',t:'s',n:'동상',tags:['frost'],d:'[마법사 전용] 냉기 1중첩당 그 적이 받는 모든 피해 +10%, 얼어붙은 적은 +40%'},
   {id:'m_shatter',cls:'mage',t:'g',n:'얼음 파쇄',tags:['frost','frost'],d:'[마법사 전용] 얼어붙은 적을 주문으로 맞히면 산산조각: 주변 90에 공격력 300% 폭발, 체력 25% 아래 잡몹·정예는 즉사 (얼음은 풀림). 냉기 2개로 계산'},
-  {id:'m_blizzard',cls:'mage',t:'p',n:'눈보라',tags:['frost','jackpot'],d:'[마법사 전용] 6초마다 적이 가장 많은 곳에 4초간 눈보라 (반경 150, 0.5초마다 공격력 60% + 냉기 1중첩)'},
+  {id:'m_blizzard',cls:'mage',t:'p',n:'눈보라',tags:['frost','frost'],d:'[마법사 전용] 6초마다 적이 가장 많은 곳에 4초간 눈보라 (반경 150, 0.5초마다 공격력 60% + 냉기 1중첩). 냉기 2개로 계산'},
   {id:'m_chain',cls:'mage',t:'g',n:'연쇄 번개',tags:['thunder','thunder'],d:'[마법사 전용] 주문이 맞으면 번개가 주변 적 4명에게 차례로 튐 (각각 주문 피해의 55%). 번개 2개로 계산'},
   {id:'m_static',cls:'mage',t:'s',n:'감전',tags:['thunder'],d:'[마법사 전용] 마법사의 번개에 맞은 적은 3초간 감전: 받는 모든 피해 +20%. 감전된 적이 죽으면 주변 3명에게 번개 (공격력 80%)'},
-  {id:'m_thunder',cls:'mage',t:'p',n:'낙뢰',tags:['thunder','jackpot'],d:'[마법사 전용] 1.5초마다 화면 안 적 3명에게 낙뢰 (범위 60, 공격력 250%, 맞은 적 감전)'},
-  {id:'m_shower',cls:'mage',t:'g',n:'분열 운석',tags:['fire','jackpot'],d:'[마법사 전용] 운석 낙하가 3개로 갈라져 주변에 함께 떨어짐 (갈라진 운석 피해 60%)'},
+  {id:'m_thunder',cls:'mage',t:'p',n:'낙뢰',tags:['thunder','thunder'],d:'[마법사 전용] 1.5초마다 화면 안 적 3명에게 낙뢰 (범위 60, 공격력 250%, 맞은 적 감전). 번개 2개로 계산'},
+  {id:'m_shower',cls:'mage',t:'g',n:'분열 운석',tags:['fire'],d:'[마법사 전용] 운석 낙하가 3개로 갈라져 주변에 함께 떨어짐 (갈라진 운석 피해 60%)'},
   // 궁수 루트: 화살비 / 폭발 화살 / 연속 명중 / 매의 눈 / 갈래 화살
   {id:'a_rain',cls:'archer',t:'g',n:'화살 소나기',tags:['card','sniper'],d:'[궁수 전용] 4.5초마다 적이 가장 많은 곳에 2초간 화살 소나기 (반경 140, 0.25초마다 공격력 50% × 초당 공격 횟수 × 0.8, 최소 50%)'},
   {id:'a_blast',cls:'archer',t:'g',n:'폭발 화살',tags:['card','fire'],d:'[궁수 전용] 화살이 관통을 다 쓰거나 사거리 끝에 닿으면 폭발 (반경 60, 공격력 120%)'},
@@ -3156,7 +3156,7 @@ const AUGS=[
   {id:'b_leap',cls:'berserk',t:'g',n:'도약 강타',tags:['blitz','fury'],d:'[광전사 전용] 대시 착지 지점에 충격파 (반경 150, 공격력 300% × (1 + 초당 공격 횟수 × 0.4)). 맞힌 적 1마리당 광란 +1'},
   {id:'b_twin',cls:'berserk',t:'p',n:'쌍격',tags:['fury','fury'],d:'[광전사 전용] 광란이 최대일 때 모든 베기가 한 번 더 나감 (두 번째 베기 피해 70%). 광란 2개로 계산'},
   {id:'b_price',cls:'berserk',t:'s',n:'피의 대가',tags:['curse','fury'],d:'[광전사 전용] 최근 받은 피해(최대 체력 대비, 3초에 걸쳐 줄어듦) 1%당 공격 속도 +4% (최대 +60%)'},
-  {id:'b_roar',cls:'berserk',t:'g',n:'공포의 포효',tags:['fury','guard'],d:'[광전사 전용] 15마리 처치마다 포효 (3초에 한 번까지): 주변 200 적에게 공격력 400% 피해, 밀쳐내고 1.5초 기절 (보스는 피해만), 광란 +5'},
+  {id:'b_roar',cls:'berserk',t:'g',n:'공포의 포효',tags:['fury','curse'],d:'[광전사 전용] 15마리 처치마다 포효 (3초에 한 번까지): 주변 200 적에게 공격력 400% 피해, 밀쳐내고 1.5초 기절 (보스는 피해만), 광란 +5'},
   {id:'b_whirl',cls:'berserk',t:'g',n:'피의 소용돌이',tags:['fury','curse'],d:'[광전사 전용] 대회전을 쓰면 2초간 몸 주변에 피의 소용돌이 (대회전 범위 +20, 초당 공격력 × 초당 공격 횟수 × 20%, 준 피해의 5% 흡혈)'},
   {id:'frostnova',t:'g',n:'서리 폭발',tags:['frost'],d:'5초마다 주변 140 안의 적에게 공격력 150% 피해, 2초간 둔화'},
   {id:'icebolt',t:'s',n:'얼음 화살',tags:['frost','card'],d:'4번째 공격마다 얼음탄 (공격력 150%, 관통 3, 맞은 적 둔화)'},
@@ -4851,7 +4851,7 @@ const CLASSES={
     stats:{hp:170,maxHp:170,speed:200,dmg:13,rate:2.8,range:340,bspd:720,pierce:1,crit:.15},fav:['sniper','card','jackpot'],dis:['curse'],
     cards:['날랜 손놀림','조준경','관통 탄','급소 노리기','다연발','럭키 세븐'],lvd:'공격 속도 +0.4%, 공격력 +0.4%, 체력 +1',lv:p=>{p.rateP=(p.rateP||0)+.004;p.dmgP=(p.dmgP||0)+.004;p.maxHp+=1;p.hp+=1;}},
   rogue:{n:'도적',role:'회피 암살',d:'단검을 난사하며 치고 빠지는 도적',passive:'그림자: 회피 15%, 대시 재사용 −30%',atk:.2,
-    stats:{hp:155,maxHp:155,speed:225,dmg:13,rate:3.9,range:260,bspd:600,dodge:.15,dashMul:.7,crit:.12,critM:2.3},fav:['blitz','poison','curse'],dis:['guard'],
+    stats:{hp:155,maxHp:155,speed:225,dmg:13,rate:3.9,range:260,bspd:600,dodge:.15,dashMul:.7,crit:.12,critM:2.3},fav:['blitz','poison','curse','shadow'],dis:['guard'],
     cards:['가벼운 장화','날렵한 몸놀림','순발력','흡혈 송곳니','급소 노리기','치명상'],lvd:'치명타 +0.2%, 회피 +0.1%, 공격력 +1%, 체력 +1',lv:p=>{p.crit+=.002;p.dodge+=.001;p.dmgP=(p.dmgP||0)+.01;p.maxHp+=1;p.hp+=1;}},
   paladin:{lock:true,n:'성기사',role:'신성 근접',d:'빛의 오라로 주변을 태우며 버티는 성전사',passive:'신성 오라: 주변 110 안의 적에게 초당 공격력 100% 빛 피해. 5번째 공격마다 체력 3% 회복',atk:.32,
     stats:{hp:210,maxHp:210,speed:178,dmg:20,rate:1.85,range:200,bspd:430,armor:12,block:.08},fav:['holy','guard','fire'],dis:['curse'],
@@ -4860,7 +4860,7 @@ const CLASSES={
     stats:{hp:155,maxHp:155,speed:185,dmg:16,rate:2.1,range:300,bspd:500,armor:7},fav:['undead','summon','curse'],dis:['holy'],
     cards:['힘의 물약','숫돌','조준경','튼튼한 체력','전투 본능','흡혈 송곳니'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
   gunner:{lock:true,n:'총잡이',role:'매그넘 저격',d:'한 발 한 발이 묵직한 매그넘 리볼버 총잡이',passive:'매그넘 리볼버: 모든 탄이 일반 공격의 1.7배 피해 + 관통 1. 6발 쏘면 0.8초 재장전 (탄창 6발 고정, 재장전은 공격 속도와 무관). 저지력으로 맞은 일반 몹이 뒤로 크게 밀려남 (정예·보스 제외)',atk:.18,
-    stats:{hp:160,maxHp:160,speed:200,dmg:12,rate:1.8,range:300,bspd:820,crit:.1,critM:2.1},fav:['rapid','sniper','card'],dis:['summon'],
+    stats:{hp:160,maxHp:160,speed:200,dmg:12,rate:1.8,range:300,bspd:820,crit:.1,critM:2.1},fav:['rapid','sniper','card'],dis:['nature'],
     cards:['날랜 손놀림','조준경','급소 노리기','치명상','힘의 물약','가벼운 장화'],lvd:'공격력 +0.6%, 치명타 +0.2%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.006;p.crit+=.002;p.maxHp+=1;p.hp+=1;}},
   elem:{lock:true,n:'정령사',role:'정령 소환',d:'화염·냉기·번개 정령을 거느리고 싸우는 정령술사',passive:'원소 정령: 화염·냉기·번개 정령 3마리가 곁을 돌며 각자 적을 쏨 (화염: 화상 / 냉기: 1초 둔화 / 번개: 주변 2명에게 60% 연쇄). 정령 탄 피해는 공격력 50%, 그 원소 시너지 1개당 +10%. 공격 속도가 오르면 정령도 빨리 쏨. 본인은 약한 원소탄(피해 60%)을 쏨. 기본 관통 1',atk:.3,
     stats:{hp:170,maxHp:170,speed:190,dmg:17,rate:2.5,range:310,bspd:560,armor:9,pierce:1},fav:['elem','fire','frost','thunder'],dis:['poison'],
@@ -8808,6 +8808,11 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:274,t:'🔗 시너지(계열) 정리',items:[
+    ['change','🔗 직업 전용 증강에 컨셉과 상관없이 붙어 있던 <b>천운</b>(7번째마다 발동하는 행운 계열)을 정리: 마법사 운석 낙하 → 화염 2개 · 분열 운석 → 화염 · 눈보라 → 냉기 2개 · 낙뢰 → 번개 2개 · 마나 폭주 → 계열 없음 (원소와 무관) / 기사 심판 → 가드 2개 / 도적 암살 → 저주·질풍 / 총잡이 마지막 한 발 → 원거리·속사 / 정령사 프리즘 폭발 → 원소 2개 / 연금술사 불안정한 혼합물 → 연금·화염'],
+    ['change','🔗 궁수 「바람 사수」(움직이며 쏘기)는 주사위 → <b>질풍</b>, 광전사 「공포의 포효」는 가드(광전사가 꺼리는 계열) → <b>저주</b>'],
+    ['change','🗡 도적의 주력 계열에 <b>그림자</b> 추가 (고유 능력 「그림자」·분신 루트와 맞춤): 그림자 증강이 도적에게 더 잘 나와요'],
+    ['change','🔫 총잡이가 꺼리는 계열이 소환이었던 것 → <b>자연</b>으로 (포탑 루트가 소환 계열이라 서로 안 맞았음)']]},
   {v:273,t:'🎬 보스별 등장 연출',items:[
     ['new','🎬 <b>보스 16종 + 황금 용이 저마다 다르게 등장</b>: 오우거 왕·슬라임 킹·황금 용은 하늘에서 쿵, 해골 기사·고목 정령·화염 골렘·모래 웜은 땅을 가르고 솟아오름, 대주술사·보물고 수호자·심연의 군주는 마법진·균열에서, 번개 정령은 번개와 함께, 거대 거미는 거미줄 타고, 늑대 우두머리는 질주해 들어오고, 흡혈귀 백작·버섯 군주는 박쥐·포자가 모여서, 서리 마녀는 얼음 기둥을 깨고, 그림자 암살자는 어둠 속에서 나타나요'],
     ['look','🎞 등장하는 동안 화면 위아래 검은 띠 · 보스마다 등장 대사 · 착지 충격으로 주변 잡몹이 밀려남. 등장 중(약 2.4초, 보스 러시 1.4초)에는 보스가 공격하지 않고 피해도 받지 않으며, 이 시간은 광폭화 시간에 안 들어가요'],
@@ -14069,7 +14074,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=273,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=274,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
