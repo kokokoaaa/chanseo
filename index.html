@@ -4842,7 +4842,7 @@ const CLASSES={
   mage:{n:'마법사',role:'광역 화력',d:'느리게 시전하지만 한 방이 강한 주문으로 적 떼를 쓸어버리는 마법사',passive:'주문 폭발: 시전은 느리지만 주문 한 발 피해가 2배이고, 맞은 자리에 폭발 (범위 55). 처음 얻은 화염·냉기·번개 증강의 속성으로 특화되고, 그 뒤로 다른 속성 증강은 나오지 않음 (화염: 폭발 피해 60% + 화상, 불타는 적이 주는 피해 −40%, 폭발 범위 90 / 냉기: 폭발 55% + 냉기 1중첩 / 번개: 주문 속도 1.8배, 폭발 50% + 주변 2명에게 번개 50%, 번개 맞은 적 0.5초 경직). 마력 방패가 4초마다 받는 피해 1번을 막음 (준비되면 몸 주위에 보라색 막)',atk:.35,
     stats:{hp:175,maxHp:175,speed:185,dmg:17,rate:1.1,range:320,bspd:540,armor:8},fav:['fire','frost','thunder'],dis:['guard'],
     cards:['힘의 물약','숫돌','조준경','치명상','전투 본능','다연발'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
-  archer:{n:'궁수',role:'원거리 연사',d:'멀리서 빠르게 화살을 쏘는 사수',passive:'관통 화살: 기본 관통 1, 치명타 +10%',atk:.28,
+  archer:{n:'궁수',role:'원거리 연사',d:'멀리서 빠르게 화살을 쏘는 사수',passive:'관통 화살: 기본 관통 1, 치명타 +10%. 사냥꾼의 화살: 화살에 맞은 적은 0.8초간 이동 속도 −25% (보스 제외)',atk:.28,
     stats:{hp:170,maxHp:170,speed:200,dmg:13,rate:2.8,range:340,bspd:720,pierce:1,crit:.15},fav:['sniper','card','jackpot'],dis:['curse'],
     cards:['날랜 손놀림','조준경','관통 탄','급소 노리기','다연발','럭키 세븐'],lvd:'공격 속도 +0.4%, 공격력 +0.4%, 체력 +1',lv:p=>{p.rateP=(p.rateP||0)+.004;p.dmgP=(p.dmgP||0)+.004;p.maxHp+=1;p.hp+=1;}},
   rogue:{n:'도적',role:'회피 암살',d:'단검을 난사하며 치고 빠지는 도적',passive:'그림자: 회피 15%, 대시 재사용 −30%',atk:.2,
@@ -4854,7 +4854,7 @@ const CLASSES={
   necro:{lock:true,n:'사령술사',role:'해골 소환',d:'쓰러진 적을 해골 병사로 일으키는 술사',passive:'해골 소환: 처치 시 25% 확률, 그리고 약 2초마다(해골이 절반보다 적으면 1초마다) 해골 병사 소환 (최대 5기, 12초, 공격력 100%로 근접 공격). 해골은 주변 근접 적을 끌어당기는 방패 역할 (체력 = 내 최대 체력 50%, 받는 피해 절반). 해골 방패로 사령술사의 해골은 더 멀리(150)서 한 기당 6마리까지 붙잡음',atk:.35,
     stats:{hp:155,maxHp:155,speed:185,dmg:16,rate:2.1,range:300,bspd:500,armor:7},fav:['undead','summon','curse'],dis:['holy'],
     cards:['힘의 물약','숫돌','조준경','튼튼한 체력','전투 본능','흡혈 송곳니'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
-  gunner:{lock:true,n:'총잡이',role:'매그넘 저격',d:'한 발 한 발이 묵직한 매그넘 리볼버 총잡이',passive:'매그넘 리볼버: 모든 탄이 일반 공격의 1.7배 피해 + 관통 1. 6발 쏘면 0.8초 재장전 (탄창 6발 고정, 재장전은 공격 속도와 무관). 저지력으로 맞은 일반 몹이 뒤로 밀려남 (정예·보스 제외)',atk:.18,
+  gunner:{lock:true,n:'총잡이',role:'매그넘 저격',d:'한 발 한 발이 묵직한 매그넘 리볼버 총잡이',passive:'매그넘 리볼버: 모든 탄이 일반 공격의 1.7배 피해 + 관통 1. 6발 쏘면 0.8초 재장전 (탄창 6발 고정, 재장전은 공격 속도와 무관). 저지력으로 맞은 일반 몹이 뒤로 크게 밀려남 (정예·보스 제외)',atk:.18,
     stats:{hp:160,maxHp:160,speed:200,dmg:12,rate:1.8,range:300,bspd:820,crit:.1,critM:2.1},fav:['rapid','sniper','card'],dis:['summon'],
     cards:['날랜 손놀림','조준경','급소 노리기','치명상','힘의 물약','가벼운 장화'],lvd:'공격력 +0.6%, 치명타 +0.2%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.006;p.crit+=.002;p.maxHp+=1;p.hp+=1;}},
   elem:{lock:true,n:'정령사',role:'정령 소환',d:'화염·냉기·번개 정령을 거느리고 싸우는 정령술사',passive:'원소 정령: 화염·냉기·번개 정령 3마리가 곁을 돌며 각자 적을 쏨 (화염: 화상 / 냉기: 1초 둔화 / 번개: 주변 2명에게 60% 연쇄). 정령 탄 피해는 공격력 50%, 그 원소 시너지 1개당 +10%. 공격 속도가 오르면 정령도 빨리 쏨. 본인은 약한 원소탄(피해 60%)을 쏨. 기본 관통 1',atk:.3,
@@ -4866,10 +4866,10 @@ const CLASSES={
   druid:{lock:true,n:'드루이드',role:'덩굴 지배',d:'가시덩굴로 적을 묶고 버티는 자연술사',passive:'가시덩굴: 3번째 공격마다 대상 자리에 덩굴 지대 (3초, 범위 60, 초당 공격력 70%, 둔화). 초당 체력 재생 +1',atk:.3,
     stats:{hp:175,maxHp:175,speed:185,dmg:15,rate:2.2,range:290,bspd:520,armor:8,regen:1},fav:['nature','poison','guard'],dis:['fire'],
     cards:['힘의 물약','숫돌','튼튼한 체력','붕대','조준경','가죽 갑옷'],lvd:'공격력 +0.8%, 체력 +2',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=2;p.hp+=2;}},
-  alch:{lock:true,n:'연금술사',role:'물약 폭격',d:'터지는 플라스크와 물약을 던지는 연금술사',passive:'플라스크: 맞은 자리에 폭발 (범위 45, 공격력 50%). 플라스크도 물약 비율을 따라 산성(중독)·폭발(피해 1.4배)·얼음(둔화)으로 터짐. 4번째 공격마다 물약 (산성 중독·폭발·얼음 둔화, 독·화염·냉기 시너지를 모을수록 그 물약이 더 자주 나옴). 물약이 깨진 자리에 2.5초 장판이 남음',atk:.3,
+  alch:{lock:true,n:'연금술사',role:'물약 폭격',d:'터지는 플라스크와 물약을 던지는 연금술사',passive:'플라스크: 맞은 자리에 폭발 (범위 45, 공격력 50%). 플라스크도 물약 비율을 따라 산성(중독)·폭발(피해 1.4배)·얼음(둔화)으로 터짐. 4번째 공격마다 물약 (산성 중독·폭발·얼음 둔화, 독·화염·냉기 시너지를 모을수록 그 물약이 더 자주 나옴). 물약이 깨진 자리에 2.5초 장판이 남고, 장판 위 적은 이동 속도 −25% (보스 제외)',atk:.3,
     stats:{hp:155,maxHp:155,speed:188,dmg:14,rate:2.2,range:290,bspd:480,armor:6},fav:['alchemy','poison','fire'],dis:['sniper'],
     cards:['힘의 물약','숫돌','조준경','전투 본능','튼튼한 체력','다연발'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
-  gambler:{lock:true,n:'도박사',role:'동전 도박',d:'동전 앞뒤에 모든 걸 거는 도박사',passive:'동전 던지기: 공격마다 앞면이면 피해 2배, 뒷면이면 0.5배. 행운이 높을수록 앞면이 잘 나옴',atk:.25,
+  gambler:{lock:true,n:'도박사',role:'동전 도박',d:'동전 앞뒤에 모든 걸 거는 도박사',passive:'동전 던지기: 공격마다 앞면이면 피해 2배, 뒷면이면 0.5배. 행운이 높을수록 앞면이 잘 나옴. 운수 대통: 행운 1당 회피 +0.3%',atk:.25,
     stats:{hp:175,maxHp:175,speed:200,dmg:12,rate:2.6,range:300,bspd:600,armor:6,crit:.08,luck:5},fav:['coin','dice','jackpot'],dis:['guard'],
     cards:['럭키 세븐','날랜 손놀림','조준경','힘의 물약','급소 노리기','가벼운 장화'],lvd:'공격력 +0.7%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.007;p.maxHp+=1;p.hp+=1;}}
 };
@@ -4991,7 +4991,7 @@ const critFull=()=>critRaw()>=CRIT_CAP,critMFull=()=>critMBase()>=CRIT_DMG_CAP_F
 const stackCapped=x=>(x.k==='crit'&&critFull())||(x.k==='critm'&&critMFull())||(x.k==='luck'&&luckFull())||(x.k==='dodge'&&S.p.dodge>=DODGE_CAP_F())||(x.k==='rate'&&rawRate()>=RATE_CAP());
 // 피격 기준 조건: 흡혈·재생 때문에 '체력 ○% 이하'는 거의 안 켜져서, '맞은 뒤 ○초' / '최근 받은 피해량'으로 판정
 const hitRec=(sec=2.5)=>S.t-(S.p.hitT??-99)<sec;
-const dodgeC=()=>Math.min(DODGE_CAP_F(),S.p.dodge+gearM.dodge()+(has('f_ghoststep')&&S.p.ghT>0?.3:0))+(has('r_smoke')&&S.zones.some(z=>z.kind==='smoke'&&d2(z,S.p)<z.r*z.r)?lv3('r_smoke',.2,.3,.4):0);
+const dodgeC=()=>Math.min(DODGE_CAP_F(),S.p.dodge+gearM.dodge()+(S.cls==='gambler'?Math.max(0,Math.min(50,(S.p.luck||0)+gLk()))*.003:0)+(has('f_ghoststep')&&S.p.ghT>0?.3:0))+(has('r_smoke')&&S.zones.some(z=>z.kind==='smoke'&&d2(z,S.p)<z.r*z.r)?lv3('r_smoke',.2,.3,.4):0);
 function armorEff(){const p=S.p;let a=(blessOn('guard')?60:0)+(has('bank')?Math.min(50,Math.floor(S.gold/300)*2):0)+p.armor+ex('guard')*8+Math.max(0,p.dodge-DODGE_CAP_F())*200+(has('bonewall')&&S.skel?S.skel.length*lv3('bonewall',3,4,5):0)+(has('d_bark')?(S.vineN||0)*lv3('d_bark',.2,.3,.4):0);if(has('iron'))a*=lv3('iron',1.35,1.5,1.65);if(has('ironclad'))a*=2;if(has('bastion')&&nearTurret())a+=lv3('bastion',20,30,40)*(has('f_citadel')?2:1);return a;}
 // 증강이 주는 임시 보호막: 기본 상한(barrierMax)보다 커도 그 증강의 상한까지는 유지
 const bxAdd=(cap,add)=>{const p=S.p;p.bxM=Math.max(p.bxM||0,cap);p.barrier=Math.max(p.barrier||0,Math.min(cap,(p.barrier||0)+add));};
@@ -5519,7 +5519,7 @@ function bossAI(e,dt){
     if(hf<.25&&!e.ph3){e.ph3=true;if(S.arena)S.arena.tr*=.9;S.shake=.5;toast(`${T.n} 최후의 발악! 패턴이 더 거세집니다`);S.rings.push({x:e.x,y:e.y,r:e.r,max:e.r+200,life:.6,col:'#ff3030'});}}
   if(rushOn()&&!raidOn()&&!duelOn()&&!labOn()&&!e.hid2)rushExtra(e,dt*tempo);
   if(e.slowT>0)e.slowT-=dt;
-  const sp=e.spd*(e.slowT>0?.6:1)*(ph2?1.2:1)*(1+.05*(e.rage||0));
+  const sp=e.spd*(e.slowT>0?.6:1)*(e.hvU>S.t&&!e.boss?.75:1)*(ph2?1.2:1)*(1+.05*(e.rage||0));
   e.bt+=dt*tempo;
   const sh0=e.sh;
   S.btp=tempo;BAI[e.type](e,dt*tempo,{p,d,dx,dy,sp,ph2});S.btp=1;
@@ -6928,7 +6928,8 @@ function onPHit(b,t){
   if(S.cls==='archer'&&!b.child&&mky(0)&&t.boss)dmg*=1.35;
   if(S.cls==='archer'&&!b.child){if(mk(0)&&t.hp>=t.maxHp*.99)dmg*=1.6;if(mk(2)){dmg*=1+.15*(b.pk||0);b.pk=(b.pk||0)+1;}}
   // 총잡이 저지력: 본탄에 맞은 일반 몹(정예·보스 제외)이 16 밀려남
-  if(S.cls==='gunner'&&!b.child&&!t.boss&&!t.elite&&!t.dummy&&t.alive){const a=Math.atan2(t.y-p.y,t.x-p.x);t.x+=Math.cos(a)*16;t.y+=Math.sin(a)*16;}
+  if(S.cls==='gunner'&&!b.child&&!t.boss&&!t.elite&&!t.dummy&&t.alive){const a=Math.atan2(t.y-p.y,t.x-p.x);t.x+=Math.cos(a)*30;t.y+=Math.sin(a)*30;}
+  if(S.cls==='archer'&&!t.boss&&t.alive)t.hvU=S.t+.8; // 사냥꾼의 화살: 맞은 적 0.8초 이동 속도 −25%
   if(!b.child){const C=S.cls;
     if(C==='necro'){if(mky(1)&&p.hp>=p.maxHp*.9)dmg*=1.3;if(mk(2)&&t.alive)poisonE(t,1);}
     if(C==='gunner'){if(mky(0)){if(t.elite||t.boss)dmg*=1.3;else{const a=Math.atan2(t.y-p.y,t.x-p.x);t.x+=Math.cos(a)*18;t.y+=Math.sin(a)*18;t.slowT=Math.max(t.slowT||0,.4);t.frozen=true;}}if(mky(2))burnE(t,pDmg()*.3,3);}
@@ -7458,7 +7459,7 @@ function update(dt){
       if(z.life<=0&&!z.bo&&(tag('grav')>=6||has('f_bigcrunch')||has('blackstar'))){z.bo=1;explode(z.x,z.y,130*(has('f_hawking')?1.4:1),pDmg()*3*(has('f_bigcrunch')?2:1)*(has('f_hawking')?2:1),'#9a6aff');S.shake=Math.max(S.shake,.12);}}
     if(z.kind==='vine'){for(const e of S.en)if(e.alive&&!e.phase&&d2(e,z)<(z.r+e.r)**2){if(!(e.vnT>S.t-.05))e.vnS=0;e.vnT=S.t+.2;if(has('d_root')){e.vnS=(e.vnS||0)+dt;if(e.vnS>=1.5){e.vnS=0;e.rootT=Math.max(e.rootT||0,S.t+1);if(!e.boss)S.rings.push({x:e.x,y:e.y,r:4,max:e.r+10,life:.3,col:'#8a6a3a'});}}if(!e.boss)e.slowT=Math.max(e.slowT||0,season()===3?.8:.3);S.dsrc='nature';dmgEs('덩굴',e,pDmg()*z.m*(season()===1?1.5:1)*dt,null,null,true);S.dsrc=null;if(has('spore')&&e.alive&&!(e.ps>0))poisonE(e,has('f_thornking')?2:1);}
       if(z.life<=0&&tag('nature')>=6&&!z.bo){z.bo=1;explode(z.x,z.y,80,pDmg()*1.5*natM(),'#8ee06a');}}
-    else if(z.kind==='brew'){for(const e of S.en)if(e.alive&&!e.phase&&d2(e,z)<(z.r+e.r)**2){e.potT=Math.max(e.potT||0,S.t+.5);S.dsrc='alchemy';dmgEs('물약 장판',e,z.dps*dt,null,null,true);S.dsrc=null;if(!e.alive)continue;if(z.ks.includes(0)&&!(e.ps>0))poisonE(e);if((z.ks.includes(2)||has('frostflask'))&&!e.boss)e.slowT=Math.max(e.slowT||0,.4);}}
+    else if(z.kind==='brew'){for(const e of S.en)if(e.alive&&!e.phase&&d2(e,z)<(z.r+e.r)**2){e.potT=Math.max(e.potT||0,S.t+.5);S.dsrc='alchemy';dmgEs('물약 장판',e,z.dps*dt,null,null,true);S.dsrc=null;if(!e.alive)continue;if(z.ks.includes(0)&&!(e.ps>0))poisonE(e);e.hvU=S.t+.3;if((z.ks.includes(2)||has('frostflask'))&&!e.boss)e.slowT=Math.max(e.slowT||0,.4);}}
     else if(z.kind==='smoke'){for(const e of S.en)if(e.alive&&!e.boss&&d2(e,z)<(z.r+e.r)**2)e.slowT=Math.max(e.slowT||0,.3);}
     else if(z.kind==='arrows'){z.tick=(z.tick||0)-dt;if(z.tick<=0){z.tick=.25;for(const e of S.en)if(e.alive&&!e.phase&&d2(e,z)<(z.r+e.r)**2)dmgEs('화살 소나기',e,pDmg()*lv3('a_rain',.4,.5,.6)*Math.max(1,pRate()*.8),null,null,true);}
       for(let i=0;i<3&&S.pa.length<240;i++){const a=Math.random()*TAU,r=Math.sqrt(Math.random())*z.r;S.pa.push({x:z.x+Math.cos(a)*r,y:z.y+Math.sin(a)*r-60,vx:0,vy:500,dr:1,life:.12,col:'#e6dfcc',sh:'streak',s:5,rot:1.57});}}
@@ -8675,6 +8676,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:264,t:'⚖ 직업 특징으로 버티기',items:[
+    ['buff','⚖ 12직업 악몽 측정에서 일찍 쓰러지던 직업은 적이 붙어 둘러싸이는 게 원인이라 (사령술사는 해골, 드루이드는 덩굴, 마법사·정령사는 냉기로 적을 막는데 이 직업들은 막을 수단이 없었음), 각 직업 특징에 맞는 「붙지 못하게 하는 힘」 추가: 🏹 <b>궁수</b> 사냥꾼의 화살 (맞은 적 0.8초간 이동 속도 −25%) · ⚗ <b>연금술사</b> 물약 장판 위 적 이동 속도 −25% · 🔫 <b>총잡이</b> 저지력 강화 (밀어내는 거리 약 2배) · 🎲 <b>도박사</b> 운수 대통 (행운 1당 회피 +0.3%). 보스에게는 적용되지 않아요']]},
   {v:263,t:'🎲 도박사 점검',items:[
     ['new','🎲 대박 루트 고점 돌파 ♾ <b>잭팟 금고</b>: 이번 판 앞면이 100번 나올 때마다 앞면 피해 +1%, 상한 없음 · 추천 빌드 「🎲 운명의 주사위」(운명의 주사위·룰렛 휠·타짜의 동전) 추가 (루트마다 고점 돌파 하나씩)'],
     ['change','🎲 마스터리 「황금 비」(앞면 5연속 금화 폭발)가 증강 「대박」과 같은 조건이고 황금 용 공격 이름과도 겹쳐서 <b>설욕전</b>으로: 뒷면이 3번 연속 나오면 다음 동전은 반드시 앞면, 그 피해 ×2'],
@@ -13888,7 +13891,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=263,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=264,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
