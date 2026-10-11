@@ -4853,7 +4853,7 @@ const CLASSES={
   rogue:{n:'도적',role:'회피 암살',d:'단검을 난사하며 치고 빠지는 도적',passive:'그림자: 회피 15%, 대시 재사용 −30%',atk:.2,
     stats:{hp:155,maxHp:155,speed:225,dmg:13,rate:3.9,range:260,bspd:600,dodge:.15,dashMul:.7,crit:.12,critM:2.3},fav:['blitz','poison','curse','shadow'],dis:['guard'],
     cards:['가벼운 장화','날렵한 몸놀림','순발력','흡혈 송곳니','급소 노리기','치명상'],lvd:'치명타 +0.2%, 회피 +0.1%, 공격력 +1%, 체력 +1',lv:p=>{p.crit+=.002;p.dodge+=.001;p.dmgP=(p.dmgP||0)+.01;p.maxHp+=1;p.hp+=1;}},
-  paladin:{lock:true,n:'성기사',role:'신성 근접',d:'빛의 오라로 주변을 태우며 버티는 성전사',passive:'신성 오라: 주변 110 안의 적에게 초당 공격력 100% 빛 피해. 5번째 공격마다 체력 3% 회복',atk:.32,
+  paladin:{lock:true,n:'성기사',role:'신성 근접',d:'빛의 오라로 주변을 태우며 버티는 성전사',passive:'신성 오라: 주변 110 안의 적에게 초당 공격력 100% 빛 피해. 5번째 공격마다 체력 2% 회복',atk:.32,
     stats:{hp:210,maxHp:210,speed:178,dmg:20,rate:1.85,range:200,bspd:430,armor:12,block:.08},fav:['holy','guard','fire'],dis:['curse'],
     cards:['힘의 물약','숫돌','튼튼한 체력','가죽 갑옷','붕대','철벽 자세'],lvd:'체력 +2, 공격력 +0.8%, 방어력 +0.2',lv:p=>{p.maxHp+=2;p.hp+=2;p.dmgP=(p.dmgP||0)+.008;p.armor+=.2;}},
   necro:{lock:true,n:'사령술사',role:'해골 소환',d:'쓰러진 적을 해골 병사로 일으키는 술사',passive:'해골 소환: 처치 시 25% 확률, 그리고 약 2초마다(해골이 절반보다 적으면 1초마다) 해골 병사 소환 (최대 5기, 12초, 공격력 100%로 근접 공격). 해골은 주변 근접 적을 끌어당기는 방패 역할 (체력 = 내 최대 체력 50%, 받는 피해 절반). 해골 방패로 사령술사의 해골은 더 멀리(150)서 한 기당 6마리까지 붙잡음',atk:.35,
@@ -6912,7 +6912,7 @@ function playerFire(tg){
   if(has('crossfire')&&Math.random()<lv3('crossfire',.25,.35,.45))pBullet(p.x,p.y,base+Math.PI,d,{sub:'십자포화',child:true});
   if(has('bigshot')&&p.shots%(has('f_siege')?3:5)===0)pBullet(p.x,p.y,base,d*lv3('bigshot',2.5,3,3.5),{pierce:5,r:9,big:true,sub:'대포알',child:true,life:blife*1.3});
   if(has('overcharge')){if(p.shots%10===0)p.ocN=3;}
-  if(S.cls==='paladin'&&p.shots%5===0&&p.alive){healK(p.maxHp*(mky(1)?.06:.03)*healM());if(mky(1)){const ar=110*(1+(p.auraM||0));S.rings.push({x:p.x,y:p.y,r:10,max:ar,life:.3,col:'#fff3a0'});for(const e of S.en)if(e.alive&&!e.phase&&d2(e,p)<(ar+e.r)**2){S.dsrc='holy';dmgEs('치유의 빛',e,pDmg()*holyM(),'#fff3a0');S.dsrc=null;}}}
+  if(S.cls==='paladin'&&p.shots%5===0&&p.alive){healK(p.maxHp*(mky(1)?.04:.02)*healM());if(mky(1)){const ar=110*(1+(p.auraM||0));S.rings.push({x:p.x,y:p.y,r:10,max:ar,life:.3,col:'#fff3a0'});for(const e of S.en)if(e.alive&&!e.phase&&d2(e,p)<(ar+e.r)**2){S.dsrc='holy';dmgEs('치유의 빛',e,pDmg()*holyM(),'#fff3a0');S.dsrc=null;}}}
   if(has('smite2')&&p.shots%6===0){exS('holy',tg.x,tg.y,80,pDmg()*lv3('smite2',2,2.5,3)*holyM(),'#fff3c4');S.rings.push({x:tg.x,y:tg.y,r:4,max:30,life:.4,col:'#ffffff'});}
   {const pe=S.cls==='alch'?4:tag('alchemy')>=2?6:tag('alchemy')>=1?8:0;if(pe&&p.shots%Math.max(2,pe-(has('philosopher')?2:0)-(has('f_perfectstone')?1:0))===0){const n=has('al_grand')?3:1;S.potN=(S.potN||0)+1;for(let i=0;i<n;i++)throwPotion(tg.x+(i?rand(-50,50):0),tg.y+(i?rand(-50,50):0),1);}}
   if(S.cls==='druid'&&p.shots%(has('d_wrath')?2:3)===0)vineAt(tg.x,tg.y,.7);
@@ -9879,7 +9879,7 @@ const MST={
       {n:'낙인',td:'치명타 확률 +4%',tf:p=>{p.crit+=.04;},cn:'심판의 낙인',cd:'치명타로 맞히면 그 자리에 빛 폭발 (공격력 80%, 범위 60)'}]},
     {n:'수호',ico:'🛡',col:'#9fd3ff',td:'막기 +3%, 방어력 +3',tf:p=>{p.block=(p.block||0)+.03;p.armor+=3;},sub:[
       {n:'성벽',td:'방어력 +5',tf:p=>{p.armor+=5;},cn:'신성 방벽',cd:'막을 때마다 보호막 +최대 체력 5% (최대 25%까지)'},
-      {n:'치유',td:'최대 체력 +8%',tf:p=>{p.maxHp*=1.08;p.hp=p.maxHp;},cn:'치유의 빛',cd:'5번째 공격 회복이 3% → 6%, 회복할 때 오라 안 적에게 빛 파동 (공격력 100%)'}]},
+      {n:'치유',td:'최대 체력 +8%',tf:p=>{p.maxHp*=1.08;p.hp=p.maxHp;},cn:'치유의 빛',cd:'5번째 공격 회복이 2% → 4%, 회복할 때 오라 안 적에게 빛 파동 (공격력 100%)'}]},
     {n:'징벌',ico:'🔆',col:'#ffb070',td:'오라 범위 +10%',tf:p=>{p.auraM=(p.auraM||0)+.1;},sub:[
       {n:'태양',td:'오라 피해 +15%',tf:p=>{p.auraD=(p.auraD||0)+.15;},cn:'타오르는 오라',cd:'오라에 닿은 적이 불탐 (초당 공격력 20%)'},
       {n:'응징',td:'오라 범위 +10%',tf:p=>{p.auraM=(p.auraM||0)+.1;},cn:'응징의 파동',cd:'4초마다 오라 끝까지 빛 파동 (공격력 200%) + 적을 밀쳐냄'}]}]},
