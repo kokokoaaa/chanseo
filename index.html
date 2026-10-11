@@ -5066,7 +5066,7 @@ function affN(){const r=Math.random(),dk=S.diff;let p2=0,p3=0;
 const DIFF={normal:{oc:.35,md:1,cb:5,rg:.12,pen:.2,n:'일반',col:'#cfe3c4',hp:.9,bhp:.85,dm:.7,sp:1,el:0,sc:1,bc:22},
   hard:{oc:.45,md:1.6,cb:15,rg:.18,pen:.3,n:'어려움',col:'#ffb347',xp:2.5,hp:1.6,bhp:1.15,dm:.9,sp:.8,el:.12,sc:1.5},
   hell:{oc:.55,md:2.2,cb:35,rg:.25,pen:.4,n:'지옥',col:'#ff5a3a',xp:3.4,hp:2.5,bhp:1.6,dm:1.1,sp:.7,el:.2,sc:2.2},
-  god:{oc:.65,md:2.8,cb:60,rg:.3,pen:.45,n:'신',col:'#e9c4ff',xp:4.5,hp:3.4,bhp:2,dm:1.25,sp:.6,el:.3,sc:3.2,lt:2},
+  god:{oc:.65,md:2.8,cb:60,rg:.3,pen:.45,n:'신',col:'#e9c4ff',xp:4.5,hp:3.4,bhp:1.5,dm:.95,sp:.6,el:.3,sc:3.2,lt:1.4},
   // 악몽: 시간 제한 없는 무한 모드. 2.5분마다 보스가 계속 나오고(1~4장 보스 반복), 단계가 오를수록 보스·몹이 강해짐. 죽을 때까지 점수 경쟁
   nightmare:{oc:.7,md:3,cb:0,rg:.33,pen:.5,n:'무한의 악몽',col:'#ff4f6a',xp:5,hp:8.4,bhp:3.8,dm:3.9,sp:.55,el:.35,sc:4,endless:true},
   // 보스 러시: 잡몹·이벤트·징조 없이 1.5배 큰 보스만 연달아. 시작 증강 3개, 잡을 때마다 증강 1개 + 레벨 2 (상점·각성 없음). 몇 단계까지 잡는지 경쟁 (악몽이 열리면 열림)
@@ -6650,7 +6650,11 @@ const dLines=d=>{const t=String(d);if(/<[a-z]/i.test(t))return t;const out=[];le
   // [직업 전용] 머리말은 첫 줄에 따로
   if(L.length&&/^\[[^\]]+\] /.test(L[0])){const m=L[0].match(/^(\[[^\]]+\]) (.*)$/);L.splice(0,1,m[1],m[2]);}
   return L.map(x=>`<span class="dl">${dGlue(x)}</span>`).join('');};
-const meleeTxt=d=>{try{if(!S||!S.cls||!pureMelee())return d;return String(d).replace(/관통[ \u00a0]\+(\d+)/g,(m,n)=>`${m} <small class="mlt">(근접: 한 번에 베는 적 +${2*n})</small>`).replace(/탄환[ \u00a0]\+(\d+)발?/g,(m,n)=>`${m} <small class="mlt">(근접: 베기 각도 +${40*n}°)</small>`);}catch(e){return d;}};
+// 원거리 직업은 「탄환」을 실제로 쏘는 것 이름으로 보여 줌 (마법사 화염구·정령사 원소탄 …). 적 탄환은 그대로
+const PROJ_N={mage:'화염구',elem:'원소탄',archer:'화살',rogue:'단검',alch:'플라스크',gambler:'동전',necro:'마력탄',druid:'가시'};
+const projTxt=d=>{try{const n=S&&S.cls&&PROJ_N[S.cls];if(!n||pureMelee())return d;const v=!((n.charCodeAt(n.length-1)-0xAC00)%28);const J={'이':v?'가':'이','을':v?'를':'을','은':v?'는':'은','과':v?'와':'과','으로':v?'로':'으로'};
+  return String(d).replace(/(적 )?탄환(으로|이|을|은|과)?/g,(m,en,j)=>en?m:n+(j?J[j]:''));}catch(e){return d;}};
+const meleeTxt=d=>{try{if(!S||!S.cls||!pureMelee())return projTxt(d);return String(d).replace(/관통[ \u00a0]\+(\d+)/g,(m,n)=>`${m} <small class="mlt">(근접: 한 번에 베는 적 +${2*n})</small>`).replace(/탄환[ \u00a0]\+(\d+)발?/g,(m,n)=>`${m} <small class="mlt">(근접: 베기 각도 +${40*n}°)</small>`);}catch(e){return d;}};
 const meleeCap=n=>(S.cls==='berserk'?2:3)+2*Math.max(0,pierceE());
 const meleeArc=n=>Math.round(Math.min(360,2*(55+(n-1)*20)));
 // 관통·사거리 상한: 관통 10 이상, 원거리 사거리 550(화면 좌우 끝) · 근접 300 이상은 화면에서 의미가 없고 계산만 늘어남 → 상한에 닿으면 관련 카드·증강도 안 나옴
@@ -8133,7 +8137,7 @@ const RUSH_D={
   corrode:'중독된 적에게 받는 피해 −35%',
   stigma:'표식된 적에게 빛 피해 +20%',
   r_mark:'[도적 전용] 근처에서 체력이 가장 높은 적(보스)에게 표적. 표적은 받는 피해 +60%'};
-const augD=a=>!a?'':bRush()&&RUSH_D[a.id]||a.d;
+const augD=a=>!a?'':projTxt(bRush()&&RUSH_D[a.id]||a.d);
 const augReq=a=>!(rushOn()&&RUSH_BAN.has(a.id))&&!isBanned(a.id)&&!(MELEE_CLS.includes(S.cls)&&MELEE_BAN.has(a.id))&&!tagLocked(a)&&mechOk(a)&&(!AUG_REQ[a.id]||AUG_REQ[a.id]());
 // 태그 중복(가드 2개 등)으로 선호 가중치가 겹쳐 쌓이지 않게: 선호 태그가 하나라도 있으면 ×2.5, 비선호는 ×0.3
 // 이미 가진 증강의 합체 짝은 행운에 비례해 더 잘 나옴 (행운 0: ×1.3, 행운 상한: ×3)
@@ -8516,6 +8520,8 @@ const PATCH_NOTES=[
     ['buff','❤ 최대 체력을 <b>고정치로 더하던 증강</b>을 %로 바꿨어요 (후반에도 의미 있게): 흡혈귀(정예 처치마다 최대 체력 +0.5%, 최대 +10%) · 강인한 육체(+10%) · 요새(+15%)'],
     ['look','🧩 왼쪽 아래 <b>증강 칸 설명</b>에도 합체 정보가 나와요: 합체 없는 증강이면 「🚫 합체 없는 증강」, 있으면 짝과 결과 (가진 짝은 ✔)'],
     ['look','🃏 스탯 카드의 「⏳ 시간이 지날수록 수치가 커지는 카드예요…」 문구를 없앴어요 (고른 뒤에 더 세지는 게 아니라 헷갈려서). 수치는 그대로 시간이 갈수록 크게 나와요'],
+    ['look','🔮 카드·증강 설명의 「탄환」이 직업에 맞게 보여요: 마법사 화염구 · 정령사 원소탄 · 궁수 화살 · 도적 단검 · 연금술사 플라스크 · 도박사 동전 · 사령술사 마력탄 · 드루이드 가시 (적 탄환은 그대로)'],
+    ['enemy','👑 <b>신 난이도</b>가 너무 어려웠던 문제 (모든 강화를 연 상태로도 클리어 16%): 신 난이도의 적 공격력 −24%, 보스 체력 −25%, 3장부터 체력 2배 → 1.4배'],
     ['bug','🔁 상점 「바꿔치기」가 고점 돌파·장비로 받은 시작 증강까지 바꿔 버리던 문제를 고쳤어요 (레벨업 교체처럼 이 증강들은 바뀌지 않아요)'],
     ['look','📜 의뢰인이 이제 <b>후드 쓴 여행자 캐릭터</b>로 서 있어요 (등불 지팡이·두루마리·머리 위 「!」)'],
     ['bug','📜 판 도중에 배속을 썼다가 1배속으로 돌리면 의뢰인이 나오던 문제: 이제 <b>판 내내 1배속</b>일 때만 나와요'],
@@ -9622,7 +9628,7 @@ function openQuest(){S.mode='quest';joy=null;const Q=qD();let msg='',got='';
     <p class="sub">진행은 <b>1배속</b>으로 할 때만 쌓여요. 다 하면 <b>그 판에서 곧바로</b> 의뢰인이 보상을 주러 와요.</p></div>
     <div class="btnrow" style="display:grid;grid-template-columns:${Q.acc?'1fr':'2fr 1fr'};gap:8px"><button class="btn primary" id="qOk" style="margin:0">${Q.acc?'알겠어요':'의뢰 받기'}</button>${Q.acc?'':'<button class="btn" id="qNo" style="margin:0">다음에</button>'}</div>`);
   $('qOk').onclick=()=>{if(!Q.acc){Q.acc=1;Q.pr=0;saveMeta();toast(`📜 의뢰 「${s.n}」을 받았어요`);}resume();};if($('qNo'))$('qNo').onclick=resume;}
-const qSum=()=>{const Q=qD();if(!Q.acc)return '';const s=Q_STEPS[Q.st];return `<div class="lootsum" style="border-color:#ffd76a"><b>📜 의뢰 「${s.n}」</b> ${s.k==='end'?'의뢰인을 만나면 끝나요':`${Math.min(Q.pr,qGoal())}/${qGoal()}`}${qReady()?' <b style="color:#7be08f">완료! 1배속으로 하다 보면 의뢰인이 나타나요</b>':''}</div>`;};
+const qSum=()=>{const Q=qD();if(!Q.acc)return '';const s=Q_STEPS[Q.st];return `<div class="lootsum" style="border-color:#ffd76a"><b>📜 의뢰 「${s.n}」</b> ${s.k==='end'?'의뢰인을 만나면 끝나요':`${Math.min(Q.pr,qGoal())}/${qGoal()}`}${qReady()?' <b style="color:#7be08f">완료! 곧 의뢰인이 보상을 주러 와요 (1배속)</b>':''}</div>`;};
 /* 판 시작 시 장비 특수 효과·세트 4개 증강. 이 시점엔 아직 게임 화면 전이라 eqItem()이 대표 직업 장비를 보므로 그 판 직업(S.cls) 장비창을 직접 읽음 */
 function gearSpGrant(){if(GEAR_OVR||raidOn()||duelOn()||labOn())return;const c=S.cls,L=[];for(const k of GEAR_KEYS){const it=eqItemC(k,c),a=spAug(it);if(a&&spOn(it,c))L.push(a);}
   const sc=setCntC(c),SA=new Set();for(const k in sc){const T=SETS[k];if(T&&T.aug&&sc[k]>=4){const a=AUGS.find(x=>x.id===T.aug);if(a){L.push(a);SA.add(a.n);}}}
