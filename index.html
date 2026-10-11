@@ -3703,9 +3703,9 @@ const PREV_ST=[['공격력',()=>pDmg(),1],['공격 속도',()=>pRate(),2,'/초']
 function augPreview(a){
   if(!S||!S.p||!a||a.up)return '';
   const snap=()=>PREV_ST.map(x=>{try{return x[1]();}catch(e){return null;}});
-  const P0=S.p,A0=S.augs,o0=S.own,q0=S.oq,t0=S.tagc,g0=S.gold;let b0,b1;
+  const P0=S.p,A0=S.augs,o0=S.own,q0=S.oq,t0=S.tagc,g0=S.gold,x0=S.fxL;let b0,b1;
   try{b0=snap();const c={...P0};S.p=c;S.augs=[...A0,{...a,tags:a.tags||[],lv:a.t==='v'||a.t==='f'||a.t==='d'?1:2}];tagCount();if(a.f)for(let i=0;i<(a.t==='v'||a.t==='f'||a.t==='d'?1:2);i++)applyQ(a.f,c,a.q);b1=snap();}
-  catch(e){b1=null;}finally{S.p=P0;S.augs=A0;S.own=o0;S.oq=q0;S.tagc=t0;S.gold=g0;}
+  catch(e){b1=null;}finally{S.p=P0;S.augs=A0;S.own=o0;S.oq=q0;S.tagc=t0;S.gold=g0;S.fxL=x0;}
   if(!b1)return '';
   const rows=[];PREV_ST.forEach(([n,,dp,u],i)=>{const x=b0[i],y=b1[i];if(x==null||y==null||Math.abs(y-x)<Math.pow(10,-dp)/2)return;const f=v=>(+v.toFixed(dp)).toLocaleString()+(u||''),pc=x>0&&!u?` (${y>x?'+':''}${Math.round((y/x-1)*100)}%)`:'';const pm=pureMelee();if(n==='탄환'&&pm)u='°';n=pm?({사거리:'근접 거리',관통:'동시 타격',탄환:'베기 각도'}[n]||n):n;rows.push(`<span class="pvr ${(n==='대시 재사용'?y<x:y>x)?'up':'dn'}">${n} ${f(x)} → <b>${f(y)}</b>${pc}</span>`);});
   return rows.length?`<span class="apv">${rows.slice(0,5).join('')}</span>`:'';
@@ -5410,7 +5410,7 @@ function bossAI(e,dt){
   if(e.hid2){e.hl-=dt;if(e.hl<=0){if(e.hp<e.maxHp*.1)achUnlock('h_drg');e.alive=false;S.hb=null;burst(e.x,e.y,'#ffd040',30);toast('황금 용이 날아가 버렸다…');return;}}
   {const rg=e.hid2?0:bossRage(e);if(e.baseDmg==null)e.baseDmg=e.dmg;if(rg!==(e.rage||0)){e.rage=rg;e.dmg=e.baseDmg*(1+(dfM().rg||.25)*Math.min(5,rg))*(rg>5?Math.pow(1.5,rg-5):1);if(rg===6)toast('최종 광폭! 이제 보스 공격이 줄어들지 않고 30초마다 1.5배씩 강해집니다');if(S.arena)S.arena.tr=Math.min(S.arena.tr,Math.max(900,S.arena.tr*.95));S.shake=.4;S.flash=.15;
     S.rings.push({x:e.x,y:e.y,r:e.r,max:e.r+180,life:.6,col:'#ff2020'});toast(rg===1?`시간을 너무 끌었다! ${T.n} 광폭화`:`${T.n} 광폭화 ${rg}단계. 더 강해집니다`);}}
-  if(ph2&&!e.ph2&&!duelOn()){e.ph2=true;if(S.arena)S.arena.tr*=.85;S.shake=.4;toast(`${T.n} 분노! 패턴이 빨라집니다`);S.rings.push({x:e.x,y:e.y,r:e.r,max:e.r+140,life:.5,col:'#ff6060'});}
+  if(ph2&&!e.ph2&&!duelOn()&&!e.hid2){e.ph2=true;if(S.arena)S.arena.tr*=.85;S.shake=.4;toast(`${T.n} 분노! 패턴이 빨라집니다`);S.rings.push({x:e.x,y:e.y,r:e.r,max:e.r+140,life:.5,col:'#ff6060'});}
   // 보스 러시: 체력 25% 아래에서 최후의 발악 (결계 한 번 더 좁아짐), 패턴 박자는 단계·체력에 따라 빨라짐 (최대 1.6배)
   let tempo=1;if(rushOn()&&!e.hid2&&!duelOn()){const hf=e.hp/e.maxHp;tempo=Math.min(RUSH_TPM,1+RUSH_TP*Math.max(0,S.bossI)+(hf<.5?.12:0)+(hf<.25?.18:0));
     if(hf<.25&&!e.ph3){e.ph3=true;if(S.arena)S.arena.tr*=.9;S.shake=.5;toast(`${T.n} 최후의 발악! 패턴이 더 거세집니다`);S.rings.push({x:e.x,y:e.y,r:e.r,max:e.r+200,life:.6,col:'#ff3030'});}}
@@ -8126,7 +8126,7 @@ const ALT_FULL=4,altCnt=(n0,k)=>Math.max(1,n0-Math.max(0,k-ALT_FULL)),altTxt=t=>
 function giveAltStat(t,extra){const [n0,b]=ALT_STAT[t]||ALT_STAT.g,txt=altTxt(t);S.altN=(S.altN||0)+1;const n=altCnt(n0,S.altN);
   S.bonusSt=(S.bonusSt||0)+n-(extra?0:1);S.boostN=(S.boostN||0)+n;S.boostB=Math.max(S.boostB||0,b);return `${TIER[t]?TIER[t].n:''} 증강 대신 ${txt}`;}
 // 증강 그만 받기(S.noAug): 이번 판에서 증강 차례가 오면 스탯 카드로 대신 받음
-const augReady=()=>!S.noAug&&(slotCount()<MAXA||fullOptions().length>0);
+const augReady=()=>{if(S.noAug)return false;if(slotCount()<MAXA)return true;const pn=S.prismN;try{return fullOptions().length>0;}finally{S.prismN=pn;}};
 // 슬롯이 가득 차면: 합체 짝(최대 2) + 나머지는 '교체' 후보 (고르면 기존 증강 하나를 버리고 바꿈)
 const swappable=()=>S.augs.map((a,i)=>[a,i]).filter(([a])=>a.t!=='v'&&a.t!=='f'&&a.t!=='d'&&!a.gr&&(!a.f||a.dl)&&!a.uc);
 function fullOptions(){
@@ -8144,7 +8144,7 @@ function openAug(free,why,fixed,fixedTier){
   if(free===true&&rushOn())free=RUSH_RR+(META.sk.reroll?1:0);
   S.mode='aug';why=why||S.augWhy||'증강';S.augWhy=why;
   const full=slotCount()>=MAXA;
-  let tier=capTier(fixedTier||rollTier());const opts=fixed||(full?fullOptions():augOptions(tier));
+  const pn=S.prismN;let tier=capTier(fixedTier||rollTier());if(fixed||full)S.prismN=pn;/* 정해진 카드·교체 화면은 등급을 굴리지 않음 (확정 프리즘 보존) */const opts=fixed||(full?fullOptions():augOptions(tier));
   // 슬롯이 가득 차면 등급과 상관없이 교체 후보가 나오므로, 대신 받는 스탯 카드 등급도 실제로 보이는 카드 중 가장 높은 등급에 맞춤
   if(full){const rk={s:0,g:1,p:2},ts=opts.map(a=>a.t).filter(t=>t in rk);tier=ts.length?ts.reduce((x,y)=>rk[y]>rk[x]?y:x):'s';}
   if(!opts.length){const g=price(120);S.gold+=g;toast(`슬롯 가득, 강화할 것도 없음. ${g} 골드 지급`);openNext();return;}
@@ -8165,14 +8165,14 @@ function openAug(free,why,fixed,fixedTier){
     if(a.swap&&slotCount()>=MAXA){openSwap(a,opts,free,why);return;}
     gainAug(a);
     openNext();},300);});
-  if($('augAltC'))$('augAltC').onclick=()=>{S.arr=0;toast(giveAltStat(ALT_STAT[tier]?tier:'g',true));openNext();};
-  if($('augAltG'))$('augAltG').onclick=()=>{S.arr=0;const g=altG();S.gold+=g;toast(`증강 대신 ${g} 골드`);openNext();};
-  if($('augSkip'))$('augSkip').onclick=()=>{S.arr=0;const g=skipG();S.gold+=g;toast(`증강 포기 · ${g} 골드`);openNext();};
-  if($('augStop'))$('augStop').onclick=e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.firstChild.textContent='한 번 더 누르면 증강 그만 받기 ';return;}S.noAug=true;toast('이번 판은 증강을 더 받지 않아요 · '+giveAltStat(ALT_STAT[tier]?tier:'g',true));openNext();};
+  if($('augAltC'))$('augAltC').onclick=()=>{if(picking)return;S.arr=0;toast(giveAltStat(ALT_STAT[tier]?tier:'g',true));openNext();};
+  if($('augAltG'))$('augAltG').onclick=()=>{if(picking)return;S.arr=0;const g=altG();S.gold+=g;toast(`증강 대신 ${g} 골드`);openNext();};
+  if($('augSkip'))$('augSkip').onclick=()=>{if(picking)return;S.arr=0;const g=skipG();S.gold+=g;toast(`증강 포기 · ${g} 골드`);openNext();};
+  if($('augStop'))$('augStop').onclick=e=>{if(picking)return;const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.firstChild.textContent='한 번 더 누르면 증강 그만 받기 ';return;}S.arr=0;S.noAug=true;toast('이번 판은 증강을 더 받지 않아요 · '+giveAltStat(ALT_STAT[tier]?tier:'g',true));openNext();};
   // 봉인: 이번 판에서 이 증강 제외, 그 자리는 새 증강으로 바로 교체
-  ov.querySelectorAll('[data-seal]').forEach(b=>b.onclick=()=>{if(!(S.seals>0))return;const i=+b.dataset.seal,a=opts[i];S.seals--;(S.banL=S.banL||[]).push(a.id);toast(`🔒 ${a.n} 봉인 · 이번 판에서 다시 안 나옴 (그 칸만 새로 뽑음, 다시 뽑기 가격은 그대로)`);
+  ov.querySelectorAll('[data-seal]').forEach(b=>b.onclick=()=>{if(picking||!(S.seals>0))return;const i=+b.dataset.seal,a=opts[i];S.seals--;(S.banL=S.banL||[]).push(a.id);toast(`🔒 ${a.n} 봉인 · 이번 판에서 다시 안 나옴 (그 칸만 새로 뽑음, 다시 뽑기 가격은 그대로)`);
     const pool=(slotCount()>=MAXA?fullOptions():augOptions(tier)).filter(x=>!opts.some(o=>o.id===x.id));const nx=[...opts];if(pool.length)nx[i]=pool[0];else nx.splice(i,1);openAug(free,why,nx,tier);});
-  $('reroll').onclick=()=>{if(!free){S.gold-=cost;S.arr++;}const left=free===true?(META.sk.reroll?1:0):(typeof free==='number'?free-1:0);openAug(left>0?left:false,why,null,fixedTier);};
+  $('reroll').onclick=()=>{if(picking)return;if(!free){S.gold-=cost;S.arr++;}const left=free===true?(META.sk.reroll?1:0):(typeof free==='number'?free-1:0);openAug(left>0?left:false,why,null,fixedTier);};
 }
 function openSwap(a,opts,free,why){
   const list=swappable();
@@ -8279,7 +8279,7 @@ function renderCasino(){
   <button class="btn primary" data-a="next" ${b?'disabled':''}>${S.hub?'상점으로 돌아가기':'테이블 떠나기'}</button>`);
   ov.querySelectorAll('[data-a]').forEach(el=>el.onclick=()=>casinoAct(el.dataset.a));
 }
-function grantAug(min){if(slotCount()>=MAXA){const o=S.augs.filter(a=>AUG_UP&&a.lv<3&&a.t!=='v'&&a.t!=='f'&&a.t!=='d');if(!o.length)return null;const a=o[Math.floor(Math.random()*o.length)];a.lv++;if(a.f)augApply(a);tagCount();tryFuse();return {n:a.n+' ★'+a.lv,d:'슬롯이 가득 차서 강화로 대체'};}const order=['s','g','p'];const ok=AUGS.filter(a=>!has(a.id)&&(!a.cls||a.cls===S.cls)&&augReq(a)&&order.indexOf(a.t)>=order.indexOf(min));if(!ok.length)return null;const a={...ok[Math.floor(Math.random()*ok.length)],q:rollQ()},lv=a.t==='v'||a.t==='f'||a.t==='d'?1:2;S.augs.push({...a,lv,gift:1});tagCount();tryFuse();if(a.f)for(let i=0;i<lv;i++)applyQ(a.f,S.p,a.q);tagCount();return a;}
+function grantAug(min){if(slotCount()>=MAXA){const o=S.augs.filter(a=>AUG_UP&&a.lv<3&&a.t!=='v'&&a.t!=='f'&&a.t!=='d');if(!o.length)return null;const a=o[Math.floor(Math.random()*o.length)];a.lv++;if(a.f)augApply(a);tagCount();tryFuse();return {n:a.n+' ★'+a.lv,d:'슬롯이 가득 차서 강화로 대체'};}const order=['s','g','p'];const ok=AUGS.filter(a=>!has(a.id)&&tierOpen(a.t)&&(!a.cls||a.cls===S.cls)&&augReq(a)&&order.indexOf(a.t)>=order.indexOf(min));if(!ok.length)return null;const a={...ok[Math.floor(Math.random()*ok.length)],q:rollQ()},lv=a.t==='v'||a.t==='f'||a.t==='d'?1:2,o={...a,lv,gift:1,dl:{}};S.augs.push(o);if(a.f)for(let i=0;i<lv;i++)augApply(o);tagCount();tryFuse();tagCount();return a;}
 function casinoAct(a){
   const p=S.p;
   if(a==='next'){if(S.hub){openHub();return;}openNext();return;}
@@ -8427,6 +8427,14 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:235,t:'🛠 버그 점검 2',items:[
+    ['change','🃏 증강 카드를 고르지 않고 「포기·골드·스탯 대신·그만 받기」를 누르면 <b>마지막에 보인 카드 효과가 공짜로 켜져 있던</b> 문제를 고쳤어요','bug'],
+    ['change','🐱 행운의 고양이의 <b>확정 프리즘</b>이 슬롯이 가득 찬 상태에서 증강 화면이 아닌 곳에서 사라지던 문제를 고쳤어요','bug'],
+    ['change','🎁 천운으로 받는 증강이 <b>아직 안 열린 등급</b>(골드·프리즘)도 나오던 문제와, 받은 증강이 교체·분해가 안 되던 문제를 고쳤어요','bug'],
+    ['change','🃏 카드를 고른 직후(0.3초) 포기·대신 받기·다시 뽑기를 또 누르면 둘 다 적용되던 문제를 고쳤어요. 「증강 그만 받기」도 다시 뽑기 가격을 처음으로 돌려요','bug'],
+    ['change','🗿 레이드 보스를 쓰러뜨린 순간 남아 있던 <b>즉사 기믹</b>에 이긴 뒤 쓰러지던 문제를 고쳤어요','bug'],
+    ['change','🐉 황금 용이 체력 50% 아래로 내려가도 보스 결계를 좁히지 않아요','bug'],
+  ]},
   {v:234,t:'🛠 버그 점검',items:[
     ['change','💨 <b>대시 무적</b>이 v218부터 꺼져 있던 버그를 고쳤어요. 이제 대시하는 동안 다시 공격을 받지 않고, 큰 보스 공격을 대시로 피하면 <b>완벽한 회피</b>(슬로 모션·무적·대시 절반 환급)가 다시 나와요','bug'],
     ['change','💾 <b>이어하기</b>로 불러온 판에서 장비 증강(✦)이 일반 칸을 차지하고 🎁 표시가 사라지던 문제를 고쳤어요','bug'],
@@ -10272,7 +10280,7 @@ function drawAlly(a){const x=a.x,y=a.y,R=a.r;ctx.save();
   const w=40,f=Math.max(0,a.hp/a.maxHp);ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(x-w/2,y-46,w,5);ctx.fillStyle=f>.5?'#7be08f':f>.25?'#ffd76a':'#ff6a6a';ctx.fillRect(x-w/2,y-46,w*f,5);
   ctx.font='12px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.7)';const nm=roleOf(a.cls).ico+' '+a.name;ctx.strokeText(nm,x,y-50);ctx.fillStyle='#cfe8ff';ctx.fillText(nm,x,y-50);ctx.restore();}
 function drawAllyShots(){if(!S.abul)return;for(const q of S.abul){ctx.fillStyle=q.col;ctx.beginPath();ctx.arc(q.x,q.y,5,0,TAU);ctx.fill();ctx.fillStyle='rgba(255,255,255,.8)';ctx.beginPath();ctx.arc(q.x,q.y,2,0,TAU);ctx.fill();}}
-function raidWin(){S.raidEnd=2.8;S.raidWon=1;S.p.inv=99;S.tele=[];S.pr=S.pr.filter(b=>b.mine);for(const e of S.en)if(e.raidAdd)e.alive=false;toast('🏆 레이드 성공!');}
+function raidWin(){S.raidEnd=2.8;S.raidWon=1;S.p.inv=99;S.tele=[];S.rdoom=null;S.robj=null;S.rwav=[];S.pr=S.pr.filter(b=>b.mine);for(const e of S.en)if(e.raidAdd)e.alive=false;toast('🏆 레이드 성공!');}
 // 결과: 깬 단계마다 칭호(1·3·5단계), 메달 (처음 깨면 2배), 단계별 최고 기록(시간)
 // 레이드 성공 기록을 명예의 전당(레이드 탭)에 자동으로 올림: 이름이 있을 때만. 점수 = 단계 × 100만 − 처치 시간
 function raidSubmit(bi,st,sec,ns){const t=st-1;const nick=myNick();if(!nick||!SHEET_URL)return;const L=myHeroes(),h=L.find(q=>q.id===S.raidMe);
@@ -12531,7 +12539,7 @@ function mainTags(){const fav=CLASSES[S.cls].fav||[],ks=Object.keys(S.tagc||{}).
   const r=[...ks];for(const f of fav)if(!r.includes(f))r.push(f);return [r[0],r[1]];}
 // 자동 선택 판단용: 전투력(공격력×공격 속도×치명 기대) · 버티는 힘(최대 체력×방어×회피). 카드·증강을 잠깐 적용해 보고 되돌려서 얼마나 오르는지 비교
 function ptNow(){try{const cr=critC(),cm=critMul();return {pw:Math.max(1e-6,pDmg()*pRate()*(1+cr*Math.max(0,cm-1))),tg:Math.max(1e-6,(hpSync(),S.p.maxHp)*(100+Math.max(0,armorEff()))/100/Math.max(.35,1-dodgeC()))};}catch(e){return null;}}
-function ptTry(fn){const P0=S.p,A0=S.augs,o0=S.own,q0=S.oq,t0=S.tagc,g0=S.gold;let a=null,b=null;try{a=ptNow();const c={...P0};S.p=c;fn(c);b=ptNow();}catch(e){b=null;}finally{S.p=P0;S.augs=A0;S.own=o0;S.oq=q0;S.tagc=t0;S.gold=g0;try{hpSync();}catch(e){}}
+function ptTry(fn){const P0=S.p,A0=S.augs,o0=S.own,q0=S.oq,t0=S.tagc,g0=S.gold,x0=S.fxL;let a=null,b=null;try{a=ptNow();const c={...P0};S.p=c;fn(c);b=ptNow();}catch(e){b=null;}finally{S.p=P0;S.augs=A0;S.own=o0;S.oq=q0;S.tagc=t0;S.gold=g0;S.fxL=x0;try{hpSync();}catch(e){}}
   return a&&b?{pw:b.pw/a.pw-1,tg:b.tg/a.tg-1}:null;}
 // 위험한 선택(운에 맡기거나 체력·방어를 깎는 것)은 개발자 자동 선택이 피함
 const RISKY_C=/운명|주사위|러시안|동전|결사|천운/;
@@ -13152,7 +13160,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=234,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=235,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
