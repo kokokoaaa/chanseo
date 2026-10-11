@@ -7229,7 +7229,7 @@ function update(dt){
     if(S.echoQ&&S.echoQ.length){for(const q of S.echoQ){q.t-=dt;if(q.t<=0)for(let i=0;i<q.n;i++)pBullet(p.x,p.y,q.a+(i-(q.n-1)/2)*.13,q.d,{sub:'메아리',child:true,r:4});}S.echoQ=S.echoQ.filter(q=>q.t>0);}
     if(droneN()>0){S.drT=(S.drT||0)-dt;if(S.drT<=0){S.drT=(has('f_fleet')?.4:.6)*tmul()*sumR();for(const q of dronePos()){const e=sumTarget(q,p.range*1.1);if(e)pBullet(q.x,q.y,Math.atan2(e.y-q.y,e.x-q.x),pDmg()*.6*sumM(),{child:true,r:3,src:'summon',sub:'드론'});}}}
     if(has('turret')){S.tuT=(S.tuT??2)-dt;if(S.tuT<=0){S.tuT=(has('f_overclock')?4:8)*tmul();const n=1+(has('turret2')?lv3('turret2',1,1,2):0),lf=(lv3('turret',5,6,8)+(has('turret2')?2:0)+(p.tuL||0))*(has('f_citadel')?2:1);S.tuN=(S.tuN||0)+n;for(let k=0;k<n;k++){const a=k*TAU/n+S.t;(S.turrets=S.turrets||[]).push({x:p.x+(n>1?Math.cos(a)*40:0),y:p.y+(n>1?Math.sin(a)*40:0),life:lf,cd:0});}}}
-    if(S.turrets&&S.turrets.length){const rg=p.range*(has('overwatch')?1+lv3('overwatch',.4,.5,.6):1);for(const u of S.turrets){u.life-=dt;u.cd-=dt;if(u.cd<=0){u.cd=(has('f_sentry')?.2:.4)*sumR()*tmul();const e=sumTarget(u,rg);if(e){const an=Math.atan2(e.y-u.y,e.x-u.x),bs=S.p.bspd*(has('overwatch')?1.5:1);pBullet(u.x,u.y,an,pDmg()*.5*sumM()*(S.cls==='gunner'?1.7:1)*(has('g_engineer')?1+(S.tuN||0)*lv3('g_engineer',.002,.0025,.003):1)*(has('boltturret')?1+lv3('boltturret',.3,.4,.5):1),{child:true,r:3,src:'summon',sub:'포탑',pierce:has('boltturret')?2:0,vx:Math.cos(an)*bs,vy:Math.sin(an)*bs});}}
+    if(S.turrets&&S.turrets.length){const rg=p.range*(has('overwatch')?1+lv3('overwatch',.4,.5,.6):1);for(const u of S.turrets){u.life-=dt;u.cd-=dt;if(u.cd<=0){u.cd=(has('f_sentry')?.2:.4)*sumR()*tmul();const e=sumTarget(u,rg);if(e){const an=Math.atan2(e.y-u.y,e.x-u.x);u.a=an;u.fT=.12;const _an=an,bs=S.p.bspd*(has('overwatch')?1.5:1);pBullet(u.x,u.y,an,pDmg()*.5*sumM()*(S.cls==='gunner'?1.7:1)*(has('g_engineer')?1+(S.tuN||0)*lv3('g_engineer',.002,.0025,.003):1)*(has('boltturret')?1+lv3('boltturret',.3,.4,.5):1),{child:true,r:3,src:'summon',sub:'포탑',pierce:has('boltturret')?2:0,vx:Math.cos(an)*bs,vy:Math.sin(an)*bs});}}
       if(u.life<=0&&has('selfdestruct'))explode(u.x,u.y,130,pDmg()*4*sumM(),'#ffb347');}S.turrets=S.turrets.filter(u=>u.life>0);}
     if(has('wisp')){S.wiT=(S.wiT??1)-dt;if(S.wiT<=0){S.wiT=(has('f_willo')?.5:1)*sumR();const w=wispPos(),e=sumTarget(w,p.range);if(e)pBullet(w.x,w.y,Math.atan2(e.y-w.y,e.x-w.x),pDmg()*lv3('wisp',.6,.8,1)*sumM(),{sub:'도깨비불',child:true,r:4,burn:true,src:'summon'});}}
     if(shadowOn()){S.shT=(S.shT??6)-dt;if(S.shT<=0){S.shT=6*cdM();spawnClone();}}
@@ -8018,7 +8018,17 @@ function draw(){
     else{P(B,4,-6,2,5);P(O,5,-23,4,19);P('#dfe6ee',6,-22,2,16);P('#8a929e',7,-22,1,16);P(G,6,-21,1,1);P(O,3,-6,8,2);P('#b08a3a',4,-6,6,1);P('#5a4a3a',6,-4,2,3);}
     ctx.globalAlpha=1;}
   if(S.turrets&&S.p.alive&&has('bastion'))for(const u of S.turrets){ctx.strokeStyle='rgba(159,211,255,.25)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(u.x,u.y,120,0,TAU);ctx.stroke();}
-  if(S.turrets&&S.p.alive)for(const u of S.turrets){ctx.fillStyle='#5a5f6a';ctx.fillRect(u.x-7,u.y-7,14,14);ctx.fillStyle='#5fa8e8';ctx.fillRect(u.x-3,u.y-11,6,8);}
+  // 포탑: 받침대(삼각 다리) + 돌아가는 포신 + 푸른 마력 수정 + 남은 시간 고리. 캐릭터보다 조금 크게, 바닥에 푸른 원으로 위치가 잘 보이게
+  if(S.turrets&&S.p.alive)for(const u of S.turrets){const a=u.a??-Math.PI/2,ml=u.ml||(u.ml=Math.max(u.life,1)),f=clamp(u.life/ml,0,1),pl=.5+.5*Math.sin(S.t*6+u.x);
+    ctx.save();ctx.translate(u.x,u.y);
+    ctx.fillStyle='rgba(95,168,232,.18)';ctx.beginPath();ctx.ellipse(0,8,22,9,0,0,TAU);ctx.fill();
+    ctx.strokeStyle='#3a3f4a';ctx.lineWidth=4;ctx.lineCap='round';for(const d of [-2.4,-.7,.9]){ctx.beginPath();ctx.moveTo(0,2);ctx.lineTo(Math.cos(d+Math.PI/2)*14,8+Math.sin(d+Math.PI/2)*5);ctx.stroke();}
+    ctx.fillStyle='#4a505c';ctx.strokeStyle='#1c2028';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,11,0,TAU);ctx.fill();ctx.stroke();
+    ctx.save();ctx.rotate(a);ctx.fillStyle='#2a2f38';ctx.fillRect(4,-3.5,16+(u.fT>0?-3:0),7);ctx.fillStyle='#9fd3ff';ctx.fillRect(16+(u.fT>0?-3:0),-2.5,4,5);
+    if(u.fT>0){ctx.fillStyle='rgba(255,240,180,.9)';ctx.beginPath();ctx.arc(22,0,5,0,TAU);ctx.fill();}ctx.restore();
+    ctx.fillStyle=`rgba(${120+60*pl|0},${200+40*pl|0},255,1)`;ctx.shadowColor='#5fa8e8';ctx.shadowBlur=10;ctx.beginPath();ctx.moveTo(0,-8);ctx.lineTo(5,-1);ctx.lineTo(0,5);ctx.lineTo(-5,-1);ctx.closePath();ctx.fill();ctx.shadowBlur=0;
+    ctx.strokeStyle='rgba(159,211,255,.85)';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(0,0,15,-Math.PI/2,-Math.PI/2+TAU*f);ctx.stroke();
+    ctx.restore();if(u.fT>0)u.fT-=1/60;}
   if(has('wisp')&&S.p.alive){const w=wispPos();ctx.fillStyle='rgba(255,140,60,.35)';ctx.beginPath();ctx.arc(w.x,w.y,9,0,TAU);ctx.fill();ctx.fillStyle='#ffb347';ctx.beginPath();ctx.arc(w.x,w.y,5,0,TAU);ctx.fill();ctx.fillStyle='#fff3c4';ctx.beginPath();ctx.arc(w.x,w.y-1,2,0,TAU);ctx.fill();}
   if(droneN()>0&&S.p.alive)for(const q of dronePos()){ctx.fillStyle='#5fa8e8';ctx.beginPath();ctx.moveTo(q.x,q.y-8);ctx.lineTo(q.x+8,q.y);ctx.lineTo(q.x,q.y+8);ctx.lineTo(q.x-8,q.y);ctx.closePath();ctx.fill();ctx.strokeStyle='#f1e7cf';ctx.lineWidth=1.5;ctx.stroke();}
   if(has('dealers')&&S.p.alive)for(const q of dealerPos()){ctx.fillStyle='#c0392b';ctx.beginPath();ctx.arc(q.x,q.y,9,0,TAU);ctx.fill();ctx.strokeStyle='#f1e7cf';ctx.lineWidth=2;ctx.setLineDash([3,3]);ctx.beginPath();ctx.arc(q.x,q.y,7,0,TAU);ctx.stroke();ctx.setLineDash([]);}
@@ -8072,6 +8082,7 @@ function drawMini(){
   mctx.strokeStyle='rgba(241,231,207,.35)';mctx.lineWidth=2;mctx.strokeRect(tx(camX),ty(camY),W*k,H*k);
   mctx.fillStyle='#ff6060';for(const e of S.en){if(e.boss)continue;const z=e.elite?7:4;mctx.fillRect(tx(e.x)-z/2,ty(e.y)-z/2,z,z);}
   for(const it of S.items){mctx.fillStyle=it.k==='heal'?'#7be08f':'#5fa8e8';mctx.beginPath();mctx.arc(cl(tx(it.x)),cl(ty(it.y)),6,0,TAU);mctx.fill();}
+  if(S.turrets)for(const u of S.turrets){const x=cl(tx(u.x)),y=cl(ty(u.y));mctx.fillStyle='#9fd3ff';mctx.strokeStyle='#1c2028';mctx.lineWidth=1.5;mctx.beginPath();mctx.moveTo(x,y-6);mctx.lineTo(x+6,y);mctx.lineTo(x,y+6);mctx.lineTo(x-6,y);mctx.closePath();mctx.fill();mctx.stroke();}
   try{qMini(mctx,tx,ty,cl);}catch(e){}
   if(S.merch){mctx.fillStyle='#d6a94a';mctx.fillRect(cl(tx(S.merch.x))-11,cl(ty(S.merch.y))-8,22,16);mctx.font='14px sans-serif';mctx.textAlign='center';mctx.textBaseline='middle';mctx.fillText(MERCH[S.merch.k].icon,cl(tx(S.merch.x)),cl(ty(S.merch.y)));}
   if(S.arena){mctx.strokeStyle='#ff6a4a';mctx.lineWidth=3;mctx.strokeRect(tx(S.arena.x-S.arena.r),ty(S.arena.y-S.arena.r),S.arena.r*2*k,S.arena.r*2*k);}
@@ -8696,6 +8707,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:269,t:'🗼 포탑이 잘 보이게',items:[
+    ['look','🗼 <b>포탑 새 모습</b>: 작은 회색 네모였던 포탑을 세 다리 받침대 + 적을 따라 도는 포신 + 빛나는 푸른 수정으로 다시 그림. 쏠 때 포구가 번쩍이고, 둘레의 푸른 고리로 남은 시간이 보여요 · 미니맵에도 <b>푸른 마름모</b>로 표시']]},
   {v:267,t:'🏆 악몽 점수식 개편',items:[
     ['change','🏆 무한의 악몽 점수: <b>보스 점수 없앰</b> (보스는 시간마다 나와서 생존 시간과 똑같이 쌓였음) · <b>레벨 점수 ×3</b> (레벨 1당 48 → 144점) · 손으로 해내는 <b>플레이 보너스 ×2</b> (황금 용·숨겨진 몬스터·이스터에그·돌발 이벤트·보스 노히트·완벽한 회피, 최고 DPS 보너스는 그대로). 이번 버전 이후 기록부터 적용되고 예전 기록은 그때 점수 그대로예요']]},
   {v:266,t:'🔧 저장 호환 수정',items:[
@@ -13929,7 +13942,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=268,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=269,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
