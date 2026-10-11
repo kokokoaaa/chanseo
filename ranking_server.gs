@@ -1,4 +1,9 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v7.5
+// 찬서 명예의 전당 서버 (Google Apps Script) v7.6
+//
+// v7.5 → v7.6 바뀐 점
+// - 플레이 보너스 점수에 상한(BONUS_MAX)을 둠: 숫자가 아니거나 너무 큰 값(무한대 등)이 오면 상한으로 자름
+//   (무한대 점수가 한 번 들어가면 아무도 못 넘고 지우기 전엔 그대로 남던 문제)
+// - 악몽 새 기록의 시간 환산을 게임과 똑같이 반올림 (홀수 초에서 게임·서버 점수가 조금 달라 '내 기록' 표시가 어긋나던 문제)
 //
 // v7.4 → v7.5 바뀐 점
 // - 레이드가 보스 5종으로 나뉨: 보스마다 따로 기록 (raid_golem · raid_frost · raid_storm · raid_brood · raid_void).
@@ -225,6 +230,7 @@ const softC_ = (x, c) => x <= c ? x : c * (1 + Math.log(x / c));
 // 점수 계산식 v2 (게임과 같음): 이 시각 이후 기록은 10분 이후 생존 점수가 커지고 보스 처치 800점
 const SC_TW = 1.5, SC_KC = 2000, LV_AT = 1791609893000, lvPts_ = r => (+r.lvl || 0) * 30 * ((+r.at || 0) >= LV_AT ? 1.6 : 1);
 const SC2_AT = 1791462600000, SC3_AT = 1791493000000, NM_TK = 1.5, NM_SM = 2;
+const BONUS_MAX = 2000000; // 플레이 보너스 상한 (보통 판은 수천~수만)
 const BR_AT = 1791547600000, BR_SM = 2; // 보스 러시 새 규칙 기록은 최종 점수 ×BR_SM (게임과 같은 값)
 const timePts_ = (t, v2) => !v2 || t <= 600 ? t * 12 : 7200 + 12 * ((t - 600) + (t - 600) * (t - 600) / 240);
 
@@ -253,10 +259,10 @@ function clean_(d, at) {
 // 게임과 같은 최종 점수: (기본 + 플레이 보너스) × 난이도 배율 × (1 − 0.1 × 자동 비율). 보너스·자동 비율은 cls의 ~칸에 들어 있음
 function score_(r) {
   if (String(r.diff).indexOf('raid') === 0) return Math.max(0, r.lvl * 1000000 - Math.min(999999, r.time));
-  const seg = String(r.cls || '').split('~'), bonus = Math.max(0, +seg[1] || 0), ap = Math.min(1, Math.max(0, (+seg[2] || 0) / 100)), v2 = false; // v2(제곱 시간 점수)는 v5.3에서 폐지: 게임 화면과 같게 모든 기록 v1 식
+  const seg = String(r.cls || '').split('~'), bonus = Math.min(BONUS_MAX, Math.max(0, isFinite(+seg[1]) ? +seg[1] : 0)), ap = Math.min(1, Math.max(0, (+seg[2] || 0) / 100)), v2 = false; // v2(제곱 시간 점수)는 v5.3에서 폐지: 게임 화면과 같게 모든 기록 v1 식
   const base = r.diff === 'bossrush'
     ? r.bosses * 2500 + lvPts_(r) + r.time * 2
-    : timePts_(r.diff === 'nightmare' && +r.at >= SC3_AT ? r.time * NM_TK : r.time, v2) * SC_TW + softC_(r.kills * 2, SC_KC) + lvPts_(r) + r.bosses * (v2 ? 800 : 400) + (r.bosses >= 4 ? 3000 : 0);
+    : timePts_(r.diff === 'nightmare' && +r.at >= SC3_AT ? r.time + Math.round(r.time * (NM_TK - 1)) : r.time, v2) * SC_TW + softC_(r.kills * 2, SC_KC) + lvPts_(r) + r.bosses * (v2 ? 800 : 400) + (r.bosses >= 4 ? 3000 : 0);
   const sm = r.diff === 'nightmare' && +r.at >= SC3_AT ? NM_SM : r.diff === 'bossrush' && +r.at >= BR_AT ? BR_SM : 1;
   return Math.round(Math.round((base + bonus) * (DIFFS[r.diff] || 1)) * sm * (1 - 0.1 * ap));
 }
@@ -329,7 +335,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 75, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 76, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교

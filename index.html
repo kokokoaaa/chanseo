@@ -8328,14 +8328,14 @@ function gameOver(win){
   let unlocked='';
   // 악몽: 10분 이상 버티면 봉인 해제권 2장
   if(endless()&&S.gt>=600&&tkNeed()>0){const g=Math.min(2,tkNeed());META.tk=(META.tk||0)+g;unlocked='🎟 직업 봉인 해제권 +'+g;}
-  {if(win){META.ccls=META.ccls||{};META.ccls[S.cls]=1;}achCheck({win,dash:S.st.dash||0,diff:S.diff||'normal',t:S.gt+(S.bt||0),kills:S.st.kills||0,lvl:S.lvl,maxGold:Math.max(S.maxGold||0,S.gold),uc:S.augs.some(a=>a.uc),augN:S.augs.filter(a=>a.t!=='v').length,mcap:!!(S.mk&&Object.keys(S.mk).length),uset:(()=>{try{const c=setCnt();return Math.max(0,...Object.keys(c).filter(k=>SETS[k].u).map(k=>c[k]));}catch(e){return 0;}})(),sp:(()=>{try{return GEAR_KEYS.some(k=>{const it=eqItem(k);return it&&it.sp&&spOn(it,S.cls);});}catch(e){return false;}})()});}
+  {if(win){META.ccls=META.ccls||{};META.ccls[S.cls]=1;}achCheck({win,quit:!!S.quitEnd,dash:S.st.dash||0,diff:S.diff||'normal',t:S.gt+(S.bt||0),kills:S.st.kills||0,lvl:S.lvl,maxGold:Math.max(S.maxGold||0,S.gold),uc:S.augs.some(a=>a.uc),augN:S.augs.filter(a=>a.t!=='v').length,mcap:!!(S.mk&&Object.keys(S.mk).length),uset:(()=>{try{const c=setCnt();return Math.max(0,...Object.keys(c).filter(k=>SETS[k].u).map(k=>c[k]));}catch(e){return 0;}})(),sp:(()=>{try{return GEAR_KEYS.some(k=>{const it=eqItem(k);return it&&it.sp&&spOn(it,S.cls);});}catch(e){return false;}})()});}
   const unl=[];if(unlocked)unl.push(unlocked);
   if(win){META.clears=META.clears||{};const d=S.diff||'normal',first=!META.clears[d],spB=speedMax(),tB={g:tierOpen('g'),p:tierOpen('p'),v:tierOpen('v')};META.clears[d]=(META.clears[d]||0)+1;const nx=DKEYS[DKEYS.indexOf(d)+1];
     if(first){if(nx)unl.push(`🗺 ${DIFF[nx].n} 난이도`);for(const t of ['g','p','v'])if(!tB[t]&&tierOpen(t))unl.push(t==='v'?'💎 왕실 상점':`✨ ${TIER[t].n} 증강`);if(speedMax()>spB)unl.push(`⏩ ${speedMax()}배속`);}
     if((d==='god'||d==='hell')&&tkNeed()>0){META.tk=(META.tk||0)+1;unl.push('🎟 직업 봉인 해제권 +1');}}
   unlocked=unl.join(' · ');
   const hsnap=heroOk()?(()=>{try{return heroSnap();}catch(e){return null;}})():null;
-  const sec=runSec(),score=runScore(),medals=runMedals(score);try{mstGain(sec);}catch(e){}try{if(S.qAll!==false){qAdd('surv',Math.floor((S.gt||0)/60));qAdd('lvl',S.lvl||1);}}catch(e){}META.medals+=medals;META.total+=medals;saveMeta();CH_PEND=true;setTimeout(()=>{try{csUpload(true);}catch(e){}},4000);
+  const sec=runSec(),score=runScore(),medals=runMedals(score);try{mstGain(sec);}catch(e){}try{achCheck(null);}catch(e){}try{if(S.qAll!==false){qAdd('surv',Math.floor(((S.gt||0)+(S.bt||0))/60));qAdd('lvl',S.lvl||1);}}catch(e){}META.medals+=medals;META.total+=medals;saveMeta();CH_PEND=true;setTimeout(()=>{try{csUpload(true);}catch(e){}},4000);
   if(sec>best){best=sec;try{localStorage.setItem('chipdungeon_best_v5',String(best));}catch(e){}}
   const fmt=x=>`${Math.floor(x/60)}분 ${x%60}초`;
   show(`${unlocked?`<div class="medal" style="justify-content:center"><span>🔓 새로 해금: <b>${unlocked}</b></span></div>`:''}${lootSum()}${mstSum()}${qSum()}${win?`<h2>🏆 클리어!</h2><p class="sub">10분을 버티고 ${(ET[(S.bossT||[])[3]]||ET.boss4).n}을(를) 쓰러뜨렸습니다. 보스전에 ${fmt(Math.floor(S.bt))} 걸렸어요.</p>`:`<h2>${endless()?(rushOn()?'⚔ 보스 러시 '+(S.chap+1)+'단계 도달':'악몽 '+(S.chap+1)+'단계 도달'):S.quitEnd?'여기서 정산했습니다':'쓰러졌습니다'}</h2><p class="sub">${endless()?`보스 ${S.st.bosses||0}마리를 잡고`:Math.min(4,S.chap+1)+'장에서'} ${fmt(sec)} 버텼습니다.${S.bossI>=0?` (${ET[bossTypeOf(S.bossI)].n}에게 패배)`:''}</p>`}
@@ -8427,6 +8427,13 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:236,t:'🛠 버그 점검 3',items:[
+    ['change','📜 1배속 의뢰 「끝까지 버티기」가 무한의 악몽에서만 깰 수 있던 문제를 고쳤어요. 이제 보스전 시간까지 합쳐서 세요','bug'],
+    ['change','📜 의뢰의 마지막 보상(고유 전설 무기)을 받을 때 가방·창고가 가득 차 있으면 몰래 팔리던 문제를 고쳤어요. 이제 의뢰인이 기다려 주고, 한 칸 비우면 다음에 받아요','bug'],
+    ['change','📜 배속을 쓰다가 저장하고 1배속으로 이어하면 의뢰 진행이 인정되던 문제를 고쳤어요','bug'],
+    ['change','🏅 마스터리 도전과제가 다음 판에서야 열리던 문제, 「정산」으로 끝내도 히든 도전과제 「너무 성급했다」가 열리던 문제를 고쳤어요','bug'],
+    ['change','🏆 명예의 전당 안내 문구를 실제 규칙에 맞게 고쳤어요 (한마디는 처음 올리거나 더 좋은 기록일 때 바뀜 · 최근 기록은 신 이상)','bug'],
+  ]},
   {v:235,t:'🛠 버그 점검 2',items:[
     ['change','🃏 증강 카드를 고르지 않고 「포기·골드·스탯 대신·그만 받기」를 누르면 <b>마지막에 보인 카드 효과가 공짜로 켜져 있던</b> 문제를 고쳤어요','bug'],
     ['change','🐱 행운의 고양이의 <b>확정 프리즘</b>이 슬롯이 가득 찬 상태에서 증강 화면이 아닌 곳에서 사라지던 문제를 고쳤어요','bug'],
@@ -9424,8 +9431,9 @@ function qArrow(W,H){if(!S||!S.qn)return;const q=S.qn,sx=q.x-camX,sy=q.y-camY;if
 function qMini(mctx,tx,ty,cl){if(!S||!S.qn)return;const x=cl(tx(S.qn.x)),y=cl(ty(S.qn.y)),r=7+Math.sin(S.t*8)*2;mctx.fillStyle='#ffd76a';mctx.beginPath();for(let i=0;i<10;i++){const a=i*Math.PI/5-Math.PI/2,rr2=i%2?r*.45:r;mctx.lineTo(x+Math.cos(a)*rr2,y+Math.sin(a)*rr2);}mctx.closePath();mctx.fill();mctx.strokeStyle='#5a3a1a';mctx.lineWidth=1.5;mctx.stroke();}
 // 의뢰인 대화 (게임은 멈춤)
 function openQuest(){S.mode='quest';joy=null;const Q=qD();let msg='',got='';
-  const give=r=>{if(r==='uq'){const it=rollUnique(S.cls);gearGive(it,true);return `★ ${itName(it)}`;}if(r[0]==='m'){const m=+r.slice(1)*(1+.5*(Q.cyc||0))|0;META.medals+=m;META.total=(META.total||0)+m;return `🏅 메달 ${m}`;}const n=+r.slice(1);META.prot=(META.prot||0)+n;return `🕊 강화의 축복 ${n}장`;};
-  if(Q.acc&&qReady()){const s=Q_STEPS[Q.st];got=give(s.rw);Q.acc=0;Q.pr=0;if(Q.st>=Q_STEPS.length-1){Q.st=0;Q.cyc=(Q.cyc||0)+1;msg='전설의 증표를 받았구나! 정말 대단한 모험가야. 다음엔 더 어려운 의뢰를 준비해 둘게.';}else{Q.st++;msg='고마워! 약속한 보상이야. 다음 의뢰도 부탁해도 될까?';}saveMeta();try{achCheck(null);}catch(e){}chime([523,659,784,1047,1319],'triangle');}
+  const give=r=>{if(r==='uq'){const it=rollUnique(S.cls),c0=it.cls&&CLASSES[it.cls]?it.cls:'bag';if(!cDest([c0,'bag','wh']))return null;/* 자리가 없으면 팔지 말고 다음에 */gearGive(it,true);return `★ ${itName(it)}`;}if(r[0]==='m'){const m=+r.slice(1)*(1+.5*(Q.cyc||0))|0;META.medals+=m;META.total=(META.total||0)+m;return `🏅 메달 ${m}`;}const n=+r.slice(1);META.prot=(META.prot||0)+n;return `🕊 강화의 축복 ${n}장`;};
+  if(Q.acc&&qReady()&&Q_STEPS[Q.st].rw==='uq'&&!cDest([CLASSES[S.cls]?S.cls:'bag','bag','wh'])){msg='가방과 창고가 가득 차서 전설 무기를 줄 수가 없어! 장비를 한 칸 비우고 다음 판에 다시 만나자.';}
+  else if(Q.acc&&qReady()){const s=Q_STEPS[Q.st];got=give(s.rw)||'';Q.acc=0;Q.pr=0;if(Q.st>=Q_STEPS.length-1){Q.st=0;Q.cyc=(Q.cyc||0)+1;msg='전설의 증표를 받았구나! 정말 대단한 모험가야. 다음엔 더 어려운 의뢰를 준비해 둘게.';}else{Q.st++;msg='고마워! 약속한 보상이야. 다음 의뢰도 부탁해도 될까?';}saveMeta();try{achCheck(null);}catch(e){}chime([523,659,784,1047,1319],'triangle');}
   else msg=Q.cyc?'또 만났네! 이번 의뢰는 지난번보다 어려워.':'안녕, 모험가! 천천히(1배속) 모험하는 사람에게만 맡기는 의뢰가 있어. 여러 판에 걸쳐 해내면 전설의 증표를 줄게.';
   const s=Q_STEPS[Q.st],last=Q.st===Q_STEPS.length-1;
   show(`<h2>📜 의뢰인</h2><div class="qbox"><div class="qsay">${msg}</div>${got?`<div class="qgot">🎁 받은 보상: <b>${esc(got)}</b></div>`:''}
@@ -11070,7 +11078,7 @@ const ACH=[
   {k:'h_forge',hid:1,n:'전설의 대장장이',d:'장비를 +10까지 강화'},
   {k:'h_broke',hid:1,n:'산산조각',d:'강화하다가 장비가 부서지기'},
   {k:'h_wave',hid:1,n:'빛을 등진 자',d:'악몽의 파동에 휩쓸려 쓰러지기'},
-  {k:'h_fast',hid:1,n:'너무 성급했다',d:'시작하고 1분 안에 쓰러지기',c:R=>R&&!R.win&&R.t<60},
+  {k:'h_fast',hid:1,n:'너무 성급했다',d:'시작하고 1분 안에 쓰러지기',c:R=>R&&!R.win&&!R.quit&&R.t<60},
   {k:'h_chat',hid:1,n:'수다쟁이',d:'채팅을 100번 보내기',p:()=>[META.chatN||0,100],c:()=>(META.chatN||0)>=100},
   // v184 추가분은 맨 뒤에 (프로필 도전과제 비트 순서가 예전 버전과 어긋나지 않게)
   {k:'ms_cap',n:'첫 결실',d:'아무 직업이나 마스터리 ★ 핵심 능력 찍기',p:()=>[Math.min(1,mstCapN()),1],c:()=>mstCapN()>=1},
@@ -11923,7 +11931,7 @@ function normBoard(list){return list.map(b=>({...b,dw:dwOf(b.dw),diff:dOf(b),fx:
 const myRecs=()=>{try{return JSON.parse(localStorage.getItem('chanseo_myrec')||'{}');}catch(e){return {};}};
 const saveMyRec=r=>{try{const m=myRecs();const old=m[r.diff];if(!old||scoreOf({...r})>=scoreOf({...old}))m[r.diff]=r;localStorage.setItem('chanseo_myrec',JSON.stringify(m));}catch(e){}};
 function mergeMine(list){const m=myRecs();for(const k in m){const r=m[k];const sv=list.find(b=>b.name===r.name&&b.diff===k);if(!sv||sv.score<scoreOf({...r,diff:k}))list=[...list.filter(b=>b!==sv),...normBoard([r]).map(b=>({...b,id:'s_'+b.name+'_'+b.diff,local:true}))];}return normBoard(list).map(b=>({...b,id:b.id||'s_'+b.name+'_'+b.diff}));}
-const regForm=()=>(RDB&&RMYID)||SHEET?`<div class="nick col">${myNick()?`<input id="nickIn" type="hidden" value="${esc(myNick())}"><div style="font-size:15px">👤 <b>${esc(myNick())}</b> 이름으로 올라가요 <small style="color:var(--muted)">(이름은 시작 화면 👤에서 바꿀 수 있어요)</small></div>`:`<input id="nickIn" maxlength="12" placeholder="이름 (12자까지) · 한 번 정하면 다음부터 자동" value="">`}<div class="row"><input id="cmtIn" maxlength="40" placeholder="한마디 남기기 (40자까지, 비워도 돼요)"><button class="btn" id="rsub">등록</button></div></div><p class="sub" id="rmsg" style="margin-top:6px">${myNick()?'등록을 누르면':'이름과 한마디를 쓰고 등록을 누르면'} 메인 화면 명예의 전당에 올라가요. 이름마다 가장 높은 점수만 남고, 점수가 더 낮으면 한마디만 바뀌어요.</p>`:`<p class="sub">${RSTATE==='loading'?'랭킹 서버에 연결하는 중이에요…':'랭킹 서버(구글 시트)에 연결하지 못했어요. 인터넷 연결을 확인하거나 잠시 뒤 다시 시도해 주세요.'}</p><button class="btn ghost" id="rRetry">↻ 랭킹 서버 다시 연결</button>`;
+const regForm=()=>(RDB&&RMYID)||SHEET?`<div class="nick col">${myNick()?`<input id="nickIn" type="hidden" value="${esc(myNick())}"><div style="font-size:15px">👤 <b>${esc(myNick())}</b> 이름으로 올라가요 <small style="color:var(--muted)">(이름은 시작 화면 👤에서 바꿀 수 있어요)</small></div>`:`<input id="nickIn" maxlength="12" placeholder="이름 (12자까지) · 한 번 정하면 다음부터 자동" value="">`}<div class="row"><input id="cmtIn" maxlength="40" placeholder="한마디 남기기 (40자까지, 비워도 돼요)"><button class="btn" id="rsub">등록</button></div></div><p class="sub" id="rmsg" style="margin-top:6px">${myNick()?'등록을 누르면':'이름과 한마디를 쓰고 등록을 누르면'} 메인 화면 명예의 전당에 올라가요. 이름마다 가장 높은 점수만 남아요 (한마디는 처음 올리거나 더 좋은 기록일 때 바뀌어요).</p>`:`<p class="sub">${RSTATE==='loading'?'랭킹 서버에 연결하는 중이에요…':'랭킹 서버(구글 시트)에 연결하지 못했어요. 인터넷 연결을 확인하거나 잠시 뒤 다시 시도해 주세요.'}</p><button class="btn ghost" id="rRetry">↻ 랭킹 서버 다시 연결</button>`;
 // 명예의 전당: 지난번 받은 목록을 먼저 보여주고, 뒤에서 새로 받아 바꿈 (15초 넘으면 한 번 더 시도)
 const BOARD_KEY='chanseo_board';
 function setBoardFrom(j){BOARD_DW=!!(j.length&&'dw' in j[0]);BOARD=mergeMine(normBoard(j).map(b=>({...b,id:'s_'+b.name+'_'+b.diff})));SHEET=true;RSTATE='on';refreshBoard();}
@@ -12116,7 +12124,7 @@ async function specPoll(){const sp=SPEC;while(SPEC===sp){try{const r=await fetch
 function specStop(){const sp=SPEC;SPEC=null;SPEC_OV=null;GEAR_OVR=null;augBarKey='';if(sp&&sp.fb)fbSpecStop(sp);else if(sp&&SHEET_URL){try{fetch(SHEET_URL+'?spec='+encodeURIComponent(sp.u)+'&stop=1&me='+onlId()+'&dk='+encodeURIComponent(DEV_K),{cache:'no-store'});}catch(e){}}const b=document.getElementById('specBar');if(b)b.remove();newRun();startScreen();}
 function specBar(){let b=document.getElementById('specBar');if(!SPEC){if(b)b.remove();return;}if(!b){b=document.createElement('div');b.id='specBar';b.style.cssText='position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:9000;white-space:nowrap;max-width:96vw;overflow:hidden;background:rgba(10,6,20,.85);border:2px solid #c86aff;border-radius:999px;padding:6px 14px;color:#fff;font:15px "Do Hyeon",sans-serif;display:flex;gap:10px;align-items:center';b.innerHTML='<span id="specT"></span><button class="btn" id="specX" style="padding:2px 10px;font-size:14px">나가기</button>';document.body.appendChild(b);$('specX').onpointerdown=e=>{e.preventDefault();e.stopPropagation();specStop();};}
   const s=SPEC.snap,stale=SPEC.seen&&performance.now()-SPEC.seen>(SPEC.fb?6000:9000),h=`👁 <b>${esc(SPEC.n)}</b> 관전 중 ${stale?'· <b style="color:#ff9a6a">📴 신호 끊김 (게임을 껐거나 인터넷 문제)</b> ':''}${s?(s.m==='start'?`· 🏠 시작 화면${s.pc&&CLASSES[s.pc]?' · '+CLASSES[s.pc].n+' 고르는 중':''}${s.pd&&DIFF[s.pd]?' · '+DIFF[s.pd].n:''}`:s.m==='over'||s.m==='revive'?`· <b style="color:#ff6a6a">💀 쓰러짐</b> · Lv${s.l} · ${Math.floor(s.t/60)}분 ${s.t%60}초 · 처치 ${s.k}`:`· ${CLASSES[s.c]?CLASSES[s.c].n:''} Lv${s.l} · ${Math.floor(s.t/60)}분 ${s.t%60}초 · 처치 ${s.k} · 체력 ${s.h}%${s.m==='aug'?' · <b style="color:#ffd76a">✨ 증강 고르는 중</b>':s.m==='shop'?' · <b style="color:#ffd76a">🛒 상점</b>':''}${(s.sp||1)>1?' · x'+s.sp+'배속':''}`):(SPEC.wait>2?'· 신호 기다리는 중 (상대 게임이 최신이어야 해요)':'· 연결 중…')}${SPEC.fb?' <small style="opacity:.6">실시간</small>':' <small style="opacity:.6">예비 서버(느림)</small>'}`;const t=$('specT');if(t&&t.innerHTML!==h)t.innerHTML=h;}
-function specApply(s){const sp=SPEC;if(!sp)return;const pm=sp.snap&&sp.snap.m;sp.snap=s;sp.seen=performance.now();
+function specApply(s){const sp=SPEC;if(!sp||!s||typeof s!=='object')return;/* 받은 값은 믿지 않음: 화면에 쓰는 칸은 숫자·정해진 글자만 */for(const k of ['l','k','h','t','sp'])s[k]=isFinite(+s[k])?+s[k]:0;s.m=typeof s.m==='string'?s.m.replace(/[^a-z]/g,'').slice(0,12):'';if(!CLASSES[s.c])s.c='';const pm=sp.snap&&sp.snap.m;sp.snap=s;sp.seen=performance.now();
   // 상태가 바뀌면 바로 알림: 쓰러짐 · 시작 화면으로 나감 · 새 판 시작
   if(pm&&pm!==s.m){if(s.m==='over'||s.m==='revive')toast(`💀 ${SPEC.n} 쓰러짐! Lv${s.l} · ${Math.floor((s.t||0)/60)}분 ${(s.t||0)%60}초 · 처치 ${s.k}`);else if(s.m==='start')toast(`🏠 ${SPEC.n} 시작 화면으로 나갔어요`);else if(pm==='start')toast(`▶ ${SPEC.n} 새 판 시작!`);}
   if(s.m==='start'){S.en.length=0;specBar();return;}
@@ -12311,7 +12319,7 @@ function recentAv(r){const h=r.snap&&r.snap.cls?r.snap:null;if(h)return hofAv(h.
 const recentHeroSaved=r=>!!(r.snap&&r.snap.id&&myHeroes().some(h=>h.id===r.snap.id));
 function recentMark(run){const L=recentList();const r=L.find(x=>x.at===run.at);if(r){r.sent=1;recentSave(L);}}
 function openRecent(){const L=recentList(),f=x=>`${Math.floor(x/60)}분 ${Math.floor(x%60)}초`,d=t=>{const D=new Date(t);return `${D.getMonth()+1}/${D.getDate()} ${D.getHours()}:${String(D.getMinutes()).padStart(2,'0')}`;};
-  show(`<div class="shophead"><h2>📜 내 최근 기록</h2><button class="btn" id="rcBack">돌아가기</button></div><p class="sub">지옥 이상 난이도에서 끝난 최근 5판이에요. 깜빡하고 명예의 전당에 안 올린 판을 골라 한마디와 함께 등록할 수 있어요. (점수는 그 판을 한 때의 계산식 그대로)</p>
+  show(`<div class="shophead"><h2>📜 내 최근 기록</h2><button class="btn" id="rcBack">돌아가기</button></div><p class="sub">신 이상 난이도(신·무한의 악몽·보스 러시)에서 끝난 최근 5판이에요. 깜빡하고 명예의 전당에 안 올린 판을 골라 한마디와 함께 등록할 수 있어요. (점수는 그 판을 한 때의 계산식 그대로)</p>
   <div class="rank">${L.map((r,i)=>`<div class="rrow" data-rc="${i}" style="cursor:pointer"><span class="rn">${i+1}</span><span class="rnm"><b>${(()=>{const a=recentAv(r);return a?`<img class="hav s" src="${a}" alt="">`:'';})()}${DIFF[r.diff]?DIFF[r.diff].n:r.diff} · ${CLASSES[r.cls]?CLASSES[r.cls].n:r.cls}${DEV&&r.build?` <small style="padding:0 4px;border-radius:4px;background:rgba(95,201,217,.22);color:#9fe8ff;font-size:11px">v${r.build}</small>`:''}</b><i>${d(r.at)} · Lv ${r.lvl} · ${f(r.sec)}${r.sent?' · ✔ 등록함':''}${recentHeroSaved(r)?' · 🗃 저장함':''}</i></span><span class="rc">보스 ${r.bosses}</span><span class="rt">${scoreOf({...r,time:r.sec}).toLocaleString()}</span></div>`).join('')||'<p class="sub">아직 기록이 없어요.</p>'}</div><div id="rcReg"></div>`);
   {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}
   $('rcBack').onclick=startScreen;
@@ -12786,7 +12794,7 @@ const SAVE_KEY='chipdungeon_save_v1';
 const PKEYS=['cdP','crP','chP','mExR','shield','skCd','ulCd','oathCd','cfS','cfT','hpPk','ulCdM','ulDm','skM','fyR','dmgP','rateP','xpM','block','token','hp','maxHp','speed','dmg','rate','bspd','range','multi','pierce','crit','critM','luck','goldM','vuln','orbR','orbM','dashMul','armor','dodge','lifesteal','regen','magnet','shots','pkills','lastCd','soulN','fyO','skN','hpP','hpB','hpLM',
   // 스탯 카드·증강이 쌓는 계열별 보너스 (이어하기 때 사라지던 것들)
   'cdR','sumD','tuL','psD','fiD','thD','slD','hoD','shD','gvR','mkD','wvD','auraM','auraD','skD','skL','lbD','rlM','elD','fyC','fyD','vnR','vnD','ptR','ptD','hdP','hdD','rfN','snR','vpN','dashD'];
-const SKEYS=['mk','lk0','gl','lootGot','chip','hub','amT','dpsMax','maxGold','phoenixCd','shopPend','eggDone','eggK','altN','nmC','dragonPend','prismN','hidN','hidK','hbDone','arr','nmB','gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','takeAll','keys','vipStock','vipRoll','buys','cbuys','fused','potN','vineN','seals','banL','noAug','bossT','bioO','dlog','bStart','bHit','bHpF','boostN','boostB','bonusSt','curB','augN'];
+const SKEYS=['mk','qAll','qSeen','lk0','gl','lootGot','chip','hub','amT','dpsMax','maxGold','phoenixCd','shopPend','eggDone','eggK','altN','nmC','dragonPend','prismN','hidN','hidK','hbDone','arr','nmB','gold','xp','lvl','next','gt','chap','bossI','bt','merchT','piggyT','insureT','pendingLv','picks','bonusAug','revives','srr','debtT','cls','diff','takeAll','keys','vipStock','vipRoll','buys','cbuys','fused','potN','vineN','seals','banL','noAug','bossT','bioO','dlog','bStart','bHit','bHpF','boostN','boostB','bonusSt','curB','augN'];
 function saveGame(silent){
   if(S&&(dfM().raid||dfM().duel))return false;
   if(!S||!S.started||!S.p.alive||S.win||S.mode==='over'||S.mode==='dying'||S.mode==='revive')return false;
@@ -13160,7 +13168,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=235,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=236,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
