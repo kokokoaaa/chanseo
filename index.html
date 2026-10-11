@@ -1481,9 +1481,10 @@ const EGG={
 // 이스터에그 보너스 배율: 5분까지 ×1, 그 뒤로 5분마다 +1 (10분 ×2 · 15분 ×3 · 20분 ×4). 후반엔 찾아가기 어려운 만큼 크게
 const eggMul=()=>1+Math.max(0,((S.gt||0)+(S.bt||0))-300)/300;
 // 결계 밖 건축물은 갈 수 없으니 이스터에그 대상에서 뺌
-const inArena=(x,y,pad=0)=>{const A=S.arena;return !A||(Math.abs(x-A.x)<A.r-pad&&Math.abs(y-A.y)<A.r-pad);};
+// 결계(악몽·보스) 안인지: 줄어드는 중이면 줄어들 목표 크기 기준. 결계가 없으면 항상 안
+const inArena=(x,y,pad=0)=>{const A=S&&S.arena;if(!A)return true;const h=Math.min(A.r,A.tr||A.r)-pad;return Math.abs(x-A.x)<h&&Math.abs(y-A.y)<h;};
 // 아직 안 한 이스터에그 건축물 중 가장 가까운 것 (결계 위치 정할 때)
-function eggNearest(x,y,R){let b=null,bd=R;if(!S)return null;const D=S.eggDone||{};for(let cx=Math.floor((x-R)/LC);cx<=Math.floor((x+R)/LC);cx++)for(let cy=Math.floor((y-R)/LC);cy<=Math.floor((y+R)/LC);cy++){const m=lmAt(cx,cy);if(!m||!eggOn(m.k)||D[m.k]||D[m.x+','+m.y])continue;const d=Math.hypot(m.x-x,m.y-y);if(d<bd){bd=d;b=m;}}return b;}
+function eggNearest(x,y,R){let b=null,bd=R;if(!S)return null;const D=S.eggDone||{};for(let cx=Math.floor((x-R)/LC);cx<=Math.floor((x+R)/LC);cx++)for(let cy=Math.floor((y-R)/LC);cy<=Math.floor((y+R)/LC);cy++){const m=lmAt(cx,cy);if(!m||!eggOn(m.k)||D[m.k]||D[m.x+','+m.y]||!inArena(m.x,m.y,30))continue;const d=Math.hypot(m.x-x,m.y-y);if(d<bd){bd=d;b=m;}}return b;}
 // 이번 판에 이 배경에서 이스터에그가 걸린 건축물 종류 하나 (판마다 무작위, 아직 못 찾은 종류를 먼저 고름)
 function eggKOf(){if(!S||rushOn())return ''; // 보스 러시·레이드·결투에는 이스터에그 없음
   const b=S.biome!=null?S.biome:0;S.eggK=S.eggK||{};if(S.eggK[b]==null){const c0=(BIOMES[b].lm||[]).filter(k=>EGG[k]),cu=c0.filter(k=>!Object.values(S.eggK).includes(k)&&!(S.eggDone||{})[k]),c=cu.length?cu:c0,nw=c.filter(k=>!(META.egg||{})[k]),pool=nw.length?nw:c;S.eggK[b]=pool.length?pool[Math.floor(Math.random()*pool.length)]:'';}return S.eggK[b];}
@@ -5222,6 +5223,9 @@ const blessOn=k=>S.bless&&S.bless.t>0&&S.bless.k===k;
 // 이벤트 표적(정예 사냥 🎯, 보물 고블린 💰)이 사거리 안에 있으면 자동 조준이 먼저 노림
 function evTarget(rg){const p=S.p;let b=null,bd=(rg+40)**2;for(const e of S.en){if(!e.alive||e.phase||!(e.hunt||e.type==='goblin'))continue;const d=d2(e,p);if(d<bd){bd=d;b=e;}}return b;}
 // 결계(악몽·보스)가 있으면 결계 안으로 당겨 둠 (밖에 생기면 갈 수 없어 이벤트를 못 깸)
+// 결계가 줄어들면 이벤트 물건·의뢰인·상인을 결계 안으로 끌어옴
+function keepInArena(){if(!S||!S.arena)return;const f=(o,pad)=>{if(o&&o.x!=null&&!inArena(o.x,o.y,pad)){const q=inA(o.x,o.y,pad);o.x=q[0];o.y=q[1];}};
+  const ev=S.ev;if(ev){f(ev,(ev.r||40)*.6+20);for(const o of ev.rel||[])f(o,40);for(const o of ev.bombs||[])f(o,40);}f(S.qn,70);f(S.merch,70);}
 function inA(x,y,pad){const A=S.arena;if(!A)return [x,y];const h=Math.max(0,Math.min(A.r,A.tr||A.r)-pad);return [clamp(x,A.x-h,A.x+h),clamp(y,A.y-h,A.y+h)];}
 function farPos(r){const a=Math.random()*TAU,p=S.p;return inA(clamp(p.x+Math.cos(a)*r,80,WW-80),clamp(p.y+Math.sin(a)*r,80,WH-80),90);}
 function startEvent(){
@@ -7086,6 +7090,7 @@ function trackDps(dt){S.dpsT=(S.dpsT||0)+dt;if(S.dpsT<.5)return;const now=S.st.d
 function update(dt){
   // 중독 초당 피해는 최종 공격력(조건부 증강 배율 포함)을 따라감. 프레임마다 한 번만 계산
   if(S&&S.p&&S.mode==='play'){try{S.pdC=pDmg();}catch(e){S.pdC=0;}}
+  if(S&&S.mode==='play')try{keepInArena();}catch(e){}
   if(S&&S.mode==='play'&&endless()){const n=awakeN();if(n>(S.awkN||1+mlv('n_awkst'))){S.awkN=n;S.awkT=2.5;toast(`🔥 각성 ${n}단계! 최종 공격 배율 최소 ×${awakeF().toFixed(1)}, 최대 체력 +${Math.round(n*awHp()*100)}%`);}}
   // 보스 격파 연출: 잠깐 슬로 모션
   if(S.smT>0){S.smT-=dt;dt*=.3;}
@@ -7245,7 +7250,7 @@ function update(dt){
     p.x=clamp(p.x,p.r+10,WW-p.r-10);p.y=clamp(p.y,p.r+10,WH-p.r-10);pushOut(p,p.r);
     if(S.arena){const A=S.arena;{const dr=(A.tr-A.r)*Math.min(1,dt*.8);A.r+=A.nm&&dr<0?Math.max(dr,-140*dt):dr;}/* 악몽 결계는 1초에 140씩만 좁혀 옴 (걸어서 따라갈 수 있게) */const m=A.r-p.r-4;if(A.duel){/* 결투장은 둥근 벽 */const cl=(o,mm)=>{const dx=o.x-A.x,dy=o.y-A.y,dd=Math.hypot(dx,dy);if(dd>mm){o.x=A.x+dx/dd*mm;o.y=A.y+dy/dd*mm;}};cl(p,m);if(S.boss&&S.boss.alive)cl(S.boss,A.r-(S.boss.r||18)-4);}else{p.x=clamp(p.x,A.x-m,A.x+m);p.y=clamp(p.y,A.y-m,A.y+m);}
       // 결계는 몹에게도 벽: 밖에 있거나 밖에서 생긴 잡몹은 결계 안쪽 가장자리로 밀려 들어옴 (어두운 바깥에서 돌아다니지 않게)
-      for(const e of S.en){if(!e.alive||e.boss)continue;const me=Math.max(10,A.r-e.r);if(e.x<A.x-me||e.x>A.x+me||e.y<A.y-me||e.y>A.y+me){e.x=clamp(e.x,A.x-me,A.x+me);e.y=clamp(e.y,A.y-me,A.y+me);}}}
+      for(const e of S.en){if(!e.alive||e.boss)continue;const me=Math.max(10,A.r-e.r);if(e.x<A.x-me||e.x>A.x+me||e.y<A.y-me||e.y>A.y+me){/* 결계 밖에서 생긴 적은 걸어 들어오게 둠 (가장자리에 바로 나타나면 피할 틈이 없음). 5초 넘게 밖에 있거나 한 번 들어온 적은 가장자리로 */if(!e.inA&&!A.duel&&(e.oT=(e.oT||0)+dt)<5){const a=Math.atan2(A.y-e.y,A.x-e.x);e.x+=Math.cos(a)*60*dt;e.y+=Math.sin(a)*60*dt;continue;}e.x=clamp(e.x,A.x-me,A.x+me);e.y=clamp(e.y,A.y-me,A.y+me);}else e.inA=1;}}
     {const bR=p.maxHp*.001*mlv('regen')+((tag('nature')>=2?1.5:0)+(has('warpaint')?(p.fy||0)*lv3('warpaint',.08,.1,.15):0)+(has('worldtree')?3:0)+(has('bastion')&&nearTurret()?3*(has('f_citadel')?2:1):0)+(has('sanctuary')?lv3('sanctuary',1.5,2,3):0))*rgHpM()+(has('yggdrasil')&&inVine(p)?p.maxHp*.02:0)+(has('f_ancient')&&inVine(p)?p.maxHp*.02:0);const rgM=has('f_hydra')?3:(has('thick')&&hitRec()?3:1)*(has('troll')&&p.noHitT>3?3:1);if(p.regen||bR||has('f_immortal'))healR((p.regen*rgM*(p.skRgT>0?5:1)*rgHpM()*(has('d_photo')?1.5:1)*(season()===0?2:1)+bR+(has('f_immortal')?p.maxHp*.01:0))*dt*healM());}
     lsTick(dt);p.noHitT+=dt;{const bm=barrierMax(),bc=Math.max(bm,p.bxM||0);if(p.barrier>bc)p.barrier=bc;if(!(p.barrier>0))p.bxM=0;if(p.noHitT>(has('f_insure')?1.5:3)&&p.barrier<bm)p.barrier=Math.min(bm,p.barrier+bm*.35*dt);}
     if(S.buffT.jack>0)p.inv=Math.max(p.inv,.05);
@@ -8589,6 +8594,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
   {v:250,t:'📜 1배속 의뢰 확정',items:[
+    ['change','🧱 결계가 좁아졌을 때 적이 <b>결계 밖에서 생겨 걸어 들어와요</b> (예전엔 결계 가장자리에 바로 나타나 피할 틈이 없었음). 한 번 들어온 적은 예전처럼 밖으로 못 나가요'],
+    ['bug','🧱 악몽에서 결계가 줄어들 때 이벤트(성소·보물상자·유물 등)·의뢰인·상인이 결계 밖에 남던 문제: 결계 안으로 따라 들어와요. 결계 밖 건물의 이스터에그는 안내가 안 떠요'],
     ['change','📜 판 내내 <b>1배속</b>으로 2분 30초가 지나면 의뢰인이 <b>반드시</b> 나타나요 (예전: 20초마다 30% 확률). 1배속으로 하는 보람이 생겨요'],
     ['look','📊 스탯 창 체력 재생·흡혈에 <b>실제 한도</b>를 숫자로 (예: 0.0/초 / 12.2/초 · 흡혈 0.5% / 1초에 1.5까지). 최대 체력이 늘면 한도도 같이 늘어요']]},
   {v:249,t:'🧚 정령사 개편: 세 정령',items:[
@@ -9682,7 +9689,7 @@ const qOk=()=>!!S&&S.started&&(AUTO.speed||1)===1&&!raidOn()&&!duelOn()&&!rushOn
 const qRwTxt=r=>r.includes('+')?r.split('+').map(x=>qRwTxt(x)).join(' + '):r==='uq'?'★ 고유 전설 무기 (그 판 직업)':r[0]==='m'?`🏅 메달 ${r.slice(1)}`:`🕊 강화의 축복 ${r.slice(1)}장`;
 function qAdd(k,n){const Q=qD();if(!Q.acc||!qOk()||Q_STEPS[Q.st].k!==k)return;const g=qGoal(),b=Q.pr;Q.pr=k==='kill'||k==='boss'?Q.pr+n:Math.max(Q.pr,n);if(b<g&&Q.pr>=g){toast(`📜 의뢰 「${Q_STEPS[Q.st].n}」 완료! 곧 의뢰인이 보상을 주러 와요`);if(S&&!S.qn){S.qSeen=0;S.qnT=6;S.qForce=1;}chime([523,659,784,1047],'triangle');}}
 // 판 진행 중: 등장·소멸·접촉
-function qStep(dt){if(!S||S.mode!=='play')return;if((AUTO.speed||1)!==1)S.qAll=false;
+function qStep(dt){if(!S||S.mode!=='play')return;if((AUTO.speed||1)!==1&&!DEV)S.qAll=false; // 개발자 모드는 배속이어도 의뢰인이 나옴 (시험용)
   if(S.qn){const q=S.qn;q.life-=dt;if(q.life<=0){S.qn=null;S.qnT=60;toast('📜 의뢰인이 떠났어요');return;}const p=S.p;if(p.alive&&Math.hypot(p.x-q.x,p.y-q.y)<46+p.r){S.qn=null;S.qSeen=1;if(AUTO.pick){toast('자동 모드: 의뢰인 건너뜀');return;}openQuest();return true;}return;}
   // 버틴 시간·레벨 의뢰도 판 도중에 바로 완료 (끝날 때까지 기다리지 않음)
   if(S.qAll!==false&&qOk()){qAdd('surv',Math.floor(((S.gt||0)+(S.bt||0))/60));qAdd('lvl',S.lvl||1);}
