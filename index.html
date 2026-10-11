@@ -7671,7 +7671,6 @@ function draw(){
     ctx.fillStyle='#e8f0f4';ctx.fillRect(-2.5,-10,5,5);ctx.fillStyle='#a0703a';ctx.fillRect(-2.5,-12,5,2);
     ctx.fillStyle=c;ctx.beginPath();ctx.arc(0,1,7,0,TAU);ctx.fill();ctx.fillStyle='rgba(255,255,255,.75)';ctx.fillRect(-4,-3,2.5,2.5);ctx.restore();}
   ctx.strokeStyle='#bff3ff';ctx.lineWidth=2.5;for(const bo of S.bolts){ctx.globalAlpha=bo.life*5;ctx.beginPath();ctx.moveTo(bo.x1,bo.y1);const mx=(bo.x1+bo.x2)/2+rand(-12,12),my=(bo.y1+bo.y2)/2+rand(-12,12);ctx.lineTo(mx,my);ctx.lineTo(bo.x2,bo.y2);ctx.stroke();}ctx.globalAlpha=1;
-  try{qDraw();}catch(e){}
   if(S.merch){const tb=S.merch,M=MERCH[tb.k],pulse=1+Math.sin(S.t*6)*.04;ctx.save();ctx.translate(tb.x,tb.y);ctx.scale(pulse,pulse);
     ctx.fillStyle='rgba(0,0,0,.35)';rr(ctx,-42,-24,88,58,12);ctx.fill();
     ctx.fillStyle=M.col;rr(ctx,-44,-30,88,60,12);ctx.fill();ctx.strokeStyle='#d6a94a';ctx.lineWidth=3;ctx.stroke();
@@ -7727,8 +7726,8 @@ function draw(){
   drawBossGround();drawNW();drawRDoom();drawRObj();drawRWaves();drawSkFx(0);
   {const vis=S.en.filter(e=>!(e.x<camX-60||e.x>camX+W+60||e.y<camY-80||e.y>camY+H+60));
    ctx.fillStyle='rgba(0,0,0,.33)';ctx.beginPath();for(const e of vis){ctx.moveTo(e.x+2+e.r,e.y+e.r*.85);ctx.ellipse(e.x+2,e.y+e.r*.85,e.r,e.r*.38,0,0,TAU);}ctx.fill();
-   const L=[];for(const e of vis)L.push([e.y+e.r*.9,0,e]);for(const t of TREEV)L.push([t.y,1,t]);if(S.rob&&raidOn()){for(const o of S.rob)L.push([o.y+o.r*.4,4,o]);for(const o of S.rdec||[])if(o.x>camX-o.w&&o.x<camX+W+o.w&&o.y>camY-60&&o.y<camY+H+o.h)L.push([o.y,5,o]);}L.push([S.p.y+S.p.r+3,2,null]);if(S.allies)for(const a of S.allies)L.push([a.y+a.r+3,3,a]);L.sort((a,b)=>a[0]-b[0]);
-   for(const q of L){if(q[1]===0)drawChip(q[2]);else if(q[1]===1){ctx.imageSmoothingEnabled=false;drawTree(q[2]);}else if(q[1]===3){drawAlly(q[2]);}else if(q[1]===4){drawRaidObj(q[2]);}else if(q[1]===5){drawRaidDec(q[2]);}else{ctx.imageSmoothingEnabled=true;
+   const L=[];for(const e of vis)L.push([e.y+e.r*.9,0,e]);for(const t of TREEV)L.push([t.y,1,t]);if(S.rob&&raidOn()){for(const o of S.rob)L.push([o.y+o.r*.4,4,o]);for(const o of S.rdec||[])if(o.x>camX-o.w&&o.x<camX+W+o.w&&o.y>camY-60&&o.y<camY+H+o.h)L.push([o.y,5,o]);}L.push([S.p.y+S.p.r+3,2,null]);if(S.qn)L.push([S.qn.y+12,6,S.qn]);if(S.allies)for(const a of S.allies)L.push([a.y+a.r+3,3,a]);L.sort((a,b)=>a[0]-b[0]);
+   for(const q of L){if(q[1]===0)drawChip(q[2]);else if(q[1]===1){ctx.imageSmoothingEnabled=false;drawTree(q[2]);}else if(q[1]===3){drawAlly(q[2]);}else if(q[1]===4){drawRaidObj(q[2]);}else if(q[1]===5){drawRaidDec(q[2]);}else if(q[1]===6){try{qDraw();}catch(e){}}else{ctx.imageSmoothingEnabled=true;
      if(S.p.alive){drawPlayer(S.p);const P=S.p;if(P.skInvT>0||P.skDrT>0||P.skUndT>0){ctx.save();ctx.globalAlpha=.25+.12*Math.sin(S.t*10);ctx.fillStyle=P.skUndT>0?'#ff5a3a':P.skInvT>0?'#e8f4ff':'#9fd3ff';ctx.beginPath();ctx.arc(P.x,P.y-8,P.r+16,0,TAU);ctx.fill();ctx.globalAlpha=.8;ctx.strokeStyle=ctx.fillStyle;ctx.lineWidth=2;ctx.stroke();ctx.restore();}}
      else if(S.p.deadAt!=null&&HERO.canvas){const p=S.p;HERO_DRESS=S.mode==='spec'||SPEC?specDress(S.cls||'knight'):myDress(S.cls||'knight');try{HERO.draw(S.cls||'knight','dead',(S.t-p.deadAt)/.16,0,false);}finally{HERO_DRESS=null;}{ctx.save();ctx.imageSmoothingEnabled=false;heroBlit(HERO.canvas,p.x,p.y+p.r+3,1,true);ctx.restore();}}}}
    ctx.imageSmoothingEnabled=true;}
@@ -8205,7 +8204,8 @@ function giveAltStat(t,extra){const [n0,b]=ALT_STAT[t]||ALT_STAT.g,txt=altTxt(t)
 // 증강 그만 받기(S.noAug): 이번 판에서 증강 차례가 오면 스탯 카드로 대신 받음
 const augReady=()=>{if(S.noAug)return false;if(slotCount()<MAXA)return true;const pn=S.prismN;try{return fullOptions().length>0;}finally{S.prismN=pn;}};
 // 슬롯이 가득 차면: 합체 짝(최대 2) + 나머지는 '교체' 후보 (고르면 기존 증강 하나를 버리고 바꿈)
-const swappable=()=>S.augs.map((a,i)=>[a,i]).filter(([a])=>a.t!=='v'&&a.t!=='f'&&a.t!=='d'&&!a.gr&&(!a.f||a.dl)&&!a.uc);
+// 교체로 버릴 수 있는 증강: 왕실·합체·용·장비/세트 시작 증강(x)·고점 돌파는 제외
+const swappable=()=>S.augs.map((a,i)=>[a,i]).filter(([a])=>a.t!=='v'&&a.t!=='f'&&a.t!=='d'&&a.t!=='x'&&!a.gr&&(!a.f||a.dl)&&!a.uc);
 function fullOptions(){
   const fz=AUGS.filter(a=>!has(a.id)&&tierOpen(a.t)&&(!a.cls||a.cls===S.cls)&&augReq(a)&&partnerOf(a.id)).sort(()=>Math.random()-.5).slice(0,2).map(a=>({...a,fuseNow:true,q:rollQ()}));
   if(!swappable().length)return fz;
@@ -8508,6 +8508,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
 const PATCH_NOTES=[
   {v:247,t:'🎯 실험실 캐릭터 · 고점 돌파',items:[
     ['change','🏃 <b>멈춰 있어야 하던 증강</b>을 움직이면서 쓰도록 바꿨어요: 정신 집중(3번째 공격마다 집중 화염구 · 범위·피해 +80%) · 정조준 → <b>바람 사수</b>(움직이는 동안 공속 +40%·치명 +8%) · 안식처(항상 받는 피해 −12%·재생 +2) · 요새(항상 1초마다 충격파) · 광합성(항상 재생 +50%·3초마다 발밑 덩굴) · 성역(주변 적 1마리당 오라 범위 +5%·피해 +4%) · 무법자(움직이는 동안 공속 +50%·공격력 +30%)'],
+    ['bug','🔁 상점 「바꿔치기」가 고점 돌파·장비로 받은 시작 증강까지 바꿔 버리던 문제를 고쳤어요 (레벨업 교체처럼 이 증강들은 바뀌지 않아요)'],
+    ['look','📜 의뢰인이 이제 <b>후드 쓴 여행자 캐릭터</b>로 서 있어요 (등불 지팡이·두루마리·머리 위 「!」)'],
     ['bug','📜 판 도중에 배속을 썼다가 1배속으로 돌리면 의뢰인이 나오던 문제: 이제 <b>판 내내 1배속</b>일 때만 나와요'],
     ['change','📜 <b>1배속 의뢰</b>: 의뢰를 다 하면 <b>그 판에서 곧바로</b> 의뢰인이 보상을 주러 와요 (버티기·레벨 의뢰도 판 도중에 바로 완료). 보상도 크게 올렸어요 — 처치 800: 메달 1000+축복 2 · 보스 4: 축복 6+메달 500 · 12분 버티기: 메달 1500+축복 3 · 레벨 20: 축복 8+메달 1000 · 전설의 증표: 고유 전설 무기+메달 2000'],
     ['bug','♾ <b>고점 돌파</b> 증강이 상한에 막히던 문제: 돌격 기사(이동 속도) · 마력 과부하·패닝 사격(공격 속도) · 환영 무희(회피) · 급소 해부(치명타 확률) · 데드아이(치명타 피해)를 가지고 있으면 그 능력치 카드가 <b>상한을 넘어서도 계속 나와요</b>. 실제 능력치는 상한 그대로이고, 넘은 만큼은 그 증강의 공격력 보너스에 계산돼요'],
@@ -9579,11 +9581,22 @@ function qStep(dt){if(!S||S.mode!=='play')return;if((AUTO.speed||1)!==1)S.qAll=f
   S.qnT=(S.qnT??20)-dt;if(S.qnT>0)return;S.qnT=20;if(!S.qForce&&Math.random()>.3)return;S.qForce=0;
   const p=S.p,a=Math.random()*TAU,r=rand(320,480);S.qn={x:clamp(p.x+Math.cos(a)*r,80,WW-80),y:clamp(p.y+Math.sin(a)*r,80,WH-80),life:60,max:60};
   augFx('📜 의뢰인이 나타났어요!',Q.acc?'의뢰 보상을 받으러 가 보세요 · 화살표와 미니맵 ★':'새 의뢰가 있대요 · 화살표와 미니맵 ★을 따라가 보세요','#ffd76a',true);chime([392,523,659,784,1047],'triangle');S.flash=Math.max(S.flash,.2);}
-function qDraw(){if(!S||!S.qn)return;const q=S.qn,pl=1+Math.sin(S.t*6)*.06;ctx.save();ctx.translate(q.x,q.y);
-  ctx.globalAlpha=.25+.15*Math.sin(S.t*4);ctx.fillStyle='#ffd76a';ctx.beginPath();ctx.arc(0,0,58,0,TAU);ctx.fill();ctx.globalAlpha=1;ctx.scale(pl,pl);
-  ctx.fillStyle='rgba(0,0,0,.4)';rr(ctx,-40,-26,84,58,12);ctx.fill();ctx.fillStyle='#5a3a1a';rr(ctx,-42,-32,84,60,12);ctx.fill();ctx.strokeStyle='#ffd76a';ctx.lineWidth=3;ctx.stroke();
-  ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='24px sans-serif';ctx.fillText('📜',0,-11);ctx.font='13px "Do Hyeon",sans-serif';ctx.fillStyle='#ffe9b0';ctx.fillText('의뢰인',0,13);
-  if(q.life<12&&Math.floor(S.t*4)%2){ctx.fillStyle='#ff9a6a';ctx.fillText(Math.ceil(q.life)+'초',0,40);}ctx.restore();}
+// 의뢰인: 후드 쓴 흰 수염 여행자 (등불 지팡이·두루마리). 도트 그림을 한 번만 만들어 두고 3배로 그림
+const Q_ART=["...kkk.........kk......", "..kyYyk.......khhk.....", "..kyyyk.....kkhHHhkk...", "...kkk.....khhHHHHhhk..", "....l.....khHHHHHHHHhk.", "....l.....khHssssssHhk.", "....l.....khsoesseoshk.", "....l.....khsresserSshk", "....l.....khswwSSwwshk.", "....l.....kkwwwwwwwwkk.", "....l....kCcwwwWWwwwcCk", "...klk..kCccCwwwwwwCccCk", "...kslk.kccccCwwwwCcckkk", "....lk..kccccccCCcckpppk", "....l...kcbbbbbgbbbkprrpk", "....l...kccccccccccskpppk", "....l...kcCcccccccCckkkk.", "....l...kcCcccccccCck....", "....l...kccCcccccCcck....", "....l....kcCcccccCck.....", "....l....kccCcccCcck.....", "....l....kkkkkkkkkkk.....", "....l.....kBBk.kBBk......", "....l.....kBBk.kBBk......", "...kLk...kkkkk.kkkkk....."],Q_PAL={k:'#2a1a10',y:'#ffe27a',Y:'#ffb030',h:'#5e3a1c',H:'#8a5a2e',s:'#f2c9a0',S:'#cf9a72',e:'#2a1a10',w:'#f4f1e8',W:'#cfc8b8',c:'#3d6b39',C:'#5a8f4e',b:'#4a2c14',g:'#e8b84a',p:'#f3e6c0',r:'#e07a6a',l:'#8a5a2a',L:'#5e3a1c',B:'#3a2618',o:'#ffffff'};let Q_SPR=null;
+function qSpr(){if(Q_SPR)return Q_SPR;const w=Math.max(...Q_ART.map(r=>r.length)),h=Q_ART.length,c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');Q_ART.forEach((r,y)=>{for(let x=0;x<r.length;x++){const col=Q_PAL[r[x]];if(col){g.fillStyle=col;g.fillRect(x,y,1,1);}}});return Q_SPR=c;}
+function qDraw(){if(!S||!S.qn)return;const q=S.qn,sp=qSpr(),K=3,w=sp.width*K,h=sp.height*K,bob=Math.sin(S.t*3)*2,top=q.y-h+14+bob;ctx.save();
+  // 발밑 금빛 원 (멀리서도 눈에 띄게)
+  ctx.globalAlpha=.28+.12*Math.sin(S.t*4);ctx.fillStyle='#ffd76a';ctx.beginPath();ctx.ellipse(q.x,q.y+12,46,16,0,0,TAU);ctx.fill();ctx.globalAlpha=1;
+  ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(q.x,q.y+12,26,8,0,0,TAU);ctx.fill();
+  ctx.imageSmoothingEnabled=false;ctx.drawImage(sp,Math.round(q.x-w/2),Math.round(top),w,h);
+  // 등불 빛
+  {const lx=q.x-w/2+4*K,ly=top+2.5*K,a=.35+.15*Math.sin(S.t*9);const gr=ctx.createRadialGradient(lx,ly,2,lx,ly,22);gr.addColorStop(0,`rgba(255,226,122,${a})`);gr.addColorStop(1,'rgba(255,226,122,0)');ctx.fillStyle=gr;ctx.beginPath();ctx.arc(lx,ly,22,0,TAU);ctx.fill();}
+  // 머리 위 말풍선 (!)
+  {const by=top-20+Math.sin(S.t*5)*3,bx=q.x+6;ctx.fillStyle='#fffaf0';ctx.strokeStyle='#5a3a1a';ctx.lineWidth=2;rr(ctx,bx-14,by-14,28,24,8);ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(bx-4,by+10);ctx.lineTo(bx-9,by+17);ctx.lineTo(bx+3,by+10);ctx.closePath();ctx.fill();ctx.stroke();
+   ctx.fillStyle='#e0a020';ctx.font='bold 20px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('!',bx,by-1);}
+  // 이름표
+  ctx.font='14px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=4;ctx.strokeStyle='rgba(42,26,10,.9)';ctx.strokeText('📜 의뢰인',q.x,q.y+30);ctx.fillStyle='#ffe9b0';ctx.fillText('📜 의뢰인',q.x,q.y+30);
+  if(q.life<12&&Math.floor(S.t*4)%2){ctx.fillStyle='#ff9a6a';ctx.strokeText(Math.ceil(q.life)+'초',q.x,q.y+47);ctx.fillText(Math.ceil(q.life)+'초',q.x,q.y+47);}ctx.restore();}
 function qArrow(W,H){if(!S||!S.qn)return;const q=S.qn,sx=q.x-camX,sy=q.y-camY;if(sx>=0&&sx<=W&&sy>=0&&sy<=H)return;const a=Math.atan2(sy-H/2,sx-W/2),ex=clamp(sx,34,W-34),ey=clamp(sy,74,H-44),k=1+Math.sin(S.t*8)*.15;
   ctx.save();ctx.translate(ex,ey);ctx.rotate(a);ctx.scale(k,k);ctx.fillStyle='#ffd76a';ctx.strokeStyle='#5a3a1a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(18,0);ctx.lineTo(-10,-12);ctx.lineTo(-10,12);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
   {const lx=ex-Math.cos(a)*48,ly=ey-Math.sin(a)*32,tt='📜 의뢰인 '+Math.ceil(q.life)+'초';ctx.font='17px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='#2a1a0a';ctx.strokeText(tt,lx,ly);ctx.fillStyle='#ffd76a';ctx.fillText(tt,lx,ly);}}
@@ -13315,7 +13328,7 @@ const MERCH={
 const DEALS=[
   {id:'blood',n:'피의 거래',d:'최대 체력 −20%, 공격력 +20%',cost:()=>0,f:()=>{const p=S.p;p.hpP=(p.hpP||0)-.2;p.dmgP=(p.dmgP||0)+.2;}},
   {id:'soul',n:'영혼 담보',d:'보유 골드 절반을 내고 즉시 2레벨',cost:()=>Math.max(30,Math.floor(S.gold/2)),f:()=>{S.pendingLv+=2;}},
-  {id:'swap',n:'바꿔치기',d:'무작위 보유 증강 하나를 같은 등급 다른 증강으로 교체',cost:()=>0,ok:()=>S.augs.some(a=>!a.f&&a.t!=='v'&&a.t!=='f'&&a.t!=='d'&&a.t!=='x'),f:()=>{const c=S.augs.filter(a=>!a.f&&a.t!=='v'&&a.t!=='f'&&a.t!=='d'&&a.t!=='x');const o=c[Math.floor(Math.random()*c.length)];const pool=AUGS.filter(x=>x.t===o.t&&!has(x.id)&&!x.f&&(!x.cls||x.cls===S.cls)&&augReq(x));if(!pool.length)return '바꿀 증강이 없음';const n=pool[Math.floor(Math.random()*pool.length)];S.augs[S.augs.indexOf(o)]={...n,lv:o.lv};tagCount();return `${o.n} → ${n.n}`;}},
+  {id:'swap',n:'바꿔치기',d:'무작위 보유 증강 하나를 같은 등급 다른 증강으로 교체 (고점 돌파·장비 증강은 제외)',cost:()=>0,ok:()=>S.augs.some(a=>!a.f&&a.t!=='v'&&a.t!=='f'&&a.t!=='d'&&a.t!=='x'&&!a.uc&&!a.gr),f:()=>{const c=S.augs.filter(a=>!a.f&&a.t!=='v'&&a.t!=='f'&&a.t!=='d'&&a.t!=='x'&&!a.uc&&!a.gr); /* 빌드 핵심(고점 돌파)·장비로 받은 시작 증강은 안 바뀜 */const o=c[Math.floor(Math.random()*c.length)];const pool=AUGS.filter(x=>x.t===o.t&&!has(x.id)&&!x.f&&(!x.cls||x.cls===S.cls)&&augReq(x));if(!pool.length)return '바꿀 증강이 없음';const n=pool[Math.floor(Math.random()*pool.length)];S.augs[S.augs.indexOf(o)]={...n,lv:o.lv};tagCount();return `${o.n} → ${n.n}`;}},
   {id:'smuggle',n:'밀수 증강',d:'골드 등급 이상 증강 하나 (슬롯 필요)',cost:()=>price(380),ok:()=>slotCount()<MAXA,f:()=>{const g=grantAug('g');return g?g.n:'없음';}},
   {id:'debt',n:'운명의 빚',d:'지금 골드를 받고, 2분간 받는 피해 +30%',cost:()=>-price(260),f:()=>{S.debtT=120;}},
   {id:'blind',n:'눈가리개',d:'행운 +2, 사거리 −15%',cost:()=>0,f:()=>{S.p.luck+=2;S.p.range*=.85;}},
