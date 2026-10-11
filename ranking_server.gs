@@ -1,4 +1,8 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v7.6
+// 찬서 명예의 전당 서버 (Google Apps Script) v7.7
+//
+// v7.6 → v7.7 바뀐 점 (게임 v267)
+// - 무한의 악몽 점수식 v4(SC4_AT 이후 기록): 보스 점수·클리어 보너스 없음, 레벨 점수 ×3
+//   (손으로 해내는 플레이 보너스 ×2는 게임이 보너스 값에 이미 반영해서 보냄)
 //
 // v7.5 → v7.6 바뀐 점
 // - 플레이 보너스 점수에 상한(BONUS_MAX)을 둠: 숫자가 아니거나 너무 큰 값(무한대 등)이 오면 상한으로 자름
@@ -228,7 +232,8 @@ const str_ = (v, n) => { let t = String(v || ''); try { t = t.normalize('NFC'); 
 const dw_ = v => { const m = String(v || '').match(/^(\d{1,6})-(\d{1,6})-(\d{1,6})$/); return m ? 'w' + m[1] + 'd' + m[2] + 'l' + m[3] : ''; };
 const softC_ = (x, c) => x <= c ? x : c * (1 + Math.log(x / c));
 // 점수 계산식 v2 (게임과 같음): 이 시각 이후 기록은 10분 이후 생존 점수가 커지고 보스 처치 800점
-const SC_TW = 1.5, SC_KC = 2000, LV_AT = 1791609893000, lvPts_ = r => (+r.lvl || 0) * 30 * ((+r.at || 0) >= LV_AT ? 1.6 : 1);
+const SC4_AT = 1791753300000, nmV4_ = r => r.diff === 'nightmare' && (+r.at || 0) >= SC4_AT;
+const SC_TW = 1.5, SC_KC = 2000, LV_AT = 1791609893000, lvPts_ = r => (+r.lvl || 0) * 30 * ((+r.at || 0) >= LV_AT ? 1.6 : 1) * (nmV4_(r) ? 3 : 1);
 const SC2_AT = 1791462600000, SC3_AT = 1791493000000, NM_TK = 1.5, NM_SM = 2;
 const BONUS_MAX = 2000000; // 플레이 보너스 상한 (보통 판은 수천~수만)
 const BR_AT = 1791547600000, BR_SM = 2; // 보스 러시 새 규칙 기록은 최종 점수 ×BR_SM (게임과 같은 값)
@@ -262,7 +267,7 @@ function score_(r) {
   const seg = String(r.cls || '').split('~'), bonus = Math.min(BONUS_MAX, Math.max(0, isFinite(+seg[1]) ? +seg[1] : 0)), ap = Math.min(1, Math.max(0, (+seg[2] || 0) / 100)), v2 = false; // v2(제곱 시간 점수)는 v5.3에서 폐지: 게임 화면과 같게 모든 기록 v1 식
   const base = r.diff === 'bossrush'
     ? r.bosses * 2500 + lvPts_(r) + r.time * 2
-    : timePts_(r.diff === 'nightmare' && +r.at >= SC3_AT ? r.time + Math.round(r.time * (NM_TK - 1)) : r.time, v2) * SC_TW + softC_(r.kills * 2, SC_KC) + lvPts_(r) + r.bosses * (v2 ? 800 : 400) + (r.bosses >= 4 ? 3000 : 0);
+    : timePts_(r.diff === 'nightmare' && +r.at >= SC3_AT ? r.time + Math.round(r.time * (NM_TK - 1)) : r.time, v2) * SC_TW + softC_(r.kills * 2, SC_KC) + lvPts_(r) + (nmV4_(r) ? 0 : r.bosses * (v2 ? 800 : 400) + (r.bosses >= 4 ? 3000 : 0));
   const sm = r.diff === 'nightmare' && +r.at >= SC3_AT ? NM_SM : r.diff === 'bossrush' && +r.at >= BR_AT ? BR_SM : 1;
   return Math.round(Math.round((base + bonus) * (DIFFS[r.diff] || 1)) * sm * (1 - 0.1 * ap));
 }
