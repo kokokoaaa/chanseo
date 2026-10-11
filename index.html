@@ -517,6 +517,8 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 .sgrp h3{margin:14px 0 6px;color:var(--brass)}
 .srow{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid rgba(241,231,207,.08);font-size:15px}
 .srow b{font-family:'Do Hyeon',sans-serif;font-weight:400;font-size:18px;color:var(--ivory);white-space:nowrap}
+/* 이름 칸은 한 줄 고정(세로로 꺾이지 않게), 값이 길면 값 쪽에서 줄바꿈 */
+.srow>span{flex:0 0 auto;white-space:nowrap}.srow b{min-width:0;text-align:right;white-space:normal;line-height:1.3}
 .srow b .swrap{display:inline-block;white-space:normal;text-align:right;line-height:1.35;font-size:16px}
 .achStep{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;padding:5px 2px;border-top:1px dashed rgba(241,231,207,.12);opacity:.55}.achStep.ok{opacity:1}.achStep.nx{opacity:1;background:rgba(255,215,106,.07);border-radius:6px}.achStep .si{width:16px;text-align:center;color:#7be08f}.achStep.nx .si{color:#ffd76a}.achStep .sb{flex:1;min-width:180px}.achStep .sb small{color:var(--muted)}.achStep .sr{font-size:13px;color:#ffd76a;white-space:nowrap}
 .achDots{display:inline-flex;gap:3px;margin:0 6px}.achDots i{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3)}.achDots i.on{background:#ffd76a;border-color:#ffd76a}
