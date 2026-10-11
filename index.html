@@ -5410,9 +5410,9 @@ function bossAI(e,dt){
   if(e.hid2){e.hl-=dt;if(e.hl<=0){if(e.hp<e.maxHp*.1)achUnlock('h_drg');e.alive=false;S.hb=null;burst(e.x,e.y,'#ffd040',30);toast('황금 용이 날아가 버렸다…');return;}}
   {const rg=e.hid2?0:bossRage(e);if(e.baseDmg==null)e.baseDmg=e.dmg;if(rg!==(e.rage||0)){e.rage=rg;e.dmg=e.baseDmg*(1+(dfM().rg||.25)*Math.min(5,rg))*(rg>5?Math.pow(1.5,rg-5):1);if(rg===6)toast('최종 광폭! 이제 보스 공격이 줄어들지 않고 30초마다 1.5배씩 강해집니다');if(S.arena)S.arena.tr=Math.min(S.arena.tr,Math.max(900,S.arena.tr*.95));S.shake=.4;S.flash=.15;
     S.rings.push({x:e.x,y:e.y,r:e.r,max:e.r+180,life:.6,col:'#ff2020'});toast(rg===1?`시간을 너무 끌었다! ${T.n} 광폭화`:`${T.n} 광폭화 ${rg}단계. 더 강해집니다`);}}
-  if(ph2&&!e.ph2){e.ph2=true;if(S.arena)S.arena.tr*=.85;S.shake=.4;toast(`${T.n} 분노! 패턴이 빨라집니다`);S.rings.push({x:e.x,y:e.y,r:e.r,max:e.r+140,life:.5,col:'#ff6060'});}
+  if(ph2&&!e.ph2&&!duelOn()){e.ph2=true;if(S.arena)S.arena.tr*=.85;S.shake=.4;toast(`${T.n} 분노! 패턴이 빨라집니다`);S.rings.push({x:e.x,y:e.y,r:e.r,max:e.r+140,life:.5,col:'#ff6060'});}
   // 보스 러시: 체력 25% 아래에서 최후의 발악 (결계 한 번 더 좁아짐), 패턴 박자는 단계·체력에 따라 빨라짐 (최대 1.6배)
-  let tempo=1;if(rushOn()&&!e.hid2){const hf=e.hp/e.maxHp;tempo=Math.min(RUSH_TPM,1+RUSH_TP*Math.max(0,S.bossI)+(hf<.5?.12:0)+(hf<.25?.18:0));
+  let tempo=1;if(rushOn()&&!e.hid2&&!duelOn()){const hf=e.hp/e.maxHp;tempo=Math.min(RUSH_TPM,1+RUSH_TP*Math.max(0,S.bossI)+(hf<.5?.12:0)+(hf<.25?.18:0));
     if(hf<.25&&!e.ph3){e.ph3=true;if(S.arena)S.arena.tr*=.9;S.shake=.5;toast(`${T.n} 최후의 발악! 패턴이 더 거세집니다`);S.rings.push({x:e.x,y:e.y,r:e.r,max:e.r+200,life:.6,col:'#ff3030'});}}
   if(rushOn()&&!raidOn()&&!duelOn()&&!e.hid2)rushExtra(e,dt*tempo);
   if(e.slowT>0)e.slowT-=dt;
@@ -6437,7 +6437,8 @@ function patEst(t){const p=S.p,om=!!t.omen,PATK=(S.diff||'normal')==='normal'?1.
   return amt*(1-.015*mlv('armor'))*gearM.taken()*(autoPen()?AUTO_DM:1)*(S.raidTk||1);}
 function hurtP(amt,src,mob){
   const p=S.p;if(!p.alive||p.inv>0||p.skInvT>0)return;
-  if(S.nw&&nwSafe())return; // 악몽의 파동 예고 중 빛의 원 안: 어떤 적 공격도 받지 않음 (잡몹도 원 안으로 못 들어옴)if(p.dashT>0){if(amt>=p.maxHp*.15&&(!src||src.boss||src.omen))perfectDodge();return;}
+  if(S.nw&&nwSafe())return; // 악몽의 파동 예고 중 빛의 원 안: 어떤 적 공격도 받지 않음 (잡몹도 원 안으로 못 들어옴)
+  if(p.dashT>0){if(amt>=p.maxHp*.15&&(!src||src.boss||src.omen))perfectDodge();return;} // 대시 중 무적 (큰 공격을 대시로 피하면 완벽한 회피)
   if(src&&src.ps>0&&has('corrode'))amt*=.65;
   if(has('barkskin')&&inVine(p))amt*=.8;
   if(has('nightveil')&&S.clones&&S.clones.length)amt*=1-Math.min(.2,S.clones.length*lv3('nightveil',.03,.04,.05));
@@ -6525,7 +6526,7 @@ function addRage(){const p=S.p;if(!has('k_berserk'))return;p.rage=Math.min(lv3('
 function dmgEs(k,...a){const o=S.dsub;S.dsub=o||k;try{dmgE(...a);}finally{S.dsub=o;}}
 function dmgE(e,amt,col,label,quiet){
   if(!e.alive)return;
-  if(e.ivT>S.t){if(duelOn()&&e.bst!=='wait'&&!(e.popT>S.t)){e.popT=S.t+.45;duelPop(e.x,e.y-(e.r||14)-24,'회피!','#ff9ad0');}return;} // 결투 상대가 대시로 피하는 순간
+  if(e.ivT>S.t){if(duelOn()&&e===S.boss&&e.bst!=='wait'&&!(e.popT>S.t)){e.popT=S.t+.45;duelPop(e.x,e.y-(e.r||14)-24,'회피!','#ff9ad0');}return;} // 결투 상대가 대시로 피하는 순간
   if(e.boss&&S.raidK)amt*=S.raidK;
   if(e.raidK&&e.entT>0)return; // 레이드 보스 등장 연출 중엔 무적
   if(e.raidK&&e.vulnT>S.t)amt*=1.5; // 레이드: 기 모으기를 막아 기절한 동안 받는 피해 +50%
@@ -6641,7 +6642,7 @@ function playerFire(tg){
   if(has('velocity')&&!meleeOn())shock*=1+Math.min(has('f_accel')?1.5:1,p.bspd/100*lv3('velocity',.035,.05,.065)*(has('f_accel')?2:1));
   if(p.ocN>0){shock*=lv3('overcharge',1.8,2.2,2.6);p.ocN--;}
   if(has('goldbullet'))shock*=1+Math.min(lv3('goldbullet',.3,.45,.6)*(has('f_compound')?2:1),Math.floor(S.gold/100)*.03);
-  let ax=tg.x,ay=tg.y;if(duelOn()&&tg===S.boss&&tg.mvx!=null){const t=Math.hypot(tg.x-p.x,tg.y-p.y)/Math.max(200,p.bspd||400);ax+=tg.mvx*t;ay+=tg.mvy*t;} // 결투: 상대가 움직이는 쪽을 예측해서 조준 (상대도 나를 예측해서 쏨)
+  let ax=tg.x,ay=tg.y;if(duelOn()&&tg===S.boss&&tg.mvx!=null&&!(S.freezeT>0)){const t=Math.hypot(tg.x-p.x,tg.y-p.y)/Math.max(200,p.bspd||400);ax+=tg.mvx*t;ay+=tg.mvy*t;} // 결투: 상대가 움직이는 쪽을 예측해서 조준 (상대도 나를 예측해서 쏨)
   const base=Math.atan2(ay-p.y,ax-p.x),d=pDmg()*mult*shock;p.aimA=base;p.atkT=CLASSES[S.cls].atk;p.face=Math.cos(base)>=0?1:-1;
   const blife=S.cls==='knight'||S.cls==='rogue'||S.cls==='paladin'||S.cls==='berserk'?Math.max(.3,p.range*1.15/p.bspd):1.2;
   if(has('m_mana')&&p.shots%10===0)pBullet(p.x,p.y,base,pDmg()*5,{pierce:999,r:18,big:true,life:1.3,child:true,sub:'마나 폭주',mbomb:1,fball:false});
@@ -7829,7 +7830,7 @@ const TAG_ICO={card:'🃏',dice:'🎲',roulette:'💫',house:'💰',curse:'💀'
 let augBarKey='',synKey='';
 // 저장 캐릭터(레이드·결투)의 증강: [id,단계,품질,합체품질,기록,출처] — 출처 g=장비 f=상점·행운
 const augSer=a=>{const fl=(a.gr?'g':'')+(a.gift?'f':''),r=[a.id,a.lv,a.q||1,a.pq||0,a.dl||null];if(fl)r.push(fl);return r;};
-const augDes=([id,lv,q,pq,dl,fl])=>{fl=fl||'';const f=[...FUSIONS,...VFUSIONS].find(x=>x.id===id);if(f){const o=fusionObj(f);if(pq)o.pq=pq;if(fl.includes('g')&&o.t!=='v')o.gr=1;return o;}const a=AUGS.find(x=>x.id===id)||VIPS.find(x=>x.id===id)||DRAGON.find(x=>x.id===id);if(!a)return null;const o={...a,lv,q:q||1,dl:dl||undefined};if(fl.includes('g')||a.t==='x')o.gr=1;if(fl.includes('f'))o.gift=1;return o;};
+const augDes=([id,lv,q,pq,dl,fl])=>{fl=fl||'';const f=[...FUSIONS,...VFUSIONS].find(x=>x.id===id);if(f){const o=fusionObj(f);if(pq)o.pq=pq;if(dl)o.dl=dl;if(fl.includes('g')&&o.t!=='v')o.gr=1;return o;}const a=AUGS.find(x=>x.id===id)||VIPS.find(x=>x.id===id)||DRAGON.find(x=>x.id===id);if(!a)return null;const o={...a,lv,q:q||1,dl:dl||undefined};if(fl.includes('g')||a.t==='x')o.gr=1;if(fl.includes('f'))o.gift=1;return o;};
 // 증강 바 설명창: 레벨업에서 고르지 않은 증강은 어디서 받았는지 한 줄
 const augSrcL=a=>{const t=a.gift?'🎁 상점·행운으로 받은 증강 (일반 칸 사용)':a.src==='uw'?'⚔ 고유 무기 능력 (일반 칸 안 씀)':a.gr?'✦ 장비에서 받은 증강 (일반 칸 안 씀)':a.t==='d'?'🐉 용의 보물 (일반 칸 안 씀)':'';return t?`<small style="color:#9fd4ff;margin-top:4px">${t}</small>`:'';};
 function renderAugBar(){const el=$('augBar');const k=!S||S.mode==='start'?'':S.augs.map(a=>a.id).join(',')+'|'+MAXA+(vipCan()?'v':'')+'|'+S.cls+JSON.stringify(S.mk||{});if(k===augBarKey)return;augBarKey=k;synKey='';if(!k){el.innerHTML='';return;}
@@ -8426,6 +8427,14 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:234,t:'🛠 버그 점검',items:[
+    ['change','💨 <b>대시 무적</b>이 v218부터 꺼져 있던 버그를 고쳤어요. 이제 대시하는 동안 다시 공격을 받지 않고, 큰 보스 공격을 대시로 피하면 <b>완벽한 회피</b>(슬로 모션·무적·대시 절반 환급)가 다시 나와요','bug'],
+    ['change','💾 <b>이어하기</b>로 불러온 판에서 장비 증강(✦)이 일반 칸을 차지하고 🎁 표시가 사라지던 문제를 고쳤어요','bug'],
+    ['change','⚔ 결투 상대 체력이 50%·25% 아래로 내려가면 보스처럼 「분노」「최후의 발악」이 뜨고 결투장이 좁아지던 문제를 고쳤어요. 그만큼 상대 공격력을 조금 올렸어요','bug'],
+    ['change','💀 사령술사 결투 상대가 카운트다운 동안 세워 둔 해골이 시작 전에 내 지속 효과에 맞아 죽던 문제를 고쳤어요 (시작 전엔 무적, 제자리에 가만히)','bug'],
+    ['change','🎯 시간 정지 중엔 결투 상대가 멈춰 있으니 예측 조준 없이 정면으로 쏴요','bug'],
+    ['change','💍 장비 설명: 귀걸이·반지·팔 보호대처럼 두 칸인 부위에서 한 칸이 비어 있으면 「빈 칸 ○에 들어가요」가 다시 보여요','bug'],
+  ]},
   {v:233,t:'⚔ 결투 미세 조정',items:[
     ['nerf','🪓 광전사 결투 상대 공격력을 조금 낮췄어요 (지난 조정이 너무 셌음)'],
     ['change','🌪 정령사의 결투 피해 환산을 조금 낮췄어요 (지난 조정으로 너무 쉽게 이김)'],
@@ -9562,7 +9571,7 @@ function ftipHide(){const t=document.getElementById('ftip');if(t)t.style.display
 function ftipBind(el,fn){if(matchMedia('(hover:none)').matches)return;el.addEventListener('mouseenter',e=>{const r=fn();if(r)ftipShow(r[0],e,r[1]);});el.addEventListener('mousemove',ftipMove);el.addEventListener('mouseleave',ftipHide);}
 // 장비 설명 (마우스 옆)
 function itTip(it,sc){const col=itCol(it),ST=it.set&&SETS[it.set],a=spAug(it),sl=eqSlotOf(it),sn=ST?((sc||setCnt())[it.set]||0):0;let cmp='';
-  if(!sl){const k=cmpSlot(it),cur=k&&eqRaw(k),two=GEAR_KEYS.filter(q=>slotT(q)===it.s).length>1;if(cur){const d=Math.round(itPow(it)-itPow(cur)+setPowSwap(k,it));cmp=`<div class="ftc ${d>0?'up':d<0?'dn':''}">지금 낀 ${two?`<b>${SLOT_N[k]}</b> `:''}${esc(itName(cur))}보다 전투력 ${d>0?'+':''}${d}</div>`;}if(!k&&two)cmp=`<div class="ftc">빈 칸 <b>${SLOT_N[k]}</b>에 들어가요</div>`;}
+  if(!sl){const k=cmpSlot(it),cur=k&&eqRaw(k),two=GEAR_KEYS.filter(q=>slotT(q)===it.s).length>1;if(cur){const d=Math.round(itPow(it)-itPow(cur)+setPowSwap(k,it));cmp=`<div class="ftc ${d>0?'up':d<0?'dn':''}">지금 낀 ${two?`<b>${SLOT_N[k]}</b> `:''}${esc(itName(cur))}보다 전투력 ${d>0?'+':''}${d}</div>`;}if(k&&!cur&&two)cmp=`<div class="ftc">빈 칸 <b>${SLOT_N[k]}</b>에 들어가요</div>`;}
   return [`<div class="fth"><span class="iico">${itIcoH(it)}</span><div><b style="color:${col}">${itNameH(it)}</b><small>${GR[it.r].n} ${it.cls?CLASSES[it.cls].n+' 전용 무기':GEAR[it.s].n}${it.wt&&WT_N[it.wt]?' · '+WT_N[it.wt]:''}${sl?' · 착용 중':''}</small></div></div><div>⭐ ${itMain(it)}</div>${(it.base?[]:it.a||[]).map(x=>`<div class="faf">✦ ${affH(it,x)}</div>`).join('')}${ST?`<div style="color:${ST.col}">${ST.u?'★ 유니크 ':''}${ST.n} 세트 <b>${sn}/${setMax(ST)}</b></div><div style="font-size:12px;line-height:1.5">${setLines(ST,sn)}</div>`:''}${a?`<div class="fsp">${spLab(it)} · 판 시작 시 「${a.n}」</div>`:''}${cmp}${DEV?`<small class="fhn">누르면 오른쪽에 고정 · 두 번 누르면 ${sl?'벗기':'착용'}</small>`:''}`,col];}
 // 무기 계열(근거리·원거리 등)이 있는 무기는 지금 직업이 못 끼면 낄 수 있는 직업 모습으로 아이콘을 그림 (궁수 화면에서 대검이 활로 보이던 문제)
 const icoCls=(it,c)=>{if(it.wt&&!it.cls&&!it.bc){const L=wtCls(it.wt);if(L.length&&!L.includes(c))return L[0];}return c;};
@@ -10404,7 +10413,7 @@ const DUEL_ULT={knight:'nova',paladin:'pillars',berserk:'nova',rogue:'barrage',a
 function rivalSay(e,t){toast(`${S.duel?S.duel.opp.n:'상대'}: ${t}`);}
 function rivalRate(e){const st=e.hero&&e.hero.st,r=st?parseFloat(String(st['공격 속도']||'').replace(/[^0-9.]/g,''))||1.2:1.2;return r;}
 // 직업별 피해 보정: 맞히기 쉬운 정도가 달라서, 예상 시간(tOpp)에 맞춰 측정한 값
-const DUEL_K={knight:2.3,mage:3.5,archer:3.7,rogue:2.7,paladin:3.3,necro:4.5,gunner:3.3,elem:2.3,berserk:2.3,druid:3,alch:4,gambler:2.6}; // v232: 같은 캐릭터끼리 결투(탄 피하는 자동 조작) 실측으로 다시 맞춤
+const DUEL_K={knight:2.5,mage:3.85,archer:4.05,rogue:3,paladin:3.6,necro:4.95,gunner:3.6,elem:2.5,berserk:2.5,druid:3.3,alch:4.4,gambler:2.85}; // v234: 체력 낮을 때 빨라지던 것(보스 러시 규칙)을 없앤 만큼 +10% // v232: 같은 캐릭터끼리 결투(탄 피하는 자동 조작) 실측으로 다시 맞춤
 // 내 피해 보정(내 직업): 작고 피하는 상대에게 원거리 탄이 덜 맞는 만큼 (근접은 1). 실측
 const DUEL_PK={knight:1.04,mage:2.4,archer:2.5,rogue:2.5,gunner:3,elem:3,druid:3,alch:3.5,gambler:2.6};
 BAI.rival=function(e,dt,o){const {p,d}=o,c=e.cls,A=DUEL_ATK[c]||DUEL_ATK.archer,B=e.B||(e.B=e.bd/.9*(DUEL_K[c]||1)),el=(S.bt||0)-(S.duel.t0||0);
@@ -10412,10 +10421,10 @@ BAI.rival=function(e,dt,o){const {p,d}=o,c=e.cls,A=DUEL_ATK[c]||DUEL_ATK.archer,
   {const lim=e.spd*1.3;if(e.lx!=null&&dt>0){e.mvx=clamp((e.x-e.lx)/dt,-lim,lim);e.mvy=clamp((e.y-e.ly)/dt,-lim,lim);}e.lx=e.x;e.ly=e.y;}
   if(e.bst==='wait'){e.face=p.x>e.x?1:-1; // 카운트다운 동안 반대편에서 대기
     // 사령술사: 기다리는 동안 해골 병사 3을 미리 세워 둠 (시작 전엔 제자리에 서 있음)
-    if(A.skel){e.wsk=e.wsk||[];if(e.wsk.length<3&&(e.wskT=(e.wskT??.6)-dt)<=0){e.wskT=.9;const i=e.wsk.length,aa=Math.atan2(e.y-p.y,e.x-p.x)+(i-1)*.95,x=e.x+Math.cos(aa)*58,y=e.y+Math.sin(aa)*58,m=spawnAt('grunt',x,y,true);m.spr='ranger';m.rSkel=1;m.maxHp=m.hp=Math.max(30,S.p.maxHp*.4);m.dmg=B*.35;m.sp0=p.speed*.8;m.spd=0;m.hold=[x,y];e.wsk.push(m);S.rings.push({x,y,r:4,max:30,life:.35,col:'#9cff9a'});}
+    if(A.skel){e.wsk=e.wsk||[];if(e.wsk.filter(m=>m.alive).length<3&&(e.wskT=(e.wskT??.6)-dt)<=0){e.wskT=.9;const i=e.wsk.length,aa=Math.atan2(e.y-p.y,e.x-p.x)+(i-1)*.95,x=e.x+Math.cos(aa)*58,y=e.y+Math.sin(aa)*58,m=spawnAt('grunt',x,y,true);m.spr='ranger';m.rSkel=1;m.maxHp=m.hp=Math.max(30,S.p.maxHp*.4);m.dmg=B*.35;m.sp0=p.speed*.8;m.spd=0;m.hold=[x,y];m.ivT=S.t+99;e.wsk.push(m);S.rings.push({x,y,r:4,max:30,life:.35,col:'#9cff9a'});}
       for(const m of e.wsk)if(m.alive&&m.hold){m.x=m.hold[0];m.y=m.hold[1];}}
     return;}
-  if(e.wsk){for(const m of e.wsk){delete m.hold;if(m.sp0)m.spd=m.sp0;}e.wsk=null;}
+  if(e.wsk){for(const m of e.wsk){delete m.hold;m.ivT=0;if(m.sp0)m.spd=m.sp0;}e.wsk=null;}
   if(e.bst==='intro'){if(e.bt>1.2)go(e,'fight');return;}
   if(e.dashT>0){e.dashT-=dt;e.x+=e.dvx*dt;e.y+=e.dvy*dt;return;}
   if(e.frzT>0){e.frzT-=dt;return;}
@@ -12781,7 +12790,7 @@ function continueGame(d){
   {const I=inv();S.gl=(S.gl||[]).filter(L=>L&&L.it&&!I.items.some(x=>x.id===L.it.id));}/* 이미 주운 장비가 다시 떨어지지 않게 */
   if(d.s.augN===undefined)S.augN=Math.floor((S.picks||0)/4);// 예전 저장(4레벨마다): 받은 만큼으로 맞춰서 증강이 연달아 쏟아지지 않게
   S.st=d.st||S.st;
-  S.augs=d.augs.map(([id,lv,q,pq,dl])=>{const f=[...FUSIONS,...VFUSIONS].find(x=>x.id===id);if(f){const o=fusionObj(f);if(pq)o.pq=pq;if(dl)o.dl=dl;return o;}const a=AUGS.find(x=>x.id===id)||VIPS.find(x=>x.id===id)||DRAGON.find(x=>x.id===id);return a?{...a,lv,q:q||1,dl:dl||undefined}:null;}).filter(Boolean);
+  S.augs=d.augs.map(augDes).filter(Boolean); // 출처(장비 ✦·🎁)까지 그대로
   tagCount();S.round=diffAt(effT());
   S.started=true;const p=S.p;p.x=WW/2;p.y=WH/2;p.inv=2;p.alive=true;p.barrier=barrierMax();
   S.mode='play';hide();CH_PEND=true;toast('이어하기');
