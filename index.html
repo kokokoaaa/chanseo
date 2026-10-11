@@ -3286,7 +3286,7 @@ const FUSIONS=[
   {id:'f_zero',a:'m_shatter',b:'m_frostbite',n:'극저온',d:'얼음 파쇄 폭발에 맞은 적에게 냉기 2중첩, 파쇄 즉사 체력 25% → 40%'},
   {id:'f_icejail',a:'m_nova',b:'m_shatter',n:'얼음 감옥',d:'프로스트 노바가 얼어붙은 적에 닿으면 얼음 파쇄 발동'},
   {id:'f_tstorm',a:'m_thunder',b:'m_chain',n:'천둥 폭풍',d:'낙뢰 3명 → 5명, 낙뢰 맞은 적에게서 연쇄 번개 (4명, 공격력 100%)'},
-  {id:'f_mplasma',a:'m_chain',b:'m_static',n:'플라스마 사슬',d:'연쇄 번개 튀는 횟수 +3, 감전 피해 증가 20% → 35%'},
+  {id:'f_plasma',a:'m_chain',b:'m_static',n:'플라스마 사슬',d:'연쇄 번개 튀는 횟수 +3, 감전 피해 증가 20% → 35%'},
   {id:'f_tcloud',a:'m_thunder',b:'m_static',n:'천둥 구름',d:'감전된 적이 죽으면 그 자리에 낙뢰 (범위 60, 공격력 250%)'},
   {id:'f_ember',a:'molotov',b:'fireball',n:'불바다',d:'불덩이가 터진 자리에 3초간 불길 (초당 공격력 60%)'},
   {id:'f_citadel',a:'bastion',b:'turret2',n:'요새화',d:'포탑 지속 시간 2배, 보루 효과 2배'},
@@ -3303,7 +3303,7 @@ const FUSIONS=[
   {id:'f_wraith',a:'soulburst',b:'deathnova',n:'망령 폭풍',d:'원혼이 2갈래로 날아가고 원혼·해골 폭발 범위 +50%'},
   {id:'f_gunkata',a:'fanfire',b:'quickdraw',n:'건 카타',d:'패닝이 8번째 → 4번째 공격마다, 부채꼴 7발'},
   {id:'f_trickshot',a:'ricoshot',b:'deadeye',n:'곡예 사격',d:'튕김 사격이 3번 튕기고, 튕긴 탄은 반드시 치명타'},
-  {id:'f_plasma',a:'steam',b:'conduct',n:'플라스마',d:'증기 폭발이 주변 3명에게 번개를 연쇄시킴'},
+  {id:'f_gplasma',a:'steam',b:'conduct',n:'플라스마',d:'증기 폭발이 주변 3명에게 번개를 연쇄시킴'},
   {id:'f_tempest',a:'stormcall',b:'elembody',n:'대폭풍',d:'원소 폭풍이 2초마다, 5명에게 떨어짐'},
   {id:'f_warlord',a:'battlecry',b:'bloodlust',n:'전쟁군주',d:'함성이 4초마다, 함성 때 체력 5% 회복'},
   {id:'f_cyclone',a:'bladestorm',b:'rampage',n:'사이클론',d:'칼날 폭풍이 0.5초마다, 범위 +30%'},
@@ -6327,7 +6327,7 @@ function soulShot(x,y,n){for(let i=0;i<n;i++){const e=nearestE({x,y},320);if(!e)
 const thM=()=>homeM('thunder')*(1+(S.p.thD||0))*(tag('thunder')>=4?1.5:1)*(has('stormlord')?2:1)*(1+ex('thunder')*.15);
 const fireM=()=>homeM('fire')*(1+(S.p.fiD||0))*(tag('fire')>=6?2:1)*(has('f_willo')?1.3:1)*(has('kindle')?1+lv3('kindle',.3,.4,.5):1)*(has('inferno')?1.5:1)*(1+ex('fire')*.15);
 const sumM=()=>homeM('summon')*(1+(S.p.sumD||0))*(tag('summon')>=4?2:1)*(1+ex('summon')*.15),sumR=()=>tag('summon')>=6?.5:1;
-function burnE(e,dps,dur=3){if(has('steam')&&chilled(e)&&e.alive&&!(e.stmT>S.t)){e.stmT=S.t+(has('f_prism')?1:2);explode(e.x,e.y,60,pDmg()*lv3('steam',.8,1,1.2)*elM(),'#e8f4ff');if(has('f_plasma'))elemChain(e,3,pDmg());}e.burnT=Math.max(e.burnT||0,dur+(has('kindle')?2:0));e.burnD=Math.max(e.burnD||0,dps);}
+function burnE(e,dps,dur=3){if(has('steam')&&chilled(e)&&e.alive&&!(e.stmT>S.t)){e.stmT=S.t+(has('f_prism')?1:2);explode(e.x,e.y,60,pDmg()*lv3('steam',.8,1,1.2)*elM(),'#e8f4ff');if(has('f_gplasma'))elemChain(e,3,pDmg());}e.burnT=Math.max(e.burnT||0,dur+(has('kindle')?2:0));e.burnD=Math.max(e.burnD||0,dps);}
 function lightning(from,n){
   n+=(tag('thunder')>=4?3:0)+(has('stormlord')?2:0)+(has('f_storm3')?2:0);
   const hit=new Set([from]);let cur=from;
@@ -6717,7 +6717,7 @@ function dmgE(e,amt,col,label,quiet){
   if(e.jdU>S.t)amt*=1.25; // 성기사 마스터리 심판의 표식
   if(e.hp<e.maxHp*.3&&S.cls==='berserk'&&mk(1))amt*=1.4; // 광전사 마스터리 처단의 도끼
   if(has('m_frostbite')){if(e.frozen&&e.slowT>0)amt*=1+lv3('m_frostbite',.3,.4,.5);else if(e.nvU>S.t&&e.nvN>0)amt*=1+e.nvN*lv3('m_frostbite',.08,.1,.12);}
-  if(e.stU>S.t&&has('m_static'))amt*=1+lv3('m_static',.15,.2,.25)+(has('f_mplasma')?.15:0);
+  if(e.stU>S.t&&has('m_static'))amt*=1+lv3('m_static',.15,.2,.25)+(has('f_plasma')?.15:0);
   if(e.boss&&e.nvU>S.t&&e.nvN>0&&has('mv_ice'))amt*=1+.08*e.nvN;
   if(e.rmk&&has('r_mark'))amt*=1+lv3('r_mark',.4,.6,.8); // 죽음의 표적: 표적이 받는 모든 피해
   e.lh=S.t;if(e.esh>0){const a=Math.min(e.esh,amt);e.esh-=a;amt-=a;if(amt<=0){e.hit=.06;return;}}
@@ -7009,7 +7009,7 @@ function onPHit(b,t){
     if(has('m_steam'))for(const o of S.en)if(o.alive&&!o.boss&&(o.slowT>0||o.nvU>S.t)&&o.burnT>0&&!(o.stmT>S.t)&&d2(o,t)<(rr2+o.r)**2){o.stmT=S.t+2;exL('열충격',null,o.x,o.y,110,pDmg()*lv3('m_steam',2,2.5,3),'#e8eef2');}
     if(sc===1&&has('m_superc')&&t){S.dsub='초전도';try{mChain(t,2,b.dmg*.5);}finally{S.dsub=null;}}
     if(sc===2&&t){S.dsub='번개 폭발';try{mChain(t,2,b.dmg*.5);}finally{S.dsub=null;}}
-    if(has('m_chain')&&t){S.dsub='연쇄 번개';try{mChain(t,lv3('m_chain',3,4,5)+(has('f_mplasma')?3:0),b.dmg*lv3('m_chain',.45,.55,.65));}finally{S.dsub=null;}}
+    if(has('m_chain')&&t){S.dsub='연쇄 번개';try{mChain(t,lv3('m_chain',3,4,5)+(has('f_plasma')?3:0),b.dmg*lv3('m_chain',.45,.55,.65));}finally{S.dsub=null;}}
     if(has('m_shatter')&&fz&&t.alive)mShatter(t);
     if(has('m_napalm')){let n=0;for(const z of S.zones)if(z.kind==='fire'&&z.np)n++;if(n<14)S.zones.push({x:t.x,y:t.y,r:rr2*.8,life:has('f_wildfire')?3:2,kind:'fire',np:1,m:lv3('m_napalm',.33,.5,.67)*(sun?2:1)});}if(has('m_inferno'))for(const o of S.en)if(o.alive&&d2(o,t)<rr2*rr2)poisonE(o);}
   if(b.roll===7)explode(t.x,t.y,85*(has('f_fate7')?1.5:1),pDmg()*(has('f_fate7')?2.5:1.8),'#ff4fd8');
@@ -8088,7 +8088,7 @@ const TAG_ICO={card:'🃏',dice:'🎲',roulette:'💫',house:'💰',curse:'💀'
 let augBarKey='',synKey='';
 // 저장 캐릭터(레이드·결투)의 증강: [id,단계,품질,합체품질,기록,출처] — 출처 g=장비 f=상점·행운
 const augSer=a=>{const fl=(a.gr?'g':'')+(a.gift?'f':''),r=[a.id,a.lv,a.q||1,a.pq||0,a.dl||null];if(fl)r.push(fl);return r;};
-const augDes=([id,lv,q,pq,dl,fl])=>{fl=fl||'';const f=[...FUSIONS,...VFUSIONS].find(x=>x.id===id);if(f){const o=fusionObj(f);if(pq)o.pq=pq;if(dl)o.dl=dl;if(fl.includes('g')&&o.t!=='v')o.gr=1;return o;}const a=AUGS.find(x=>x.id===id)||VIPS.find(x=>x.id===id)||DRAGON.find(x=>x.id===id);if(!a)return null;const o={...a,lv,q:q||1,dl:dl||undefined};if(fl.includes('g')||a.t==='x')o.gr=1;if(fl.includes('f'))o.gift=1;return o;};
+const augDes=([id,lv,q,pq,dl,fl])=>{fl=fl||'';if(id==='f_mplasma')id='f_plasma';const f=[...FUSIONS,...VFUSIONS].find(x=>x.id===id);if(f){const o=fusionObj(f);if(pq)o.pq=pq;if(dl)o.dl=dl;if(fl.includes('g')&&o.t!=='v')o.gr=1;return o;}const a=AUGS.find(x=>x.id===id)||VIPS.find(x=>x.id===id)||DRAGON.find(x=>x.id===id);if(!a)return null;const o={...a,lv,q:q||1,dl:dl||undefined};if(fl.includes('g')||a.t==='x')o.gr=1;if(fl.includes('f'))o.gift=1;return o;};
 // 증강 바 설명창: 레벨업에서 고르지 않은 증강은 어디서 받았는지 한 줄
 const augSrcL=a=>{const t=a.gift?'🎁 상점·행운으로 받은 증강 (일반 칸 사용)':a.src==='uw'?'⚔ 고유 무기 능력 (일반 칸 안 씀)':a.gr?'✦ 장비에서 받은 증강 (일반 칸 안 씀)':a.t==='d'?'🐉 용의 보물 (일반 칸 안 씀)':'';return t?`<small style="color:#9fd4ff;margin-top:4px">${t}</small>`:'';};
 function renderAugBar(){const el=$('augBar');const k=!S||S.mode==='start'?'':S.augs.map(a=>a.id).join(',')+'|'+MAXA+(vipCan()?'v':'')+'|'+S.cls+JSON.stringify(S.mk||{});if(k===augBarKey)return;augBarKey=k;synKey='';if(!k){el.innerHTML='';return;}
@@ -8696,6 +8696,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:266,t:'🔧 저장 호환 수정',items:[
+    ['change','🔧 예전에 저장한 마법사 캐릭터(보관함·명예의 전당·결투)의 합체 「플라스마 사슬」이 공용 합체로 잘못 읽힐 수 있던 문제 수정 · 마스터리 갈래 이름도 새 이름에 맞춤 (독칼 → 독니 등)','bug']]},
   {v:265,t:'🆁 궁극기 루트 효과',items:[
     ['new','🆁 궁극기에 <b>루트 효과</b>: 추천 빌드 루트의 증강을 2개 이상 모으면 가장 많이 모은 루트에 맞는 효과가 더해져요. 궁극기 버튼 설명에 지금 루트와 효과가 보여요 (마법사는 속성별 궁극기가 따로 있어 제외)'],
     ['new','🛡 기사: 방어 탱커 받는 피해 −40% · 막기 반격 막기 60% · 돌격 기사 대시 초기화+기절 / ✝ 성기사: 오라 공격력 +30% · 망치 심판의 망치 12개 · 수호 받는 피해 −50% / 🪓 광전사: 광란 최대 공격력 +30% · 피의 회전 체력 30% 회복 · 도약 돌격 대시 초기화+기절'],
@@ -8743,7 +8745,7 @@ const PATCH_NOTES=[
     ['change','🏹 증강 「화살비」 → <b>화살 소나기</b> (고유 무기 「화살비」와 겹침)']]},
   {v:255,t:'🔮 마법사 점검',items:[
     ['change','🔮 마법사 이름 정리 (같은 이름이 여러 개라 헷갈려서): 「증기 폭발」 → <b>열충격</b> (공용 「증기 폭발」과 겹침) · 「유성우」 → <b>분열 운석</b> (세트 증강·돌발 이벤트와 겹침) · 합체 「절대 영도」 → <b>극저온</b> (얼음 궁극기와 겹침) · 「뇌우」 → <b>천둥 폭풍</b> · 「빙하기」 → <b>혹한의 폭설</b> · 「플라스마」 → <b>플라스마 사슬</b> · 마스터리 「불바다」 → <b>잔불</b>, 「연쇄 폭발」 → <b>불씨 폭발</b>'],
-    ['change','🔧 마법사 합체 「플라스마」가 공용 합체 「플라스마」(증기 폭발 + 전도)와 내부 번호가 같아서 서로 섞이던 문제 수정','bug'],
+    ['change','🔧 마법사 합체 「플라스마」가 공용 합체 「플라스마」(증기 폭발 + 전도)와 내부 번호가 같아서 서로 섞이던 문제 수정 (예전에 저장한 마법사 캐릭터의 플라스마 사슬도 그대로 읽힘)','bug'],
     ['look','🔮 마법사에게 총·활 느낌이던 공용 증강 이름을 주문 이름으로: 집중 사격 → <b>집중 주문</b> · 가벼운 방아쇠 → <b>가벼운 손짓</b> · 연속 사격 → <b>연속 시전</b> · 조준경 → <b>마력 렌즈</b> · 얼음 화살 → <b>얼음 창</b> · 대포알 → <b>거대 마력구</b> · 강선 → <b>마력 가속</b> 등 (효과는 그대로) · 공용 증강 「화염구」는 마법사 화염구와 헷갈려서 <b>불덩이</b>로'],
     ['change','🔮 한 속성으로 특화한 마법사에게 장비로 얻은 다른 속성 증강끼리 합체(예: 얼음 마법사가 「불바다」)가 뜨던 것 막음 · 처음 고른 속성이 합체 뒤에 다른 속성으로 바뀔 수 있던 문제 → 한 판 동안 고정','bug'],
     ['buff','🔮 <b>열충격</b>이 얼어붙은 적에게만 터져서 거의 안 터지던 문제 → 불타면서 냉기가 걸린 적이면 터짐 · <b>마나 폭주</b> 공격력 500% → 700%, 폭발 반경 150 → 170'],
@@ -9722,7 +9724,7 @@ const MST={
       {n:'은신',td:'이동 속도 +4%',tf:p=>{p.speed*=1.04;},cn:'그림자 일격',cd:'회피하면 1.5초간 모든 공격이 치명타'}]},
     {n:'암살',ico:'🗡',col:'#ff7a7a',td:'치명타 확률 +3%, 치명타 피해 +10%',tf:p=>{p.crit+=.03;p.critM+=.1;},sub:[
       {n:'연타',td:'치명타 확률 +3%',tf:p=>{p.crit+=.03;},cn:'급소 연타',cd:'같은 적을 치명타로 맞힐 때마다 그 적에게 주는 치명타 피해 +10% (최대 +50%, 4초 유지)'},
-      {n:'독칼',td:'치명타 피해 +10%',tf:p=>{p.critM+=.1;},cn:'독사의 송곳니',cd:'중독된 적에게 주는 치명타 피해 +40%'}]},
+      {n:'독니',td:'치명타 피해 +10%',tf:p=>{p.critM+=.1;},cn:'독사의 송곳니',cd:'중독된 적에게 주는 치명타 피해 +40%'}]},
     {n:'질풍',ico:'💨',col:'#9fe8ff',td:'이동 속도 +3%, 대시 재사용 −5%',tf:p=>{p.speed*=1.03;p.dashMul*=.95;},sub:[
       {n:'단검 비',td:'대시 재사용 −6%',tf:p=>{p.dashMul*=.94;},cn:'단검 비',cd:'대시가 끝나면 10방향으로 단검 (공격력 100%)'},
       {n:'잔상',td:'공격 속도 +4%',tf:p=>{p.rateP=(p.rateP||0)+.04;},cn:'질풍 연격',cd:'대시하면 1.5초간 공격 속도 +40%'}]}]},
@@ -9791,8 +9793,8 @@ const MST={
       {n:'대폭발',td:'물약 범위 +10%',tf:p=>{p.ptR=(p.ptR||0)+.1;},cn:'2차 폭발',cd:'물약이 터질 때 더 넓게 한 번 더 폭발 (피해 50%, 범위 1.5배)'},
       {n:'쌍병',td:'공격력 +4%',tf:p=>{p.dmgP=(p.dmgP||0)+.04;},cn:'쌍병 투척',cd:'4번째 물약마다 근처에 물약 1병을 더 던짐'}]},
     {n:'독술',ico:'☠',col:'#8ee06a',td:'공격 속도 +4%',tf:p=>{p.rateP=(p.rateP||0)+.04;},sub:[
-      {n:'맹독',td:'공격 속도 +4%',tf:p=>{p.rateP=(p.rateP||0)+.04;},cn:'산성 침식',cd:'중독된 적에게 주는 기본 공격 피해 +20%'},
-      {n:'안개',td:'공격력 +4%',tf:p=>{p.dmgP=(p.dmgP||0)+.04;},cn:'진득한 장판',cd:'물약 장판이 2초 더 남고 장판 피해 2배'}]},
+      {n:'침식',td:'공격 속도 +4%',tf:p=>{p.rateP=(p.rateP||0)+.04;},cn:'산성 침식',cd:'중독된 적에게 주는 기본 공격 피해 +20%'},
+      {n:'장판',td:'공격력 +4%',tf:p=>{p.dmgP=(p.dmgP||0)+.04;},cn:'진득한 장판',cd:'물약 장판이 2초 더 남고 장판 피해 2배'}]},
     {n:'약사',ico:'⚗',col:'#ffb0e0',td:'최대 체력 +5%',tf:p=>{p.maxHp*=1.05;p.hp=p.maxHp;},sub:[
       {n:'회복약',td:'재생 +1',tf:p=>{p.regen=(p.regen||0)+1;},cn:'회복 물약',cd:'4번째 물약마다 최대 체력 3% 회복'},
       {n:'강화약',td:'공격력 +4%',tf:p=>{p.dmgP=(p.dmgP||0)+.04;},cn:'강화 물약',cd:'물약이 적 3마리 이상 맞히면 3초간 공격 속도 +40%'}]}]},
@@ -10201,7 +10203,7 @@ function heroSnap(){const p=S.p,st={};try{hpSync();for(const [n,f,dg,u] of PREV_
     skin:cosEq('skin')?cosEq('skin').k:'',look:lookOld(S.cls)?'old':'new',name:'',title:META.title||'',gear:gearCode(),aura:auraStr(),dr:myDrStr(S.cls),st,p:{},s:{},augs:S.augs.map(augSer)};
   for(const k of PKEYS)d.p[k]=p[k];d.p.hp=d.p.maxHp;for(const k of ['cls','lvl','fused','takeAll','potN','vineN','boostN','boostB','diff','mk'])d.s[k]=S[k];return d;}
 const heroName=h=>h.name||`${CLASSES[h.cls]?CLASSES[h.cls].n:h.cls} Lv${h.lvl}`;
-const heroAugN=id=>{const a=[...AUGS,...VIPS,...DRAGON,...FUSIONS,...VFUSIONS].find(x=>x.id===id);return a?a.n:null;};
+const heroAugN=id=>{if(id==='f_mplasma')id='f_plasma';const a=[...AUGS,...VIPS,...DRAGON,...FUSIONS,...VFUSIONS].find(x=>x.id===id);return a?a.n:null;};
 // 결과 화면 저장 버튼. 같은 직업이 3칸 다 찼으면 점수가 가장 낮은 캐릭터와 바꿀지 물어봄
 async function heroSave(snap){const L=myHeroes(),same=L.filter(h=>h.cls===snap.cls);let rm=null;
   if(same.length>=HERO_PER||L.length>=HERO_MAX){const pool=same.length>=HERO_PER?same:L,low=pool.reduce((a,b)=>(b.score||0)<(a.score||0)?b:a);
@@ -12871,7 +12873,7 @@ function specApply(s){const sp=SPEC;if(!sp||!s||typeof s!=='object')return;/* �
   if(s.m==='start'){S.en.length=0;specBar();return;}
   const now=performance.now();if(sp.lt){const g=Math.min(2000,Math.max(120,now-sp.lt));sp.dur=sp.dur?sp.dur*.7+g*.3:g;}sp.lt=now;
   {const A=auraList(s.au);SPEC_OV={ti:s.ti||'',skin:s.cs||'',aura:(A.find(x=>x.cat==='aura')||{}).k||'',wing:(A.find(x=>x.cat==='wing')||{}).k||'',hof:s.hf||'',dr:/^[0-9a-z\-]{14}$/.test(s.dr||'')?dressDec(s.dr):null};};GEAR_OVR=s.g?gearDecode(s.g):null;
-  if(s.ag!==sp.ag){sp.ag=s.ag;const F=[...FUSIONS,...VFUSIONS];S.augs=(s.ag||'').split(',').filter(Boolean).map(q=>{const [id,lv]=q.split(':');const f=F.find(x=>x.id===id);if(f)return fusionObj(f);const a=augDef(id)||DRAGON.find(x=>x.id===id);return a?{...a,lv:+lv||1}:null;}).filter(Boolean);try{tagCount();}catch(e){}augBarKey='';}
+  if(s.ag!==sp.ag){sp.ag=s.ag;const F=[...FUSIONS,...VFUSIONS];S.augs=(s.ag||'').split(',').filter(Boolean).map(q=>{let [id,lv]=q.split(':');if(id==='f_mplasma')id='f_plasma';const f=F.find(x=>x.id===id);if(f)return fusionObj(f);const a=augDef(id)||DRAGON.find(x=>x.id===id);return a?{...a,lv:+lv||1}:null;}).filter(Boolean);try{tagCount();}catch(e){}augBarKey='';}
   if(S.cls!==s.c&&CLASSES[s.c]){applyClass(s.c);}S.biome=s.bi||0;S.lvl=s.l;S.gt=s.t;S.bt=0;S.st.kills=s.k;S.diff=s.d;
   const p=S.p,go=(o,x,y)=>{if(o.tx==null){o.x=x;o.y=y;}o.fx0=o.x;o.fy0=o.y;o.tx=x;o.ty=y;o.t0=now;};
   go(p,s.x,s.y);p.hp=p.maxHp*s.h/100;
@@ -13916,7 +13918,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=265,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=266,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
