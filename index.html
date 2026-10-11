@@ -13661,7 +13661,7 @@ function renderStats(){
     ...(p.block?[row('막기',pct(p.block+(has('k_wall')?lv3('k_wall',.15,.2,.25):0)+(has('p_divine')?.2:0)),'막으면 피해 무효')]:[]),
     row('보호막',Math.round(barrierMax())),
     row('체력 재생',(p.regen*rgHpM()).toFixed(1)+'/초',(rgHpM()>1?`기본 ${p.regen.toFixed(1)} ×${rgHpM().toFixed(1)} · `:'')+`재생·문신·성역 같은 자동 회복은 다 합쳐서 1초에 최대 체력의 ${(rgCapF()*100).toFixed(1)}%까지`),
-    row('흡혈',pct(lsNow()),`흡혈 회복은 1초에 최대 체력의 ${(lsRate()*100).toFixed(1)}%까지`),
+    row('흡혈',pct(lsNow()),`준 피해의 ${pct(lsNow())}만큼 체력이 차요. 단, 흡혈로 차는 체력은 1초에 최대 체력의 ${(lsRate()*100).toFixed(1)}%(${Math.round(S.p.maxHp*lsRate())})까지만`),
     row('처치·적중 회복','1초에 최대 체력의 '+((raidOn()?KH_RAID:KH_MAX)*100)+'%까지','처치·적중할 때 차는 회복을 다 합친 상한'),
     row('받는 피해 배율','×'+p.vuln.toFixed(2))
   ].join('');
