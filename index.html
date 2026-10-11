@@ -3762,7 +3762,7 @@ function augPreview(a){
   try{b0=snap();const c={...P0};S.p=c;S.augs=[...A0,{...a,tags:a.tags||[],lv:a.t==='v'||a.t==='f'||a.t==='d'?1:2}];tagCount();if(a.f)for(let i=0;i<(a.t==='v'||a.t==='f'||a.t==='d'?1:2);i++)applyQ(a.f,c,a.q);b1=snap();}
   catch(e){b1=null;}finally{S.p=P0;S.augs=A0;S.own=o0;S.oq=q0;S.tagc=t0;S.gold=g0;S.fxL=x0;}
   if(!b1)return '';
-  const rows=[];PREV_ST.forEach(([n,,dp,u],i)=>{const x=b0[i],y=b1[i];if(x==null||y==null||Math.abs(y-x)<Math.pow(10,-dp)/2)return;const f=v=>(+v.toFixed(dp)).toLocaleString()+(u||''),pc=x>0&&!u?` (${y>x?'+':''}${Math.round((y/x-1)*100)}%)`:'';const pm=pureMelee();if(n==='공격 속도')n=RATE_NM();const lo=n==='대시 재사용';if(n==='탄환'&&pm)u='°';n=pm?({사거리:'근접 거리',관통:'동시 타격',탄환:'베기 각도'}[n]||n):n;rows.push(`<span class="pvr ${(lo?y<x:y>x)?'up':'dn'}">${n} ${f(x)} → <b>${f(y)}</b>${pc}</span>`);});
+  const rows=[];PREV_ST.forEach(([n,,dp,u],i)=>{const x=b0[i],y=b1[i];if(x==null||y==null||Math.abs(y-x)<Math.pow(10,-dp)/2)return;const f=v=>(+v.toFixed(dp)).toLocaleString()+(u||''),pc=x>0&&!u?` (${y>x?'+':''}${Math.round((y/x-1)*100)}%)`:'';const pm=pureMelee();if(n==='공격 속도')n=RATE_NM();if(!pm&&(n==='탄속'||n==='탄환'))n=projTxt(n==='탄속'?' 탄속':'탄환').trim();const lo=n==='대시 재사용';if(n==='탄환'&&pm)u='°';n=pm?({사거리:'근접 거리',관통:'동시 타격',탄환:'베기 각도'}[n]||n):n;rows.push(`<span class="pvr ${(lo?y<x:y>x)?'up':'dn'}">${n} ${f(x)} → <b>${f(y)}</b>${pc}</span>`);});
   return rows.length?`<span class="apv">${rows.slice(0,5).join('')}</span>`:'';
 }
 // 숫자로 오르는 기본 스탯(공격력·최대 체력·방어력·체력 재생)은 레벨에 비례해 커짐: × (1 + 레벨 × 4%). 퍼센트·초·행운·광란은 그대로
@@ -6716,7 +6716,9 @@ const dLines=d=>{const t=String(d);if(/<[a-z]/i.test(t))return t;const out=[];le
 // 원거리 직업은 「탄환」을 실제로 쏘는 것 이름으로 보여 줌 (마법사 화염구·정령사 원소탄 …). 적 탄환은 그대로
 const PROJ_N={mage:'화염구',elem:'원소탄',archer:'화살',rogue:'단검',alch:'플라스크',gambler:'동전',necro:'마력탄',druid:'가시'};
 const projTxt=d=>{try{if(S&&S.cls==='mage')d=String(d).replace(/공격 속도/g,'마법 시전 속도');const n=S&&S.cls&&(S.cls==='mage'?MAGE_PN[mSchool()]:PROJ_N[S.cls]);if(!n||pureMelee())return d;const v=!((n.charCodeAt(n.length-1)-0xAC00)%28);const J={'이':v?'가':'이','을':v?'를':'을','은':v?'는':'은','과':v?'와':'과','으로':v?'로':'으로'};
-  return String(d).replace(/(적 )?탄환(으로|이|을|은|과)?/g,(m,en,j)=>en?m:n+(j?J[j]:''));}catch(e){return d;}};
+  return String(d).replace(/(적 )?탄환(으로|이|을|은|과)?/g,(m,en,j)=>en?m:n+(j?J[j]:''))
+    // 낱말 「탄」·「탄속」도 직업 투사체 이름으로 (증강 이름처럼 붙어 있는 말은 그대로)
+    .replace(/(^|[\s(·,])탄속/g,(m,a)=>a+n+' 속도').replace(/(^|[\s(·,])탄(이|은|을|의|마다)?(?![가-힣])/g,(m,a,j)=>a+n+(j?(J[j]||j):''));}catch(e){return d;}};
 const meleeTxt=d=>{try{if(!S||!S.cls||!pureMelee())return projTxt(d);return String(d).replace(/관통[ \u00a0]\+(\d+)/g,(m,n)=>`${m} <small class="mlt">(근접: 한 번에 베는 적 +${2*n})</small>`).replace(/탄환[ \u00a0]\+(\d+)발?/g,(m,n)=>`${m} <small class="mlt">(근접: 베기 각도 +${40*n}°)</small>`);}catch(e){return d;}};
 const meleeCap=n=>(S.cls==='berserk'?2:3)+2*Math.max(0,pierceE());
 const meleeArc=n=>Math.round(Math.min(360,2*(55+(n-1)*20)));
@@ -8601,6 +8603,7 @@ const PATCH_NOTES=[
     ['change','🧱 결계가 좁아졌을 때 적이 <b>결계 바로 바깥에서 생겨 걸어 들어와요</b> (예전엔 결계 가장자리에 바로 나타나 피할 틈이 없었음). 한 번 들어온 적은 예전처럼 밖으로 못 나가요'],
     ['bug','🧱 악몽에서 결계가 줄어들 때 이벤트(성소·보물상자·유물 등)·의뢰인·상인이 결계 밖에 남던 문제: 결계 안으로 따라 들어와요. 결계 밖 건물의 이스터에그는 안내가 안 떠요'],
     ['change','📜 판 내내 <b>1배속</b>으로 2분 30초가 지나면 의뢰인이 <b>반드시</b> 나타나요 (예전: 20초마다 30% 확률). 1배속으로 하는 보람이 생겨요'],
+    ['look','🔮 마법사 등 원거리 직업의 카드·시너지·스탯 창에서 「탄환」·「탄」·「탄속」이 직업 투사체 이름으로 (마법사: 화염구·화염구 속도 등)'],
     ['look','📊 스탯 창 체력 재생·흡혈에 <b>실제 한도</b>를 숫자로 (예: 0.0/초 / 12.2/초 · 흡혈 0.5% / 1초에 1.5까지). 최대 체력이 늘면 한도도 같이 늘어요']]},
   {v:249,t:'🧚 정령사 개편: 세 정령',items:[
     ['change','🧚 <b>정령사</b>는 이제 정령을 거느려요: <b>화염·냉기·번개 정령 3마리</b>가 곁을 돌며 각자 적을 쏨 (화상 / 둔화 / 연쇄 번개). 정령 탄 피해 = 공격력 50%, 그 원소 시너지 1개당 +10%. 공격 속도가 오르면 정령도 빨리 쏴요'],
@@ -13660,10 +13663,10 @@ function renderStats(){
     row('동시 타격',meleeCap()+`마리 <small>/ ${(S.cls==='berserk'?2:3)+2*PIERCE_CAP}</small>`,'관통 +1마다 +2마리','한 번 휘두를 때 맞히는 최대 적 수 (가까운 순). 관통 스탯이 여기에 적용'),
     row('근접 거리',Math.round(meleeR())+` <small>/ ${Math.round((S.cls==='druid'?200:RANGE_CAP())*.65)}</small>`,`사거리 ${Math.round(p.range)}의 65%`,'칼이 닿는 거리. 사거리를 올리면 같이 늘어남'),
     row('탄속','—','근접 직업은 적용 안 됨','근접 공격은 탄환이 없어 탄속이 쓰이지 않음. 탄속 카드는 나오지 않음')]:[
-    row('탄환 수',n+'발'),
+    row(projTxt('탄환')+' 수',n+'발'),
     row('관통',Math.min(p.pierce,PIERCE_CAP)+` <small>/ ${PIERCE_CAP}</small>`,p.pierce>PIERCE_CAP?(has('a_pierce')?`초과 ${p.pierce-PIERCE_CAP}은 꿰뚫는 화살 공격력에만 계산`:`초과 ${p.pierce-PIERCE_CAP}은 효과 없음`):p.pierce>=PIERCE_CAP?(has('a_pierce')?'최대치. 넘는 관통은 꿰뚫는 화살 공격력으로':'최대치. 관통 카드·증강이 더 안 나와요'):''),
     row('사거리',Math.round(rangeE())+` <small>/ ${RANGE_CAP()}</small>`,p.range>RANGE_CAP()?`초과 ${Math.round(p.range-RANGE_CAP())}은 효과 없음`:p.range>=RANGE_CAP()?'최대치. 사거리 카드·조준경이 더 안 나와요':'',`적이 다가오기 전에 먼저 공격하는 안전 거리. 딜을 직접 올리지는 않고, 원거리 시너지(원거리 숙련·저격수·조준경 등: 사거리 100당 피해)와 소환물의 탐지 범위에 쓰임. 최대 ${RANGE_CAP()} (원거리 550 · 근접 300)까지만 늘어나고, 최대가 되면 사거리 카드·조준경은 더 나오지 않음`),
-    row('탄속',Math.round(p.bspd)+(has('a_gale')?' <small>/ 상한 없음</small>':` <small>/ ${Math.round((CLASSES[S.cls].stats.bspd||560)*3)}</small>`),bspdB()>0?`기본보다 빠른 만큼 탄환 피해 +${Math.round(bspdB()*100)}%${has('a_gale')?' (질풍 화살: 상한 없음)':bspdB()>=.99?' · 최대치 도달 (가속 탄 카드 안 나옴)':' / 최대 +100%'}`:'기본 탄속보다 빠르면 1%당 탄환 피해 +0.5% (최대 +100%)')]),
+    row(projTxt(' 탄속').trim(),Math.round(p.bspd)+(has('a_gale')?' <small>/ 상한 없음</small>':` <small>/ ${Math.round((CLASSES[S.cls].stats.bspd||560)*3)}</small>`),bspdB()>0?`기본보다 빠른 만큼 탄환 피해 +${Math.round(bspdB()*100)}%${has('a_gale')?' (질풍 화살: 상한 없음)':bspdB()>=.99?' · 최대치 도달 (가속 탄 카드 안 나옴)':' / 최대 +100%'}`:'기본 탄속보다 빠르면 1%당 탄환 피해 +0.5% (최대 +100%)')]),
     ...clsRows(row),
     row('기대 초당 피해',Math.round(pureMelee()?pDmg()*rate*MELEE_DM*(1+critC()*(critMul()-1)):dps),pureMelee()?'적 1마리 기준 근접 피해 (×1.6 근접 보정 포함). 회전 베기, 폭발, 독 제외':'탄환 기본 피해 기준. 회전 부적, 폭발, 독 제외')
   ].join('');
