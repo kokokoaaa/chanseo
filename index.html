@@ -3753,6 +3753,7 @@ function withActual(desc,f){desc=projTxt(desc);const W=a=>a.map(l=>`<div>${cardP
       return a!=null&&b!=null?`${line} <span style="display:block;opacity:.85;font-size:.85em">(${a.toFixed(2)}초 → <strong>${b.toFixed(2)}초</strong>)</span>`:line;}
     const m=PV.find(([k])=>line.startsWith(k)||k==='공격 속도'&&line.startsWith(RATE_NM()));if(!m)return line;
     const a=v(m[1]);let b=null;S.p=c;try{if(!c.__ap){c.__ap=1;f(c);}b=v(m[1]);}catch(e){}finally{S.p=P0;}
+    if(m[0]==='공격 속도'&&rateUnc()&&rawRate()>=RATE_CAP())return line+`<span style="display:block;opacity:.85;font-size:.85em;color:#ff9a3c">(상한 도달 · 넘는 만큼은 「${has('m_overload')?'마력 과부하':'패닝 사격'}」 공격력으로)</span>`;
     if(a==null||b==null||Math.abs(b-a)<Math.pow(10,-m[2])/2)return line;const d=b-a;
     const pc=a>0?Math.abs(d/a*100):0;return `${m[0]==='공격 속도'?RATE_NM():m[0]} <span style="font-weight:700">${d>0?'+':'−'}${Math.abs(d).toFixed(m[2])}</span>${pc>=.1?`<span style="display:block;opacity:.7;font-size:.85em">(지금보다 ${d>0?'+':'−'}${pc.toFixed(pc<10?1:0)}%)</span>`:''}`;}));}
 // 증강 미리보기: 이 증강을 얻었을 때(★2) 주요 스탯이 얼마나 바뀌는지. 잠깐 적용해서 계산한 뒤 그대로 되돌림
