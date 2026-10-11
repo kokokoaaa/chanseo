@@ -8590,7 +8590,7 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
 const PATCH_NOTES=[
   {v:250,t:'📜 1배속 의뢰 확정',items:[
     ['change','📜 판 내내 <b>1배속</b>으로 2분 30초가 지나면 의뢰인이 <b>반드시</b> 나타나요 (예전: 20초마다 30% 확률). 1배속으로 하는 보람이 생겨요'],
-    ['look','📊 스탯 창 흡혈 설명을 쉽게: 「준 피해의 N%만큼 체력이 차요 · 1초에 최대 체력의 0.3%까지만」']]},
+    ['look','📊 스탯 창 체력 재생·흡혈에 <b>실제 한도</b>를 숫자로 (예: 0.0/초 / 12.2/초 · 흡혈 0.5% / 1초에 1.5까지). 최대 체력이 늘면 한도도 같이 늘어요']]},
   {v:249,t:'🧚 정령사 개편: 세 정령',items:[
     ['change','🧚 <b>정령사</b>는 이제 정령을 거느려요: <b>화염·냉기·번개 정령 3마리</b>가 곁을 돌며 각자 적을 쏨 (화상 / 둔화 / 연쇄 번개). 정령 탄 피해 = 공격력 50%, 그 원소 시너지 1개당 +10%. 공격 속도가 오르면 정령도 빨리 쏴요'],
     ['change','🔹 본인 원소탄은 피해 60%의 약한 마력탄 (원소 효과 없음)'],
@@ -13663,9 +13663,9 @@ function renderStats(){
     row('회피',pct(dodgeC())+` <small>/ ${pct(DODGE_CAP_F())}</small>`,p.dodge>DODGE_CAP_F()?`초과 ${Math.round((p.dodge-DODGE_CAP_F())*100)}% → 방어력 +${Math.round((p.dodge-DODGE_CAP_F())*200)}`:''),
     ...(p.block?[row('막기',pct(p.block+(has('k_wall')?lv3('k_wall',.15,.2,.25):0)+(has('p_divine')?.2:0)),'막으면 피해 무효')]:[]),
     row('보호막',Math.round(barrierMax())),
-    row('체력 재생',(p.regen*rgHpM()).toFixed(1)+'/초',(rgHpM()>1?`기본 ${p.regen.toFixed(1)} ×${rgHpM().toFixed(1)} · `:'')+`재생·문신·성역 같은 자동 회복은 다 합쳐서 1초에 최대 체력의 ${(rgCapF()*100).toFixed(1)}%까지`),
-    row('흡혈',pct(lsNow()),`준 피해의 ${pct(lsNow())}만큼 체력이 차요. 단, 흡혈로 차는 체력은 1초에 최대 체력의 ${(lsRate()*100).toFixed(1)}%(${Math.round(S.p.maxHp*lsRate())})까지만`),
-    row('처치·적중 회복','1초에 최대 체력의 '+((raidOn()?KH_RAID:KH_MAX)*100)+'%까지','처치·적중할 때 차는 회복을 다 합친 상한'),
+    row('체력 재생',(p.regen*rgHpM()).toFixed(1)+`/초 <small>/ ${(p.maxHp*rgCapF()).toFixed(1)}/초</small>`,(rgHpM()>1?`기본 ${p.regen.toFixed(1)} ×${rgHpM().toFixed(1)} · `:'')+`재생·문신·성역 같은 자동 회복은 다 합쳐서 1초에 ${(p.maxHp*rgCapF()).toFixed(1)}까지 (최대 체력 ${Math.round(p.maxHp)}의 ${(rgCapF()*100).toFixed(1)}%). 최대 체력이 늘면 한도도 같이 늘어요`),
+    row('흡혈',pct(lsNow())+` <small>/ 1초에 ${(p.maxHp*lsRate()).toFixed(1)}까지</small>`,`준 피해의 ${pct(lsNow())}만큼 체력이 차요. 단, 흡혈로 차는 체력은 1초에 ${(p.maxHp*lsRate()).toFixed(1)}까지 (최대 체력 ${Math.round(p.maxHp)}의 ${(lsRate()*100).toFixed(2)}%). 한도는 흡혈 수치의 절반만큼 (흡혈 1% → 최대 체력의 0.5%, 최대 ${(raidOn()?RAID_LS:LS_MAX)*100}%)이라 흡혈과 최대 체력이 늘면 같이 늘어요`),
+    row('처치·적중 회복',`1초에 ${(p.maxHp*(raidOn()?KH_RAID:KH_MAX)).toFixed(1)}까지`,`처치·적중할 때 차는 회복을 다 합친 한도: 1초에 ${(p.maxHp*(raidOn()?KH_RAID:KH_MAX)).toFixed(1)} (최대 체력 ${Math.round(p.maxHp)}의 ${((raidOn()?KH_RAID:KH_MAX)*100)}%). 최대 체력이 늘면 한도도 같이 늘어요`),
     row('받는 피해 배율','×'+p.vuln.toFixed(2))
   ].join('');
   const util=[
