@@ -4859,7 +4859,7 @@ const CLASSES={
   necro:{lock:true,n:'사령술사',role:'해골 소환',d:'쓰러진 적을 해골 병사로 일으키는 술사',passive:'해골 소환: 처치 시 25% 확률, 그리고 약 2초마다(해골이 절반보다 적으면 1초마다) 해골 병사 소환 (최대 5기, 12초, 공격력 100%로 근접 공격). 해골은 주변 근접 적을 끌어당기는 방패 역할 (체력 = 내 최대 체력 50%, 받는 피해 절반). 해골 방패로 사령술사의 해골은 더 멀리(150)서 한 기당 6마리까지 붙잡음',atk:.35,
     stats:{hp:155,maxHp:155,speed:185,dmg:16,rate:2.1,range:300,bspd:500,armor:7},fav:['undead','summon','curse'],dis:['holy'],
     cards:['힘의 물약','숫돌','조준경','튼튼한 체력','전투 본능','흡혈 송곳니'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
-  gunner:{lock:true,n:'총잡이',role:'매그넘 저격',d:'한 발 한 발이 묵직한 매그넘 리볼버 총잡이',passive:'매그넘 리볼버: 모든 탄이 일반 공격의 1.7배 피해 + 관통 1. 6발 쏘면 0.8초 재장전 (탄창 6발 고정, 재장전은 공격 속도와 무관). 구르며 재장전: 재장전하는 동안 회피 +25% (회피 상한 안에서). 저지력으로 맞은 일반 몹이 뒤로 크게 밀려남 (정예·보스 제외)',atk:.18,
+  gunner:{lock:true,n:'총잡이',role:'매그넘 저격',d:'한 발 한 발이 묵직한 매그넘 리볼버 총잡이',passive:'매그넘 리볼버: 모든 탄이 일반 공격의 1.7배 피해 + 관통 1. 6발 쏘면 0.8초 재장전 (탄창 6발 고정). 숙련된 손놀림: 공격 속도가 오를수록 재장전도 빨라짐 (기본보다 4배 빠르면 재장전 절반). 구르며 재장전: 재장전하는 동안 회피 +25% (회피 상한 안에서). 저지력으로 맞은 일반 몹이 뒤로 크게 밀려남 (정예·보스 제외)',atk:.18,
     stats:{hp:160,maxHp:160,speed:200,dmg:12,rate:1.8,range:300,bspd:820,crit:.1,critM:2.1},fav:['rapid','sniper','card'],dis:['nature'],
     cards:['날랜 손놀림','조준경','급소 노리기','치명상','힘의 물약','가벼운 장화'],lvd:'공격력 +0.6%, 치명타 +0.2%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.006;p.crit+=.002;p.maxHp+=1;p.hp+=1;}},
   elem:{lock:true,n:'정령사',role:'정령 소환',d:'화염·냉기·번개 정령을 거느리고 싸우는 정령술사',passive:'원소 정령: 화염·냉기·번개 정령 3마리가 곁을 돌며 각자 적을 쏨 (화염: 화상 / 냉기: 1초 둔화 / 번개: 주변 2명에게 60% 연쇄). 정령 탄 피해는 공격력 50%, 그 원소 시너지 1개당 +10%. 공격 속도가 오르면 정령도 빨리 쏨. 본인은 약한 원소탄(피해 60%)을 쏨. 기본 관통 1',atk:.3,
@@ -6298,7 +6298,7 @@ function elemDrop(e){explode(e.x,e.y,70,pDmg()*2*elM(),'#c8a0ff');for(const o of
 // 리볼버: 탄창 6발 고정
 const magN=()=>6+(has('g_bigmag')?4:0);
 // 재장전: 공격 속도와 무관하게 기본 1초. 재장전 카드·쌍권총·총기 숙련으로만 줄고 최소 0.35초
-const RL_MIN_B=.35,reloadRaw=()=>.8*(has('g_twin')?.5:1)*(has('g_bigmag')?1.25:1)*(S.p.rlM||1)*(1-.05*mlv('m_rapid')),reloadT=()=>Math.max(RL_MIN_F(),reloadRaw());
+const RL_MIN_B=.35,reloadRaw=()=>.8*Math.sqrt(Math.min(1,CLASSES.gunner.stats.rate/Math.max(.1,pRate())))/* 숙련된 손놀림 (v276): 공격 속도가 오르면 재장전도 빨라짐 (4배면 절반) */*(has('g_twin')?.5:1)*(has('g_bigmag')?1.25:1)*(S.p.rlM||1)*(1-.05*mlv('m_rapid')),reloadT=()=>Math.max(RL_MIN_F(),reloadRaw());
 function ricoShot(t,dm,n){const o=nearestE(t,220,new Set([t]));if(o)pBullet(t.x,t.y,Math.atan2(o.y-t.y,o.x-t.x),dm,{sub:'도탄',child:true,r:3,rc:n,hit:new Set([t]),sure:has('f_trickshot'),life:.6,pierce:0});}
 // 해골 최대 수: 실제로 나오는 해골은 30기까지, 넘는 만큼은 해골 피해 배율로 바뀜 (skelRaw/30)
 // 차트 마스터 칭호를 단 힘기범 전용: 사령술사 해골 최대 +10 (상한도 +10)
