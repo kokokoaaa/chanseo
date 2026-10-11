@@ -3568,7 +3568,7 @@ function fusable(){return FUSIONS.filter(f=>!noFuse(f.a)&&!noFuse(f.b)&&S.augs.s
 const fzNone=a=>!!a&&!a.up&&a.t!=='f'&&a.t!=='d'&&(noFuse(a.id)||(!fzOf(a.id).length&&!VFUSIONS.some(f=>f.a===a.id||f.b===a.id)));
 // 증강 칸 설명용 합체 안내: 합체 없는 증강이면 그렇다고, 있으면 짝 → 결과 (가진 짝은 ✔)
 function fzInfo(a){if(!a||a.t==='f'||a.t==='d'||a.t==='x'||a.gr)return '';if(fzNone(a))return '<small style="color:#a8b0a0;margin-top:4px">🚫 합체 없는 증강</small>';const L=fzOf(a.id);if(!L.length)return '';const own=new Set(S.augs.map(x=>x.id));
-  return '<small style="color:#ff9a3c;margin-top:4px;line-height:1.5">💥 합체할 수 있는 증강'+L.slice(0,5).map(f=>{const o=f.a===a.id?f.b:f.a,d=augDef(o);return '<br>'+(own.has(o)?'✔ ':'· ')+(d?d.n:o)+' → <b>'+f.n+'</b>';}).join('')+(L.length>5?'<br>· 외 '+(L.length-5)+'개':'')+'</small>';}
+  return '<small style="color:#ff9a3c;margin-top:4px;line-height:1.5">💥 합체할 수 있는 증강'+L.slice(0,5).map(f=>{const o=f.a===a.id?f.b:f.a,d=augDef(o);return '<br>'+(own.has(o)?'✔ ':'· ')+(d?d.n:o)+' → <span style="color:#ffd76a;font-weight:700">'+f.n+'</span>';}).join('')+(L.length>5?'<br>· 외 '+(L.length-5)+'개':'')+'</small>';}
 function partnersOf(id){if(noFuse(id))return [];const L=fzOf(id);if(!L.length)return [];const own=new Set(S.augs.map(a=>a.id));return L.filter(f=>!noFuse(f.a)&&!noFuse(f.b)&&own.has(f.a===id?f.b:f.a));}
 function partnerOf(id){return partnersOf(id)[0]||null;}
 function doFuse(f){
@@ -4989,7 +4989,7 @@ function txSpr(s,col,size,sc){if(!TXF){const nw=performance.now();if(nw<TXN)retu
   g.font=f;g.textAlign=ctx.textAlign;g.textBaseline=ctx.textBaseline;const ox=g.textAlign==='center'?w/2:g.textAlign==='right'||g.textAlign==='end'?w-3*sc:3*sc,oy=g.textBaseline==='middle'?h/2:g.textBaseline==='top'?3*sc:g.textBaseline==='bottom'?h-3*sc:h-size*sc*.3-3*sc;
   g.lineWidth=(size>=24?5:3)*sc;g.lineJoin='round';g.strokeStyle=size>=24?'rgba(0,0,0,.88)':'rgba(0,0,0,.7)';g.strokeText(s,ox,oy);g.fillStyle=col;g.fillText(s,ox,oy);c.ox=ox;c.oy=oy;
   TXS.set(k,c);if(TXS.size>500)TXS.delete(TXS.keys().next().value);return c;}
-function ftext(x,y,s,col,size=14){S.tx.push({x,y,s:String(s),col,size,life:.7});if(S.tx.length>40)S.tx.shift();}
+function ftext(x,y,s,col,size=14){S.tx.push({x,y,s:rateTxt(String(s)),col,size,life:.7});if(S.tx.length>40)S.tx.shift();}
 // 실험실 피해 숫자: 크게, 1만 넘으면 K·M으로 (치명타 등 색 있는 숫자는 더 크게), 오래 보이게
 function labNum(e,amt,label,col,dot){const s=label&&isNaN(+label)?label:fmtN(amt);S.tx.push({x:(e.hx??e.x)+rand(-14,14),y:(e.hy??e.y)-e.r-(dot?34:12),s:String(s),col:col||'#fff4d6',size:dot?22:col?34:28,life:1.1,vy:64});if(S.tx.length>70)S.tx.shift();}
 // 정해 둔 닉네임에게만: 한 판 끝날 때마다 「차트는 쓰고 게임 하시나요?」 → YES 행운 +1 (최대 +5) · NO 행운 −1 (최소 −10). 다음 판부터 계속 적용
@@ -5011,7 +5011,7 @@ function burst(x,y,col,n=10){for(let i=0;i<n;i++){const a=Math.random()*TAU,v=ra
 // 알림: 여러 개가 한꺼번에 와도 겹치지 않게 0.35초 간격으로 하나씩 아래로 쌓이고, 각각 2.4초 보인 뒤 천천히 사라짐 (최대 4줄)
 let toastNext=0;const toastQ=new Set();
 let LAST_T='';
-function toast(s){LAST_T=s;const now=performance.now();if(toastQ.has(s))return;for(const c of toastEl.children)if(c.textContent===s&&!c.classList.contains('off')){clearTimeout(c._t);c._t=setTimeout(()=>tstOff(c),2400);return;}
+function toast(s){s=rateTxt(s);LAST_T=s;const now=performance.now();if(toastQ.has(s))return;for(const c of toastEl.children)if(c.textContent===s&&!c.classList.contains('off')){clearTimeout(c._t);c._t=setTimeout(()=>tstOff(c),2400);return;}
   const at=Math.max(now,toastNext);toastNext=at+350;toastQ.add(s);setTimeout(()=>{toastQ.delete(s);const d=document.createElement('div');d.className='tst';d.textContent=s;toastEl.appendChild(d);
     const live=[...toastEl.children].filter(c=>!c.classList.contains('off'));if(live.length>4)tstOff(live[0],1);
     requestAnimationFrame(()=>d.classList.add('on'));d._t=setTimeout(()=>tstOff(d),2400);},at-now);}
@@ -6214,6 +6214,8 @@ const MAGE_BC=[['#ff7a2a','#e0451f','#ff9a2a','#ffe27a','rgba(255,90,30,.35)'],[
 const MAGE_CAST=.52,MAGE_HIT=2,MAGE_R=55,MAGE_PN=['화염구','얼음 구체','번개 구체'],MAGE_COL=['#ff8a3a','#9fe2ff','#fff08a'];
 const mSchool=()=>{if(!S||S.cls!=='mage')return 0;const f=tag('fire'),i=tag('frost'),t=tag('thunder');return i>f&&i>=t?1:t>f&&t>i?2:0;};
 const RATE_NM=()=>S&&S.cls==='mage'?'마법 시전 속도':'공격 속도';
+// 마법사 판에서는 알림·떠오르는 글자·버프 줄의 「공격 속도」도 「마법 시전 속도」로
+function rateTxt(t){try{return typeof t==='string'&&S&&S.cls==='mage'&&t.includes('공격 속도')?t.replace(/공격 속도/g,'마법 시전 속도'):t;}catch(e){return t;}}
 // 마법사 번개: 가까운 적에게 차례로 튐. 맞은 적은 3초 감전
 // 얼음 파쇄: 얼어붙은 적을 깨뜨림 (주변 폭발 + 체력 낮으면 즉사)
 function mShatter(t){if(!t.alive||t.boss)return;t.frozen=false;t.slowT=0;const z=has('f_zero');S.dsub='얼음 파쇄';try{if(t.hp<t.maxHp*(z?.4:lv3('m_shatter',.2,.25,.3)))dmgE(t,t.hp+1,'#dff6ff');explode(t.x,t.y,90,pDmg()*lv3('m_shatter',2.4,3,3.6),'#dff6ff');if(z)for(const o of S.en)if(o!==t&&o.alive&&d2(o,t)<(90+(o.r||12))**2){novaHit(o);novaHit(o);}}finally{S.dsub=null;}burst(t.x,t.y,'#dff6ff',14);}
@@ -8098,7 +8100,7 @@ function hud(){
   if(p.rage>0)bf.push(`<span style="color:#ff6a4a">분노 ${p.rage}</span>`);
   if(raidOn()){const M=raidMembers();bf.push(`<span style="color:#d8b0ff">🗿 부활 기회 ${S.raidTok||0} · ${M.map(m=>`${roleOf(m.cls).ico}${m.me?'나':(m.o.name||'')}${m.o.alive?'':'💀'}`).join(' · ')}</span>`);if((S.raidTeam||1)>1)bf.push(`<span style="color:#ffd76a">⚗ 팀 피해 +${Math.round((S.raidTeam-1)*100)}%</span>`);}
   bf.push(dpsPanel());
-  {const show=play||((S.mode==='aug'||S.mode==='stat')&&innerWidth>=760),h=show?bf.join(''):'',B=$('buffs');if(B._h!==h){B.innerHTML=h;B._h=h;}B.classList.toggle('over',!play);bfTipTick();}
+  {const show=play||((S.mode==='aug'||S.mode==='stat')&&innerWidth>=760),h=show?rateTxt(bf.join('')):'',B=$('buffs');if(B._h!==h){B.innerHTML=h;B._h=h;}B.classList.toggle('over',!play);bfTipTick();}
   dashBtn.classList.toggle('cd',p.dashCd>0);{const sb=$('skBtn'),K=SKILLS[S.cls];if(K){const c=p.skCd||0;sb.classList.toggle('cd',c>0);const ic=K.ico,sub=c>0?Math.ceil(c)+'초':'E';if(sb._k!==ic+sub){sb._k=ic+sub;$('skIco').textContent=ic;$('skSub').textContent=sub;}}}{const ub=$('ulBtn'),U=ULTS[S.cls];if(U){const c=p.ulCd||0;ub.classList.toggle('cd',c>0);ub.classList.toggle('rdy',c<=0);const sub=c>0?Math.ceil(c)+'초':'R';if(ub._k!==U.ico+sub){ub._k=U.ico+sub;$('ulIco').textContent=U.ico;$('ulSub').textContent=sub;}}}
   const tt=rushOn()?(S.gt||0)+(S.bt||0):S.gt,mm=Math.floor(tt/60),ss=String(Math.floor(tt%60)).padStart(2,'0'),nx=augNextIn(S.pendingLv);
   const key=[S.bossI,S.chap,Math.ceil(p.barrier),Math.ceil(p.hp),Math.round(p.maxHp),S.round,S.gold,S.lvl,Math.floor(S.xp),mm,ss,S.biome,slotCount(),S.round.toFixed(1),S.st.kills,S.augs.length,S.mode==='start',S.st.bosses,S.raidTok,S.dps|0,Math.floor(S.bt||0)].join('|');
@@ -8379,7 +8381,7 @@ function gainAug(a){
 // 큰 알림 띠: 여러 개가 한꺼번에 오면(증강 + 칭호 등) 1.3초 간격으로 차례로 띄우고, 아직 떠 있는 띠가 있으면 그 아래 줄에 띄움
 let AFX_NEXT=0;const AFX_ON=[];
 // delay는 초 단위. (예전엔 밀리초와 섞여서, 알림이 겹쳐 대기하면 1.3초가 아니라 약 20분 뒤에 떠서 한참 전 합체·시너지 알림이 엉뚱할 때 나왔음)
-function augFx(title,sub,col,big,delay=0,keep=false){
+function augFx(title,sub,col,big,delay=0,keep=false){title=rateTxt(title);sub=rateTxt(sub);
   const now=performance.now(),at=Math.max(now+delay*1000,AFX_NEXT);AFX_NEXT=at+1300;const wait=at-now,run0=S;
   setTimeout(()=>{if(S!==run0&&!keep)return; // 그 사이 판이 바뀌었으면 지난 판 알림은 안 띄움 (도전과제 알림은 판이 바뀌어도 띄움)
     const bn=document.createElement('div');bn.className='abanner'+((statsOpen||ov.classList.contains('on'))?' low':'');bn.style.color=col;bn.innerHTML=`<b>${title}</b>${sub?`<small>${sub}</small>`:''}`;
