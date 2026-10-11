@@ -5163,7 +5163,10 @@ function spawnAt(type,x,y,noElite,forceElite){
   if(elite&&effT()>150){const ks=Object.keys(AFFIX).sort(()=>Math.random()-.5),n=affN();e.affs=ks.slice(0,n);e.ak=[1,.7,.55][n-1];e.aff=e.affs[0];for(const a of e.affs)if(AFFIX[a].on)AFFIX[a].on(e,e.ak);}
   return e;
 }
-function ringPos(extra=40){const p=S.p,a=(p.moving&&Math.random()<.6)?Math.atan2(p.lmy,p.lmx)+rand(-1.1,1.1):Math.random()*TAU,r=Math.hypot(GW,GH)/2+extra;return [clamp(p.x+Math.cos(a)*r,20,WW-20),clamp(p.y+Math.sin(a)*r,20,WH-20)];}
+function ringPos(extra=40){const p=S.p,a=(p.moving&&Math.random()<.6)?Math.atan2(p.lmy,p.lmx)+rand(-1.1,1.1):Math.random()*TAU,r=Math.hypot(GW,GH)/2+extra;let x=clamp(p.x+Math.cos(a)*r,20,WW-20),y=clamp(p.y+Math.sin(a)*r,20,WH-20);
+  // 결계가 좁으면 결계 바로 바깥(70)에서 생겨 걸어 들어옴: 가장자리에 갑자기 나타나지도, 너무 멀리서 늦게 오지도 않게
+  const A=S.arena;if(A&&!A.duel&&!inArena(x,y,0)){const h=Math.min(A.r,A.tr||A.r),o=70;const dx=x-A.x,dy=y-A.y;x=A.x+clamp(dx,-h-o,h+o);y=A.y+clamp(dy,-h-o,h+o);}
+  return [x,y];}
 function spawnBurst(){
   if(rushOn())return;
   if(S.en.length>(S.bossI>=0?(dfM().bc||35):(chapM().cap||190)*nmCrowd()))return;
@@ -8595,7 +8598,7 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
 const PATCH_NOTES=[
   {v:250,t:'📜 1배속 의뢰 확정',items:[
     ['buff','🔥 <b>화염 마법사</b>가 둘러싸이지 않게: 화염구 폭발 범위 70 → 90, 마법사 주문 크기 1.5배 · 운석 낙하 4번째 → 3번째 · 마나 폭주 5번째 → 4번째 · 정신 집중 3번째 → 2번째 · 대화재 5번째 → 4번째 · 마스터리 마나 순환 5번째 → 4번째'],
-    ['change','🧱 결계가 좁아졌을 때 적이 <b>결계 밖에서 생겨 걸어 들어와요</b> (예전엔 결계 가장자리에 바로 나타나 피할 틈이 없었음). 한 번 들어온 적은 예전처럼 밖으로 못 나가요'],
+    ['change','🧱 결계가 좁아졌을 때 적이 <b>결계 바로 바깥에서 생겨 걸어 들어와요</b> (예전엔 결계 가장자리에 바로 나타나 피할 틈이 없었음). 한 번 들어온 적은 예전처럼 밖으로 못 나가요'],
     ['bug','🧱 악몽에서 결계가 줄어들 때 이벤트(성소·보물상자·유물 등)·의뢰인·상인이 결계 밖에 남던 문제: 결계 안으로 따라 들어와요. 결계 밖 건물의 이스터에그는 안내가 안 떠요'],
     ['change','📜 판 내내 <b>1배속</b>으로 2분 30초가 지나면 의뢰인이 <b>반드시</b> 나타나요 (예전: 20초마다 30% 확률). 1배속으로 하는 보람이 생겨요'],
     ['look','📊 스탯 창 체력 재생·흡혈에 <b>실제 한도</b>를 숫자로 (예: 0.0/초 / 12.2/초 · 흡혈 0.5% / 1초에 1.5까지). 최대 체력이 늘면 한도도 같이 늘어요']]},
