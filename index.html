@@ -2895,6 +2895,7 @@ const AUGS=[
   {id:'m_inferno',cls:'mage',t:'g',n:'화염 확산',tags:['fire','poison'],d:'[마법사 전용] 화염 폭발 범위 +90%, 폭발이 적을 중독시킴'},
   {id:'m_meteor',cls:'mage',t:'p',n:'운석 낙하',tags:['fire','jackpot'],d:'[마법사 전용] 8번째 공격마다 대상 위치에 운석. 공격력 6배 대폭발'},
   {id:'m_ring',cls:'mage',t:'s',n:'불꽃 장막',tags:['fire'],d:'[마법사 전용] 주변 110 안의 적에게 초당 공격력 150% 화염 피해'},
+  {id:'m_nova',cls:'mage',t:'g',n:'프로스트 노바',tags:['frost','frost'],d:'[마법사 전용] 2초마다 내 주변으로 얼음 파동이 퍼짐 (범위 170, 공격력 100%). 맞은 적에게 냉기 1중첩 (5초, 중첩당 이동 속도 −20%). 3중첩이 되면 1.2초 얼어붙음 (정예는 절반, 보스는 피해만). 냉기 2개로 계산. 공격 속도가 오를수록 더 자주'},
   {id:'a_multi',cls:'archer',t:'g',n:'부채꼴 사격',tags:['card'],d:'[궁수 전용] 화살 +2발',f:p=>{p.multi+=1;}},
   {id:'a_snipe',cls:'archer',t:'s',n:'저격수',tags:['sniper'],d:'[궁수 전용] 사거리 100당 피해 +6.5%'},
   {id:'a_still',cls:'archer',t:'s',n:'정조준',tags:['sniper','dice'],d:'[궁수 전용] 멈춰 있으면 공격 속도 +50%, 치명타 +10%'},
@@ -6560,6 +6561,8 @@ function hurtP(amt,src,mob){
 function addRage(){const p=S.p;if(!has('k_berserk'))return;p.rage=Math.min(lv3('k_berserk',5,7,9),(p.rage||0)+1);p.rageT=5;}
 // 피해 출처 세분화: S.dsub(구체적 이름) > 큰 분류(S.dsrc) > 기본 공격. 판 전체 누적은 S.dlog
 function dmgEs(k,...a){const o=S.dsub;S.dsub=o||k;try{dmgE(...a);}finally{S.dsub=o;}}
+// 프로스트 노바 냉기 중첩: 5초 유지, 중첩당 이동 속도 −20%, 3중첩이 되면 얼어붙고 중첩 초기화
+function novaHit(e){e.nvN=(e.nvU>S.t?e.nvN||0:0)+1;e.nvU=S.t+5;if(e.nvN>=3){e.nvN=0;e.nvU=0;e.slowT=Math.max(e.slowT||0,lv3('m_nova',1.2,1.5,1.8)*(e.elite?.5:1));e.frozen=true;burst(e.x,e.y,'#dff6ff',8);}}
 function dmgE(e,amt,col,label,quiet){
   if(!e.alive)return;
   if(e.ivT>S.t){if(duelOn()&&e===S.boss&&e.bst!=='wait'&&!(e.popT>S.t)){e.popT=S.t+.45;duelPop(e.x,e.y-(e.r||14)-24,'회피!','#ff9ad0');}return;} // 결투 상대가 대시로 피하는 순간
@@ -7081,6 +7084,9 @@ function update(dt){
       for(let i=0;i<S.skel.length;i++)for(let j=i+1;j<S.skel.length;j++){const a=S.skel[i],b=S.skel[j],dx=b.x-a.x,dy=b.y-a.y,dd=dx*dx+dy*dy;if(dd<36*36){const d=Math.sqrt(dd)||.01,push=(36-d)/2,ux=dd?dx/d:Math.cos(i+j),uy=dd?dy/d:Math.sin(i+j);a.x-=ux*push;a.y-=uy*push;b.x+=ux*push;b.y+=uy*push;}}
       S.skel=S.skel.filter(k=>k.life>0);}
     if(has('frostnova')){S.fnT=(S.fnT??5)-dt;if(S.fnT<=0){S.fnT=(has('f_permafrost')?3:5)*tmul();S.rings.push({x:p.x,y:p.y,r:10,max:140,life:.35,col:'#9fe8ff'});for(const e of S.en)if(e.alive&&d2(e,p)<140*140){dmgEs('서리 폭발',e,pDmg()*lv3('frostnova',1.2,1.5,1.8),'#9fe8ff');if(!e.boss)e.slowT=Math.max(e.slowT||0,2);}}}
+    // 프로스트 노바(마법사): 내 자리에서 얼음 파동이 0.45초 동안 퍼지며 닿는 적마다 한 번씩 피해 + 냉기 중첩 (3중첩이면 빙결)
+    if(has('m_nova')){S.nvT=(S.nvT??1.5)-dt;if(S.nvT<=0){S.nvT=2*tmul();(S.novas=S.novas||[]).push({x:p.x,y:p.y,r:8,max:lv3('m_nova',170,190,210),hit:new Set()});}}
+    if(S.novas&&S.novas.length){for(const w of S.novas){w.r=Math.min(w.max,w.r+w.max/.45*dt);for(const e of S.en){if(!e.alive||e.phase||w.hit.has(e)||d2(e,w)>(w.r+(e.r||12))**2)continue;w.hit.add(e);dmgEs('프로스트 노바',e,pDmg()*lv3('m_nova',1,1.25,1.5),'#bfe8ff');if(e.alive&&!e.boss&&!e.dummy)novaHit(e);}}S.novas=S.novas.filter(w=>w.r<w.max);}
     // 유니크 세트 전용 증강: 용왕의 숨결(불 뿜기) · 별의 축복(별똥별) · 폭풍의 눈(근처 번개)
     if(has('x_dragon')){S.xdT=(S.xdT??4)-dt;if(S.xdT<=0){S.xdT=4*tmul();const e=nearestE(p,320);if(e){const a=Math.atan2(e.y-p.y,e.x-p.x),dm=pDmg()*lv3('x_dragon',1.5,1.8,2.1);for(let i=1;i<=3;i++){const q={x:p.x+Math.cos(a)*i*75,y:p.y+Math.sin(a)*i*75};exL('용왕의 숨결',null,q.x,q.y,70,dm,'#ff7a3c');for(const o of S.en)if(o.alive&&d2(o,q)<(70+(o.r||12))**2)burnE(o,pDmg()*.5,3);}}}}
     if(has('x_star')){S.xsT=(S.xsT??3)-dt;if(S.xsT<=0){S.xsT=3*tmul();const L=S.en.filter(o=>o.alive&&!o.phase&&d2(o,p)<420*420).sort(()=>Math.random()-.5).slice(0,lv3('x_star',3,4,5));for(const o of L){exL('별의 축복',null,o.x,o.y,60,pDmg()*lv3('x_star',1.4,1.7,2),'#9fd8ff');S.bolts.push({x1:o.x-50,y1:o.y-260,x2:o.x,y2:o.y,life:.2});}}}
@@ -7193,7 +7199,7 @@ function update(dt){
     const tg_=sk||p,dx=tg_.x-e.x,dy=tg_.y-e.y,d=Math.hypot(dx,dy)||1;
     if(T.mimic&&!e.awake){e.cd=1;if(d<130||e.hp<e.maxHp){e.awake=1;S.shake=.2;ftext(e.x,e.y-e.r-8,'미믹이다!','#ff6060',18);}else continue;}
     if(e.slowT>0){e.slowT-=dt;if(e.frozen&&e.slowT>0)continue;}else e.frozen=false;
-    let spd=e.spd*(e.rootT>S.t&&!e.boss?0:1)*(e.ps>0&&has('neuro')?lv3('neuro',.6,.45,.3):1)*(e.slowT>0?.4:1)*(has('gravity')&&d<150?1-lv3('gravity',.2,.3,.4):1)*(evOn('moon')?1.2:1)*(e.tbT>S.t?1.3:1)*(e.stole?.8:1),vx=dx/d,vy=dy/d;
+    let spd=e.spd*(e.rootT>S.t&&!e.boss?0:1)*(e.ps>0&&has('neuro')?lv3('neuro',.6,.45,.3):1)*(e.slowT>0?.4:1)*(e.nvU>S.t?1-.2*(e.nvN||0):1)*(has('gravity')&&d<150?1-lv3('gravity',.2,.3,.4):1)*(evOn('moon')?1.2:1)*(e.tbT>S.t?1.3:1)*(e.stole?.8:1),vx=dx/d,vy=dy/d;
     if(T.charge){e.ccd=(e.ccd??rand(1,3))-dt;
       if(e.chT>0){e.chT-=dt;vx=e.cx;vy=e.cy;spd=(T.lance?620:560)*(e.slowT>0?.4:1);
         // 돌격 기사: 3연속 돌진 (돌진이 끝날 때마다 0.4초 다시 조준)
@@ -7362,7 +7368,7 @@ const SPR=new Map();
 const TINTC=new WeakMap();
 function tintSpr(spr,col){let m=TINTC.get(spr);if(!m){m={};TINTC.set(spr,m);}let c=m[col];if(c)return c;c=document.createElement('canvas');c.width=spr.width;c.height=spr.height;c.hd=spr.hd;const g=c.getContext('2d');g.drawImage(spr,0,0);g.globalCompositeOperation='source-atop';g.fillStyle='rgba(0,0,0,.28)';g.fillRect(0,0,c.width,c.height);g.globalAlpha=.6;g.fillStyle=col;g.fillRect(0,0,c.width,c.height);m[col]=c;return c;}
 // 걸린 디버프 색 (여러 개면 번갈아): 빙결·둔화 파랑 · 화상 주황 · 중독 초록 · 감전 노랑
-const debCol=e=>{const L=[];if(e.slowT>0)L.push(e.frozen?'#2f7dff':'#4a9cff');if(e.burnT>0)L.push('#ff5a1a');if(e.ps>0)L.push('#3fc23a');if(e.shkT>S.t)L.push('#ffd21a');return L.length?L[Math.floor(S.t*2.5+e.rot)%L.length]:null;};
+const debCol=e=>{const L=[];if(e.slowT>0)L.push(e.frozen?'#2f7dff':'#4a9cff');else if(e.nvU>S.t&&e.nvN>0)L.push('#7fd0ff');if(e.burnT>0)L.push('#ff5a1a');if(e.ps>0)L.push('#3fc23a');if(e.shkT>S.t)L.push('#ffd21a');return L.length?L[Math.floor(S.t*2.5+e.rot)%L.length]:null;};
 // 레이드 보스 전용 외형: 기존 보스 그림을 크게·색을 바꾸고 그 위에 보스마다 다른 장식 (뒤: 오라·마법진, 앞: 왕관·눈빛·떠다니는 것)
 // ---------- 레이드 보스 등장 연출 (3.2초, 무적·공격 없음, 화면 흔들림) ----------
 // 거신: 땅이 갈라지며 솟아오름 · 서리 여왕: 얼음 기둥이 자라났다 깨짐 · 폭풍의 핵: 번개가 연달아 내리치며 나타남 · 둥지 여왕: 바닥 그림자가 커지고 거미줄 타고 내려옴 · 끝없는 어둠: 차원문이 열리며 나옴
@@ -7428,6 +7434,8 @@ function drawChip(e){
   ctx.imageSmoothingEnabled=false;const drS=im=>{if(e.bsc){ctx.save();if(e.flt)ctx.filter=e.flt;pxDrawS(im,x,y-air+R*.9,(sz*hk)>>1,(sz-2)*hk,e.bsc/hk);ctx.restore();}else if(hk>1)pxDrawS(im,x,y-air+R*.9,(sz*hk)>>1,(sz-2)*hk,1/hk);else pxDraw(im,x,y-air+R*.9,sz>>1,sz-2);};drS(spr);if(e.raidK||e.cln)raidDecoF(e,top);
   // 디버프: 몸 색이 그 디버프 색으로 어둡게 물들며 깜빡임 (얼면 더 진하게)
   {const dc=!(e.hit>0&&!e.noFlash)&&debCol(e);if(dc){const ga=ctx.globalAlpha;ctx.globalAlpha=ga*(e.frozen?.85:.3+.45*(.5+.5*Math.sin(S.t*9+e.rot*7)));drS(tintSpr(spr,dc));}}ctx.globalAlpha=1;
+  // 프로스트 노바 냉기 중첩: 머리 위 얼음 결정 (3개가 되면 얼어붙음)
+  if(e.nvU>S.t&&e.nvN>0&&!e.boss){ctx.fillStyle='#bfe8ff';ctx.strokeStyle='rgba(20,60,110,.8)';ctx.lineWidth=1;for(let i=0;i<e.nvN;i++){const px=x-(e.nvN-1)*4.5+i*9,py=top-7;ctx.beginPath();ctx.moveTo(px,py-5);ctx.lineTo(px+3.5,py);ctx.lineTo(px,py+5);ctx.lineTo(px-3.5,py);ctx.closePath();ctx.fill();ctx.stroke();}}
   // 소매치기: 금빛 테두리 + 훔친 뒤엔 머리 위 돈주머니와 남은 시간
   if(ET[e.type].thief){ctx.strokeStyle=e.stole?'#ffb030':'rgba(255,215,106,.55)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,R+4,0,TAU);ctx.stroke();if(e.stole){ctx.font='16px sans-serif';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText('💰',x,y-R-6+Math.sin(S.t*8)*2);ctx.font='11px "Do Hyeon",sans-serif';ctx.fillStyle='#ffd76a';ctx.fillText(Math.max(0,Math.ceil(e.flT??15))+'초',x,y-R-22);}}
   if(e.elite){ctx.strokeStyle='#ffd76a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,R+5,0,TAU);ctx.stroke();
@@ -7767,6 +7775,10 @@ function draw(){
     ctx.restore();}
   ctx.globalAlpha=1;ctx.lineCap='butt';
   for(const r of S.rings){ctx.globalAlpha=Math.min(1,r.life*3.5);ctx.strokeStyle=r.col||'#ffb347';ctx.lineWidth=3;ctx.beginPath();ctx.arc(r.x,r.y,r.r,0,TAU);ctx.stroke();}ctx.globalAlpha=1;
+  // 프로스트 노바: 얼음 바닥이 번지는 원 + 가장자리를 따라 솟는 얼음 결정
+  if(S.novas)for(const w of S.novas){const k=w.r/w.max,n=Math.max(10,Math.round(w.r/9));ctx.globalAlpha=.3*(1-k*.6);ctx.fillStyle='#5ab4ff';ctx.beginPath();ctx.arc(w.x,w.y,w.r,0,TAU);ctx.fill();
+    ctx.globalAlpha=.95*(1-k*.45);ctx.strokeStyle='#1f7fe0';ctx.lineWidth=4+5*(1-k);ctx.beginPath();ctx.arc(w.x,w.y,w.r,0,TAU);ctx.stroke();ctx.strokeStyle='#f2fbff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(w.x,w.y,w.r-2,0,TAU);ctx.stroke();
+    ctx.fillStyle='#d8f2ff';ctx.strokeStyle='#1a5fb0';ctx.lineWidth=1.5;for(let i=0;i<n;i++){const a=i*TAU/n+(i%2)*.12,h=(i%3?7:12)*(1-k*.4),cx=w.x+Math.cos(a)*w.r,cy=w.y+Math.sin(a)*w.r,ux=Math.cos(a),uy=Math.sin(a);ctx.beginPath();ctx.moveTo(cx+ux*h,cy+uy*h);ctx.lineTo(cx-uy*3,cy+ux*3);ctx.lineTo(cx-ux*4,cy-uy*4);ctx.lineTo(cx+uy*3,cy-ux*3);ctx.closePath();ctx.fill();ctx.stroke();}}ctx.globalAlpha=1;
   for(const q of S.pa){if(offV(q.x,q.y,10))continue;drawPart(ctx,q);}ctx.globalAlpha=1;
   ctx.textAlign='center';ctx.textBaseline='middle';
   ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.7)';let lastF=0;{const sc=Math.max(1,Math.ceil(ctx.getTransform().a-.01));for(const t of S.tx){if(offV(t.x,t.y))continue;ctx.globalAlpha=Math.min(1,t.life*2.5);const sp=txSpr(t.s,t.col,t.size,sc);if(sp){ctx.drawImage(sp,t.x-sp.ox/sc,t.y-sp.oy/sc,sp.width/sc,sp.height/sc);continue;}if(t.size!==lastF){lastF=t.size;ctx.font=`${t.size}px "Do Hyeon",sans-serif`;}ctx.strokeText(t.s,t.x,t.y);ctx.fillStyle=t.col;ctx.fillText(t.s,t.x,t.y);}}
@@ -8416,7 +8428,7 @@ function gameOver(win){
 // 직업별 추천 빌드 (직업 선택 화면 안내용 · 증강 이름은 실제 증강과 같아야 함)
 const CLS_BUILDS={
   knight:[['🛡 철벽 방패','방어력을 쌓아 공격력·체력으로 바꾸는 탱커',['수호 기사','불굴의 성채','철벽','방패 투척']],['💨 돌격 기사','빠르게 달리며 대시로 들이받기',['돌격 기사','방패 돌진','돌격 창']]],
-  mage:[['🔥 화염 폭발','폭발 범위를 키워 몰려오는 적을 한 번에',['화염 확산','화염 지대','정신 집중','불꽃 장막']],['☄ 운석','몇 번째 공격마다 큰 폭발 (공격 속도와 잘 맞음)',['운석 낙하','유성우','마나 폭주']]],
+  mage:[['🔥 화염 폭발','폭발 범위를 키워 몰려오는 적을 한 번에',['화염 확산','화염 지대','정신 집중','불꽃 장막']],['☄ 운석','몇 번째 공격마다 큰 폭발 (공격 속도와 잘 맞음)',['운석 낙하','유성우','마나 폭주']],['❄ 서리','얼음 파동으로 적을 느리게 하고 얼려서 붙지 못하게',['프로스트 노바','빙하','얼음 화살','서리 탄']]],
   archer:[['🏹 관통 저격','멀리서 한 줄로 꿰뚫기',['꿰뚫는 화살','저격수','매의 눈','질풍 화살']],['🎯 화살 폭풍','화살 수를 늘려 넓게 쓸기',['부채꼴 사격','갈래 화살','폭발 화살','화살비']]],
   rogue:[['👥 분신','분신을 늘려 함께 싸우기',['그림자 분신','도플갱어','그림자 도약','밤의 장막']],['🗡 암살','치명타로 정예·보스를 빠르게',['급소 해부','암살','죽음의 표적']],['☠ 독','독을 퍼뜨려 줄줄이 쓰러뜨리기',['독 바른 단검','독 폭발']]],
   paladin:[['☀ 오라','적 사이에 서서 오라로 녹이기',['확장 오라','작열하는 태양','성역','빛의 기둥']],['🔨 망치','관통 망치를 여러 방향으로',['심판의 망치','망치 폭풍','회귀하는 망치']]],
@@ -8471,6 +8483,10 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:245,t:'❄ 프로스트 노바',items:[
+    ['new','❄ 마법사 전용 증강 <b>프로스트 노바</b> (골드): 2초마다 내 주변으로 <b>얼음 파동</b>이 퍼져요 (공격력 100%). 맞은 적은 <b>냉기 중첩</b>이 쌓여 점점 느려지고 (중첩당 이동 속도 −20%, 머리 위 얼음 결정으로 보여요), <b>3중첩이 되면 얼어붙어요</b> (1.2초 · 정예는 절반 · 보스는 피해만). 냉기 2개로 계산하고, 공격 속도가 오를수록 더 자주 퍼져요'],
+    ['change','📘 마법사 추천 빌드에 <b>❄ 서리</b> 길이 생겼어요 (프로스트 노바 · 빙하 · 얼음 화살 · 서리 탄)','look'],
+  ]},
   {v:244,t:'🗿 레이드·결투 버튼',items:[
     ['change','🗿 <b>레이드</b>·⚔ <b>결투</b> 버튼이 캐릭터를 저장하지 않아도 눌려요. 들어가면 맨 위에 <b>💾 캐릭터 저장이 필요해요</b> 안내가 나오고, 어디서 저장하는지 알려 줘요 (출전·결투는 저장한 캐릭터로)'],
   ]},
@@ -13533,7 +13549,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=244,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=245,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
