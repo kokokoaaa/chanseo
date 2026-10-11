@@ -4859,7 +4859,7 @@ const CLASSES={
   necro:{lock:true,n:'사령술사',role:'해골 소환',d:'쓰러진 적을 해골 병사로 일으키는 술사',passive:'해골 소환: 처치 시 25% 확률, 그리고 약 2초마다(해골이 절반보다 적으면 1초마다) 해골 병사 소환 (최대 5기, 12초, 공격력 100%로 근접 공격). 해골은 주변 근접 적을 끌어당기는 방패 역할 (체력 = 내 최대 체력 50%, 받는 피해 절반). 해골 방패로 사령술사의 해골은 더 멀리(150)서 한 기당 6마리까지 붙잡음',atk:.35,
     stats:{hp:155,maxHp:155,speed:185,dmg:16,rate:2.1,range:300,bspd:500,armor:7},fav:['undead','summon','curse'],dis:['holy'],
     cards:['힘의 물약','숫돌','조준경','튼튼한 체력','전투 본능','흡혈 송곳니'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
-  gunner:{lock:true,n:'총잡이',role:'매그넘 저격',d:'한 발 한 발이 묵직한 매그넘 리볼버 총잡이',passive:'매그넘 리볼버: 모든 탄이 일반 공격의 1.7배 피해 + 관통 1. 6발 쏘면 0.8초 재장전 (탄창 6발 고정, 재장전은 공격 속도와 무관). 저지력으로 맞은 일반 몹이 뒤로 크게 밀려남 (정예·보스 제외)',atk:.18,
+  gunner:{lock:true,n:'총잡이',role:'매그넘 저격',d:'한 발 한 발이 묵직한 매그넘 리볼버 총잡이',passive:'매그넘 리볼버: 모든 탄이 일반 공격의 1.7배 피해 + 관통 1. 6발 쏘면 0.8초 재장전 (탄창 6발 고정, 재장전은 공격 속도와 무관). 구르며 재장전: 재장전하는 동안 회피 +25% (회피 상한 안에서). 저지력으로 맞은 일반 몹이 뒤로 크게 밀려남 (정예·보스 제외)',atk:.18,
     stats:{hp:160,maxHp:160,speed:200,dmg:12,rate:1.8,range:300,bspd:820,crit:.1,critM:2.1},fav:['rapid','sniper','card'],dis:['nature'],
     cards:['날랜 손놀림','조준경','급소 노리기','치명상','힘의 물약','가벼운 장화'],lvd:'공격력 +0.6%, 치명타 +0.2%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.006;p.crit+=.002;p.maxHp+=1;p.hp+=1;}},
   elem:{lock:true,n:'정령사',role:'정령 소환',d:'화염·냉기·번개 정령을 거느리고 싸우는 정령술사',passive:'원소 정령: 화염·냉기·번개 정령 3마리가 곁을 돌며 각자 적을 쏨 (화염: 화상 / 냉기: 1초 둔화 / 번개: 주변 2명에게 60% 연쇄). 정령 탄 피해는 공격력 50%, 그 원소 시너지 1개당 +10%. 공격 속도가 오르면 정령도 빨리 쏨. 본인은 약한 원소탄(피해 60%)을 쏨. 기본 관통 1',atk:.3,
@@ -5001,7 +5001,7 @@ const critFull=()=>critRaw()>=CRIT_CAP,critMFull=()=>critMBase()>=CRIT_DMG_CAP_F
 const stackCapped=x=>(x.k==='crit'&&critFull())||(x.k==='critm'&&critMFull())||(x.k==='luck'&&luckFull())||(x.k==='dodge'&&S.p.dodge>=DODGE_CAP_F())||(x.k==='rate'&&rawRate()>=RATE_CAP());
 // 피격 기준 조건: 흡혈·재생 때문에 '체력 ○% 이하'는 거의 안 켜져서, '맞은 뒤 ○초' / '최근 받은 피해량'으로 판정
 const hitRec=(sec=2.5)=>S.t-(S.p.hitT??-99)<sec;
-const dodgeC=()=>Math.min(DODGE_CAP_F(),S.p.dodge+gearM.dodge()+(S.cls==='gambler'?Math.max(0,Math.min(50,(S.p.luck||0)+gLk()))*.006:0)+(has('f_ghoststep')&&S.p.ghT>0?.3:0))+(has('r_smoke')&&S.zones.some(z=>z.kind==='smoke'&&d2(z,S.p)<z.r*z.r)?lv3('r_smoke',.2,.3,.4):0);
+const dodgeC=()=>Math.min(DODGE_CAP_F(),S.p.dodge+gearM.dodge()+(S.cls==='gambler'?Math.max(0,Math.min(50,(S.p.luck||0)+gLk()))*.006:0)+(has('f_ghoststep')&&S.p.ghT>0?.3:0)+(S.cls==='gunner'&&S.p.rlT>0?.25:0)/* 총잡이: 구르며 재장전 (v276) */)+(has('r_smoke')&&S.zones.some(z=>z.kind==='smoke'&&d2(z,S.p)<z.r*z.r)?lv3('r_smoke',.2,.3,.4):0);
 function armorEff(){const p=S.p;let a=(blessOn('guard')?60:0)+(has('bank')?Math.min(50,Math.floor(S.gold/300)*2):0)+p.armor+ex('guard')*8+Math.max(0,p.dodge-DODGE_CAP_F())*200+(has('bonewall')&&S.skel?S.skel.length*lv3('bonewall',3,4,5):0)+(has('d_bark')?(S.vineN||0)*lv3('d_bark',.2,.3,.4):0);if(has('iron'))a*=lv3('iron',1.35,1.5,1.65);if(has('ironclad'))a*=2;if(has('bastion')&&nearTurret())a+=lv3('bastion',20,30,40)*(has('f_citadel')?2:1);return a;}
 // 증강이 주는 임시 보호막: 기본 상한(barrierMax)보다 커도 그 증강의 상한까지는 유지
 const bxAdd=(cap,add)=>{const p=S.p;p.bxM=Math.max(p.bxM||0,cap);p.barrier=Math.max(p.barrier||0,Math.min(cap,(p.barrier||0)+add));};
@@ -14080,7 +14080,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=275,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=276,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
