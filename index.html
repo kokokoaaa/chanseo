@@ -10412,10 +10412,10 @@ BAI.rival=function(e,dt,o){const {p,d}=o,c=e.cls,A=DUEL_ATK[c]||DUEL_ATK.archer,
   {const lim=e.spd*1.3;if(e.lx!=null&&dt>0){e.mvx=clamp((e.x-e.lx)/dt,-lim,lim);e.mvy=clamp((e.y-e.ly)/dt,-lim,lim);}e.lx=e.x;e.ly=e.y;}
   if(e.bst==='wait'){e.face=p.x>e.x?1:-1; // 카운트다운 동안 반대편에서 대기
     // 사령술사: 기다리는 동안 해골 병사 3을 미리 세워 둠 (시작 전엔 제자리에 서 있음)
-    if(A.skel){e.wsk=e.wsk||[];if(e.wsk.length<3&&(e.wskT=(e.wskT??.6)-dt)<=0){e.wskT=.9;const i=e.wsk.length,aa=Math.atan2(e.y-p.y,e.x-p.x)+(i-1)*.95,x=e.x+Math.cos(aa)*58,y=e.y+Math.sin(aa)*58,m=spawnAt('grunt',x,y,true);m.spr='ranger';m.rSkel=1;m.maxHp=m.hp=Math.max(30,S.p.maxHp*.4);m.dmg=B*.35;m.spd=p.speed*.8;m.hold=[x,y];e.wsk.push(m);S.rings.push({x,y,r:4,max:30,life:.35,col:'#9cff9a'});}
+    if(A.skel){e.wsk=e.wsk||[];if(e.wsk.length<3&&(e.wskT=(e.wskT??.6)-dt)<=0){e.wskT=.9;const i=e.wsk.length,aa=Math.atan2(e.y-p.y,e.x-p.x)+(i-1)*.95,x=e.x+Math.cos(aa)*58,y=e.y+Math.sin(aa)*58,m=spawnAt('grunt',x,y,true);m.spr='ranger';m.rSkel=1;m.maxHp=m.hp=Math.max(30,S.p.maxHp*.4);m.dmg=B*.35;m.sp0=p.speed*.8;m.spd=0;m.hold=[x,y];e.wsk.push(m);S.rings.push({x,y,r:4,max:30,life:.35,col:'#9cff9a'});}
       for(const m of e.wsk)if(m.alive&&m.hold){m.x=m.hold[0];m.y=m.hold[1];}}
     return;}
-  if(e.wsk){for(const m of e.wsk)delete m.hold;e.wsk=null;}
+  if(e.wsk){for(const m of e.wsk){delete m.hold;if(m.sp0)m.spd=m.sp0;}e.wsk=null;}
   if(e.bst==='intro'){if(e.bt>1.2)go(e,'fight');return;}
   if(e.dashT>0){e.dashT-=dt;e.x+=e.dvx*dt;e.y+=e.dvy*dt;return;}
   if(e.frzT>0){e.frzT-=dt;return;}
@@ -13134,7 +13134,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=233,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=234,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
