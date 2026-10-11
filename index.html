@@ -7844,6 +7844,10 @@ function draw(){
       if(b.skull){ctx.fillStyle='rgba(200,120,255,.4)';ctx.beginPath();ctx.arc(b.x,b.y,b.r+4,0,TAU);ctx.fill();ctx.fillStyle='#e9dcff';ctx.beginPath();ctx.arc(b.x,b.y,b.r+1,0,TAU);ctx.fill();ctx.fillStyle='#2a1440';ctx.fillRect(b.x-2.5,b.y-1.5,1.8,1.8);ctx.fillRect(b.x+.7,b.y-1.5,1.8,1.8);continue;}
       if(!b.child&&!b.dieThrow&&!b.card&&S.cls){const an=Math.atan2(b.vy,b.vx),gl=b.big||b.x7;ctx.save();ctx.translate(b.x,b.y);ctx.rotate(an);
         if(S.cls==='knight'||S.cls==='paladin'||S.cls==='berserk'){const r=(b.r+4)*(gl?1.4:1),bz=S.cls==='berserk';ctx.strokeStyle=gl?'rgba(255,215,106,.6)':bz?'rgba(255,110,80,.5)':'rgba(160,210,255,.45)';ctx.lineWidth=6;ctx.beginPath();ctx.arc(-r*.6,0,r,-1.15,1.15);ctx.stroke();ctx.strokeStyle='#f4f9ff';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(-r*.6,0,r,-1,1);ctx.stroke();}
+        else if(S.cls==='mage'&&!b.ball&&mSchool()===2){/* 번개 마법사: 얇은 번개 줄기 */const L=26+b.r*1.5,z=S.t*40+b.x*.3;ctx.shadowColor='#ffe040';ctx.shadowBlur=12;ctx.lineCap='round';ctx.lineJoin='round';
+          const pts=[[-L,0]];for(let i=1;i<6;i++)pts.push([-L+L*1.25*i/6,(Math.sin(z+i*2.3)*.5+(i%2?.5:-.5))*5]);pts.push([L*.3,0]);
+          ctx.strokeStyle='rgba(255,224,64,.9)';ctx.lineWidth=4;ctx.beginPath();pts.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.stroke();ctx.strokeStyle='#ffffff';ctx.lineWidth=1.5;ctx.stroke();ctx.shadowBlur=0;
+          if(!trl&&Math.random()<.3&&S.pa.length<230)S.pa.push({x:b.x+rand(-4,4),y:b.y+rand(-4,4),vx:rand(-30,30),vy:rand(-30,30),dr:.9,life:.18,col:'#fff08a',s:2});}
         else if(S.cls==='mage'){const r=b.r*(gl?1.5:1),Q=MAGE_BC[b.ball?2:mSchool()];if(!trl&&Math.random()<.45&&S.pa.length<230)S.pa.push({x:b.x-b.vx*.02+rand(-2,2),y:b.y-b.vy*.02+rand(-2,2),vx:rand(-20,20),vy:rand(-50,-15),dr:.92,life:.3,col:Math.random()<.5?Q[2]:Q[3],sh:'ember',s:2.5});
           ctx.shadowColor=Q[0];ctx.shadowBlur=14;ctx.fillStyle=Q[4];ctx.beginPath();ctx.ellipse(-r*.8,0,r*2,r*1.1,0,0,TAU);ctx.fill();ctx.fillStyle=Q[1];ctx.beginPath();ctx.arc(0,0,r+1,0,TAU);ctx.fill();ctx.fillStyle=Q[2];ctx.beginPath();ctx.arc(.5,0,r*.7,0,TAU);ctx.fill();ctx.fillStyle=Q[3];ctx.beginPath();ctx.arc(1,0,r*.35,0,TAU);ctx.fill();ctx.shadowBlur=0;}
         else if(S.cls==='gambler'){const hd=b.coin>=0,w=Math.abs(Math.cos(S.t*18))*(b.r+2)+1;ctx.rotate(-an);ctx.fillStyle=hd?'rgba(255,215,106,.4)':'rgba(180,180,190,.3)';ctx.beginPath();ctx.arc(0,0,b.r+5,0,TAU);ctx.fill();ctx.fillStyle=hd?'#ffd76a':'#a8a8b4';ctx.beginPath();ctx.ellipse(0,0,w,b.r+2,0,0,TAU);ctx.fill();ctx.fillStyle=hd?'#b08a24':'#6a6a78';ctx.fillRect(-.5,-2,1,4);}
@@ -8622,7 +8626,7 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
 const PATCH_NOTES=[
   {v:251,t:'🔮 마법사 속성 특화',items:[
     ['new','🔥❄ 드문 <b>이중 속성 증강</b> (그 속성 증강을 3개 이상 모았을 때만): <b>증기 폭발</b>(화염·얼음 특화: 화상+냉기, 불타며 얼어붙은 적 증기 폭발) · <b>초전도</b>(얼음·번개 특화: 냉기 걸린 적에게 번개 2배, 서로의 폭발 효과)'],
-    ['buff','⚡ 번개 마법사의 번개 구체가 <b>1.8배 빠르게</b> 날아가요'],
+    ['buff','⚡ 번개 마법사의 주문이 <b>얇은 번개 줄기</b> 모양으로 <b>1.8배 빠르게</b> 날아가요'],
     ['new','🌟 마법사 <b>궁극기가 속성마다 달라요</b>: 🔥 메테오 스톰 · ❄ 절대 영도 (잡몹 3초 빙결, 보스 냉기 3중첩) · ⚡ 천둥 심판 (잡몹 1.5초 경직, 감전)'],
     ['change','🔥 화염구는 첫 적에서 터져요 (관통 없음, 관통 증강·카드 안 나옴). 튕김 증강은 ❄ 얼음 마법사에게만 나와요'],
     ['change','🔮 <b>마법사 속성 특화</b>: 처음 고른 화염·냉기·번개 증강으로 속성이 정해지고 (장비로 받은 시작 증강은 제외), 그 뒤로 다른 속성 증강은 나오지 않아요 (특화 알림). 화염·번개 마법사에겐 튕김 증강(도탄·튕김 사격)이 안 나오고, 카드 시너지 「튕김」은 「주문 폭발 범위 +20%」로 바뀌어요'],
