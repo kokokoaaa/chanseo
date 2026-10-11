@@ -2889,14 +2889,15 @@ const AUGS=[
   {id:'b_carnage',uc:2,cls:'berserk',t:'s',n:'학살자',tags:['fury'],d:'[광전사 전용] 광란이 최대일 때 처치하면 피의 축적 +1 (영구). 축적 100당 공격력 +2%, 상한 없음'},
   {id:'d_overgrowth',uc:2,cls:'druid',t:'s',n:'끝없는 생장',tags:['nature'],d:'[드루이드 전용] 덩굴 지대가 생길 때마다 생장 +1 (영구). 생장 10당 공격력 +1%, 상한 없음'},
   {id:'gb_dice',uc:1,cls:'gambler',t:'s',n:'운명의 주사위',tags:['dice'],d:'[도박사 전용] 행운 1당 치명타 피해 +1.8%. 행운 상한(50)을 넘은 행운도 계산, 상한 없음'},
+  {id:'k_parry',uc:2,cls:'knight',t:'s',n:'받아치기',tags:['guard'],d:'[기사 전용] 이번 판 막은 횟수 20번마다 공격력 +1%, 상한 없음 (막기 확률이 높을수록 빨리 쌓임)'},
   {id:'k_bulwark',uc:1,cls:'knight',t:'s',n:'불굴의 성채',tags:['guard'],d:'[기사 전용] 방어력 10당 최대 체력 +1%, 상한 없음'},
   {id:'p_aegis',uc:1,cls:'paladin',t:'s',n:'신의 방패',tags:['holy','guard'],d:'[성기사 전용] 신성 시너지 1당 최대 체력 +8%, 상한 없음'},
   {id:'d_bark',uc:1,cls:'druid',t:'s',n:'고목의 껍질',tags:['nature','guard'],d:'[드루이드 전용] 덩굴 지대가 생길 때마다 생장 +1 (영구). 생장 1당 방어력 +0.3, 상한 없음'},
   {id:'b_hide',uc:1,cls:'berserk',t:'s',n:'전쟁 군주',tags:['fury','guard'],d:'[광전사 전용] 이번 판 처치 100마리당 최대 체력 +1%, 상한 없음'},
-  {id:'k_cleave',cls:'knight',t:'s',n:'회오리 베기',tags:['blitz','card'],d:'[기사 전용] 회전 베기가 3번째 공격마다, 공격력 160%로 강화'},
-  {id:'k_berserk',cls:'knight',t:'g',n:'분노의 기사',tags:['curse','jackpot'],d:'[기사 전용] 피격·막기 시 5초간 분노 1중첩 (공격력 +8%, 공격 속도 +6%, 최대 7중첩)'},
+  {id:'k_cleave',cls:'knight',t:'s',n:'회오리 베기',tags:['blitz','guard'],d:'[기사 전용] 회전 베기가 3번째 공격마다, 공격력 160%로 강화'},
+  {id:'k_berserk',cls:'knight',t:'g',n:'분노의 기사',tags:['guard','fury'],d:'[기사 전용] 피격·막기 시 5초간 분노 1중첩 (공격력 +8%, 공격 속도 +6%, 최대 7중첩)'},
   {id:'k_smite',cls:'knight',t:'p',n:'심판',tags:['guard','jackpot'],d:'[기사 전용] 5번째 공격마다 대상에 빛기둥. 공격력 3배 × (1 + 방어력÷100) 범위 피해'},
-  {id:'k_wall',cls:'knight',t:'p',n:'철벽',tags:['guard','guard'],d:'[기사 전용] 막기 확률 +20%, 막을 때마다 주변 충격파. 가드 2개로 계산'},
+  {id:'k_wall',cls:'knight',t:'p',n:'난공불락',tags:['guard','guard'],d:'[기사 전용] 막기 확률 +20%, 막을 때마다 주변 충격파. 가드 2개로 계산'},
   {id:'m_inferno',cls:'mage',t:'g',n:'화염 확산',tags:['fire','poison'],d:'[마법사 전용] 주문 폭발 범위 +90%, 폭발이 적을 중독시킴'},
   {id:'m_meteor',cls:'mage',t:'p',n:'운석 낙하',tags:['fire','jackpot'],d:'[마법사 전용] 3번째 시전마다 대상 위치에 운석. 공격력 6배 대폭발'},
   {id:'m_nova',cls:'mage',t:'g',n:'프로스트 노바',tags:['frost','frost'],d:'[마법사 전용] 2초마다 내 주변으로 얼음 파동이 퍼짐 (범위 170, 공격력 100%). 맞은 적에게 냉기 1중첩 (5초, 중첩당 이동 속도 −20%). 3중첩이 되면 1.2초 얼어붙음 (정예는 절반, 보스는 피해만). 냉기 2개로 계산. 공격 속도가 오를수록 더 자주'},
@@ -3456,8 +3457,8 @@ const FUSIONS=[
   {id:'f_y057',a:'iron',b:'spikearmor',n:'강철 가시',pb:1.15,fx:'h:2:boom:1.2:100',d:'철의 의지 수치 +15%, 새 능력: 맞으면 (2초에 한 번) 폭발 (범위 100, 공격력 120%)'},
   {id:'f_y058',a:'spikearmor',b:'thorns',n:'가시 요새',pb:1.15,fx:'t:2:boom:.8:90',d:'새 능력: 2초마다 폭발 (범위 90, 공격력 80%)'},
   {id:'f_y059',a:'titan',b:'heart',n:'타이탄 하트',pb:1.15,fx:'t:5:heal:.03',d:'새 능력: 5초마다 체력 3% 회복'},
-  {id:'f_y060',a:'k_wall',b:'k_smite',n:'성벽 심판',pb:1.15,fx:'h:2:holy:1.5:100',d:'철벽 수치 +15%, 심판 수치 +15%, 새 능력: 맞으면 (2초에 한 번) 빛 폭발 (범위 100, 공격력 150%)'},
-  {id:'f_y062',a:'k_wall',b:'k_charge',n:'방패 돌격',pb:1.15,fx:'d:wave',d:'철벽 수치 +15%, 새 능력: 대시가 끝나면 충격파 발동'},
+  {id:'f_y060',a:'k_wall',b:'k_smite',n:'성벽 심판',pb:1.15,fx:'h:2:holy:1.5:100',d:'난공불락 수치 +15%, 심판 수치 +15%, 새 능력: 맞으면 (2초에 한 번) 빛 폭발 (범위 100, 공격력 150%)'},
+  {id:'f_y062',a:'k_wall',b:'k_charge',n:'성벽 돌파',pb:1.15,fx:'d:wave',d:'난공불락 수치 +15%, 새 능력: 대시가 끝나면 충격파 발동'},
   {id:'f_y063',a:'unbreak',b:'insure',n:'불굴의 보험',pb:1.15,fx:'h:4:shield:.12',d:'불굴 수치 +15%, 새 능력: 맞으면 (4초에 한 번) 보호막 +최대 체력의 12%'},
   {id:'f_y064',a:'unbreak',b:'fortress',n:'불굴의 요새',pb:1.15,fx:'h:3:boom:2:110',d:'불굴 수치 +15%, 요새 수치 +15%, 새 능력: 맞으면 (3초에 한 번) 폭발 (범위 110, 공격력 200%)'},
   {id:'f_y065',a:'blessing',b:'sanctuary',n:'성소의 축복',pb:1.15,fx:'t:5:shield:.05',d:'성역 수치 +15%, 새 능력: 5초마다 보호막 +최대 체력의 5%'},
@@ -3662,6 +3663,8 @@ const CARDS=[
   {req:()=>gravOn(),n:'중력자',g:'중력장',v:[[6,12,0]],t:v=>`중력장 범위 +${v[0]}%`,a:(p,v)=>{p.gvR=(p.gvR||0)+v[0]/100;}},
   {req:()=>tag('mark')>=1||has('judge'),n:'표적 지정',g:'표식',v:[[3,6,0]],t:v=>`표식된 적이 받는 추가 피해 +${v[0]}%`,a:(p,v)=>{p.mkD=(p.mkD||0)+v[0]/100;}},
   {req:()=>waveOn(),n:'진동판',g:'충격파',v:[[8,15,0]],t:v=>`충격파 피해 +${v[0]}%`,a:(p,v)=>{p.wvD=(p.wvD||0)+v[0]/100;}},
+  {cls:'knight',n:'방패 손잡이',req:()=>blockRaw()<BLOCK_CAP,v:[[2,4,0]],t:v=>`막기 확률 +${v[0]}%`,a:(p,v)=>{p.block=(p.block||0)+v[0]/100;}},
+  {cls:'paladin',n:'방패 손잡이 ',req:()=>blockRaw()<BLOCK_CAP,v:[[2,4,0]],t:v=>`막기 확률 +${v[0]}%`,a:(p,v)=>{p.block=(p.block||0)+v[0]/100;}},
   {cls:'paladin',n:'성유',g:'성기사 오라',v:[[5,10,0]],t:v=>`신성 오라 범위 +${v[0]}%`,a:(p,v)=>{p.auraM=(p.auraM||0)+v[0]/100;}},
   {cls:'paladin',n:'성가',g:'성기사 오라',v:[[15,26,0]],t:v=>`신성 오라 피해 +${v[0]}%`,a:(p,v)=>{p.auraD=(p.auraD||0)+v[0]/100;}},
   {src:()=>skelMax()>0,cls:'necro',n:'뼈 가루',g:'해골 병사',v:[[8,15,0]],t:v=>`해골 병사 피해 +${v[0]}%`,a:(p,v)=>{p.skD=(p.skD||0)+v[0]/100;}},
@@ -4897,6 +4900,7 @@ function pDmg(){const p=S.p;let d=effDmg(p);
   if(has('d_cycle'))d*=1+Math.max(0,p.regen)*lv3('d_cycle',.08,.1,.12);
   if(has('k_charger'))d*=1+Math.max(0,moveSpd()-150)/10*lv3('k_charger',.015,.02,.025);
   if(has('m_overload'))d*=1+rawRate()*lv3('m_overload',.08,.1,.12);
+  if(has('k_parry'))d*=1+Math.floor((S.parN||0)/20)*lv3('k_parry',.0075,.01,.0125);
   if(has('m_pyro'))d*=1+Math.floor((S.pyN||0)/50)*lv3('m_pyro',.015,.02,.025);
   if(has('m_cryo'))d*=1+Math.floor((S.cryN||0)/20)*lv3('m_cryo',.0075,.01,.0125);
   if(has('g_fan'))d*=1+rawRate()*lv3('g_fan',.04,.05,.06);
@@ -4942,6 +4946,8 @@ function rawRate(){const p=S.p;let r=(1+.015*mlv('rate'))*gearM.rate()*effRate(p
   if(S.buffT.jack>0)r*=2;
   if(blessOn('rate'))r*=1.35;
   return r;}
+// 막기 확률: 상한 60% (넘는 만큼은 버려짐 · 막기 카드는 상한이면 안 나옴)
+const BLOCK_CAP=.6,blockRaw=()=>{const p=S.p;return (p.block||0)+(has('k_wall')?lv3('k_wall',.15,.2,.25):0)+(has('p_divine')?.2:0);},blockC=()=>Math.min(BLOCK_CAP,blockRaw());
 const RATE_CAP=()=>Math.round(((has('overflow')?13:10)+ccap('rate')+(has('gatling')?2:0)+(has('f_minigun')?2:0))*(S&&S.cls==='mage'?MAGE_CAST:1)*100)/100,CRIT_CAP=1,DODGE_CAP_B=.6;
 // 직업별 상한: 그 직업다움에 맞춰 몇 가지 상한만 조금 높여 줌 (낮추는 직업은 없음)
 const CLS_CAP={rogue:{dodge:.1,dash:-.05,critD:1},archer:{rate:2,spd:20},gunner:{rate:2,rl:-.05},gambler:{luck:10,critD:1},berserk:{spd:30,rate:1},mage:{critD:1},elem:{rate:1},druid:{spd:20}};
@@ -6591,7 +6597,7 @@ function hurtP(amt,src,mob){
   // 보스 러시 후반: 패턴 공격은 단계마다 더 아파짐 (5단계부터 단계당 +RUSH_PAT) → 후반엔 한 번 맞으면 거의 죽음
   if(pat&&rushOn()&&S.bossI>4)amt*=1+RUSH_PAT*(S.bossI-4);
   if(!pat&&Math.random()<dodgeC()){if(duelOn())duelPop(p.x,p.y-34,'회피!','#5fc9d9');else ftext(p.x,p.y-24,'회피','#5fc9d9',15);if(has('evade'))p.evT=2;if(has('x_wind'))p.xwU=S.t+2;if(S.cls==='rogue'&&mk(0))for(let i=0;i<8;i++)pBullet(p.x,p.y,i*TAU/8,pDmg()*.8,{child:true,sub:'그림자 반격'});if(S.cls==='rogue'&&mky(0))p.shadowT=Math.max(p.shadowT||0,1.5);p.inv=has('f_shadow')?.5:.15;if(has('counter')){const k=Math.round((3+3*L('counter'))*(has('f_shadow')?2:1)*(has('f_counterarmor')?1.5:1));for(let i=0;i<k;i++)pBullet(p.x,p.y,i*TAU/k,pDmg()*.8,{sub:'반격',child:true});}return;}
-  if(!pat&&p.block&&Math.random()<p.block+(has('k_wall')?lv3('k_wall',.15,.2,.25):0)+(has('p_divine')?.2:0)){if(src&&S.en.includes(src))thornHit(src);if(duelOn())duelPop(p.x,p.y-36,'막기!','#cfe3ff');else ftext(p.x,p.y-26,'막기','#cfe3ff',16);p.inv=.2;addRage();if(has('k_wall'))explode(p.x,p.y,75,pDmg()*1.5,'#9fd3ff');if(S.cls==='knight'&&mk(0)){S.dsub='반격 충격파';explode(p.x,p.y,120,pDmg()*1.5,'#cfe3ff');S.dsub=null;}if(S.cls==='knight'&&mky(0)&&p.alive){p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.04*healM());}if(S.cls==='paladin'&&mk(1))bxAdd(p.maxHp*.25,p.maxHp*.05);if(has('p_divine'))exS('holy',p.x,p.y,90,pDmg()*1.5*holyM(),'#fff3a0');return;}
+  if(!pat&&p.block&&Math.random()<blockC()){S.parN=(S.parN||0)+1;if(src&&S.en.includes(src))thornHit(src);if(duelOn())duelPop(p.x,p.y-36,'막기!','#cfe3ff');else ftext(p.x,p.y-26,'막기','#cfe3ff',16);p.inv=.2;addRage();if(has('k_wall'))explode(p.x,p.y,75,pDmg()*1.5,'#9fd3ff');if(S.cls==='knight'&&mk(0)){S.dsub='반격 충격파';explode(p.x,p.y,120,pDmg()*1.5,'#cfe3ff');S.dsub=null;}if(S.cls==='knight'&&mky(0)&&p.alive){p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.04*healM());}if(S.cls==='paladin'&&mk(1))bxAdd(p.maxHp*.25,p.maxHp*.05);if(has('p_divine'))exS('holy',p.x,p.y,90,pDmg()*1.5*holyM(),'#fff3a0');return;}
   p.hits++;fxRun('h');
   if(has('xs_dragon')&&p.xdrT>S.t)amt*=.8;
   if(has('xr_golem')){amt*=.88;if(!(p.xgoT>S.t)){p.xgoT=S.t+1;exL('심연의 갑주',null,p.x,p.y,140,pDmg()*lv3('xr_golem',2,2.5,3),'#b88aff');S.rings.push({x:p.x,y:p.y,r:10,max:150,life:.35,col:'#d8b8ff'});}}
@@ -6734,8 +6740,9 @@ const dLines=d=>{const t=String(d);if(/<[a-z]/i.test(t))return t;const out=[];le
   if(L.length&&/^\[[^\]]+\] /.test(L[0])){const m=L[0].match(/^(\[[^\]]+\]) (.*)$/);L.splice(0,1,m[1],m[2]);}
   return L.map(x=>`<span class="dl">${dGlue(x)}</span>`).join('');};
 // 원거리 직업은 「탄환」을 실제로 쏘는 것 이름으로 보여 줌 (마법사 화염구·정령사 원소탄 …). 적 탄환은 그대로
+const MELEE_PN={knight:'검기',paladin:'빛의 검기',berserk:'도끼날'};
 const PROJ_N={mage:'화염구',elem:'원소탄',archer:'화살',rogue:'단검',alch:'플라스크',gambler:'동전',necro:'마력탄',druid:'가시'};
-const projTxt=d=>{try{if(S&&S.cls==='mage'){d=String(d).replace(/공격 속도/g,'마법 시전 속도');if(mSchool()!==1)d=d.replace('탄환이 다른 적에게 1회 튕김','주문 폭발 범위 +20%');d=d.replace(/번째 공격마다/g,'번째 시전마다');}const n=S&&S.cls&&(S.cls==='mage'?MAGE_PN[mSchool()]:PROJ_N[S.cls]);if(S&&S.cls&&pureMelee())return String(d).replace(/(적 )?탄환/g,(m,en)=>en?m:'공격').replace(/(^|[\s(·,])탄속/g,'$1투사체 속도').replace(/(^|[\s(·,])탄(?![가-힣])/g,'$1공격'); /* 근접 직업: 탄환 → 공격 */if(!n)return d;const v=!((n.charCodeAt(n.length-1)-0xAC00)%28);const J={'이':v?'가':'이','을':v?'를':'을','은':v?'는':'은','과':v?'와':'과','으로':v?'로':'으로'};
+const projTxt=d=>{try{if(S&&S.cls==='mage'){d=String(d).replace(/공격 속도/g,'마법 시전 속도');if(mSchool()!==1)d=d.replace('탄환이 다른 적에게 1회 튕김','주문 폭발 범위 +20%');d=d.replace(/번째 공격마다/g,'번째 시전마다');}const n=S&&S.cls&&(S.cls==='mage'?MAGE_PN[mSchool()]:PROJ_N[S.cls]);if(S&&S.cls&&pureMelee()){const mn=MELEE_PN[S.cls]||'공격',mv=!((mn.charCodeAt(mn.length-1)-0xAC00)%28),MJ={'이':mv?'가':'이','을':mv?'를':'을','은':mv?'는':'은','과':mv?'와':'과','으로':mv?'로':'으로'};return String(d).replace(/(적 )?탄환(으로|이|을|은|과)?/g,(m,en,j)=>en?m:mn+(j?MJ[j]:'')).replace(/(^|[\s(·,])탄속/g,'$1'+mn+' 속도').replace(/(^|[\s(·,])탄(이|은|을|의|마다)?(?![가-힣])/g,(m,a,j)=>a+mn+(j?(MJ[j]||j):''));} /* 근접 직업: 탄환 → 검기·빛의 검기·도끼날 */if(!n)return d;const v=!((n.charCodeAt(n.length-1)-0xAC00)%28);const J={'이':v?'가':'이','을':v?'를':'을','은':v?'는':'은','과':v?'와':'과','으로':v?'로':'으로'};
   return String(d).replace(/(적 )?탄환(으로|이|을|은|과)?/g,(m,en,j)=>en?m:n+(j?J[j]:''))
     // 낱말 「탄」·「탄속」도 직업 투사체 이름으로 (증강 이름처럼 붙어 있는 말은 그대로)
     .replace(/(^|[\s(·,])탄속/g,(m,a)=>a+n+' 속도').replace(/(^|[\s(·,])탄(이|은|을|의|마다)?(?![가-힣])/g,(m,a,j)=>a+n+(j?(J[j]||j):''));}catch(e){return d;}};
@@ -8582,7 +8589,7 @@ function gameOver(win){
 }
 // 직업별 추천 빌드 (직업 선택 화면 안내용 · 증강 이름은 실제 증강과 같아야 함)
 const CLS_BUILDS={
-  knight:[['🛡 철벽 방패','방어력을 쌓아 공격력·체력으로 바꾸는 탱커',['수호 기사','불굴의 성채','철벽','방패 투척']],['💨 돌격 기사','빠르게 달리며 대시로 들이받기',['돌격 기사','방패 돌진','돌격 창']]],
+  knight:[['🛡 방어 탱커','방어력을 쌓아 공격력·체력으로 바꾸는 탱커',['수호 기사','불굴의 성채','심판','방패 투척']],['⚔ 막기 반격','막을수록 강해지고 막을 때마다 반격',['난공불락','받아치기','분노의 기사','기사의 맹세']],['💨 돌격 기사','빠르게 달리며 대시로 들이받기',['돌격 기사','방패 돌진','돌격 창']]],
   mage:[['🔥 화염','불 장판·운석으로 넓게 태우기 (처음 고른 속성으로 특화)',['화염 확산','화염 지대','연소 전염','운석 낙하','유성우','업화의 정수']],['❄ 얼음','냉기를 쌓아 얼리고 깨뜨리기 (처음 고른 속성으로 특화)',['프로스트 노바','동상','얼음 파쇄','눈보라']],['⚡ 번개','번개가 적 사이를 튀며 떼를 지지기 (처음 고른 속성으로 특화)',['연쇄 번개','감전','낙뢰','마력 과부하']]],
   archer:[['🏹 관통 저격','멀리서 한 줄로 꿰뚫기',['꿰뚫는 화살','저격수','매의 눈','질풍 화살']],['🎯 화살 폭풍','화살 수를 늘려 넓게 쓸기',['부채꼴 사격','갈래 화살','폭발 화살','화살비']]],
   rogue:[['👥 분신','분신을 늘려 함께 싸우기',['그림자 분신','도플갱어','그림자 도약','밤의 장막']],['🗡 암살','치명타로 정예·보스를 빠르게',['급소 해부','암살','죽음의 표적']],['☠ 독','독을 퍼뜨려 줄줄이 쓰러뜨리기',['독 바른 단검','독 폭발']]],
@@ -8638,6 +8645,11 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:253,t:'🛡 기사 점검',items:[
+    ['new','⚔ 기사 <b>막기 루트</b>: 막기 카드 「방패 손잡이」(막기 +2~4%, 기사·성기사) · 고점 돌파 ♾ <b>받아치기</b>(막은 20번마다 공격력 +1%, 상한 없음) · 추천 빌드 「막기 반격」. 막기 상한 60%'],
+    ['change','🛡 이름 정리: 증강 「철벽」 → <b>난공불락</b> (생존기 「철벽 방패」·마스터리 「철벽」과 겹쳐서) · 합체 「방패 돌격」 → <b>성벽 돌파</b> (방패 돌진·돌격 기사와 헷갈려서)'],
+    ['change','🏷 시너지 정리: 분노의 기사 저주·천운 → 가드·분노 · 회오리 베기 질풍·카드 → 질풍·가드'],
+    ['look','⚔ 근접 직업의 「탄환」은 <b>기사 검기 · 성기사 빛의 검기 · 광전사 도끼날</b>로 보여요']]},
   {v:252,t:'⚔ 보스 러시 회복 · 장비 여러 개',items:[
     ['look','📊 스탯 창 <b>체력 재생·흡혈</b>에 최근 5초 <b>실제로 찬 체력</b>과 <b>한도로 버려진 비율</b>을 실시간으로 보여줘요. 재생이 한도를 넘으면 빨간색 + 재생 카드가 더 안 나오고, 흡혈이 최대 한도(4%)에 닿아 30% 넘게 버려지면 흡혈 카드도 안 나와요'],
     ['change','🎁 보스 장비가 <b>한 번에 여러 개</b> 떨어질 수 있어요 (평균 개수는 그대로, 예: 악몽 0개 30% · 1개 44% · 2개 22% · 3개 4%). 연속으로 안 나오면 보장은 그대로'],
@@ -13733,7 +13745,7 @@ function renderStats(){
     row('최대 체력',Math.round(p.maxHp),`기본 ${Math.round(p.hpB||p.maxHp)} × (1 + 체력 보너스 합계 ${Math.round(hpPct()*100)}%)${p.chP?` × (1 ${p.chP<0?'−':'+'} 카드 ${Math.abs(Math.round(p.chP*100))}%)`:''}`),
     row('방어력',Math.round(ar),`받는 피해 −${pct(red_)}`+(p.dodge>DODGE_CAP_F()?`, 회피 초과분 +${Math.round((p.dodge-DODGE_CAP_F())*200)} 포함`:'')+(has('iron')?', 철의 의지 적용':'')),
     row('회피',pct(dodgeC())+` <small>/ ${pct(DODGE_CAP_F())}</small>`,p.dodge>DODGE_CAP_F()?`초과 ${Math.round((p.dodge-DODGE_CAP_F())*100)}% → 방어력 +${Math.round((p.dodge-DODGE_CAP_F())*200)}`:''),
-    ...(p.block?[row('막기',pct(p.block+(has('k_wall')?lv3('k_wall',.15,.2,.25):0)+(has('p_divine')?.2:0)),'막으면 피해 무효')]:[]),
+    ...(p.block?[row('막기',pct(blockC())+' <small>/ 60%</small>','막으면 피해 무효 (보스 패턴 공격은 못 막음)'+(blockRaw()>BLOCK_CAP?` · 상한을 넘은 ${Math.round((blockRaw()-BLOCK_CAP)*100)}%는 버려져요`:'')+(has('k_parry')?` · 받아치기: 막은 ${S.parN||0}번 → 공격력 +${Math.floor((S.parN||0)/20)*Math.round(lv3('k_parry',.75,1,1.25)*100)/100}%`:''))]:[]),
     row('보호막',Math.round(barrierMax())),
     (()=>{const rg=p.regen*rgHpM(),cap=p.maxHp*rgCapF(),over=rg>cap,H=hRate('rg');const live=H&&H.w>0?` · 최근 5초 실제로 찬 체력 ${H.g.toFixed(1)}/초 (회복하려던 ${H.w.toFixed(1)}/초 중 한도로 버려짐 ${Math.round((1-H.c/H.w)*100)}%, 체력이 가득 차 버려짐 ${Math.round((H.c-H.g)/H.w*100)}%)`:'';
       return row('체력 재생',(over?`<span style="color:#ff8a8a">${rg.toFixed(1)}</span>`:rg.toFixed(1))+`/초 <small>/ ${cap.toFixed(1)}/초</small>`,(over?`<span style="color:#ff8a8a">한도를 넘은 ${(rg-cap).toFixed(1)}/초는 버려져요 (재생 카드가 더 안 나와요)</span> · `:'')+(rgHpM()>1?`기본 ${p.regen.toFixed(1)} ×${rgHpM().toFixed(1)} · `:'')+`재생·문신·성역 같은 자동 회복은 다 합쳐서 1초에 ${cap.toFixed(1)}까지 (최대 체력 ${Math.round(p.maxHp)}의 ${(rgCapF()*100).toFixed(1)}%). 최대 체력이 늘면 한도도 같이 늘어요`+live);})(),
@@ -13793,7 +13805,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=252,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=253,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
