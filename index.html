@@ -13660,15 +13660,15 @@ function renderStats(){
     row('회피',pct(dodgeC())+` <small>/ ${pct(DODGE_CAP_F())}</small>`,p.dodge>DODGE_CAP_F()?`초과 ${Math.round((p.dodge-DODGE_CAP_F())*100)}% → 방어력 +${Math.round((p.dodge-DODGE_CAP_F())*200)}`:''),
     ...(p.block?[row('막기',pct(p.block+(has('k_wall')?lv3('k_wall',.15,.2,.25):0)+(has('p_divine')?.2:0)),'막으면 피해 무효')]:[]),
     row('보호막',Math.round(barrierMax())),
-    row('체력 재생',(p.regen*rgHpM()).toFixed(1)+'/초'+` <small style="opacity:.75">(자동 회복은 1초에 최대 체력의 ${(rgCapF()*100).toFixed(1)}%까지)</small>`,(rgHpM()>1?`기본 ${p.regen.toFixed(1)} ×${rgHpM().toFixed(1)} · `:'')+'재생·문신·성역 같은 자동 회복을 다 합친 상한'),
-    row('흡혈',pct(lsNow())+` <small style="opacity:.75">(회복은 1초에 최대 체력의 ${(lsRate()*100).toFixed(1)}%까지)</small>`),
+    row('체력 재생',(p.regen*rgHpM()).toFixed(1)+'/초',(rgHpM()>1?`기본 ${p.regen.toFixed(1)} ×${rgHpM().toFixed(1)} · `:'')+`재생·문신·성역 같은 자동 회복은 다 합쳐서 1초에 최대 체력의 ${(rgCapF()*100).toFixed(1)}%까지`),
+    row('흡혈',pct(lsNow()),`흡혈 회복은 1초에 최대 체력의 ${(lsRate()*100).toFixed(1)}%까지`),
     row('처치·적중 회복','1초에 최대 체력의 '+((raidOn()?KH_RAID:KH_MAX)*100)+'%까지','처치·적중할 때 차는 회복을 다 합친 상한'),
     row('받는 피해 배율','×'+p.vuln.toFixed(2))
   ].join('');
   const util=[
     row('이동 속도',Math.round(Math.min(SPEED_CAP_F(),moveSpd())*lightK())+` <small>/ ${SPEED_CAP_F()}</small>`,fieldK()>1?`🌀 둔화 장막: 주변 ${FIELD_R} 안 적 이동 속도 ÷${fieldK().toFixed(2)}`:lightK()>1?`🪶 가벼운 몸 ×${lightK().toFixed(2)} (상한 위에 곱함)`+(moveSpd()>SPEED_CAP_F()?` · 상한 초과 ${Math.round(moveSpd()-SPEED_CAP_F())} → 공격 속도 +${Math.round((moveSpd()-SPEED_CAP_F())/10*3)}%`:''):moveSpd()>SPEED_CAP_F()?`상한 ${SPEED_CAP_F()} 초과 ${Math.round(moveSpd()-SPEED_CAP_F())} → 공격 속도 +${Math.round((moveSpd()-SPEED_CAP_F())/10*3)}%`:''),
     row('대시 재사용',dashCdVal().toFixed(2)+`초 <small>/ 최소 ${DASH_MIN_F()}초</small>`,dashCdRaw()<=DASH_MIN_F()+.001?'최소치. 대시 재사용 카드가 더 안 나와요':''),row('대시 거리',Math.round(dashDist())+` <small>/ ${120+DASH_MAX}</small>`,(S.p.dashD||0)>=DASH_MAX?'최대치. 먼 도약 카드가 더 안 나와요':''),
-    ...(SKILLS[S.cls]?[row('생존기(E) 재사용','−'+Math.round((1-Math.max(.5,p.skM||1))*100)+'% <small>/ −50%</small>',(p.skM||1)<=.55?'최대치 근처. 숨 고르기 카드가 더 안 나와요':'')]:[]),
+    ...(SKILLS[S.cls]?[row('생존기(E) 재사용','−'+Math.round((1-Math.max(.5,p.skM||1))*100)+'% <small>/ −50%</small>',(p.skM||1)<=.55?'최대치 근처. 숨 고르기 카드가 더 안 나와요':`생존기(E) ${SKILLS[S.cls].n}의 재사용 대기시간 감소 (최대 −50%). 숨 고르기 카드·불굴의 의지 등으로 줄어들어요`)]:[]),
     row('회전 부적',orbitN()+'개'),
     row('흡수 범위',Math.round(magE())+` <small>/ ${MAGNET_CAP}</small>`,p.magnet>MAGNET_CAP?`초과 ${Math.round(p.magnet-MAGNET_CAP)}은 효과 없음`:p.magnet>=MAGNET_CAP?'최대치. 자석 카드가 더 안 나와요':''),
     (()=>{const lt=p.luck+gLk(),cap=LUCK_CAP_F();return row('행운',(+Math.min(lt,cap).toFixed(1))+` <small>/ ${cap}</small>`,lt>cap?(luckUse()?`초과 ${(lt-cap).toFixed(1)}도 판돈 올리기·운명의 주사위에 계산`:`초과 ${(lt-cap).toFixed(1)}은 효과 없음`):luckFull()?'최대치. 행운 카드·증강이 더 안 나와요':'');})(),
