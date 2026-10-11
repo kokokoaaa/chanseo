@@ -4794,7 +4794,7 @@ const CLASSES={
     stats:{hp:200,maxHp:200,speed:180,dmg:19,rate:1.9,range:210,bspd:430,armor:15,block:.15},fav:['guard','frost','blitz'],dis:['poison'],
     cards:['힘의 물약','숫돌','날랜 손놀림','손목 단련','치명상','튼튼한 체력','무거운 갑옷'],lvd:'체력 +2, 방어력 +0.3, 공격력 +1%',lv:p=>{p.maxHp+=2;p.hp+=2;p.armor+=.3;p.dmgP=(p.dmgP||0)+.01;}},
   mage:{n:'마법사',role:'광역 화력',d:'맞으면 터지는 화염구를 쏘는 마법사',passive:'화염 폭발: 화염구가 맞은 자리에 폭발 (범위 40, 공격력 55%). 마력 방패가 4초마다 받는 피해 1번을 막음 (준비되면 몸 주위에 보라색 막)',atk:.35,
-    stats:{hp:175,maxHp:175,speed:200,dmg:17,rate:2.1,range:320,bspd:540,armor:8},fav:['fire','thunder','summon'],dis:['guard'],
+    stats:{hp:175,maxHp:175,speed:185,dmg:17,rate:2.1,range:320,bspd:540,armor:8},fav:['fire','thunder','summon'],dis:['guard'],
     cards:['힘의 물약','숫돌','조준경','치명상','전투 본능','다연발'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
   archer:{n:'궁수',role:'원거리 연사',d:'멀리서 빠르게 화살을 쏘는 사수',passive:'관통 화살: 기본 관통 1, 치명타 +10%',atk:.28,
     stats:{hp:170,maxHp:170,speed:200,dmg:13,rate:2.8,range:340,bspd:720,pierce:1,crit:.15},fav:['sniper','card','jackpot'],dis:['curse'],
@@ -8495,7 +8495,7 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
 const PATCH_NOTES=[
   {v:246,t:'🪶 가벼운 몸 · 마력 방패',items:[
     ['new','🪶 몸이 가벼운 직업(마법사·궁수·총잡이·사령술사·정령사·도박사·연금술사)에 <b>가벼운 몸</b>이 생겼어요. 적이 빨라지기 시작하면(무한의 악몽 6분 · 그 외 10분부터) <b>1분마다 이동 속도 +5%</b> (악몽 외 +3.5%, 연금술사는 절반). 이동 속도 상한을 넘어서도 빨라져서, 후반에 맞으면서 버티는 대신 <b>빠른 적을 따돌리며</b> 살아남을 수 있어요'],
-    ['buff','🔮 마법사: <b>마력 방패</b>가 4초마다 받는 피해 1번을 막아요 (준비되면 몸 주위에 보라색 막). 기본 이동 속도 185 → <b>200</b>'],
+    ['buff','🔮 마법사: <b>마력 방패</b>가 4초마다 받는 피해 1번을 막아요 (준비되면 몸 주위에 보라색 막)'],
   ]},
   {v:245,t:'❄ 프로스트 노바',items:[
     ['new','❄ 마법사 전용 증강 <b>프로스트 노바</b> (골드): 2초마다 내 주변으로 <b>얼음 파동</b>이 퍼져요 (공격력 100%). 맞은 적은 <b>냉기 중첩</b>이 쌓여 점점 느려지고 (중첩당 이동 속도 −20%, 머리 위 얼음 결정으로 보여요), <b>3중첩이 되면 얼어붙어요</b> (1.2초 · 정예는 절반 · 보스는 피해만). 냉기 2개로 계산하고, 공격 속도가 오를수록 더 자주 퍼져요'],
