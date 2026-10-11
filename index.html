@@ -570,6 +570,7 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 .labaugs{display:flex;flex-direction:column;gap:4px}
 .labaug{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;align-items:center;gap:0 8px;padding:5px 8px;border-radius:8px;background:rgba(0,0,0,.25)}
 .labaug small{grid-column:1;color:var(--muted);font-size:12px}.labaug span{grid-column:2;grid-row:1/3;display:flex;gap:4px}.labaug span .btn{margin:0;min-width:36px;padding:4px 8px}
+.heroneed{display:flex;flex-direction:column;gap:4px;margin:6px 0 10px;padding:10px 14px;border-radius:12px;border:2px solid #ffd76a;background:rgba(255,215,106,.12);line-height:1.5}.heroneed b:first-child{font-size:18px;color:#ffd76a}
 .labrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0}.labrow .btn,.labrow .btn.primary{margin:0!important;display:inline-flex;align-items:center;justify-content:center;width:auto;flex:0 0 auto;min-width:48px;padding:8px 12px;font-size:16px}.labrow.fill .btn{flex:1 1 0}
 .labgo{display:block;width:100%;margin:8px 0 4px!important;font-size:19px!important;padding:12px!important}
 .labmobs{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px;margin:4px 0}
@@ -8470,6 +8471,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:244,t:'🗿 레이드·결투 버튼',items:[
+    ['change','🗿 <b>레이드</b>·⚔ <b>결투</b> 버튼이 캐릭터를 저장하지 않아도 눌려요. 들어가면 맨 위에 <b>💾 캐릭터 저장이 필요해요</b> 안내가 나오고, 어디서 저장하는지 알려 줘요 (출전·결투는 저장한 캐릭터로)'],
+  ]},
   {v:243,t:'🎯 실험실 새로 꾸미기',items:[
     ['change','🎯 <b>실험실</b>: 누르면 고르는 화면 없이 <b>바로 훈련장</b>으로 들어가요. 캐릭터를 보관하지 않아도 열리고, <b>시간 제한도 없어요</b> (나가기 버튼을 누를 때까지)'],
     ['new','🎯 왼쪽 버튼 <b>소환</b>: <b>허수아비</b>(보스 허수아비·허수아비, 원하는 개수) · <b>👾 몬스터</b>(도감에서 만난 몬스터, 세기·정예·계속 채우기) · <b>👑 보스</b>(도감에서 만난 보스, 패턴 그대로·광폭화 없음)를 불러오거나 치울 수 있어요. 🛡 <b>안 죽기</b>도 켜고 끌 수 있어요'],
@@ -9140,7 +9144,7 @@ function startScreen(){REP_PEND=null;FCLS=null;SEL_RUSH=false;try{metaMig2();}ca
     <div class="btnrow" id="dsel">${DKEYS.filter(k=>!DIFF[k].rush&&k!=='nightmare').map(dBtn).join('')}</div>
     <div class="hUnlock">증강 해금: <b style="color:${TIER.s.col}">실버 ✅</b> · ${['g','p','v'].map(t=>`<b style="color:${TIER[t].col}">${TIER[t].n} ${tierOpen(t)?'✅':'🔒'}</b>${tierOpen(t)?'':`<small>(${DIFF[TIER_UNLOCK[t]].n} 클리어)</small>`}`).join(' · ')}</div>
     <div class="hSect">엔드 컨텐츠</div>
-    <div class="btnrow" id="endc"><button class="btn nmBtn ${pickDiff==='nightmare'?'primary':''}" data-diff="nightmare" ${diffOpen('nightmare')?'':'disabled'}><span class="skull">☠</span><b>${diffOpen('nightmare')?'':'🔒 '}무한의 악몽</b><small>${diffOpen('nightmare')?'끝없이 조여 오는 결계 · 악몽의 파동':'신 클리어 시 열림'}</small><span class="pick">${diffOpen('nightmare')?'영웅 고르기 ▸':''}</span></button><button class="btn" id="rushBtn" ${diffOpen('bossrush')?'':'disabled'}><i>${diffOpen('bossrush')?'⚔':'🔒'}</i><b>보스 러시${(META.ach||{}).br_5?' ✔':''}</b><small>${diffOpen('bossrush')?'보스만 연달아':'무한의 악몽이 열리면'}</small></button><button class="btn" id="raidBtn" ${myHeroes().length?'':'disabled'}><i>${myHeroes().length?'🗿':'🔒'}</i><b>레이드</b><small>${myHeroes().length?'3인 거신 토벌':'캐릭터 저장 시 열림'}</small></button><button class="btn" id="duelBtn" ${myHeroes().length?'':'disabled'}><i>${myHeroes().length?'⚔':'🔒'}</i><b>결투</b><small>${myHeroes().length?'전당 캐릭터와 1:1':'캐릭터 저장 시 열림'}</small></button><button class="btn labBtn" id="labBtn"><i>🎯</i><b>실험실</b><small>허수아비 · 증강 실험</small></button></div>
+    <div class="btnrow" id="endc"><button class="btn nmBtn ${pickDiff==='nightmare'?'primary':''}" data-diff="nightmare" ${diffOpen('nightmare')?'':'disabled'}><span class="skull">☠</span><b>${diffOpen('nightmare')?'':'🔒 '}무한의 악몽</b><small>${diffOpen('nightmare')?'끝없이 조여 오는 결계 · 악몽의 파동':'신 클리어 시 열림'}</small><span class="pick">${diffOpen('nightmare')?'영웅 고르기 ▸':''}</span></button><button class="btn" id="rushBtn" ${diffOpen('bossrush')?'':'disabled'}><i>${diffOpen('bossrush')?'⚔':'🔒'}</i><b>보스 러시${(META.ach||{}).br_5?' ✔':''}</b><small>${diffOpen('bossrush')?'보스만 연달아':'무한의 악몽이 열리면'}</small></button><button class="btn" id="raidBtn"><i>🗿</i><b>레이드</b><small>${myHeroes().length?'3인 거신 토벌':'저장한 캐릭터로 출전'}</small></button><button class="btn" id="duelBtn"><i>⚔</i><b>결투</b><small>${myHeroes().length?'전당 캐릭터와 1:1':'저장한 캐릭터로 1:1'}</small></button><button class="btn labBtn" id="labBtn"><i>🎯</i><b>실험실</b><small>허수아비 · 증강 실험</small></button></div>
     ${DONATE_URL?`<button id="donBtn" class="hDon"><span class="hug"><canvas width="48" height="40" id="donArt"></canvas><span class="bub">배고파요…</span></span><span class="dt"><b>참붕이 밥 사주기</b><small>게임이 재밌었다면 밥 한 끼 응원해 주세요</small></span></button>`:''}
    </div>
   </div>
@@ -10415,11 +10419,14 @@ function raidOver(win){S.mode='over';joy=null;const bi=S.raidB||0,st=S.raidS||1,
 let RAID_SEL=[],RAID_B=0,RAID_STG={};
 const RB_IMG={};
 function raidBossImg(R){if(RB_IMG[R.k])return RB_IMG[R.k];try{const c=ESPR.get(R.spr,0,false,false),k=3,q=document.createElement('canvas');q.width=c.width*k;q.height=c.height*k;const g=q.getContext('2d');g.imageSmoothingEnabled=false;if(R.flt)g.filter=R.flt;g.drawImage(c,0,0,q.width,q.height);return RB_IMG[R.k]=q.toDataURL();}catch(e){return '';}}
+// 레이드·결투: 저장한 캐릭터가 없을 때 맨 위 안내 (화면은 열리고, 출전하려면 저장이 필요하다고 알려 줌)
+const HERO_NEED=(n,k)=>`<div class="heroneed"><b>💾 캐릭터 저장이 필요해요</b><span>${n}는 <b>저장한 캐릭터</b>(${k})로 싸워요. 아직 저장한 캐릭터가 없어요. <b>☠ 무한의 악몽</b>이나 <b>⚔ 보스 러시</b>를 끝낸 뒤 결과 화면(또는 🏆 명예의 전당 › 📜 내 최근 기록)에서 <b>💾 캐릭터 저장</b>을 누르면 여기서 고를 수 있어요.</span></div>`;
 function openRaid(){cosPreviewHide();const L=myHeroes().sort((a,b)=>(b.score||0)-(a.score||0));RAID_SEL=RAID_SEL.filter(id=>L.some(h=>h.id===id)).filter((id,i,a)=>{const c=(L.find(h=>h.id===id)||{}).cls;return a.findIndex(x=>(L.find(h=>h.id===x)||{}).cls===c)===i;});
   const RD=RAIDS[RAID_B]||RAIDS[0],RC=raidRec()[RD.k],top=raidTop(RD.k);let st=RAID_STG[RD.k]||Math.min(RAID_ST,top+1);if(!raidOpenS(RD.k,st))st=1;RAID_STG[RD.k]=st;
   const card=h=>{const i=RAID_SEL.indexOf(h.id),av=hofAv(h.cls,h.skin,'',heroDrG(h),recLook(h)),tk=i<0&&RAID_SEL.some(x=>{const o=L.find(q=>q.id===x);return o&&o.cls===h.cls;});return `<button class="rcard ${i>=0?'on':''}" data-rsel="${h.id}"${tk?' style="opacity:.5" title="같은 직업이 이미 출전 중 (누르면 바꿈)"':''}>${i>=0?`<span class="rbadge">${i===0?'🎮 나':'🤝 동료'}</span>`:''}${av?`<img src="${av}" alt="">`:''}<b>${esc(heroName(h))}</b><small class="rrole">${roleOf(h.cls).ico} ${roleOf(h.cls).n}</small><small>${CLASSES[h.cls]?CLASSES[h.cls].n:''} · 점수 ${(h.score||0).toLocaleString()} · 각성 ${h.aw||0}</small><small>공격력 ${h.st&&h.st['공격력']||'-'} · 체력 ${h.st&&h.st['최대 체력']||'-'}</small></button>`;};
   const bc=(r,i)=>{const t=raidTop(r.k);return `<button class="rboss${i===RAID_B?' on':''}" data-rb="${i}" style="--rc:${r.col}"><span class="rbi">${r.ico}</span><b>${r.n}</b><small>${r.t}</small><em>${t?`최고 ${t}단계`:'첫 도전'}</em></button>`;};
   show(`<div class="shophead"><h2>🗿 레이드</h2><button class="btn" id="rdBack2">돌아가기</button></div>
+  ${L.length?'':HERO_NEED('🗿 레이드','최대 3명')}
   <div class="rbhero" style="--rc:${RD.col}">${(()=>{const im=raidBossImg(RD);return im?`<img src="${im}" alt="${RD.n}">`:`<span style="font-size:110px">${RD.ico}</span>`;})()}<div><h2>${RD.ico} ${RD.n}</h2><div class="rbt">${RD.t} · ${top?`최고 ${top}단계 클리어`:'아직 도전 전'}</div><p>${RD.d}</p><div class="rmech">${RD.mech}</div><div class="rmech" style="color:#ffb0b0">☠ 등장하는 자리(빨간 원) 안에 있으면 즉사 · 🩸 보스에게서 흡혈은 1초에 최대 체력 ${RAID_LS*100}%까지</div>${(()=>{const sk=RSET(RD.k),T=sk&&SETS[sk];const a=T&&T.aug&&AUGS.find(x=>x.id===T.aug);return T?`<div class="rmech" style="color:${T.col}">🎁 전용 풀세트 <span class="augref" data-sref="${sk}"><b>「${T.n}」</b></span>${a?` · 세트 증강 ${augRef(a)}`:''} · 이 보스 상자에서만 나와요</div>`:'';})()}</div></div>
   <p class="sub">보스마다 따로 <b>1~${RAID_ST}단계</b>에 도전해요. 보관한 캐릭터를 최대 <b>3명</b> 골라 출전 — 처음 고른 캐릭터를 <b>내가 조작</b>하고, 나머지는 동료로 함께 싸워요. 판 중 성장은 없어요. 쓰러진 동료는 곁에 서 있으면 일으켜요 (<b>부활 기회 ${RAID_TOK}번</b>, 내가 쓰러져도 1번 씀).</p>
   <div class="rbosses">${RAIDS.map(bc).join('')}</div>
@@ -10427,7 +10434,7 @@ function openRaid(){cosPreviewHide();const L=myHeroes().sort((a,b)=>(b.score||0)
   <div class="rsinfo">${RD.n} ${st}단계 · 체력 <b>${fmtN(raidHpOf(RAID_B,st))}</b> · 공격력 <b>${fmtN(raidDmOf(RAID_B,st))}</b> · 보상: 🏅 ${raidMedal(st).toLocaleString()} · 🎁 전설 상자 ${raidBoxN(st,false)}개 · 🌟 마스터리 +${raidXp(st)}${RC.c[st]?'':' <b style="color:#ffd76a">(첫 클리어: 메달·경험치 2배 + 상자 1개 더)</b>'}${RC.b[st]?` · 최고 ${Math.floor(RC.b[st]/60)}:${String(RC.b[st]%60).padStart(2,'0')}`:''}</div>
   <div class="rroles">${[...new Set(Object.values(RAID_ROLE).map(r=>r.n))].map(n=>{const r=Object.values(RAID_ROLE).find(x=>x.n===n),cs=Object.keys(RAID_ROLE).filter(k=>RAID_ROLE[k].n===n).map(k=>CLASSES[k].n).join('·');return `<span><b>${r.ico} ${n}</b> ${cs} — ${r.d}</span>`;}).join('')}<span><b>${RAID_DPS.ico} 딜러</b> 그 밖의 직업 — ${RAID_DPS.d}</span></div>
   <h3>출전 캐릭터 (${RAID_SEL.length}/3) <small style="color:var(--muted);font-weight:normal">직업당 한 명</small></h3>${L.length?`<div class="rgrid">${L.map(card).join('')}</div>`:'<p class="sub">보관한 캐릭터가 없어요. 악몽·보스 러시가 끝나면 결과 화면(또는 📜 내 최근 기록)에서 💾 캐릭터 저장!</p>'}
-  <button class="btn primary" id="rdGo" ${RAID_SEL.length?'':'disabled'}>⚔ ${RD.n} ${st}단계 출전 ${RAID_SEL.length?`(${RAID_SEL.length}명${RAID_SEL.length<3?' · 3명이면 더 쉬워요':''})`:''}</button>`);
+  <button class="btn primary" id="rdGo" ${RAID_SEL.length?'':'disabled'}>${L.length?'':'💾 캐릭터를 저장하면 출전할 수 있어요 · '}⚔ ${RD.n} ${st}단계 출전 ${RAID_SEL.length?`(${RAID_SEL.length}명${RAID_SEL.length<3?' · 3명이면 더 쉬워요':''})`:''}</button>`);
   {const P=ov.querySelector('.panel');if(P)P.classList.add('wide');}
   $('rdBack2').onclick=startScreen;ov.querySelectorAll('[data-rb]').forEach(b=>b.onclick=()=>{RAID_B=+b.dataset.rb;openRaid();});ov.querySelectorAll('[data-rs]').forEach(b=>b.onclick=()=>{RAID_STG[RD.k]=+b.dataset.rs;openRaid();});
   ov.querySelectorAll('[data-rsel]').forEach(b=>b.onclick=()=>{const id=b.dataset.rsel,i=RAID_SEL.indexOf(id);if(i>=0)RAID_SEL.splice(i,1);else{/* 직업당 한 명: 같은 직업이 이미 있으면 그 자리를 바꿈 */const L2=myHeroes(),c=(L2.find(h=>h.id===id)||{}).cls,j=RAID_SEL.findIndex(x=>(L2.find(h=>h.id===x)||{}).cls===c);if(j>=0){RAID_SEL[j]=id;toast(`같은 직업(${CLASSES[c]?CLASSES[c].n:''})은 한 명만 출전할 수 있어요 — 바꿨어요`);}else if(RAID_SEL.length<3)RAID_SEL.push(id);else toast('최대 3명까지');}openRaid();});
@@ -10663,6 +10670,7 @@ function openDuel(){cosPreviewHide();const H=myHeroes().sort((a,b)=>(b.score||0)
   const card=(h)=>{const av=hofAv(h.cls,h.skin,'',heroDrG(h),recLook(h));return `<button class="rcard ${h.id===DUEL_ME?'on':''}" data-dme="${h.id}">${h.id===DUEL_ME?'<span class="rbadge">🎮 나</span>':''}${av?`<img src="${av}" alt="">`:''}<b>${esc(heroName(h))}</b><small>${CLASSES[h.cls].n} · 점수 ${(h.score||0).toLocaleString()}</small><small>⚔ ${wdl(heroDRec(h.id))}</small></button>`;};
   const ocard=(o,i)=>{const av=hofAv(o.c,o.k,'',o.g,o.look),r=me&&o.hero?heroPow(o.hero)/heroPow(me):null,A=o.t&&ACH.find(a=>a.k===o.t);return `<button class="rcard" data-dop="${i}">${av?`<img src="${av}" alt="">`:''}<b>${esc(o.n)}</b>${A?`<small class="rrole">「${A.n}」</small>`:''}${o.rank?`<small style="color:#ffd76a">🏆 ${DIFF[o.hof.diff].n} 랭킹 ${o.rank}위</small>`:''}<small>${o.src} · ${CLASSES[o.c].n} · ${(o.s||0).toLocaleString()}점</small>${r==null?'<small style="color:var(--muted)">누르면 캐릭터를 불러와요</small>':`<small style="color:${r>1.3?'#ff8a8a':r<.8?'#7be08f':'#ffd76a'}">${r>1.5?'강함':r<.67?'약함':'비슷함'} · 전투력 ×${r.toFixed(2)}${r<DUEL_PRAC?' · 🥋 연습':''}</small>`}</button>`;};
   show(`<div class="shophead"><h2>⚔ 결투</h2><button class="btn" id="dlBack2">돌아가기</button></div>
+  ${H.length?'':HERO_NEED('⚔ 결투','내 캐릭터 1명')}
   <p class="sub">내 캐릭터로 명예의 전당에 올라간 <b>실제 캐릭터</b>·내 다른 캐릭터·친구의 <b>대결 코드</b>와 1:1! 상대는 그 캐릭터의 체력·방어력·화력·각성만큼 강하고, <b>그 직업 그대로</b> 평타·고유 능력·생존기(E)를 써요 (결투에선 궁극기 없음). 예고를 보고 피하고 대시를 잘 쓰는 게 승부! · 제한 시간 ${DUEL_LIMIT}초, 넘기면 무승부 · 전적 ${R.w}승 ${R.d||0}무 ${R.l}패</p>
   <div class="medal" style="justify-content:center;gap:16px;flex-wrap:wrap"><span>${duelTierH(duelRt())}</span>${(R.st||0)>=1?`<span>🔥 ${R.st}연승 중 · 승리 메달 +${Math.round((duelStreakM()-1)*100)}%</span>`:''}<span>최고 ${R.bst||0}연승</span>${(()=>{const n=DUEL_TIER.find(x=>x[0]>duelRt());return n?`<small style="color:var(--muted)">다음 등급 「${n[1]}」까지 ${n[0]-duelRt()}점</small>`:'';})()}</div>
   ${duelLogHtml()}
@@ -10673,7 +10681,7 @@ function openDuel(){cosPreviewHide();const H=myHeroes().sort((a,b)=>(b.score||0)
   $('dlBack2').onclick=startScreen;ov.querySelectorAll('[data-dme]').forEach(b=>b.onclick=()=>{DUEL_ME=b.dataset.dme;openDuel();});
   $('dlAdd').onclick=async()=>{const h=await heroUnpack($('dlCode').value);if(!h){toast('대결 코드가 올바르지 않아요');return;}const o=oppOf(h,'🤝 코드');DUEL_CODES=[o,...DUEL_CODES.filter(x=>x.n!==o.n||x.c!==o.c)].slice(0,5);toast(`🤝 ${o.n} 추가!`);openDuel();};
   {const need=O.filter(o=>!o.hero&&o.hof);(async()=>{let got=0;for(const o of need.slice(0,8)){if(!document.querySelector('[data-dop]'))return;if(await hofHero(o))got++;}if(got&&document.querySelector('[data-dop]')&&!document.getElementById('dlCode').value){const y=ov.scrollTop;openDuel();ov.scrollTop=y;}})();}
-  ov.querySelectorAll('[data-dop]').forEach(b=>b.onclick=async()=>{const o=O[+b.dataset.dop];if(!me||!o)return;if(!o.hero){toast('캐릭터 불러오는 중…');const h=await hofHero(o);if(!h){toast('이 기록의 캐릭터를 불러오지 못했어요');return;}}duelPreview(me,o);});}
+  ov.querySelectorAll('[data-dop]').forEach(b=>b.onclick=async()=>{const o=O[+b.dataset.dop];if(!me){toast('💾 먼저 캐릭터를 저장해야 결투할 수 있어요');return;}if(!o)return;if(!o.hero){toast('캐릭터 불러오는 중…');const h=await hofHero(o);if(!h){toast('이 기록의 캐릭터를 불러오지 못했어요');return;}}duelPreview(me,o);});}
 // 결투 전: 나와 상대 비교 + 걸린 보상
 function duelPreview(me,o){const h=o.hero,r=heroPow(h)/heroPow(me),W=duelReward(r,o);
   const col=(x,lbl)=>{const av=hofAv(x.cls,x.skin,'',heroDrG(x),recLook(x));return `<div class="hcard" style="align-items:center;text-align:center">${av?`<img src="${av}" alt="" style="width:56px;height:56px;image-rendering:pixelated">`:''}<b>${esc(lbl)}</b><small style="color:var(--muted)">${CLASSES[x.cls]?CLASSES[x.cls].n:'?'} · 레벨 ${esc(String(x.lvl||'?'))} · 점수 ${(+x.score||0).toLocaleString()}</small></div>`;};
@@ -13525,7 +13533,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=243,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=244,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
