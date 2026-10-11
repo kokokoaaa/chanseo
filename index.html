@@ -4993,7 +4993,7 @@ function txSpr(s,col,size,sc){if(!TXF){const nw=performance.now();if(nw<TXN)retu
   g.font=f;g.textAlign=ctx.textAlign;g.textBaseline=ctx.textBaseline;const ox=g.textAlign==='center'?w/2:g.textAlign==='right'||g.textAlign==='end'?w-3*sc:3*sc,oy=g.textBaseline==='middle'?h/2:g.textBaseline==='top'?3*sc:g.textBaseline==='bottom'?h-3*sc:h-size*sc*.3-3*sc;
   g.lineWidth=(size>=24?5:3)*sc;g.lineJoin='round';g.strokeStyle=size>=24?'rgba(0,0,0,.88)':'rgba(0,0,0,.7)';g.strokeText(s,ox,oy);g.fillStyle=col;g.fillText(s,ox,oy);c.ox=ox;c.oy=oy;
   TXS.set(k,c);if(TXS.size>500)TXS.delete(TXS.keys().next().value);return c;}
-function ftext(x,y,s,col,size=14){S.tx.push({x,y,s:rateTxt(String(s)),col,size,life:.7});if(S.tx.length>40)S.tx.shift();}
+function ftext(x,y,s,col,size=14){S.tx.push({x,y,s:projTxt(rateTxt(String(s))),col,size,life:.7});if(S.tx.length>40)S.tx.shift();}
 // 실험실 피해 숫자: 크게, 1만 넘으면 K·M으로 (치명타 등 색 있는 숫자는 더 크게), 오래 보이게
 function labNum(e,amt,label,col,dot){const s=label&&isNaN(+label)?label:fmtN(amt);S.tx.push({x:(e.hx??e.x)+rand(-14,14),y:(e.hy??e.y)-e.r-(dot?34:12),s:String(s),col:col||'#fff4d6',size:dot?22:col?34:28,life:1.1,vy:64});if(S.tx.length>70)S.tx.shift();}
 // 정해 둔 닉네임에게만: 한 판 끝날 때마다 「차트는 쓰고 게임 하시나요?」 → YES 행운 +1 (최대 +5) · NO 행운 −1 (최소 −10). 다음 판부터 계속 적용
@@ -6733,10 +6733,18 @@ const dLines=d=>{const t=String(d);if(/<[a-z]/i.test(t))return t;const out=[];le
   return L.map(x=>`<span class="dl">${dGlue(x)}</span>`).join('');};
 // 원거리 직업은 「탄환」을 실제로 쏘는 것 이름으로 보여 줌 (마법사 화염구·정령사 원소탄 …). 적 탄환은 그대로
 const PROJ_N={mage:'화염구',elem:'원소탄',archer:'화살',rogue:'단검',alch:'플라스크',gambler:'동전',necro:'마력탄',druid:'가시'};
-const projTxt=d=>{try{if(S&&S.cls==='mage'){d=String(d).replace(/공격 속도/g,'마법 시전 속도');if(mSchool()!==1)d=d.replace('탄환이 다른 적에게 1회 튕김','주문 폭발 범위 +20%');d=d.replace(/번째 공격마다/g,'번째 시전마다');}const n=S&&S.cls&&(S.cls==='mage'?MAGE_PN[mSchool()]:PROJ_N[S.cls]);if(!n||pureMelee())return d;const v=!((n.charCodeAt(n.length-1)-0xAC00)%28);const J={'이':v?'가':'이','을':v?'를':'을','은':v?'는':'은','과':v?'와':'과','으로':v?'로':'으로'};
+const projTxt=d=>{try{if(S&&S.cls==='mage'){d=String(d).replace(/공격 속도/g,'마법 시전 속도');if(mSchool()!==1)d=d.replace('탄환이 다른 적에게 1회 튕김','주문 폭발 범위 +20%');d=d.replace(/번째 공격마다/g,'번째 시전마다');}const n=S&&S.cls&&(S.cls==='mage'?MAGE_PN[mSchool()]:PROJ_N[S.cls]);if(S&&S.cls&&pureMelee())return String(d).replace(/(적 )?탄환/g,(m,en)=>en?m:'공격').replace(/(^|[\s(·,])탄속/g,'$1투사체 속도').replace(/(^|[\s(·,])탄(?![가-힣])/g,'$1공격'); /* 근접 직업: 탄환 → 공격 */if(!n)return d;const v=!((n.charCodeAt(n.length-1)-0xAC00)%28);const J={'이':v?'가':'이','을':v?'를':'을','은':v?'는':'은','과':v?'와':'과','으로':v?'로':'으로'};
   return String(d).replace(/(적 )?탄환(으로|이|을|은|과)?/g,(m,en,j)=>en?m:n+(j?J[j]:''))
     // 낱말 「탄」·「탄속」도 직업 투사체 이름으로 (증강 이름처럼 붙어 있는 말은 그대로)
     .replace(/(^|[\s(·,])탄속/g,(m,a)=>a+n+' 속도').replace(/(^|[\s(·,])탄(이|은|을|의|마다)?(?![가-힣])/g,(m,a,j)=>a+n+(j?(J[j]||j):''));}catch(e){return d;}};
+// 판 중 화면에 나오는 모든 글자를 직업 단어로: 탄환·탄·탄속 → 투사체 이름, 마법사는 공격 속도 → 마법 시전 속도·N번째 공격마다 → 시전마다.
+// 화면마다 따로 고치지 않도록 새로 그려지는 글자를 모두 바꿈 (패치 노트·설명서는 여러 직업 이야기라 그대로)
+const PROJ_MODES=new Set(['play','shop','stat','aug','revive','dying','over','labr','labm']);
+const projOn=()=>!!(S&&S.cls&&PROJ_MODES.has(S.mode));
+const PROJ_RX=/탄|공격 속도|공격마다/;
+function projText(t){const v=t.nodeValue;if(!v||!PROJ_RX.test(v))return;const pe=t.parentElement;if(pe&&pe.closest('#patchPop,.gdoc,script,style,textarea'))return;const nv=projTxt(v);if(nv!==v)t.nodeValue=nv;}
+function projWalk(root){if(root.nodeType===3){projText(root);return;}if(root.nodeType!==1)return;const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let t;while((t=w.nextNode()))projText(t);}
+try{new MutationObserver(ms=>{if(!projOn())return;for(const m of ms){if(m.type==='characterData')projText(m.target);else for(const n of m.addedNodes)projWalk(n);}}).observe(document.body,{childList:true,subtree:true,characterData:true});}catch(e){}
 const meleeTxt=d=>{try{if(!S||!S.cls||!pureMelee())return projTxt(d);return String(d).replace(/관통[ \u00a0]\+(\d+)/g,(m,n)=>`${m} <small class="mlt">(근접: 한 번에 베는 적 +${2*n})</small>`).replace(/탄환[ \u00a0]\+(\d+)발?/g,(m,n)=>`${m} <small class="mlt">(근접: 베기 각도 +${40*n}°)</small>`);}catch(e){return d;}};
 const meleeCap=n=>(S.cls==='berserk'?2:3)+2*Math.max(0,pierceE());
 const meleeArc=n=>Math.round(Math.min(360,2*(55+(n-1)*20)));
@@ -8631,7 +8639,7 @@ const PATCH_NOTES=[
     ['change','🔥 화염구는 첫 적에서 터져요 (관통 없음, 관통 증강·카드 안 나옴). 튕김 증강은 ❄ 얼음 마법사에게만 나와요'],
     ['change','🔮 <b>마법사 속성 특화</b>: 처음 고른 화염·냉기·번개 증강으로 속성이 정해지고 (장비로 받은 시작 증강은 제외), 그 뒤로 다른 속성 증강은 나오지 않아요 (특화 알림). 화염·번개 마법사에겐 튕김 증강(도탄·튕김 사격)이 안 나오고, 카드 시너지 「튕김」은 「주문 폭발 범위 +20%」로 바뀌어요'],
     ['change','🧱 결계가 좁아졌을 때 적이 <b>결계 바로 바깥에서 생겨 걸어 들어와요</b> (예전엔 결계 가장자리에 바로 나타나 피할 틈이 없었음). 한 번 들어온 적은 예전처럼 밖으로 못 나가요'],
-    ['look','🔮 마법사 등 원거리 직업의 카드·시너지·스탯 창에서 「탄환」·「탄」·「탄속」이 직업 투사체 이름으로 (마법사: 화염구·화염구 속도 등)']]},
+    ['look','🔮 판 중에 나오는 <b>모든 글자</b>(카드·증강·왕실·합체·시너지·상점·도감·알림·스탯)가 직업에 맞는 말로: 「탄환」·「탄」·「탄속」 → 화살·단검·화염구 등 투사체 이름 (근접 직업은 「공격」), 마법사는 「공격 속도」 → 「마법 시전 속도」, 「N번째 공격마다」 → 「N번째 시전마다」']]},
   {v:250,t:'📜 1배속 의뢰 확정',items:[
     ['buff','🔥 <b>화염 마법사</b>가 둘러싸이지 않게: 화염구 폭발 범위 70 → 90, 마법사 주문 크기 1.5배 · 운석 낙하 4번째 → 3번째 · 마나 폭주 5번째 → 4번째 · 정신 집중 3번째 → 2번째 · 대화재 5번째 → 4번째 · 마스터리 마나 순환 5번째 → 4번째'],
     ['bug','🧱 악몽에서 결계가 줄어들 때 이벤트(성소·보물상자·유물 등)·의뢰인·상인이 결계 밖에 남던 문제: 결계 안으로 따라 들어와요. 결계 밖 건물의 이스터에그는 안내가 안 떠요'],
