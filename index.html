@@ -6689,7 +6689,7 @@ function dmgE(e,amt,col,label,quiet){
   {const k=S.dsrc||'base',c=S.dcat||(S.dcat={});c[k]=(c[k]||0)+amt;const k2=S.dsub==='폭발'&&S.dsrc&&DSRC_N[S.dsrc]?DSRC_N[S.dsrc].split('(')[0]+' 폭발':S.dsub||DSRC_N[S.dsrc]||'기본 공격',L2=S.dlog||(S.dlog={});L2[k2]=(L2[k2]||0)+amt;}
   // 지속 피해(화상·중독 등, quiet)는 매 프레임 들어와서 흰색 번쩍임을 켜면 계속 허옇게 보임 → 번쩍임은 직접 맞을 때만
   e.hp-=amt;if(!quiet)e.hit=.06;S.st.dmg+=amt;
-  {let ls=lsNow();if(ls&&S.p.alive){const P=S.p;let hl=(e.type==='rival'?amt*P.maxHp*3/e.maxHp:amt)*ls*(has('f_vampknight')&&hitRec()?2:1)*healM();{hl=Math.min(hl,S.lsBud||0);S.lsBud=(S.lsBud||0)-hl;}/* 흡혈 상한: 1초에 회복할 수 있는 양이 정해져 있음 (lsTick) */const nh=P.hp+hl;if(nh>P.maxHp&&has('vampirelord'))P.barrier=Math.min(Math.max(barrierMax(),P.bxM||0),(P.barrier||0)+nh-P.maxHp);P.hp=Math.min(P.maxHp,nh);}}
+  {let ls=lsNow();if(ls&&S.p.alive){const P=S.p;let hl=(e.type==='rival'?amt*P.maxHp*3/e.maxHp:amt)*ls*(has('f_vampknight')&&hitRec()?2:1)*healM();{const w0=hl;hl=Math.min(hl,S.lsBud||0);S.lsBud=(S.lsBud||0)-hl;hStat('ls',w0,hl,Math.max(0,Math.min(hl,P.maxHp-P.hp)));}/* 흡혈 상한: 1초에 회복할 수 있는 양이 정해져 있음 (lsTick) */const nh=P.hp+hl;if(nh>P.maxHp&&has('vampirelord'))P.barrier=Math.min(Math.max(barrierMax(),P.bxM||0),(P.barrier||0)+nh-P.maxHp);P.hp=Math.min(P.maxHp,nh);}}
   // quiet=2: 회전 부적처럼 자주 맞는 피해는 작은 하늘색 숫자로
   if(labOn()){if(quiet===true){e.ldA=(e.ldA||0)+amt;e.ldC=S.dsrc;}else if(label&&isNaN(+label))labNum(e,amt,label,col);else{e.lnA=(e.lnA||0)+amt;if(col)e.lnC=col;}}
   else if(quiet===2)ftext(e.x+rand(-8,8),e.y-e.r-4,Math.round(amt),'#9fe8ff',12);
@@ -8454,9 +8454,13 @@ function rarityFx(){
 // 스탯 카드 등급 (행운 0: 영웅 4.6% 전설 0.6%, 행운 50: 영웅 7.5% 전설 1.7%)
 function rollRarity(bonus=0){const L=LK(bonus);const w=[['c',66],['r',26+.33*L],['e',4.5+.09*L],['l',.55+.03*L]];let t=w.reduce((a,b)=>a+b[1],0),x=Math.random()*t;for(const [k,v] of w){if((x-=v)<0)return k;}return 'c';}
 // 공격 속도가 상한에 닿으면 공격 속도만 올리는 카드는 안 나옴 (받아도 0%)
-const RATE_ONLY=new Set(['손목 단련','날랜 손놀림','광기']);
+const RATE_ONLY=new Set(['손목 단련','날랜 손놀림','광기']),REGEN_ONLY=new Set(['붕대']),LS_ONLY=new Set(['흡혈 송곳니']);
+// 실제 계산으로 한도를 넘었으면 그 회복 카드는 안 나옴: 재생은 스탯 또는 최근 5초 실제 자동 회복 합계가 한도 이상, 흡혈은 한도 최대치(4%)에 닿았고 최근 5초 30% 이상 버려질 때
+// (흡혈 한도는 흡혈 수치의 절반이라 최대치 전까지는 흡혈을 올리면 한도도 같이 올라 버려지지 않음)
+const regenFull=()=>{try{const cap=S.p.maxHp*rgCapF(),H=hRate('rg');return S.p.regen*rgHpM()>=cap||(H&&H.w>=cap*.98);}catch(e){return false;}};
+const lsFull=()=>{try{const H=hRate('ls');return lsRate()>=(raidOn()?RAID_LS:LS_MAX)&&H&&H.w>0&&H.c/H.w<.7;}catch(e){return false;}};
 // 고점 돌파 증강이 있으면 그 능력치 카드는 상한을 넘어서도 계속 나옴 (넘은 만큼은 그 증강 보너스에만 계산)
-const cardOk=c=>!(RATE_ONLY.has(c.n)&&rawRate()>=RATE_CAP()*.98&&!rateUnc())&&!(PCT_CARDS.has(c.n)&&!pctOpen())&&!(MELEE_CLS.includes(S.cls)&&c.n==='가속 탄')&&!(c.cc&&critFull()&&!has('r_vital'))&&!(c.cm&&critMFull()&&!has('g_deadeye'))&&!(c.n==='관통 탄'&&((S.p.pierce>=PIERCE_CAP&&!has('a_pierce'))||rushOn()))&&!(c.n==='조준경'&&S.p.range>=RANGE_CAP())&&(!c.req||c.req());
+const cardOk=c=>!(REGEN_ONLY.has(c.n)&&regenFull())&&!(LS_ONLY.has(c.n)&&lsFull())&&!(RATE_ONLY.has(c.n)&&rawRate()>=RATE_CAP()*.98&&!rateUnc())&&!(PCT_CARDS.has(c.n)&&!pctOpen())&&!(MELEE_CLS.includes(S.cls)&&c.n==='가속 탄')&&!(c.cc&&critFull()&&!has('r_vital'))&&!(c.cm&&critMFull()&&!has('g_deadeye'))&&!(c.n==='관통 탄'&&((S.p.pierce>=PIERCE_CAP&&!has('a_pierce'))||rushOn()))&&!(c.n==='조준경'&&S.p.range>=RANGE_CAP())&&(!c.req||c.req());
 // 직업 선호 카드는 ×1.6, 최근 9장 안에 나온 카드는 ×0.3 (같은 카드 반복 방지)
 // 루트 스탯 카드: 열렸다고 계속 뜨지 않고, 그 루트가 최근 내 피해에서 차지하는 비중만큼 자주 뜸 (비중 0이면 드물게)
 const CARD_SRC={'정비 키트':['summon'],'포탑 개조':['summon'],'뼈 가루':['summon','undead'],'영혼 사슬':['summon','undead'],'독샘':['poison'],'연료':['fire'],'축전지':['thunder','elem'],'원소 결정':['elem','fire','thunder'],'정령 공명':['elem'],'씨앗 주머니':['nature'],'가시 독':['nature'],'큰 병':['alchemy'],'농축액':['alchemy'],'진동판':['wave'],'그림자 정수':['shadow'],'중력자':['grav'],'성수':['holy'],'성유':['holy'],'성가':['holy'],'시계 태엽':['grav','nature','wave','shadow','summon','elem']};
@@ -8635,6 +8639,7 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
   {v:252,t:'⚔ 보스 러시 회복 · 장비 여러 개',items:[
+    ['look','📊 스탯 창 <b>체력 재생·흡혈</b>에 최근 5초 <b>실제로 찬 체력</b>과 <b>한도로 버려진 비율</b>을 실시간으로 보여줘요. 재생이 한도를 넘으면 빨간색 + 재생 카드가 더 안 나오고, 흡혈이 최대 한도(4%)에 닿아 30% 넘게 버려지면 흡혈 카드도 안 나와요'],
     ['change','🎁 보스 장비가 <b>한 번에 여러 개</b> 떨어질 수 있어요 (평균 개수는 그대로, 예: 악몽 0개 30% · 1개 44% · 2개 22% · 3개 4%). 연속으로 안 나오면 보장은 그대로'],
     ['change','⚔ <b>보스 러시</b>에서 보스를 잡을 때마다 체력이 거의 가득 차던 문제: 보스 등장 회복(30%)·레벨업 회복 없음, 보스 처치 회복 30% → 20% (「전리품 정리」 강화 60% → 35%). 이제 보스 하나 잡을 때마다 20%만 차요. 다른 모드는 그대로. 대신 보스 러시 보스 공격력 −13% (난이도는 비슷하게)']]},
   {v:251,t:'🔮 마법사 속성 특화',items:[
@@ -10124,11 +10129,15 @@ const LS_K=.5,LS_MAX=.04;
 const KH_MAX=.03,KH_RAID=.02;
 // 재생 상한: 시간당 자동 회복(체력 재생·문신·성역·세계수 등)을 다 합쳐 1초에 최대 체력의 RG_MAX까지 (레이드 RG_RAID)
 const RG_MAX=.025,RG_RAID=.0125;const rgCapF=()=>raidOn()?RG_RAID:RG_MAX;
-function healR(v){const p=S.p;if(!p||!p.alive||!(v>0))return;const h=Math.min(v,S.rgBud||0);if(h<=0)return;S.rgBud-=h;p.hp=Math.min(p.maxHp,p.hp+h);}
+// 회복 실측: 최근 5초 동안 회복하려던 양(w) · 한도 안에서 허락된 양(c) · 실제로 찬 체력(g)
+function hStat(k,w,c,g){const H=S.hS||(S.hS={}),o=H[k]||(H[k]={w:0,c:0,g:0,L:[]});o.w+=w;o.c+=c;o.g+=g;}
+function hRoll(dt){S.hT=(S.hT||0)+dt;if(S.hT<1)return;S.hT=0;for(const o of Object.values(S.hS||{})){o.L.push([o.w,o.c,o.g]);if(o.L.length>5)o.L.shift();o.w=o.c=o.g=0;}}
+const hRate=k=>{const o=S&&S.hS&&S.hS[k];if(!o||!o.L.length)return null;const n=o.L.length,r=[0,1,2].map(i=>o.L.reduce((a,x)=>a+x[i],0)/n);return {w:r[0],c:r[1],g:r[2]};};
+function healR(v){const p=S.p;if(!p||!p.alive||!(v>0))return;const h=Math.min(v,S.rgBud||0);const g=Math.max(0,Math.min(h,p.maxHp-p.hp));hStat('rg',v,Math.max(0,h),g);if(h<=0)return;S.rgBud-=h;p.hp=Math.min(p.maxHp,p.hp+h);}
 function healK(v){const p=S.p;if(!p||!p.alive||!(v>0))return;const h=Math.min(v,S.khBud||0);if(h<=0)return;S.khBud-=h;p.hp=Math.min(p.maxHp,p.hp+h);}
 function lsNow(){const P=S.p;let ls=P.lifesteal+(has('f_bloodsport')&&P.mbT>0?.03:0)+ex('curse')*.006+(has('vampirelord')?.05:0)+(has('bloodking')?Math.floor((P.fy||0)/10)*.006:0)+(has('bloodlust')&&(P.fy||0)>=furyCap()?.012:0);if(tag('curse')>=6)ls*=1.5;return ls;}
 const lsRate=()=>Math.min(raidOn()?RAID_LS:LS_MAX,lsNow()*LS_K);
-function lsTick(dt){const P=S.p;if(!P)return;const r=P.maxHp*lsRate();S.lsBud=Math.min(r,(S.lsBud||0)+r*dt);const k=P.maxHp*(raidOn()?KH_RAID:KH_MAX);S.khBud=Math.min(k,(S.khBud||0)+k*dt);const g=P.maxHp*rgCapF();S.rgBud=Math.min(g*dt*1.5,(S.rgBud||0)+g*dt);}
+function lsTick(dt){const P=S.p;if(!P)return;hRoll(dt);const r=P.maxHp*lsRate();S.lsBud=Math.min(r,(S.lsBud||0)+r*dt);const k=P.maxHp*(raidOn()?KH_RAID:KH_MAX);S.khBud=Math.min(k,(S.khBud||0)+k*dt);const g=P.maxHp*rgCapF();S.rgBud=Math.min(g*dt*1.5,(S.rgBud||0)+g*dt);}
 const RAID_ALLY=.6; // 동료 초당 피해 = 저장 당시 판 평균 초당 피해 × 이 비율 (기본만 하는 AI · 평균이 없는 옛 캐릭터는 최대 DPS의 15%를 평균으로)
 const RAID_TOK=3; // 부활 기회 (팀 공유): 동료를 일으키거나 내가 쓰러졌을 때 1회씩 씀
 // 거신 체력 = max(단계 기본값, 팀 예상 초당 피해 × 단계별 목표 시간). 악몽에서 키운 캐릭터는 DPS가 수천만이라 고정 체력이면 순식간에 녹음
@@ -13726,8 +13735,10 @@ function renderStats(){
     row('회피',pct(dodgeC())+` <small>/ ${pct(DODGE_CAP_F())}</small>`,p.dodge>DODGE_CAP_F()?`초과 ${Math.round((p.dodge-DODGE_CAP_F())*100)}% → 방어력 +${Math.round((p.dodge-DODGE_CAP_F())*200)}`:''),
     ...(p.block?[row('막기',pct(p.block+(has('k_wall')?lv3('k_wall',.15,.2,.25):0)+(has('p_divine')?.2:0)),'막으면 피해 무효')]:[]),
     row('보호막',Math.round(barrierMax())),
-    row('체력 재생',(p.regen*rgHpM()).toFixed(1)+`/초 <small>/ ${(p.maxHp*rgCapF()).toFixed(1)}/초</small>`,(rgHpM()>1?`기본 ${p.regen.toFixed(1)} ×${rgHpM().toFixed(1)} · `:'')+`재생·문신·성역 같은 자동 회복은 다 합쳐서 1초에 ${(p.maxHp*rgCapF()).toFixed(1)}까지 (최대 체력 ${Math.round(p.maxHp)}의 ${(rgCapF()*100).toFixed(1)}%). 최대 체력이 늘면 한도도 같이 늘어요`),
-    row('흡혈',pct(lsNow())+` <small>/ 1초에 ${(p.maxHp*lsRate()).toFixed(1)}까지</small>`,`준 피해의 ${pct(lsNow())}만큼 체력이 차요. 단, 흡혈로 차는 체력은 1초에 ${(p.maxHp*lsRate()).toFixed(1)}까지 (최대 체력 ${Math.round(p.maxHp)}의 ${(lsRate()*100).toFixed(2)}%). 한도는 흡혈 수치의 절반만큼 (흡혈 1% → 최대 체력의 0.5%, 최대 ${(raidOn()?RAID_LS:LS_MAX)*100}%)이라 흡혈과 최대 체력이 늘면 같이 늘어요`),
+    (()=>{const rg=p.regen*rgHpM(),cap=p.maxHp*rgCapF(),over=rg>cap,H=hRate('rg');const live=H&&H.w>0?` · 최근 5초 실제로 찬 체력 ${H.g.toFixed(1)}/초 (회복하려던 ${H.w.toFixed(1)}/초 중 한도로 버려짐 ${Math.round((1-H.c/H.w)*100)}%, 체력이 가득 차 버려짐 ${Math.round((H.c-H.g)/H.w*100)}%)`:'';
+      return row('체력 재생',(over?`<span style="color:#ff8a8a">${rg.toFixed(1)}</span>`:rg.toFixed(1))+`/초 <small>/ ${cap.toFixed(1)}/초</small>`,(over?`<span style="color:#ff8a8a">한도를 넘은 ${(rg-cap).toFixed(1)}/초는 버려져요 (재생 카드가 더 안 나와요)</span> · `:'')+(rgHpM()>1?`기본 ${p.regen.toFixed(1)} ×${rgHpM().toFixed(1)} · `:'')+`재생·문신·성역 같은 자동 회복은 다 합쳐서 1초에 ${cap.toFixed(1)}까지 (최대 체력 ${Math.round(p.maxHp)}의 ${(rgCapF()*100).toFixed(1)}%). 최대 체력이 늘면 한도도 같이 늘어요`+live);})(),
+    (()=>{const H=hRate('ls'),cap=p.maxHp*lsRate(),waste=H&&H.w>0?Math.round((1-H.c/H.w)*100):null;
+      return row('흡혈',pct(lsNow())+(H&&H.w>0?` <small>· 실제 ${H.g.toFixed(1)}/초${waste>=5?` <span style="color:#ff8a8a">(한도로 ${waste}% 버려짐)</span>`:''}</small>`:` <small>/ 1초에 ${cap.toFixed(1)}까지</small>`),`준 피해의 ${pct(lsNow())}만큼 체력이 차요. 단, 흡혈로 차는 체력은 1초에 ${cap.toFixed(1)}까지 (최대 체력 ${Math.round(p.maxHp)}의 ${(lsRate()*100).toFixed(2)}%). 한도는 흡혈 수치의 절반만큼 (흡혈 1% → 최대 체력의 0.5%, 최대 ${(raidOn()?RAID_LS:LS_MAX)*100}%)이라 흡혈과 최대 체력이 늘면 같이 늘어요`+(H&&H.w>0?` · 최근 5초: 흡혈로 회복하려던 ${H.w.toFixed(1)}/초 → 한도 안 ${H.c.toFixed(1)}/초 → 실제로 찬 체력 ${H.g.toFixed(1)}/초 (나머지는 체력이 가득 차서 버려짐)`:' · 공격해서 피해를 주면 실제 회복량이 여기에 나와요'));})(),
     row('처치·적중 회복',`1초에 ${(p.maxHp*(raidOn()?KH_RAID:KH_MAX)).toFixed(1)}까지`,`처치·적중할 때 차는 회복을 다 합친 한도: 1초에 ${(p.maxHp*(raidOn()?KH_RAID:KH_MAX)).toFixed(1)} (최대 체력 ${Math.round(p.maxHp)}의 ${((raidOn()?KH_RAID:KH_MAX)*100)}%). 최대 체력이 늘면 한도도 같이 늘어요`),
     row('받는 피해 배율','×'+p.vuln.toFixed(2))
   ].join('');
