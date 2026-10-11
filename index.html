@@ -4869,7 +4869,7 @@ const CLASSES={
   alch:{lock:true,n:'연금술사',role:'물약 폭격',d:'터지는 플라스크와 물약을 던지는 연금술사',passive:'플라스크: 맞은 자리에 폭발 (범위 45, 공격력 50%). 플라스크도 물약 비율을 따라 산성(중독)·폭발(피해 1.4배)·얼음(둔화)으로 터짐. 4번째 공격마다 물약 (산성 중독·폭발·얼음 둔화, 독·화염·냉기 시너지를 모을수록 그 물약이 더 자주 나옴). 물약이 깨진 자리에 2.5초 장판이 남고, 장판 위 적은 이동 속도 −25% (보스 제외)',atk:.3,
     stats:{hp:155,maxHp:155,speed:188,dmg:14,rate:2.2,range:290,bspd:480,armor:6},fav:['alchemy','poison','fire'],dis:['sniper'],
     cards:['힘의 물약','숫돌','조준경','전투 본능','튼튼한 체력','다연발'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
-  gambler:{lock:true,n:'도박사',role:'동전 도박',d:'동전 앞뒤에 모든 걸 거는 도박사',passive:'동전 던지기: 공격마다 앞면이면 피해 2배, 뒷면이면 0.5배. 행운이 높을수록 앞면이 잘 나옴. 운수 대통: 행운 1당 회피 +0.3%',atk:.25,
+  gambler:{lock:true,n:'도박사',role:'동전 도박',d:'동전 앞뒤에 모든 걸 거는 도박사',passive:'동전 던지기: 공격마다 앞면이면 피해 2배, 뒷면이면 0.5배. 행운이 높을수록 앞면이 잘 나옴. 운수 대통: 행운 1당 회피 +0.6%',atk:.25,
     stats:{hp:175,maxHp:175,speed:200,dmg:12,rate:2.6,range:300,bspd:600,armor:6,crit:.08,luck:5},fav:['coin','dice','jackpot'],dis:['guard'],
     cards:['럭키 세븐','날랜 손놀림','조준경','힘의 물약','급소 노리기','가벼운 장화'],lvd:'공격력 +0.7%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.007;p.maxHp+=1;p.hp+=1;}}
 };
@@ -4991,7 +4991,7 @@ const critFull=()=>critRaw()>=CRIT_CAP,critMFull=()=>critMBase()>=CRIT_DMG_CAP_F
 const stackCapped=x=>(x.k==='crit'&&critFull())||(x.k==='critm'&&critMFull())||(x.k==='luck'&&luckFull())||(x.k==='dodge'&&S.p.dodge>=DODGE_CAP_F())||(x.k==='rate'&&rawRate()>=RATE_CAP());
 // 피격 기준 조건: 흡혈·재생 때문에 '체력 ○% 이하'는 거의 안 켜져서, '맞은 뒤 ○초' / '최근 받은 피해량'으로 판정
 const hitRec=(sec=2.5)=>S.t-(S.p.hitT??-99)<sec;
-const dodgeC=()=>Math.min(DODGE_CAP_F(),S.p.dodge+gearM.dodge()+(S.cls==='gambler'?Math.max(0,Math.min(50,(S.p.luck||0)+gLk()))*.003:0)+(has('f_ghoststep')&&S.p.ghT>0?.3:0))+(has('r_smoke')&&S.zones.some(z=>z.kind==='smoke'&&d2(z,S.p)<z.r*z.r)?lv3('r_smoke',.2,.3,.4):0);
+const dodgeC=()=>Math.min(DODGE_CAP_F(),S.p.dodge+gearM.dodge()+(S.cls==='gambler'?Math.max(0,Math.min(50,(S.p.luck||0)+gLk()))*.006:0)+(has('f_ghoststep')&&S.p.ghT>0?.3:0))+(has('r_smoke')&&S.zones.some(z=>z.kind==='smoke'&&d2(z,S.p)<z.r*z.r)?lv3('r_smoke',.2,.3,.4):0);
 function armorEff(){const p=S.p;let a=(blessOn('guard')?60:0)+(has('bank')?Math.min(50,Math.floor(S.gold/300)*2):0)+p.armor+ex('guard')*8+Math.max(0,p.dodge-DODGE_CAP_F())*200+(has('bonewall')&&S.skel?S.skel.length*lv3('bonewall',3,4,5):0)+(has('d_bark')?(S.vineN||0)*lv3('d_bark',.2,.3,.4):0);if(has('iron'))a*=lv3('iron',1.35,1.5,1.65);if(has('ironclad'))a*=2;if(has('bastion')&&nearTurret())a+=lv3('bastion',20,30,40)*(has('f_citadel')?2:1);return a;}
 // 증강이 주는 임시 보호막: 기본 상한(barrierMax)보다 커도 그 증강의 상한까지는 유지
 const bxAdd=(cap,add)=>{const p=S.p;p.bxM=Math.max(p.bxM||0,cap);p.barrier=Math.max(p.barrier||0,Math.min(cap,(p.barrier||0)+add));};
@@ -8677,7 +8677,7 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
   {v:264,t:'⚖ 직업 특징으로 버티기',items:[
-    ['buff','⚖ 12직업 악몽 측정에서 일찍 쓰러지던 직업은 적이 붙어 둘러싸이는 게 원인이라 (사령술사는 해골, 드루이드는 덩굴, 마법사·정령사는 냉기로 적을 막는데 이 직업들은 막을 수단이 없었음), 각 직업 특징에 맞는 「붙지 못하게 하는 힘」 추가: 🏹 <b>궁수</b> 사냥꾼의 화살 (맞은 적 0.8초간 이동 속도 −25%) · ⚗ <b>연금술사</b> 물약 장판 위 적 이동 속도 −25% · 🔫 <b>총잡이</b> 저지력 강화 (밀어내는 거리 약 2배) · 🎲 <b>도박사</b> 운수 대통 (행운 1당 회피 +0.3%). 보스에게는 적용되지 않아요']]},
+    ['buff','⚖ 12직업 악몽 측정에서 일찍 쓰러지던 직업은 적이 붙어 둘러싸이는 게 원인이라 (사령술사는 해골, 드루이드는 덩굴, 마법사·정령사는 냉기로 적을 막는데 이 직업들은 막을 수단이 없었음), 각 직업 특징에 맞는 「붙지 못하게 하는 힘」 추가: 🏹 <b>궁수</b> 사냥꾼의 화살 (맞은 적 0.8초간 이동 속도 −25%) · ⚗ <b>연금술사</b> 물약 장판 위 적 이동 속도 −25% · 🔫 <b>총잡이</b> 저지력 강화 (밀어내는 거리 약 2배) · 🎲 <b>도박사</b> 운수 대통 (행운 1당 회피 +0.6%). 보스에게는 적용되지 않아요']]},
   {v:263,t:'🎲 도박사 점검',items:[
     ['new','🎲 대박 루트 고점 돌파 ♾ <b>잭팟 금고</b>: 이번 판 앞면이 100번 나올 때마다 앞면 피해 +1%, 상한 없음 · 추천 빌드 「🎲 운명의 주사위」(운명의 주사위·룰렛 휠·타짜의 동전) 추가 (루트마다 고점 돌파 하나씩)'],
     ['change','🎲 마스터리 「황금 비」(앞면 5연속 금화 폭발)가 증강 「대박」과 같은 조건이고 황금 용 공격 이름과도 겹쳐서 <b>설욕전</b>으로: 뒷면이 3번 연속 나오면 다음 동전은 반드시 앞면, 그 피해 ×2'],
