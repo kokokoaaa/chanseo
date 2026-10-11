@@ -5121,7 +5121,7 @@ const bRush=()=>rushOn()&&!(typeof raidOn==='function'&&raidOn())&&!(typeof duel
 const RUSH_DG=1.24,RUSH_PAT=.22,RUSH_OHK=5,RUSH_TP=.035,RUSH_TPM=1.85,RUSH_PAR0=100,RUSH_PARM=150,RUSH_RI=15;
 // 보스 러시 엇박: 보스 크기, 걷는 시간 흔들기(초, 단계당 늘어남), 예고 시간 배율 범위, 여러 개 예고가 어긋나는 최대(초), 후속타 확률(시작·단계당·최대)
 const RUSH_BSC=2,RUSH_WJ=.45,RUSH_WJS=.06,RUSH_TJ=[.8,1.08],RUSH_OFF=.18,RUSH_ECH=[.15,.025,.45];
-const RUSH_HP=.9,RUSH_DM=.55,RUSH_RR=5,RUSH_SEAL=3,rushHpM=i=>RUSH_HP*(i<10?Math.pow(1.6,i):Math.pow(1.6,10)*Math.pow(1.25,i-10));
+const RUSH_HP=.9,RUSH_DM=.48,RUSH_RR=5,RUSH_SEAL=3,rushHpM=i=>RUSH_HP*(i<10?Math.pow(1.6,i):Math.pow(1.6,10)*Math.pow(1.25,i-10));
 const endless=()=>!!dfM().endless;
 // 최대 체력 = 기본 체력(절대 수치 합) × (1 + 체력 % 합계). 공격력 %처럼 합연산이라 나중에 오르는 체력에도 계속 적용됨
 // 코드 곳곳의 p.maxHp+=X(절대 수치)는 그대로 두고, 매 프레임 차이를 기본 체력으로 옮겨 다시 곱함
@@ -8636,7 +8636,7 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
 const PATCH_NOTES=[
   {v:252,t:'⚔ 보스 러시 회복 · 장비 여러 개',items:[
     ['change','🎁 보스 장비가 <b>한 번에 여러 개</b> 떨어질 수 있어요 (평균 개수는 그대로, 예: 악몽 0개 30% · 1개 44% · 2개 22% · 3개 4%). 연속으로 안 나오면 보장은 그대로'],
-    ['change','⚔ <b>보스 러시</b>에서 보스를 잡을 때마다 체력이 거의 가득 차던 문제: 보스 등장 회복(30%)·레벨업 회복 없음, 보스 처치 회복 30% → 20% (「전리품 정리」 강화 60% → 35%). 이제 보스 하나 잡을 때마다 20%만 차요. 다른 모드는 그대로']]},
+    ['change','⚔ <b>보스 러시</b>에서 보스를 잡을 때마다 체력이 거의 가득 차던 문제: 보스 등장 회복(30%)·레벨업 회복 없음, 보스 처치 회복 30% → 20% (「전리품 정리」 강화 60% → 35%). 이제 보스 하나 잡을 때마다 20%만 차요. 다른 모드는 그대로. 대신 보스 러시 보스 공격력 −13% (난이도는 비슷하게)']]},
   {v:251,t:'🔮 마법사 속성 특화',items:[
     ['look','🧩 증강 칸 설명의 합체 목록에서 짝이 이미 다른 합체에 쓰였으면 회색 「불가: 이미 합체됨」으로 보여요'],
     ['look','🧙 <b>마법사 옷 새 디자인</b>: 갑옷은 상의(튜닉), 바지는 하의(두 다리)로 따로 보여요 (예전엔 둘 다 로브 한 벌처럼 보였음)'],
