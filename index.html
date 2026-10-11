@@ -3075,8 +3075,8 @@ const AUGS=[
   {id:'elembody',t:'s',n:'원소 친화',tags:['elem'],d:'공격력 +12%. 화상·둔화된 적에게 피해 +15%',f:p=>{p.dmgP=(p.dmgP||0)+.06;}},
   {id:'stormcall',t:'p',n:'원소 폭풍',tags:['elem','elem'],d:'4초마다 주변 적 3명에게 원소 낙하 (범위 70, 공격력 200%, 화상·둔화). 원소 2개로 계산'},
   {id:'e_overflow',cls:'elem',t:'s',n:'원소 과부하',tags:['elem'],d:'[정령사 전용] 화상 피해 +50%, 둔화 +0.5초, 연쇄 +1'},
-  {id:'e_trinity',cls:'elem',t:'g',n:'삼위일체',tags:['elem','thunder'],d:'[정령사 전용] 3번째 공격마다 대상에 원소 폭발 (범위 90, 공격력 200%, 화상·둔화)'},
-  {id:'e_avatar',cls:'elem',t:'p',n:'원소 화신',tags:['elem','frost'],d:'[정령사 전용] 모든 기본 공격이 화상·둔화·연쇄를 모두 가짐'},
+  {id:'e_trinity',cls:'elem',t:'g',n:'삼위일체',tags:['elem','thunder'],d:'[정령사 전용] 세 정령이 같은 적을 3초 안에 모두 맞히면 원소 폭발 (범위 100, 공격력 250%, 화상·둔화). 적마다 2초에 한 번'},
+  {id:'e_avatar',cls:'elem',t:'p',n:'원소 화신',tags:['elem','frost'],d:'[정령사 전용] 정령이 원소마다 2마리씩 (총 6마리), 정령 탄 피해 +20%'},
   {id:'fanfire',t:'g',n:'패닝',tags:['rapid'],d:'8번째 공격마다 부채꼴로 5발 (공격력 80%)'},
   {id:'quickdraw',t:'s',n:'빠른 손',tags:['rapid','blitz'],d:'공격 속도 +12%. 대시가 끝나면 가까운 적에게 탄환 3발 (공격력 100%)',f:p=>{p.rateP=(p.rateP||0)+.06;}},
   {id:'ricoshot',t:'s',n:'튕김 사격',tags:['rapid','sniper'],d:'기본 탄환이 처음 맞힌 뒤 가까운 적에게 한 번 튕김 (공격력 60%)'},
@@ -3097,10 +3097,13 @@ const AUGS=[
   {id:'g_rshot',cls:'gunner',t:'g',n:'장전 사격',tags:['rapid','blitz'],d:'[총잡이 전용] 재장전할 때 사방으로 8발 사격 (각 공격력 80%, 관통 1)'},
   {id:'g_ap',cls:'gunner',t:'s',n:'철갑탄',tags:['sniper','card'],d:'[총잡이 전용] 관통 +2. 탄이 적을 하나 뚫을 때마다 피해 +15% (누적)',f:p=>{p.pierce+=1;}},
   // 정령사 루트: 원소 정렬 / 빙결 파쇄 / 폭풍 사슬 / 프리즘 폭발
-  {id:'e_align',cls:'elem',t:'g',n:'원소 정렬',tags:['elem','elem'],d:'[정령사 전용] 같은 원소로 3번 연속 공격하면 강화 발동 (화염: 대폭발 300% / 냉기: 주변 빙결 + 150% / 번개: 8연쇄). 원소 2개로 계산'},
+  {id:'e_align',cls:'elem',t:'g',n:'원소 정렬',tags:['elem','elem'],d:'[정령사 전용] 시너지가 가장 많은 원소의 정령이 정령왕이 됨: 정령 탄 피해 2배, 공격 속도 +30%. 원소 2개로 계산'},
+  {id:'e_ifrit',cls:'elem',t:'g',n:'이프리트',tags:['fire','elem'],d:'[정령사 전용] 화염 정령 탄이 맞은 자리에 폭발 (범위 70, 공격력 120%), 화상 피해 2배'},
+  {id:'e_frostspirit',cls:'elem',t:'g',n:'서리 정령',tags:['frost','elem'],d:'[정령사 전용] 얼음 정령 탄이 냉기 1중첩 (3중첩이면 얼어붙음), 4번째 탄마다 주변 100에 얼음 폭발 (공격력 150% + 냉기 1중첩)'},
+  {id:'e_thunderbird',cls:'elem',t:'g',n:'뇌조',tags:['thunder','elem'],d:'[정령사 전용] 번개 정령 공격 속도 +60%, 번개 정령 탄 관통 +2'},
   {id:'e_shatter',cls:'elem',t:'s',n:'빙결 파쇄',tags:['frost','elem'],d:'[정령사 전용] 둔화·빙결된 적이 죽으면 얼음 파편 6발 (각 공격력 60%)'},
-  {id:'e_storm',cls:'elem',t:'s',n:'폭풍 사슬',tags:['thunder','elem'],d:'[정령사 전용] 번개 원소 공격이 맞힐 때마다 3연쇄 번개'},
-  {id:'e_prism',cls:'elem',t:'p',n:'프리즘 폭발',tags:['elem','jackpot'],d:'[정령사 전용] 5초 안에 세 원소를 모두 쓰면 대상에 프리즘 폭발 (반경 140, 공격력 400%, 화상·빙결). 재사용 4초'},
+  {id:'e_storm',cls:'elem',t:'s',n:'폭풍 사슬',tags:['thunder','elem'],d:'[정령사 전용] 번개 정령 탄이 맞힐 때마다 3연쇄 번개'},
+  {id:'e_prism',cls:'elem',t:'p',n:'프리즘 폭발',tags:['elem','jackpot'],d:'[정령사 전용] 6초마다 세 정령이 힘을 모아 대상에 프리즘 폭발 (반경 140, 공격력 400%, 화상·빙결)'},
   // 마법사 루트: 화염 지대 / 마나 폭주 / 연소 전염 / 정신 집중 / 유성우
   {id:'m_napalm',cls:'mage',t:'g',n:'화염 지대',tags:['fire','fire'],d:'[마법사 전용] 주문 폭발 자리에 2초간 불 장판 (초당 공격력 60%). 화염 2개로 계산'},
   {id:'m_mana',cls:'mage',t:'p',n:'마나 폭주',tags:['jackpot'],d:'[마법사 전용] 5번째 시전마다 모든 적을 꿰뚫는 거대 마력구 (공격력 500%), 끝에서 대폭발 (반경 150, 공격력 500%)'},
@@ -3276,7 +3279,7 @@ const FUSIONS=[
   {id:'f_judgment',a:'p_hammer',b:'smite2',n:'심판의 날',d:'심판의 망치를 던질 때 대상에 빛기둥 (범위 80, 공격력 200%)'},
   {id:'f_bonestorm',a:'n_bone',b:'bonefire',n:'뼈 폭풍',d:'뼈창이 화상을 입히고 관통 +3'},
   {id:'f_deadshot',a:'g_hollow',b:'fanfire',n:'데드샷',d:'재장전할 때마다 패닝(부채꼴 사격)이 함께 발동'},
-  {id:'f_prism',a:'e_trinity',b:'steam',n:'프리즘',d:'삼위일체 폭발 범위 +50%, 증기 폭발이 적마다 1초에 한 번'},
+  {id:'f_prism',a:'e_trinity',b:'steam',n:'프리즘',d:'삼위일체 폭발 범위 100 → 150, 증기 폭발이 적마다 1초에 한 번'},
   {id:'f_whirlwind',a:'b_cleave',b:'bladestorm',n:'광란의 회오리',d:'대회전 범위 +40%, 칼날 폭풍이 광란 10 → 5부터'},
   {id:'f_thornking',a:'d_bramble',b:'spore',n:'가시 왕관',d:'덩굴 범위 +30%, 덩굴 위 적 중독 2중첩'},
   {id:'f_chainpot',a:'al_chain',b:'catalyst',n:'연쇄 폭발',d:'연쇄 반응 피해 +50%, 한 번에 터지는 수 한도 12 → 30'},
@@ -4835,7 +4838,7 @@ const CLASSES={
   gunner:{lock:true,n:'총잡이',role:'매그넘 저격',d:'한 발 한 발이 묵직한 매그넘 리볼버 총잡이',passive:'매그넘 리볼버: 모든 탄이 일반 공격의 1.7배 피해 + 관통 1. 6발 쏘면 0.8초 재장전 (탄창 6발 고정, 재장전은 공격 속도와 무관). 저지력으로 맞은 일반 몹이 뒤로 밀려남 (정예·보스 제외)',atk:.18,
     stats:{hp:160,maxHp:160,speed:200,dmg:12,rate:1.8,range:300,bspd:820,crit:.1,critM:2.1},fav:['rapid','sniper','card'],dis:['summon'],
     cards:['날랜 손놀림','조준경','급소 노리기','치명상','힘의 물약','가벼운 장화'],lvd:'공격력 +0.6%, 치명타 +0.2%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.006;p.crit+=.002;p.maxHp+=1;p.hp+=1;}},
-  elem:{lock:true,n:'정령사',role:'원소 순환',d:'화염·냉기·번개를 번갈아 쏘는 정령술사',passive:'원소 공격: 화염(화상)·냉기(1초 둔화)·번개(주변 2명에게 60% 연쇄)를 섞어 쏨. 화염·냉기·번개 시너지를 모을수록 그 원소가 더 자주 나감. 기본 관통 1',atk:.3,
+  elem:{lock:true,n:'정령사',role:'정령 소환',d:'화염·냉기·번개 정령을 거느리고 싸우는 정령술사',passive:'원소 정령: 화염·냉기·번개 정령 3마리가 곁을 돌며 각자 적을 쏨 (화염: 화상 / 냉기: 1초 둔화 / 번개: 주변 2명에게 60% 연쇄). 정령 탄 피해는 공격력 50%, 그 원소 시너지 1개당 +10%. 공격 속도가 오르면 정령도 빨리 쏨. 본인은 약한 원소탄(피해 60%)을 쏨. 기본 관통 1',atk:.3,
     stats:{hp:170,maxHp:170,speed:190,dmg:17,rate:2.5,range:310,bspd:560,armor:9,pierce:1},fav:['elem','fire','frost','thunder'],dis:['poison'],
     cards:['힘의 물약','숫돌','조준경','전투 본능','튼튼한 체력','날랜 손놀림'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
   berserk:{lock:true,n:'광전사',role:'광란 근접',d:'처치할수록 빨라지고 강해지는 도끼 전사',passive:'광란: 처치 시 광란 +1 (4초, 최대 20). 중첩당 공격력 +2%. 흡혈 2%',atk:.32,
@@ -6218,8 +6221,25 @@ function mChain(from,n,dm){n+=(tag('thunder')>=4?2:0)+(has('mv_thor')?3:0);const
 const condM=e=>has('conduct')&&(e.burnT>0||chilled(e))?1+lv3('conduct',.3,.4,.5):1;
 const elCnt=e=>(e.burnT>0?1:0)+(chilled(e)?1:0)+(e.shkT>S.t?1:0);
 function elemChain(t,n,dm){const hit=new Set([t]);let cur=t;t.shkT=S.t+2;for(let i=0;i<n;i++){const nx=nearestE(cur,180,hit);if(!nx)break;hit.add(nx);S.bolts.push({x1:cur.x,y1:cur.y,x2:nx.x,y2:nx.y,life:.15});nx.shkT=S.t+2;dmgE(nx,dm*condM(nx)*elM(),'#fff08a');cur=nx;}}
+// 정령사 정령: 화염(0)·냉기(1)·번개(2). 원소 화신이면 원소마다 2마리. 원소 정렬이면 시너지가 가장 많은 원소 정령이 정령왕(피해 2배·공격 속도 +30%)
+const ELEM_PL=.6,SP_COL=[['#ff5a2a','#ffd06a'],['#5ac8f0','#e8fbff'],['#f0d030','#fffbd0']];
+const spKing=()=>{if(!has('e_align'))return -1;const t=ELEM_TAGS.map(x=>tag(x));const m=Math.max(...t);return t.indexOf(m);};
+const spDmg=k=>pDmg()*.5*(1+.1*tag(ELEM_TAGS[k]))*(has('e_avatar')?1.2:1)*(spKing()===k?lv3('e_align',1.6,2,2.4):1);
+const spList=()=>{const L=[0,1,2];return has('e_avatar')?[0,1,2,0,1,2]:L;};
+function spPos(i,n){const P=S.p,a=S.t*1.6+i*TAU/n;return {x:P.x+Math.cos(a)*34,y:P.y-12+Math.sin(a)*16};}
+function spiritTick(dt){const p=S.p;if(S.cls!=='elem'||!p.alive)return;const L=spList(),n=L.length,kg=spKing();S.spT=S.spT||[];
+  const r0=Math.min(rawRate(),RATE_CAP())*.45;
+  L.forEach((k,i)=>{S.spT[i]=(S.spT[i]??i*.2)-dt;if(S.spT[i]>0)return;const q=spPos(i,n),tg=sumTarget(q,p.range*1.1);if(!tg){S.spT[i]=.1;return;}
+    const rk=(k===kg?1.3:1)*(k===2&&has('e_thunderbird')?1+lv3('e_thunderbird',.4,.6,.8):1);S.spT[i]=1/Math.max(.2,r0*rk);
+    const a=Math.atan2(tg.y-q.y,tg.x-q.x),m=Math.max(1,p.multi||1);(S.spN=S.spN||[0,0,0])[k]++;
+    for(let j=0;j<m;j++)pBullet(q.x,q.y,a+(j-(m-1)/2)*.12,spDmg(k),{el:k,spk:k+1,sub:['화염 정령','얼음 정령','번개 정령'][k],pierce:pierceE()+(k===2&&has('e_thunderbird')?2:0),life:1.1,r:k===kg?7:5});});}
+// 정령 탄 적중: 이프리트·서리 정령·삼위일체
+function spiritHit(b,t){const k=b.spk-1;
+  if(k===0&&has('e_ifrit')){S.dsub='이프리트';try{explode(t.x,t.y,70,pDmg()*lv3('e_ifrit',.9,1.2,1.5)*elM(),'#ff7a2a');}finally{S.dsub=null;}}
+  if(k===1&&has('e_frostspirit')){novaHit(t);if(S.spN&&S.spN[1]%4===0&&!b.fsD){b.fsD=1;S.rings.push({x:t.x,y:t.y,r:8,max:100,life:.3,col:'#a8dcf8'});for(const o of S.en)if(o.alive&&!o.phase&&d2(o,t)<(100+o.r)**2){dmgEs('서리 정령',o,pDmg()*lv3('e_frostspirit',1.2,1.5,1.8)*elM(),'#a8dcf8');novaHit(o);}}}
+  if(has('e_trinity')&&t.alive){t.spH=t.spH||[-9,-9,-9];t.spH[k]=S.t;if(t.spH.every(v=>S.t-v<3)&&S.t-(t.trT||-9)>2){t.trT=S.t;t.spH=[-9,-9,-9];const r=has('f_prism')?150:100;S.dsub='삼위일체';try{explode(t.x,t.y,r,pDmg()*lv3('e_trinity',2,2.5,3)*elM(),'#c8a0ff');}finally{S.dsub=null;}for(const o of S.en)if(o.alive&&d2(o,t)<r*r){burnE(o,pDmg()*.25*elM(),3);if(!o.boss)o.slowT=Math.max(o.slowT||0,1);}}}}
 function elemFx(t,k,dm){const ov=has('e_overflow');
-  if(k===0||k===3)burnE(t,pDmg()*.4*elM()*(ov?1+lv3('e_overflow',.3,.5,.7):1),3);
+  if(k===0||k===3)burnE(t,pDmg()*.4*elM()*(ov?1+lv3('e_overflow',.3,.5,.7):1)*(has('e_ifrit')?2:1),3);
   if((k===1||k===3)&&!t.boss)t.slowT=Math.max(t.slowT||0,1+(ov?.5:0));
   if(k===2||k===3)elemChain(t,2+(ov?1:0)+(S.cls==='elem'&&mk(2)?3:0),dm*.6);}
 function elemDrop(e){explode(e.x,e.y,70,pDmg()*2*elM(),'#c8a0ff');for(const o of S.en)if(o.alive&&d2(o,e)<70*70){burnE(o,pDmg()*.25*elM(),3);if(!o.boss)o.slowT=Math.max(o.slowT||0,1);}}
@@ -6718,13 +6738,7 @@ function playerFire(tg){
   let shock=1;if(p.shockT>0){shock=2+2*L('shock');p.shockT=0;}
   if(p.revT>0){shock*=lv3('revenge',2,2.5,3);p.revT=0;}
   if(S.cls==='mage'){shock*=MAGE_HIT;p.castT=S.t+.3;}
-  const el0=S.cls==='elem'?(p.elN??0):null,el=S.cls==='elem'?(has('e_avatar')?3:el0):null;if(S.cls==='elem')p.elN=routePick(ELEM_TAGS);
-  if(S.cls==='elem'&&el0!=null&&el0<3){const el=el0; // 원소 정렬·프리즘: 원소 화신이어도 돌아가는 원소 순서로
-    if(has('e_align')){if(el===p.elL)p.elC=(p.elC||0)+1;else{p.elL=el;p.elC=1;}if(p.elC>=3){p.elC=0;const k=lv3('e_align',.8,1,1.3);
-      if(el===0){exL('원소 정렬',null,tg.x,tg.y,100,pDmg()*3*k,'#ff5a2a');for(const o of S.en)if(o.alive&&d2(o,tg)<100*100)burnE(o,pDmg()*.4,3);}
-      else if(el===1){S.rings.push({x:tg.x,y:tg.y,r:10,max:120,life:.35,col:'#a8dcf8'});for(const o of S.en)if(o.alive&&!o.phase&&d2(o,tg)<(120+o.r)**2){dmgEs('원소 정렬',o,pDmg()*1.5*k,'#a8dcf8');if(!o.boss){o.slowT=Math.max(o.slowT||0,1.5);o.frozen=true;}}}
-      else{S.dsub='원소 정렬';lightning(tg,Math.round(8*k));S.dsub=null;}}}
-    if(has('e_prism')){p.elU=p.elU||[0,0,0];p.elU[el]=S.t;if(p.elU.every(v=>S.t-v<5)&&S.t-(p.prT||-9)>4){p.prT=S.t;p.elU=[0,0,0];exL('프리즘 폭발',null,tg.x,tg.y,140,pDmg()*4,'#e8dcff');S.shake=Math.max(S.shake,.2);for(const o of S.en)if(o.alive&&d2(o,tg)<140*140){burnE(o,pDmg()*.4,3);if(!o.boss){o.slowT=Math.max(o.slowT||0,1.2);o.frozen=true;}}}}}
+  const el=null;if(S.cls==='elem')shock*=ELEM_PL;
   let lastB=false;if(S.cls==='gunner'){shock*=1.7*(1+(p.lbD||0));p.mag=(p.mag??magN())-1;if(p.mag<=0){lastB=true;if(has('f_deadshot'))S.deadShot=1;if(has('g_last'))shock*=lv3('g_last',2.5,3,4);if(mk(0))shock*=2;}}
   let coin=0;if(coinOn()){const hp0=headP(),r1=Math.random()<hp0,r2=has('gb_double')&&Math.random()<hp0;
     const hd=p.cfF||r1||(has('f_goddess')&&Math.random()<.25);p.cfF=false;coin=hd?1:-1;if(has('gb_double')&&r1&&r2){shock*=1.75;ftext(p.x+10,p.y-30,'더블!','#ffd76a',13);}
@@ -6798,7 +6812,6 @@ function playerFire(tg){
   if(has('b_cleave')&&p.shots%3===0){spinHit(has('f_whirlwind')?140:100,pDmg()*lv3('b_cleave',.8,1,1.2),'#ff8a6a');if(has('b_whirl')&&S.zones.length<70)S.zones.push({x:p.x,y:p.y,r:90,life:2,kind:'blood',fol:1});}
   if(tag('fury')>=6&&p.fy>=furyCap())spinHit(90,pDmg()*.6,'#ff6a4a');
   if(tag('elem')>=1&&p.shots%Math.max(2,(tag('elem')>=2?6:8)-(has('primordial')?2:0))===0)pBullet(p.x,p.y,base,pDmg()*1.5*elM(),{sub:'원소 시너지',child:true,r:6,el:3,orb:true,pierce:0});
-  if(has('e_trinity')&&p.shots%3===0){const r=has('f_prism')?135:90;explode(tg.x,tg.y,r,pDmg()*lv3('e_trinity',1.5,2,2.5)*elM(),'#c8a0ff');for(const o of S.en)if(o.alive&&d2(o,tg)<r*r){burnE(o,pDmg()*.25*elM(),3);if(!o.boss)o.slowT=Math.max(o.slowT||0,1);}}
   if((tag('rapid')>=2||has('gatling'))&&p.shots%(has('gatling')?5:10)===0)for(let i=0;i<3;i++)pBullet(p.x,p.y,base+(i-1)*.08,d*.7*rpM(),{sub:'속사 시너지',child:true,r:3});
   if(has('fanfire')&&(p.shots%(has('f_gunkata')?4:8)===0||S.deadShot)){S.deadShot=0;const k=has('f_gunkata')?7:5;for(let i=0;i<k;i++)pBullet(p.x,p.y,base+(i-(k-1)/2)*.18,pDmg()*lv3('fanfire',.6,.8,1)*rpM(),{sub:'패닝',child:true,r:3});}
   if(has('n_bone')&&p.shots%5===0&&has('n_spearstorm'))for(const da of [-.4,.4])pBullet(p.x,p.y,base+da,pDmg()*lv3('n_bone',2,2.5,3)*undM(),{pierce:4,r:7,child:true,life:1.1,bone:true,src:'undead',sub:'뼈창',bshard:1});
@@ -6864,6 +6877,7 @@ function onPHit(b,t){
   if(tag('nature')>=4&&t.vnT>S.t)dmg*=1.2;
   if(p.slD&&chilled(t))dmg*=1+p.slD;
   if(b.mk)markE(t);
+  if(b.spk&&t.alive!==undefined)spiritHit(b,t);
   if(b.el!=null){elemFx(t,b.el,b.dmg);if(b.orb&&tag('elem')>=6)explode(t.x,t.y,90,pDmg()*2*elM(),'#c8a0ff');}
   if(has('ricoshot')&&!b.child&&!b.ric){b.ric=1;ricoShot(t,b.dmg*lv3('ricoshot',.5,.6,.7)*rpM(),has('f_trickshot')?2:0);}
   if(b.rc>0){const n=b.rc;b.rc=0;ricoShot(t,b.dmg,n-1);}
@@ -7158,6 +7172,8 @@ function update(dt){
     if(has('frostnova')){S.fnT=(S.fnT??5)-dt;if(S.fnT<=0){S.fnT=(has('f_permafrost')?3:5)*tmul();S.rings.push({x:p.x,y:p.y,r:10,max:140,life:.35,col:'#9fe8ff'});for(const e of S.en)if(e.alive&&d2(e,p)<140*140){dmgEs('서리 폭발',e,pDmg()*lv3('frostnova',1.2,1.5,1.8),'#9fe8ff');if(!e.boss)e.slowT=Math.max(e.slowT||0,2);}}}
     // 프로스트 노바(마법사): 내 자리에서 얼음 파동이 0.45초 동안 퍼지며 닿는 적마다 한 번씩 피해 + 냉기 중첩 (3중첩이면 빙결)
     if(has('m_nova')){S.nvT=(S.nvT??1.5)-dt;if(S.nvT<=0){S.nvT=2*tmul();(S.novas=S.novas||[]).push({x:p.x,y:p.y,r:8,max:lv3('m_nova',170,190,210),hit:new Set()});}}
+    spiritTick(dt);
+    if(has('e_prism')&&S.cls==='elem'){S.prT2=(S.prT2??3)-dt;if(S.prT2<=0){const tg=sumTarget(p,p.range*1.2);if(tg){S.prT2=6*tmul();exL('프리즘 폭발',null,tg.x,tg.y,140,pDmg()*lv3('e_prism',3,4,5)*elM(),'#e8dcff');S.shake=Math.max(S.shake,.15);for(const o of S.en)if(o.alive&&d2(o,tg)<140*140){burnE(o,pDmg()*.4,3);if(!o.boss){o.slowT=Math.max(o.slowT||0,1.2);o.frozen=true;}}for(let i=0;i<3;i++){const q=spPos(i,3);S.bolts.push({x1:q.x,y1:q.y,x2:tg.x,y2:tg.y,life:.2});}}else S.prT2=.3;}}
     if(has('m_blizzard')){S.bzT=(S.bzT??2)-dt;if(S.bzT<=0){S.bzT=(has('f_iceage')?4:6)*tmul();const C=S.en.filter(e=>e.alive&&!e.phase&&Math.abs(e.x-p.x)<GW/2&&Math.abs(e.y-p.y)<GH/2);let b=null,bn=-1;for(let i=0;i<12&&C.length;i++){const c=C[Math.floor(Math.random()*C.length)];let n=0;for(const o of C)if(d2(o,c)<150*150)n++;if(n>bn){bn=n;b=c;}}for(let k=0;k<(has('f_eternal')?2:1)&&b;k++){(S.bliz=S.bliz||[]).push({x:b.x+(k?rand(-160,160):0),y:b.y+(k?rand(-120,120):0),r:lv3('m_blizzard',130,150,170),life:has('f_iceage')?6:4,tk:0});}}}
     if(S.bliz&&S.bliz.length){for(const z of S.bliz){z.life-=dt;z.tk-=dt;if(z.tk<=0){z.tk=.5;for(const e of S.en)if(e.alive&&!e.phase&&d2(e,z)<(z.r+(e.r||12))**2){dmgEs('눈보라',e,pDmg()*lv3('m_blizzard',.5,.6,.7),'#dff6ff',null,true);novaHit(e);}}}S.bliz=S.bliz.filter(z=>z.life>0);}
     if(has('m_thunder')){S.thT=(S.thT??1)-dt;if(S.thT<=0){S.thT=1.5*tmul();const C=S.en.filter(e=>e.alive&&!e.phase&&Math.abs(e.x-p.x)<GW/2&&Math.abs(e.y-p.y)<GH/2),tn=(has('f_tstorm')?5:3)*(has('f_ragnarok')?2:1);for(let i=0;i<tn&&C.length;i++){const e=C.splice(Math.floor(Math.random()*C.length),1)[0];S.bolts.push({x1:e.x+rand(-20,20),y1:e.y-260,x2:e.x,y2:e.y,life:.2});for(const o of S.en)if(o.alive&&d2(o,e)<(60+(o.r||12))**2)o.stU=S.t+3;exL('낙뢰',null,e.x,e.y,60,pDmg()*lv3('m_thunder',2,2.5,3)*(has('f_ragnarok')?2:1),'#fff08a');if(has('f_tstorm')&&e.alive){S.dsub='뇌우';try{mChain(e,4,pDmg());}finally{S.dsub=null;}}}}}
@@ -7860,7 +7876,14 @@ function draw(){
   ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.7)';let lastF=0;{const sc=Math.max(1,Math.ceil(ctx.getTransform().a-.01));for(const t of S.tx){if(offV(t.x,t.y))continue;ctx.globalAlpha=Math.min(1,t.life*2.5);const sp=txSpr(t.s,t.col,t.size,sc);if(sp){ctx.drawImage(sp,t.x-sp.ox/sc,t.y-sp.oy/sc,sp.width/sc,sp.height/sc);continue;}if(t.size!==lastF){lastF=t.size;ctx.font=`${t.size}px "Do Hyeon",sans-serif`;}ctx.strokeText(t.s,t.x,t.y);ctx.fillStyle=t.col;ctx.fillText(t.s,t.x,t.y);}}
   ctx.globalAlpha=1;
   if(S.p.bearT>0&&S.p.alive){ctx.fillStyle='rgba(201,138,82,.18)';ctx.beginPath();ctx.arc(S.p.x,S.p.y,26,0,TAU);ctx.fill();ctx.strokeStyle='rgba(201,138,82,.55)';ctx.lineWidth=2;ctx.stroke();}
-  if(S.cls==='elem'&&S.p.alive){const P=S.p,c=['#ff5a2a','#5ac8f0','#f0d030'],nx=has('e_avatar')?-1:(P.elN??0);for(let i=0;i<3;i++){const a=S.t*2.4+i*2.094,x=P.x+Math.cos(a)*22,y=P.y-10+Math.sin(a)*8,on=i===nx||nx<0;ctx.fillStyle=c[i]+(on?'66':'33');ctx.beginPath();ctx.arc(x,y,on?6:4,0,TAU);ctx.fill();ctx.fillStyle=c[i];ctx.fillRect(Math.round(x)-(on?2:1),Math.round(y)-(on?2:1),on?4:2,on?4:2);}}
+  if(S.cls==='elem'&&S.p.alive){const L=spList(),n=L.length,kg=spKing();L.forEach((k,i)=>{const q=spPos(i,n),big=k===kg,R=big?9:6,C=SP_COL[k],bob=Math.sin(S.t*5+i)*1.5,x=q.x,y=q.y+bob;
+    ctx.save();ctx.globalAlpha=.35;ctx.fillStyle=C[0];ctx.beginPath();ctx.arc(x,y,R*1.9,0,TAU);ctx.fill();ctx.globalAlpha=1;ctx.shadowColor=C[0];ctx.shadowBlur=10;
+    if(k===0){ctx.fillStyle=C[0];ctx.beginPath();ctx.moveTo(x-R,y+R*.6);ctx.quadraticCurveTo(x-R*1.1,y-R*.6,x,y-R*1.7-Math.sin(S.t*12+i)*2);ctx.quadraticCurveTo(x+R*1.1,y-R*.6,x+R,y+R*.6);ctx.closePath();ctx.fill();}
+    else if(k===1){ctx.fillStyle=C[0];ctx.beginPath();ctx.moveTo(x,y-R*1.4);ctx.lineTo(x+R,y);ctx.lineTo(x,y+R*1.2);ctx.lineTo(x-R,y);ctx.closePath();ctx.fill();}
+    else{ctx.fillStyle=C[0];ctx.beginPath();ctx.arc(x,y,R,0,TAU);ctx.fill();ctx.strokeStyle=C[1];ctx.lineWidth=1.5;ctx.beginPath();const z=S.t*20+i;ctx.moveTo(x-R*1.5,y+Math.sin(z)*3);ctx.lineTo(x-R*.8,y-3);ctx.lineTo(x+R*.8,y+3);ctx.lineTo(x+R*1.5,y+Math.cos(z)*3);ctx.stroke();}
+    ctx.shadowBlur=0;ctx.fillStyle=C[1];ctx.beginPath();ctx.arc(x,y,R*.55,0,TAU);ctx.fill();ctx.fillStyle='#1a1a2a';ctx.fillRect(Math.round(x-R*.35),Math.round(y-1),2,2);ctx.fillRect(Math.round(x+R*.35-2),Math.round(y-1),2,2);
+    if(big){ctx.fillStyle='#ffd76a';ctx.beginPath();ctx.moveTo(x-5,y-R-2);ctx.lineTo(x-5,y-R-7);ctx.lineTo(x-2,y-R-4);ctx.lineTo(x,y-R-8);ctx.lineTo(x+2,y-R-4);ctx.lineTo(x+5,y-R-7);ctx.lineTo(x+5,y-R-2);ctx.closePath();ctx.fill();}
+    ctx.restore();});}
   if(S.cls==='gunner'&&S.p.alive){const P=S.p,m=magN(),c=P.rlT>0?0:(P.mag??m),w=m*4;for(let i=0;i<m;i++){ctx.fillStyle='rgba(0,0,0,.45)';ctx.fillRect(P.x-w/2+i*4-.5,P.y+P.r+9-.5,4,5);ctx.fillStyle=i<c?'#ffd76a':'#4a4030';ctx.fillRect(P.x-w/2+i*4,P.y+P.r+9,3,4);}
     if(P.rlT>0){ctx.fillStyle='#ffd76a';ctx.fillRect(P.x-w/2,P.y+P.r+15,w*(1-P.rlT/(P.rlMax||1)),2);}}
   if(S.cls==='paladin'&&S.p.alive){const ar=110*(1+(S.p.auraM||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1);ctx.fillStyle=`rgba(255,230,140,${.07+Math.sin(S.t*3)*.02})`;ctx.beginPath();ctx.arc(S.p.x,S.p.y,ar,0,TAU);ctx.fill();ctx.strokeStyle='rgba(255,230,140,.28)';ctx.lineWidth=2;ctx.stroke();}
@@ -8514,7 +8537,7 @@ const CLS_BUILDS={
   paladin:[['☀ 오라','적 사이에 서서 오라로 녹이기',['확장 오라','작열하는 태양','성역','빛의 기둥']],['🔨 망치','관통 망치를 여러 방향으로',['심판의 망치','망치 폭풍','회귀하는 망치']]],
   necro:[['💀 해골 군단','해골 수를 늘려 물량으로 밀기',['해골 군단','리치','망자의 왕','뼈 갑옷']],['🦴 뼈창','직접 관통 뼈창을 던지기',['뼈창','뼈창 폭풍','해골 궁수대']]],
   gunner:[['🔧 포탑','포탑을 깔아 화력을 늘리는 공병',['마법 포탑','포탑 증설','감시탑','보루']],['🔫 연사','공격 속도로 몰아치기',['패닝 사격','쌍권총','대형 탄창','장전 사격']],['💥 치명 폭발','치명타 탄이 터지게',['데드아이','할로우 포인트','마지막 한 발']]],
-  elem:[['🌈 원소 순환','세 원소를 고루 섞어 쓰기',['원소 공명','원소 화신','프리즘 폭발']],['⚡ 한 원소 몰기','한 원소를 연달아 써서 강화',['원소 정렬','폭풍 사슬','빙결 파쇄']]],
+  elem:[['🔥 화염 정령','화염 정령을 키워 폭발과 화상으로',['이프리트','원소 과부하','원소 정렬','원소 공명']],['❄ 얼음 정령','냉기를 쌓아 얼리고 깨뜨리기',['서리 정령','빙결 파쇄','원소 정렬','원소 공명']],['⚡ 번개 정령','빠른 번개 정령의 연쇄 번개',['뇌조','폭풍 사슬','원소 정렬','원소 공명']],['🌈 세 정령','세 정령을 고루 키워 합동 공격',['삼위일체','원소 화신','프리즘 폭발']]],
   berserk:[['🩸 광란 최대','광란을 꽉 채워 유지하기',['광기','쌍격','학살자']],['🌀 피의 회전','흡혈 회전 베기로 버티며 싸우기',['대회전','피의 회오리','피의 갈증']]],
   druid:[['🌿 덩굴 지대','덩굴 장판을 깔아 녹이기',['가시 장벽','자연의 분노','끝없는 생장','뿌리 속박']],['🐻 곰','곰으로 변신해 몸으로 버티기',['곰 변신','곰의 일격','고목의 껍질']]],
   alch:[['⚗ 물약 폭격','물약 장판을 겹쳐 키우기',['대연성','가마솥','매그넘 플라스크']],['🧪 연쇄 반응','터지고 또 터지게',['연쇄 반응','불안정한 혼합물','호문쿨루스']]],
@@ -8522,7 +8545,7 @@ const CLS_BUILDS={
 let pickCls=(()=>{try{return localStorage.getItem('chipdungeon_cls')||'knight';}catch(e){return 'knight';}})();
 // 직업 고유 능력에 어떤 능력치가 적용되는지 (코드 기준으로 확인한 표)
 const clsApplyHtml=k=>CLS_APPLY[k]?`<details class="capl"><summary>🔍 고유 능력에 적용되는 능력치</summary><div class="capg"><div><b style="color:#7be08f">✅ 적용돼요</b>${CLS_APPLY[k].y.map(x=>`<span>${x}</span>`).join('')}</div><div><b style="color:#ff8a8a">❌ 적용 안 돼요</b>${CLS_APPLY[k].n.map(x=>`<span>${x}</span>`).join('')}</div></div>${CLS_APPLY[k].m?`<small>${CLS_APPLY[k].m}</small>`:''}</details>`:'';
-const CLS_APPLY={"knight":{"y":["공격력: 회전 베기 피해가 오름","공격 속도: 4번째 공격이 더 빨리 옴","주사위·동전 같은 공격 배율도 같이 붙음","흡혈: 회전 베기에도 적용","표식 등 받는 피해 증가 적용","막기 확률: 「철벽」 증강으로 오름"],"n":["치명타: 회전 베기는 치명타 없음","사거리: 회전 범위는 95로 고정","탄환 개수·관통: 회전 베기와 무관","근접 보정 ×1.6은 회전 베기엔 없음","막기는 보스 패턴 공격엔 안 됨"],"m":"「회오리 베기」 증강이 있으면 3번째(합체하면 2번째)마다, 범위 ×1.3, 피해 120~200% · 막으면 0.2초 무적"},"mage":{"y":["공격력: 폭발 피해가 오름","마법 시전 속도: 빠를수록 폭발도 많음","탄환 개수: 주문마다 폭발","관통: 맞은 적마다 폭발","탄속 보너스·집중 등 주문 배율 적용","흡혈·표식 적용"],"n":["치명타: 폭발은 치명타 없음 (직격만)","사거리: 폭발 범위와 무관","직격용 배율(저격·처형 등)은 폭발엔 X"],"m":"마법 시전 속도가 다른 직업의 약 절반 (상한도 절반), 대신 주문 한 발 피해 ×2 · 폭발 범위는 「화염 확산」·「정신 집중」(3번째 시전마다)·「촉매」 증강으로만 커짐 · 화염·냉기·번개 시너지 중 가장 많은 속성으로 주문이 바뀜 (같으면 화염)"},"archer":{"y":["관통 카드·증강과 그대로 더해짐","치명타 확률이 다른 치명타 보너스와 더해짐","치명타 피해 스탯이 그대로 적용"],"n":["따로 발동하는 효과 없음 (스탯 보너스)"],"m":"치명타 100% 넘는 만큼은 치명타 피해로 바뀜 (넘친 1%당 +0.5%)"},"rogue":{"y":["회피 카드·장비 회피와 더해짐 (최대 60%)","대시 재사용 감소 카드와 곱해짐"],"n":["회피는 보스 패턴 공격엔 안 됨","공격력·공격 속도와는 무관"],"m":"대시 재사용 = 2.4초 × 0.7 = 약 1.7초부터 · 회피하면 0.15초 무적"},"paladin":{"y":["공격력: 오라 피해가 오름","신성 시너지·성수 등 빛 피해 증가","성유(범위)·성가(피해) 카드","흡혈·표식 적용","공격 속도: 회복이 더 자주 나옴"],"n":["공격 속도: 오라 피해 횟수는 고정 (0.5초마다)","치명타: 오라는 치명타 없음","사거리: 오라 범위와 무관","탄환 개수·관통: 무관"],"m":"오라 범위는 성유 카드·「확장 오라」·「성역」(주변 적이 많을수록)으로만 커짐 · 보스전 분노 단계엔 회복량 줄어듦"},"necro":{"y":["공격력: 해골 피해가 실시간으로 오름","해골 피해 카드(뼈 가루)·망자 시너지","소환 시너지: 4개 피해 ×2, 6개 공격 2배 빠름","해골 수(해골 증원 등)·지속(영혼 사슬)","최대 체력: 해골 체력 = 내 최대 체력 50%","흡혈·표식 적용","쿨타임 감소(시계 태엽): 소환 간격 줄어듦"],"n":["공격 속도: 해골 공격은 0.7초마다 고정","치명타: 해골은 치명타 없음","사거리·탄환 개수·관통: 무관","정비 키트(소환물 피해 카드)는 해골엔 X"],"m":"해골이 30기를 넘으면 넘는 만큼 해골 피해 배율로 · 해골이 받는 피해 = 절반 + 내 방어력 적용 · 해골 공격은 보스 처치 효과(3타) 집계 안 됨"},"gunner":{"y":["공격력·치명타·치명타 피해 모두 적용","탄두 가공 카드(매그넘 탄 피해)","탄환 개수: 한 번에 여러 발 (탄창은 1발만 씀)","관통 카드와 더해짐","공격 속도: 6발 사이 간격이 빨라짐","탄속 보너스도 적용"],"n":["공격 속도: 재장전 시간엔 영향 없음","탄창 수는 6발 고정 (대용량 탄창 증강만 +4)"],"m":"재장전 기본 0.8초, 빠른 장전·쌍권총·총기 숙련으로 줄어듦 (최소 0.35초) · 1.7배는 같은 공격에서 나오는 일부 추가 탄에도 붙음"},"elem":{"y":["공격력: 화상·연쇄 피해 오름","원소 결정 카드(원소 효과 피해)","화염 시너지 등: 화상 피해 증가","시너지 모은 원소가 더 자주 나옴","관통: 맞은 적마다 원소 효과","흡혈·표식 적용","공격 속도: 원소 공격이 자주 나감"],"n":["치명타: 화상·연쇄 번개엔 없음 (직격만)","사거리: 연쇄 거리(180)와 무관","화상은 겹쳐 쌓이지 않음 (센 쪽만)","보스는 냉기 둔화 안 걸림"],"m":"한 번 공격의 탄들은 모두 같은 원소 · 연쇄 번개는 탄 피해(치명타 전)의 60%"},"berserk":{"y":["광란 공격력은 모든 피해에 붙음","흡혈 2%: 흡혈 카드와 더해짐","흡혈은 모든 피해(화상·독 포함)에 적용","보스는 3번 때릴 때마다 처치 1회로 침","광란 최대 수 카드(피의 북)·영구 강화"],"n":["광란 자체는 공격 속도를 안 올림 (광란 시너지 4개부터)","치명타·사거리와 무관"],"m":"4초 지나면 0.3초마다 1중첩씩 빠짐 · 광란 시너지로 중첩당 공격력 조금 더"},"druid":{"y":["공격력: 덩굴 피해가 실시간으로 오름","공격 속도: 덩굴이 더 자주 생김","덩굴 카드(씨앗 주머니 범위·가시 독 피해)","자연 시너지: 피해·지속 증가","흡혈·표식 적용","덩굴이 겹치면 각각 피해"],"n":["치명타: 덩굴은 치명타 없음","사거리: 덩굴 범위와 무관","탄환 개수·관통: 덩굴 1개만","주사위·동전 같은 공격 배율 X","보스는 둔화 안 됨"],"m":"덩굴은 동시에 최대 14개 · 체력 재생은 최대 체력 300 넘으면 비례해 커짐"},"alch":{"y":["공격력: 플라스크·물약 피해 오름","공격 속도: 물약이 자주 나옴","탄환 개수·관통: 맞은 적마다 플라스크","물약 카드(큰 병·농축액)는 물약에만","독·화염·냉기 시너지로 물약 종류 비율","흡혈·표식 적용"],"n":["치명타: 플라스크·물약 모두 없음","사거리: 폭발 범위와 무관","농축액·큰 병은 플라스크엔 X"],"m":"물약 범위 70, 피해 산성 60%·폭발 150%·얼음 80% · 장판은 2.5초, 초당 물약 피해의 20% · 폭발형 플라스크는 피해 1.4배"},"gambler":{"y":["행운: 앞면 확률 오름 (행운 1당 +0.24%)","공격력·치명타·치명타 피해 그대로 적용","판돈 카드: 앞면 피해 증가","타짜의 손 카드: 앞면 확률","탄환 개수: 모든 탄이 같은 동전 결과"],"n":["앞면 확률은 최대 75% (타짜의 손 있으면 80%)","폭발·장판 같은 따로 나가는 피해엔 X"],"m":"기본 앞면 확률 약 52% (행운 5) · 동전은 공격 1번에 1번만 던짐"}};
+const CLS_APPLY={"knight":{"y":["공격력: 회전 베기 피해가 오름","공격 속도: 4번째 공격이 더 빨리 옴","주사위·동전 같은 공격 배율도 같이 붙음","흡혈: 회전 베기에도 적용","표식 등 받는 피해 증가 적용","막기 확률: 「철벽」 증강으로 오름"],"n":["치명타: 회전 베기는 치명타 없음","사거리: 회전 범위는 95로 고정","탄환 개수·관통: 회전 베기와 무관","근접 보정 ×1.6은 회전 베기엔 없음","막기는 보스 패턴 공격엔 안 됨"],"m":"「회오리 베기」 증강이 있으면 3번째(합체하면 2번째)마다, 범위 ×1.3, 피해 120~200% · 막으면 0.2초 무적"},"mage":{"y":["공격력: 폭발 피해가 오름","마법 시전 속도: 빠를수록 폭발도 많음","탄환 개수: 주문마다 폭발","관통: 맞은 적마다 폭발","탄속 보너스·집중 등 주문 배율 적용","흡혈·표식 적용"],"n":["치명타: 폭발은 치명타 없음 (직격만)","사거리: 폭발 범위와 무관","직격용 배율(저격·처형 등)은 폭발엔 X"],"m":"마법 시전 속도가 다른 직업의 약 절반 (상한도 절반), 대신 주문 한 발 피해 ×2 · 폭발 범위는 「화염 확산」·「정신 집중」(3번째 시전마다)·「촉매」 증강으로만 커짐 · 화염·냉기·번개 시너지 중 가장 많은 속성으로 주문이 바뀜 (같으면 화염)"},"archer":{"y":["관통 카드·증강과 그대로 더해짐","치명타 확률이 다른 치명타 보너스와 더해짐","치명타 피해 스탯이 그대로 적용"],"n":["따로 발동하는 효과 없음 (스탯 보너스)"],"m":"치명타 100% 넘는 만큼은 치명타 피해로 바뀜 (넘친 1%당 +0.5%)"},"rogue":{"y":["회피 카드·장비 회피와 더해짐 (최대 60%)","대시 재사용 감소 카드와 곱해짐"],"n":["회피는 보스 패턴 공격엔 안 됨","공격력·공격 속도와는 무관"],"m":"대시 재사용 = 2.4초 × 0.7 = 약 1.7초부터 · 회피하면 0.15초 무적"},"paladin":{"y":["공격력: 오라 피해가 오름","신성 시너지·성수 등 빛 피해 증가","성유(범위)·성가(피해) 카드","흡혈·표식 적용","공격 속도: 회복이 더 자주 나옴"],"n":["공격 속도: 오라 피해 횟수는 고정 (0.5초마다)","치명타: 오라는 치명타 없음","사거리: 오라 범위와 무관","탄환 개수·관통: 무관"],"m":"오라 범위는 성유 카드·「확장 오라」·「성역」(주변 적이 많을수록)으로만 커짐 · 보스전 분노 단계엔 회복량 줄어듦"},"necro":{"y":["공격력: 해골 피해가 실시간으로 오름","해골 피해 카드(뼈 가루)·망자 시너지","소환 시너지: 4개 피해 ×2, 6개 공격 2배 빠름","해골 수(해골 증원 등)·지속(영혼 사슬)","최대 체력: 해골 체력 = 내 최대 체력 50%","흡혈·표식 적용","쿨타임 감소(시계 태엽): 소환 간격 줄어듦"],"n":["공격 속도: 해골 공격은 0.7초마다 고정","치명타: 해골은 치명타 없음","사거리·탄환 개수·관통: 무관","정비 키트(소환물 피해 카드)는 해골엔 X"],"m":"해골이 30기를 넘으면 넘는 만큼 해골 피해 배율로 · 해골이 받는 피해 = 절반 + 내 방어력 적용 · 해골 공격은 보스 처치 효과(3타) 집계 안 됨"},"gunner":{"y":["공격력·치명타·치명타 피해 모두 적용","탄두 가공 카드(매그넘 탄 피해)","탄환 개수: 한 번에 여러 발 (탄창은 1발만 씀)","관통 카드와 더해짐","공격 속도: 6발 사이 간격이 빨라짐","탄속 보너스도 적용"],"n":["공격 속도: 재장전 시간엔 영향 없음","탄창 수는 6발 고정 (대용량 탄창 증강만 +4)"],"m":"재장전 기본 0.8초, 빠른 장전·쌍권총·총기 숙련으로 줄어듦 (최소 0.35초) · 1.7배는 같은 공격에서 나오는 일부 추가 탄에도 붙음"},"elem":{"y":["공격력: 정령 탄·화상·연쇄 피해 오름","화염·냉기·번개 시너지 1개당 그 정령 탄 피해 +10%","원소 결정 카드(원소 효과 피해)","공격 속도: 정령도 빨리 쏨 (공격 속도의 45%)","탄환 개수: 정령마다 여러 발","관통: 정령 탄에도 적용","흡혈·표식 적용"],"n":["치명타: 화상·연쇄 번개엔 없음 (직격만)","사거리: 정령 사거리는 내 사거리의 1.1배","화상은 겹쳐 쌓이지 않음 (센 쪽만)","보스는 냉기 둔화 안 걸림"],"m":"정령 탄 = 공격력 50% × 시너지 보너스 · 본인 원소탄은 피해 60%에 원소 효과 없음 · 연쇄 번개는 탄 피해(치명타 전)의 60%"},"berserk":{"y":["광란 공격력은 모든 피해에 붙음","흡혈 2%: 흡혈 카드와 더해짐","흡혈은 모든 피해(화상·독 포함)에 적용","보스는 3번 때릴 때마다 처치 1회로 침","광란 최대 수 카드(피의 북)·영구 강화"],"n":["광란 자체는 공격 속도를 안 올림 (광란 시너지 4개부터)","치명타·사거리와 무관"],"m":"4초 지나면 0.3초마다 1중첩씩 빠짐 · 광란 시너지로 중첩당 공격력 조금 더"},"druid":{"y":["공격력: 덩굴 피해가 실시간으로 오름","공격 속도: 덩굴이 더 자주 생김","덩굴 카드(씨앗 주머니 범위·가시 독 피해)","자연 시너지: 피해·지속 증가","흡혈·표식 적용","덩굴이 겹치면 각각 피해"],"n":["치명타: 덩굴은 치명타 없음","사거리: 덩굴 범위와 무관","탄환 개수·관통: 덩굴 1개만","주사위·동전 같은 공격 배율 X","보스는 둔화 안 됨"],"m":"덩굴은 동시에 최대 14개 · 체력 재생은 최대 체력 300 넘으면 비례해 커짐"},"alch":{"y":["공격력: 플라스크·물약 피해 오름","공격 속도: 물약이 자주 나옴","탄환 개수·관통: 맞은 적마다 플라스크","물약 카드(큰 병·농축액)는 물약에만","독·화염·냉기 시너지로 물약 종류 비율","흡혈·표식 적용"],"n":["치명타: 플라스크·물약 모두 없음","사거리: 폭발 범위와 무관","농축액·큰 병은 플라스크엔 X"],"m":"물약 범위 70, 피해 산성 60%·폭발 150%·얼음 80% · 장판은 2.5초, 초당 물약 피해의 20% · 폭발형 플라스크는 피해 1.4배"},"gambler":{"y":["행운: 앞면 확률 오름 (행운 1당 +0.24%)","공격력·치명타·치명타 피해 그대로 적용","판돈 카드: 앞면 피해 증가","타짜의 손 카드: 앞면 확률","탄환 개수: 모든 탄이 같은 동전 결과"],"n":["앞면 확률은 최대 75% (타짜의 손 있으면 80%)","폭발·장판 같은 따로 나가는 피해엔 X"],"m":"기본 앞면 확률 약 52% (행운 5) · 동전은 공격 1번에 1번만 던짐"}};
 // 영웅 선택 창: 마우스를 올리면 자세한 설명 (직업 카드·고유 능력·생존기·궁극기·능력치·시너지)
 function selTipHtml(key){const [t,a,b]=key.split(':');const tagH=x=>{const T=TAGS[x];if(!T)return '';return `<b>${TAG_ICO&&TAG_ICO[x]||''} ${T.n} 시너지</b><br>${[[1,T.t1],[2,T.t2],[4,T.t4],[6,T.t6]].filter(q=>q[1]).map(([n,d])=>`<div>· ${n}개: ${d}</div>`).join('')}<div>· 5개부터 1개마다: ${T.ex}</div>`;};
   if(t==='tag')return tagH(a)+`<small style="color:#9fb">증강 카드에 붙은 시너지 표시를 모으면 효과가 커져요</small>`;
@@ -8563,6 +8586,12 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:249,t:'🧚 정령사 개편: 세 정령',items:[
+    ['change','🧚 <b>정령사</b>는 이제 정령을 거느려요: <b>화염·냉기·번개 정령 3마리</b>가 곁을 돌며 각자 적을 쏨 (화상 / 둔화 / 연쇄 번개). 정령 탄 피해 = 공격력 50%, 그 원소 시너지 1개당 +10%. 공격 속도가 오르면 정령도 빨리 쏴요'],
+    ['change','🔹 본인 원소탄은 피해 60%의 약한 마력탄 (원소 효과 없음)'],
+    ['new','새 증강: 🔥 <b>이프리트</b>(화염 정령 탄 폭발, 화상 2배) · ❄ <b>서리 정령</b>(얼음 정령 탄 냉기 중첩, 4번째마다 얼음 폭발) · ⚡ <b>뇌조</b>(번개 정령 공격 속도 +60%, 관통 +2)'],
+    ['change','바뀐 증강: <b>원소 정렬</b>(시너지가 가장 많은 원소의 정령이 👑 정령왕: 피해 2배·공격 속도 +30%) · <b>원소 화신</b>(정령 원소마다 2마리, 피해 +20%) · <b>삼위일체</b>(세 정령이 같은 적을 3초 안에 맞히면 원소 폭발) · <b>프리즘 폭발</b>(6초마다 세 정령 합동 폭발) · 폭풍 사슬(번개 정령 탄)'],
+    ['look','📊 스탯 창에 「원소 비율」 대신 정령별 탄 피해']]},
   {v:248,t:'🔮 마법사 개편: 화염 · 얼음 · 번개',items:[
     ['change','🔮 <b>마법사</b>는 이제 느리게 시전하는 강한 마법: <b>마법 시전 속도</b>가 다른 직업의 약 절반 (상한도 절반), 대신 주문 한 발 피해 2배 · 폭발 범위 40 → 55'],
     ['new','🔥❄⚡ 화염·냉기·번개 시너지 중 <b>가장 많은 속성으로 주문이 바뀌어요</b>: 화염구(폭발 + 화상, 불타는 적이 주는 피해 −40%, 폭발 범위 70) · 얼음 구체(폭발 + 냉기 1중첩, 3중첩이면 얼어붙음) · 번개 구체(폭발 + 주변 2명에게 번개, 번개 맞은 적 0.5초 경직). 시전할 때 발밑에 마법진'],
@@ -13577,7 +13606,7 @@ const routePct=ts=>{const w=ts.map(t=>1+1.5*Math.min(6,tag(t))),T=w.reduce((a,b)
 function clsRows(row){const p=S.p,c=S.cls,r=[];
   if(c==='paladin')r.push(row('신성 오라',`범위 ${Math.round(110*(1+(p.auraM||0)))}, 피해 +${Math.round((p.auraD||0)*100)}%`));
   if(skelMax()>0)r.push(row('해골 병사',`${(S.skel||[]).length} / ${skelMax()}기, 피해 +${Math.round((p.skD||0)*100)}%, 지속 ${12+(p.skL||0)+(has('deathnova')?4:0)}초`));
-  if(c==='elem'&&!has('e_avatar')){const q=routePct(ELEM_TAGS);r.push(row('원소 비율',`화염 ${q[0]}% · 냉기 ${q[1]}% · 번개 ${q[2]}%`,'화염·냉기·번개 시너지를 모을수록 그 원소 공격이 더 자주 나감'));}
+  if(c==='elem'){const kg=spKing(),nm=['화염','냉기','번개'];r.push(row('정령 탄 피해',[0,1,2].map(k=>`${nm[k]}${k===kg?'👑':''} ${spDmg(k).toFixed(1)}`).join(' · '),`공격력 50% × (1 + 그 원소 시너지 1개당 10%)${has('e_avatar')?' · 원소 화신 ×1.2, 원소마다 2마리':''}${kg>=0?' · 👑 정령왕 피해 ×'+lv3('e_align',1.6,2,2.4)+', 공격 속도 +30%':''}`));}
   if(c==='alch'||tag('alchemy')>=1){const q=routePct(POT_TAGS);r.push(row('물약 비율',`산성 ${q[0]}% · 폭발 ${q[1]}% · 얼음 ${q[2]}%`,'독·화염·냉기 시너지를 모을수록 그 물약이 더 자주 나옴 (기본 플라스크 포함)'));}
   if(c==='gunner')r.push(row('탄창',`${magN()}발, 재장전 ${reloadT().toFixed(2)}초 <small>/ 최소 ${RL_MIN_F()}초</small>${reloadRaw()<=RL_MIN_F()+.001?' (최소치)':''}`,'재장전은 공격 속도와 무관 (빠른 장전·쌍권총·총기 숙련으로만 단축, 최소 0.35초)'));
   if(c==='elem'||tag('elem')>=1||has('elemcoin'))r.push(row('원소 효과 피해','+'+Math.round((elM()-1)*100)+'%'));
@@ -13685,7 +13714,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=248,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=249,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
