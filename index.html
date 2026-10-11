@@ -4843,7 +4843,7 @@ const CLASSES={
     stats:{hp:175,maxHp:175,speed:185,dmg:17,rate:1.1,range:320,bspd:540,armor:8},fav:['fire','frost','thunder'],dis:['guard'],
     cards:['힘의 물약','숫돌','조준경','치명상','전투 본능','다연발'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
   archer:{n:'궁수',role:'원거리 연사',d:'멀리서 빠르게 화살을 쏘는 사수',passive:'관통 화살: 기본 관통 1, 치명타 +10%',atk:.28,
-    stats:{hp:190,maxHp:190,speed:200,dmg:14.3,rate:2.8,range:340,bspd:720,pierce:1,crit:.15},fav:['sniper','card','jackpot'],dis:['curse'],
+    stats:{hp:170,maxHp:170,speed:200,dmg:13,rate:2.8,range:340,bspd:720,pierce:1,crit:.15},fav:['sniper','card','jackpot'],dis:['curse'],
     cards:['날랜 손놀림','조준경','관통 탄','급소 노리기','다연발','럭키 세븐'],lvd:'공격 속도 +0.4%, 공격력 +0.4%, 체력 +1',lv:p=>{p.rateP=(p.rateP||0)+.004;p.dmgP=(p.dmgP||0)+.004;p.maxHp+=1;p.hp+=1;}},
   rogue:{n:'도적',role:'회피 암살',d:'단검을 난사하며 치고 빠지는 도적',passive:'그림자: 회피 15%, 대시 재사용 −30%',atk:.2,
     stats:{hp:155,maxHp:155,speed:225,dmg:13,rate:3.9,range:260,bspd:600,dodge:.15,dashMul:.7,crit:.12,critM:2.3},fav:['blitz','poison','curse'],dis:['guard'],
@@ -4855,7 +4855,7 @@ const CLASSES={
     stats:{hp:155,maxHp:155,speed:185,dmg:16,rate:2.1,range:300,bspd:500,armor:7},fav:['undead','summon','curse'],dis:['holy'],
     cards:['힘의 물약','숫돌','조준경','튼튼한 체력','전투 본능','흡혈 송곳니'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
   gunner:{lock:true,n:'총잡이',role:'매그넘 저격',d:'한 발 한 발이 묵직한 매그넘 리볼버 총잡이',passive:'매그넘 리볼버: 모든 탄이 일반 공격의 1.7배 피해 + 관통 1. 6발 쏘면 0.8초 재장전 (탄창 6발 고정, 재장전은 공격 속도와 무관). 저지력으로 맞은 일반 몹이 뒤로 밀려남 (정예·보스 제외)',atk:.18,
-    stats:{hp:185,maxHp:185,speed:200,dmg:13,rate:1.8,range:300,bspd:820,crit:.1,critM:2.1},fav:['rapid','sniper','card'],dis:['summon'],
+    stats:{hp:160,maxHp:160,speed:200,dmg:12,rate:1.8,range:300,bspd:820,crit:.1,critM:2.1},fav:['rapid','sniper','card'],dis:['summon'],
     cards:['날랜 손놀림','조준경','급소 노리기','치명상','힘의 물약','가벼운 장화'],lvd:'공격력 +0.6%, 치명타 +0.2%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.006;p.crit+=.002;p.maxHp+=1;p.hp+=1;}},
   elem:{lock:true,n:'정령사',role:'정령 소환',d:'화염·냉기·번개 정령을 거느리고 싸우는 정령술사',passive:'원소 정령: 화염·냉기·번개 정령 3마리가 곁을 돌며 각자 적을 쏨 (화염: 화상 / 냉기: 1초 둔화 / 번개: 주변 2명에게 60% 연쇄). 정령 탄 피해는 공격력 50%, 그 원소 시너지 1개당 +10%. 공격 속도가 오르면 정령도 빨리 쏨. 본인은 약한 원소탄(피해 60%)을 쏨. 기본 관통 1',atk:.3,
     stats:{hp:170,maxHp:170,speed:190,dmg:17,rate:2.5,range:310,bspd:560,armor:9,pierce:1},fav:['elem','fire','frost','thunder'],dis:['poison'],
@@ -4867,10 +4867,10 @@ const CLASSES={
     stats:{hp:175,maxHp:175,speed:185,dmg:15,rate:2.2,range:290,bspd:520,armor:8,regen:1},fav:['nature','poison','guard'],dis:['fire'],
     cards:['힘의 물약','숫돌','튼튼한 체력','붕대','조준경','가죽 갑옷'],lvd:'공격력 +0.8%, 체력 +2',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=2;p.hp+=2;}},
   alch:{lock:true,n:'연금술사',role:'물약 폭격',d:'터지는 플라스크와 물약을 던지는 연금술사',passive:'플라스크: 맞은 자리에 폭발 (범위 45, 공격력 50%). 플라스크도 물약 비율을 따라 산성(중독)·폭발(피해 1.4배)·얼음(둔화)으로 터짐. 4번째 공격마다 물약 (산성 중독·폭발·얼음 둔화, 독·화염·냉기 시너지를 모을수록 그 물약이 더 자주 나옴). 물약이 깨진 자리에 2.5초 장판이 남음',atk:.3,
-    stats:{hp:185,maxHp:185,speed:188,dmg:15.4,rate:2.2,range:290,bspd:480,armor:9},fav:['alchemy','poison','fire'],dis:['sniper'],
+    stats:{hp:155,maxHp:155,speed:188,dmg:14,rate:2.2,range:290,bspd:480,armor:6},fav:['alchemy','poison','fire'],dis:['sniper'],
     cards:['힘의 물약','숫돌','조준경','전투 본능','튼튼한 체력','다연발'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
-  gambler:{lock:true,n:'도박사',role:'동전 도박',d:'동전 앞뒤에 모든 걸 거는 도박사',passive:'동전 던지기: 공격마다 앞면이면 피해 2배, 뒷면이면 0.6배. 행운이 높을수록 앞면이 잘 나옴',atk:.25,
-    stats:{hp:190,maxHp:190,speed:200,dmg:12,rate:2.6,range:300,bspd:600,armor:6,crit:.08,luck:5},fav:['coin','dice','jackpot'],dis:['guard'],
+  gambler:{lock:true,n:'도박사',role:'동전 도박',d:'동전 앞뒤에 모든 걸 거는 도박사',passive:'동전 던지기: 공격마다 앞면이면 피해 2배, 뒷면이면 0.5배. 행운이 높을수록 앞면이 잘 나옴',atk:.25,
+    stats:{hp:175,maxHp:175,speed:200,dmg:12,rate:2.6,range:300,bspd:600,armor:6,crit:.08,luck:5},fav:['coin','dice','jackpot'],dis:['guard'],
     cards:['럭키 세븐','날랜 손놀림','조준경','힘의 물약','급소 노리기','가벼운 장화'],lvd:'공격력 +0.7%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.007;p.maxHp+=1;p.hp+=1;}}
 };
 function applyClass(cls){S.cls=cls;Object.assign(S.p,CLASSES[cls].stats);S.p.face=1;}
@@ -6825,7 +6825,7 @@ function playerFire(tg){
     else p.cfT=Math.min(3,(p.cfT||0)+1);
     if(hd){p.cfS=(p.cfS||0)+1;if(S.cls==='gambler'){S.hdN=(S.hdN||0)+1;if(has('gb_vault'))shock*=1+Math.floor(S.hdN/100)*lv3('gb_vault',.008,.01,.012);}if(S.cls==='gambler'&&p.slW){p.slW=0;shock*=2;ftext(p.x,p.y-44,'설욕전 ×2','#ffd76a',14);}p.tlN=0;shock*=((tag('coin')>=6?3:2)+(has('allin')?1:0)+(S.cls==='gambler'&&mky(2)?.75:0))*(1+(p.hdD||0)+(has('gb_allin')?Math.max(0,S.p.luck+gLk())*lv3('gb_allin',.012,.018,.024):0))*homeM('coin');if(has('gb_streak'))shock*=1+Math.min(has('f_streakrun')?20:10,p.cfS-1)*lv3('gb_streak',.1,.15,.2);
       if(tag('coin')>=2&&p.cfS%3===0)S.coinB=1;if(has('gb_jackpot')&&p.cfS%5===0)S.coinJ=1;if(has('coinshower')&&Math.random()<(has('f_goldrush')?.4:.15))S.coinS=1;}
-    else{p.cfS=0;if(S.cls==='gambler'&&mky(0)){p.tlN=(p.tlN||0)+1;if(p.tlN>=3){p.tlN=0;p.cfF=true;p.slW=1;}}shock*=has('f_twoface')||(S.cls==='gambler'&&mk(2))?1:has('allin')?.25:S.cls==='gambler'?.6:.5;if(tag('coin')>=4)p.cfF=true;if(has('coinguard')){bxAdd(Math.max(barrierMax(),20*rgHpM()),lv3('coinguard',3,4,5)*rgHpM());}}}
+    else{p.cfS=0;if(S.cls==='gambler'&&mky(0)){p.tlN=(p.tlN||0)+1;if(p.tlN>=3){p.tlN=0;p.cfF=true;p.slW=1;}}shock*=has('f_twoface')||(S.cls==='gambler'&&mk(2))?1:has('allin')?.25:.5;if(tag('coin')>=4)p.cfF=true;if(has('coinguard')){bxAdd(Math.max(barrierMax(),20*rgHpM()),lv3('coinguard',3,4,5)*rgHpM());}}}
   if(tag('rapid')>=4){p.rpS=Math.min(20,(p.rpS||0)+1);p.rpT=1.5;}
   let n=p.multi+(tag('card')>=6?2:0)+(has('bulletstorm')?3:0)+(has('g_twin')?1:0);if(has('bulletstorm'))shock*=.85;
   if(has('focus'))shock*=n<=1?1+lv3('focus',.35,.5,.65):1.1;
@@ -8675,8 +8675,6 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
-  {v:264,t:'⚖ 하위 직업 상향',items:[
-    ['buff','⚖ 12직업 악몽 측정(직업당 4판)에서 평균보다 2~3분 일찍 쓰러지던 4직업 기본 능력치 상향: ⚗ <b>연금술사</b> 체력 155 → 185, 방어력 6 → 9, 공격력 +10% · 🏹 <b>궁수</b> 체력 170 → 190, 공격력 +10% · 🔫 <b>총잡이</b> 체력 160 → 185, 공격력 +8% · 🎲 <b>도박사</b> 체력 175 → 190, 뒷면 피해 0.5배 → 0.6배']]},
   {v:263,t:'🎲 도박사 점검',items:[
     ['new','🎲 대박 루트 고점 돌파 ♾ <b>잭팟 금고</b>: 이번 판 앞면이 100번 나올 때마다 앞면 피해 +1%, 상한 없음 · 추천 빌드 「🎲 운명의 주사위」(운명의 주사위·룰렛 휠·타짜의 동전) 추가 (루트마다 고점 돌파 하나씩)'],
     ['change','🎲 마스터리 「황금 비」(앞면 5연속 금화 폭발)가 증강 「대박」과 같은 조건이고 황금 용 공격 이름과도 겹쳐서 <b>설욕전</b>으로: 뒷면이 3번 연속 나오면 다음 동전은 반드시 앞면, 그 피해 ×2'],
@@ -13890,7 +13888,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=264,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=263,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
