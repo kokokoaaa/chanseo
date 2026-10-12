@@ -10130,7 +10130,7 @@ function openMastery(){cosPreviewHide();ftipHide();const ks=Object.keys(CLASSES)
   $('mBack').onclick=startScreen;
   ov.querySelectorAll('[data-mcls]').forEach(b=>b.onclick=()=>{MST_CLS=b.dataset.mcls;MST_TIP='';openMastery();});
   if(!T)return;
-  const tip=$('mTip');ov.querySelectorAll('.mnode').forEach(n=>{ftipBind(n,()=>{const st=n.classList.contains('own')?'<span style="color:#7be08f">✔ 찍었어요</span>':n.classList.contains('lock')?'<span style="color:#ff9a9a">🔒 다른 가지를 골라서 잠겼어요</span>':n.classList.contains('can')?'<span style="color:#ffd76a">▶ 눌러서 찍기</span>':'<span style="color:var(--muted)">앞 칸을 먼저 찍거나 레벨을 올려야 해요</span>';const [h,...r]=n.dataset.tip.split(' · ');const dp=+n.dataset.md,nb=n.dataset.mb===''?null:+n.dataset.mb,ns=n.dataset.ms===''?null:+n.dataset.ms,TT=MST[MST_CLS];let fx='';if(DEV&&TT){if(dp===6)fx=mstFx(MST_CLS,nb,ns);else{const fnS=(dp===1?TT.root:dp<=3?TT.br[nb]:TT.br[nb].sub[ns]).tf.toString();fx=`<div class="dfx"><b>🛠 계산식</b><code>${esc(fnS)}</code><div class="dxp">💬 판 시작 때 이 능력치를 더함 · 실제로는 바뀐 값의 ${MST_K*100}%만 들어감 (관통·해골 최대·광란 최대·광란 유지는 그대로)</div></div>`;}}
+  const tip=$('mTip');ov.querySelectorAll('.mnode').forEach(n=>{ftipBind(n,()=>{const st=n.classList.contains('own')?'<span style="color:#7be08f">✔ 찍었어요</span>':n.classList.contains('lock')?'<span style="color:#ff9a9a">🔒 다른 가지를 골라서 잠겼어요</span>':n.classList.contains('can')?'<span style="color:#ffd76a">▶ 눌러서 찍기</span>':'<span style="color:var(--muted)">앞 칸을 먼저 찍거나 레벨을 올려야 해요</span>';const [h,...r]=n.dataset.tip.split(' · ');const dp=+n.dataset.md,nb=n.dataset.mb===''?null:+n.dataset.mb,ns=n.dataset.ms===''?null:+n.dataset.ms,TT=MST[MST_CLS];let fx='';if(devFxOn()&&TT){/* v292: 계산식 숨김 스위치를 따름 */if(dp===6)fx=mstFx(MST_CLS,nb,ns);else{const fnS=(dp===1?TT.root:dp<=3?TT.br[nb]:TT.br[nb].sub[ns]).tf.toString();fx=`<div class="dfx"><b>🛠 계산식</b><code>${esc(fnS)}</code><div class="dxp">💬 판 시작 때 이 능력치를 더함 · 실제로는 바뀐 값의 ${MST_K*100}%만 들어감 (관통·해골 최대·광란 최대·광란 유지는 그대로)</div></div>`;}}
     return [`<div class="mtt" style="color:var(--rc)">${esc(h)}</div><div>${esc(r.join(' · '))}</div><div class="mst">${st}</div>${fx}`,getComputedStyle(n).getPropertyValue('--mc').trim()||'#ffd76a'];});n.onmouseenter=()=>{tip.textContent=n.dataset.tip;};n.onclick=()=>{tip.textContent=n.dataset.tip;MST_TIP=n.dataset.tip;if(!n.classList.contains('can'))return;const dp=+n.dataset.md,b=n.dataset.mb===''?null:+n.dataset.mb,s=n.dataset.ms===''?null:+n.dataset.ms;
     if(dp===2)o.b=b;if(dp===4)o.s=s;o.d=dp;saveMeta();if(dp===6){chime([523,659,784,1047],'triangle');try{achCheck(null);}catch(e){}}openMastery();};});
   if($('mReset'))$('mReset').onclick=()=>{o.d=0;o.b=-1;o.s=-1;MST_TIP='';META.mrN=(META.mrN||0)+1;saveMeta();achCheck(null);openMastery();};
@@ -14224,7 +14224,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=291,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=292,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
