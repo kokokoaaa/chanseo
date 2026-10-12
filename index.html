@@ -6871,7 +6871,7 @@ const GUN_AN=[['얼음 화살','얼음 탄'],['화살 덱','탄환 덱'],['화�
 const CLS_AN={gambler:['투척','연투'],alch:['투척','연투'],druid:['발사','연발'],rogue:['투척','연투'],necro:['주문','연발 주문'],elem:['주문','연발 주문']};
 const MELEE_ANRX=/사격|방아쇠|연사|저격|화살|대포|조준경|명사수|증식 탄|탄막|도탄|강선|질풍탄|천공탄|런 앤 건/;
 const PROJ_N={mage:'화염구',elem:'원소탄',archer:'화살',rogue:'단검',alch:'플라스크',gambler:'동전',necro:'마력탄',druid:'가시'};
-const projTxt=d=>{try{if(S&&S.cls==='mage'){d=String(d);{const mn=MAGE_PN[mSchool()];for(const [x,y] of MAGE_AN(mn))if(d.includes(x))d=d.split(x).join(y);d=d.replace(/(?<!나선 |·)탄막(?! 사이)/g,'주문 폭풍');}d=d.replace(/공격 속도/g,'마법 시전 속도');if(mSchool()!==1)d=d.replace('탄환이 다른 적에게 1회 튕김','주문 폭발 범위 +20%');d=d.replace(/번째 공격마다/g,'번째 시전마다');}const n=S&&S.cls&&(S.cls==='mage'?MAGE_PN[mSchool()]:PROJ_N[S.cls]);if(S&&S.cls&&pureMelee()){const mn=MELEE_PN[S.cls]||'공격';{d=String(d);for(const [x,y] of MELEE_AN(mn))if(d.includes(x))d=d.split(x).join(y);d=d.replace(/(?<!나선 |·)탄막(?! 사이)/g,mn+' 폭풍');}const mv=!((mn.charCodeAt(mn.length-1)-0xAC00)%28),MJ={'이':mv?'가':'이','을':mv?'를':'을','은':mv?'는':'은','과':mv?'와':'과','으로':mv?'로':'으로'};return String(d).replace(/(적 )?탄환(으로|이|을|은|과)?/g,(m,en,j)=>en?m:mn+(j?MJ[j]:'')).replace(/(^|[\s(·,])탄속/g,'$1'+mn+' 속도').replace(/(^|[\s(·,])탄(이|은|을|의|마다)?(?![가-힣])/g,(m,a,j)=>a+mn+(j?(MJ[j]||j):''));} /* 근접 직업: 탄환 → 검기·빛의 검기·도끼날 */if(S.cls==='archer'||S.cls==='gunner'){d=String(d);for(const [x,y] of S.cls==='archer'?ARCH_AN:GUN_AN)if(d.includes(x))d=d.split(x).join(y);if(S.cls==='archer')d=d.replace(/(?<!나선 |·)탄막(?! 사이)/g,'화살 폭풍');}if(!n)return d;if(CLS_AN[S.cls]){d=String(d);for(const [x,y] of S.cls==='alch'?ALCH_AN:S.cls==='gambler'?GAMB_AN:[])if(d.includes(x))d=d.split(x).join(y);const [cv,cv2]=CLS_AN[S.cls];for(const [x,y] of GEN_AN(n,cv,cv2))if(d.includes(x))d=d.split(x).join(y);d=d.replace(/(?<!나선 |·)탄막(?! 사이)/g,n+' 폭풍');}const v=!((n.charCodeAt(n.length-1)-0xAC00)%28);const J={'이':v?'가':'이','을':v?'를':'을','은':v?'는':'은','과':v?'와':'과','으로':v?'로':'으로'};
+const projTxt=d=>{try{if(S&&S.cls==='mage'){d=String(d);{const mn=MAGE_PN[mSchool()];for(const [x,y] of MAGE_AN(mn))if(d.includes(x))d=d.split(x).join(y);d=d.replace(/(?<!나선 |·)탄막(?! 사이)/g,'주문 폭풍');}d=d.replace(/공격 속도/g,'마법 시전 속도').replace(/공속(이|은|을)?/g,(m,j)=>'시전 속도'+(j?{'이':'가','은':'는','을':'를'}[j]:'')).replace(/공격 횟수/g,'시전 횟수');/* v302: 줄임말 「공속」도 */if(mSchool()!==1)d=d.replace('탄환이 다른 적에게 1회 튕김','주문 폭발 범위 +20%');d=d.replace(/번째 공격마다/g,'번째 시전마다');}const n=S&&S.cls&&(S.cls==='mage'?MAGE_PN[mSchool()]:PROJ_N[S.cls]);if(S&&S.cls&&pureMelee()){const mn=MELEE_PN[S.cls]||'공격';{d=String(d);for(const [x,y] of MELEE_AN(mn))if(d.includes(x))d=d.split(x).join(y);d=d.replace(/(?<!나선 |·)탄막(?! 사이)/g,mn+' 폭풍');}const mv=!((mn.charCodeAt(mn.length-1)-0xAC00)%28),MJ={'이':mv?'가':'이','을':mv?'를':'을','은':mv?'는':'은','과':mv?'와':'과','으로':mv?'로':'으로'};return String(d).replace(/(적 )?탄환(으로|이|을|은|과)?/g,(m,en,j)=>en?m:mn+(j?MJ[j]:'')).replace(/(^|[\s(·,])탄속/g,'$1'+mn+' 속도').replace(/(^|[\s(·,])탄(이|은|을|의|마다)?(?![가-힣])/g,(m,a,j)=>a+mn+(j?(MJ[j]||j):''));} /* 근접 직업: 탄환 → 검기·빛의 검기·도끼날 */if(S.cls==='archer'||S.cls==='gunner'){d=String(d);for(const [x,y] of S.cls==='archer'?ARCH_AN:GUN_AN)if(d.includes(x))d=d.split(x).join(y);if(S.cls==='archer')d=d.replace(/(?<!나선 |·)탄막(?! 사이)/g,'화살 폭풍');}if(!n)return d;if(CLS_AN[S.cls]){d=String(d);for(const [x,y] of S.cls==='alch'?ALCH_AN:S.cls==='gambler'?GAMB_AN:[])if(d.includes(x))d=d.split(x).join(y);const [cv,cv2]=CLS_AN[S.cls];for(const [x,y] of GEN_AN(n,cv,cv2))if(d.includes(x))d=d.split(x).join(y);d=d.replace(/(?<!나선 |·)탄막(?! 사이)/g,n+' 폭풍');}const v=!((n.charCodeAt(n.length-1)-0xAC00)%28);const J={'이':v?'가':'이','을':v?'를':'을','은':v?'는':'은','과':v?'와':'과','으로':v?'로':'으로'};
   return String(d).replace(/(적 )?탄환(으로|이|을|은|과)?/g,(m,en,j)=>en?m:n+(j?J[j]:''))
     // 낱말 「탄」·「탄속」도 직업 투사체 이름으로 (증강 이름처럼 붙어 있는 말은 그대로)
     .replace(/(^|[\s(·,])탄속/g,(m,a)=>a+n+' 속도').replace(/(^|[\s(·,])탄(이|은|을|의|마다)?(?![가-힣])/g,(m,a,j)=>a+n+(j?(J[j]||j):''));}catch(e){return d;}};
@@ -8901,6 +8901,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:302,t:'🧙 마법사 용어 · 스탯 설명',items:[
+    ['look','🧙 마법사는 설명의 「공속이 오를수록 더 자주」 같은 줄임말도 「시전 속도」로, 「공격 횟수」는 「시전 횟수」로 보여요'],
+    ['look','📊 스탯 창에서 직업마다 이름이 바뀐 줄(마법사 「번개 구체 수」 등)에도 ▸ 설명이 나와요']]},
   {v:301,t:'📖 도감 펼침 수정',items:[
     ['change','📖 도감에서 펼친 카드 안(직업 탭 「🔍 고유 능력에 적용되는 능력치」 등)을 누르면 카드가 접히면서 목록 맨 위로 튀던 문제: 이제 펼친 카드는 <b>제목 줄을 눌러야</b> 접혀요']]},
   {v:300,t:'🤖 자동 이동 패턴 회피',items:[
@@ -10396,7 +10399,7 @@ function devExplain(c){const an=id=>{const a=(typeof augDef==='function'&&augDef
    .replace(/\*\*2/g,'²').replace(/(?<![\w.])\.(\d)/g,'0.$1').replace(/\*/g,' × ').replace(/\b(\w+)\.(x|y)\b/g,'').replace(/\(([^()?]+)\?([^:()]+):([^()]+)\)/g,(m,a,b,d)=>`(${a.trim()}이면 ${b}, 아니면 ${d})`).replace(/([「」\w\s]+보유)\?([\d.]+):([\d.]+)/g,(m,a,b,d)=>`(${a.trim()}이면 ${b}, 아니면 ${d})`).replace(/lightning\(\w+,/g,'번개 튕김(').replace(/\bconst |\blet /g,'').replace(/\bbt\b/g,'대상').replace(/[{};]+/g,' · ').replace(/\s+/g,' ').replace(/(· )+/g,'· ').trim().replace(/^·|·$/g,'').trim();
   return t;}
 // 🛠 계산식 보기 스위치(도감에서 켜고 끔): 끄면 개발자 모드여도 계산식 줄을 숨김
-let DEV_FX=(()=>{try{return localStorage.getItem('chanseo_devfx')!=='0';}catch(e){return true;}})();
+let DEV_FX=(()=>{try{return localStorage.getItem('chanseo_devfx2')==='1';}catch(e){return false;}})();/* v302: 기본은 꺼짐 (켜야만 보임). 예전 저장값은 무시하고 꺼진 상태로 시작 */
 const devFxOn=()=>DEV&&DEV_FX;
 function devFx(pats,max=5){if(!devFxOn())return '';const S0=dsrc(),out=[];for(const pt of pats){let i=-1;while((i=S0.indexOf(pt,i+1))>=0&&out.length<max){const t=srcStmt(S0,i,pt.length);if(t&&!/^\s*\{id:/.test(t)&&!/bf\.push|<span|innerHTML|\.n\+'|toFixed/.test(t)&&!out.some(o=>o.includes(t)||t.includes(o)))out.push(t);}}
   return out.length?`<div class="dfx"><b>🛠 계산식</b>${out.map(t=>`<code>${esc(t)}</code><div class="dxp">💬 ${esc(devExplain(t))}</div>`).join('')}</div>`:'<div class="dfx"><b>🛠 계산식</b><code>(능력치 카드: 획득 시 바로 적용)</code></div>';}
@@ -12571,7 +12574,7 @@ function openCodex(o){Object.assign(CX,o||{});
   const tabs=[['aug','증강'],['fuse','합체'],['vip','왕실'],['syn','시너지'],['cls','직업'],['gear','🛡 장비'],['mob','몬스터'],['ev','돌발 이벤트'],['egg','🥚 이스터에그'],['help','❓ 도움말']].concat(DEV?[['score','🛠 점수 계산']]:[]);if(CX.tab==='score'&&!DEV)CX.tab='aug';
   const clsOpt=`<option value="">전체 직업</option><option value="-">공용</option>`+Object.keys(CLASSES).map(k=>`<option value="${k}" ${CX.cls===k?'selected':''}>${CLASSES[k].n}</option>`).join('');
   const tierOpt=`<option value="">전체 등급</option>`+['s','g','p'].map(k=>`<option value="${k}" ${CX.tier===k?'selected':''}>${TIER[k].n}</option>`).join('')+`<option value="uc" ${CX.tier==='uc'?'selected':''}>♾ 고점 돌파</option><option value="d" ${CX.tier==='d'?'selected':''}>🐉 용의 보물</option>`;
-  cxShow(`<div class="shophead"><h2>📖 도감</h2>${DEV?`<button class="btn ghost devmf" id="cxFx" style="margin:0 auto 0 12px!important">🛠 계산식 ${DEV_FX?'보기':'숨김'}</button>`:''}<button class="btn" id="cxBack">${cxGame?'닫기 (게임으로)':'돌아가기'}</button></div>
+  cxShow(`<div class="shophead"><h2>📖 도감</h2>${DEV?`<button class="btn ghost devmf" id="cxFx" style="margin:0 auto 0 12px!important">🛠 계산식: ${DEV_FX?'켜짐':'꺼짐'}</button>`:''}<button class="btn" id="cxBack">${cxGame?'닫기 (게임으로)':'돌아가기'}</button></div>
   <div class="cxbar">${tabs.map(([k,n])=>`<button class="cxtab ${CX.tab===k?'on':''}" data-cxt="${k}">${n}</button>`).join('')}</div>
   <div class="cxbar"><input id="cxQ" placeholder="이름·내용 검색 (예: 보호막 / 해골 공격력)" value="${CX.q.replace(/"/g,'&quot;')}">
   ${CX.tab==='aug'||CX.tab==='fuse'?`<select id="cxCls">${clsOpt}</select>`:''}${CX.tab==='aug'?`<select id="cxTier">${tierOpt}</select><select id="cxSort">${[['tier','등급순 (실버→프리즘)'],['tierd','등급순 (프리즘→실버)'],['name','이름순 (가나다)'],['','기본순']].map(([k,n])=>`<option value="${k}" ${CX.sort===k?'selected':''}>↕ ${n}</option>`).join('')}</select>`:''}</div>
@@ -12586,7 +12589,7 @@ function openCodex(o){Object.assign(CX,o||{});
   if($('cxCls'))$('cxCls').onchange=e=>{CX.cls=e.target.value;cxList();};
   if($('cxTier'))$('cxTier').onchange=e=>{CX.tier=e.target.value;cxList();};
   if($('cxSort'))$('cxSort').onchange=e=>{CX.sort=e.target.value;cxList();};
-  $('cxBack').onclick=cxClose;if($('cxFx'))$('cxFx').onclick=()=>{DEV_FX=!DEV_FX;try{localStorage.setItem('chanseo_devfx',DEV_FX?'1':'0');}catch(e){}toast(DEV_FX?'🛠 계산식 보기 켬':'🛠 계산식 숨김');openCodex();};
+  $('cxBack').onclick=cxClose;if($('cxFx'))$('cxFx').onclick=()=>{DEV_FX=!DEV_FX;try{localStorage.setItem('chanseo_devfx2',DEV_FX?'1':'0');}catch(e){}toast(DEV_FX?'🛠 계산식 켜짐':'🛠 계산식 꺼짐');openCodex();};
   $('cxL').onclick=e=>{if(e.target.closest('a,button,input,select,label,summary,details,.patc'))return;const r=e.target.closest('.cxrow');if(r&&r.parentNode===$('cxL')){/* v301: 펼친 카드는 제목 줄을 눌러야 접힘 (안의 「고유 능력에 적용되는 능력치」 등을 누르면 카드가 접혀 목록 맨 위로 튀던 문제) */if(r.classList.contains('open')&&!e.target.closest('.h'))return;r.classList.toggle('open');ftipHide();}};
   /* 마우스를 올리면 접힌 카드의 자세한 설명을 마우스 옆에 (누르면 펼쳐서 고정) */
   if(!matchMedia('(hover:none)').matches){const L=$('cxL');let cur=null;
@@ -14224,7 +14227,7 @@ function clsRows(row){const p=S.p,c=S.cls,r=[];
 function renderStats(){
   const p=S.p,raw=rawRate(),rate=pRate(),ar=armorEff(),red_=ar/(ar+100),n=p.multi+(tag('card')>=6?2:0);
   const pct=v=>(v*100).toFixed(v<.1&&v>0?1:0)+'%';
-  const tip=k=>STAT_TIP[k.replace(/ \d+$/,'')]||'';
+  const tip=k=>{const b=k.replace(/ \d+$/,'');if(STAT_TIP[b])return STAT_TIP[b];for(const q in STAT_TIP)if(projTxt(q)===b)return projTxt(STAT_TIP[q]);return '';};/* v302: 직업마다 바뀐 이름(번개 구체 수 등)도 원래 설명을 찾음 */
   // 스탯 줄마다 ▸ 화살표: 누르면 그 줄의 계산식·설명이 아래로 펼쳐짐 (다시 누르면 닫힘)
   const row=(k,v,note,ct)=>{const t=ct||tip(k),x=t||note;return `<div class="sitem${x?' sx':''}"><div class="srow"><span>${x?'<i class="sar"></i>':''}${k}</span><b>${v}</b></div>${x?`<div class="sdet">${note?`<div class="snote">${note}</div>`:''}${t?`<div class="stip">${t}</div>`:''}</div>`:''}</div>`;};
   const dps=pDmg()*rate*n*(1+critC()*(critMul()-1));
