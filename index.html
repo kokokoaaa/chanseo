@@ -8896,6 +8896,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:299,t:'⚔ 보스 러시 캐릭터 보정 · 직업별 명예의 전당',items:[
+    ['change','🏆 <b>명예의 전당이 직업마다 따로</b>: 다른 직업으로 낸 기록은 점수가 낮아도 따로 올라가요. 같은 직업끼리만 더 높은 점수로 바뀌어요 (레이드는 지금처럼 이름마다 한 기록)'],
+    ['buff','⚔ <b>보스 러시 캐릭터</b>는 각성이 없어서 레이드·결투·실험실에서 악몽 캐릭터보다 훨씬 약했어요 (레이드 동료 딜이 수십 분의 1, 10~40초 만에 쓰러짐). 이제 <b>잡은 보스 약 3마리 = 각성 1단계</b>로 쳐서 공격 배율·최대 체력이 같이 올라요 (악몽 캐릭터는 그대로)']]},
   {v:298,t:'🔒 직업 제한 장비 · 고유 증강 대폭 상향',items:[
     ['buff','✦ <b>고유 장비 증강 대폭 상향</b> (일반 증강보다 확실히 세게): 발동 피해 2배 (용왕의 숨결 · 별의 축복 · 폭풍의 눈 · 서리 숨결 · 천마 질주 · 현자의 지혜 · 불사조, 세트 증강 3종, 레이드 세트 증강 5종) · 용사의 맹세 보스·정예 피해 +18% → +35% · 질풍 걸음 공격 속도 +25% → +50% · 현자 치명타 +15% → +25% · 그림자 장막 6초 → 3초 · 수호의 맹세 보호막 20% → 35%, 40초 → 25초 · 불사조 2분 → 75초 · 피의 갈증 흡혈 2.4% → 4%'],
     ['buff','🗡 <b>고유 무기 증강 피해 2.5배</b> (12직업 모든 루트)'],
@@ -10629,12 +10632,14 @@ const raidCur=()=>RAIDS[S&&S.raidB||0];
 const raidOn=()=>!!(S&&dfM().raid);
 let DEV_RAID_TEST=false;
 // 동료 하나 만들기: 저장된 능력치에서 체력·방어·초당 피해·사거리·이동 속도만 가져옴
-function allyOf(h,i){const P=h.p||{},sp=(P.speed||200),mel=MELEE_CLS.includes(h.cls),hp=Math.max(200,(P.maxHp||200));
+// v299: 보스 러시 캐릭터는 각성이 없어서 레이드·결투·실험실에서 악몽 캐릭터보다 훨씬 약했음 → 잡은 보스 약 3마리(×0.35) = 각성 1단계로 환산 (악몽은 저장된 각성 그대로)
+const BR_AWK=.35,heroDf=h=>h&&(h.diff||(h.s&&h.s.diff))||'',heroAw=h=>!h?0:heroDf(h)==='bossrush'?Math.max(h.aw||0,Math.round((+h.bosses||0)*BR_AWK)):(h.aw||0),heroBrK=h=>{if(!h||heroDf(h)!=='bossrush')return {d:1,hp:1};const n=heroAw(h)-(h.aw||0);return {d:Math.pow(1.35,n),hp:1+AWAKE_HP*n};};
+function allyOf(h,i){const P=h.p||{},sp=(P.speed||200),mel=MELEE_CLS.includes(h.cls),bk=heroBrK(h),hp=Math.max(200,(P.maxHp||200)*bk.hp);
   // 동료 초당 피해 = 저장 당시 최대 DPS × (그 직업을 직접 조작했을 때 거신에게 들어가는 비율, 측정값) × 0.65 → 손으로 하는 것의 60~70%
-  const dps=Math.max(50,RAID_ALLY*(h.da||(h.dps||1e5)*.15));
+  const dps=Math.max(50,RAID_ALLY*(h.da||(h.dps||1e5)*.15)*bk.d);
   return {id:h.id,cls:h.cls,name:heroName(h),skin:h.skin||'',look:recLook(h),dr:/^[0-9a-z\-]{14}$/.test(h.dr||'')?dressDec(h.dr):null,x:WW/2+(i?1:-1)*90,y:WH/2+100,r:14,hp,maxHp:hp,armor:Math.max(0,P.armor||0),dps,mel,rng:mel?0:Math.min(420,Math.max(220,P.range||300)),sp:Math.min(320,sp),alive:true,cd:rand(0,.4),mvT:0,tx:0,ty:0,inv:0,hurtT:0,atkT:0,face:1,orb:(i?1:-1)*1.2,revT:0,rv:0};}
 function beginRaid(bi,st,ids){const L=myHeroes(),hs=ids.map(id=>L.find(h=>h.id===id)).filter(Boolean).filter((h,i,a)=>a.findIndex(x=>x.cls===h.cls)===i);if(!hs.length)return;const me=hs[0],R=RAIDS[bi];
-  newRun();S.diff='raid';S.raidB=bi;S.raidS=st;S.raidAw=me.aw||0;S.st.kills=me.kills||0; // 처치 수로 커지는 증강(수확·두꺼운 가죽)이 그대로
+  newRun();S.diff='raid';S.raidB=bi;S.raidS=st;S.raidAw=heroAw(me);S.st.kills=me.kills||0; // 처치 수로 커지는 증강(수확·두꺼운 가죽)이 그대로
   for(const k of PKEYS)if(me.p[k]!==undefined)S.p[k]=me.p[k];for(const k in (me.s||{}))if(me.s[k]!==undefined&&k!=='diff')S[k]=me.s[k];S.cls=me.cls;S.diff='raid';
   S.augs=(me.augs||[]).map(augDes).filter(Boolean);
   tagCount();S.noAug=true;S.started=true;S.raidMe=me.id;S.raidTok=RAID_TOK;S.raidIds=hs.map(h=>h.id);
@@ -11237,7 +11242,7 @@ BTITLE.rival='결투';
 const oppOf=(h,src)=>({n:String(h.name||heroName(h)||'도전자').slice(0,12),c:h.cls,k:h.skin||'',t:h.title||'',s:h.score||0,g:String(h.gear||'').split('!')[0]+heroDrG(h),look:recLook(h),src,hero:h});
 let DUEL_ME=null,DUEL_OPP=null,DUEL_CODES=[];
 function beginDuel(meId,opp){const me=myHeroes().find(h=>h.id===meId);if(!me||!opp)return;
-  newRun();S.diff='duel';S.raidAw=me.aw||0;S.st.kills=me.kills||0;
+  newRun();S.diff='duel';S.raidAw=heroAw(me);S.st.kills=me.kills||0;
   for(const k of PKEYS)if(me.p[k]!==undefined)S.p[k]=me.p[k];for(const k in (me.s||{}))if(me.s[k]!==undefined&&k!=='diff')S[k]=me.s[k];S.cls=me.cls;S.diff='duel';
   S.augs=(me.augs||[]).map(augDes).filter(Boolean);
   tagCount();S.noAug=true;S.started=true;
@@ -11387,11 +11392,11 @@ function duelOpps(){const L=[],me=myHeroes().find(h=>h.id===DUEL_ME),md=me?(me.d
   return [...DUEL_CODES,...L.sort((a,b)=>mk(a)-mk(b)||(a.rank||999)-(b.rank||999))];}
 // 명예의 전당 기록의 캐릭터 내려받기
 // 한 번 받은 캐릭터 정보는 저장해 두고 다시 씀 (예비 서버가 느려서). 같은 이름·모드·점수면 같은 캐릭터
-const HERO_MEM={},HERO_CACHE='chanseo_hero_cache',heroCK=o=>o.hof.name+'|'+o.hof.diff+'|'+(o.hof.score||0);
+const HERO_MEM={},HERO_CACHE='chanseo_hero_cache',heroCK=o=>o.hof.name+'|'+o.hof.diff+'|'+(o.hof.score||0)+(o.c?'|'+o.c:'');
 function heroCacheGet(o){try{return (JSON.parse(localStorage.getItem(HERO_CACHE)||'{}'))[heroCK(o)]||null;}catch(e){return null;}}
 function heroCachePut(o,code){try{const m=JSON.parse(localStorage.getItem(HERO_CACHE)||'{}');m[heroCK(o)]=code;const ks=Object.keys(m);if(ks.length>40)for(const k of ks.slice(0,ks.length-40))delete m[k];localStorage.setItem(HERO_CACHE,JSON.stringify(m));}catch(e){}}
 async function hofHero(o){if(o.hero)return o.hero;if(HERO_MEM[heroCK(o)])return o.hero=HERO_MEM[heroCK(o)];{const c=heroCacheGet(o);if(c){const h=await heroUnpack(c);if(h){h.name=h.name||o.n;o.hero=HERO_MEM[heroCK(o)]=h;return h;}}}
-  try{const r=await fetch(SHEET_URL+'?hero='+encodeURIComponent(o.hof.name)+'&diff='+encodeURIComponent(o.hof.diff),{cache:'no-store'});const j=await r.json();if(j&&j.hero)heroCachePut(o,j.hero);const h=await heroUnpack(j&&j.hero);if(h){h.name=h.name||o.n;o.hero=HERO_MEM[heroCK(o)]=h;}return h;}catch(e){return null;}}
+  try{const r=await fetch(SHEET_URL+'?hero='+encodeURIComponent(o.hof.name)+'&diff='+encodeURIComponent(o.hof.diff)+(o.c?'&cls='+encodeURIComponent(o.c):''),{cache:'no-store'});const j=await r.json();if(j&&j.hero)heroCachePut(o,j.hero);const h=await heroUnpack(j&&j.hero);if(h){h.name=h.name||o.n;o.hero=HERO_MEM[heroCK(o)]=h;}return h;}catch(e){return null;}}
 function openDuel(){cosPreviewHide();const H=myHeroes().sort((a,b)=>(b.score||0)-(a.score||0));if(!H.some(h=>h.id===DUEL_ME))DUEL_ME=H[0]?H[0].id:null;
   const me=H.find(h=>h.id===DUEL_ME),O=duelOpps(),R=duelRec();
   const card=(h)=>{const av=hofAv(h.cls,h.skin,'',heroDrG(h),recLook(h));return `<button class="rcard ${h.id===DUEL_ME?'on':''}" data-dme="${h.id}">${h.id===DUEL_ME?'<span class="rbadge">🎮 나</span>':''}${av?`<img src="${av}" alt="">`:''}<b>${esc(heroName(h))}</b><small>${CLASSES[h.cls].n} · 점수 ${(h.score||0).toLocaleString()}</small><small>⚔ ${wdl(heroDRec(h.id))}</small></button>`;};
@@ -12783,7 +12788,7 @@ function normBoard(list){return list.map(b=>({...b,dw:dwOf(b.dw),diff:dOf(b),fx:
 const myRecs=()=>{try{return JSON.parse(localStorage.getItem('chanseo_myrec')||'{}');}catch(e){return {};}};
 const saveMyRec=r=>{try{const m=myRecs();const old=m[r.diff];if(!old||scoreOf({...r})>=scoreOf({...old}))m[r.diff]=r;localStorage.setItem('chanseo_myrec',JSON.stringify(m));}catch(e){}};
 function mergeMine(list){const m=myRecs();for(const k in m){const r=m[k];const sv=list.find(b=>b.name===r.name&&b.diff===k);if(!sv||sv.score<scoreOf({...r,diff:k}))list=[...list.filter(b=>b!==sv),...normBoard([r]).map(b=>({...b,id:'s_'+b.name+'_'+b.diff,local:true}))];}return normBoard(list).map(b=>({...b,id:b.id||'s_'+b.name+'_'+b.diff}));}
-const regForm=()=>(RDB&&RMYID)||SHEET?`<div class="nick col">${myNick()?`<input id="nickIn" type="hidden" value="${esc(myNick())}"><div style="font-size:15px">👤 <b>${esc(myNick())}</b> 이름으로 올라가요 <small style="color:var(--muted)">(이름은 시작 화면 👤에서 바꿀 수 있어요)</small></div>`:`<input id="nickIn" maxlength="12" placeholder="이름 (12자까지) · 한 번 정하면 다음부터 자동" value="">`}<div class="row"><input id="cmtIn" maxlength="40" placeholder="한마디 남기기 (40자까지, 비워도 돼요)"><button class="btn" id="rsub">등록</button></div></div><p class="sub" id="rmsg" style="margin-top:6px">${myNick()?'등록을 누르면':'이름과 한마디를 쓰고 등록을 누르면'} 메인 화면 명예의 전당에 올라가요. 이름마다 가장 높은 점수만 남아요 (한마디는 처음 올리거나 더 좋은 기록일 때 바뀌어요).</p>`:`<p class="sub">${RSTATE==='loading'?'랭킹 서버에 연결하는 중이에요…':'랭킹 서버(구글 시트)에 연결하지 못했어요. 인터넷 연결을 확인하거나 잠시 뒤 다시 시도해 주세요.'}</p><button class="btn ghost" id="rRetry">↻ 랭킹 서버 다시 연결</button>`;
+const regForm=()=>(RDB&&RMYID)||SHEET?`<div class="nick col">${myNick()?`<input id="nickIn" type="hidden" value="${esc(myNick())}"><div style="font-size:15px">👤 <b>${esc(myNick())}</b> 이름으로 올라가요 <small style="color:var(--muted)">(이름은 시작 화면 👤에서 바꿀 수 있어요)</small></div>`:`<input id="nickIn" maxlength="12" placeholder="이름 (12자까지) · 한 번 정하면 다음부터 자동" value="">`}<div class="row"><input id="cmtIn" maxlength="40" placeholder="한마디 남기기 (40자까지, 비워도 돼요)"><button class="btn" id="rsub">등록</button></div></div><p class="sub" id="rmsg" style="margin-top:6px">${myNick()?'등록을 누르면':'이름과 한마디를 쓰고 등록을 누르면'} 메인 화면 명예의 전당에 올라가요. 이름·직업마다 가장 높은 점수만 남아요 (다른 직업 기록은 점수가 낮아도 따로 올라가요) (한마디는 처음 올리거나 더 좋은 기록일 때 바뀌어요).</p>`:`<p class="sub">${RSTATE==='loading'?'랭킹 서버에 연결하는 중이에요…':'랭킹 서버(구글 시트)에 연결하지 못했어요. 인터넷 연결을 확인하거나 잠시 뒤 다시 시도해 주세요.'}</p><button class="btn ghost" id="rRetry">↻ 랭킹 서버 다시 연결</button>`;
 // 명예의 전당: 지난번 받은 목록을 먼저 보여주고, 뒤에서 새로 받아 바꿈 (15초 넘으면 한 번 더 시도)
 const BOARD_KEY='chanseo_board';
 function setBoardFrom(j){BOARD_DW=!!(j.length&&'dw' in j[0]);BOARD=mergeMine(normBoard(j).map(b=>({...b,id:'s_'+b.name+'_'+b.diff})));SHEET=true;RSTATE='on';refreshBoard();}
@@ -12980,7 +12985,7 @@ const labCounts=()=>{const D=S&&S.en?S.en.filter(e=>e.alive&&e.dummy):[];return 
 function beginLab(src,keep,ext){const H=myHeroes(),me=src==='x'?ext:src[0]==='h'?H.find(h=>h.id===src.slice(2)):null,cls=me?me.cls:src.slice(2);if(!CLASSES[cls]||(src==='x'&&!me))return;
   const dum=keep||{b:1,g:0},god=S&&S.lab&&labOn()?S.lab.god!==false:true;if(src!=='x')labSrcSet(me?'h:'+me.id:'c:'+cls);
   newRun();
-  if(me){S.diff='lab';S.raidAw=me.aw||0;S.st.kills=me.kills||0;
+  if(me){S.diff='lab';S.raidAw=heroAw(me);S.st.kills=me.kills||0;
     for(const k of PKEYS)if(me.p[k]!==undefined)S.p[k]=me.p[k];for(const k in (me.s||{}))if(me.s[k]!==undefined&&k!=='diff')S[k]=me.s[k];S.cls=me.cls;S.diff='lab';
     S.augs=(me.augs||[]).map(augDes).filter(Boolean);}
   // 새 캐릭터: 판을 새로 시작할 때처럼 직업·영구 강화·마스터리·장비 특수 효과까지 (저장된 판은 건드리지 않음)
@@ -13597,8 +13602,8 @@ async function hofDel(b){const nm=String(b.name||''),df=b.diff;if(!DEV||!nm)retu
   const dropLocal=()=>{try{const m=myRecs();if(m[df]&&(m[df].name===nm||b.local)){delete m[df];localStorage.setItem('chanseo_myrec',JSON.stringify(m));}}catch(e){}};
   if(b.local){dropLocal();BOARD=(BOARD||[]).filter(x=>x!==b);refreshBoard();toast('이 기기의 기록을 지웠어요');return;}
   if(!SHEET_URL){toast('서버 주소가 없어요');return;}
-  try{const r=await fetch(SHEET_URL+'?delrec='+encodeURIComponent(nm)+'&diff='+encodeURIComponent(df)+'&dk='+encodeURIComponent(DEV_K),{cache:'no-store'});const j=await r.json();
-    if(j&&j.ok){dropLocal();BOARD=(BOARD||[]).filter(x=>!(x.name===nm&&x.diff===df));refreshBoard();toast(`🗑 「${nm}」 기록 ${j.n||0}줄 삭제`);}
+  try{const r=await fetch(SHEET_URL+'?delrec='+encodeURIComponent(nm)+'&diff='+encodeURIComponent(df)+(SRV_V>=78&&b.cls&&!/^raid/.test(df)?'&cls='+encodeURIComponent(b.cls):'')+'&dk='+encodeURIComponent(DEV_K),{cache:'no-store'});const j=await r.json();
+    if(j&&j.ok){dropLocal();BOARD=(BOARD||[]).filter(x=>!(x.name===nm&&x.diff===df&&(!(SRV_V>=78&&b.cls&&!/^raid/.test(df))||x.cls===b.cls)));refreshBoard();toast(`🗑 「${nm}」 기록 ${j.n||0}줄 삭제`);}
     else if(Array.isArray(j))uiAlert(`서버가 아직 삭제 기능이 없는 예전 버전으로 응답했어요 (지금 서버 ${SRV_V?'v'+(SRV_V/10).toFixed(1):'버전 확인 안 됨'}).\n\nApps Script에서 코드를 붙여넣은 뒤 꼭\n배포 → 배포 관리 → 연필(수정) → 버전: 「새 버전」 → 배포\n를 눌러야 실제 서버가 바뀌어요. (저장만 하면 예전 버전이 계속 돌아가요)`);
     else toast(j&&j.err==='key'?'개발자 키가 맞지 않아요':j&&j.err?'삭제 실패: '+j.err:'삭제 실패');}
   catch(e){toast('삭제 실패 (인터넷 확인)');}}
@@ -13609,7 +13614,7 @@ async function submitScore(nick,comment,run){
   const sheet=SHEET||!RDB;
   if(!sheet&&!RMYID){say('온라인 랭킹을 쓸 수 없는 환경이에요.');return;}
   const dk=run.diff||'normal',docId=dk==='normal'?RMYID:RMYID+'_'+dk;
-  const cur=(BOARD||[]).find(b=>b.diff===dk&&(sheet?b.name===nick:b.id===docId));
+  const cur=(BOARD||[]).find(b=>b.diff===dk&&(sheet?b.name===nick:b.id===docId)&&(!(sheet&&SRV_V>=78)||b.cls===run.cls));/* v299: 서버 v7.8부터 명예의 전당은 직업마다 따로 (같은 직업끼리만 점수 비교) */
   const better=!cur||run.score>cur.score;
   if(!better){say(`'${nick}'의 이전 최고 점수(${cur.score.toLocaleString()}점)가 더 높아서 그대로 둘게요. (한마디는 기록을 처음 올리거나 더 좋은 기록으로 바꿀 때만 바뀌어요)`);return;}
   const hf=cosEq('hof');const rec={name:nick,cls:run.cls+(dk==='normal'?'':':'+dk)+(hf?'#'+hf.k:'')+(cosEq('skin')?'@'+cosEq('skin').k:'')+(()=>{const sg=[run.bonus||0,run.ap?Math.round(run.ap*100):'',META.title||'',auraStr(),gearCode(),lookOld(run.cls)?'o':'n',(cosEq('frame')||{}).k||'',run.build||BUILD,'',run.dr||(()=>{try{return dressEnc(myDress(run.cls));}catch(e){return '';}})(),run.gd||''];while(sg.length&&(sg[sg.length-1]===''||/^-+$/.test(String(sg[sg.length-1]))||sg[sg.length-1]===0))sg.pop();return sg.length?'~'+sg.join('~'):'';})(),bonus:run.bonus||0,ap:run.ap||0,diff:dk,time:run.sec,lvl:run.lvl,kills:run.kills,bosses:run.bosses,gold:run.gold||0,score:run.score,comment,k:MYKEY,at:run.at||Date.now()};if(rec.cls.length>120)rec.cls=rec.cls.replace(/~\d+$/,'');if(dwStr())rec.dw=dwStr();
@@ -14285,7 +14290,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=298,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=299,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});

@@ -1,4 +1,9 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v7.7
+// 찬서 명예의 전당 서버 (Google Apps Script) v7.8
+//
+// v7.7 → v7.8 바뀐 점 (게임 v299)
+// - 명예의 전당을 직업마다 따로 저장: 이름 + 난이도 + 직업마다 한 줄 (레이드는 지금처럼 이름 + 레이드 보스마다 한 줄)
+//   다른 직업으로 낸 기록은 점수가 낮아도 따로 올라가고, 같은 직업끼리만 더 높은 점수로 바뀜
+// - 캐릭터 내려받기(?hero=)·기록 삭제(?delrec=)에 직업(cls)을 같이 받음 (없으면 예전처럼 이름 + 난이도)
 //
 // v7.6 → v7.7 바뀐 점 (게임 v267)
 // - 무한의 악몽 점수식 v4(SC4_AT 이후 기록): 보스 점수·클리어 보너스 없음, 레벨 점수 ×3
@@ -340,7 +345,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 76, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 78, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -519,16 +524,20 @@ function delList_() { const c = CacheService.getScriptCache(); let j = null; try
   const s = delSheet_(), last = s.getLastRow(), L = last < 2 ? [] : s.getRange(2, 1, last - 1, 3).getValues().map(r => ({ n: String(r[0]), d: String(r[1]), t: +r[2] || 0 }));
   try { c.put(DEL_CACHE, JSON.stringify(L), 300); } catch (err) {} return L; }
 function delAdd_(nm, df) { delSheet_().appendRow([nm, df, Date.now()]); try { CacheService.getScriptCache().remove(DEL_CACHE); } catch (err) {} }
-const delBlocked_ = (nm, df, at) => delList_().some(x => x.n === nm && x.d === df && (+at || 0) <= x.t);
+// v7.8: 기록은 이름 + 난이도 + 직업마다 한 줄 (레이드는 이름 + 난이도). 직업은 cls 칸의 앞부분 (knight:nightmare@skin → knight)
+const clsB_ = c => String(c || '').split(/[:#@]/)[0];
+const recKey_ = (nm, df, c) => String(nm) + '\u0001' + df + (/^raid/.test(String(df)) ? '' : '\u0001' + clsB_(c));
+const delBlocked_ = (nm, df, at, c) => delList_().some(x => x.n === nm && (x.d === df || x.d === df + '|' + clsB_(c)) && (+at || 0) <= x.t);
 function delrec_(q) {
   if (String(q.dk || '') !== DEV_KEY) return { err: 'key' };
   const nm = str_(q.delrec, 12), df = String(q.diff || '');if (!nm || !df) return { err: 'name' };
   const lock = LockService.getScriptLock();try { lock.waitLock(8000); } catch (err) { return { err: 'busy' }; }
   try { const s = sheet_(), last = s.getLastRow();if (last < 2) return { ok: 1, n: 0 };
     const v = s.getRange(2, 1, last - 1, LIST_COLS).getValues(), rows = [];
-    v.forEach((r, i) => { const o = Object.fromEntries(HEAD.slice(0, LIST_COLS).map((h, j) => [h, r[j]])); if (String(o.name) === nm && fixDiff_(o) === df) rows.push(i + 2); });
+    const qc = String(q.cls || '');
+    v.forEach((r, i) => { const o = Object.fromEntries(HEAD.slice(0, LIST_COLS).map((h, j) => [h, r[j]])); if (String(o.name) === nm && fixDiff_(o) === df && (!qc || clsB_(o.cls) === qc)) rows.push(i + 2); });
     rows.reverse().forEach(rw => s.deleteRow(rw));
-    delAdd_(nm, df);
+    delAdd_(nm, qc ? df + '|' + qc : df);
     ownerSet_(nm, owner_(s, nm).kh || acctKh_(nm) || '');
     try { CacheService.getScriptCache().remove(CACHE_KEY); } catch (err) {}
     return { ok: 1, n: rows.length };
@@ -585,7 +594,7 @@ function doGet(e) {
     const s = sheet_(), last = s.getLastRow();
     if (last < 2) return out_({ hero: '' });
     const v = s.getRange(2, 1, last - 1, LIST_COLS).getValues();
-    const i = v.findIndex(r => { const o = Object.fromEntries(HEAD.slice(0, LIST_COLS).map((h, j) => [h, r[j]])); return String(o.name) === String(q.hero) && fixDiff_(o) === String(q.diff || 'nightmare'); });
+    const i = v.findIndex(r => { const o = Object.fromEntries(HEAD.slice(0, LIST_COLS).map((h, j) => [h, r[j]])); return String(o.name) === String(q.hero) && fixDiff_(o) === String(q.diff || 'nightmare') && (!q.cls || clsB_(o.cls) === String(q.cls)); });
     return out_({ hero: i < 0 ? '' : String(s.getRange(i + 2, HEAD.indexOf('hero') + 1).getValue() || '') });
   }
   const c = CacheService.getScriptCache();
@@ -635,7 +644,7 @@ function doPost(e) {
       return out_({ ok: true, result: 'devrekey', n: o.rows.length });
     }
     // 관리자가 지운 기록을 옛 기기가 다시 올리는 경우: 이름 주인을 새로 정하기 전에 먼저 거절
-    if (!d.rekey && !d.dwOnly) { const a0 = +d.at || 0, r0 = clean_(d, a0 > 1.7e12 && a0 <= Date.now() + 60000 ? a0 : 0); if (delBlocked_(r0.name, r0.diff, r0.at)) return out_({ ok: false, result: 'deleted' }); }
+    if (!d.rekey && !d.dwOnly) { const a0 = +d.at || 0, r0 = clean_(d, a0 > 1.7e12 && a0 <= Date.now() + 60000 ? a0 : 0); if (delBlocked_(r0.name, r0.diff, r0.at, r0.cls)) return out_({ ok: false, result: 'deleted' }); }
     // 이름 주인 확인: 주인이 있는 이름은 같은 열쇠로만. 주인이 없으면 열쇠와 함께 처음 올린 기기가 주인
     const nm0 = str_(d.name, 12) || '익명', my = kh_(d.k), own = nm0 === '익명' ? { rows: [], kh: '' } : owner_(s, nm0);
     if (!own.kh && nm0 !== '익명') own.kh = acctKh_(nm0);
@@ -687,10 +696,10 @@ function doPost(e) {
     }
     // 기록 시각: 게임이 보낸 값(그 판을 한 시각)을 씀. 지금보다 미래거나 너무 옛날이면 서버 시각
     const at0 = +d.at || 0, r = clean_(d, at0 > 1.7e12 && at0 <= Date.now() + 60000 ? at0 : 0);
-    if (delBlocked_(r.name, r.diff, r.at)) return out_({ ok: false, result: 'deleted' });
+    if (delBlocked_(r.name, r.diff, r.at, r.cls)) return out_({ ok: false, result: 'deleted' });
     const last = s.getLastRow();
-    const keys = last > 1 ? s.getRange(2, 1, last - 1, 3).getValues().map(x => String(x[0]) + '\u0001' + fixDiff_({ diff: x[1], cls: x[2] })) : [];
-    const i = keys.indexOf(r.name + '\u0001' + r.diff);
+    const keys = last > 1 ? s.getRange(2, 1, last - 1, 3).getValues().map(x => recKey_(x[0], fixDiff_({ diff: x[1], cls: x[2] }), x[2])) : [];
+    const i = keys.indexOf(recKey_(r.name, r.diff, r.cls));
     if (i < 0) {
       s.appendRow(HEAD.map(h => r[h]));
       return out_({ ok: true, result: 'new' });
