@@ -5480,7 +5480,7 @@ function nwTick(dt){if(!endless()||rushOn()||!S.p.alive||S.win||dfM().raid||dfM(
   else{S.st.nwOk=(S.st.nwOk||0)+1;achCheck({nwOk:S.st.nwOk});}}
 // 즉사: 피해 감소·무적·보호막을 무시. 최후의 패·부활 보험·불사조·골드 부활은 그대로 작동
 // v290: 즉사 패턴(악몽의 파동·보스 즉사기·레이드 심판)은 소환물(해골·포탑·그림자 분신)도 휩쓸어 부숨
-function sumWipe(hit){let n=0;const P=S.p;for(const L of [S.skel,S.turrets,S.clones])for(const k of L||[])if(k.life>0&&hit(k)){k.life=0;n++;burst(k.x,k.y,'#ff8a8a',6);}if(n&&P)ftext(P.x,P.y-52,'💥 소환물 '+n+' 소멸','#ff8a8a',14);return n;}
+function sumWipe(hit){let n=0;const P=S.p;for(const L of [S.skel,S.turrets,S.clones,...(S.allies||[]).map(a=>a.sk)])for(const k of L||[])if(k.life>0&&hit(k)){k.life=0;n++;burst(k.x,k.y,'#ff8a8a',6);}if(n&&P)ftext(P.x,P.y-52,'💥 소환물 '+n+' 소멸','#ff8a8a',14);return n;}
 function killP(why){const p=S.p;if(!p.alive)return;if(labOn()&&S.lab&&S.lab.god){p.hp=Math.max(1,p.hp);return;}S.bHit=1;ftext(p.x,p.y-30,why,'#ff4f6a',20);
   if(has('lastcard')&&p.lastCd<=0){p.lastCd=lv3('lastcard',60,45,30);p.hp=1;p.inv=2;toast('최후의 패');achUnlock('h_1hp');return;}
   if(p.token){p.token=false;p.hp=p.maxHp*.5;p.inv=2.5;S.rings.push({x:p.x,y:p.y,r:10,max:160,life:.4,col:'#7be08f'});toast('부활 보험 사용');achUnlock('h_1hp');return;}
@@ -7409,7 +7409,7 @@ function update(dt){
       if(p.dashT<=0)dashEnd();
     }else{const lk=lightK(),sp=Math.min(SPEED_CAP_F(),moveSpd())*lk*(S.buffT.slow>0?.6:1);p.x+=mx*sp*dt;p.y+=my*sp*dt;if(!S.lkTold&&(lk>1||fieldK()>1)){S.lkTold=1;toast(lk>1?'🍃 가벼운 몸: 적이 빨라지는 만큼 나도 조금씩 빨라져요':'🌀 둔화 장막: 적이 빨라지는 만큼 내 주변 적이 느려져요');}}
     p.x=clamp(p.x,p.r+10,WW-p.r-10);p.y=clamp(p.y,p.r+10,WH-p.r-10);pushOut(p,p.r);
-    if(S.arena){const A=S.arena;{const dr=(A.tr-A.r)*Math.min(1,dt*.8);A.r+=A.nm&&dr<0?Math.max(dr,-140*dt):dr;}/* 악몽 결계는 1초에 140씩만 좁혀 옴 (걸어서 따라갈 수 있게) */const m=A.r-p.r-4;if(A.duel){/* 결투장은 둥근 벽 */const cl=(o,mm)=>{const dx=o.x-A.x,dy=o.y-A.y,dd=Math.hypot(dx,dy);if(dd>mm){o.x=A.x+dx/dd*mm;o.y=A.y+dy/dd*mm;}};cl(p,m);if(S.boss&&S.boss.alive)cl(S.boss,A.r-(S.boss.r||18)-4);for(const k of S.skel||[])cl(k,A.r-18);}else{p.x=clamp(p.x,A.x-m,A.x+m);p.y=clamp(p.y,A.y-m,A.y+m);/* v290: 해골도 결계 밖으로 못 나감 */const km=A.r-18;for(const k of S.skel||[]){k.x=clamp(k.x,A.x-km,A.x+km);k.y=clamp(k.y,A.y-km,A.y+km);}}
+    if(S.arena){const A=S.arena;{const dr=(A.tr-A.r)*Math.min(1,dt*.8);A.r+=A.nm&&dr<0?Math.max(dr,-140*dt):dr;}/* 악몽 결계는 1초에 140씩만 좁혀 옴 (걸어서 따라갈 수 있게) */const m=A.r-p.r-4;if(A.duel){/* 결투장은 둥근 벽 */const cl=(o,mm)=>{const dx=o.x-A.x,dy=o.y-A.y,dd=Math.hypot(dx,dy);if(dd>mm){o.x=A.x+dx/dd*mm;o.y=A.y+dy/dd*mm;}};cl(p,m);if(S.boss&&S.boss.alive)cl(S.boss,A.r-(S.boss.r||18)-4);for(const k of S.skel||[])cl(k,A.r-18);}else{p.x=clamp(p.x,A.x-m,A.x+m);p.y=clamp(p.y,A.y-m,A.y+m);/* v290: 해골도 결계 밖으로 못 나감 */const km=A.r-18;for(const k of [...(S.skel||[]),...(S.allies||[]).flatMap(a=>a.sk||[])]){k.x=clamp(k.x,A.x-km,A.x+km);k.y=clamp(k.y,A.y-km,A.y+km);}}
       // 결계는 몹에게도 벽: 밖에 있거나 밖에서 생긴 잡몹은 결계 안쪽 가장자리로 밀려 들어옴 (어두운 바깥에서 돌아다니지 않게)
       for(const e of S.en){if(!e.alive||e.boss)continue;const me=Math.max(10,A.r-e.r);if(e.x<A.x-me||e.x>A.x+me||e.y<A.y-me||e.y>A.y+me){/* 결계 밖에서 생긴 적은 걸어 들어오게 둠 (가장자리에 바로 나타나면 피할 틈이 없음). 5초 넘게 밖에 있거나 한 번 들어온 적은 가장자리로 */if(!e.inA&&!A.duel&&(e.oT=(e.oT||0)+dt)<5){const a=Math.atan2(A.y-e.y,A.x-e.x);e.x+=Math.cos(a)*60*dt;e.y+=Math.sin(a)*60*dt;continue;}e.x=clamp(e.x,A.x-me,A.x+me);e.y=clamp(e.y,A.y-me,A.y+me);}else e.inA=1;}}
     {const bR=p.maxHp*.001*mlv('regen')+((tag('nature')>=2?1.5:0)+(has('warpaint')?(p.fy||0)*lv3('warpaint',.08,.1,.15):0)+(has('worldtree')?3:0)+(has('bastion')&&nearTurret()?3*(has('f_citadel')?2:1):0)+(has('sanctuary')?lv3('sanctuary',1.5,2,3):0))*rgHpM()+(has('yggdrasil')&&inVine(p)?p.maxHp*.02:0)+(has('f_ancient')&&inVine(p)?p.maxHp*.02:0);const rgM=has('f_hydra')?3:(has('thick')&&hitRec()?3:1)*(has('troll')&&p.noHitT>3?3:1);if(p.regen||bR||has('f_immortal'))healR((p.regen*rgM*(p.skRgT>0?5:1)*rgHpM()*(has('d_photo')?1.5:1)*(season()===0?2:1)+bR+(has('f_immortal')?p.maxHp*.01:0))*dt*healM());}
@@ -8142,7 +8142,7 @@ function draw(){
   for(const e of S.en){if(!(e.mkT>S.t)||!e.alive||offV(e.x,e.y))continue;const r=e.r+6,a=S.t*3;ctx.strokeStyle='rgba(255,80,100,.85)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(e.x,e.y,r,0,TAU);ctx.stroke();for(let i=0;i<4;i++){const q=a+i*1.571;ctx.beginPath();ctx.moveTo(e.x+Math.cos(q)*(r-4),e.y+Math.sin(q)*(r-4));ctx.lineTo(e.x+Math.cos(q)*(r+4),e.y+Math.sin(q)*(r+4));ctx.stroke();}}
   if(S.skel&&S.p.alive)for(const k of S.skel){if(k.mhp&&k.hp<k.mhp&&!offV(k.x,k.y)){const w=26,fr=Math.max(0,k.hp/k.mhp);ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(k.x-w/2-1,k.y-56,w+2,5);ctx.fillStyle=fr>.5?'#8cff9a':fr>.25?'#ffd76a':'#ff6a6a';ctx.fillRect(k.x-w/2,k.y-55,w*fr,3);}}
   drawThr();
-  if(S.skel&&S.p.alive)for(const k of S.skel){if(offV(k.x,k.y))continue;const X=Math.round(k.x),Y=Math.round(k.y),f=k.f,bob=k.mv?Math.floor(S.t*10)%2:0,al=k.life<2?.5+.5*Math.sin(S.t*20):1,K=2,gl=.5+.5*Math.sin(S.t*5+k.ox);ctx.globalAlpha=al;
+  if(S.p.alive)for(const k of [...(S.skel||[]),...(S.allies||[]).flatMap(a=>a.alive?a.sk||[]:[])]){if(offV(k.x,k.y))continue;const X=Math.round(k.x),Y=Math.round(k.y),f=k.f,bob=k.mv?Math.floor(S.t*10)%2:0,al=k.life<2?.5+.5*Math.sin(S.t*20):1,K=2,gl=.5+.5*Math.sin(S.t*5+k.ox);ctx.globalAlpha=al;
     // 해골 기사: 도트 1칸=2 (약 히어로 크기), 녹색 영기 오라 + 뿔투구 + 대검/방패
     ctx.fillStyle=`rgba(90,255,130,${.10+.08*gl})`;ctx.beginPath();ctx.ellipse(X,Y+12,20,7,0,0,TAU);ctx.fill();ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(X,Y+13,13,4,0,0,TAU);ctx.fill();
     const P=(c,x,y,w,h)=>{ctx.fillStyle=c;ctx.fillRect(X+(f>0?x:-x-w)*K,Y+y*K,w*K,h*K);},O='#120e16',B='#ece6d6',Bs='#bdb6a4',Ir='#3e4450',Ih='#646c7a',G='#8cff9a';
@@ -8880,6 +8880,7 @@ const PATCH_NOTES=[
   {v:290,t:'💀 사령술사 해골 조정',items:[
     ['nerf','💀 해골이 호위무사처럼 근접 적을 너무 많이 붙잡던 것: 해골 1기당 붙잡는 적 <b>6 → 4마리</b>, 붙잡는 거리 150 → 110. <b>정예(금색 테두리)는 해골을 무시하고 본체를 노려요</b>'],
     ['change','🧱 해골이 결계 밖으로 나가던 문제 수정: 해골도 결계 안에서만 움직여요'],
+    ['new','💀 <b>레이드 사령술사</b>: 동료로 데려간 사령술사가 해골을 못 부르던 것 → 해골 병사 최대 4기를 불러 함께 싸워요 (동료 피해의 절반을 해골이 냄). 대표로 나가면 레이드 시작 때 해골이 미리 채워져요'],
     ['change','☠ <b>즉사 패턴</b>(악몽의 파동·보스 즉사기·레이드 심판)에 <b>소환물도 휩쓸려 부서져요</b>: 해골·포탑·그림자 분신이 빛의 원 밖이나 즉사 범위 안에 있으면 사라짐'],
     ['look','📊 스탯 창 흡혈: 체력 재생처럼 <b>지금 DPS로 계산한 초당 흡혈 회복 / 1초 한도</b>를 보여줘요. 한도를 넘으면 빨간색 (넘는 만큼은 회복되지 않아요)']]},
   {v:289,t:'📈 고점 돌파 증강 점검',items:[
@@ -10582,7 +10583,7 @@ function beginRaid(bi,st,ids){const L=myHeroes(),hs=ids.map(id=>L.find(h=>h.id==
   S.augs=(me.augs||[]).map(augDes).filter(Boolean);
   tagCount();S.noAug=true;S.started=true;S.raidMe=me.id;S.raidTok=RAID_TOK;S.raidIds=hs.map(h=>h.id);
   const p=S.p;p.x=WW/2;p.y=WH/2+40;hpSync();p.hp=p.maxHp;p.inv=2;p.alive=true;p.barrier=barrierMax();
-  S.allies=hs.slice(1).map(allyOf);for(const a of S.allies)a.y=WH/2+60;raidRoles();S.rushT=1.5;S.mode='play';hide();
+  S.allies=hs.slice(1).map(allyOf);for(const a of S.allies)a.y=WH/2+60;/* v290: 레이드 시작 때 해골을 미리 채움 (결투처럼) */{const p=S.p;let n=0;while(skelMax()>0&&(S.skel||[]).length<skelMax()&&n<40){raiseSkel(p.x+rand(-80,80),p.y+rand(-80,80));n++;}for(const a of S.allies)if(a.cls==='necro'){a.sk=[];for(let i=0;i<4;i++)a.sk.push({x:a.x+rand(-40,40),y:a.y+rand(-40,40),life:12,cd:rand(0,.7),f:1,mv:0,ox:Math.random()*6,sw:0});}}raidRoles();S.rushT=1.5;S.mode='play';hide();
   S.arena={x:WW/2,y:WH/2-100,r:1100,tr:1100};raidMapInit(R.map);
   toast(`${R.ico} 레이드 「${R.n}」 ${st}단계 · 동료 ${S.allies.length}명과 함께!`);}
 // 지형물: 사람·동료가 못 지나가고 적 탄환을 막음 (보스는 통과). 얼음 기둥은 숨결에 맞을 때마다 금이 가다 부서짐
@@ -10999,7 +11000,7 @@ BAI.raidboss=function(e,dt,o){if(e.entT>0){raidEntTick(e,dt);return;}const RD=ra
     if(e.bt>3){e.wt=.2;go(e,'walk');}break;}
   // 몸통 접촉: 동료도 맞음
   for(const a of S.allies||[])if(a.alive&&d2(a,e)<(e.r+a.r)**2&&(a.ccd||0)<=0){allyHurt(a,dm*.25,'몸통');a.ccd=1.5;}};
-function allyDie(a,src){if(!a.alive)return;a.hp=0;a.alive=false;a.rv=0;raidRoles();(S.aDie=S.aDie||[]).push(Math.round((S.bt||0)-(S.bStart||0))+'s '+(src||'?'));burst(a.x,a.y,'#ff6a6a',16);toast((S.raidTok||0)>0?`💀 ${a.name} 쓰러짐! 곁에 서 있으면 일으켜요 (부활 기회 ${S.raidTok})`:`💀 ${a.name} 쓰러짐… 부활 기회가 없어요`);}
+function allyDie(a,src){if(!a.alive)return;a.hp=0;a.alive=false;a.rv=0;a.sk=[];raidRoles();(S.aDie=S.aDie||[]).push(Math.round((S.bt||0)-(S.bStart||0))+'s '+(src||'?'));burst(a.x,a.y,'#ff6a6a',16);toast((S.raidTok||0)>0?`💀 ${a.name} 쓰러짐! 곁에 서 있으면 일으켜요 (부활 기회 ${S.raidTok})`:`💀 ${a.name} 쓰러짐… 부활 기회가 없어요`);}
 function allyHurt(a,amt,src){if(!a.alive||a.inv>0)return;S.aHit=S.aHit||{};S.aHit[src||'?']=(S.aHit[src||'?']||0)+1;// 동료는 받는 피해 절반, 한 방에 최대 체력 25%까지 (기본만 하는 AI라 잘 못 피하니까). 역할(탱커 등) 피해 감소도 적용
   amt=Math.min(amt*.5*(roleOf(a.cls).tk||1)*100/(100+a.armor),a.maxHp*.25);a.hp-=amt;a.hurtT=.3;a.inv=.25;a.calm=0;ftext(a.x,a.y-30,'-'+fmtN(amt),'#ff9a9a',13);
   if(a.hp<=0){a.alive=true;allyDie(a,src);}}
@@ -11021,9 +11022,15 @@ function allyTick(a,dt){const p=S.p;a.inv=Math.max(0,a.inv-dt);if(a.alive){a.cal
    if(hit){const l=Math.hypot(ex,ey)||1;vx=ex/l*400;vy=ey/l*400;}}
   const l=Math.hypot(vx,vy);a.moving=l>12;if(a.moving){const s=Math.min(l,a.sp*(S.rdoom?1.7:1)*dt);a.x+=vx/l*s;a.y+=vy/l*s;a.lmx=vx/l;a.lmy=vy/l;if(Math.abs(vx)>4)a.face=vx>0?1:-1;}
   if(S.rob)pushOut(a,a.r);if(S.arena){const A=S.arena,m=A.r-a.r-4;a.x=clamp(a.x,A.x-m,A.x+m);a.y=clamp(a.y,A.y-m,A.y+m);}
+  // v290: 동료 사령술사도 해골 병사를 부름 (최대 4기, 12초). 동료 초당 피해의 절반을 해골들이 나눠서 냄
+  if(a.cls==='necro'){a.sk=a.sk||[];a.skT=(a.skT??0)-dt;if(a.skT<=0&&a.sk.length<4){a.skT=1.5;a.sk.push({x:a.x+rand(-30,30),y:a.y+rand(-30,30),life:12,cd:rand(0,.5),f:1,mv:0,ox:Math.random()*6,sw:0});}
+    for(const k of a.sk){k.life-=dt;k.cd-=dt;k.sw=Math.max(0,k.sw-dt);const e=b&&!b.phase&&!b.air?b:null,tx=e?e.x:a.x+(k.ox-3)*12,ty=e?e.y:a.y+20,dx=tx-k.x,dy=ty-k.y,dd=Math.hypot(dx,dy)||1,rr=e?e.r+9:6;
+      if(dd>rr){const sp=Math.min(dd-rr,(e?175:260)*dt);k.x+=dx/dd*sp;k.y+=dy/dd*sp;k.f=dx>=0?1:-1;k.mv=1;}else k.mv=0;
+      if(e&&dd<=rr+4&&k.cd<=0){k.cd=.7;k.sw=.18;raidHit(e,a.dps*.5*.7/4,a);}}
+    a.sk=a.sk.filter(k=>k.life>0);}
   // 공격: 가장 가까운 적(보통 거신) — 초당 피해를 0.4초마다 나눠서
   a.cd-=dt;if(a.cd<=0){a.cd=.4;let tg=null,bd=1e12;for(const e of S.en){if(!e.alive||e.phase)continue;const d=d2(e,a);if(d<bd){bd=d;tg=e;}}
-    if(tg&&Math.sqrt(bd)<=(a.mel?tg.r+a.r+60:a.rng+tg.r)){const dm=a.dps*.4;a.atkT=.25;a.face=tg.x>a.x?1:-1;
+    if(tg&&Math.sqrt(bd)<=(a.mel?tg.r+a.r+60:a.rng+tg.r)){const dm=a.dps*.4*(a.cls==='necro'?.5:1);a.atkT=.25;a.face=tg.x>a.x?1:-1;
       if(a.mel){S.rings.push({x:a.x+(tg.x-a.x)*.5,y:a.y+(tg.y-a.y)*.5,r:8,max:34,life:.18,col:'#ffe6b0'});raidHit(tg,dm,a);}
       else(S.abul=S.abul||[]).push({x:a.x,y:a.y-14,tg,dm,a,col:CLASSES[a.cls]&&a.cls==='mage'?'#8ab0ff':a.cls==='necro'?'#9cff9a':'#ffe6a0',life:1.2});}}}
 function raidHit(e,dm,a){if(!e.alive||e.entT>0)return;dm*=(S.raidTeam||1)*(a?roleOf(a.cls).dm||1:1)*(e.raidK&&e.vulnT>S.t?1.5:1);e.hp-=dm;S.st.ally=(S.st.ally||0)+dm;if(Math.random()<.25)ftext(e.x+rand(-30,30),e.y-e.r-10,fmtN(dm),'#bfe8ff',12);if(e.hp<=0){e.alive=false;onKill(e);}}
@@ -13686,7 +13693,7 @@ function autoMoveVec(){
   const dx=g.x-p.x,dy=g.y-p.y,d=Math.hypot(dx,dy)||1;if(d<20)return [v[0]*.2,v[1]*.2];
   const w=p.hp/p.maxHp<.45?.35:(DEV&&!S.easyAI?AI_W.ev:.7);let x=dx/d*w+v[0]*(1-w),y=dy/d*w+v[1]*(1-w);const l=Math.hypot(x,y)||1;return [x/l,y/l];}
 // 개발자 자동 이동 가중치 (측정으로 맞춤)
-const AI_W={crowd:35,far:.6,nmC:.12,egg:1,pd:1,pdf:1,ev:.85,m1:4,m2:2,off:4,cOff:1.2,def:4};
+const AI_W={crowd:55,far:1,/* v290: 같은 난수로 24판 맞비교 → 점수 +12% (17/24판 우세) */nmC:.12,egg:1,pd:1,pdf:1,ev:.85,m1:4,m2:2,off:4,cOff:1.2,def:4};
 // 개발자 자동(점수 위주): 근처 이스터에그 건물의 조건에 맞춰 움직임. 한 판 5개까지만 점수라 그 뒤엔 안 함
 function aiEggPlan(){const p=S.p;if(!AI_W.egg||bossOn()||S.npc||(S.st.eggN||0)>=5||typeof lmAt!=='function')return null;
   let crowd=0;for(const e of S.en)if(e.alive&&d2(e,p)<120*120)crowd++;if(crowd>=4)return null;
