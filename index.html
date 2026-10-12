@@ -13708,14 +13708,8 @@ function aiDefend(dt){const p=S.p;if(!p.alive||S.mode!=='play')return;
     if(ulR&&((p.hp<p.maxHp*.2&&(nb>=3||lethal))||(p.hp<p.maxHp*.4&&nb>=8))){useUlt();return;}}
   if(ulR&&S.ulHeld>25&&!lethal&&(bossOn()||S.en.filter(e=>e.alive).length>30))useUlt();}
 function aiDodge(){const p=S.p;if(!AI_W.pd||p.dashCd>0||p.dashT>0)return;for(const t of S.tele){if(!t.dmg||t.t>.08)continue;let inn;if(t.k==='c')inn=d2(t,p)<(t.r+p.r)**2;else{const ux=Math.cos(t.a),uy=Math.sin(t.a),px=p.x-t.x,py=p.y-t.y,u=clamp(px*ux+py*uy,0,t.len);inn=Math.hypot(px-ux*u,py-uy*u)<t.w/2+p.r;}if(inn){dash();return;}}}
-// v288 고점 자동: 그 방향으로 0.6초 움직였을 때 적 탄환·잡몹이 몸에 닿는지 시간 순서대로 예측 (가까운 미래일수록 크게 감점)
-function aiRisk(cx,cy,sp,near,shots){const p=S.p;let pen=0;
-  for(const T of [.1,.2,.32,.45,.6]){const px=p.x+cx*sp*T,py=p.y+cy*sp*T,w=1.6-T*1.5;
-    for(const b of shots){if(b.life!=null&&b.life<T)continue;const bx=b.x+b.vx*T,by=b.y+b.vy*T,R=(b.r||5)+p.r+6+(b.aoe||0)*.5,d=Math.hypot(bx-px,by-py);if(d<R)pen+=(R-d)/R*420*w*(b.dmg>p.maxHp*.12?1.6:1);}
-    for(const e of near){if(e.boss||e.phase)continue;const es=(e.spd||100)*(e.slowT>0?.4:1)*(e.rootT>S.t?0:1),dx=px-e.x,dy=py-e.y,dd=Math.hypot(dx,dy)||1,mv=Math.min(Math.max(0,dd-e.r-p.r),es*T),ex=e.x+dx/dd*mv,ey=e.y+dy/dd*mv,R=e.r+p.r+8,d=Math.hypot(ex-px,ey-py);if(d<R)pen+=(R-d)/R*(e.elite?220:120)*w;}}
-  return pen;}
 function autoMoveVec0(){
-  const p=S.p,HI=DEV&&AUTO.hi&&!S.easyAI,N=HI?24:16,STEP=100,M=70,SPD=HI?Math.min(SPEED_CAP_F(),moveSpd()):0;
+  const p=S.p,N=16,STEP=100,M=70;
   // 이동 가능 영역: 보스전이면 결계, 아니면 맵 전체
   const A=S.arena,X0=A?A.x-A.r:0,X1=A?A.x+A.r:WW,Y0=A?A.y-A.r:0,Y1=A?A.y+A.r:WH,CX=(X0+X1)/2,CY=(Y0+Y1)/2,inA=o=>o.x>X0+M&&o.x<X1-M&&o.y>Y0+M&&o.y<Y1-M;
   const near=S.en.filter(e=>e.alive&&d2(e,p)<420*420),wide=S.en.filter(e=>e.alive&&!e.phase&&d2(e,p)<1000*1000);
@@ -13724,7 +13718,7 @@ function autoMoveVec0(){
   // 오라형(성기사 신성 오라·후광): 오라 범위 안쪽에 적이 들어오도록 바짝 붙음. 체력이 낮을 때만 평소처럼 거리 유지
   const auR=S.cls==='paladin'?110*(1+(p.auraM||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1):has('halo')?(has('f_seraph')?210:140):0;
   const mel=meleeOn(),pr=mel?meleeR():p.range,desired=auR&&!low?clamp(auR*.6,55,200):clamp(pr*(low?.85:.72),95,290),reach=auR&&!low?Math.max(pr*.88,auR*.9):pr*.88;
-  const shots=S.pr.filter(b=>!b.mine&&d2(b,p)<(S.easyAI?140:260)**2),shotsF=HI?S.pr.filter(b=>!b.mine&&d2(b,p)<480*480):null;
+  const shots=S.pr.filter(b=>!b.mine&&d2(b,p)<(S.easyAI?140:260)**2);
   let goal=null;
   // 이벤트 목표(상자·균열·유물·제단)로 이동. 체력이 낮거나 보스전이면 무시
   let evG=null;if(S.ev&&!low&&!bossOn&&!S.easyAI){const ev=S.ev;if((ev.k==='chest'&&!ev.open)||ev.k==='rift'||ev.k==='shrine'||ev.k==='fountain'||(ev.k==='altar'&&!ev.rolled))evG=ev;else if(ev.k==='relic'||ev.k==='bombs'){let bd=1e12;for(const o of (ev.rel||ev.bombs))if(!(o.got||o.done)){const d=d2(o,p);if(d<bd){bd=d;evG=o;}}}}
@@ -13750,7 +13744,6 @@ function autoMoveVec0(){
     if(!S.easyAI){let cn=0,mn2=420;const fx=p.x+cx*STEP*2,fy=p.y+cy*STEP*2;for(const e of near){const d=Math.hypot(e.x-tx,e.y-ty);if(d<140)cn+=e.elite?2:1;const d2b=Math.hypot(e.x-fx,e.y-fy);if(d2b<mn2)mn2=d2b;}
       sc-=cn*AI_W.crowd*(DEV&&AUTO.hi?1.4:1);sc+=Math.min(mn2,desired)*AI_W.far;}
     if(wide.length){let dn=1e9;for(const e of wide){const d=Math.hypot(e.x-tx,e.y-ty);if(d<dn)dn=d;}if(!bossOn){if(dn>reach)sc-=(dn-reach)*(danger>=3||low?1.2:2.6);else sc+=25;}}
-    if(HI)sc-=aiRisk(cx,cy,SPD,near,shotsF);
     // 탄환은 현재 위치가 아니라 앞으로 0.6초간 날아갈 경로 기준으로 회피
     for(const b of shots){const ex=b.vx*.6,ey=b.vy*.6,L2=ex*ex+ey*ey||1,u=clamp(((tx-b.x)*ex+(ty-b.y)*ey)/L2,0,1),d=Math.hypot(b.x+ex*u-tx,b.y+ey*u-ty),R0=(b.r||5)+p.r+22;if(d<R0)sc-=(R0-d)*(S.easyAI?3:6);}
     // 보스전: 보스를 사거리의 50~95% 안에 두면 됨 (사거리가 길수록 움직일 여유가 커짐). 체력이 낮으면 70% 이상 거리 유지
