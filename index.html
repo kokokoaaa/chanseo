@@ -2870,11 +2870,11 @@ const AUGS=[
   {id:'a_gale',uc:2,cls:'archer',t:'s',n:'질풍 화살',tags:['sniper'],d:'[궁수 전용] 탄속 보너스 상한 없음, 효율 1.6배 (기본보다 빠른 1%당 탄환 피해 +0.8%)'},
   {id:'r_vital',uc:2,cls:'rogue',t:'s',n:'급소 해부',tags:['curse'],d:'[도적 전용] 치명타 확률 1%당 치명타 피해 +1.5% (100% 넘는 확률도 계산 · 치명타 확률 카드가 계속 나와요), 상한 없음'},
   {id:'p_zeal',uc:1,cls:'paladin',t:'s',n:'신앙의 무게',tags:['guard'],d:'[성기사 전용] 최대 체력 100당 공격력 +10%, 상한 없음 (오라 포함 모든 피해)'},
-  {id:'n_harvest',uc:1,cls:'necro',t:'s',n:'망자의 수확',tags:['curse'],d:'[사령술사 전용] 이번 판 처치 100마리당 공격력 +2%, 상한 없음 (해골 포함)'},
+  {id:'n_harvest',uc:1,cls:'necro',t:'s',n:'망자의 수확',tags:['curse'],d:'[사령술사 전용] 이번 판 처치 500마리당 공격력 +2%, 상한 없음 (해골 포함)'},
   {id:'g_deadeye',uc:2,cls:'gunner',t:'s',n:'치명의 조준',tags:['sniper'],d:'[총잡이 전용] 치명타 피해가 150%를 넘는 10%당 공격력 +2.5% (치명타 피해 상한을 넘은 만큼도 계산 · 치명타 피해 카드가 계속 나와요), 상한 없음'},
-  {id:'e_pyre',uc:2,cls:'elem',t:'s',n:'불꽃 심장',tags:['fire'],d:'[정령사 전용] 이번 판 불탄 채 쓰러진 적 300마리당 화염 정령 피해 +2%, 상한 없음'},
+  {id:'e_pyre',uc:2,cls:'elem',t:'s',n:'불꽃 심장',tags:['fire'],d:'[정령사 전용] 이번 판 불탄 채 쓰러진 적 150마리당 화염 정령 피해 +2%, 상한 없음'},
   {id:'e_rime',uc:2,cls:'elem',t:'s',n:'서리 심장',tags:['frost'],d:'[정령사 전용] 이번 판 둔화·빙결된 채 쓰러진 적 600마리당 얼음 정령 피해 +2%, 상한 없음'},
-  {id:'e_tempest',uc:2,cls:'elem',t:'s',n:'폭풍 심장',tags:['thunder'],d:'[정령사 전용] 이번 판 번개 정령 탄이 맞힌 300번마다 번개 정령 피해 +2%, 상한 없음'},
+  {id:'e_tempest',uc:2,cls:'elem',t:'s',n:'폭풍 심장',tags:['thunder'],d:'[정령사 전용] 이번 판 번개 정령 탄이 맞힌 100번마다 번개 정령 피해 +2%, 상한 없음'},
   {id:'e_resonance',uc:2,cls:'elem',t:'s',n:'원소 공명',tags:['elem'],d:'[정령사 전용] 원소·화염·냉기·번개 증강 1개당 공격력 +4%, 상한 없음'},
   {id:'b_thirst',uc:1,cls:'berserk',t:'s',n:'선혈의 도끼',tags:['curse'],d:'[광전사 전용] 흡혈 1%당 공격력 +10%, 상한 없음'},
   {id:'d_cycle',uc:1,cls:'druid',t:'s',n:'생명의 순환',tags:['guard'],d:'[드루이드 전용] 초당 체력 재생 1당 공격력 +10%, 상한 없음'},
@@ -2883,24 +2883,24 @@ const AUGS=[
   {id:'gb_allin',uc:2,cls:'gambler',t:'s',n:'판돈 올리기',tags:['coin'],d:'[도박사 전용] 행운 1당 동전 앞면 피해 +1.8%. 행운 상한(50)을 넘은 행운도 계산, 상한 없음'},
   {id:'k_charger',uc:1,cls:'knight',t:'s',n:'돌격 기사',tags:['blitz'],d:'[기사 전용] 이동 속도 150을 넘는 10당 공격력 +2%, 상한 없음 (상한 넘은 이동 속도도 계산 · 이동 속도 카드가 계속 나와요)'},
   {id:'m_pyro',uc:2,cls:'mage',t:'s',n:'업화의 정수',tags:['fire'],d:'[마법사 전용] 이번 판 불탄 채 쓰러진 적 50마리당 공격력 +2%, 상한 없음'},
-  {id:'m_cryo',uc:2,cls:'mage',t:'s',n:'절대 냉기',tags:['frost'],d:'[마법사 전용] 적을 얼릴 때마다 냉기 결정 +1 (이번 판). 결정 20개당 공격력 +1%, 상한 없음'},
+  {id:'m_cryo',uc:2,cls:'mage',t:'s',n:'절대 냉기',tags:['frost'],d:'[마법사 전용] 적을 얼릴 때마다 냉기 결정 +1 (이번 판). 결정 40개당 공격력 +1%, 상한 없음'},
   {id:'m_overload',uc:1,cls:'mage',t:'s',n:'마력 과부하',tags:['thunder'],d:'[마법사 전용] 마법 시전 속도 1당 공격력 +10% (상한 넘은 시전 속도도 계산 · 시전 속도 카드가 계속 나와요), 상한 없음'},
   {id:'a_myriad',uc:2,cls:'archer',t:'s',n:'만발의 사수',tags:['card'],d:'[궁수 전용] 이번 판에 쏜 화살 300발마다 공격력 +1%, 상한 없음 (화살이 많은 빌드일수록 빨리 쌓임)'},
   {id:'a_pierce',uc:1,cls:'archer',t:'s',n:'꿰뚫는 화살',tags:['card'],d:'[궁수 전용] 관통 1당 공격력 +8% (상한 10을 넘은 관통도 계산 · 관통 카드·증강이 계속 나와요), 상한 없음'},
   {id:'r_plague',uc:2,cls:'rogue',t:'s',n:'독의 대가',tags:['poison'],d:'[도적 전용] 이번 판 중독된 채 쓰러진 적 200마리당 독 피해 +2%, 상한 없음'},
   {id:'r_phantom',uc:1,cls:'rogue',t:'s',n:'환영 무희',tags:['blitz'],d:'[도적 전용] 회피 1%당 공격력 +1.5% (상한 넘은 회피도 계산 · 회피 카드가 계속 나와요), 상한 없음'},
-  {id:'p_sun',uc:2,cls:'paladin',t:'s',n:'작열하는 태양',tags:['holy'],d:'[성기사 전용] 신성 오라 범위 보너스 1%당 오라 피해 +0.8%, 상한 없음'},
+  {id:'p_sun',uc:2,cls:'paladin',t:'s',n:'작열하는 태양',tags:['holy'],d:'[성기사 전용] 신성 오라가 적을 맞힐 때마다 열기 +1 (이번 판). 열기 200당 오라 피해 +2%, 상한 없음'},
   {id:'n_horde',uc:2,cls:'necro',t:'s',n:'망자의 왕',tags:['undead','summon'],d:'[사령술사 전용] 망자·소환 시너지 증강이 합쳐서 5개를 넘는 1개마다 해골 최대 수 +1. 해골 최대 수 1기당 공격력 +5% (해골 포함), 상한 없음'},
   {id:'g_engineer',uc:2,cls:'gunner',t:'s',n:'공병의 집념',tags:['summon'],d:'[총잡이 전용] 이번 판 포탑을 세울 때마다 포탑 피해 +0.25%, 상한 없음 (마법 포탑이 있을 때만)'},
   {id:'g_fan',uc:1,cls:'gunner',t:'s',n:'패닝 사격',tags:['rapid'],d:'[총잡이 전용] 공격 속도 1당 공격력 +5% (상한 넘은 공격 속도도 계산 · 공격 속도 카드가 계속 나와요), 상한 없음'},
   {id:'b_carnage',uc:2,cls:'berserk',t:'s',n:'학살자',tags:['fury'],d:'[광전사 전용] 광란이 최대일 때 처치하면 피의 축적 +1 (영구). 축적 100당 공격력 +2%, 상한 없음'},
   {id:'d_overgrowth',uc:2,cls:'druid',t:'s',n:'끝없는 생장',tags:['nature'],d:'[드루이드 전용] 덩굴 지대가 생길 때마다 생장 +1 (영구). 생장 10당 공격력 +1%, 상한 없음'},
   {id:'gb_dice',uc:1,cls:'gambler',t:'s',n:'운명의 주사위',tags:['dice'],d:'[도박사 전용] 행운 1당 치명타 피해 +1.8%. 행운 상한(50)을 넘은 행운도 계산, 상한 없음'},
-  {id:'k_parry',uc:2,cls:'knight',t:'s',n:'받아치기',tags:['guard'],d:'[기사 전용] 이번 판 막은 횟수 20번마다 공격력 +1%, 상한 없음 (막기 확률이 높을수록 빨리 쌓임)'},
+  {id:'k_parry',uc:2,cls:'knight',t:'s',n:'받아치기',tags:['guard'],d:'[기사 전용] 막거나 맞을 때마다 투지 +1 (이번 판). 투지 5당 공격력 +1%, 상한 없음'},
   {id:'k_bulwark',uc:1,cls:'knight',t:'s',n:'불굴의 성채',tags:['guard'],d:'[기사 전용] 방어력 10당 최대 체력 +1%, 상한 없음'},
-  {id:'p_crusade',uc:2,cls:'paladin',t:'s',n:'성전의 망치',tags:['holy','card'],d:'[성기사 전용] 이번 판 심판의 망치로 맞힌 적 50명마다 망치 피해 +2%, 상한 없음'},
+  {id:'p_crusade',uc:2,cls:'paladin',t:'s',n:'성전의 망치',tags:['holy','card'],d:'[성기사 전용] 이번 판 심판의 망치로 맞힌 적 150명마다 망치 피해 +2%, 상한 없음'},
   {id:'p_aegis',uc:1,cls:'paladin',t:'s',n:'신의 방패',tags:['holy','guard'],d:'[성기사 전용] 신성 시너지 1당 최대 체력 +8%, 상한 없음'},
-  {id:'d_bark',uc:1,cls:'druid',t:'s',n:'고목의 껍질',tags:['nature','guard'],d:'[드루이드 전용] 덩굴 지대가 생길 때마다 생장 +1 (영구). 생장 1당 방어력 +0.3, 상한 없음'},
+  {id:'d_bark',uc:1,cls:'druid',t:'s',n:'고목의 껍질',tags:['nature','guard'],d:'[드루이드 전용] 덩굴 지대가 생길 때마다 생장 +1 (영구). 생장 1당 방어력 +0.1, 상한 없음'},
   {id:'b_hide',uc:1,cls:'berserk',t:'s',n:'피의 갑주',tags:['fury','guard'],d:'[광전사 전용] 이번 판 처치 100마리당 최대 체력 +1%, 상한 없음'},
   {id:'k_cleave',cls:'knight',t:'s',n:'회오리 베기',tags:['blitz','guard'],d:'[기사 전용] 회전 베기가 3번째 공격마다, 공격력 160%로 강화'},
   {id:'k_berserk',cls:'knight',t:'g',n:'분노의 기사',tags:['guard','fury'],d:'[기사 전용] 피격·막기 시 5초간 분노 1중첩 (공격력 +8%, 공격 속도 +6%, 최대 7중첩)'},
@@ -4924,16 +4924,16 @@ function pDmg(){const p=S.p;let d=effDmg(p);if(p.ulAtT>0)d*=1.3;
   if(has('k_holy'))d*=1+armorEff()/(500-100*(L('k_holy')-1));
   if(has('m_archmage'))d*=1+S.lvl*LVF*lv3('m_archmage',.012,.016,.02);
   if(has('p_zeal'))d*=1+p.maxHp/100*lv3('p_zeal',.08,.1,.12);
-  if(has('n_harvest'))d*=1+(S.st.kills||0)/100*lv3('n_harvest',.015,.02,.025);
+  if(has('n_harvest'))d*=1+(S.st.kills||0)/500*lv3('n_harvest',.015,.02,.025);
   if(has('g_deadeye'))d*=1+Math.max(0,critMExtra()+critMRaw()-1.5)*10*lv3('g_deadeye',.02,.025,.03); // 치명타 피해 상한을 넘은 만큼도 계산
   if(has('e_resonance'))d*=1+(tag('elem')+tag('fire')+tag('frost')+tag('thunder'))*lv3('e_resonance',.03,.04,.05);
   if(has('b_thirst'))d*=1+lsNow()*100*lv3('b_thirst',.08,.1,.12);
   if(has('d_cycle'))d*=1+Math.max(0,p.regen)*lv3('d_cycle',.08,.1,.12);
   if(has('k_charger'))d*=1+Math.max(0,moveSpd()-150)/10*lv3('k_charger',.015,.02,.025);
   if(has('m_overload'))d*=1+rawRate()*lv3('m_overload',.08,.1,.12);
-  if(has('k_parry'))d*=1+Math.floor((S.parN||0)/20)*lv3('k_parry',.0075,.01,.0125);
+  if(has('k_parry'))d*=1+Math.floor((S.kpN||0)/5)*lv3('k_parry',.0075,.01,.0125);
   if(has('m_pyro'))d*=1+Math.floor((S.pyN||0)/50)*lv3('m_pyro',.015,.02,.025);
-  if(has('m_cryo'))d*=1+Math.floor((S.cryN||0)/20)*lv3('m_cryo',.0075,.01,.0125);
+  if(has('m_cryo'))d*=1+Math.floor((S.cryN||0)/40)*lv3('m_cryo',.0075,.01,.0125);
   if(has('g_fan'))d*=1+rawRate()*lv3('g_fan',.04,.05,.06);
   if(has('a_pierce'))d*=1+(S.p.pierce||0)*lv3('a_pierce',.06,.08,.1);
   if(has('a_myriad'))d*=1+Math.floor((S.arN||0)/300)*lv3('a_myriad',.008,.01,.012);
@@ -5018,7 +5018,7 @@ const stackCapped=x=>(x.k==='crit'&&critFull())||(x.k==='critm'&&critMFull())||(
 // 피격 기준 조건: 흡혈·재생 때문에 '체력 ○% 이하'는 거의 안 켜져서, '맞은 뒤 ○초' / '최근 받은 피해량'으로 판정
 const hitRec=(sec=2.5)=>S.t-(S.p.hitT??-99)<sec;
 const dodgeC=()=>Math.min(DODGE_CAP_F(),S.p.dodge+gearM.dodge()+(S.cls==='gambler'?Math.max(0,Math.min(50,(S.p.luck||0)+gLk()))*.006:0)+(has('f_ghoststep')&&S.p.ghT>0?.3:0)+(S.cls==='gunner'&&S.p.rlT>0?.25:0)/* 총잡이: 구르며 재장전 (v276) */)+(has('r_smoke')&&S.zones.some(z=>z.kind==='smoke'&&d2(z,S.p)<z.r*z.r)?lv3('r_smoke',.2,.3,.4):0);
-function armorEff(){const p=S.p;let a=(blessOn('guard')?60:0)+(has('bank')?Math.min(50,Math.floor(S.gold/300)*2):0)+p.armor+ex('guard')*8+Math.max(0,p.dodge-DODGE_CAP_F())*200+(has('bonewall')&&S.skel?S.skel.length*lv3('bonewall',3,4,5):0)+(has('d_bark')?(S.vineN||0)*lv3('d_bark',.2,.3,.4):0);if(has('iron'))a*=lv3('iron',1.35,1.5,1.65);if(has('ironclad'))a*=2;if(has('bastion')&&nearTurret())a+=lv3('bastion',20,30,40)*(has('f_citadel')?2:1);return a;}
+function armorEff(){const p=S.p;let a=(blessOn('guard')?60:0)+(has('bank')?Math.min(50,Math.floor(S.gold/300)*2):0)+p.armor+ex('guard')*8+Math.max(0,p.dodge-DODGE_CAP_F())*200+(has('bonewall')&&S.skel?S.skel.length*lv3('bonewall',3,4,5):0)+(has('d_bark')?(S.vineN||0)*lv3('d_bark',.07,.1,.13):0);if(has('iron'))a*=lv3('iron',1.35,1.5,1.65);if(has('ironclad'))a*=2;if(has('bastion')&&nearTurret())a+=lv3('bastion',20,30,40)*(has('f_citadel')?2:1);return a;}
 // 증강이 주는 임시 보호막: 기본 상한(barrierMax)보다 커도 그 증강의 상한까지는 유지
 const bxAdd=(cap,add)=>{const p=S.p;p.bxM=Math.max(p.bxM||0,cap);p.barrier=Math.max(p.barrier||0,Math.min(cap,(p.barrier||0)+add));};
 function barrierMax(){const p=S.p;return (tag('holy')>=4?p.maxHp*.15:0)+(has('blessing')?30*rgHpM():0)+(has('vampirelord')?p.maxHp*(has('f_bloodthrone')?.6:.3):0)+(has('f_juggernaut')?p.armor:0)+(has('f_vaultkeeper')?30*rgHpM():0)+(has('goldskin')?Math.min(p.maxHp*.5,S.gold*.01):0)+(tag('guard')>=4?p.maxHp*.2:0)+(has('gen')?(40*L('gen')+Math.min(60,Math.floor(S.gold/100)*10))*rgHpM():0);}
@@ -6291,7 +6291,7 @@ function elemChain(t,n,dm){const hit=new Set([t]);let cur=t;t.shkT=S.t+2;for(let
 // 정령사 정령: 화염(0)·냉기(1)·번개(2). 원소 화신이면 원소마다 2마리. 원소 정렬이면 시너지가 가장 많은 원소 정령이 정령왕(피해 2배·공격 속도 +30%)
 const ELEM_PL=.6,SP_COL=[['#ff5a2a','#ffd06a'],['#5ac8f0','#e8fbff'],['#f0d030','#fffbd0']];
 const spKing=()=>{if(!has('e_align'))return -1;const t=ELEM_TAGS.map(x=>tag(x));const m=Math.max(...t);return t.indexOf(m);};
-const spUc=k=>k===0&&has('e_pyre')?1+Math.floor((S.eF||0)/300)*lv3('e_pyre',.015,.02,.025):k===1&&has('e_rime')?1+Math.floor((S.eI||0)/600)*lv3('e_rime',.015,.02,.025):k===2&&has('e_tempest')?1+Math.floor((S.eT||0)/300)*lv3('e_tempest',.015,.02,.025):1;
+const spUc=k=>k===0&&has('e_pyre')?1+Math.floor((S.eF||0)/150)*lv3('e_pyre',.015,.02,.025):k===1&&has('e_rime')?1+Math.floor((S.eI||0)/600)*lv3('e_rime',.015,.02,.025):k===2&&has('e_tempest')?1+Math.floor((S.eT||0)/100)*lv3('e_tempest',.015,.02,.025):1;
 const spDmg=k=>pDmg()*.5*(S.p.ulSpT>0?1.5:1)*spUc(k)*(1+.1*tag(ELEM_TAGS[k]))*(has('e_avatar')?1.2:1)*(spKing()===k?lv3('e_align',1.6,2,2.4):1);
 const spList=()=>{const L=[0,1,2];return has('e_avatar')?[0,1,2,0,1,2]:L;};
 function spPos(i,n){const P=S.p,a=S.t*1.6+i*TAU/n;return {x:P.x+Math.cos(a)*34,y:P.y-12+Math.sin(a)*16};}
@@ -6687,7 +6687,7 @@ function hurtP(amt,src,mob){
   // 보스 러시 후반: 패턴 공격은 단계마다 더 아파짐 (5단계부터 단계당 +RUSH_PAT) → 후반엔 한 번 맞으면 거의 죽음
   if(pat&&rushOn()&&S.bossI>4)amt*=1+RUSH_PAT*(S.bossI-4);
   if(!pat&&Math.random()<dodgeC()){if(duelOn())duelPop(p.x,p.y-34,'회피!','#5fc9d9');else ftext(p.x,p.y-24,'회피','#5fc9d9',15);if(has('evade'))p.evT=2;if(has('x_wind'))p.xwU=S.t+2;if(S.cls==='rogue'&&mk(0))for(let i=0;i<8;i++)pBullet(p.x,p.y,i*TAU/8,pDmg()*.8,{child:true,sub:'그림자 반격'});if(S.cls==='rogue'&&mky(0))p.shadowT=Math.max(p.shadowT||0,1.5);p.inv=has('f_shadow')?.5:.15;if(has('counter')){const k=Math.round((3+3*L('counter'))*(has('f_shadow')?2:1)*(has('f_counterarmor')?1.5:1));for(let i=0;i<k;i++)pBullet(p.x,p.y,i*TAU/k,pDmg()*.8,{sub:'반격',child:true});}return;}
-  if(!pat&&p.block&&Math.random()<blockC()){S.parN=(S.parN||0)+1;if(S.cls==='knight')bxAdd(p.maxHp*.2,p.maxHp*.03);/* 기사 고유: 막으면 보호막 (v275) */if(S.cls==='knight'&&has('w_knight1')&&!(p.uwkT>S.t)){p.uwkT=S.t+.8;exL('반격의 성검',null,p.x,p.y,150,pDmg()*2.5,'#cfe3ff');S.rings.push({x:p.x,y:p.y,r:10,max:160,life:.3,col:'#cfe3ff'});}if(src&&S.en.includes(src))thornHit(src);if(duelOn())duelPop(p.x,p.y-36,'막기!','#cfe3ff');else ftext(p.x,p.y-26,'막기','#cfe3ff',16);p.inv=.2;addRage();if(has('k_wall'))explode(p.x,p.y,75,pDmg()*1.5,'#9fd3ff');if(has('v_fort')&&!(S.vfT>S.t)){const fu=has('f_vfort');S.vfT=S.t+(fu?.5:1);S.dsub='천년 성채';S.rings.push({x:p.x,y:p.y,r:20,max:150,life:.35,col:'#cfe3ff'});explode(p.x,p.y,150,pDmg()*1.5*(1+armorEff()/100)*(fu?2:1),'#cfe3ff');S.dsub=null;}if(S.cls==='knight'&&mk(0)){S.dsub='반격 충격파';explode(p.x,p.y,120,pDmg()*1.5,'#cfe3ff');S.dsub=null;}if(S.cls==='knight'&&mky(0)&&p.alive){p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.04*healM());}if(S.cls==='paladin'&&mk(1))bxAdd(p.maxHp*.25,p.maxHp*.05);if(has('p_divine'))exS('holy',p.x,p.y,90,pDmg()*1.5*holyM(),'#fff3a0');return;}
+  if(!pat&&p.block&&Math.random()<blockC()){S.parN=(S.parN||0)+1;if(has('k_parry'))S.kpN=(S.kpN||0)+1;if(S.cls==='knight')bxAdd(p.maxHp*.2,p.maxHp*.03);/* 기사 고유: 막으면 보호막 (v275) */if(S.cls==='knight'&&has('w_knight1')&&!(p.uwkT>S.t)){p.uwkT=S.t+.8;exL('반격의 성검',null,p.x,p.y,150,pDmg()*2.5,'#cfe3ff');S.rings.push({x:p.x,y:p.y,r:10,max:160,life:.3,col:'#cfe3ff'});}if(src&&S.en.includes(src))thornHit(src);if(duelOn())duelPop(p.x,p.y-36,'막기!','#cfe3ff');else ftext(p.x,p.y-26,'막기','#cfe3ff',16);p.inv=.2;addRage();if(has('k_wall'))explode(p.x,p.y,75,pDmg()*1.5,'#9fd3ff');if(has('v_fort')&&!(S.vfT>S.t)){const fu=has('f_vfort');S.vfT=S.t+(fu?.5:1);S.dsub='천년 성채';S.rings.push({x:p.x,y:p.y,r:20,max:150,life:.35,col:'#cfe3ff'});explode(p.x,p.y,150,pDmg()*1.5*(1+armorEff()/100)*(fu?2:1),'#cfe3ff');S.dsub=null;}if(S.cls==='knight'&&mk(0)){S.dsub='반격 충격파';explode(p.x,p.y,120,pDmg()*1.5,'#cfe3ff');S.dsub=null;}if(S.cls==='knight'&&mky(0)&&p.alive){p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.04*healM());}if(S.cls==='paladin'&&mk(1))bxAdd(p.maxHp*.25,p.maxHp*.05);if(has('p_divine'))exS('holy',p.x,p.y,90,pDmg()*1.5*holyM(),'#fff3a0');return;}
   p.hits++;fxRun('h');
   if(has('xs_dragon')&&p.xdrT>S.t)amt*=.8;
   if(has('xr_golem')){const w=x8('xr_golem');amt*=w?.8:.88;if(!(p.xgoT>S.t)){p.xgoT=S.t+(w?.6:1);exL('심연의 갑주',null,p.x,p.y,w?200:140,pDmg()*lv3('xr_golem',2,2.5,3)*(w?1.6:1),'#b88aff');S.rings.push({x:p.x,y:p.y,r:10,max:w?210:150,life:.35,col:'#d8b8ff'});}}
@@ -6737,7 +6737,7 @@ function hurtP(amt,src,mob){
   if(has('revenge'))p.revT=3;
   if(has('armor')&&!(p.amCd>0)){p.amCd=has('f_counterarmor')?.2:.5;explode(p.x,p.y,90,pDmg()*armM()*lv3('armor',1,1.5,2),'#cfd6e0');}
   addRage();
-  p.hp-=amt;p.inv=.4;p.hurtT=.3;if(S.bossI>=0)S.bHit=1;if(S.ev&&S.ev.k==='moon'&&amt>=p.maxHp*.15){S.ev.big=(S.ev.big||0)+1;ftext(p.x,p.y-40,'🌕 '+S.ev.big+'/3','#ff5050',16);}
+  p.hp-=amt;if(has('k_parry'))S.kpN=(S.kpN||0)+1;p.inv=.4;p.hurtT=.3;if(S.bossI>=0)S.bHit=1;if(S.ev&&S.ev.k==='moon'&&amt>=p.maxHp*.15){S.ev.big=(S.ev.big||0)+1;ftext(p.x,p.y-40,'🌕 '+S.ev.big+'/3','#ff5050',16);}
   if(has('p_martyr'))p.mtyr=Math.min(5,(p.mtyr||0)+1);/* v286: 받은 피해량이 아니라 맞은 횟수로 빛을 모음 (적 체력에 비해 받은 피해가 너무 작아 의미 없던 것) */
   if(has('k_oath')&&p.hp>0&&amt>=p.maxHp*.15&&!(p.oathCd>0)){p.oathCd=lv3('k_oath',60,45,30);p.oathT=4;p.inv=4;ftext(p.x,p.y-40,'기사의 맹세!','#cfe3ff',20);S.rings.push({x:p.x,y:p.y,r:10,max:120,life:.5,col:'#ffffff'});}S.shake=Math.max(S.shake,.15);ftext(p.x,p.y-24,'-'+Math.round(amt),'#ff6060',16);
   if(src&&p.skThT>0&&src.alive)dmgEs('가시 껍질',src,raw*.5+pDmg()*2,'#7bd36a');
@@ -6974,7 +6974,7 @@ function playerFire(tg){
   if(has('n_bone')&&p.shots%5===0&&has('n_spearstorm'))for(const da of [-.4,.4])pBullet(p.x,p.y,base+da,pDmg()*lv3('n_bone',2,2.5,3)*undM()*bnM(),{pierce:4,r:7,child:true,life:1.1,bone:true,src:'undead',sub:'뼈창',bshard:1});
   if(has('n_bone')&&p.shots%5===0)pBullet(p.x,p.y,base,pDmg()*lv3('n_bone',2,2.5,3)*undM()*bnM(),{pierce:has('f_bonestorm')?7:4,r:7,sub:'뼈창',child:true,life:1.1,bone:true,src:'undead',burn:has('f_bonestorm')});
   if(has('k_throw')&&p.shots%5===0)shieldThrow(tg,lv3('k_throw',3,4,6));
-  if(has('p_hammer')&&p.shots%(has('p_hstorm')?3:4)===0){for(const da of has('p_hstorm')?[-.35,0,.35]:[0])pBullet(p.x,p.y,base+da,pDmg()*lv3('p_hammer',1.8,2.2,2.6)*holyM()*(da?.7:1)*(has('p_crusade')?1+Math.floor((S.hmN||0)/50)*lv3('p_crusade',.015,.02,.025):1),{pierce:5,r:9,big:true,sub:'심판의 망치',child:true,life:1,hret:has('p_hret')?1:0,stun:has('p_hret')?lv3('p_hret',1,1.5,2):0});if(has('f_judgment')){exS('holy',tg.x,tg.y,80,pDmg()*2*holyM(),'#fff3c4');S.rings.push({x:tg.x,y:tg.y,r:4,max:30,life:.4,col:'#ffffff'});}}
+  if(has('p_hammer')&&p.shots%(has('p_hstorm')?3:4)===0){for(const da of has('p_hstorm')?[-.35,0,.35]:[0])pBullet(p.x,p.y,base+da,pDmg()*lv3('p_hammer',1.8,2.2,2.6)*holyM()*(da?.7:1)*(has('p_crusade')?1+Math.floor((S.hmN||0)/150)*lv3('p_crusade',.015,.02,.025):1),{pierce:5,r:9,big:true,sub:'심판의 망치',child:true,life:1,hret:has('p_hret')?1:0,stun:has('p_hret')?lv3('p_hret',1,1.5,2):0});if(has('f_judgment')){exS('holy',tg.x,tg.y,80,pDmg()*2*holyM(),'#fff3c4');S.rings.push({x:tg.x,y:tg.y,r:4,max:30,life:.4,col:'#ffffff'});}}
   if(tag('thunder')>=2&&p.shots%10===0)lightning(tg,4);
   if(has('icebolt')&&p.shots%(has('f_permafrost')?2:4)===0)pBullet(p.x,p.y,base,d*lv3('icebolt',1.2,1.5,1.8),{pierce:3,r:5,ice:true,sub:'얼음 화살',child:true,col:'#9fe8ff'});
   if(has('fireball')&&p.shots%(has('f_hellfire')?3:6)===0)pBullet(p.x,p.y,base,d*.5,{r:7,sub:'불덩이',child:true,fball:true,burn:true});
@@ -7366,10 +7366,10 @@ function update(dt){
     if(has('tesla')){S.teT=(S.teT??3)-dt;if(S.teT<=0){S.teT=(has('f_tesla2')?1.5:3)*tmul();const e=nearestE(p,200);if(e){S.bolts.push({x1:p.x,y1:p.y,x2:e.x,y2:e.y,life:.18});dmgEs('테슬라',e,pDmg()*1.5*thM(),'#9fe8ff');lightning(e,lv3('tesla',2,3,4)-1);}}}
     if(S.cls==='necro'&&mky(2)){S.mkPc=(S.mkPc??3)-dt;if(S.mkPc<=0){S.mkPc=3;S.rings.push({x:p.x,y:p.y,r:10,max:130,life:.4,col:'#b8e05a'});for(const e of S.en)if(e.alive&&d2(e,p)<(130+e.r)**2)poisonE(e,2);}}
     if(S.cls==='paladin'&&mky(2)){S.mkPw=(S.mkPw??4)-dt;if(S.mkPw<=0){S.mkPw=4;const ar=110*(1+(p.auraM||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1);S.rings.push({x:p.x,y:p.y,r:10,max:ar,life:.4,col:'#ffd76a'});for(const e of S.en)if(e.alive&&!e.phase&&d2(e,p)<(ar+e.r)**2){S.dsrc='holy';dmgEs('응징의 파동',e,pDmg()*2*holyM(),'#ffd76a');S.dsrc=null;if(!e.boss){const a=Math.atan2(e.y-p.y,e.x-p.x);e.x+=Math.cos(a)*40;e.y+=Math.sin(a)*40;}}}}
-    if(S.cls==='paladin'||has('halo')){S.auT=(S.auT??.5)-dt;if(S.auT<=0){S.auT=.5;const sn=has('p_sanct')?Math.min(10,S.en.reduce((c,e)=>c+(e.alive&&!e.boss&&d2(e,p)<200*200?1:0),0)):0,ar=110*(1+(p.auraM||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1)*(1+.05*sn),ad=S.cls==='paladin'?pDmg()*.5*(1+(p.auraD||0))*(1+sn*lv3('p_sanct',.03,.04,.05))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1)*holyM()*(has('p_sun')?1+Math.max(0,ar/110-1)*100*lv3('p_sun',.006,.008,.01):1):0,hd=has('halo')?pDmg()*.3*holyM():0;
+    if(S.cls==='paladin'||has('halo')){S.auT=(S.auT??.5)-dt;if(S.auT<=0){S.auT=.5;const sn=has('p_sanct')?Math.min(10,S.en.reduce((c,e)=>c+(e.alive&&!e.boss&&d2(e,p)<200*200?1:0),0)):0,ar=110*(1+(p.auraM||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1)*(1+.05*sn),ad=S.cls==='paladin'?pDmg()*.5*(1+(p.auraD||0))*(1+sn*lv3('p_sanct',.03,.04,.05))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1)*holyM()*(has('p_sun')?1+Math.floor((S.sunN||0)/200)*lv3('p_sun',.015,.02,.025):1):0,hd=has('halo')?pDmg()*.3*holyM():0;
       if(has('p_martyr')&&(p.mtyr||0)>0&&S.cls==='paladin'){const v=p.mtyr*pDmg()*lv3('p_martyr',1.2,1.6,2)*holyM();p.mtyr=0;S.rings.push({x:p.x,y:p.y,r:10,max:ar,life:.35,col:'#fff3a0'});for(const e of S.en)if(e.alive&&d2(e,p)<(ar+e.r)**2){S.dsrc='holy';dmgEs('순교자',e,v,'#fff3a0');S.dsrc=null;}}
       if(has('p_beacon')&&S.cls==='paladin'){p.bcT=(p.bcT||0)+.5;if(p.bcT>=5){p.bcT=0;let bt=null;for(const e of S.en)if(e.alive&&!e.phase&&d2(e,p)<(ar+e.r)**2&&(!bt||e.hp>bt.hp))bt=e;if(bt){exL('단죄의 빛','holy',bt.x,bt.y,70,pDmg()*lv3('p_beacon',3,4,5)*holyM(),'#fff3a0');S.bolts.push({x1:bt.x,y1:bt.y-260,x2:bt.x,y2:bt.y,life:.2});}}}
-      for(const e of S.en){if(!e.alive)continue;const dd=d2(e,p);let v=0;if(ad&&dd<(ar+e.r)**2)v+=ad;if(hd&&dd<((has('f_seraph')?210:140)+e.r)**2)v+=hd;if(v){S.dsrc='holy';dmgEs('신성 오라·후광',e,v,null,null,true);S.dsrc=null;if(ad&&S.cls==='paladin'&&mk(2)&&dd<(ar+e.r)**2)burnE(e,pDmg()*.2,2);}}}}
+      for(const e of S.en){if(!e.alive)continue;const dd=d2(e,p);let v=0;if(ad&&dd<(ar+e.r)**2)v+=ad;if(hd&&dd<((has('f_seraph')?210:140)+e.r)**2)v+=hd;if(v){S.dsrc='holy';dmgEs('신성 오라·후광',e,v,null,null,true);S.dsrc=null;if(ad&&has('p_sun'))S.sunN=(S.sunN||0)+1;if(ad&&S.cls==='paladin'&&mk(2)&&dd<(ar+e.r)**2)burnE(e,pDmg()*.2,2);}}}}
     if(has('inferno')){S.inT=(S.inT??1)-dt;if(S.inT<=0){S.inT=1;for(const e of S.en)if(e.alive&&d2(e,p)<120*120)burnE(e,pDmg()*.2,2);}}
     if(has('nova')){S.novaT=(S.novaT??10)-dt;if(S.novaT<=0){S.novaT=(10-(has('f_supernova')?3:0))*tmul();explode(p.x,p.y,180,pDmg()*lv3('nova',7,9,11),'#ffd76a');S.shake=Math.max(S.shake,.2);if(has('f_supernova'))thunderStrike(6);}}
     if(has('goldbomb')){S.gbT=(S.gbT??8)-dt;if(S.gbT<=0){S.gbT=8*tmul();if(S.en.some(e=>e.alive&&d2(e,p)<200*200)){explode(p.x,p.y,200,Math.min(S.gold*.02,pDmg()*4)+pDmg()*3,'#ffd76a');S.shake=Math.max(S.shake,.15);}}}
@@ -8873,6 +8873,12 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:289,t:'📈 고점 돌파 증강 점검',items:[
+    ['buff','🛡 기사 「받아치기」: 막은 횟수만 세서 15분 동안 공격력 +1%밖에 안 오르던 것 → <b>막거나 맞을 때마다 투지 +1, 투지 5당 공격력 +1%</b>'],
+    ['buff','☀ 성기사 「작열하는 태양」: 오라 범위 보너스에 묶여 +11%에서 멈추던 것 → <b>오라가 적을 맞힐 때마다 열기 +1, 열기 200당 오라 피해 +2%</b> (계속 쌓임)'],
+    ['buff','🌀 정령사 「불꽃 심장」 300마리 → 150마리당, 「폭풍 심장」 300번 → 100번마다 +2% (서리 심장보다 한참 느리던 것)'],
+    ['nerf','💀 사령술사 「망자의 수확」: 해골이 잡은 적까지 세서 18분에 공격력 +1800%까지 튀던 것 → 처치 500마리당 +2%'],
+    ['nerf','✝ 성기사 「성전의 망치」 50명 → 150명마다 +2% (27분에 망치 피해 +1180%), 🌿 드루이드 「고목의 껍질」 생장 1당 방어력 +0.3 → +0.1 (18분에 방어력 +900), 🔮 마법사 「절대 냉기」 결정 20개 → 40개당 +1% (18분에 +590%)']]},
   {v:288,t:'💔 흡혈 소폭 상향',items:[
     ['buff','💔 <b>흡혈 전체 +5%</b>: 흡혈로 회복하는 양 ×1.05, 1초 회복 한도도 ×1.05 (최대 체력의 4% → 4.2%, 레이드 2% → 2.1%)']]},
   {v:287,t:'📊 스탯 창 정리',items:[
@@ -14121,7 +14127,7 @@ function renderStats(){
   if(tag('house')>=4)bonus.push(`보물 골드 보너스 +${Math.round(Math.min(1.2,S.gold/1250)*100)}%`);
   if(p.dwT>0)bonus.push(`죽음의 소원 +${Math.round(12*(p.dwS||0))}%`);
   if(has('m_pyro'))bonus.push(`업화의 정수 +${Math.round(Math.floor((S.pyN||0)/50)*lv3('m_pyro',.015,.02,.025)*100)}% (불탄 처치 ${S.pyN||0})`);
-  if(has('m_cryo'))bonus.push(`절대 냉기 +${Math.round(Math.floor((S.cryN||0)/20)*lv3('m_cryo',.0075,.01,.0125)*100)}% (결정 ${S.cryN||0})`);
+  if(has('m_cryo'))bonus.push(`절대 냉기 +${Math.round(Math.floor((S.cryN||0)/40)*lv3('m_cryo',.0075,.01,.0125)*100)}% (결정 ${S.cryN||0})`);
   if(raw>RATE_CAP())bonus.push(`공속 초과 ×${(1+(raw/RATE_CAP()-1)*.5).toFixed(2)}`);
   const atk=[
     row('공격력',pDmg().toFixed(1),`기본 ${p.dmg.toFixed(1)} × (1 + 보너스 합계 ${Math.round((p.dmgP||0)*100)}%)${p.cdP?` × (1 ${p.cdP<0?'−':'+'} 카드 ${Math.abs(Math.round(p.cdP*100))}%)`:''}`+(bonus.length?`, ${bonus.join(', ')}`:'')),
@@ -14145,7 +14151,7 @@ function renderStats(){
     row('최대 체력',Math.round(p.maxHp),`기본 ${Math.round(p.hpB||p.maxHp)} × (1 + 체력 보너스 합계 ${Math.round(hpPct()*100)}%)${p.chP?` × (1 ${p.chP<0?'−':'+'} 카드 ${Math.abs(Math.round(p.chP*100))}%)`:''}`),
     row('방어력',Math.round(ar),`받는 피해 −${pct(red_)}`+(p.dodge>DODGE_CAP_F()?`, 회피 초과분 +${Math.round((p.dodge-DODGE_CAP_F())*200)} 포함`:'')+(has('iron')?', 철의 의지 적용':'')),
     row('회피',pct(dodgeC())+` <small>/ ${pct(DODGE_CAP_F())}</small>`,p.dodge>DODGE_CAP_F()?`초과 ${Math.round((p.dodge-DODGE_CAP_F())*100)}% → 방어력 +${Math.round((p.dodge-DODGE_CAP_F())*200)}`:''),
-    ...(p.block?[row('막기',pct(blockC())+` <small>/ ${Math.round(BLOCK_CAP_F()*100)}%</small>`,'막으면 피해 무효 (보스 패턴 공격은 못 막음)'+(blockRaw()>BLOCK_CAP_F()?` · 상한을 넘은 ${Math.round((blockRaw()-BLOCK_CAP_F())*100)}%는 버려져요`:'')+(has('k_parry')?` · 받아치기: 막은 ${S.parN||0}번 → 공격력 +${Math.floor((S.parN||0)/20)*Math.round(lv3('k_parry',.75,1,1.25)*100)/100}%`:''))]:[]),
+    ...(p.block?[row('막기',pct(blockC())+` <small>/ ${Math.round(BLOCK_CAP_F()*100)}%</small>`,'막으면 피해 무효 (보스 패턴 공격은 못 막음)'+(blockRaw()>BLOCK_CAP_F()?` · 상한을 넘은 ${Math.round((blockRaw()-BLOCK_CAP_F())*100)}%는 버려져요`:'')+(has('k_parry')?` · 받아치기: 투지 ${S.kpN||0} → 공격력 +${Math.floor((S.kpN||0)/5)*Math.round(lv3('k_parry',.75,1,1.25)*100)/100}%`:''))]:[]),
     row('보호막',Math.round(barrierMax())),
     (()=>{const rg=p.regen*rgHpM(),cap=p.maxHp*rgCapF(),over=rg>cap,H=hRate('rg');const live=H&&H.w>0?` · 최근 5초 실제 회복 ${H.g.toFixed(1)}/초`:'';
       return row('체력 재생',(over?`<span style="color:#ff8a8a">${rg.toFixed(1)}</span>`:rg.toFixed(1))+`/초 <small>/ ${cap.toFixed(1)}/초</small>`,(over?`<span style="color:#ff8a8a">한도 초과 ${(rg-cap).toFixed(1)}/초</span> · `:'')+(rgHpM()>1?`기본 ${p.regen.toFixed(1)} ×${rgHpM().toFixed(1)} · `:'')+`재생·문신·성역 같은 자동 회복은 다 합쳐서 1초에 ${cap.toFixed(1)}까지 (최대 체력 ${Math.round(p.maxHp)}의 ${(rgCapF()*100).toFixed(1)}%). 최대 체력이 늘면 한도도 같이 늘어요`+live);})(),
@@ -14205,7 +14211,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=288,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=289,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
