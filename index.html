@@ -8896,6 +8896,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:301,t:'📖 도감 펼침 수정',items:[
+    ['change','📖 도감에서 펼친 카드 안(직업 탭 「🔍 고유 능력에 적용되는 능력치」 등)을 누르면 카드가 접히면서 목록 맨 위로 튀던 문제: 이제 펼친 카드는 <b>제목 줄을 눌러야</b> 접혀요']]},
   {v:300,t:'🤖 자동 이동 패턴 회피',items:[
     ['buff','🤖 <b>자동 이동이 예고 패턴을 더 잘 피해요</b>: 터지기 직전인데 아직 장판 안이면 대시로 피하고(대시 중엔 패턴 피해 없음), 장판 안이거나 보스·탄환이 가까우면 더 자주 다시 판단해요. 보스전에서는 대시를 패턴 피하는 데 아껴요 (보스 러시처럼 예고가 짧아 걸어서는 못 빠져나가는 큰 원에 계속 맞던 문제)'],
     ['change','🗡 무기 이름이 아이콘과 다르던 것: 마법사로 하다 원거리 무기가 떨어지면 이름은 「완드」인데 그림은 활이었어요 → 이름도 그 무기를 낄 수 있는 직업 기준 (활·방패 등)']]},
@@ -12571,7 +12573,7 @@ function openCodex(o){Object.assign(CX,o||{});
   if($('cxTier'))$('cxTier').onchange=e=>{CX.tier=e.target.value;cxList();};
   if($('cxSort'))$('cxSort').onchange=e=>{CX.sort=e.target.value;cxList();};
   $('cxBack').onclick=cxClose;if($('cxFx'))$('cxFx').onclick=()=>{DEV_FX=!DEV_FX;try{localStorage.setItem('chanseo_devfx',DEV_FX?'1':'0');}catch(e){}toast(DEV_FX?'🛠 계산식 보기 켬':'🛠 계산식 숨김');openCodex();};
-  $('cxL').onclick=e=>{if(e.target.closest('a,button,input,select,label,.patc'))return;const r=e.target.closest('.cxrow');if(r&&r.parentNode===$('cxL')){r.classList.toggle('open');ftipHide();}};
+  $('cxL').onclick=e=>{if(e.target.closest('a,button,input,select,label,summary,details,.patc'))return;const r=e.target.closest('.cxrow');if(r&&r.parentNode===$('cxL')){/* v301: 펼친 카드는 제목 줄을 눌러야 접힘 (안의 「고유 능력에 적용되는 능력치」 등을 누르면 카드가 접혀 목록 맨 위로 튀던 문제) */if(r.classList.contains('open')&&!e.target.closest('.h'))return;r.classList.toggle('open');ftipHide();}};
   /* 마우스를 올리면 접힌 카드의 자세한 설명을 마우스 옆에 (누르면 펼쳐서 고정) */
   if(!matchMedia('(hover:none)').matches){const L=$('cxL');let cur=null;
     L.addEventListener('mouseover',e=>{const r=e.target.closest('.cxrow');if(!r||r.parentNode!==L||r.classList.contains('open')){if(cur){cur=null;ftipHide();}return;}if(r===cur)return;cur=r;let h=r.innerHTML;if(!DEV){const c=r.cloneNode(true);c.querySelectorAll('button,.keep').forEach(x=>x.remove());const ds=[...c.querySelectorAll(':scope>.d')];h=c.querySelector('.h').outerHTML+(ds.length?ds.map(x=>x.outerHTML).join(''):(c.querySelector('.d')||{outerHTML:''}).outerHTML);}ftipShow(`<div class="cxrow open cxft">${h}</div>${DEV&&r.dataset.cxa?augDevFx(r.dataset.cxa):''}${DEV?'<small class="fhn">누르면 펼쳐서 고정</small>':''}`,e,getComputedStyle(r).getPropertyValue('--rc').trim()||'#d6a94a');});
@@ -14300,7 +14302,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=300,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=301,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
