@@ -3153,7 +3153,7 @@ const AUGS=[
   {id:'p_martyr',cls:'paladin',t:'g',n:'순교자',tags:['holy','guard'],d:'[성기사 전용] 받은 피해의 60%를 모아 3배로 키운 뒤, 다음 오라 때 오라 범위 전체에 빛으로 방출'},
   {id:'p_beacon',cls:'paladin',t:'s',n:'단죄의 빛',tags:['holy'],d:'[성기사 전용] 5초마다 오라 안에서 체력이 가장 높은 적에게 빛기둥 (공격력 400%, 범위 70)'},
   // 광전사 루트: 도약 / 쌍격 / 피의 대가(저체력) / 공포의 포효 / 피의 소용돌이
-  {id:'b_leap',cls:'berserk',t:'g',n:'도약 강타',tags:['blitz','fury'],d:'[광전사 전용] 대시 착지 지점에 충격파 (반경 150, 공격력 300% × (1 + 초당 공격 횟수 × 0.4)). 맞힌 적 1마리당 광란 +1'},
+  {id:'b_leap',cls:'berserk',t:'g',n:'도약 강타',tags:['blitz','fury'],d:'[광전사 전용] 대시가 도약으로 바뀜: 높이 뛰어 더 멀리(×1.3) 날아가 착지 지점(붉게 미리 표시)을 내려찍는 충격파 (반경 150, 공격력 300% × (1 + 초당 공격 횟수 × 0.4)). 맞힌 적 1마리당 광란 +1'},
   {id:'b_twin',cls:'berserk',t:'p',n:'쌍격',tags:['fury','fury'],d:'[광전사 전용] 광란이 최대일 때 모든 베기가 한 번 더 나감 (두 번째 베기 피해 70%). 광란 2개로 계산'},
   {id:'b_price',cls:'berserk',t:'s',n:'피의 대가',tags:['curse','fury'],d:'[광전사 전용] 최근 받은 피해(최대 체력 대비, 3초에 걸쳐 줄어듦) 1%당 공격 속도 +4% (최대 +60%)'},
   {id:'b_roar',cls:'berserk',t:'g',n:'공포의 포효',tags:['fury','curse'],d:'[광전사 전용] 15마리 처치마다 포효 (3초에 한 번까지): 주변 200 적에게 공격력 400% 피해, 밀쳐내고 1.5초 기절 (보스는 피해만), 광란 +5'},
@@ -7217,7 +7217,7 @@ function dash(){
   const p=S.p;if(!p.alive||p.dashCd>0||p.dashT>0||PAUSED||statsOpen||p.skRootT>0)return; // 얼음 결계(못 움직임) 중엔 대시도 안 됨
   let dx=p.lmx,dy=p.lmy;const l=Math.hypot(dx,dy)||1;dx/=l;dy/=l;
   if((S.cls==='knight'&&mky(2))||(S.cls==='rogue'&&mky(2))){p.fxR=Math.max(p.fxRT>0?p.fxR||0:0,.4);p.fxRT=S.cls==='knight'?2:1.5;}
-  p.dx=dx;p.dy=dy;p.dashT=.14;p.pdDone=0;S.st.dash=(S.st.dash||0)+1;if(has('f_lightspeed'))p.lsT=2;if(has('r_smoke')&&S.zones.length<70)S.zones.push({x:p.x,y:p.y,r:90,life:3,kind:'smoke'});if(has('r_clone')){spawnClone();}if(has('sprint'))p.spT=2.14;if(has('x_wind'))p.xwU=S.t+2;if(has('m_wind')){exL('바람신의 장화',null,p.x,p.y,150,pDmg()*3,'#cfffff');S.rings.push({x:p.x,y:p.y,r:10,max:160,life:.35,col:'#cfffff'});}p.chargeHit=new Set();if(has('phantom'))p.phT=3;if(tag('shadow')>=2||has('shadowstep')){spawnClone();if(has('f_eclipse'))spawnClone();}
+  p.dx=dx;p.dy=dy;p.dashT=.14;p.leapD=0;if(S.cls==='berserk'&&has('b_leap')){p.dashT=p.leapD=.34;p.leapL={x:p.x+dx*dashDist()*1.3,y:p.y+dy*dashDist()*1.3};}/* v283 도약 강타: 대시가 포물선 도약으로 (착지 지점 미리 표시) */p.pdDone=0;S.st.dash=(S.st.dash||0)+1;if(has('f_lightspeed'))p.lsT=2;if(has('r_smoke')&&S.zones.length<70)S.zones.push({x:p.x,y:p.y,r:90,life:3,kind:'smoke'});if(has('r_clone')){spawnClone();}if(has('sprint'))p.spT=2.14;if(has('x_wind'))p.xwU=S.t+2;if(has('m_wind')){exL('바람신의 장화',null,p.x,p.y,150,pDmg()*3,'#cfffff');S.rings.push({x:p.x,y:p.y,r:10,max:160,life:.35,col:'#cfffff'});}p.chargeHit=new Set();if(has('phantom'))p.phT=3;if(tag('shadow')>=2||has('shadowstep')){spawnClone();if(has('f_eclipse'))spawnClone();}
   if(has('vaultbomb'))explode(p.x,p.y,140,Math.min(S.gold*.05,pDmg()*4)+pDmg()*1.5,'#ffd76a');
   if(has('warcry')){p.wcT=2;for(const e of S.en)if(e.alive&&!e.boss&&d2(e,p)<160*160)e.slowT=Math.max(e.slowT||0,lv3('warcry',.8,1.2,1.6));S.rings.push({x:p.x,y:p.y,r:10,max:160,life:.3,col:'#ffe08a'});}
   const cd=dashCdVal();p.dashCd=cd;p.dashMax=cd;
@@ -7229,7 +7229,7 @@ function dashEnd(){
   if(S.cls==='knight'&&mk(2)){S.dsub='돌진 강타';explode(p.x,p.y,110,pDmg()*3,'#9fe8b0');S.dsub=null;S.shake=Math.max(S.shake,.12);}
   if(S.cls==='rogue'&&mk(2))for(let i=0;i<10;i++)pBullet(p.x,p.y,i*TAU/10,pDmg(),{child:true,sub:'단검 비'});
   if(has('k_lance')){exL('돌격 창',null,p.x,p.y,110,pDmg()*lv3('k_lance',2,2.5,3)*armM(),'#cfe3ff');S.shake=Math.max(S.shake,.12);}
-  if(has('b_leap')){let n=0;for(const e of S.en)if(e.alive&&!e.phase&&d2(e,p)<(150+e.r)**2)n++;exL('도약 강타',null,p.x,p.y,150,pDmg()*lv3('b_leap',2.5,3,3.5)*(1+pRate()*.4),'#ff6a4a');addFury(n);S.shake=Math.max(S.shake,.18);S.rings.push({x:p.x,y:p.y,r:10,max:140,life:.35,col:'#ff8a6a'});}if(has('r_shadow'))p.shadowT=1+.5*L('r_shadow');
+  if(has('b_leap')){let n=0;for(const e of S.en)if(e.alive&&!e.phase&&d2(e,p)<(150+e.r)**2)n++;exL('도약 강타',null,p.x,p.y,150,pDmg()*lv3('b_leap',2.5,3,3.5)*(1+pRate()*.4),'#ff6a4a');addFury(n);S.shake=Math.max(S.shake,.32);S.flash=Math.max(S.flash||0,.08);S.rings.push({x:p.x,y:p.y,r:10,max:160,life:.4,col:'#ff8a6a'},{x:p.x,y:p.y,r:6,max:110,life:.28,col:'#fff0c0'});burst(p.x,p.y,'#ff6a4a',22);burst(p.x,p.y,'#8a5a3a',14);S.rings.push({x:p.x,y:p.y,r:20,max:200,life:.55,col:'#c0502a'});if(n)ftext(p.x,p.y-46,'쾅!','#ff8a6a',22);}p.leapD=0;p.leapL=null;if(has('r_shadow'))p.shadowT=1+.5*L('r_shadow');
   if(tag('blitz')>=4)explode(p.x,p.y,75,pDmg()*1.2,'#5fc9d9');
   if(tag('blitz')>=6)p.blitzT=2;
   if(has('after')){const k=6+4*L('after');for(let i=0;i<k;i++)pBullet(p.x,p.y,i*TAU/k,pDmg()*.7,{sub:'잔상',child:true});}
@@ -7397,7 +7397,7 @@ function update(dt){
     const ml=Math.hypot(mx,my);if(ml>1){mx/=ml;my/=ml;}
     p.moving=ml>.1;if(p.moving){p.lmx=mx;p.lmy=my;}
     if(p.dashT>0){
-      const dist=dashDist()/.14;
+      const dist=dashDist()*(p.leapD?1.3:1)/(p.leapD||.14);
       p.x+=p.dx*dist*dt;p.y+=p.dy*dist*dt;p.dashT-=dt;
       if(has('molotov')){p.trailT-=dt;if(p.trailT<=0){S.zones.push({x:p.x,y:p.y,r:has('f_napalm')?44:22,life:2.5,kind:'fire',m:L('molotov')*3*(has('f_phoenixfire')?2:1),nap:has('f_napalm')});p.trailT=.075;}}
       if(tag('blitz')>=2&&!has('k_charge'))for(const e of S.en){if(!e.alive||p.chargeHit.has(e)||d2(e,p)>(e.r+p.r+10)**2)continue;p.chargeHit.add(e);dmgEs('돌진',e,pDmg(),'#5fc9d9');}
@@ -7899,7 +7899,15 @@ function enhFx(p,R){if(!p.alive||S.mode==='spec')return;if(!S.enhC||S.t-S.enhC.t
   if(E.w>=7){const hx=p.x-(p.face||1)*R*.9,hy=p.y-R*.2;for(let i=0;i<2;i++){const ph=(t*1.7+i*.5)%1;ctx.globalAlpha=Math.sin(ph*Math.PI)*.9;ctx.fillStyle=i?'#ffffff':E.col;const x=hx+Math.sin(i*2.1+Math.floor(t*1.7+i*.5)*1.3)*R*.6,y=hy-ph*R*.8,sz=2+2*Math.sin(ph*Math.PI);ctx.fillRect(x-sz/2,y-.5,sz,1);ctx.fillRect(x-.5,y-sz/2,1,sz);}
     if(E.w>=10){ctx.globalAlpha=.35+.2*Math.sin(t*4);ctx.strokeStyle='#ffd76a';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(hx,hy,R*.55+Math.sin(t*4)*1.5,0,TAU);ctx.stroke();}}
   ctx.restore();}
-function drawPlayer(p){
+// v283 도약 강타: 뛰는 동안 캐릭터를 포물선 높이만큼 위로 그리고, 땅 그림자·착지 지점 표시를 따로 그림
+function drawPlayer(p){const h=p===S.p&&p.leapD>0&&p.dashT>0?Math.sin(Math.PI*(1-p.dashT/p.leapD))*56:0;if(!h)return drawPlayer0(p);
+  const L=p.leapL,k=1-p.dashT/p.leapD;ctx.save();
+  if(L){ctx.globalAlpha=.35+.45*k;ctx.fillStyle='rgba(255,70,40,.16)';ctx.strokeStyle='#ff6a4a';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(L.x,L.y+p.r,150,150*.45,0,0,TAU);ctx.fill();ctx.stroke();
+    ctx.fillStyle='rgba(255,90,50,.35)';ctx.beginPath();ctx.ellipse(L.x,L.y+p.r,150*k,150*.45*k,0,0,TAU);ctx.fill();
+    ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(L.x-18,L.y+p.r);ctx.lineTo(L.x+18,L.y+p.r);ctx.moveTo(L.x,L.y+p.r-9);ctx.lineTo(L.x,L.y+p.r+9);ctx.stroke();}
+  ctx.globalAlpha=.45;ctx.fillStyle='#000';const sc=1-h/140;ctx.beginPath();ctx.ellipse(p.x,p.y+p.r+3,p.r*.95*sc,p.r*.36*sc,0,0,TAU);ctx.fill();ctx.restore();
+  p.y-=h;try{drawPlayer0(p);}finally{p.y+=h;}}
+function drawPlayer0(p){
   const emitG=q=>{if(S.pa.length<260)S.pa.push(q);};
   {const wg=cosEq('wing'),au=cosEq('aura');if(wg)auraFx(ctx,p.x,p.y,wg,S.t,emitG);if(au)auraFx(ctx,p.x,p.y,au,S.t,emitG);}
   const n=orbitN();
@@ -8864,6 +8872,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:283,t:'💥 광전사 도약 강타',items:[
+    ['change','💥 광전사 「도약 강타」: 대시가 <b>진짜 도약</b>으로 바뀌어요. 캐릭터가 포물선으로 뛰어올라 더 멀리(×1.3) 날아가고, <b>착지 지점이 붉은 원으로 미리 표시</b>되며 차오르다가 내려찍을 때 충격파·겹 충격파·파편·화면 흔들림이 나와요 (피해는 그대로)']]},
   {v:282,t:'📝 체력 비례 표시 다듬기',items:[
     ['look','📝 「지금 재생 +1.1」 초록 글씨가 무슨 뜻인지 알기 어렵던 것: 다른 카드의 「(지금보다 +5.9%)」와 같은 흐린 글씨로 「(최대 체력 비례 → 지금 실제 재생 +1.1/초)」라고 풀어서 보여줘요']]},
   {v:281,t:'📝 체력 비례 수치 표시',items:[
@@ -14170,7 +14180,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=282,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=283,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
