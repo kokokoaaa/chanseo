@@ -5014,7 +5014,8 @@ const CRIT_DMG_CAP_F=()=>(has('sharpshot')?8:5)+ccap('critD');
 const critMRaw=()=>S.p.critM+ex('dice')*.15+Math.max(0,critRaw()-CRIT_CAP)*.5,critMBase=()=>Math.min(CRIT_DMG_CAP_F(),critMRaw()),rateUnc=()=>has('m_overload')||has('g_fan'),critMExtra=()=>(has('sharpshot')?1:0)+(has('f_luckstar')?LK()*.012:0)+(has('r_vital')?critRaw()*100*lv3('r_vital',.01,.015,.02):0)+(has('gb_dice')?Math.max(0,S.p.luck+gLk())*lv3('gb_dice',.012,.018,.024):0);
 const critMul=()=>critMExtra()+critMBase();
 const critFull=()=>critRaw()>=CRIT_CAP,critMFull=()=>critMBase()>=CRIT_DMG_CAP_F()-1e-9;
-const stackCapped=x=>(x.k==='crit'&&critFull())||(x.k==='critm'&&critMFull())||(x.k==='luck'&&luckFull())||(x.k==='dodge'&&S.p.dodge>=DODGE_CAP_F())||(x.k==='rate'&&rawRate()>=RATE_CAP());
+// v295: 상점 능력치도 레벨업 카드와 같은 기준으로 한도면 못 삼 (고점 돌파 증강이 있으면 계속 살 수 있음) · 근접 직업은 탄환 +1발이 의미 없어 안 팖
+const stackCapped=x=>(x.k==='crit'&&critFull()&&!has('r_vital'))||(x.k==='critm'&&critMFull()&&!has('g_deadeye'))||(x.k==='luck'&&luckFull())||(x.k==='dodge'&&S.p.dodge>=DODGE_CAP_F())||(x.k==='rate'&&rawRate()>=RATE_CAP()*.98&&!rateUnc())||(x.k==='ls'&&lsFull())||(x.k==='multi'&&MELEE_CLS.includes(S.cls));
 // 피격 기준 조건: 흡혈·재생 때문에 '체력 ○% 이하'는 거의 안 켜져서, '맞은 뒤 ○초' / '최근 받은 피해량'으로 판정
 const hitRec=(sec=2.5)=>S.t-(S.p.hitT??-99)<sec;
 const dodgeC=()=>Math.min(DODGE_CAP_F(),S.p.dodge+gearM.dodge()+(S.cls==='gambler'?Math.max(0,Math.min(50,(S.p.luck||0)+gLk()))*.006:0)+(has('f_ghoststep')&&S.p.ghT>0?.3:0)+(S.cls==='gunner'&&S.p.rlT>0?.25:0)/* 총잡이: 구르며 재장전 (v276) */)+(has('r_smoke')&&S.zones.some(z=>z.kind==='smoke'&&d2(z,S.p)<z.r*z.r)?lv3('r_smoke',.2,.3,.4):0);
@@ -8877,6 +8878,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:295,t:'🛒 상점 한도 표시',items:[
+    ['change','🛒 상점 능력치도 <b>한도에 닿으면 「최대」로 막혀요</b>: 흡혈(최대 한도에 닿아 버려질 때)·공격 속도·치명타·치명타 피해·회피·행운. 고점 돌파 증강이 있으면 계속 살 수 있어요'],
+    ['change','⚔ 근접 직업(기사·성기사·광전사)은 상점에 「탄환 +1발」이 안 나와요']]},
   {v:294,t:'🗡 양손 무기 개편',items:[
     ['change','🗡 <b>양손 무기는 마법사·궁수·사령술사·광전사만</b> 써요. 기사·도적·총잡이·드루이드 전용 무기는 한손이 되어 왼손(방패 등)도 같이 낄 수 있어요 (기사 장검 · 암살 단검 · 연발 권총 · 고목 완드)'],
     ['change','🎯 일반 양손 무기는 <b>떨어질 때 낄 직업이 정해져요</b> (마법사 지팡이 · 궁수 장궁 · 사령술사 큰 낫 · 광전사 양손 도끼). 그 직업만 낄 수 있고, 추가 옵션도 그 직업에 맞는 것으로 나와요'],
@@ -13971,7 +13975,7 @@ const DEALS=[
 const disG=a=>a.t==='v'?0:price(40*a.lv);
 function openHub(){
   S.mode='shop';joy=null;
-  if(!S.hub||S.hub.k!=='hub')S.hub={k:'hub',used:{},stock:STACKS.map((_,i)=>i).filter(i=>!(STACKS[i].k==='crit'&&critFull())&&!(STACKS[i].k==='critm'&&critMFull())&&!(STACKS[i].k==='luck'&&S.p.luck>=LUCK_CAP_F())&&!(STACKS[i].k==='dodge'&&S.p.dodge>=DODGE_CAP_F())&&!(STACKS[i].k==='rate'&&rawRate()>=RATE_CAP())).sort(()=>Math.random()-.5).slice(0,6)};
+  if(!S.hub||S.hub.k!=='hub')S.hub={k:'hub',used:{},stock:STACKS.map((_,i)=>i).filter(i=>!stackCapped(STACKS[i])).sort(()=>Math.random()-.5).slice(0,6)};
   openShop(()=>{S.hub=null;openNext();},S.hub);
 }
 function openMerch(m){
@@ -14013,7 +14017,7 @@ function openShop(back,m){
   S.mode='shop';S.shopBack=back;
   const g=S.gold,M=MERCH[m.k],H=m.k==='hub';let body='';
   if(m.k==='chips'){
-    body+=`<h3>${'오늘의 품목'} <small style="color:var(--muted);font-size:13px">지금 스탯이 높을수록 비쌈</small></h3><div class="grid">${m.stock.map(i=>{const x=STACKS[i],c=stackCost(x);return `<button class="btn" data-k="${i}" ${g<c?'disabled':''}>${withActual(x.n,x.f)}<small>${c}골드${S.buys[x.k]?`, ${S.buys[x.k]}회 구매`:''}</small></button>`;}).join('')}</div>`;
+    body+=`<h3>${'오늘의 품목'} <small style="color:var(--muted);font-size:13px">지금 스탯이 높을수록 비쌈</small></h3><div class="grid">${m.stock.map(i=>{const x=STACKS[i],c=stackCost(x);const cap=stackCapped(x);return `<button class="btn" data-k="${i}" ${cap||g<c?'disabled':''}>${cap?projTxt(x.n):withActual(x.n,x.f)}<small>${cap?'최대':c+'골드'}${!cap&&S.buys[x.k]?`, ${S.buys[x.k]}회 구매`:''}</small></button>`;}).join('')}</div>`;
   }
   if(m.k==='smith'){
     const ups=S.augs.map((a,i)=>[a,i]).filter(([a])=>AUG_UP&&a.lv<3&&a.t!=='v'&&a.t!=='f'&&a.t!=='d');const maxed=S.augs.length-ups.length;
@@ -14243,7 +14247,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=294,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=295,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
