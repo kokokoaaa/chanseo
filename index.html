@@ -8875,7 +8875,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
 const PATCH_NOTES=[
   {v:290,t:'💀 사령술사 해골 조정',items:[
     ['nerf','💀 해골이 호위무사처럼 근접 적을 너무 많이 붙잡던 것: 해골 1기당 붙잡는 적 <b>6 → 4마리</b>, 붙잡는 거리 150 → 110. <b>정예(금색 테두리)는 해골을 무시하고 본체를 노려요</b>'],
-    ['change','🧱 해골이 결계 밖으로 나가던 문제 수정: 해골도 결계 안에서만 움직여요']]},
+    ['change','🧱 해골이 결계 밖으로 나가던 문제 수정: 해골도 결계 안에서만 움직여요'],
+    ['look','📊 스탯 창 흡혈: 체력 재생처럼 <b>지금 DPS로 계산한 초당 흡혈 회복 / 1초 한도</b>를 보여줘요. 한도를 넘으면 빨간색 (넘는 만큼은 회복되지 않아요)']]},
   {v:289,t:'📈 고점 돌파 증강 점검',items:[
     ['buff','🛡 기사 「받아치기」: 막은 횟수만 세서 15분 동안 공격력 +1%밖에 안 오르던 것 → <b>막거나 맞을 때마다 투지 +1, 투지 2당 공격력 +1%</b>'],
     ['buff','☀ 성기사 「작열하는 태양」: 오라 범위 보너스에 묶여 +11%에서 멈추던 것 → <b>오라가 적을 맞힐 때마다 열기 +1, 열기 300당 오라 피해 +2%</b> (계속 쌓임)'],
@@ -8886,7 +8887,7 @@ const PATCH_NOTES=[
   {v:288,t:'💔 흡혈 소폭 상향',items:[
     ['buff','💔 <b>흡혈 전체 +5%</b>: 흡혈로 회복하는 양 ×1.05, 1초 회복 한도도 ×1.05 (최대 체력의 4% → 4.2%, 레이드 2% → 2.1%)']]},
   {v:287,t:'📊 스탯 창 정리',items:[
-    ['look','📊 스탯 창 흡혈 줄의 안내 문구를 빼고 「지금 회복 ○/초 (최대 ○/초)」만 보여줘요']]},
+    ['look','📊 스탯 창 흡혈 줄: 체력 재생처럼 「지금 DPS로 계산한 초당 흡혈 회복 / 1초 한도」를 보여주고, 한도를 넘으면 빨간색']]},
   {v:286,t:'✝ 받은 피해로 되갚는 효과 정리',items:[
     ['buff','✝ 성기사 「순교자」: 받은 피해량(방어로 줄어든 뒤)을 모으던 것 → 적 체력에 비해 너무 작아 거의 의미가 없었어요. 이제 <b>맞을 때마다 빛을 1번 모아(최대 5번)</b> 다음 오라 때 오라 범위 전체에 <b>모은 1번당 공격력 160%</b>로 방출 (실버 120% · 프리즘 200%)'],
     ['buff','🛡 가드 6단계 반사: 「방어 전 피해의 30%」 → <b>맞을 때마다 공격력 60% 반격</b> (방어력이 높을수록 더 셈, 보호막이 있으면 2배)']]},
@@ -14153,7 +14154,7 @@ function renderStats(){
     (()=>{const rg=p.regen*rgHpM(),cap=p.maxHp*rgCapF(),over=rg>cap,H=hRate('rg');const live=H&&H.w>0?` · 최근 5초 실제 회복 ${H.g.toFixed(1)}/초`:'';
       return row('체력 재생',(over?`<span style="color:#ff8a8a">${rg.toFixed(1)}</span>`:rg.toFixed(1))+`/초 <small>/ ${cap.toFixed(1)}/초</small>`,(over?`<span style="color:#ff8a8a">한도 초과 ${(rg-cap).toFixed(1)}/초</span> · `:'')+(rgHpM()>1?`기본 ${p.regen.toFixed(1)} ×${rgHpM().toFixed(1)} · `:'')+`재생·문신·성역 같은 자동 회복은 다 합쳐서 1초에 ${cap.toFixed(1)}까지 (최대 체력 ${Math.round(p.maxHp)}의 ${(rgCapF()*100).toFixed(1)}%). 최대 체력이 늘면 한도도 같이 늘어요`+live);})(),
     (()=>{const H=hRate('ls'),cap=p.maxHp*lsRate(),waste=H&&H.w>0?Math.round((1-H.c/H.w)*100):null;
-      return row('흡혈',pct(lsNow())+(H&&H.w>0?`<br><small>지금 회복 ${H.g.toFixed(1)}/초 (최대 ${cap.toFixed(1)}/초)${waste>=5&&lsRate()>=(raidOn()?RAID_LS:LS_MAX_F())-1e-9?` · <span style="color:#ff8a8a">한도 최대</span>`:''}</small>`:` <small>/ 1초에 ${cap.toFixed(1)}까지</small>`),`준 피해의 ${pct(lsNow())}만큼 체력이 차요. 단, 흡혈로 차는 체력은 1초에 ${cap.toFixed(1)}까지 (최대 체력 ${Math.round(p.maxHp)}의 ${(lsRate()*100).toFixed(2)}%). 한도는 흡혈 수치의 약 절반 (흡혈 1% → 최대 체력의 0.525%, 최대 ${(raidOn()?RAID_LS:LS_MAX)*100}%)이라 흡혈과 최대 체력이 늘면 같이 늘어요`+(H&&H.w>0?` · 최근 5초 실제 회복 ${H.g.toFixed(1)}/초`:' · 공격해서 피해를 주면 실제 회복량이 여기에 나와요'));})(),
+      return row('흡혈',pct(lsNow())+(()=>{const est=(S.dps||0)*lsNow()*LS_BUFF*healM(),ov=est>cap;return `<br><small>${ov?`<span style="color:#ff8a8a">${est.toFixed(1)}</span>`:est.toFixed(1)}/초 / ${cap.toFixed(1)}/초</small>`;})(),`준 피해의 ${pct(lsNow())}만큼 체력이 차요. 단, 흡혈로 차는 체력은 1초에 ${cap.toFixed(1)}까지 (최대 체력 ${Math.round(p.maxHp)}의 ${(lsRate()*100).toFixed(2)}%). 한도는 흡혈 수치의 약 절반 (흡혈 1% → 최대 체력의 0.525%, 최대 ${(raidOn()?RAID_LS:LS_MAX)*100}%)이라 흡혈과 최대 체력이 늘면 같이 늘어요`+(H&&H.w>0?` · 최근 5초 실제 회복 ${H.g.toFixed(1)}/초`:' · 공격해서 피해를 주면 실제 회복량이 여기에 나와요'));})(),
     row('처치·적중 회복',`1초에 ${(p.maxHp*KH_MAX_F()).toFixed(1)}까지`,`처치·적중할 때 차는 회복을 다 합친 한도: 1초에 ${(p.maxHp*KH_MAX_F()).toFixed(1)} (최대 체력 ${Math.round(p.maxHp)}의 ${+(KH_MAX_F()*100).toFixed(1)}%). 최대 체력이 늘면 한도도 같이 늘어요`),
     row('받는 피해 배율','×'+p.vuln.toFixed(2))
   ].join('');
