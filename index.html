@@ -2811,7 +2811,7 @@ const TAGS={
   elem:    {n:'원소',  t1:'8번째 공격마다 원소 구슬 (공격력 150%, 맞으면 화상·둔화·연쇄 2 모두)',t2:'원소 구슬을 6번째 공격마다 쏨',t4:'화상·둔화·감전 중 2가지 이상 걸린 적에게 피해 +25%',t6:'원소 구슬이 맞힌 자리에 원소 폭발 (범위 90, 공격력 200%)',ex:'원소 효과 피해 +12%'},
   rapid:   {n:'속사',  t2:'10번째 공격마다 연사 3발 (기본 탄환 피해의 70%)',t4:'공격할 때마다 공격 속도 +1% (최대 20%, 1.5초 쉬면 초기화)',t6:'치명타가 터지면 같은 방향으로 1발 더 (기본 탄환 피해의 60%)',ex:'공격력 +5%'},
   undead:  {n:'망자',  t1:'처치 시 8% 확률로 해골 병사 소환 (최대 1기)',t2:'처치 시 15% 확률로 원혼이 날아가 가까운 적에게 공격력 120% 피해',t4:'처치 시 10% 확률, 그리고 5초마다 해골 병사 소환. 해골 최대 수 +2',t6:'해골 병사 피해 2배, 해골이 적을 처치하면 체력 1% 회복',ex:'원혼·해골 피해 +12%'},
-  guard:   {n:'가드',  t2:'맞으면 주변 적을 밀쳐내고 1초간 둔화 (1초에 한 번)',t4:'최대 체력 20%만큼 보호막 (3초간 안 맞으면 재충전). 방어력 4당 공격력 +1% (최대 +100%)',t6:'맞을 때마다 방어 전 피해의 30% 반사 (방어력이 높을수록 더 셈), 보호막이 있으면 2배 (보스전에선 보스에게). 보호막이 깨지면 폭발',ex:'방어력 +8, 공격력 +5%'},
+  guard:   {n:'가드',  t2:'맞으면 주변 적을 밀쳐내고 1초간 둔화 (1초에 한 번)',t4:'최대 체력 20%만큼 보호막 (3초간 안 맞으면 재충전). 방어력 4당 공격력 +1% (최대 +100%)',t6:'맞을 때마다 공격력 60% 반격 (방어력이 높을수록 더 셈), 보호막이 있으면 2배 (보스전에선 보스에게). 보호막이 깨지면 폭발',ex:'방어력 +8, 공격력 +5%'},
   poison:  {n:'독',    t2:'적중 시 중독 (3초, 초당 공격력 30%)',t4:'중독된 적이 죽으면 주변에 독 전염',t6:'중독 10중첩, 독 피해 2배',ex:'독 피해 +20%'}
 };
 const TIER={d:{n:'용의 보물',col:'#ffb020'},s:{n:'실버',col:'#9aa1ab'},g:{n:'골드',col:'#c99223'},p:{n:'프리즘',col:'#b552d6'},v:{n:'왕실',col:'#c0392b'},f:{n:'합체',col:'#e0418f'},x:{n:'장비 전용',col:'#ff7ac8'}};
@@ -3150,7 +3150,7 @@ const AUGS=[
   {id:'p_hret',cls:'paladin',t:'g',n:'회귀하는 망치',tags:['holy','card'],d:'[성기사 전용] 심판의 망치가 끝까지 날아간 뒤 되돌아오며 한 번 더 피해. 망치에 맞은 적 1.5초 기절 (보스 제외)'},
   {id:'p_hstorm',cls:'paladin',t:'p',n:'망치 폭풍',tags:['holy','card'],d:'[성기사 전용] 심판의 망치를 3방향으로 던짐 (양옆 망치 피해 70%), 망치 주기 4번째 → 3번째 공격'},
   {id:'p_sanct',cls:'paladin',t:'s',n:'성역',tags:['holy','guard'],d:'[성기사 전용] 주변 200 안의 적 1마리당 신성 오라 범위 +5%, 오라 피해 +4% (최대 10마리)'},
-  {id:'p_martyr',cls:'paladin',t:'g',n:'순교자',tags:['holy','guard'],d:'[성기사 전용] 받은 피해의 60%를 모아 3배로 키운 뒤, 다음 오라 때 오라 범위 전체에 빛으로 방출'},
+  {id:'p_martyr',cls:'paladin',t:'g',n:'순교자',tags:['holy','guard'],d:'[성기사 전용] 맞을 때마다 빛을 1번 모음 (최대 5번). 다음 오라 때 오라 범위 전체에 방출: 모은 1번당 공격력 160%'},
   {id:'p_beacon',cls:'paladin',t:'s',n:'단죄의 빛',tags:['holy'],d:'[성기사 전용] 5초마다 오라 안에서 체력이 가장 높은 적에게 빛기둥 (공격력 400%, 범위 70)'},
   // 광전사 루트: 도약 / 쌍격 / 피의 대가(저체력) / 공포의 포효 / 피의 소용돌이
   {id:'b_leap',cls:'berserk',t:'g',n:'도약 강타',tags:['blitz','fury'],d:'[광전사 전용] 대시가 도약으로 바뀜: 높이 뛰어 더 멀리(×1.3) 날아가 착지 지점(붉게 미리 표시)을 내려찍는 충격파 (반경 150, 공격력 300%, 공격 속도가 빠를수록 더 셈). 맞힌 적 1마리당 광란 +1'},
@@ -6723,8 +6723,8 @@ function hurtP(amt,src,mob){
   // 영구 '단단함'과 갑옷은 한 방 상한을 적용한 뒤에 줄임 → 후반 큰 공격에도 그대로 효과가 남
   amt*=(1-.015*mlv('armor'))*gearM.taken()*(autoPen()?AUTO_DM:1)*(S.raidTk||1);
   p.noHitT=0;
-  // 가드 6: 맞을 때마다 방어 전 피해의 30% 반사 (방어력이 높을수록 더 셈), 보호막이 있으면 2배. 보스전에서는 보스에게
-  if(tag('guard')>=6){const t=src&&src.alive?src:bossOn()&&!S.boss.air&&!S.boss.phase?S.boss:nearestE(p,150);if(t)dmgEs('반사 피해',t,raw*.3*(p.barrier>0?2:1)*(1+armorEff()/100),'#9fd3ff');}
+  // 가드 6: 맞을 때마다 공격력 60% 반격 (v286: 받은 피해 비례는 적 체력에 비해 너무 작아서) (방어력이 높을수록 더 셈), 보호막이 있으면 2배. 보스전에서는 보스에게
+  if(tag('guard')>=6){const t=src&&src.alive?src:bossOn()&&!S.boss.air&&!S.boss.phase?S.boss:nearestE(p,150);if(t)dmgEs('반사 피해',t,pDmg()*.6*(p.barrier>0?2:1)*(1+armorEff()/100),'#9fd3ff');}
   if(amt>=p.maxHp*.03)p.hitT=S.t;p.rdm=(p.rdm||0)+amt/Math.max(1,p.maxHp);
   if(p.barrier>0){
     const ab=Math.min(p.barrier,amt);p.barrier-=ab;amt-=ab;
@@ -6738,7 +6738,7 @@ function hurtP(amt,src,mob){
   if(has('armor')&&!(p.amCd>0)){p.amCd=has('f_counterarmor')?.2:.5;explode(p.x,p.y,90,pDmg()*armM()*lv3('armor',1,1.5,2),'#cfd6e0');}
   addRage();
   p.hp-=amt;p.inv=.4;p.hurtT=.3;if(S.bossI>=0)S.bHit=1;if(S.ev&&S.ev.k==='moon'&&amt>=p.maxHp*.15){S.ev.big=(S.ev.big||0)+1;ftext(p.x,p.y-40,'🌕 '+S.ev.big+'/3','#ff5050',16);}
-  if(has('p_martyr'))p.mtyr=(p.mtyr||0)+amt*lv3('p_martyr',.4,.6,.8)*3;
+  if(has('p_martyr'))p.mtyr=Math.min(5,(p.mtyr||0)+1);/* v286: 받은 피해량이 아니라 맞은 횟수로 빛을 모음 (적 체력에 비해 받은 피해가 너무 작아 의미 없던 것) */
   if(has('k_oath')&&p.hp>0&&amt>=p.maxHp*.15&&!(p.oathCd>0)){p.oathCd=lv3('k_oath',60,45,30);p.oathT=4;p.inv=4;ftext(p.x,p.y-40,'기사의 맹세!','#cfe3ff',20);S.rings.push({x:p.x,y:p.y,r:10,max:120,life:.5,col:'#ffffff'});}S.shake=Math.max(S.shake,.15);ftext(p.x,p.y-24,'-'+Math.round(amt),'#ff6060',16);
   if(src&&p.skThT>0&&src.alive)dmgEs('가시 껍질',src,raw*.5+pDmg()*2,'#7bd36a');
   if(p.skUndT>0&&p.hp<1)p.hp=1;
@@ -7367,7 +7367,7 @@ function update(dt){
     if(S.cls==='necro'&&mky(2)){S.mkPc=(S.mkPc??3)-dt;if(S.mkPc<=0){S.mkPc=3;S.rings.push({x:p.x,y:p.y,r:10,max:130,life:.4,col:'#b8e05a'});for(const e of S.en)if(e.alive&&d2(e,p)<(130+e.r)**2)poisonE(e,2);}}
     if(S.cls==='paladin'&&mky(2)){S.mkPw=(S.mkPw??4)-dt;if(S.mkPw<=0){S.mkPw=4;const ar=110*(1+(p.auraM||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1);S.rings.push({x:p.x,y:p.y,r:10,max:ar,life:.4,col:'#ffd76a'});for(const e of S.en)if(e.alive&&!e.phase&&d2(e,p)<(ar+e.r)**2){S.dsrc='holy';dmgEs('응징의 파동',e,pDmg()*2*holyM(),'#ffd76a');S.dsrc=null;if(!e.boss){const a=Math.atan2(e.y-p.y,e.x-p.x);e.x+=Math.cos(a)*40;e.y+=Math.sin(a)*40;}}}}
     if(S.cls==='paladin'||has('halo')){S.auT=(S.auT??.5)-dt;if(S.auT<=0){S.auT=.5;const sn=has('p_sanct')?Math.min(10,S.en.reduce((c,e)=>c+(e.alive&&!e.boss&&d2(e,p)<200*200?1:0),0)):0,ar=110*(1+(p.auraM||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1)*(1+.05*sn),ad=S.cls==='paladin'?pDmg()*.5*(1+(p.auraD||0))*(1+sn*lv3('p_sanct',.03,.04,.05))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1)*holyM()*(has('p_sun')?1+Math.max(0,ar/110-1)*100*lv3('p_sun',.006,.008,.01):1):0,hd=has('halo')?pDmg()*.3*holyM():0;
-      if(has('p_martyr')&&(p.mtyr||0)>0&&S.cls==='paladin'){const v=p.mtyr*holyM();p.mtyr=0;S.rings.push({x:p.x,y:p.y,r:10,max:ar,life:.35,col:'#fff3a0'});for(const e of S.en)if(e.alive&&d2(e,p)<(ar+e.r)**2){S.dsrc='holy';dmgEs('순교자',e,v,'#fff3a0');S.dsrc=null;}}
+      if(has('p_martyr')&&(p.mtyr||0)>0&&S.cls==='paladin'){const v=p.mtyr*pDmg()*lv3('p_martyr',1.2,1.6,2)*holyM();p.mtyr=0;S.rings.push({x:p.x,y:p.y,r:10,max:ar,life:.35,col:'#fff3a0'});for(const e of S.en)if(e.alive&&d2(e,p)<(ar+e.r)**2){S.dsrc='holy';dmgEs('순교자',e,v,'#fff3a0');S.dsrc=null;}}
       if(has('p_beacon')&&S.cls==='paladin'){p.bcT=(p.bcT||0)+.5;if(p.bcT>=5){p.bcT=0;let bt=null;for(const e of S.en)if(e.alive&&!e.phase&&d2(e,p)<(ar+e.r)**2&&(!bt||e.hp>bt.hp))bt=e;if(bt){exL('단죄의 빛','holy',bt.x,bt.y,70,pDmg()*lv3('p_beacon',3,4,5)*holyM(),'#fff3a0');S.bolts.push({x1:bt.x,y1:bt.y-260,x2:bt.x,y2:bt.y,life:.2});}}}
       for(const e of S.en){if(!e.alive)continue;const dd=d2(e,p);let v=0;if(ad&&dd<(ar+e.r)**2)v+=ad;if(hd&&dd<((has('f_seraph')?210:140)+e.r)**2)v+=hd;if(v){S.dsrc='holy';dmgEs('신성 오라·후광',e,v,null,null,true);S.dsrc=null;if(ad&&S.cls==='paladin'&&mk(2)&&dd<(ar+e.r)**2)burnE(e,pDmg()*.2,2);}}}}
     if(has('inferno')){S.inT=(S.inT??1)-dt;if(S.inT<=0){S.inT=1;for(const e of S.en)if(e.alive&&d2(e,p)<120*120)burnE(e,pDmg()*.2,2);}}
@@ -8873,6 +8873,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:286,t:'✝ 받은 피해로 되갚는 효과 정리',items:[
+    ['buff','✝ 성기사 「순교자」: 받은 피해량(방어로 줄어든 뒤)을 모으던 것 → 적 체력에 비해 너무 작아 거의 의미가 없었어요. 이제 <b>맞을 때마다 빛을 1번 모아(최대 5번)</b> 다음 오라 때 오라 범위 전체에 <b>모은 1번당 공격력 160%</b>로 방출 (실버 120% · 프리즘 200%)'],
+    ['buff','🛡 가드 6단계 반사: 「방어 전 피해의 30%」 → <b>맞을 때마다 공격력 60% 반격</b> (방어력이 높을수록 더 셈, 보호막이 있으면 2배)']]},
   {v:285,t:'🧹 직업·모드에 안 맞는 증강 정리',items:[
     ['change','🪓 <b>근접 직업(기사·성기사·광전사)</b>에게 탄환 개수·관통·튕김·추가 발사에 기대는 증강이 이름만 바꿔 나오던 것 (「도끼날 1발당」, 「도끼날 2발 추가」 등) → <b>아예 안 나와요</b>: 분열·관통·카드 폭풍·일곱 번째 패·잔상·반격·튕김·집중·소용돌이 패·덱 빌딩·한 번 더·가벼운 방아쇠·꿰뚫는 탄·패닝·빠른 손·얼음 화살·십자포화·대포알·골든 세븐·잔영, 스탯 카드 관통 탄·다연발'],
     ['change','⚔ <b>보스 러시</b>에서 적이 보스 하나뿐이라 의미 없는 증강이 나오던 것 → 안 나와요: 성역(주변 적 수), 추적자(표식된 적 수), 역병(번짐), 체인 라이트닝·정전기·특이점·공명·번개 토템·과부하·연쇄 번개·폭풍 사슬(다른 적에게 연쇄), 얼음 파쇄(보스는 안 얼음), 시체 폭발(졸개 처치), 기절 주사위(일반 적만), 중력장 생성(끌어당김)'],
@@ -14191,7 +14194,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=285,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=286,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
