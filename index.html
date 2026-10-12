@@ -8693,7 +8693,7 @@ function rarityFx(){
 // 스탯 카드 등급 (행운 0: 영웅 4.6% 전설 0.6%, 행운 50: 영웅 7.5% 전설 1.7%)
 function rollRarity(bonus=0){const L=LK(bonus);const w=[['c',66],['r',26+.33*L],['e',4.5+.09*L],['l',.55+.03*L]];let t=w.reduce((a,b)=>a+b[1],0),x=Math.random()*t;for(const [k,v] of w){if((x-=v)<0)return k;}return 'c';}
 // 공격 속도가 상한에 닿으면 공격 속도만 올리는 카드는 안 나옴 (받아도 0%)
-const RATE_ONLY=new Set(['손목 단련','날랜 손놀림','광기']),REGEN_ONLY=new Set(['붕대']),LS_ONLY=new Set(['흡혈 송곳니']);
+const RATE_ONLY=new Set(['손목 단련','날랜 손놀림','광기']),REGEN_ONLY=new Set(['붕대','불사의 맹세']),LS_ONLY=new Set(['흡혈 송곳니','불사의 맹세'])/* v291: 흡혈+재생 복합 카드도 둘 중 하나가 한도면 안 나옴 */;
 // 실제 계산으로 한도를 넘었으면 그 회복 카드는 안 나옴: 재생은 스탯 또는 최근 5초 실제 자동 회복 합계가 한도 이상, 흡혈은 한도 최대치(4%)에 닿았고 최근 5초 30% 이상 버려질 때
 // (흡혈 한도는 흡혈 수치의 절반이라 최대치 전까지는 흡혈을 올리면 한도도 같이 올라 버려지지 않음)
 const regenFull=()=>{try{const cap=S.p.maxHp*rgCapF(),H=hRate('rg');return S.p.regen*rgHpM()>=cap||(H&&H.w>=cap*.98);}catch(e){return false;}};
@@ -8877,6 +8877,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:291,t:'💚 회복 카드 정리',items:[
+    ['change','🦇 흡혈이 최대 한도에 닿으면 <b>흡혈+재생 복합 카드(불사의 맹세)</b>도 더 안 나와요. 체력 재생이 한도를 넘었을 때도 마찬가지 (절반이 버려지는 카드라서)']]},
   {v:290,t:'💀 사령술사 해골 조정',items:[
     ['nerf','💀 해골이 호위무사처럼 근접 적을 너무 많이 붙잡던 것: 해골 1기당 붙잡는 적 <b>6 → 4마리</b>, 붙잡는 거리 150 → 110. <b>정예(금색 테두리)는 해골을 무시하고 본체를 노려요</b>'],
     ['change','🧱 해골이 결계 밖으로 나가던 문제 수정: 해골도 결계 안에서만 움직여요'],
@@ -14222,7 +14224,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=290,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=291,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
