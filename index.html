@@ -3741,9 +3741,9 @@ const CARDS=[
   {n:'유리 대포',v:[[6.5,10.5,1]],t:v=>`공격력 +${v[0]}%, 최대 체력 −8%`,a:(p,v)=>{p.cdP=(p.cdP||0)+v[0]/100;p.chP=(p.chP||0)-.08;}},
   {n:'무거운 갑옷',v:[[6,10,0]],t:v=>`방어력 +${v[0]}, 이동 속도 −4%`,a:(p,v)=>{p.armor+=v[0];p.speed*=.96;}},
   {req:()=>rawRate()<RATE_CAP()||rateUnc(),n:'광기',v:[[6.5,10.5,1]],t:v=>`공격 속도 +${v[0]}%, 받는 피해 +8%`,a:(p,v)=>{p.crP=(p.crP||0)+v[0]/100;p.vuln*=1.08;}},
-  {n:'거인의 심장',v:[[8,14,0],[.6,1,1]],t:v=>`최대 체력 +${v[0]}, 초당 체력 재생 +${v[1]}`,a:(p,v)=>{p.maxHp+=v[0];p.hp+=v[0];p.regen+=v[1];}},
+  {n:'거인의 심장',v:[[8,14,0],[.6,1,1]],t:v=>{/* v303: 재생이 한도면 최대 체력만 */const rf=S&&S.p&&regenFull();return rf?`최대 체력 +${v[0]}`:`최대 체력 +${v[0]}, 초당 체력 재생 +${v[1]}`;},a:(p,v)=>{p.maxHp+=v[0];p.hp+=v[0];if(!regenFull())p.regen+=v[1];}},
   {n:'철벽 자세',v:[[2.5,4,1],[6,10,0]],t:v=>`방어력 +${v[0]}, 최대 체력 +${v[1]}`,a:(p,v)=>{p.armor+=v[0];p.maxHp+=v[1];p.hp+=v[1];}},
-  {req:()=>moveSpd()<SPEED_CAP_F()||has('k_charger')||dashCdRaw()>DASH_MIN_F()+.03,n:'질주 본능',v:[[2,3.5,1],[3,5,1]],t:v=>dashCdRaw()>DASH_MIN_F()+.03?`이동 속도 +${v[0]}%, 대시 재사용 −${v[1]}%`:`이동 속도 +${v[0]}%`,a:(p,v)=>{p.speed*=1+v[0]/100;p.dashMul*=1-v[1]/100;}},
+  {req:()=>moveSpd()<SPEED_CAP_F()||has('k_charger')||dashCdRaw()>DASH_MIN_F()+.03,n:'질주 본능',v:[[2,3.5,1],[3,5,1]],t:v=>{/* v303: 이동 속도가 한도면 대시만 */const sf=S&&S.p&&moveSpd()>=SPEED_CAP_F()&&!has('k_charger'),df=dashCdRaw()>DASH_MIN_F()+.03;return sf?`대시 재사용 −${v[1]}%`:df?`이동 속도 +${v[0]}%, 대시 재사용 −${v[1]}%`:`이동 속도 +${v[0]}%`;},a:(p,v)=>{if(!(moveSpd()>=SPEED_CAP_F()&&!has('k_charger')))p.speed*=1+v[0]/100;p.dashMul*=1-v[1]/100;}},
   {fr:'r',n:'모험가의 주사위',get d(){const k=1;return `공격력 −${Math.round(15*k)}% ~ +${Math.round(25*k)}%, 굴려봐야 압니다`;},f:p=>{const m=Math.round((-15+Math.random()*40)*1);p.cdP=(p.cdP||0)+m/100;return `공격력 ${m>=0?'+':''}${m}%`;}},
   // 도박 카드: 후반에도 의미 있게 레벨·시간에 따라 커짐
   {fr:'r',n:'운명의 숫돌',get d(){const k=lvScale()*dmgUnit(),f=v=>Math.round(v*k*10)/10;return `공격력 −${f(1)} ~ +${f(3)}, 굴려봐야 압니다`;},f:p=>{const a0=pDmg(),m=Math.round((-1+Math.random()*4)*lvScale()*10)/10;p.dmg=Math.max(1,p.dmg+m);const d=Math.round((pDmg()-a0)*10)/10;return `공격력 ${d>=0?'+':''}${d}`;}},
@@ -8721,7 +8721,8 @@ const RATE_ONLY=new Set(['손목 단련','날랜 손놀림','광기']),REGEN_ONL
 const regenFull=()=>{try{const cap=S.p.maxHp*rgCapF(),H=hRate('rg');return S.p.regen*rgHpM()*RG_BUFF>=cap||(H&&H.w>=cap*.98);}catch(e){return false;}};
 // v296: 한도가 최대치의 90% 이상(흡혈을 더 올려도 한도가 거의 안 오름)이고, 지금 DPS로 계산한 흡혈량이 한도를 넘거나 최근 30% 이상 버려지면 흡혈 카드·상점 흡혈 안 나옴 (스탯 창에서 빨간색)
 const lsEst=()=>{try{return (S.dps||0)*lsNow()*LS_BUFF*healM();}catch(e){return 0;}},lsCapS=()=>S.p.maxHp*lsRate();
-const lsFull=()=>{try{if(lsRate()<(raidOn()?RAID_LS:LS_MAX_F())*.9)return false;const H=hRate('ls');return lsEst()>lsCapS()||!!(H&&H.w>0&&H.c/H.w<.7);}catch(e){return false;}};
+/* v303: 지금 DPS로 계산한 흡혈량이 1초 한도를 넘으면(스탯 창 빨간색) 흡혈 카드·상점 흡혈 안 나옴 */
+const lsFull=()=>{try{const H=hRate('ls');return lsEst()>lsCapS()||!!(H&&H.w>0&&H.c/H.w<.7);}catch(e){return false;}};
 // 고점 돌파 증강이 있으면 그 능력치 카드는 상한을 넘어서도 계속 나옴 (넘은 만큼은 그 증강 보너스에만 계산)
 const cardOk=c=>!(REGEN_ONLY.has(c.n)&&regenFull())&&!(LS_ONLY.has(c.n)&&lsFull())&&!(RATE_ONLY.has(c.n)&&rawRate()>=RATE_CAP()*.98&&!rateUnc())&&!(PCT_CARDS.has(c.n)&&!pctOpen())&&!(MELEE_CLS.includes(S.cls)&&(c.n==='가속 탄'||MELEE_CARD_BAN.has(c.n)))&&!(c.cc&&critFull()&&!has('r_vital'))&&!(c.cm&&critMFull()&&!has('g_deadeye'))&&!(c.n==='관통 탄'&&((S.p.pierce>=PIERCE_CAP&&!has('a_pierce'))||rushOn()))&&!(c.n==='조준경'&&S.p.range>=RANGE_CAP())&&(!c.req||c.req());
 // 직업 선호 카드는 ×1.6, 최근 9장 안에 나온 카드는 ×0.3 (같은 카드 반복 방지)
@@ -8901,6 +8902,12 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:303,t:'🦇 흡혈 카드 기준 · 레이드 동료 · 전당 모습',items:[
+    ['change','🏆 명예의 전당·보관함 모습에서 <b>레이드 세트</b> 장비가 일반 전설 모양으로 보이고, 세트 <b>양손 무기</b>가 한손으로 보이던 문제 수정 (이미 올라간 기록은 다시 올리면 바르게 보여요)'],
+    ['change','🛡 레이드 동료가 파동·곧 터질 예고를 <b>대시</b>로 피해요 (2.4초마다). 피하는 중에는 같은 방향으로 더 빠르게 달려서 연달아 따라오는 공격을 덜 맞아요. 저장된 흡혈·체력 재생만큼 싸우는 동안 계속 회복해요'],
+    ['change','🏃 이동 속도가 한도면 「질주 본능」 카드는 대시 재사용만 올려요 (이동 속도 문구도 안 나와요). 「가벼운 장화」는 원래대로 한도면 안 나와요'],
+    ['change','💚 체력 재생이 한도면 「거인의 심장」 카드는 최대 체력만 올려요 (재생 문구도 안 나와요)'],
+    ['change','🦇 스탯 창 흡혈이 <b>빨간색</b>(지금 딜로 계산한 흡혈량이 1초 한도를 넘음)이면 흡혈 카드·상점 흡혈이 안 나와요. 예전엔 흡혈 한도가 최대치에 가까울 때만 막아서, 흡혈 수치가 낮으면 한도를 한참 넘어도 계속 나왔어요']]},
   {v:302,t:'🧙 마법사 용어 · 스탯 설명',items:[
     ['look','🧙 마법사는 설명의 「공속이 오를수록 더 자주」 같은 줄임말도 「시전 속도」로, 「공격 횟수」는 「시전 횟수」로 보여요'],
     ['look','📊 스탯 창에서 직업마다 이름이 바뀐 줄(마법사 「번개 구체 수」 등)에도 ▸ 설명이 나와요']]},
@@ -10652,7 +10659,7 @@ const BR_AWK=.35,heroDf=h=>h&&(h.diff||(h.s&&h.s.diff))||'',heroAw=h=>!h?0:heroD
 function allyOf(h,i){const P=h.p||{},sp=(P.speed||200),mel=MELEE_CLS.includes(h.cls),bk=heroBrK(h),hp=Math.max(200,(P.maxHp||200)*bk.hp);
   // 동료 초당 피해 = 저장 당시 최대 DPS × (그 직업을 직접 조작했을 때 거신에게 들어가는 비율, 측정값) × 0.65 → 손으로 하는 것의 60~70%
   const dps=Math.max(50,RAID_ALLY*(h.da||(h.dps||1e5)*.15)*bk.d);
-  return {id:h.id,cls:h.cls,name:heroName(h),skin:h.skin||'',look:recLook(h),dr:/^[0-9a-z\-]{14}$/.test(h.dr||'')?dressDec(h.dr):null,x:WW/2+(i?1:-1)*90,y:WH/2+100,r:14,hp,maxHp:hp,armor:Math.max(0,P.armor||0),dps,mel,rng:mel?0:Math.min(420,Math.max(220,P.range||300)),sp:Math.min(320,sp),alive:true,cd:rand(0,.4),mvT:0,tx:0,ty:0,inv:0,hurtT:0,atkT:0,face:1,orb:(i?1:-1)*1.2,revT:0,rv:0};}
+  return {id:h.id,cls:h.cls,name:heroName(h),skin:h.skin||'',look:recLook(h),dr:/^[0-9a-z\-]{14}$/.test(h.dr||'')?dressDec(h.dr):null,x:WW/2+(i?1:-1)*90,y:WH/2+100,r:14,hp,maxHp:hp,armor:Math.max(0,P.armor||0),dps,sus:Math.min(LS_MAX,(P.lifesteal||0)*LS_K)+Math.min(RG_MAX,(P.regen||0)/Math.max(1,P.maxHp||200)),dcd:rand(0,1),mel,rng:mel?0:Math.min(420,Math.max(220,P.range||300)),sp:Math.min(320,sp),alive:true,cd:rand(0,.4),mvT:0,tx:0,ty:0,inv:0,hurtT:0,atkT:0,face:1,orb:(i?1:-1)*1.2,revT:0,rv:0};}
 function beginRaid(bi,st,ids){const L=myHeroes(),hs=ids.map(id=>L.find(h=>h.id===id)).filter(Boolean).filter((h,i,a)=>a.findIndex(x=>x.cls===h.cls)===i);if(!hs.length)return;const me=hs[0],R=RAIDS[bi];
   newRun();S.diff='raid';S.raidB=bi;S.raidS=st;S.raidAw=heroAw(me);S.st.kills=me.kills||0; // 처치 수로 커지는 증강(수확·두꺼운 가죽)이 그대로
   for(const k of PKEYS)if(me.p[k]!==undefined)S.p[k]=me.p[k];for(const k in (me.s||{}))if(me.s[k]!==undefined&&k!=='diff')S[k]=me.s[k];S.cls=me.cls;S.diff='raid';
@@ -11081,7 +11088,11 @@ function allyHurt(a,amt,src){if(!a.alive||a.inv>0)return;S.aHit=S.aHit||{};S.aHi
   amt=Math.min(amt*.5*(roleOf(a.cls).tk||1)*100/(100+a.armor),a.maxHp*.25);a.hp-=amt;a.hurtT=.3;a.inv=.25;a.calm=0;ftext(a.x,a.y-30,'-'+fmtN(amt),'#ff9a9a',13);
   if(a.hp<=0){a.alive=true;allyDie(a,src);}}
 // 동료 AI: 기본만 함. 보스 둘레를 천천히 돌며 사거리 유지, 발밑 예고 원은 남은 시간이 짧아지면 바깥으로, 직선 예고는 옆으로 피함
-function allyTick(a,dt){const p=S.p;a.inv=Math.max(0,a.inv-dt);if(a.alive){a.calm=(a.calm||0)+dt;if(a.calm>4)a.hp=Math.min(a.maxHp,a.hp+a.maxHp*.03*dt);}a.hurtT=Math.max(0,a.hurtT-dt);a.ccd=Math.max(0,(a.ccd||0)-dt);a.atkT=Math.max(0,a.atkT-dt);
+function allyTick(a,dt){const p=S.p;a.inv=Math.max(0,a.inv-dt);if(a.alive){a.calm=(a.calm||0)+dt;if(a.calm>4)a.hp=Math.min(a.maxHp,a.hp+a.maxHp*.03*dt);/* v303: 저장된 흡혈·재생만큼 계속 회복 (플레이어처럼) */if(a.sus>0&&S.boss&&S.boss.alive)a.hp=Math.min(a.maxHp,a.hp+a.maxHp*a.sus*dt);
+    /* v303: 동료도 대시: 파동이 곧 닿거나, 곧 터질 예고 안에서 못 빠져나가면 대시 (0.35초 무적, 2.4초마다) — 예전엔 파동을 매번 맞아서 금방 쓰러졌음 */
+    a.dcd=Math.max(0,(a.dcd||0)-dt);if(a.dcd<=0){let nd=0;for(const w of S.rwav||[]){if(w.hit.has(a))continue;const gp=Math.hypot(a.x-w.x,a.y-w.y)-w.r;if(gp>-w.w/2&&gp<w.sp*.12+w.w/2+a.r){nd=1;break;}}
+      if(!nd)for(const t of S.tele){if(!t.dmg||t.kill||t.t>.14)continue;const In=t.k==='c'?d2(t,a)<(t.r+a.r*.5)**2:(()=>{const ux=Math.cos(t.a),uy=Math.sin(t.a),px=a.x-t.x,py=a.y-t.y,u=clamp(px*ux+py*uy,0,t.len);return Math.hypot(px-ux*u,py-uy*u)<t.w/2+a.r*.5;})();if(In){nd=1;break;}}
+      if(nd){a.inv=Math.max(a.inv,.35);a.dcd=2.4;S.rings.push({x:a.x,y:a.y,r:6,max:26,life:.2,col:'#bfe8ff'});}}}a.hurtT=Math.max(0,a.hurtT-dt);a.ccd=Math.max(0,(a.ccd||0)-dt);a.atkT=Math.max(0,a.atkT-dt);
   if(!a.alive){const need=raidMembers().some(m=>m.o.alive&&roleOf(m.cls).mend)?1.5:3;if((S.raidTok||0)>0&&p.alive&&d2(a,p)<(70)**2){a.rv+=dt;if(a.rv>=need){a.alive=true;a.hp=a.maxHp*.4;a.inv=2;S.raidTok--;raidRoles();burst(a.x,a.y,'#7be08f',20);toast(`✨ ${a.name} 부활! (남은 부활 기회 ${S.raidTok})`);}}else a.rv=Math.max(0,a.rv-dt*.5);return;}
   const b=S.boss&&S.boss.alive?S.boss:null;let vx=0,vy=0;
   if(S.rdoom){let q=null,bd=1e18;for(const c of S.rdoom.safe){const d=d2(c,a);if(d<bd){bd=d;q=c;}}if(q&&bd>(q.r*.5)**2){vx=q.x-a.x;vy=q.y-a.y;}}
@@ -11095,8 +11106,10 @@ function allyTick(a,dt){const p=S.p;a.inv=Math.max(0,a.inv-dt);if(a.alive){a.cal
   {let ex=0,ey=0,hit=0;for(const t of S.tele){if(!t.dmg||t.t>Math.max(1.2,(t.k==='c'?t.r:0)/a.sp+.6))continue;
     if(t.k==='c'){const dx=a.x-t.x,dy=a.y-t.y,d=Math.hypot(dx,dy)||1,m=t.r+a.r+10;if(d<m){const w=(m-d)/m+.3;ex+=dx/d*w;ey+=dy/d*w;hit++;}}
     else{const ux=Math.cos(t.a),uy=Math.sin(t.a),px=a.x-t.x,py=a.y-t.y,u=clamp(px*ux+py*uy,0,t.len),ox=px-ux*u,oy=py-uy*u,dd=Math.hypot(ox,oy)||1,m=t.w/2+a.r+10;if(dd<m){const w=(m-dd)/m+.3;ex+=ox/dd*w;ey+=oy/dd*w;hit++;}}}
-   if(hit){const l=Math.hypot(ex,ey)||1;vx=ex/l*400;vy=ey/l*400;}}
-  const l=Math.hypot(vx,vy);a.moving=l>12;if(a.moving){const s=Math.min(l,a.sp*(S.rdoom?1.7:1)*dt);a.x+=vx/l*s;a.y+=vy/l*s;a.lmx=vx/l;a.lmy=vy/l;if(Math.abs(vx)>4)a.face=vx>0?1:-1;}
+   /* v303: 회피 중엔 하던 방향을 이어서 달림 (연달아 따라오는 원을 왔다 갔다 하며 맞던 문제) + 회피 걸음 1.3배 */
+   if(hit){if(a.evT>0){ex+=(a.lmx||0)*.6;ey+=(a.lmy||0)*.6;}const l=Math.hypot(ex,ey)||1;vx=ex/l*400;vy=ey/l*400;a.evT=.5;}}
+  a.evT=Math.max(0,(a.evT||0)-dt);
+  const l=Math.hypot(vx,vy);a.moving=l>12;if(a.moving){const s=Math.min(l,a.sp*(S.rdoom?1.7:a.evT>0?1.3:1)*dt);a.x+=vx/l*s;a.y+=vy/l*s;a.lmx=vx/l;a.lmy=vy/l;if(Math.abs(vx)>4)a.face=vx>0?1:-1;}
   if(S.rob)pushOut(a,a.r);if(S.arena){const A=S.arena,m=A.r-a.r-4;a.x=clamp(a.x,A.x-m,A.x+m);a.y=clamp(a.y,A.y-m,A.y+m);}
   // v290: 동료 사령술사도 해골 병사를 부름 (최대 4기, 12초). 동료 초당 피해의 절반을 해골들이 나눠서 냄
   if(a.cls==='necro'){a.sk=a.sk||[];a.skT=(a.skT??0)-dt;if(a.skT<=0&&a.sk.length<4){a.skT=1.5;a.sk.push({x:a.x+rand(-30,30),y:a.y+rand(-30,30),life:12,cd:rand(0,.5),f:1,mv:0,ox:Math.random()*6,sw:0});}
@@ -12863,9 +12876,9 @@ const B64='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.';
 const achEnc=()=>{let o='';for(let i=0;i<ACH.length;i+=6){let v=0;for(let j=0;j<6;j++){const a=ACH[i+j];if(a&&META.ach&&META.ach[a.k])v|=1<<j;}o+=B64[v];}return o;};
 const achDec=s=>{const L=[];if(!s)return null;for(let i=0;i<s.length;i++){const v=B64.indexOf(s[i]);if(v<0)continue;for(let j=0;j<6;j++)if(v&(1<<j)&&ACH[i*6+j])L.push(ACH[i*6+j]);}/* 달성하기 어려운 것부터: ★ → 보상 외형이 있는 것 → 나중 단계 */return L.sort((a,b)=>(b.hard?1:0)-(a.hard?1:0)||(b.rw?1:0)-(a.rw?1:0)||ACH.indexOf(b)-ACH.indexOf(a));};
 // 외형 코드에 쓰는 고정 색 목록 (세트·유니크 장비) — 순서 바꾸지 말 것 (다른 사람에게 보이는 외형 문자열 호환)
-const LOOK_PK=['st_hero','st_wind','st_sage','st_guard','drg','frs','shd','phx','wgd','myth'];
-const dressEnc=D=>D?DR_K.map(k=>{const v=D[k];return v==null?'--':v==='def'?'dd':v==='cw'?'cc':v==='uq'?'uu':v.pk&&LOOK_PK.includes(v.pk)?'p'+LOOK_PK.indexOf(v.pk):String(v.t)+String((v.v||0)+(v.th?3:0));}).join(''):'';
-const dressDec=s=>{if(!s||s.length<14)return null;const o={};DR_K.forEach((k,i)=>{const c=s.substr(i*2,2);o[k]=c==='--'?null:c==='dd'?'def':c==='cc'?'cw':c==='uu'?'uq':c[0]==='p'&&LOOK_PK[+c[1]]?{t:3,v:0,pk:LOOK_PK[+c[1]]}:{t:Math.min(3,+c[0]||0),v:(+c[1]||0)%3,th:(+c[1]||0)>=3?1:0};});return o;};
+const LOOK_PK=['st_hero','st_wind','st_sage','st_guard','drg','frs','shd','phx','wgd','myth','rstm','rbrd','rgol','rfrq','rvod'];/* v303: 레이드 세트 외형 추가 (뒤에만 붙일 것: 번호가 저장 코드) */
+const dressEnc=D=>D?DR_K.map(k=>{const v=D[k];return v==null?'--':v==='def'?'dd':v==='cw'?'cc':v==='uq'?'uu':v.pk&&LOOK_PK.includes(v.pk)?(v.th?'q':'p')+LOOK_PK.indexOf(v.pk).toString(36):String(v.t)+String((v.v||0)+(v.th?3:0));}).join(''):'';
+const dressDec=s=>{if(!s||s.length<14)return null;const o={};DR_K.forEach((k,i)=>{const c=s.substr(i*2,2);o[k]=c==='--'?null:c==='dd'?'def':c==='cc'?'cw':c==='uu'?'uq':(c[0]==='p'||c[0]==='q')&&LOOK_PK[parseInt(c[1],36)]?{t:3,v:0,th:c[0]==='q'?1:0,pk:LOOK_PK[parseInt(c[1],36)]}:{t:Math.min(3,+c[0]||0),v:(+c[1]||0)%3,th:(+c[1]||0)>=3?1:0};});return o;};
 // 프로필 그림: 옷차림까지 반영하고, 보여 줄 크기(px)에 맞춰 도트 한 칸이 정수 픽셀이 되게 그림
 function profAv(p,px){if(!p||typeof HERO==='undefined'||!HERO.canvas)return null;const D=avDim(px),key='P'+D.F+'|'+p.cls+'|'+p.skin+'|'+p.aura+'|'+(p.dr||'')+'|'+(p.dress?'':p.gear)+'|'+(p.look?'o':'n');
   if(!HOF_AV[key])HOF_AV[key]=withLook(p.look,()=>{try{const c=document.createElement('canvas');c.width=c.height=D.F;const g=c.getContext('2d');g.imageSmoothingEnabled=false;g.scale(D.kf,D.kf);
@@ -14264,7 +14277,7 @@ function renderStats(){
     (()=>{const rg=p.regen*rgHpM()*RG_BUFF,cap=p.maxHp*rgCapF(),over=rg>cap,H=hRate('rg');const live=H&&H.w>0?` · 최근 5초 실제 회복 ${H.g.toFixed(1)}/초`:'';
       return row('체력 재생',(over?`<span style="color:#ff8a8a">${rg.toFixed(1)}</span>`:rg.toFixed(1))+`/초 <small>/ ${cap.toFixed(1)}/초</small>`,(over?`<span style="color:#ff8a8a">한도 초과 ${(rg-cap).toFixed(1)}/초</span> · `:'')+(rgHpM()>1?`기본 ${p.regen.toFixed(1)} ×${rgHpM().toFixed(1)} · `:'')+`재생·문신·성역 같은 자동 회복은 다 합쳐서 1초에 ${cap.toFixed(1)}까지 (최대 체력 ${Math.round(p.maxHp)}의 ${(rgCapF()*100).toFixed(1)}%). 최대 체력이 늘면 한도도 같이 늘어요`+live);})(),
     (()=>{const H=hRate('ls'),cap=p.maxHp*lsRate(),waste=H&&H.w>0?Math.round((1-H.c/H.w)*100):null;
-      return row('흡혈',pct(lsNow())+(()=>{const est=lsEst(),ov=est>cap,fu=lsFull(),nf=v=>v>=1000?Math.round(v).toLocaleString():v.toFixed(1);/* v296: 빨강 = 한도 최대라 흡혈 카드 안 나옴, 주황 = 넘지만 흡혈을 올리면 한도가 아직 오름 */return `<br><small>${ov||fu?`<span style="color:${fu?'#ff8a8a':'#ffb35a'}">${nf(est)}</span>`:nf(est)}/초 / ${cap.toFixed(1)}/초${fu?' <span style="color:#ff8a8a">최대</span>':''}</small>`;})(),`준 피해의 ${pct(lsNow())}만큼 체력이 차요. 단, 흡혈로 차는 체력은 1초에 ${cap.toFixed(1)}까지 (최대 체력 ${Math.round(p.maxHp)}의 ${(lsRate()*100).toFixed(2)}%). 한도는 흡혈 수치의 약 절반 (흡혈 1% → 최대 체력의 ${+(LS_K*100).toFixed(3)}%, 최대 ${+((raidOn()?RAID_LS:LS_MAX_F())*100).toFixed(1)}%)이라 흡혈과 최대 체력이 늘면 같이 늘어요. 「최대」가 뜨면 흡혈을 더 올려도 소용없어서 흡혈 카드가 안 나와요`+(H&&H.w>0?` · 최근 5초 실제 회복 ${H.g.toFixed(1)}/초`:' · 공격해서 피해를 주면 실제 회복량이 여기에 나와요'));})(),
+      return row('흡혈',pct(lsNow())+(()=>{const est=lsEst(),ov=est>cap,fu=lsFull()&&ov,nf=v=>v>=1000?Math.round(v).toLocaleString():v.toFixed(1);/* v296: 빨강 = 한도 최대라 흡혈 카드 안 나옴, 주황 = 넘지만 흡혈을 올리면 한도가 아직 오름 */return `<br><small>${ov||fu?`<span style="color:${ov?'#ff8a8a':'#ffb35a'}">${nf(est)}</span>`:nf(est)}/초 / ${cap.toFixed(1)}/초${fu?' <span style="color:#ff8a8a">최대</span>':''}</small>`;})(),`준 피해의 ${pct(lsNow())}만큼 체력이 차요. 단, 흡혈로 차는 체력은 1초에 ${cap.toFixed(1)}까지 (최대 체력 ${Math.round(p.maxHp)}의 ${(lsRate()*100).toFixed(2)}%). 한도는 흡혈 수치의 약 절반 (흡혈 1% → 최대 체력의 ${+(LS_K*100).toFixed(3)}%, 최대 ${+((raidOn()?RAID_LS:LS_MAX_F())*100).toFixed(1)}%)이라 흡혈과 최대 체력이 늘면 같이 늘어요. 빨간색이면 지금 딜로 이미 한도까지 차서 흡혈 카드·상점 흡혈이 안 나와요`+(H&&H.w>0?` · 최근 5초 실제 회복 ${H.g.toFixed(1)}/초`:' · 공격해서 피해를 주면 실제 회복량이 여기에 나와요'));})(),
     row('처치·적중 회복',`1초에 ${(p.maxHp*KH_MAX_F()).toFixed(1)}까지`,`처치·적중할 때 차는 회복을 다 합친 한도: 1초에 ${(p.maxHp*KH_MAX_F()).toFixed(1)} (최대 체력 ${Math.round(p.maxHp)}의 ${+(KH_MAX_F()*100).toFixed(1)}%). 최대 체력이 늘면 한도도 같이 늘어요`),
     row('받는 피해 배율','×'+p.vuln.toFixed(2))
   ].join('');
@@ -14319,7 +14332,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=302,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=303,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
