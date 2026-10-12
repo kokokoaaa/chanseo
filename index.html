@@ -6723,6 +6723,7 @@ function dmgE(e,amt,col,label,quiet){
   if(!e.alive)return;
   if(e.ivT>S.t){if(duelOn()&&e===S.boss&&e.bst!=='wait'&&!(e.popT>S.t)){e.popT=S.t+.45;duelPop(e.x,e.y-(e.r||14)-24,'회피!','#ff9ad0');}return;} // 결투 상대가 대시로 피하는 순간
   if(e.boss&&S.raidK)amt*=S.raidK;
+  if(e.boss&&bRush()&&RUSH_AOE.has(S.cls))amt*=1.4; // 보스 러시: 범위 공격 직업은 범위가 보스 하나에 몰림 (v277)
   if(e.entT>0)return; // 보스 등장 연출 중엔 무적 (레이드·일반 보스)
   if(e.raidK&&e.vulnT>S.t)amt*=1.5; // 레이드: 기 모으기를 막아 기절한 동안 받는 피해 +50%
   if(e.tbT>S.t)amt*=.7;
@@ -8408,7 +8409,8 @@ const RUSH_BAN=new Set(['a_rain','k_taunt','piggy','king','tip','rush','lottery'
   /* 골드를 거의 못 모으는 모드라 골드에 기대는 것 */'luckycoin','clover',
   /* v271: 쓰러진 적·얼린 적 수로 쌓이는 고점 돌파 (보스 러시는 졸개가 적어 거의 안 쌓임) */'e_pyre','e_rime','m_pyro','m_cryo','r_plague']);
 // 보스 러시에서 처치로 발동하는 고유 능력 안내 (고유 능력 설명창·능력치 창)
-const RUSH_PAS={berserk:'보스 러시: 졸개를 처치할 때뿐 아니라 보스를 3번 맞힐 때마다 광란 +1 (보스를 계속 때리면 광란이 유지돼요)',necro:'보스 러시: 졸개를 처치할 때뿐 아니라 보스를 3번 맞힐 때마다 25% 확률로 해골 소환 (약 2초마다 소환은 그대로)'};
+const RUSH_AOE=new Set(['mage','elem','alch','druid']);
+const RUSH_PAS={mage:'보스 러시: 적이 보스 하나뿐이라 범위 마법이 한곳에 몰려 보스에게 주는 피해 +40%',elem:'보스 러시: 세 정령의 공격이 보스 하나에 몰려 보스에게 주는 피해 +40%',alch:'보스 러시: 물약과 장판이 보스 하나에 몰려 보스에게 주는 피해 +40%',druid:'보스 러시: 덩굴이 보스 하나를 휘감아 보스에게 주는 피해 +40%',berserk:'보스 러시: 졸개를 처치할 때뿐 아니라 보스를 3번 맞힐 때마다 광란 +1 (보스를 계속 때리면 광란이 유지돼요)',necro:'보스 러시: 졸개를 처치할 때뿐 아니라 보스를 3번 맞힐 때마다 25% 확률로 해골 소환 (약 2초마다 소환은 그대로)'};
 // 보스 러시 증강 설명: 「처치」 효과가 보스 3번 맞힐 때마다(처치 1회로 침) 발동하는 것은 그렇게 쓰고, 보스 러시에서 생기지 않는 처치 효과는 설명에서 뺌
 const RUSH_D={
   r_assassin:'[도적 전용] 정예와 보스에게 피해 2.5배, 보스를 3번 맞힐 때마다 체력 2% 회복',
@@ -14083,7 +14085,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=276,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=277,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
