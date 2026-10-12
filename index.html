@@ -7403,7 +7403,7 @@ function update(dt){
     if(keys['a']||keys['arrowleft'])mx--;if(keys['d']||keys['arrowright'])mx++;
     if(joy){const dx=joy.x-joy.sx,dy=joy.y-joy.sy,d=Math.hypot(dx,dy);if(d>6){const k=Math.min(d,50)/50;mx=dx/d*k;my=dy/d*k;}}
     S.manualNow=!!(mx||my);
-    if(AUTO.move&&!mx&&!my){const v=S.nw?nwVec():S.rdoom?rdoomVec():S.robj?robjVec():DEV?autoMoveVec():easyMoveVec(dt);mx=v[0];my=v[1];}
+    if(AUTO.move&&!mx&&!my){const v=S.nw?nwVec():S.rdoom?rdoomVec():S.robj?robjVec():DEV?autoMoveVec():easyMoveVec(dt);mx=v[0];my=v[1];try{autoTrapDash(v);}catch(e){}}
     if(autoPen())S.amT=(S.amT||0)+dt;
     if(p.skRootT>0){mx=0;my=0;}
     const ml=Math.hypot(mx,my);if(ml>1){mx/=ml;my/=ml;}
@@ -8896,6 +8896,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:300,t:'🤖 자동 이동 패턴 회피',items:[
+    ['buff','🤖 <b>자동 이동이 예고 패턴을 더 잘 피해요</b>: 터지기 직전인데 아직 장판 안이면 대시로 피하고(대시 중엔 패턴 피해 없음), 장판 안이거나 보스·탄환이 가까우면 더 자주 다시 판단해요. 보스전에서는 대시를 패턴 피하는 데 아껴요 (보스 러시처럼 예고가 짧아 걸어서는 못 빠져나가는 큰 원에 계속 맞던 문제)'],
+    ['change','🗡 무기 이름이 아이콘과 다르던 것: 마법사로 하다 원거리 무기가 떨어지면 이름은 「완드」인데 그림은 활이었어요 → 이름도 그 무기를 낄 수 있는 직업 기준 (활·방패 등)']]},
   {v:299,t:'⚔ 보스 러시 캐릭터 보정 · 직업별 명예의 전당',items:[
     ['change','🏆 <b>명예의 전당이 직업마다 따로</b>: 다른 직업으로 낸 기록은 점수가 낮아도 따로 올라가요. 같은 직업끼리만 더 높은 점수로 바뀌어요 (레이드는 지금처럼 이름마다 한 기록)'],
     ['buff','⚔ <b>보스 러시 캐릭터</b>는 각성이 없어서 레이드·결투·실험실에서 악몽 캐릭터보다 훨씬 약했어요 (레이드 동료 딜이 수십 분의 1, 10~40초 만에 쓰러짐). 이제 <b>잡은 보스 약 3마리 = 각성 1단계</b>로 쳐서 공격 배율·최대 체력이 같이 올라요 (악몽 캐릭터는 그대로)']]},
@@ -10328,7 +10331,9 @@ const wtCls=t=>Object.keys(CT).filter(c=>CT[c]===t);
 const wtOk=(it,c)=>!it||(!it.thc||it.thc===c)&&(!it.wt||CT[c]===it.wt);
 let NM_CLS=null;let NM_IT=null;/* 이름·아이콘을 고를 때: 종류가 안 맞는 직업이면 그 종류의 대표 직업 모습으로 */
 const nmCls=()=>{const c=NM_CLS||wCls();if(NM_IT&&NM_IT.bc&&CLASSES[NM_IT.bc])return NM_IT.bc;return NM_IT&&NM_IT.wt&&CT[c]!==NM_IT.wt?WT_REP[NM_IT.wt]:c;},wlook=()=>WLOOK[nmCls()]||WLOOK.knight;
-const gNoun=it=>{const L=it.thc&&WLOOK[it.thc]?WLOOK[it.thc]:wlook();return it.s==='sword'?(it.th?L[2]:L[0]):it.s==='shield'?L[4]:GEAR[it.s].n;};
+// v300: 무기 이름·아이콘은 그 무기를 낄 수 있는 직업 모양으로 (마법사 판에서 원거리 무기가 「완드」로 이름 붙고 아이콘은 활이던 문제)
+const wlookOf=it=>{if(it.thc&&WLOOK[it.thc])return WLOOK[it.thc];if(it.wt&&!it.cls&&!it.bc){const c=icoCls(it,eqCls());if(WLOOK[c])return WLOOK[c];}return wlook();};
+const gNoun=it=>{const L=wlookOf(it);return it.s==='sword'?(it.th?L[2]:L[0]):it.s==='shield'?L[4]:GEAR[it.s].n;};
 const reN=(n,it)=>{if(it.s!=='sword'&&it.s!=='shield')return n;const c=nmCls();let m=String(n).replace(/(장검|검|방패)$/,gNoun(it));if(c!=='knight'&&c!=='paladin')m=m.replace('기사의 ','명장의 ');return m;};
 // 세트 장비 이름 앞 표시: 【용사 세트】 (유니크 세트는 【★용왕 세트】). 화면 글에서는 세트 색으로 칠함
 const setTag=it=>{const T=it&&!it.base&&it.set&&SETS[it.set];return T?`【${T.u?'★':''}${T.n} 세트】`:'';};
@@ -10413,7 +10418,7 @@ const itOnly=it=>it.thc&&CLASSES[it.thc]?[it.thc]:it.cls&&CLASSES[it.cls]?[it.cl
 const itOnlyH=it=>{const L=itOnly(it);if(!L||!L.length)return '';const ok=L.includes(eqCls());return `<div class="fonly" style="color:${ok?'#ffd76a':'#ff8a8a'};font-weight:bold">🔒 ${L.length===1?CLASSES[L[0]].n+'만 낄 수 있어요':(WT_N[it.wt]||'')+' 장비 · '+L.map(c=>CLASSES[c].n).join('·')+'만'}${ok?'':' (지금 직업은 못 껴요)'}</div>`;};
 const icoCls=(it,c)=>{if(it.thc&&CLASSES[it.thc])return it.thc;if(it.wt&&!it.cls&&!it.bc){const L=wtCls(it.wt);if(L.length&&!L.includes(c))return L[0];}return c;};
 const itIcoH=(it,cls,big)=>{const u=itLook(it,icoCls(it,cls||eqCls()));return u?`<img class="ipx${big?' big':''}" src="${u}" alt="">`:itIco(it);};
-const itIco0=it=>it.cls?CW[it.cls][0]:it.s==='sword'?(it.thc&&WLOOK[it.thc]?WLOOK[it.thc]:wlook())[it.th?3:1]:it.s==='shield'?wlook()[5]:GEAR[it.s].ico;
+const itIco0=it=>it.cls?CW[it.cls][0]:it.s==='sword'?wlookOf(it)[it.th?3:1]:it.s==='shield'?wlookOf(it)[5]:GEAR[it.s].ico;
 const itCol=it=>it.my?MY_COL:it.u?UNQ_COL:it.ui?UQ_COL:GR[it.r].col;
 const itTag=it=>(ICO_PART[it.s]&&!lookVis(it)?'<b style="color:#a8a8a8">👁 이 직업은 겉모습에 안 보여요</b> ':'')+(it.s==='armor'&&robeR(eqCls())?'<b style="color:#c8a8ff">🧙 마법사는 로브 한 벌 · 바지 칸까지 · 기본 능력 ×1.5</b> ':'')+(it.thc&&CLASSES[it.thc]?`<b style="color:#ffcf8a">${WT_ICO[it.wt]||''} ${CLASSES[it.thc].n} 전용 양손 무기</b> `:it.wt?`<b style="color:#ffcf8a">${WT_ICO[it.wt]} ${WT_N[it.wt]} · ${wtCls(it.wt).map(c=>CLASSES[c].n).join('·')}</b> `:'')+(isTH(it)?'<b style="color:#9fd3ff">양손 무기 · 왼손(방패)과 같이 못 껴요</b> ':'')+itTag0(it);
 const itTag0=it=>it.base?`<b style="color:#c8c8c8">${it.bc&&CLASSES[it.bc]?CLASSES[it.bc].n+' ':''}기본 장비 · ${it.bc&&CLASSES[it.bc]?CLASSES[it.bc].n+'만 낄 수 있어요':'직업 기본 모습'}</b>`:it.my?`<b style="color:${MY_COL}">✦ 신화 장비 · 모든 직업</b>`:it.ui?`<b style="color:${UQ_COL}">★ 유니크 장비</b>`:it.u?`<b style="color:${UNQ_COL}">★ ${CLASSES[it.cls].n} 고유 무기</b>`:it.cls?`<b style="color:#ffd76a">${CLASSES[it.cls].n} 전용</b>`:it.set?`<b style="color:${SETS[it.set].col}">${SETS[it.set].u?'★ 유니크 · ':''}${SETS[it.set].n} 세트</b>`:'';
@@ -13729,7 +13734,10 @@ function evGoal(){const ev=S.ev,p=S.p;if(!ev||(S.boss&&S.boss.alive))return null
 // 이벤트 목표·생존기는 안 챙김 → 잘하는 손 조작의 70~75% 정도
 // 일반 자동 이동의 대가 (안내·패치노트·결과 화면 어디에도 드러내지 않음): 켜 둔 동안 받는 피해 +12%(한 방 상한 뒤에 적용), 켜 둔 시간 비율만큼 최종 점수 −10% (기록의 숨은 값 ap, 명예의 전당 문자열 끝 ~숫자) (개발자 모드는 측정용이라 제외). 직접 움직이면 그 순간은 해당 없음
 const AUTO_DM=1.12,autoPen=()=>AUTO.move&&!DEV&&!!S&&S.mode==='play'&&!S.manualNow;
-function easyMoveVec(dt){S.emT=(S.emT||0)-dt;const p=S.p;let near=false;for(const e of S.en)if(e.alive&&d2(e,p)<(e.r+p.r+60)**2){near=true;break;}if(near&&S.emT>.25)S.emT=.25;if(S.emT>0&&S.emV)return S.emV;S.emT=near?.25:.9;S.easyAI=1;try{S.emV=autoMoveVec0();}finally{S.easyAI=0;}return S.emV;}
+// v300: 자동 이동 공통 — 예고 장판 안에 서 있는지 (t초 안에 터지는 것만). 터지기 직전(0.13초)이면 대시 (대시 중엔 패턴 피해 없음, 보스 러시처럼 예고가 짧아 걸어서 못 빠져나가는 큰 원도 피함)
+const inTele=(t,p)=>{if(t.k==='c')return Math.hypot(t.x-p.x,t.y-p.y)<t.r+p.r;const ux=Math.cos(t.a),uy=Math.sin(t.a),px2=p.x-t.x,py2=p.y-t.y,u=clamp(px2*ux+py2*uy,0,t.len);return Math.hypot(px2-ux*u,py2-uy*u)<t.w/2+p.r;};
+function autoTrapDash(v){const p=S.p;if(!p||p.dashCd>0||p.dashT>0)return;if(!S.tele.some(t=>t.dmg&&t.t<=.13&&inTele(t,p)))return;const l=Math.hypot(v[0],v[1]);if(l>.01){p.lmx=v[0]/l;p.lmy=v[1]/l;}dash();}
+function easyMoveVec(dt){S.emT=(S.emT||0)-dt;const p=S.p;let near=false;for(const e of S.en)if(e.alive&&d2(e,p)<(e.r+p.r+60)**2){near=true;break;}if(near&&S.emT>.25)S.emT=.25;if(S.emT>.1&&S.tele.some(t=>t.dmg&&inTele(t,p)))S.emT=.1;/* v300: 예고 장판 안이면 0.1초마다 다시 판단 */if(S.emT>.15&&((S.boss&&S.boss.alive&&d2(S.boss,p)<(S.boss.r+p.r+160)**2)||S.pr.some(b=>!b.mine&&d2(b,p)<200*200)))S.emT=.15;/* 보스가 가깝거나 탄환이 근처면 0.15초마다 */if(S.emT>0&&S.emV)return S.emV;S.emT=near?.25:.9;S.easyAI=1;try{S.emV=autoMoveVec0();}finally{S.easyAI=0;}return S.emV;}
 // 개발자 자동 '야영' 모드: 가만히 있어야 세지는 증강이 있으면 켤 때 물어봄. 켜면 이벤트가 있을 때만 움직이고, 평소엔 맵(보스전은 결계) 끝에서 정지.
 // 예고 공격 위에 있거나 체력이 45% 아래면 그때만 평소처럼 피함
 const STILL_AUGS=[];
@@ -13854,7 +13862,9 @@ function autoMoveVec0(){
   if(bStay&&(wide.length||shots.length||S.tele.length))return [0,0];
   p.amA=ba;
   const vx=Math.cos(ba),vy=Math.sin(ba);
-  if(p.dashCd<=0&&(S.en.some(e=>e.alive&&d2(e,p)<(e.r+p.r+26)**2)||(DEV&&AUTO.hi&&danger>=5))){p.lmx=vx;p.lmy=vy;dash();}
+  // v300: 터지기 직전(0.13초 안)인 예고 장판 안에 아직 있으면 대시 (대시 중엔 패턴 피해 없음). 보스 러시처럼 예고가 짧아 걸어서는 못 빠져나가는 큰 원도 피함
+  // v300: 보스전에서는 대시를 예고 패턴 회피용으로 아낌 (잡몹이 붙었다고 쓰지 않고, 보스 몸통에 닿기 직전만)
+  if(p.dashCd<=0&&(bossOn?d2(S.boss,p)<(S.boss.r+p.r+12)**2:(S.en.some(e=>e.alive&&d2(e,p)<(e.r+p.r+26)**2)||(DEV&&AUTO.hi&&danger>=5)))){p.lmx=vx;p.lmy=vy;dash();}
   return [vx,vy];
 }
 function cycleZoom(){ZOOM=(ZOOM+1)%ZOOM_N;try{localStorage.setItem('chanseo_zoom',ZOOM);}catch(e){}resize();refreshAutoBtns();toast(`시야 ${ZOOM+1}단계 (${[1,1.25,1.5,1.75,2][ZOOM]}배 넓게)`);}
@@ -14290,7 +14300,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=299,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=300,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
