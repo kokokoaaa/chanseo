@@ -5475,9 +5475,12 @@ function nwTick(dt){if(!endless()||rushOn()||!S.p.alive||S.win||dfM().raid||dfM(
   for(const q of w.safe)S.rings.push({x:q.x,y:q.y,r:q.r,max:q.r+40,life:.4,col:'#fff2b0'});
   // 몸(발~머리) 어느 부분이든 빛의 원에 걸쳐 있으면 생존 (예전엔 몸 중심 한 점만 봐서, 눈으로는 원 안인데 죽는 경우가 있었음)
   const inW=q=>[p.r,0,-p.r,-p.r*2].some(oy=>Math.hypot(p.x-q.x,p.y+oy-q.y)<q.r+p.r*.5);
+  sumWipe(o=>!w.safe.some(q=>Math.hypot(o.x-q.x,o.y-q.y)<q.r));
   if(!w.safe.some(inW)){killP('악몽의 파동');if(!p.alive||S.mode==='dying')achUnlock('h_wave');}
   else{S.st.nwOk=(S.st.nwOk||0)+1;achCheck({nwOk:S.st.nwOk});}}
 // 즉사: 피해 감소·무적·보호막을 무시. 최후의 패·부활 보험·불사조·골드 부활은 그대로 작동
+// v290: 즉사 패턴(악몽의 파동·보스 즉사기·레이드 심판)은 소환물(해골·포탑·그림자 분신)도 휩쓸어 부숨
+function sumWipe(hit){let n=0;const P=S.p;for(const L of [S.skel,S.turrets,S.clones])for(const k of L||[])if(k.life>0&&hit(k)){k.life=0;n++;burst(k.x,k.y,'#ff8a8a',6);}if(n&&P)ftext(P.x,P.y-52,'💥 소환물 '+n+' 소멸','#ff8a8a',14);return n;}
 function killP(why){const p=S.p;if(!p.alive)return;if(labOn()&&S.lab&&S.lab.god){p.hp=Math.max(1,p.hp);return;}S.bHit=1;ftext(p.x,p.y-30,why,'#ff4f6a',20);
   if(has('lastcard')&&p.lastCd<=0){p.lastCd=lv3('lastcard',60,45,30);p.hp=1;p.inv=2;toast('최후의 패');achUnlock('h_1hp');return;}
   if(p.token){p.token=false;p.hp=p.maxHp*.5;p.inv=2.5;S.rings.push({x:p.x,y:p.y,r:10,max:160,life:.4,col:'#7be08f'});toast('부활 보험 사용');achUnlock('h_1hp');return;}
@@ -5864,6 +5867,7 @@ function updBoss(dt){
   const TL=S.tele;for(const t of TL){if(S.tele!==TL)break;t.t-=dt;if(t.t>0)continue;
     if(t.dmg&&p.alive&&t.k==='c'&&d2(t,p)<(t.r+p.r*.5)**2&&!nwSafe()){if(t.kill)killP(t.kn||'즉사');else if(t.vol){if(!(p.inv>0)){hurtP(Math.min(t.dmg,p.maxHp*(dfM().oc||.35)*.85),PAT_SRC);p.inv=Math.max(p.inv,.3);}}else hurtP(t.dmg,t.omen?OMEN_SRC:PAT_SRC);}
     if(S.tele!==TL)break; // 이 예고에 맞으며 반사 등으로 보스가 쓰러짐 → 남은 효과 없음
+    if(t.kill&&t.dmg){if(t.k==='c')sumWipe(o=>d2(t,o)<t.r*t.r);else if(t.k==='l'){const ux=Math.cos(t.a),uy=Math.sin(t.a);sumWipe(o=>{const px=o.x-t.x,py=o.y-t.y,u=clamp(px*ux+py*uy,0,t.len);return Math.hypot(px-ux*u,py-uy*u)<t.w/2;});}}
     if(t.fk)teleImpact(t);else if(t.k==='c')S.rings.push({x:t.x,y:t.y,r:t.r*.6,max:t.r,life:.25,col:t.col||'#ff6060'});
     // 직선 예고에 피해가 있으면(번개 등) 그 선 위에 있으면 맞음
     if(t.k==='l'&&t.dmg){const ux=Math.cos(t.a),uy=Math.sin(t.a),px=p.x-t.x,py=p.y-t.y,u=clamp(px*ux+py*uy,0,t.len);if(p.alive&&Math.hypot(px-ux*u,py-uy*u)<t.w/2+p.r*.5&&!nwSafe()){if(t.kill)killP(t.kn||'즉사');else hurtP(t.dmg,t.omen?OMEN_SRC:PAT_SRC);}if(!t.fk)S.bolts.push({x1:t.x,y1:t.y,x2:t.x+ux*t.len,y2:t.y+uy*t.len,life:.18});}
@@ -8876,6 +8880,7 @@ const PATCH_NOTES=[
   {v:290,t:'💀 사령술사 해골 조정',items:[
     ['nerf','💀 해골이 호위무사처럼 근접 적을 너무 많이 붙잡던 것: 해골 1기당 붙잡는 적 <b>6 → 4마리</b>, 붙잡는 거리 150 → 110. <b>정예(금색 테두리)는 해골을 무시하고 본체를 노려요</b>'],
     ['change','🧱 해골이 결계 밖으로 나가던 문제 수정: 해골도 결계 안에서만 움직여요'],
+    ['change','☠ <b>즉사 패턴</b>(악몽의 파동·보스 즉사기·레이드 심판)에 <b>소환물도 휩쓸려 부서져요</b>: 해골·포탑·그림자 분신이 빛의 원 밖이나 즉사 범위 안에 있으면 사라짐'],
     ['look','📊 스탯 창 흡혈: 체력 재생처럼 <b>지금 DPS로 계산한 초당 흡혈 회복 / 1초 한도</b>를 보여줘요. 한도를 넘으면 빨간색 (넘는 만큼은 회복되지 않아요)']]},
   {v:289,t:'📈 고점 돌파 증강 점검',items:[
     ['buff','🛡 기사 「받아치기」: 막은 횟수만 세서 15분 동안 공격력 +1%밖에 안 오르던 것 → <b>막거나 맞을 때마다 투지 +1, 투지 2당 공격력 +1%</b>'],
@@ -10622,7 +10627,7 @@ function raidDoomStart(e,kind,T){const n=e.hp<e.maxHp*.5?2:3;let w;
 function raidDoomTick(dt){const w=S.rdoom;if(!w)return;w.t-=dt;if(w.t>0)return;S.rdoom=null;const p=S.p;S.shake=.6;S.flash=.3;
   const safe=w.kind==='breath'?o=>behindPillar(o,w.bx,w.by):o=>{const R=o.r||14;return w.safe.some(q=>[R,0,-R,-R*2].some(oy=>Math.hypot(o.x-q.x,o.y+oy-q.y)<q.r+R*.5));};
   const nm={doom:'심연의 심판',breath:'서리 숨결',thunder:'심판의 낙뢰',chain:'연쇄 붕괴',chain2:'연쇄 붕괴'}[w.kind]||'즉사';
-  if(p.alive&&!safe(p))killP(nm);for(const a of S.allies||[])if(a.alive&&!safe(a))allyDie(a,nm);
+  if(p.alive&&!safe(p))killP(nm);for(const a of S.allies||[])if(a.alive&&!safe(a))allyDie(a,nm);sumWipe(o=>!safe(o));
   if(w.kind==='breath'){for(let i=0;i<40;i++){const a=Math.random()*TAU,d=rand(80,1100);S.rings.push({x:w.bx+Math.cos(a)*d,y:w.by+Math.sin(a)*d,r:6,max:40,life:.5,col:'#cfefff'});}
     // 누가 숨었던 기둥만 금이 감 (두 번 숨으면 부서짐) → 같은 기둥만 쓸 수 없음. 3개보다 적어지면 새 기둥이 솟음
     const used=new Set();for(const o of [p,...(S.allies||[])])if(o.alive){const c=behindPillar(o,w.bx,w.by);if(c)used.add(c);}
