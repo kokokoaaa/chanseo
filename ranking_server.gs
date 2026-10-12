@@ -1,4 +1,8 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v7.8
+// 찬서 명예의 전당 서버 (Google Apps Script) v7.9
+//
+// v7.8 → v7.9 바뀐 점 (게임 v304)
+// - 결투 전적(dw)에 결투에 쓴 캐릭터(직업·옷차림·외형·이름)를 함께 저장: "3-0-0-c:mage:옷차림:외형:이름" → "w3d0l0|mage|옷차림|외형|이름"
+//   (예전엔 결투 전당 줄의 그림·한마디를 그 이름의 최고 점수 기록에서 가져와서, 결투 안 한 캐릭터가 보였음)
 //
 // v7.7 → v7.8 바뀐 점 (게임 v299)
 // - 명예의 전당을 직업마다 따로 저장: 이름 + 난이도 + 직업마다 한 줄 (레이드는 지금처럼 이름 + 레이드 보스마다 한 줄)
@@ -234,7 +238,7 @@ const num_ = (v, max) => Math.max(0, Math.min(max, Math.floor(+v || 0)));
 const str_ = (v, n) => { let t = String(v || ''); try { t = t.normalize('NFC'); } catch (err) {} return t.replace(/[\u200b-\u200f\ufeff]/g, '').replace(/\s+/g, ' ').trim().replace(/^[=+\-@]+/, '').slice(0, n); };
 // 결투 전적 "승-무-패"
 // 시트가 날짜로 바꾸지 않게 "w3d1l2" 꼴로 저장
-const dw_ = v => { const m = String(v || '').match(/^(\d{1,6})-(\d{1,6})-(\d{1,6})$/); return m ? 'w' + m[1] + 'd' + m[2] + 'l' + m[3] : ''; };
+const dw_ = v => { const m = String(v || '').match(/^(\d{1,6})-(\d{1,6})-(\d{1,6})(?:-c:([a-z]{2,10}):([0-9a-z\-]{0,14}):([A-Za-z0-9_]{0,24}):([^:|]{0,16}))?$/); return m ? 'w' + m[1] + 'd' + m[2] + 'l' + m[3] + (m[4] ? '|' + m[4] + '|' + m[5] + '|' + m[6] + '|' + m[7] : '') : ''; };
 const softC_ = (x, c) => x <= c ? x : c * (1 + Math.log(x / c));
 // 점수 계산식 v2 (게임과 같음): 이 시각 이후 기록은 10분 이후 생존 점수가 커지고 보스 처치 800점
 const SC4_AT = 1791753300000, nmV4_ = r => r.diff === 'nightmare' && (+r.at || 0) >= SC4_AT;
@@ -345,7 +349,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 78, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 79, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교

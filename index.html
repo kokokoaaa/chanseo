@@ -5494,7 +5494,7 @@ function killP(why){const p=S.p;if(!p.alive)return;if(labOn()&&S.lab&&S.lab.god)
   if(has('lastcard')&&p.lastCd<=0){p.lastCd=lv3('lastcard',60,45,30);p.hp=1;p.inv=2;toast('최후의 패');achUnlock('h_1hp');return;}
   if(p.token){p.token=false;p.hp=p.maxHp*.5;p.inv=2.5;S.rings.push({x:p.x,y:p.y,r:10,max:160,life:.4,col:'#7be08f'});toast('부활 보험 사용');achUnlock('h_1hp');return;}
   if(has('phoenix')&&S.phoenixCd<=0){S.phoenixCd=has('f_phoenixfire')?110:180;p.hp=p.maxHp*.4;p.inv=2.5;S.flash=.4;for(const e of S.en)if(e.alive)dmgEs('불사조',e,pDmg()*6,'#ff8a4a');toast('불사조');achUnlock('h_1hp');return;}
-  p.hp=0;const rc=reviveCost();if(S.gold>=rc&&!labOn()){if(AUTO.pick){S.gold-=rc;S.revives++;p.hp=p.maxHp*.5;p.inv=2.5;S.rings.push({x:p.x,y:p.y,r:10,max:160,life:.4,col:'#ffd76a'});toast('자동 부활');return;}openRevive(rc);return;}
+  p.hp=0;const rc=reviveCost();if(S.gold>=rc&&!labOn()&&!raidOn()&&!duelOn()){/* v304: 레이드(전용 부활 기회)·결투에서는 골드 부활 없음 */if(AUTO.pick){S.gold-=rc;S.revives++;p.hp=p.maxHp*.5;p.inv=2.5;S.rings.push({x:p.x,y:p.y,r:10,max:160,life:.4,col:'#ffd76a'});toast('자동 부활');return;}openRevive(rc);return;}
   p.alive=false;p.deadAt=S.t;burst(p.x,p.y,'#f1e7cf',30);setTimeout(gameOver,700);S.mode='dying';if(!raidOn()&&!duelOn()&&!labOn())clearSave();}
 function drawNW(){const w=S.nw;if(!w)return;const k=1-w.t/w.T,pul=.5+.5*Math.sin(S.t*14);ctx.save();
   // 화면 전체 붉은 막 + 안전지대만 뚫림
@@ -6767,7 +6767,7 @@ function hurtP(amt,src,mob){
     if(has('lastcard')&&p.lastCd<=0){p.lastCd=lv3('lastcard',60,45,30);p.hp=1;p.inv=2;toast('최후의 패');achUnlock('h_1hp');return;}
     if(p.token){p.token=false;p.hp=p.maxHp*.5;p.inv=2.5;S.rings.push({x:p.x,y:p.y,r:10,max:160,life:.4,col:'#7be08f'});toast('부활 보험 사용');achUnlock('h_1hp');return;}
     if(has('phoenix')&&S.phoenixCd<=0){S.phoenixCd=has('f_phoenixfire')?110:180;p.hp=p.maxHp*.4;p.inv=2.5;S.flash=.4;for(const e of S.en)if(e.alive)dmgEs('불사조',e,pDmg()*6,'#ff8a4a');toast('불사조');achUnlock('h_1hp');return;}
-    p.hp=0;const rc=reviveCost();if(S.gold>=rc&&!labOn()){if(AUTO.pick){S.gold-=rc;S.revives++;p.hp=p.maxHp*.5;p.inv=2.5;S.rings.push({x:p.x,y:p.y,r:10,max:160,life:.4,col:'#ffd76a'});toast('자동 부활');return;}openRevive(rc);return;}
+    p.hp=0;const rc=reviveCost();if(S.gold>=rc&&!labOn()&&!raidOn()&&!duelOn()){/* v304: 레이드(전용 부활 기회)·결투에서는 골드 부활 없음 */if(AUTO.pick){S.gold-=rc;S.revives++;p.hp=p.maxHp*.5;p.inv=2.5;S.rings.push({x:p.x,y:p.y,r:10,max:160,life:.4,col:'#ffd76a'});toast('자동 부활');return;}openRevive(rc);return;}
     p.alive=false;p.deadAt=S.t;burst(p.x,p.y,'#f1e7cf',30);setTimeout(gameOver,700);S.mode='dying';if(!raidOn()&&!duelOn()&&!labOn())clearSave();
   }
 }
@@ -8902,6 +8902,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:304,t:'⚔ 결투 전당 캐릭터 · 레이드 부활',items:[
+    ['change','🗿 레이드·결투에서 쓰러질 때 「골드 내고 부활」 창이 뜨던 문제 수정. 레이드는 원래대로 <b>부활 기회</b>로만 다시 일어나요 (저장 캐릭터가 가진 골드로 부활되던 것)','bug'],
+    ['change','⚔ 명예의 전당 결투 줄에 <b>결투에서 가장 많이 이긴 내 캐릭터</b>가 보여요. 예전엔 그 이름의 최고 점수 기록 캐릭터와 한마디가 보여서, 결투하지 않은 캐릭터를 새로 저장하면 결투 줄도 같이 바뀌었어요 (서버 v7.9 이상, 다음 결투나 접속 때 갱신)']]},
   {v:303,t:'🦇 흡혈 카드 기준 · 레이드 동료 · 전당 모습',items:[
     ['change','🏆 명예의 전당·보관함 모습에서 <b>레이드 세트</b> 장비가 일반 전설 모양으로 보이고, 세트 <b>양손 무기</b>가 한손으로 보이던 문제 수정 (이미 올라간 기록은 다시 올리면 바르게 보여요)'],
     ['change','🛡 레이드 동료가 파동·곧 터질 예고를 <b>대시</b>로 피해요 (2.4초마다). 피하는 중에는 같은 방향으로 더 빠르게 달려서 연달아 따라오는 공격을 덜 맞아요. 저장된 흡혈·체력 재생만큼 싸우는 동안 계속 회복해요'],
@@ -11252,11 +11255,11 @@ function duelReward(r,o){if(r<DUEL_PRAC)return {prac:1,w:0,d:0,l:0};const n=duel
 // 결투 전적: 캐릭터마다 승·무·패 + 최근 10판 기록
 const heroDRec=id=>{const R=duelRec();return (R.by&&R.by[id])||{w:0,d:0,l:0};};
 const wdl=o=>`${o.w||0}승 ${o.d||0}무 ${o.l||0}패`;
-function duelLogAdd(me,D,res,t,prac){const R=duelRec();if(me&&!prac){R.by=R.by||{};const o=R.by[me.id]||(R.by[me.id]={w:0,d:0,l:0});o[res]++;}
+function duelLogAdd(me,D,res,t,prac){const R=duelRec();if(me&&!prac){R.by=R.by||{};const o=R.by[me.id]||(R.by[me.id]={w:0,d:0,l:0});o[res]++;R.lastMe=me.id;}
   R.log=[{at:Date.now(),me:me?heroName(me):'?',mc:me?me.cls:'',o:D.opp?D.opp.n:'?',oc:D.opp?D.opp.c:'',r:res,t,p:prac?1:0},...(R.log||[])].slice(0,10);}
 // 명예의 전당에 내 이름 기록이 있으면 결투 전적도 갱신 (서버 v4.2 이상일 때만)
 function duelPush(){const nm=myNick(),dw=dwStr();if(!nm||!dw)return;const mine=(BOARD||[]).filter(b=>b.name===nm);if(!mine.length)return;
-  for(const b of mine)b.dw=dwOf('w'+dw.replace('-','d').replace('-','l'));
+  {const q=dw.split('-'),t=dw.split('-c:')[1];const o=dwOf('w'+q[0]+'d'+q[1]+'l'+q[2]+(t?'|'+t.split(':').join('|'):''));for(const b of mine)b.dw=o;}
   if(SHEET&&BOARD_DW){try{fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({name:nm,dwOnly:1,dw,k:MYKEY})}).catch(()=>{});}catch(e){}}}
 function duelLogHtml(){const L=duelRec().log||[];if(!L.length)return '';const ic={w:'🏆 승',d:'🤝 무',l:'💀 패'},col={w:'#7be08f',d:'#ffd76a',l:'#ff8a8a'};
   return `<details class="duellog" style="margin:6px 0"><summary>최근 결투 ${L.length}판</summary><div style="display:flex;flex-direction:column;gap:3px;margin-top:4px;font-size:13.5px">${L.map(x=>{const d=new Date(x.at);return `<div style="display:flex;gap:8px;padding:3px 8px;border-radius:6px;background:rgba(0,0,0,.22)"><b style="color:${col[x.r]};white-space:nowrap">${ic[x.r]}${x.p?' <small style="color:var(--muted)">연습</small>':''}</b><span style="flex:1">${esc(x.me)}${CLASSES[x.mc]?' ('+CLASSES[x.mc].n+')':''} vs ${esc(x.o)}${CLASSES[x.oc]?' ('+CLASSES[x.oc].n+')':''} · ${Math.floor((x.t||0)/60)}:${String((x.t||0)%60).padStart(2,'0')}</span><small style="color:var(--muted);white-space:nowrap">${d.getMonth()+1}/${d.getDate()}</small></div>`;}).join('')}</div></details>`;}
@@ -12817,8 +12820,12 @@ const clsS=b=>String(b.cls||'').split('~')[0].split('@')[0],skinOf=b=>(String(b.
 const dOf=b=>{const c=clsS(b).split('#')[0];let k=String(b.diff||(c.includes(':')?c.split(':')[1]:'normal'));if(/^raid_(golem|frost|storm|brood|void)$/.test(k))return k;if(DIFF[k])return k;return Object.keys(DIFF).find(x=>k&&x.startsWith(k))||'normal';};
 const calcScore=b=>scoreOf({...b,diff:dOf(b),bonus:bonusOf(b),ap:apOf(b)});
 // 결투 전적 "w3d1l2" → {w,d,l}
-const dwOf=v=>{if(v&&typeof v==='object')return v;const m=String(v||'').match(/^w(\d+)d(\d+)l(\d+)$/);return m?{w:+m[1],d:+m[2],l:+m[3]}:null;};
-const dwStr=()=>{const R=META.duel;return R&&(R.w||R.l||R.d)?`${R.w||0}-${R.d||0}-${R.l||0}`:'';};
+const dwOf=v=>{if(v&&typeof v==='object')return v;const m=String(v||'').match(/^w(\d+)d(\d+)l(\d+)(?:\|([a-z]+)\|([0-9a-z\-]*)\|([A-Za-z0-9_]*)\|(.*))?$/);return m?{w:+m[1],d:+m[2],l:+m[3],h:m[4]&&CLASSES[m[4]]?{cls:m[4],dr:/^[0-9a-z\-]{14}$/.test(m[5])?m[5]:'',skin:m[6]||'',name:m[7]||''}:null}:null;};
+const dwStr=()=>{const R=META.duel;if(!R||!(R.w||R.l||R.d))return '';const h=SRV_V>=79?duelHeroTag():'';return `${R.w||0}-${R.d||0}-${R.l||0}`+(h?'-c:'+h:'');};
+// v304: 결투 전당 줄에 보일 캐릭터 = 결투에서 가장 많이 이긴 보관 캐릭터 (같으면 마지막에 결투한 캐릭터). 예전엔 그 이름의 최고 점수 기록 캐릭터가 보여서, 결투 안 한 캐릭터로 바뀌었음
+function duelHeroTag(){try{const R=META.duel||{},by=R.by||{},L=myHeroes().filter(h=>by[h.id]&&CLASSES[h.cls]);if(!L.length)return '';
+  L.sort((a,b)=>(by[b.id].w-by[a.id].w)||((b.id===R.lastMe)-(a.id===R.lastMe)));const h=L[0],old=recLook(h),dr=!old&&/^[0-9a-z\-]{14}$/.test(h.dr||'')?h.dr:'';
+  return [h.cls,dr,String(h.skin||'').replace(/[^A-Za-z0-9_]/g,'').slice(0,24),String(heroName(h)).replace(/[:|]/g,'').slice(0,16)].join(':');}catch(e){return '';}}
 let BOARD_DW=false; // 서버가 결투 전적 칸을 아는지 (v4.2 이상)
 function normBoard(list){return list.map(b=>({...b,dw:dwOf(b.dw),diff:dOf(b),fx:fxOk(clsS(b).split('#')[1]||b.fx||''),bonus:bonusOf(b),ap:apOf(b),title:titleOf(b),aura:auraOf(b),gear:(g=>String(g).includes('!')||!segOf(b,10)?g:g+'!'+segOf(b,10))(gearOf(b)),look:lookOf(b),frame:frameOf(b),build:buildOf(b),team:teamOf(b),gd:b.gd||segOf(b,11),skin:skinOf(b),cls:clsS(b).split('#')[0].split(':')[0],name:String(b.name||''),time:+b.time||0,lvl:+b.lvl||0,kills:+b.kills||0,bosses:+b.bosses||0,comment:String(b.comment||''),score:calcScore(b)})).sort((a,b)=>b.score-a.score);}
 // 내 등록 기록 백업: 서버가 어떤 기록(예: 새 난이도)을 반영하지 못해도 내 화면에서는 사라지지 않게. 서버에 더 높은 기록이 있으면 서버 것을 씀
@@ -13443,7 +13450,7 @@ async function dmSend(to,msg){to=String(to||'').trim();msg=String(msg||'').trim(
 async function onlPing(bye){if(!SHEET_URL||!MYKEY)return;const u=SHEET_URL+'?ping=1&id='+onlId()+'&k='+encodeURIComponent(MYKEY||'')+'&n='+encodeURIComponent(myNick()||'모험가')+'&a='+encodeURIComponent(onlAct())+'&fx='+myFx()+'&ua='+encodeURIComponent(devUa())+'&b='+BUILD+(bye?'&bye=1':'&pf='+encodeURIComponent(myProf()));
   if(bye){try{fetch(u,{keepalive:true,cache:'no-store'});}catch(e){}return;}
   const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),15000):0;
-  let ok=false;try{const r=await fetch(u,{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();if(j&&Array.isArray(j.on)){ok=true;ONL_FAIL=0;SRV_V=+j.v||0;if(SRV_V>=74&&!RECFILL)setTimeout(recFill,3000);ONL_AS=j.on.filter(x=>x.me||(x.s||0)<((x.b||0)>=54?70:130));for(const x of j.on)if(x&&x.pf&&x.n){const p=profParse(x.pf);if(p)PROF_C[onlKey(x.n)]={t:Date.now(),p};}if(SRV_V<70)profPre();onlSet();if(Array.isArray(j.dm)&&j.dm.length)dmShow(j.dm);if(j.w)snapLoop();fbPres();if(j.ct)CHAT_CT=Math.max(CHAT_CT,+j.ct||0);onlPaint();try{supCheck();}catch(e){}}}catch(e){}finally{clearTimeout(to);}
+  let ok=false;try{const r=await fetch(u,{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();if(j&&Array.isArray(j.on)){ok=true;ONL_FAIL=0;SRV_V=+j.v||0;if(SRV_V>=74&&!RECFILL)setTimeout(recFill,3000);if(SRV_V>=79&&!DUELSYNC){DUELSYNC=1;setTimeout(()=>{try{const nm=myNick();if(nm&&(BOARD||[]).some(b=>b.name===nm&&b.dw&&!b.dw.h)&&duelHeroTag())duelPush();}catch(e){}},5000);}ONL_AS=j.on.filter(x=>x.me||(x.s||0)<((x.b||0)>=54?70:130));for(const x of j.on)if(x&&x.pf&&x.n){const p=profParse(x.pf);if(p)PROF_C[onlKey(x.n)]={t:Date.now(),p};}if(SRV_V<70)profPre();onlSet();if(Array.isArray(j.dm)&&j.dm.length)dmShow(j.dm);if(j.w)snapLoop();fbPres();if(j.ct)CHAT_CT=Math.max(CHAT_CT,+j.ct||0);onlPaint();try{supCheck();}catch(e){}}}catch(e){}finally{clearTimeout(to);}
   if(!ok){ONL_FAIL++;if(!ONLINE)onlPaint();clearTimeout(ONL_RT);ONL_RT=setTimeout(()=>{if(!document.hidden)onlPing();},Math.min(30000,4000*ONL_FAIL));}}
 setTimeout(()=>{onlPaint();onlPing();},300);// 예비 서버 신호: 실시간 서버에 연결돼 있으면 50초마다(예비 서버 부담 줄이기), 아니면 25초마다
 let ONL_LP=0,ONL_BYE=0;setInterval(()=>{if(document.hidden||STOPPED)return;if(onlIdle()>=2){if(!ONL_BYE){ONL_BYE=1;onlPing(true);}return;}ONL_BYE=0;const now=Date.now();if(FB&&now-ONL_LP<49000)return;ONL_LP=now;onlPing();},25000);
@@ -13487,7 +13494,7 @@ async function myRecSync(){if(MYREC_SYNCED||!SHEET_URL||SRV_V<54)return;MYREC_SY
   setTimeout(loadSheet,4000);}
 // 예전 기록의 빈 외모 채우기 (서버 v7.4): 이 기기가 주인인 이름의 기록에 옷차림(장비 외형)이 없으면 서버에 채워 달라고 보냄 → 다른 사람 화면에도 그 모습으로 보임
 // 이 기기에 같은 판 사본(내 최고 기록)이 있으면 그 판의 옷차림·장비 상세. 없으면 옷차림만 지금 그 직업 모습으로 (장비 상세는 그 판 것만, 없으면 「정보 없음」 그대로)
-let RECFILL=0;
+let RECFILL=0,DUELSYNC=0;/* v304: 결투 전적에 결투 캐릭터가 없으면 한 번 다시 보냄 */
 async function recFill(){if(RECFILL||!SHEET_URL||SRV_V<74||!BOARD||!BOARD.length)return;RECFILL=1;
   let sent={};try{sent=JSON.parse(localStorage.getItem('chanseo_fill')||'{}');}catch(e){}
   const m=myRecs(),me=myNick();let ch=0;
@@ -13601,7 +13608,7 @@ function boardHtml(){
   if(RSTATE==='err')return note('랭킹을 불러오지 못했어요.');
   // 결투: 이름마다 결투 전적(dw)이 있는 기록 하나(가장 높은 점수의 캐릭터)를 골라 승리 → 승률 순. 레이드: 높은 단계 → 빠른 처치 순(점수 순과 같음)
   const dwN=d=>d?d.w+d.d+d.l:0,wr=d=>dwN(d)?d.w/dwN(d):0;
-  const B=hd==='duel'?(()=>{const M={};for(const b of BOARD||[]){if(!dwN(b.dw)||!b.name||/^raid/.test(String(b.diff||''))||!DIFF[b.diff])continue;/* v298: 레이드 보스별 기록(raid_○○)이 결투 대표로 뽑혀 3명 파티 문구가 뜨던 것 */const o=M[b.name];if(!o||(b.score||0)>(o.score||0))M[b.name]=b;}return Object.values(M).sort((a,b)=>b.dw.w-a.dw.w||wr(b.dw)-wr(a.dw));})():hd==='raid'?(HOF_RB==='all'?raidTotals():(BOARD||[]).filter(b=>b.diff===(HOF_RB==='old'?'raid':'raid_'+HOF_RB))):(BOARD||[]).filter(b=>b.diff===hd);
+  const B=hd==='duel'?(()=>{const M={};for(const b of BOARD||[]){if(!dwN(b.dw)||!b.name||/^raid/.test(String(b.diff||''))||!DIFF[b.diff])continue;/* v298: 레이드 보스별 기록(raid_○○)이 결투 대표로 뽑혀 3명 파티 문구가 뜨던 것 */const o=M[b.name];if(!o||(b.score||0)>(o.score||0))M[b.name]=b;}/* v304: 결투에 쓴 캐릭터가 같이 오면 그 캐릭터 그림·이름으로 (점수 기록의 한마디는 안 보임) */for(const k in M){const h=M[k].dw.h;if(h)M[k]={...M[k],cls:h.cls,skin:h.skin,gear:h.dr?'!'+h.dr:'',look:h.dr?'new':'old',comment:'',duelHero:h.name};}return Object.values(M).sort((a,b)=>b.dw.w-a.dw.w||wr(b.dw)-wr(a.dw));})():hd==='raid'?(HOF_RB==='all'?raidTotals():(BOARD||[]).filter(b=>b.diff===(HOF_RB==='old'?'raid':'raid_'+HOF_RB))):(BOARD||[]).filter(b=>b.diff===hd);
   const RA=hd==='raid'&&HOF_RB==='all',RO=hd==='raid'&&HOF_RB==='old',RBo=RAIDS.find(r=>r.k===HOF_RB);
   if(!B.length)return note(hd==='duel'?'아직 결투 전적이 없어요. 다른 사람 캐릭터와 결투해 이겨 보세요!':hd==='raid'?(RBo?`아직 ${RBo.n} 기록이 없어요. 깨면 내 이름으로 자동으로 올라가요.`:'아직 레이드 기록이 없어요. 레이드를 깨면 내 이름으로 자동으로 올라가요.'):`아직 ${DIFF[hd].n} 난이도 기록이 없어요. 첫 기록의 주인공이 되어보세요.`);
   const f=x=>`${Math.floor(x/60)}:${String(Math.floor(x%60)).padStart(2,'0')}`;
@@ -13612,7 +13619,7 @@ function boardHtml(){
   const psT=b=>hd==='duel'?`${b.dw.w}승 <small style="font-size:.6em;opacity:.8">승률 ${Math.round(wr(b.dw)*100)}%</small>`:hd==='raid'?(RA?`${b.rsum.toLocaleString()}점`:`${Math.floor(b.time/60)}분 ${b.time%60}초`):`${b.score.toLocaleString()}점`;
   const rcT=b=>hd==='duel'?`${cn(b)}<br>${b.dw.w}승 ${b.dw.d}무 ${b.dw.l}패`:hd==='raid'?(RA?raidChips(b):`${RBo?RBo.ico:'🗿'} ${b.lvl}단계<br>${cn(b)}`):`${DIFF[b.diff]&&DIFF[b.diff].rush?'⚔'+(+b.bosses||0)+'단계 ':DIFF[b.diff]&&DIFF[b.diff].endless?'☠'+((+b.bosses||0)+1)+'단계 ':b.bosses>=4?'👑 ':''}${cn(b)}<br>Lv ${b.lvl} · ${f(b.time)}`;
   const rtT=b=>hd==='duel'?`${b.dw.w}승 · ${Math.round(wr(b.dw)*100)}%`:hd==='raid'?(RA?b.rsum.toLocaleString():`${Math.floor(b.time/60)}:${String(b.time%60).padStart(2,'0')}`):b.score.toLocaleString();
-  const cmT=b=>hd==='raid'?(b.comment?'🤝 '+esc(b.comment.slice(0,40)):''):b.comment?'“'+esc(b.comment.slice(0,40))+'”':'';
+  const cmT=b=>hd==='duel'&&b.duelHero?'⚔ '+esc(b.duelHero):hd==='raid'?(b.comment?'🤝 '+esc(b.comment.slice(0,40)):''):b.comment?'“'+esc(b.comment.slice(0,40))+'”':'';
   const avT=(b,c,mv,px)=>{const a=mv?hofAvS(b.cls,b.skin,b.aura,b.gear,recLook(b),mv,px):hofAv(b.cls,b.skin,b.aura,b.gear,recLook(b)),dm=px?avDim(px).css:0,me1=a?(mv?`<span class="${c} avs ${mv}" style="background-image:url(${a})${dm?`;width:${dm}px;height:${dm}px;image-rendering:${(window.devicePixelRatio||1)<2?'auto':'pixelated'}`:''}"></span>`:`<img class="${c}" src="${a}" alt="">`):'';if(hd!=='raid'||!(b.team||[]).length)return me1;
     return `<span class="hteam">${me1}${b.team.map(q=>{const x=hofAv(q.cls,q.skin,'',q.dr?'!'+q.dr:'',q.look==='old');return x?`<img class="${c} mate" src="${x}" alt="" title="${CLASSES[q.cls].n}">`:'';}).join('')}</span>`;};
   HOF_B=B;const del=i=>DEV&&hd!=='duel'&&!RA?`<button class="hdel" data-del="${i}" title="이 기록 삭제 (개발자)">🗑</button>`:'';// 시상식 무대: 같은 재질의 이어진 단상에 1~3등이 서고(왕관 금·은·동), 점수·칭호·한마디는 아래 순위 목록에
@@ -14332,7 +14339,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=303,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=304,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
