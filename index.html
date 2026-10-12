@@ -8880,6 +8880,7 @@ const PATCH_NOTES=[
   {v:290,t:'💀 사령술사 해골 조정',items:[
     ['nerf','💀 해골이 호위무사처럼 근접 적을 너무 많이 붙잡던 것: 해골 1기당 붙잡는 적 <b>6 → 4마리</b>, 붙잡는 거리 150 → 110. <b>정예(금색 테두리)는 해골을 무시하고 본체를 노려요</b>'],
     ['change','🧱 해골이 결계 밖으로 나가던 문제 수정: 해골도 결계 안에서만 움직여요'],
+    ['look','⚒ 대장간: 메달이 모자라 강화 버튼이 눌리지 않을 때 이유가 안 보이던 것 → 버튼에 「메달 부족 (보유 ○)」, 축복 강화엔 「+5부터 / 축복 없음 / 메달 부족」 표시'],
     ['new','💀 <b>레이드 사령술사</b>: 동료로 데려간 사령술사가 해골을 못 부르던 것 → 해골 병사 최대 4기를 불러 함께 싸워요 (동료 피해의 절반을 해골이 냄). 대표로 나가면 레이드 시작 때 해골이 미리 채워져요'],
     ['change','☠ <b>즉사 패턴</b>(악몽의 파동·보스 즉사기·레이드 심판)에 <b>소환물도 휩쓸려 부서져요</b>: 해골·포탑·그림자 분신이 빛의 원 밖이나 즉사 범위 안에 있으면 사라짐'],
     ['look','📊 스탯 창 흡혈: 체력 재생처럼 <b>지금 DPS로 계산한 초당 흡혈 회복 / 1초 한도</b>를 보여줘요. 한도를 넘으면 빨간색 (넘는 만큼은 회복되지 않아요)']]},
@@ -11557,8 +11558,8 @@ function openForge(){cosPreviewHide();ftipHide();devGearBak();invMig();if(!FCLS|
         return `<div class="icmp"><div class="ich"><span>지금 낀 것과 비교${oth?` · <b style="color:#7fd0ff">${SLOT_N[cmpK]}</b> 칸 <small>(${CMP_K?'직접 고름':'전투력이 더 낮은 쪽'})</small>`:''}</span><b style="color:${itCol(cur)}">${itIco(cur)} ${itNameH(cur)}</b>${oth&&eqRaw(oth)?`<button class="btn ghost cmpsw" data-cmpk="${oth}">↔ ${gwa(SLOT_N[oth])} 비교</button>`:''}</div><table><tr><th></th><th>지금</th><th>이것</th></tr>${ks.map(k=>{const d=(A[k]||0)-(B[k]||0);const cls=Math.abs(d)<1e-4?'':d>0?'up':'dn';return `<tr class="${cls}"><td>${(ST_N[k]||[k])[0]}</td><td>${v(B,k)}</td><td>${v(A,k)}${cls?(cls==='up'?' ▲':' ▼'):''}</td></tr>`;}).join('')}<tr class="${dp>=0?'up':'dn'}"><td><b>⚔ 전투력</b></td><td>${itPow(cur)}</td><td><b>${itPow(it)} (${dp>=0?'+':''}${dp})</b>${sd?`<br><small>세트 ${sd>0?'+':''}${sd} 포함</small>`:''}</td></tr></table></div>`;})():''}
       ${it.base?'<div class="ist note">벗으면 그 부위가 맨몸 모습이 돼요</div>':''}<div class="ist note"${mx||!matchMedia('(hover:none)').matches?' style="display:none"':''}>${mx?'✨ 최대 강화 완료!':`+${t} 강화 · 성공 <b style="color:#7be08f">${rate}%</b> · 실패 <b>${100-rate}%</b>${t>=6?' (실패 시 −1단계)':''}${brk?` · <b style="color:#ff7a7a">파괴 ${brk}%</b>`:''}`}</div>
       <div class="ibtns"><button class="btn primary" id="iEq" ${!on&&(it.cls&&it.cls!==rc||it.bc&&it.bc!==rc||!wtOk(it,rc))?'disabled':''}>${on?'벗기':it.cls&&it.cls!==rc?CLASSES[it.cls].n+'만 가능':it.bc&&it.bc!==rc&&CLASSES[it.bc]?CLASSES[it.bc].n+'만 가능':!wtOk(it,rc)?WT_N[it.wt]+' 직업용':'착용하기'}</button>
-        <button class="btn" id="iUp" ${mx||!medOk(c)?'disabled':''}>⚒ 강화 · 🏅 ${mx?'-':c}</button>
-        <button class="btn" id="iPr" ${mx||t<5||!medOk(c)||(META.prot||0)<1?'disabled':''}>🕊 축복 강화</button>
+        <button class="btn" id="iUp" ${mx||!medOk(c)?'disabled':''}>⚒ 강화 · 🏅 ${mx?'-':c}${!mx&&!medOk(c)?`<small style="display:block;color:#ff8a8a">메달 부족 (보유 ${Math.floor(META.medals||0)})</small>`:''}</button>
+        <button class="btn" id="iPr" ${mx||t<5||!medOk(c)||(META.prot||0)<1?'disabled':''}>🕊 축복 강화${!mx?(t<5?'<small style="display:block">+5부터</small>':(META.prot||0)<1?'<small style="display:block;color:#ff8a8a">축복 없음</small>':!medOk(c)?'<small style="display:block;color:#ff8a8a">메달 부족</small>':''):''}</button>
         <button class="btn" id="iMv" ${on?'disabled':''}>${it.w?'🎒 공용 가방으로':'📦 창고로'}</button>
         <button class="btn ghost" id="iSell" ${it.lk?'disabled title="잠긴 장비는 팔 수 없어요"':''}>${it.lk?'🔒 판매 금지':`판매 · 🏅 ${itSell(it)}`}</button>
         <button class="btn ghost" id="iDis" ${it.lk?'disabled title="잠긴 장비는 해체할 수 없어요"':''}>${it.lk?'🔒 해체 금지':`해체 · ✨ ${itDust(it)}`}</button>
