@@ -9393,7 +9393,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
 const PATCH_NOTES=[
   {v:357,t:'💬 AI 모험가가 진짜로 대답해요',items:[
     ['new','💬 채팅을 치면 지금 접속해서 쉬고 있는 <b>AI 모험가</b>가 자기 말투로 <b>내 말에 맞춰</b> 대답할 때가 있어요 (이름을 부르거나 물어보면 더 잘 대답해요). 대답은 채팅에 그대로 남아 모두에게 똑같이 보여요 (랭킹 서버 v8.4 + AI 키가 있을 때만)'],
-    ['change','🏆 명예의 전당 기간(종합·월간·주간·일간)을 난이도 탭과 다른 작은 전환 막대로 바꿨어요. 시작 화면은 늘 <b>무한의 악몽 · 일간</b>부터 보여요']]},
+    ['change','🏆 명예의 전당 기간(종합·월간·주간·일간)을 난이도 탭과 다른 작은 전환 막대로 바꿨어요. 시작 화면은 늘 <b>무한의 악몽 · 일간</b>부터 보여요'],
+    ['fix','🏆 기간 순위가 서로 어긋나던 문제: 이제 큰 기간이 작은 기간을 늘 품어요 (오늘 세운 기록은 일간·주간·월간·종합 모두에). 순위 아래에 <b>집계 기간과 새 집계까지 남은 시간</b>을 보여 줘요']]},
   {v:356,t:'🏆 기간별 순위 · 🤝 레이드 고용 · ✨ 마법부여 창',items:[
     ['new','🏆 명예의 전당에 <b>종합 · 월간 · 주간 · 일간</b> 탭이 생겼어요 (한국 시각, 주간은 월요일부터). 그 기간에 세운 기록끼리 순위를 매겨요. 종합 최고 기록보다 낮은 판도 그 기간 순위에는 올라가요'],
     ['new','🤝 <b>레이드 고용</b>: 레이드 출전 화면에서 명예의 전당에 올라간 다른 모험가의 캐릭터를 동료로 고용할 수 있어요. 출전할 때마다 수수료 메달을 내고, 그 메달은 캐릭터 주인에게 가요. 내 캐릭터가 고용되면 「OO님이 데려갔어요 → 🏅」 알림과 함께 메달을 받아요 (랭킹 서버 v8.3부터)'],
@@ -14931,9 +14932,15 @@ function postPer(rec){if(!SHEET_URL||SRV_V<82||!rec)return;for(const p of ['D','
 // 그 기간의 기록: 서버 기간 기록 + 그 기간 안에 세운 종합 기록 (봇·예전 서버 포함). 이름·직업·난이도마다 가장 좋은 것 하나
 // 그 기간이 시작된 시각 (한국 시간 0시 · 월요일 · 1일)
 function perStart(p,t){const d=new Date((t||Date.now())+9*3600e3),y=d.getUTCFullYear(),m=d.getUTCMonth(),dd=d.getUTCDate();return (p==='M'?Date.UTC(y,m,1):p==='W'?Date.UTC(y,m,dd-((d.getUTCDay()+6)%7)):Date.UTC(y,m,dd))-9*3600e3;}
-function hofSrc(){if(HOF_PER==='all')return BOARD||[];const key=perKeyC(HOF_PER),M=new Map(),add=b=>{const k=b.name+'|'+b.cls+'|'+b.diff,o=M.get(k);if(!o||(b.score||0)>(o.score||0))M.set(k,b);};
-  /* 봇은 그 기간 안에 실제로 끝낸 판 중 가장 좋은 판 (10분마다 다시 계산) */const ck=key+'|'+Math.floor(Date.now()/6e5);if(!BOT_PRC[ck]){try{BOT_PRC={[ck]:normBoard(botRecs(BOT_REAL,perStart(HOF_PER)))};}catch(e){BOT_PRC={[ck]:[]};}}
-  for(const b of BOARD||[])if(!b.bot&&b.at&&perKeyC(HOF_PER,b.at)===key)add(b);for(const b of BOT_PRC[ck])add(b);for(const b of BOARD_P||[])if(b.per===key)add(b);return [...M.values()];}
+// 기간 순위는 큰 기간이 작은 기간을 늘 품음 (종합 ⊇ 월간 ⊇ 주간 ⊇ 일간): 기간 안에 세운 기록이면 어느 기간 줄로 올라왔든 다 넣음
+function hofSrc(){const M=new Map(),add=b=>{const k=b.name+'|'+b.cls+'|'+b.diff,o=M.get(k);if(!o||(b.score||0)>(o.score||0))M.set(k,b);};
+  if(HOF_PER==='all'){for(const b of BOARD||[])add(b);for(const b of BOARD_P||[])add(b);return [...M.values()];}
+  const t0=perStart(HOF_PER),inP=b=>(+b.at||0)>=t0;
+  /* 봇은 그 기간 안에 실제로 끝낸 판 중 가장 좋은 판 (10분마다 다시 계산) */const key=perKeyC(HOF_PER),ck=key+'|'+Math.floor(Date.now()/6e5);if(!BOT_PRC[ck]){try{BOT_PRC={[ck]:normBoard(botRecs(BOT_REAL,t0))};}catch(e){BOT_PRC={[ck]:[]};}}
+  for(const b of BOARD||[])if(!b.bot&&inP(b))add(b);for(const b of BOARD_P||[])if(inP(b))add(b);for(const b of BOT_PRC[ck])add(b);return [...M.values()];}
+// 집계 기간 글자: 「10월 13일(월) 0시 ~ 지금 · 다음 집계 3시간 12분 뒤」
+function perRange(p){if(p==='all')return '전체 기간';const W='일월화수목금토',f=t=>{const d=new Date(t+9*3600e3);return `${d.getUTCMonth()+1}월 ${d.getUTCDate()}일(${W[d.getUTCDay()]})`;},t0=perStart(p),t1=p==='D'?t0+864e5:p==='W'?t0+7*864e5:(()=>{const d=new Date(t0+9*3600e3);return Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+1,1)-9*3600e3;})(),left=Math.max(0,t1-Date.now()),h=Math.floor(left/3600e3),m=Math.floor(left%3600e3/60000);
+  return `${f(t0)} 0시 ~ ${f(t1-1)} 24시 (한국 시각) · 새 집계까지 ${h>=48?Math.floor(h/24)+'일 ':''}${h>=48?h%24:h}시간 ${m}분`;}
 function raidTotals(){const M={};for(const b of hofSrc()){const m=/^raid_(\w+)$/.exec(b.diff||'');if(!m||!b.name)continue;const o=M[b.name]||(M[b.name]={per:{},best:null,sum:0});const q=o.per[m[1]];if(!q||raidPts(b)>raidPts(q))o.per[m[1]]=b;}
   return Object.entries(M).map(([n,o])=>{let sum=0,best=null;for(const k in o.per){sum+=raidPts(o.per[k]);if(!best||(+o.per[k].lvl||0)>(+best.lvl||0))best=o.per[k];}return {...best,rsum:sum,rper:o.per,score:sum};}).sort((a,b)=>b.rsum-a.rsum);}
 const raidChips=b=>RAIDS.map(r=>{const q=b.rper&&b.rper[r.k];return `<span style="opacity:${q?1:.35}">${r.ico}${q?q.lvl:'–'}</span>`;}).join(' ');
@@ -15021,7 +15028,7 @@ async function hofStatOpen(b){if(!b)return;let w=document.getElementById('hofSt'
 function hofTipHide(){const t=document.getElementById('hofTip');if(t)t.style.display='none';}
 function boardHtml(){
   const hd=HOF_KEYS.includes(HOF_DIFF)?HOF_DIFF:'nightmare';
-  const head=`${(()=>{const n=recentList().length;return n?`<button class="btn hrecent" id="hofRecent" title="깜빡하고 명예의 전당에 안 올린 판을 나중에 등록 (멘트도 그때 한 번)">📜 내 최근 기록 ${n}</button>`:'';})()}<h2>🏆 명예의 전당</h2><div class="dtabs hof3">${HOF_KEYS.map(k=>`<button class="btn ${k===hd?'primary':''}" data-hd="${k}">${HOF_TAB[k]}</button>`).join('')}</div>${hd==='duel'?'':`<div class="hper">${HOF_PERS.map(([k,n])=>`<button class="${k===HOF_PER?'on':''}" data-hper="${k}">${n}</button>`).join('')}</div>`}${hd==='raid'?`<div class="dtabs rbt">${[['all','🏆 종합'],...RAIDS.map(r=>[r.k,r.ico+' '+({golem:'거신',frost:'서리',storm:'폭풍',brood:'둥지',void:'어둠'}[r.k]||r.n)]),...((BOARD||[]).some(b=>b.diff==='raid')?[['old','예전 레이드']]:[])].map(([k,n])=>`<button class="btn ${k===HOF_RB?'primary':''}" data-rbt="${k}">${n}</button>`).join('')}</div>`:''}<p class="hsub"${hd==='raid'&&HOF_RB==='all'?' title="보스 5종 합산 · 보스마다 단계 × 1,000 + 빠른 처치 보너스(최대 300)" style="cursor:help"':''}>${hd==='raid'?(HOF_RB==='all'?'보스 5종 종합 순위 ⓘ':'높은 단계 → 빠른 처치 순'):hd==='duel'?'':(HOF_PER!=='all'?HOF_PERS.find(x=>x[0]===HOF_PER)[1]+' · ':'')+DIFF[hd].n+' 난이도 순위'}</p>`;
+  const head=`${(()=>{const n=recentList().length;return n?`<button class="btn hrecent" id="hofRecent" title="깜빡하고 명예의 전당에 안 올린 판을 나중에 등록 (멘트도 그때 한 번)">📜 내 최근 기록 ${n}</button>`:'';})()}<h2>🏆 명예의 전당</h2><div class="dtabs hof3">${HOF_KEYS.map(k=>`<button class="btn ${k===hd?'primary':''}" data-hd="${k}">${HOF_TAB[k]}</button>`).join('')}</div>${hd==='duel'?'':`<div class="hper">${HOF_PERS.map(([k,n])=>`<button class="${k===HOF_PER?'on':''}" data-hper="${k}">${n}</button>`).join('')}</div>`}${hd==='raid'?`<div class="dtabs rbt">${[['all','🏆 종합'],...RAIDS.map(r=>[r.k,r.ico+' '+({golem:'거신',frost:'서리',storm:'폭풍',brood:'둥지',void:'어둠'}[r.k]||r.n)]),...((BOARD||[]).some(b=>b.diff==='raid')?[['old','예전 레이드']]:[])].map(([k,n])=>`<button class="btn ${k===HOF_RB?'primary':''}" data-rbt="${k}">${n}</button>`).join('')}</div>`:''}<p class="hsub"${hd==='raid'&&HOF_RB==='all'?' title="보스 5종 합산 · 보스마다 단계 × 1,000 + 빠른 처치 보너스(최대 300)" style="cursor:help"':''}>${hd==='raid'?(HOF_RB==='all'?'보스 5종 종합 순위 ⓘ':'높은 단계 → 빠른 처치 순'):hd==='duel'?'':(HOF_PER!=='all'?HOF_PERS.find(x=>x[0]===HOF_PER)[1]+' · ':'')+DIFF[hd].n+' 난이도 순위'}</p>${hd==='duel'?'':`<p class="hsub" style="margin-top:-6px;font-size:12px;opacity:.75">🗓 ${perRange(HOF_PER)}</p>`}`;
   const note=t=>head+`<p class="sub" style="text-align:center;margin:0">${t}</p>`;
   if(RSTATE==='off')return note('랭킹 서버에 연결하지 못했어요. 인터넷 연결을 확인해주세요.');
   if(RSTATE==='loading')return note('랭킹 불러오는 중…');
