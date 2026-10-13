@@ -14446,7 +14446,8 @@ const aiOk=()=>!!SHEET_URL&&SRV_V>=84&&SRV_AI;
 const aiCtx=extra=>{const C=[...CHAT.filter(c=>!/^🤖/.test(c.n||'')),...botChat()].sort((a,b)=>a.t-b.t).slice(-20),L=C.map(c=>aiAgo(c.t)+' '+String(c.n).replace(/^🤖 /,'')+': '+c.m);if(extra&&!C.some(c=>String(c.n).replace(/^🤖 /,'')+': '+c.m===extra))L.push('(방금) '+extra);return L.slice(-20);};
 /* 그 모험가가 예전에 실제로 한 말 (말이 앞뒤로 맞게: 직업·나이·한 말을 기억) */const aiMine=i=>{const n=BOTS[i][0];let L=[];try{L=[...CHAT,...botChat()];}catch(e){L=CHAT;}return L.filter(c=>String(c.n||'').replace(/^🤖 /,'')===n).sort((a,b)=>(a.t||0)-(b.t||0)).slice(-10).map(c=>c.m);};/* v377 미리 짜 둔 잡담에서 한 말도 자기 말 (자기 말에 대꾸하지 않게) */
 // 봇 i가 한마디 (said = 바로 앞 사람의 말, who = 그 사람, named = 그 사람이 i를 직접 불렀는지, said가 없으면 먼저 화제를 꺼냄)
-/* v377 지금 접속한 사람 (사람 먼저, 그다음 모험가) — AI가 나간 사람에게 말 걸지 않게 */const aiOnline=i=>{const me=BOTS[i][0],H=(ONLINE||[]).map(x=>x&&x.n).filter(n=>n&&!BOT_NM.has(n)),Bn=botsNow().map(x=>x.n).filter(n=>n!==me);return [...new Set([...H,...Bn])].slice(0,15);};
+/* v377 지금 접속한 사람 (사람 먼저, 그다음 모험가) — AI가 나간 사람에게 말 걸지 않게 *//* v386 관리자(박참봉)는 말 걸 순서가 일반 유저 다음 (다른 모험가들과 같은 취급) */const AI_ADM=new Set(['박참봉']),isAdm=n=>AI_ADM.has(n)||(DEV&&n===myNick());
+const aiOnline=i=>{const me=BOTS[i][0],H=(ONLINE||[]).map(x=>x&&x.n).filter(n=>n&&!BOT_NM.has(n)),Bn=botsNow().map(x=>x.n).filter(n=>n!==me);return [...new Set([...H.filter(n=>!isAdm(n)),...Bn,...H.filter(isAdm)])].slice(0,15);};
 /* v379 접속이 끝난 모험가는 말하지 않음 (예약해 둔 인사·대답도 보내기 직전에 다시 확인) */
 async function aiSay(i,said,who,named,cut,k,tgt,gr){if(!botOn(i,Date.now()))return null;const T0=Date.now(),body={ai:1,b:i,me:who||'',said:said||'',named:named?1:0,cut:cut?1:0,k:k||'',tgt:tgt||'',gr:gr?1:0,on:JSON.stringify(aiOnline(i)),st:botState(i,Date.now()),mine:JSON.stringify(aiMine(i)),ctx:JSON.stringify(aiCtx(said&&who?who+': '+said:''))};
   /* 서버 v8.6부터는 POST (긴 대화도 다 보냄), 그 전엔 주소에 실어 보냄 */const r=SRV_V>=86?await fetch(SHEET_URL,{method:'POST',body:JSON.stringify(body)}):await fetch(SHEET_URL+'?'+Object.entries({...body,mine:JSON.stringify(aiMine(i).slice(-4)),ctx:JSON.stringify(aiCtx(said&&who?who+': '+said:'').slice(-10))}).map(([k,v])=>k+'='+encodeURIComponent(v)).join('&'),{cache:'no-store'});
@@ -14490,7 +14491,7 @@ const aiPickBot=(now,stub)=>{const nt=new Date(now+9*3600e3).getUTCHours()<7,L=B
 /* v380 말 걸기·인사는 그 사람 자신의 게임만 보냄 (여러 사람 게임이 같은 사람에게 따로 보내 같은 말이 반복되던 문제). 같은 모험가는 15분에 한 번만 먼저 말을 걺 *//* v381 「말 걸지 마·닥쳐·조용히」라고 한 사람에겐 1시간 동안 먼저 말을 안 걺 (대답은 함) */const AI_DND_RE=/말\s*(좀\s*)?걸지\s*마|말\s*걸지\s*말|닥쳐|닥치|조용히\s*(좀|해)|그만\s*(좀\s*)?(말|떠들)|꺼져|귀찮게\s*하지\s*마|말\s*시키지\s*마/;
 const aiDnd=n=>CHAT.some(c=>c.n===n&&Date.now()-(+c.t||0)<3600e3&&AI_DND_RE.test(String(c.m||'')));
 /* v382 공격적·비판적·사회성 부족한 모험가는 「말 걸지 마」를 안 들음 (그래도 가끔만) */const BOT_STUB=new Set(['bunny99','달빛','도윤이형','원소술사J','랭커지망생','보리아빠','캣맘나비','알빠노','진지충']);
-const aiSelfH=()=>{const me=myNick();return me&&!BOT_NM.has(me)?[me]:[];},AI_INIT={};
+const aiSelfH=()=>{const me=myNick();if(!me||BOT_NM.has(me))return [];/* 관리자에겐 다른 유저가 없을 때만, 덜 자주 */if(isAdm(me)&&(humansOn().some(n=>n!==me&&!isAdm(n))||Math.random()<.5))return [];return [me];},AI_INIT={};
 function aiLure(now){const H=aiSelfH();if(!H.length)return false;if(now-AI_ANY<120000||CHAT.some(c=>!c.bot&&!BOT_NM.has(c.n)&&now-(+c.t||0)<120000))return false;
   const cand=H.map(n=>{const L=AI_LURE[n]||{t:0,n:0},spoke=CHAT.some(c=>c.n===n&&(+c.t||0)>L.t),wait=spoke?360000:Math.min(60*60000,8*60000*Math.pow(2,L.n));return {n,L,spoke,ok:now-L.t>=wait};}).filter(x=>x.ok);if(!cand.length||Math.random()>.6)return false;
   const x=cand[Math.floor(Math.random()*cand.length)],dnd=aiDnd(x.n);if(dnd&&Math.random()>.35)return false;const i=aiPickBot(now,dnd);if(i<0)return false;AI_INIT[i]=now;AI_LURE[x.n]={t:now,n:x.spoke?0:x.L.n+1};const gen=++AI_GEN;aiSay(i,'','',0,0,'lure|'+x.n+'|'+Math.floor(now/300000),x.n).then(m=>{if(m)AI_LAST[x.n]={i,t:Date.now()};});return true;}
@@ -16238,7 +16239,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=385,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=386,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
