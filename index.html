@@ -703,7 +703,7 @@ summary{cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-weight:700;fon
 .home .swf .btn{margin:0!important}.home .swf #cosBtn2{width:auto!important;flex:none}
 .home .swf #go{flex:1;font-size:21px!important;padding:13px!important;border-radius:14px!important;letter-spacing:1px}
 @media (max-width:760px){
- .home .hTop{padding:6px 10px;gap:6px}.home .hTop h1{font-size:24px}.home .hTop h1 span,.home .hTop #verLbl{display:none}
+ .home .hTop{padding:6px 10px;gap:6px}.home .hTop h1{font-size:24px}.home .hTop h1 span{display:none}.home .hTop #verLbl{font-size:11px;line-height:1.3}
  .home .hMain{display:flex;flex-direction:column;padding:10px}
  .home .hof .dtabs.hof3 .btn{font-size:12px!important;padding:8px 1px!important;min-height:44px;white-space:normal;line-height:1.15}
  .home .hDon{margin:14px auto 4px}
@@ -9415,6 +9415,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:385,t:'🔢 버전 표시',items:[
+    ['change','🔢 시작 화면 위쪽에 <b>게임 버전과 서버 버전</b>이 보여요 (폰에서도)'],
+    ['change','🏆 명예의 전당 기록 옆에 그 기록을 세운 <b>게임 버전</b>(예: v381)이 모두에게 보여요']]},
   {v:384,t:'🗿 레이드 자동 등록',items:[
     ['change','📱 시작 화면 위쪽에도 <b>🔄 화면 고정</b> 버튼 (폰에서만 보여요)'],
     ['change','🗿 레이드도 깨면 명예의 전당에 <b>자동으로</b> 올라가요 (보스·이름마다 가장 좋은 기록만). 한마디는 결과 화면이나 나중에 메인 화면 명예의 전당에서 내 기록을 눌러 남겨요']]},
@@ -10646,7 +10649,7 @@ function startScreen(){REP_PEND=null;FCLS=null;SEL_RUSH=false;try{metaMig2();}ca
   const dBtn=k=>{const op=diffOpen(k),cl=(META.clears||{})[k];return `<button class="btn ${k===pickDiff?'primary':''} ${cl?'dclr':''}" data-diff="${k}" ${op?'':'disabled'} title="${op?'':DIFF[DKEYS[DKEYS.indexOf(k)-1]].n+' 클리어 시 열림'}"><b class="dn">${op?'':'🔒'}${DIFF[k].n}</b>${cl?'<span class="dcl">✔ 클리어</span>':op?'<span class="dcl new">도전!</span>':''}</button>`;};
   const mBtn=(id,ico,n,sub)=>`<button class="btn ghost" id="${id}" title="${String(sub).replace(/"/g,'&quot;')}"><i>${ico}</i><b>${n}</b><small>${sub}</small></button>`;
   show(`
-  <div class="hTop"><h1>찬서 <span>: 찬붕이의 뱀서</span></h1><div id="verLbl">v${BUILD} · ${updLabel()}</div>${APP_INST()?'':`<button class="btn" id="appInst" style="margin:0 0 0 8px;padding:3px 10px;min-height:0;font-size:13px" title="바탕화면·홈 화면에 앱으로 설치 (자동 업데이트·오프라인)">📲 앱 설치</button>`}<button class="btn" id="bgView" style="margin:0 0 0 8px;padding:3px 10px;min-height:0;font-size:13px" title="메뉴를 숨기고 배경만 보기 (아무 곳이나 누르면 돌아와요)">🖼 배경 구경</button><button class="btn" id="homeBgm" style="margin:0 0 0 8px;padding:3px 10px;min-height:0;font-size:13px" title="누를 때마다 음량: 끄기 → 1 → 2 → 3 → 4 → 5">${bgmLbl()}</button><button class="btn" id="homeSfx" style="margin:0 0 0 8px;padding:3px 10px;min-height:0;font-size:13px" title="누를 때마다 효과음 음량이 바뀌어요 (끄기 → 1 → … → 5)">🔔</button>${matchMedia('(pointer:coarse)').matches?`<button class="btn" id="homeOri" style="margin:0 0 0 8px;padding:3px 10px;min-height:0;font-size:13px" title="화면 방향 고정 (폰)">${ORI_LOCK?'🔒 화면 고정됨':'🔄 화면 고정'}</button>`:''}<div class="grow"></div>
+  <div class="hTop"><h1>찬서 <span>: 찬붕이의 뱀서</span></h1><div id="verLbl">${verTxt()}</div>${APP_INST()?'':`<button class="btn" id="appInst" style="margin:0 0 0 8px;padding:3px 10px;min-height:0;font-size:13px" title="바탕화면·홈 화면에 앱으로 설치 (자동 업데이트·오프라인)">📲 앱 설치</button>`}<button class="btn" id="bgView" style="margin:0 0 0 8px;padding:3px 10px;min-height:0;font-size:13px" title="메뉴를 숨기고 배경만 보기 (아무 곳이나 누르면 돌아와요)">🖼 배경 구경</button><button class="btn" id="homeBgm" style="margin:0 0 0 8px;padding:3px 10px;min-height:0;font-size:13px" title="누를 때마다 음량: 끄기 → 1 → 2 → 3 → 4 → 5">${bgmLbl()}</button><button class="btn" id="homeSfx" style="margin:0 0 0 8px;padding:3px 10px;min-height:0;font-size:13px" title="누를 때마다 효과음 음량이 바뀌어요 (끄기 → 1 → … → 5)">🔔</button>${matchMedia('(pointer:coarse)').matches?`<button class="btn" id="homeOri" style="margin:0 0 0 8px;padding:3px 10px;min-height:0;font-size:13px" title="화면 방향 고정 (폰)">${ORI_LOCK?'🔒 화면 고정됨':'🔄 화면 고정'}</button>`:''}<div class="grow"></div>
    <div class="hChip">🏅 <b>${META.medals.toLocaleString()}</b></div><div id="onl" class="onl">${onlHtml()}</div><div class="nickbar"><button class="onlb" id="nickBtn">👤 ${myNick()?`<b>${esc(myNick())}</b> ✏`:'내 이름 정하기'}</button></div>
    ${DEV?'<div class="donrow"><button id="supBox" class="donb" style="animation:none">💌</button> <button id="devLog" class="donb" style="animation:none">🖥</button></div>':''}</div>
   <div class="hMain">
@@ -15122,7 +15125,7 @@ async function dmSend(to,msg){to=String(to||'').trim();msg=String(msg||'').trim(
 async function onlPing(bye){if(!SHEET_URL||!MYKEY)return;const u=SHEET_URL+'?ping=1&id='+onlId()+'&k='+encodeURIComponent(MYKEY||'')+'&n='+encodeURIComponent(myNick()||'모험가')+'&a='+encodeURIComponent(onlAct())+'&fx='+myFx()+'&ua='+encodeURIComponent(devUa())+'&b='+BUILD+(bye?'&bye=1':'&pf='+encodeURIComponent(myProf()));
   if(bye){try{fetch(u,{keepalive:true,cache:'no-store'});}catch(e){}return;}
   const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),15000):0;
-  let ok=false;try{const r=await fetch(u,{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();if(j&&Array.isArray(j.on)){ok=true;ONL_FAIL=0;SRV_V=+j.v||0;SRV_AI=!!j.ai;if(SRV_V>=74&&!RECFILL)setTimeout(recFill,3000);if(SRV_V>=79&&!DUELSYNC){DUELSYNC=1;setTimeout(()=>{try{const nm=myNick();if(nm&&(BOARD||[]).some(b=>b.name===nm&&b.dw&&!b.dw.h)&&duelHeroTag())duelPush();}catch(e){}},5000);}ONL_AS=j.on.filter(x=>x.me||(x.s||0)<((x.b||0)>=54?70:130));for(const x of j.on)if(x&&x.pf&&x.n){const p=profParse(x.pf);if(p)PROF_C[onlKey(x.n)]={t:Date.now(),p};}if(SRV_V<70)profPre();onlSet();if(Array.isArray(j.dm)&&j.dm.length)dmShow(j.dm);if(j.w)snapLoop();fbPres();if(j.ct)CHAT_CT=Math.max(CHAT_CT,+j.ct||0);onlPaint();try{supCheck();}catch(e){}}}catch(e){}finally{clearTimeout(to);}
+  let ok=false;try{const r=await fetch(u,{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();if(j&&Array.isArray(j.on)){ok=true;ONL_FAIL=0;SRV_V=+j.v||0;try{updPaint();}catch(e){}SRV_AI=!!j.ai;if(SRV_V>=74&&!RECFILL)setTimeout(recFill,3000);if(SRV_V>=79&&!DUELSYNC){DUELSYNC=1;setTimeout(()=>{try{const nm=myNick();if(nm&&(BOARD||[]).some(b=>b.name===nm&&b.dw&&!b.dw.h)&&duelHeroTag())duelPush();}catch(e){}},5000);}ONL_AS=j.on.filter(x=>x.me||(x.s||0)<((x.b||0)>=54?70:130));for(const x of j.on)if(x&&x.pf&&x.n){const p=profParse(x.pf);if(p)PROF_C[onlKey(x.n)]={t:Date.now(),p};}if(SRV_V<70)profPre();onlSet();if(Array.isArray(j.dm)&&j.dm.length)dmShow(j.dm);if(j.w)snapLoop();fbPres();if(j.ct)CHAT_CT=Math.max(CHAT_CT,+j.ct||0);onlPaint();try{supCheck();}catch(e){}}}catch(e){}finally{clearTimeout(to);}
   if(!ok){ONL_FAIL++;if(!ONLINE)onlPaint();clearTimeout(ONL_RT);ONL_RT=setTimeout(()=>{if(!document.hidden)onlPing();},Math.min(30000,4000*ONL_FAIL));}}
 setTimeout(()=>{onlPaint();onlPing();},300);// 예비 서버 신호: 실시간 서버에 연결돼 있으면 50초마다(예비 서버 부담 줄이기), 아니면 25초마다
 let ONL_LP=0,ONL_BYE=0;setInterval(()=>{if(document.hidden||STOPPED)return;if(onlIdle()>=2){if(!ONL_BYE){ONL_BYE=1;onlPing(true);}return;}ONL_BYE=0;const now=Date.now();if(FB&&now-ONL_LP<49000)return;ONL_LP=now;onlPing();},25000);
@@ -15324,7 +15327,7 @@ function boardHtml(){
   const f=x=>`${Math.floor(x/60)}:${String(Math.floor(x%60)).padStart(2,'0')}`;
   const me=b=>SHEET?(b.name&&b.name===myNick()):!!RMYID&&String(b.id).startsWith(RMYID);
   const cn=b=>CLASSES[b.cls]?CLASSES[b.cls].n:'?';
-  const nm=b=>`<span class="hn ${fxOk(b.fx)?'hx-'+b.fx:''}">${fxOk(b.fx)?(FX_PRE[b.fx]||''):''}${esc(b.name.slice(0,12)||'이름 없음')}</span>${DEV&&recVer(b)?`<small title="이 기록을 세운 게임 버전 (~는 기록 시각으로 추정)" style="margin-left:4px;padding:0 4px;border-radius:4px;background:rgba(95,201,217,.22);color:#9fe8ff;font-size:11px">${recVer(b)}</small>`:''}${(()=>{const A=b.title&&ACH.find(a=>a.k===b.title);return A?`<small class="htt ${A.hard||A.rw?'hard':''}">${A.hard||A.rw?'✨':''}「${A.n}」</small>`:'';})()}${b.local?'<small title="서버에 아직 반영되지 않은 이 기기의 기록" style="opacity:.7"> 📱</small>':''}`;
+  const nm=b=>`<span class="hn ${fxOk(b.fx)?'hx-'+b.fx:''}">${fxOk(b.fx)?(FX_PRE[b.fx]||''):''}${esc(b.name.slice(0,12)||'이름 없음')}</span>${recVer(b)?`<small title="이 기록을 세운 게임 버전 (~는 기록 시각으로 추정)" style="margin-left:4px;padding:0 4px;border-radius:4px;background:rgba(95,201,217,.22);color:#9fe8ff;font-size:11px">${recVer(b)}</small>`:''}${(()=>{const A=b.title&&ACH.find(a=>a.k===b.title);return A?`<small class="htt ${A.hard||A.rw?'hard':''}">${A.hard||A.rw?'✨':''}「${A.n}」</small>`:'';})()}${b.local?'<small title="서버에 아직 반영되지 않은 이 기기의 기록" style="opacity:.7"> 📱</small>':''}`;
   const pcT=b=>hd==='duel'?`⚔ ${b.dw.w}승 ${b.dw.d}무 ${b.dw.l}패 · ${cn(b)}`:hd==='raid'?(RA?`${raidChips(b)}`:RO?`🗿 ${b.lvl}단계 「${RAID_N[b.lvl-1]||''}」 · ${cn(b)}`:`${RBo?RBo.ico:'🗿'} ${b.lvl}단계 · ${cn(b)}`):`${DIFF[b.diff]&&DIFF[b.diff].rush?'⚔ '+(+b.bosses||0)+'단계 돌파 · ':DIFF[b.diff]&&DIFF[b.diff].endless?'☠ '+((+b.bosses||0)+1)+'단계 · ':b.bosses>=4?'👑 클리어 · ':''}${cn(b)} · Lv ${b.lvl} · ${f(b.time)}`;
   const psT=b=>hd==='duel'?`${b.dw.w}승 <small style="font-size:.6em;opacity:.8">승률 ${Math.round(wr(b.dw)*100)}%</small>`:hd==='raid'?(RA?`${b.rsum.toLocaleString()}점`:`${Math.floor(b.time/60)}분 ${b.time%60}초`):`${b.score.toLocaleString()}점`;
   const rcT=b=>hd==='duel'?`${cn(b)}<br>${b.dw.w}승 ${b.dw.d}무 ${b.dw.l}패`:hd==='raid'?(RA?raidChips(b):`${RBo?RBo.ico:'🗿'} ${b.lvl}단계<br>${cn(b)}`):`${DIFF[b.diff]&&DIFF[b.diff].rush?'⚔'+(+b.bosses||0)+'단계 ':DIFF[b.diff]&&DIFF[b.diff].endless?'☠'+((+b.bosses||0)+1)+'단계 ':b.bosses>=4?'👑 ':''}${cn(b)}<br>Lv ${b.lvl} · ${f(b.time)}`;
@@ -16235,7 +16238,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=384,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=385,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
@@ -16243,7 +16246,8 @@ async function updCache(v,html){try{const db=await updDb();await new Promise((re
 async function updCached(){try{const db=await updDb();const c=await new Promise((res,rej)=>{const q=db.transaction('h').objectStore('h').get('new');q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error);});db.close();return c||null;}catch(e){return null;}}
 const updOk=t=>typeof t==='string'&&t.length>400000&&/<\/html>\s*$/.test(t)&&/const BUILD=\d+/.test(t);
 const updLabel=()=>UPD.ver>BUILD?`<span style="color:#7be08f">🔄 새 버전 v${UPD.ver} 적용 중…</span>`:UPD.st==='checking'?'업데이트 확인 중…':UPD.st==='ok'?`<span style="color:#7be08f">✅ 최신 버전</span><small style="opacity:.6"> (${UPD.at?new Date(UPD.at).toTimeString().slice(0,5):''} 확인)</small>`:'<span style="opacity:.7">📴 업데이트 확인 못 함 (인터넷 연결 확인)</span>';
-function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=`v${BUILD} · ${updLabel()}`;}
+/* v385 게임 버전 + 서버 버전 (모두에게 보임) */const verTxt=()=>`v${BUILD}${SRV_V?` · 서버 v${(SRV_V/10).toFixed(1)}`:''} · ${updLabel()}`;
+function updPaint(){const el=document.getElementById('verLbl');if(el)el.innerHTML=verTxt();}
 const updIdle=()=>!S||S.mode==='start'||S.mode==='over'; // 메인·결과 화면일 때만 바로 업데이트 (판 중·첫 증강 고르는 중엔 미룸)
 function applyUpd(){if(!(UPD.ver>BUILD))return false;
   STOPPED=true;try{if(FB&&FB.db)FB.db.goOffline();}catch(e){}try{BGM.on=false;}catch(e){}try{if(AC)AC.close();}catch(e){}try{saveMeta();}catch(e){}
