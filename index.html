@@ -262,7 +262,7 @@ body.bgview #ov,body.bgview #toast,body.bgview .chartq,body.bgview #patchPop,bod
 #bgvHint{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:40000;pointer-events:none;background:rgba(4,18,12,.75);color:var(--ivory);border:1px solid var(--brass);border-radius:10px;padding:8px 16px;font-size:15px;font-weight:700;transition:opacity .6s;display:none}body.bgview #bgvHint{display:block}#bgvHint.off{opacity:0}
 /* v338 메인 상단 줄: 메달·접속·채팅·이름·개발 버튼 높이·간격 통일 */
 #ov.home .hTop{column-gap:8px}#ov.home .hTop .onl,#ov.home .hTop .donrow{display:flex;align-items:center;gap:8px}
-#ov.home .hTop .hChip,#ov.home .hTop .onlb,#ov.home .hTop .donb,#ov.home #appInst,#ov.home #bgView{height:34px;min-height:34px!important;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:0 12px!important;margin:0!important;font-size:14px!important;line-height:1;vertical-align:middle}
+#ov.home .hTop .hChip,#ov.home .hTop .onlb,#ov.home .hTop .donb,#ov.home #appInst,#ov.home #bgView,#ov.home #homeBgm{height:34px;min-height:34px!important;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:0 12px!important;margin:0!important;font-size:14px!important;line-height:1;vertical-align:middle}
 #ov.home .hTop .donb{min-width:40px;border-radius:8px}
 .resTop{margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid rgba(214,169,74,.3)}.resTop .btnrow{margin:0 0 6px}
 .stTop{margin:2px 0 10px;padding-bottom:10px;border-bottom:1px solid rgba(214,169,74,.3)}.stTop .btnrow{margin:0 0 6px;grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
@@ -722,7 +722,7 @@ summary{cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-weight:700;fon
 #ov.home .hTop{background:rgba(10,30,24,.55)!important;border-bottom:2px solid #d6b45a!important;box-shadow:0 4px 14px rgba(0,0,0,.4)!important;border-radius:0!important}
 #ov.home .hTop h1{font-family:'Gugi','Noto Sans KR',sans-serif!important;color:#e0b84a!important;text-shadow:0 2px 0 #3a2a08!important}
 #ov.home .hTop h1 span{color:#eef3e6!important;text-shadow:none!important}
-#ov.home .hChip,#ov.home .onlb,#ov.home #appInst,#ov.home #bgView{background:#1f5240!important;border:1px solid #b9a25a!important;border-radius:8px!important;box-shadow:none!important;color:#eef3e6!important}
+#ov.home #ov.home #homeBgm,.hChip,#ov.home .onlb,#ov.home #appInst,#ov.home #bgView{background:#1f5240!important;border:1px solid #b9a25a!important;border-radius:8px!important;box-shadow:none!important;color:#eef3e6!important}
 #ov.home #board.hof,#ov.home .hRep,#ov.home .hQuick{background:rgba(10,32,26,.34)!important;border:2px solid #d6b45a!important;box-shadow:inset 0 0 0 4px rgba(214,180,90,.22),0 8px 22px rgba(0,0,0,.35)!important}
 #ov.home #board.hof{border-radius:90px 90px 10px 10px!important;padding-top:22px!important}
 #ov.home .hRep,#ov.home .hQuick{border-radius:10px!important}
@@ -9122,6 +9122,7 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
   {v:338,t:'🤖 AI 모험가 프로필',items:[
+    ['new','🎵 메인 화면에 <b>잔잔한 음악</b> 「성채의 밤」이 흘러요 (화음·하프·종소리, 약 80초마다 멜로디가 바뀜). 위쪽 「🎵 음악」 버튼으로 켜고 끌 수 있어요 (게임 안 음악 설정과 같이 움직여요)'],
     ['change','📐 메인 화면 위쪽 버튼(메달·접속·채팅·이름 등) 높이와 간격을 똑같이 맞췄어요'],
     ['new','🤖 AI 모험가 이름을 누르면 <b>계정 정보</b>가 떠요: 대표 캐릭터·장비(강화)·외형·오라·날개·칭호·완료한 도전과제·전투력·플레이 시간. 모험가마다 실력과 꾸밈이 달라요 (채팅의 이름도 눌러 볼 수 있어요)'],
   ]},
@@ -10204,7 +10205,7 @@ function startScreen(){REP_PEND=null;FCLS=null;SEL_RUSH=false;try{metaMig2();}ca
   const dBtn=k=>{const op=diffOpen(k),cl=(META.clears||{})[k];return `<button class="btn ${k===pickDiff?'primary':''} ${cl?'dclr':''}" data-diff="${k}" ${op?'':'disabled'} title="${op?'':DIFF[DKEYS[DKEYS.indexOf(k)-1]].n+' 클리어 시 열림'}"><b class="dn">${op?'':'🔒'}${DIFF[k].n}</b>${cl?'<span class="dcl">✔ 클리어</span>':op?'<span class="dcl new">도전!</span>':''}</button>`;};
   const mBtn=(id,ico,n,sub)=>`<button class="btn ghost" id="${id}" title="${String(sub).replace(/"/g,'&quot;')}"><i>${ico}</i><b>${n}</b><small>${sub}</small></button>`;
   show(`
-  <div class="hTop"><h1>찬서 <span>: 찬붕이의 뱀서</span></h1><div id="verLbl">v${BUILD} · ${updLabel()}</div>${APP_INST()?'':`<button class="btn" id="appInst" style="margin:0 0 0 8px;padding:3px 10px;min-height:0;font-size:13px" title="바탕화면·홈 화면에 앱으로 설치 (자동 업데이트·오프라인)">📲 앱 설치</button>`}<button class="btn" id="bgView" style="margin:0 0 0 8px;padding:3px 10px;min-height:0;font-size:13px" title="메뉴를 숨기고 배경만 보기 (아무 곳이나 누르면 돌아와요)">🖼 배경 구경</button><div class="grow"></div>
+  <div class="hTop"><h1>찬서 <span>: 찬붕이의 뱀서</span></h1><div id="verLbl">v${BUILD} · ${updLabel()}</div>${APP_INST()?'':`<button class="btn" id="appInst" style="margin:0 0 0 8px;padding:3px 10px;min-height:0;font-size:13px" title="바탕화면·홈 화면에 앱으로 설치 (자동 업데이트·오프라인)">📲 앱 설치</button>`}<button class="btn" id="bgView" style="margin:0 0 0 8px;padding:3px 10px;min-height:0;font-size:13px" title="메뉴를 숨기고 배경만 보기 (아무 곳이나 누르면 돌아와요)">🖼 배경 구경</button><button class="btn" id="homeBgm" style="margin:0 0 0 8px;padding:3px 10px;min-height:0;font-size:13px" title="음악 켜기·끄기">${BGM.on?'🎵 음악 켜짐':'🔇 음악 꺼짐'}</button><div class="grow"></div>
    <div class="hChip">🏅 <b>${META.medals.toLocaleString()}</b></div><div id="onl" class="onl">${onlHtml()}</div><div class="nickbar"><button class="onlb" id="nickBtn">👤 ${myNick()?`<b>${esc(myNick())}</b> ✏`:'내 이름 정하기'}</button></div>
    ${DEV?'<div class="donrow"><button id="supBox" class="donb" style="animation:none">💌</button> <button id="devLog" class="donb" style="animation:none">🖥</button></div>':''}</div>
   <div class="hMain">
@@ -10246,6 +10247,7 @@ function startScreen(){REP_PEND=null;FCLS=null;SEL_RUSH=false;try{metaMig2();}ca
   if(sv)$o('cont').onclick=()=>continueGame(sv);
   $o('go').onclick=()=>{if(SEL_RUSH){SEL_RUSH=false;beginRunD('bossrush',pickCls);}else beginRun(pickCls);};
   if($('bgView'))$('bgView').onclick=bgViewOn;
+  if($('homeBgm'))$('homeBgm').onclick=e=>{BGM.on=!BGM.on;try{localStorage.setItem('chanseo_bgm',BGM.on?'1':'0');}catch(er){}refreshBgmBtn();e.currentTarget.textContent=BGM.on?'🎵 음악 켜짐':'🔇 음악 꺼짐';};
   if($('appInst'))$('appInst').onclick=()=>WEB?appInstall():appGate(1);
   $o('meta').onclick=()=>openMeta();if($('mstBtn'))$o('mstBtn').onclick=openMastery;$o('cosBtn').onclick=()=>openMeta(1);if($('hRepCv')){gearLiveStart($('hRepCv'));repPickBind('mr',$('hRepCv'),startScreen);}onlPaint();if($('donBtn'))$o('donBtn').onclick=openDonate;if($('donArt'))drawDonArt($('donArt'));donPlace();if($('supBox'))$o('supBox').onclick=openSupBox;if($('devLog'))$o('devLog').onclick=()=>openDevLog();if($('nickBtn'))$o('nickBtn').onclick=openNick;$o('forgeBtn').onclick=openForge;$o('heroBtn').onclick=openHeroes;if($('raidBtn'))$o('raidBtn').onclick=openRaid;if($('rushBtn'))$o('rushBtn').onclick=()=>{SEL_RUSH=true;if(!clsOpen(pickCls))pickCls=Object.keys(CLASSES).find(clsOpen)||'knight';openSel();};if($('duelBtn'))$o('duelBtn').onclick=openDuel;if($('labBtn'))$o('labBtn').onclick=openLab;$o('sync').onclick=openSync;if($('guideBtn'))$o('guideBtn').onclick=()=>openGuide('a');if($('patchBtn'))$o('patchBtn').onclick=()=>openPatch(true);if($('verLbl')){$o('verLbl').onclick=devTapVer;$('verLbl').style.userSelect='none';}$o('codex').onclick=()=>openCodex();$o('achBtn').onclick=openAch;
   refreshBoard();
@@ -14569,9 +14571,27 @@ function bgmStep(T,k,t){const st=k%32,bar=Math.floor(k/8)%4,ch=T.prog[bar],boss=
   if(k%4===0||(boss&&k%2===0))bgmKick(t,.5);
   if(boss?(k%4===2):(k%8===4))bgmNoise(t,.12,.18,1200);
   bgmNoise(t,.03,boss?.07:.05,7000);}
+// v338 메인 화면 곡 「성채의 밤」: 느린 템포, 부드러운 화음 + 하프 아르페지오 + 종소리 멜로디 + 잔향. 멜로디 A → B → 반주만 순서로 약 80초마다 한 바퀴
+const HOME_T={bpm:72,ch:[[53,57,60,64],[57,60,64,67],[50,53,57,60],[46,50,53,57],[53,57,60,64],[48,52,55,60],[55,58,62,65],[48,53,55,60]],
+  mel:[[72,0,0,74,77,0,76,0, 76,0,72,0,0,0,69,0, 74,0,0,72,74,0,77,0, 74,0,0,0,70,0,0,0, 72,0,0,74,77,0,79,0, 79,0,77,0,76,0,74,0, 74,0,0,77,74,0,70,0, 72,0,0,0,0,0,0,0],
+       [81,0,0,0,79,0,77,0, 76,0,0,0,72,0,0,0, 77,0,76,0,74,0,72,0, 70,0,0,0,0,0,74,0, 72,0,0,0,77,0,0,0, 76,0,74,0,72,0,0,0, 70,0,72,0,74,0,0,0, 72,0,0,0,0,0,0,0],null],
+  arp:[0,1,2,3,2,1,2,3]};
+function homeVerb(){if(BGM.rv)return BGM.rv;const ac=AC,len=ac.sampleRate*3,b=ac.createBuffer(2,len,ac.sampleRate);for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3);}
+  const cv=ac.createConvolver();cv.buffer=b;const w=ac.createGain();w.gain.value=.55;cv.connect(w).connect(BGM.g);BGM.rv=cv;return cv;}
+function homeNote(f,t,a,d,type,vol,wet,lp){const ac=AC,o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+a);g.gain.exponentialRampToValueAtTime(.0003,t+a+d);
+  let n=g;if(lp){const fl=ac.createBiquadFilter();fl.type='lowpass';fl.frequency.value=lp;g.connect(fl);n=fl;}n.connect(BGM.g);if(wet){const s2=ac.createGain();s2.gain.value=wet;n.connect(s2).connect(homeVerb());}o.connect(g);o.start(t);o.stop(t+a+d+.05);}
+function homeStep(k,t){const T=HOME_T,st=k%64,ci=Math.floor(st/8),ch=T.ch[ci],e=60/T.bpm/2,M=T.mel[Math.floor(k/64)%3];
+  if(st%8===0){for(const n of ch){homeNote(mf(n),t,1.2,e*8+1.5,'sine',.035,.5,1400);homeNote(mf(n)*1.003,t,1.4,e*8+1.2,'triangle',.018,.4,900);}homeNote(mf(ch[0]-12),t,.4,e*8+1,'sine',.09,.2);}
+  homeNote(mf(ch[T.arp[st%8]]+12),t,.01,1.4,'triangle',st%2?.022:.03,.6);
+  const m=M&&M[st];if(m){homeNote(mf(m),t,.02,2.2,'sine',.05,.7);homeNote(mf(m)*2,t,.01,.9,'sine',.012,.6);}}
 function bgmTick(){if(document.hidden)return;
-  const want=BGM.on&&S&&S.started&&S.mode!=='over'&&S.mode!=='dying'&&!S.win?(S.bossI>=0?'boss':'field'):null;
+  const home=BGM.on&&(!S||S.mode==='start')&&!(typeof raidOn==='function'&&raidOn());
+  const want=home?'home':BGM.on&&S&&S.started&&S.mode!=='over'&&S.mode!=='dying'&&!S.win?(S.bossI>=0?'boss':'field'):null;
   if(!want){BGM.cur=null;return;}
+  if(want==='home'){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();}catch(e){return;}if(AC.state==='suspended'){AC.resume().catch(()=>{});return;}
+    if(!BGM.g){BGM.g=AC.createGain();BGM.g.gain.value=.5;BGM.g.connect(AC.destination);const b=AC.createBuffer(1,AC.sampleRate*.5,AC.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;BGM.noise=b;}
+    if(BGM.cur!=='home'){BGM.cur='home';BGM.step=0;BGM.next=AC.currentTime+.3;}const e=60/HOME_T.bpm/2;if(BGM.next<AC.currentTime-.2)BGM.next=AC.currentTime+.05;
+    while(BGM.next<AC.currentTime+.2){homeStep(BGM.step,BGM.next);BGM.next+=e;BGM.step++;}return;}
   try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();}catch(e){return;}
   if(AC.state==='suspended')AC.resume();
   if(!BGM.g){BGM.g=AC.createGain();BGM.g.gain.value=.5;BGM.g.connect(AC.destination);const b=AC.createBuffer(1,AC.sampleRate*.5,AC.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;BGM.noise=b;}
@@ -14583,6 +14603,8 @@ function bgmTick(){if(document.hidden)return;
 setInterval(bgmTick,30);
 const refreshBgmBtn=()=>{const b=$('bgmBtn');b.textContent=BGM.on?'🎵':'🔇';b.classList.toggle('on',BGM.on);b.title=BGM.on?'BGM 끄기':'BGM 켜기';};
 $('bgmBtn').addEventListener('click',()=>{BGM.on=!BGM.on;try{localStorage.setItem('chanseo_bgm',BGM.on?'1':'0');}catch(e){}refreshBgmBtn();});refreshBgmBtn();
+// 브라우저는 처음 누르기 전엔 소리를 막음 → 첫 클릭·키 입력 때 소리 장치를 깨움 (메인 화면 곡이 바로 나오게)
+{const wake=()=>{try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();}catch(e){}};addEventListener('pointerdown',wake,{capture:true});addEventListener('keydown',wake,{capture:true});}
 // 개발자 테스트: 대시·생존기(E)·궁극기(R) 쿨타임 없이 계속 쓰기 (이번에 켠 창에서만)
 let DEV_NOCD=false;$('noCdBtn').addEventListener('click',()=>{if(!DEV)return;DEV_NOCD=!DEV_NOCD;refreshAutoBtns();toast(DEV_NOCD?'🛠 쿨타임 무시 ON · 대시·E·R 계속 쓸 수 있어요':'쿨타임 무시 OFF');});
 $('autoPickBtn').addEventListener('click',()=>{if(!DEV)return;AUTO.pick=!AUTO.pick;saveAuto();refreshAutoBtns();toast(AUTO.pick?'자동 선택 ON. 레벨업, 증강을 알아서 고릅니다':'자동 선택 OFF');});
