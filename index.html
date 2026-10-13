@@ -9,7 +9,7 @@
 <title>찬서 : 찬붕이의 뱀서</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gowun+Dodum&family=Gugi&display=swap" rel="stylesheet">
 <style>
 :root{
   --felt:#0e3a2c; --felt-deep:#072219; --brass:#d6a94a; --chip-red:#c8323a;
@@ -705,6 +705,44 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 .invgrid{position:relative}.invgrid.msmode{touch-action:none}.msbox{position:absolute;border:2px dashed #7fd0ff;background:rgba(127,208,255,.14);pointer-events:none;z-index:5;border-radius:4px}
 .btn.mson{border-color:#7fd0ff!important;color:#7fd0ff!important;box-shadow:0 0 8px rgba(127,208,255,.5)}
 .ftool.mstool{padding:6px;border:1px solid rgba(127,208,255,.55);border-radius:10px;background:rgba(127,208,255,.08)}.mshd{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;padding:0 2px}.mshd b{color:#7fd0ff}.mshd small{color:var(--muted);font-size:11px}
+/* v316 숲속 성채 테마 (메인 화면): 움직이는 도트 배경(#homeBg) 위에 짙은 초록 단색 창 + 얇은 금테. 누르는 것은 전부 단색 */
+#homeBg{position:absolute;inset:0;width:100%;height:100%;display:none;object-fit:cover;image-rendering:pixelated;pointer-events:none}
+#ov.home{background:transparent!important}
+#ov.home .panel.home{background:transparent!important;border:none!important;box-shadow:none!important}
+#ov.home .hTop{background:rgba(10,30,24,.92)!important;border-bottom:2px solid #d6b45a!important;box-shadow:0 4px 14px rgba(0,0,0,.4)!important;border-radius:0!important}
+#ov.home .hTop h1{font-family:'Gugi','Do Hyeon',sans-serif!important;color:#e0b84a!important;text-shadow:0 2px 0 #3a2a08!important}
+#ov.home .hTop h1 span{color:#eef3e6!important;text-shadow:none!important}
+#ov.home .hChip,#ov.home .onlb,#ov.home #appInst{background:#1f5240!important;border:1px solid #2f6a52!important;border-radius:8px!important;box-shadow:none!important;color:#eef3e6!important}
+#ov.home #board.hof,#ov.home .hRep,#ov.home .hQuick{background:#12342a!important;border:2px solid #d6b45a!important;box-shadow:inset 0 0 0 3px #12342a,inset 0 0 0 4px rgba(214,180,90,.35),0 8px 22px rgba(0,0,0,.45)!important}
+#ov.home #board.hof{border-radius:90px 90px 10px 10px!important;padding-top:22px!important}
+#ov.home .hRep,#ov.home .hQuick{border-radius:10px!important}
+#ov.home #board.hof h2{font-family:'Gugi','Do Hyeon',sans-serif!important;color:#e0b84a!important;text-shadow:0 2px 0 #000!important}
+#ov.home #board .dtabs .btn{background:#1f5240!important;border:1px solid #2f6a52!important;border-radius:8px!important;color:#eef3e6!important;box-shadow:none!important}
+#ov.home #board .dtabs .btn.primary{background:#e0b84a!important;color:#2a2208!important;border-color:#e0b84a!important}
+#ov.home .rlist .ri{background:#174034!important;border:1px solid #2f6a52!important;border-radius:8px!important;box-shadow:none!important}
+#ov.home .rlist .ri.r1{border-color:#d6b45a!important}
+#ov.home .rlist .ri .rsc{color:#e0b84a!important;font-family:'Gugi','Do Hyeon',sans-serif}
+#ov.home .stagebg{background:var(--stageImg,none) 50% 58%/auto 175% no-repeat,#0e2a22!important;image-rendering:pixelated;border:1px solid #2f6a52;box-shadow:inset 0 0 30px rgba(0,0,0,.35)!important}
+#ov.home .stagebg .valance,#ov.home .stagebg .curtL,#ov.home .stagebg .curtR,#ov.home .stagebg .spot,#ov.home .stagebg .conf{display:none!important}
+#ov.home .stagebg .carpet{background:#0c241c!important;box-shadow:inset 0 2px 0 #2f6a52!important}
+#ov.home .hRep canvas{background:#0c241c;border:2px solid #d6b45a;border-radius:8px}
+#ov.home .hRep .hri b{font-family:'Gugi','Do Hyeon',sans-serif;color:#eef3e6!important}
+#ov.home #quickGo{background:#e0b84a!important;color:#2a2208!important;border:none!important;border-radius:10px!important;box-shadow:0 4px 0 #8a6a1a!important;font-family:'Gugi','Do Hyeon',sans-serif}
+#ov.home .hSect{font-family:'Gugi','Do Hyeon',sans-serif;color:#e0b84a!important;letter-spacing:3px!important;border-bottom:1px solid rgba(214,180,90,.35);padding-bottom:3px}
+#ov.home #dsel{background:var(--mapImg,none) 0 0/100% 100%,#d8d4aa!important;image-rendering:pixelated;min-height:110px;align-items:start;padding:8px 8px 0;border-radius:10px;border:2px solid #d6b45a;box-sizing:border-box}
+#ov.home #dsel .btn{background:#1f5240!important;border:2px solid #eef3e6!important;border-radius:50%!important;width:64px!important;height:64px!important;padding:0!important;min-height:0!important;justify-self:center;box-shadow:0 3px 0 rgba(0,0,0,.45)!important;color:#eef3e6!important}
+#ov.home #dsel .btn.primary{background:#e0b84a!important;color:#2a2208!important;border-color:#fff!important}
+#ov.home #dsel .btn .dn{font-family:'Gugi','Do Hyeon',sans-serif!important;font-size:14px!important;white-space:nowrap;letter-spacing:-.5px}
+#ov.home #dsel .dcl{background:#3a8a5a!important}
+#ov.home .hUnlock{color:#a8c4b2}
+#ov.home #endc .nmBtn{background:#5a1a26!important;border:2px solid #d84a5a!important;border-radius:12px!important;box-shadow:0 4px 0 #2a0810!important;color:#ffe4e8!important;font-family:'Gugi','Do Hyeon',sans-serif}
+#ov.home #endc .btn:not(.nmBtn){background:#1f5240!important;border:1px solid #2f6a52!important;border-radius:12px!important;box-shadow:0 3px 0 #0a1e16!important;color:#eef3e6!important}
+#ov.home #endc .btn:not(.nmBtn) b{font-family:'Gugi','Do Hyeon',sans-serif}
+#ov.home .hDock{background:#0c241c!important;border-top:2px solid #d6b45a!important;box-shadow:0 -4px 14px rgba(0,0,0,.4)!important}
+#ov.home .hDock .btn i{background:#1f5240!important;border:2px solid #2f6a52!important;border-radius:50%!important;box-shadow:none!important}
+#ov.home .hDock .btn b{color:#eef3e6!important}
+#ov.home .hDon .dt b{color:#eef3e6!important}#ov.home .hDon .dt small{color:#a8c4b2!important}
+
 </style>
 </head>
 <body>
@@ -727,6 +765,7 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
   <canvas id="mini" width="260" height="260" aria-label="미니맵"></canvas>
   <div id="xp"><i id="xpf"></i></div>
   <div id="toast"></div>
+  <canvas id="homeBg" aria-hidden="true"></canvas>
   <div id="ov"></div>
   <div id="st"></div>
   <button id="statBtn">스탯 (Tab)</button><button id="cxBtn">📖 도감</button><div id="onlHud"></div>
@@ -8975,6 +9014,10 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:316,t:'🏰 숲속 성채',items:[
+    ['new','🏰 메인 화면이 <b>숲속 성채</b>로 바뀌었어요: 호수 위의 성, 눈 덮인 산, 달밤 숲. 구름이 흘러가고 달이 빛나고, 반딧불이 날아다니고, 깃발이 펄럭이고, 호수에 성이 비쳐 일렁여요','look'],
+    ['change','🟩 메인 화면 버튼을 모두 <b>단색</b>으로 바꿔 잘 보이게 했어요. 색은 눈이 편한 초록 계열, 고른 것은 금색','look'],
+    ['change','🗺 난이도 고르기가 <b>원정 지도</b> 위로 (마을 → 숲 → 화산 → 신전). 명예의 전당 단상 뒤도 같은 성 풍경이에요','look']]},
   {v:315,t:'📜 의뢰인의 네 갈래 길',items:[
     ['change','📜 의뢰인이 <b>첫 보스를 잡으면</b> 바로 나타나요 (예전: 2분 30초. 일반 난이도는 1분 30초). 의뢰를 다 하면 그 판에서 곧바로 다시 와서 보상과 다음 의뢰를 줘요'],
     ['new','📜 1배속 의뢰가 <b>네 갈래 길</b>로 바뀌었어요. 의뢰인을 처음 만나면 길을 골라요: <b>⚔ 사냥꾼</b>(처치·정예·지옥 보스·노히트 보스) · <b>🧭 탐험가</b>(돌발 이벤트·이스터에그·악몽 탐사) · <b>🧘 수련자</b>(레벨·완벽한 회피·지옥 클리어·악몽 버티기) · <b>💰 상인</b>(골드·상인 거래·지옥 이상 대량 처치)'],
@@ -14540,7 +14583,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=315,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=316,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
@@ -14618,6 +14661,130 @@ if(WEB&&location.hash==='#move'){try{history.replaceState(null,'',location.pathn
       try{if(v==='file'){bakSave('dev','앱으로 옮기기 전 이 페이지 데이터',syncExport());syncImport(d.cs);}else bakSave('dev','앱으로 옮길 때 고르지 않은 파일 게임 데이터',d.cs);}catch(er){uiAlert('가져오기 실패: '+er.message);got=false;return;}
       mergeRec();try{window.opener.postMessage({csDone:1,keep:v==='keep'?1:0},'*');}catch(er){}toast(v==='file'?'📲 파일 진행을 가져왔어요! 다시 불러옵니다…':'📲 이 앱 진행 그대로 · 기록을 합쳤어요! 다시 불러옵니다…');setTimeout(()=>location.reload(),700);};
     addEventListener('message',on);let n=0;const t=setInterval(()=>{if(got||++n>60){clearInterval(t);return;}try{window.opener.postMessage({csReq:1},'*');}catch(er){clearInterval(t);}},500);}}
+// ===== v316 숲속 성채 메인 배경 =====
+// 숲속 성채 움직이는 배경 (640x400 도트를 화면 크기로 확대)
+// 고정 층(하늘·산·성·숲·풀밭)은 한 번만 그리고, 매 장면마다 구름·달빛·별 반짝임·호수 반사 일렁임·깃발·창문 불빛·횃불·반딧불만 새로 그림
+window.CSBG=(()=>{
+const W=640,H=400,LK=240;let seed=23;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
+const mk=()=>{const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.imageSmoothingEnabled=false;return [c,x];};
+const mix=(a,b,t)=>{const p=s=>[1,3,5].map(i=>parseInt(s.slice(i,i+2),16)),A=p(a),B=p(b);return '#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('');};
+const P=x=>(c,X,Y,w=1,h=1)=>{x.fillStyle=c;x.fillRect(X|0,Y|0,w,h);};
+const BAY=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
+// ---------- 하늘 층 ----------
+const [sky,sx]=mk(),sp=P(sx);
+const SK=['#0a1c1a','#0c221f','#0f2a25','#12322b','#163b31','#1b4537','#21503d','#285b43','#2f6548'];
+for(let y=0;y<250;y++){const t=y/250*(SK.length-1),i=Math.floor(t),f=t-i;for(let X=0;X<W;X++)sp(f>(BAY[(y%4)*4+X%4]+.5)/16?SK[Math.min(SK.length-1,i+1)]:SK[i],X,y);}
+sx.fillStyle='#0f2a22';sx.fillRect(0,250,W,H-250);
+const STARS=[];for(let i=0;i<130;i++){const s={x:rnd()*W,y:rnd()*150,b:rnd(),ph:rnd()*6.28,sp:.5+rnd()*2};if(s.b<.85)sp(s.b>.5?'#8ab89a':'#5a8a70',s.x,s.y);else STARS.push(s);}
+const MOON={x:500,y:62};
+// ---------- 산 층 ----------
+const [mid,mx]=mk(),mp=P(mx);
+const range=(peaks,lit,dark,snow,base)=>{for(let X=0;X<W;X++){let top=base,pk=null;for(const p of peaks){const t=p.h-Math.abs(X-p.x)*p.s;if(base-t<top){top=base-t;pk=p;}}
+  for(let y=top|0;y<LK+2;y++){let c=pk&&X<pk.x?lit:dark;if(snow&&pk&&y-top<pk.sn&&y<base-pk.h+pk.sn+((X*13+y*7)%5)-2)c=X<pk.x?snow:mix(snow,'#000000',.25);mp(c,X,y);}}};
+range([{x:40,h:120,s:.9,sn:14},{x:150,h:150,s:.8,sn:18},{x:300,h:110,s:.9,sn:12},{x:470,h:160,s:.75,sn:20},{x:600,h:125,s:.85,sn:14}],'#2c5648','#1e4034','#b4d8c6',236);
+range([{x:90,h:70,s:1.1},{x:220,h:85,s:1},{x:400,h:75,s:1.1},{x:540,h:90,s:1},{x:640,h:60,s:1}],'#21483a','#18362c',null,240);
+for(let X=0;X<W;X+=3){const h=8+Math.sin(X*.2)*3+rnd()*5;mp('#143128',X,228-h,3,12+h);}
+// 호수 바탕
+for(let y=LK;y<H;y++)for(let X=0;X<W;X++)mp(mix('#1a4a3e','#0f3028',Math.min(1,(y-LK)/60)),X,y);
+// ---------- 성 (따로 그려서 호수 반사에도 씀) ----------
+const [cs,cx]=mk(),cp=P(cx);const CB=LK;// 성 바닥선
+const FLAGS=[],WINS=[],TORCH=[];
+const brick=(X0,Y0,w,h,base)=>{for(let y=Y0;y<Y0+h;y++)for(let X=X0;X<X0+w;X++){const row=Math.floor((y-Y0)/4),off=(row%2)*3,col=Math.floor((X-X0+off)/6),seam=((y-Y0)%4===0)||((X-X0+off)%6===0);const v=((row*31+col*17)%7)/7;
+  cp(seam?mix(base,'#000000',.38):mix(base,v>.7?'#ffffff':'#000000',v>.7?.07:v*.12),X,y);}
+  for(let k=0;k<w*h/90;k++){const ix=X0+((k*37)%w),iy=Y0+h-1-((k*13)%Math.min(h,18));cp((k%3)?'#2e5a3a':'#3a6e44',ix,iy,1+(k%2),1);}};// 아래쪽 이끼
+const roof=(X0,w,yTop,h)=>{for(let k=0;k<h;k++){const half=(w/2+2)*(k/h);for(let X=Math.round(-half);X<=half;X++){const shade=X<0?'#2a7a58':'#1c5a42',row=k%3===0;cp(row?mix(shade,'#000000',.25):shade,X0+w/2+X,yTop+k);}}
+  cp('#0c2a1e',X0-2,yTop+h,w+4,2);cp('#d8b860',X0+w/2,yTop-4,1,4);cp('#f0d880',X0+w/2,yTop-5,1,1);FLAGS.push({x:X0+w/2,y:yTop-16,len:10+(w>20?3:0)});cp('#c8a85a',X0+w/2,yTop-16,1,12);};
+const tower=(X0,w,h,rh)=>{const top=CB-h;brick(X0,top,w,h,'#3a6a5c');
+  for(let X=X0-2;X<X0+w+2;X+=4){cp('#3e7062',X,top-5,3,5);cp('#264a40',X+2,top-5,1,5);}cp('#244640',X0-2,top,w+4,2);// 위 성가퀴
+  cp(mix('#3a6a5c','#000000',.3),X0+w-3,top,3,h);// 오른쪽 그늘
+  for(let k=0;k*22+14<h-16;k++){const wy=top+10+k*22,wx=X0+w/2-2;cp('#0e221c',wx-1,wy-1,6,9);cp('#e8c870',wx,wy+1,4,6);cp('#0e221c',wx+1,wy,2,1);cp('#c8a850',wx,wy+4,4,1);WINS.push({x:wx,y:wy+1,w:4,h:6,ph:rnd()*6});}
+  cp('#0e221c',X0+3,top+h*.45,1,5);cp('#0e221c',X0+w-4,top+h*.6,1,5);// 화살 구멍
+  roof(X0,w,top-rh-5,rh);};
+// 성벽 몸체
+brick(244,CB-50,162,50,'#365f53');for(let X=244;X<406;X+=6){cp('#3a6a5c',X,CB-55,4,5);cp('#22443a',X+3,CB-55,1,5);}cp('#22443a',244,CB-51,162,1);
+for(let X=252;X<400;X+=26){cp('#0e221c',X,CB-34,1,6);}// 화살 구멍 줄
+// 벽 걸개 깃발 (정적)
+for(const bx of [270,372]){cp('#c8a85a',bx-1,CB-46,10,1);cp('#1f5a3e',bx,CB-45,8,18);cp('#1f5a3e',bx+1,CB-27,6,2);cp('#1f5a3e',bx+3,CB-25,2,2);cp('#d8b860',bx+3,CB-40,2,6);cp('#d8b860',bx+2,CB-38,4,1);}
+// 탑들
+tower(236,22,96,16);tower(392,22,96,16);tower(284,16,74,12);tower(350,16,74,12);
+// 본성(가운데 큰 탑) + 발코니
+brick(309,CB-128,32,128,'#3e7062');cp(mix('#3e7062','#000000',.3),337,CB-128,4,128);
+for(let X=307;X<343;X+=4){cp('#428070',X,CB-133,3,5);}cp('#244640',307,CB-128,36,2);
+cp('#2a4a40',304,CB-78,42,3);for(let X=305;X<345;X+=3)cp('#1a332c',X,CB-75,1,4);cp('#2a4a40',304,CB-71,42,1);// 발코니 난간
+for(const [wx,wy] of [[314,CB-118],[328,CB-118],[314,CB-100],[328,CB-100]]){cp('#0e221c',wx-1,wy-2,7,10);cp('#0e221c',wx,wy-3,5,1);cp('#e8c870',wx,wy,5,7);cp('#0e221c',wx+2,wy,1,7);WINS.push({x:wx,y:wy,w:5,h:7,ph:rnd()*6});}
+// 큰 아치 창 (스테인드글라스)
+cp('#0e221c',318,CB-68,14,18);for(let k=0;k<5;k++)cp('#0e221c',319+k,CB-69-k,12-2*k,1);cp('#d8b860',320,CB-66,10,14);cp('#5ab88a',320,CB-66,5,7);cp('#e86a5a',325,CB-59,5,7);cp('#0e221c',324,CB-66,1,14);cp('#0e221c',320,CB-60,10,1);
+roof(309,32,CB-128-26,22);
+// 성문: 아치 + 내리닫이 쇠창살 + 안쪽 불빛 + 양옆 횃불
+cp('#152c26',313,CB-26,24,26);for(let k=0;k<8;k++)cp('#152c26',313+k,CB-27-k,24-2*k,1);
+cp('#e8a850',316,CB-22,18,22);for(let k=0;k<6;k++)cp('#e8a850',317+k,CB-23-k,16-2*k,1);
+for(let X=317;X<334;X+=3)cp('#3a3a3a',X,CB-26,1,26);for(let y=CB-20;y<CB;y+=4)cp('#3a3a3a',316,y,18,1);
+TORCH.push({x:309,y:CB-20},{x:340,y:CB-20});for(const t of TORCH){cp('#2a221a',t.x,t.y,2,7);cp('#4a3a2a',t.x-1,t.y-1,4,2);}
+// 섬 둔치
+for(let X=226;X<424;X++){const d=Math.abs(X-325)/99;const h=Math.round(5*(1-d*d));for(let y=CB;y<CB+h;y++)cp(y===CB?'#2e5a46':'#1e3e32',X,y);}
+// ---------- 앞쪽 층 (언덕 숲·풀밭·선착장) ----------
+const [fr,fx]=mk(),fp=P(fx);
+fp('#4a3a28',300,LK+6,50,3);fp('#3a2a1c',304,LK+9,2,6);fp('#3a2a1c',344,LK+9,2,6);
+const DOCK=[{x:302,y:LK-6},{x:346,y:LK-6}];for(const l of DOCK){fp('#2a221a',l.x,l.y,2,12);fp('#5a4a2a',l.x-2,l.y-4,6,5);}
+const pine=(tx,ty,s,c1,c2)=>{for(let k=0;k<4;k++){const w=s*(.3+k*.18),yy=ty-s*1.5+k*s*.32;fx.fillStyle=c1;fx.beginPath();fx.moveTo(tx,yy-s*.25);fx.lineTo(tx-w,yy+s*.22);fx.lineTo(tx+w,yy+s*.22);fx.fill();fx.fillStyle=c2;fx.beginPath();fx.moveTo(tx,yy-s*.25);fx.lineTo(tx-w*.4,yy+s*.1);fx.lineTo(tx,yy+s*.12);fx.fill();}fp('#2a1e14',tx-1,ty-s*.25,3,s*.3);};
+const oak=(tx,ty,s,c1,c2)=>{fp('#2a1e14',tx-2,ty-s*.6,4,s*.6);fx.fillStyle=c1;for(const [a,b,r] of [[0,-1.1,.55],[-.45,-.85,.4],[.45,-.85,.42],[0,-.7,.5]]){fx.beginPath();fx.arc(tx+a*s,ty+b*s,r*s,0,7);fx.fill();}fx.fillStyle=c2;fx.beginPath();fx.arc(tx-.15*s,ty-1.2*s,.25*s,0,7);fx.fill();};
+for(let X=-10;X<W+10;X+=11){const t=rnd();if(X>225&&X<425)continue;(t<.5?pine:oak)(X+rnd()*5,300+rnd()*10,18+rnd()*8,'#173c2e','#1f4c3a');}
+fx.fillStyle='#10291f';fx.beginPath();fx.moveTo(0,H);fx.lineTo(0,318);for(let X=0;X<=W;X+=8)fx.lineTo(X,316+Math.sin(X*.03)*6+rnd()*2);fx.lineTo(W,H);fx.fill();
+for(let X=-10;X<W+10;X+=19){const t=rnd();(t<.55?pine:oak)(X+rnd()*6,345+rnd()*8,26+rnd()*10,'#0f2a20','#163a2c');}
+for(let y=350;y<H;y++)for(let X=0;X<W;X++)fp(((X*13+y*7)%23<2)?'#183a2a':mix('#0f2a1e','#0a1e16',(y-350)/50),X,y);
+for(let i=0;i<260;i++){const gx=rnd()*W,gy=352+rnd()*48,h=2+rnd()*5;fp(rnd()<.5?'#2a5a3e':'#1f4a34',gx,gy-h,1,h);}
+for(let i=0;i<40;i++){const qx=rnd()*W,qy=360+rnd()*36,c=['#e8d070','#c8a8e0','#e8a0a0','#d8f0e0'][i%4];fp('#2a5a3e',qx,qy,1,3);fp(c,qx-1,qy-1,3,1);fp(c,qx,qy-2,1,3);}
+for(const [rx,ry,rw] of [[40,372,22],[600,366,28],[180,384,16],[460,380,20]]){fx.fillStyle='#3a4a46';fx.beginPath();fx.ellipse(rx,ry,rw/2,rw/3.4,0,Math.PI,0);fx.fill();fx.fillStyle='#4e605a';fx.fillRect(rx-rw/4,ry-rw/4,rw/3,2);}
+for(const [qx,qy] of [[70,378],[76,380],[520,374],[612,388]]){fp('#e8e0d0',qx,qy-2,2,3);fp('#c84a3a',qx-2,qy-4,6,2);}
+for(const q of [20,130,250,390,560,630]){fx.strokeStyle='#245a3a';fx.lineWidth=1;for(let k=-3;k<=3;k++){fx.beginPath();fx.moveTo(q,392);fx.quadraticCurveTo(q+k*3,382,q+k*6,378+Math.abs(k));fx.stroke();}}
+for(const [my,a] of [[236,.18],[300,.12],[338,.1]]){const g=fx.createLinearGradient(0,my-10,0,my+10);g.addColorStop(0,'rgba(170,220,190,0)');g.addColorStop(.5,`rgba(170,220,190,${a})`);g.addColorStop(1,'rgba(170,220,190,0)');fx.fillStyle=g;fx.fillRect(0,my-10,W,20);}
+const vg=fx.createRadialGradient(W/2,H*.45,120,W/2,H*.45,420);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.45)');fx.fillStyle=vg;fx.fillRect(0,0,W,H);
+// ---------- 움직이는 것들 ----------
+const CLOUDS=[];for(let i=0;i<6;i++){const w=60+rnd()*70,blobs=[];for(let k=0;k<w/6;k++)blobs.push([k*6-w/2,Math.sin(k)*2,4+rnd()*7]);CLOUDS.push({x:rnd()*W,y:30+rnd()*90,w,blobs,sp:2+rnd()*3,a:.22+rnd()*.15});}
+const FF=[];for(let i=0;i<24;i++)FF.push({x:rnd()*W,y:270+rnd()*120,vx:(rnd()-.5)*8,vy:(rnd()-.5)*5,ph:rnd()*6.28,bl:.6+rnd()*1.2});
+function frame(x,t,dt){const p=P(x);
+  x.drawImage(sky,0,0);
+  for(const s of STARS){const a=.45+.55*Math.max(0,Math.sin(t*s.sp+s.ph));p(`rgba(244,255,232,${a})`,s.x,s.y);if(a>.9){p('rgba(160,210,170,.6)',s.x-1,s.y);p('rgba(160,210,170,.6)',s.x+1,s.y);p('rgba(160,210,170,.6)',s.x,s.y-1);p('rgba(160,210,170,.6)',s.x,s.y+1);}}
+  // 달: 달무리가 천천히 숨 쉬듯 밝아졌다 어두워짐
+  {const pulse=.75+.25*Math.sin(t*.8);for(let r=40;r>14;r-=3){x.fillStyle=`rgba(200,240,190,${.03*pulse})`;x.beginPath();x.arc(MOON.x,MOON.y,r+pulse*2,0,7);x.fill();}
+   x.fillStyle='#e6f4d8';x.beginPath();x.arc(MOON.x,MOON.y,13,0,7);x.fill();x.fillStyle='#cfe4c0';for(const [a,b,r] of [[-4,-3,3],[4,3,2],[1,6,2],[-5,5,1.5]]){x.beginPath();x.arc(MOON.x+a,MOON.y+b,r,0,7);x.fill();}}
+  // 구름: 천천히 오른쪽으로 흘러감 (화면 밖으로 나가면 왼쪽에서 다시)
+  for(const c of CLOUDS){c.x+=c.sp*dt;if(c.x-c.w/2>W+20)c.x=-c.w/2-20;x.fillStyle=`rgba(70,120,96,${c.a})`;for(const [a,b,r] of c.blobs){x.beginPath();x.arc(c.x+a,c.y+b,r,0,7);x.fill();}x.fillRect(c.x-c.w/2,c.y,c.w,6);}
+  x.drawImage(mid,0,0);x.drawImage(cs,0,0);
+  // 창문 불빛 깜빡임
+  for(const w of WINS){const f=.85+.15*Math.sin(t*3+w.ph)+(Math.sin(t*11+w.ph*3)>.97?-.3:0);p(`rgba(255,230,140,${Math.max(0,(f-.7))})`,w.x,w.y,w.w,w.h);}
+  // 깃발 펄럭임 (파도 모양으로 휘어짐)
+  for(const f of FLAGS){for(let i=0;i<f.len;i++){const wv=Math.sin(t*5-i*.7+f.x)*(i/f.len)*2.2,hh=Math.max(1,Math.round(5-i*.3));p(i%4<2?'#3aa070':'#2e8a5e',f.x+1+i,f.y+wv,1,hh);}p('#e8d070',f.x+3,f.y+1+Math.sin(t*5-2+f.x)*.6,2,2);}
+  // 호수: 성 반사 (줄마다 좌우로 일렁임) + 달빛 반사
+  x.save();x.globalAlpha=.26;for(let y=0;y<56;y++){const sy=LK-1-y,dy=LK+1+y,off=Math.round(Math.sin(t*1.6+y*.45)*(.6+y*.03));x.drawImage(cs,0,sy,W,1,off,dy,W,1);}x.restore();
+  for(let k=0;k<12;k++){const w=6+(k%3)*5+Math.sin(t*2+k)*2;p(`rgba(220,245,200,${.35+.15*Math.sin(t*1.7+k)})`,MOON.x-w/2+Math.sin(t+k)*2,LK+6+k*4,w,1);}
+  for(let i=0;i<18;i++){const rx=((i*97+t*6)%W),ry=LK+6+((i*37)%44);p('rgba(160,220,190,.22)',rx,ry,6+(i%4)*3,1);}
+  // 횃불 (성문 양옆 + 선착장)
+  for(const l of [...TORCH.map(o=>({x:o.x+1,y:o.y-2})),...DOCK.map(o=>({x:o.x+1,y:o.y-2}))]){const fl=.8+.2*Math.sin(t*13+l.x)+.1*Math.sin(t*23+l.x*2);const g=x.createRadialGradient(l.x,l.y,0,l.x,l.y,14*fl);g.addColorStop(0,`rgba(255,210,120,${.5*fl})`);g.addColorStop(1,'rgba(255,210,120,0)');x.fillStyle=g;x.fillRect(l.x-15,l.y-15,30,30);p('#ffb040',l.x-1,l.y-1,3,2);p('#ffe890',l.x,l.y-2-Math.round(fl),1,2);}
+  x.drawImage(fr,0,0);
+  // 반딧불: 천천히 떠다니며 깜빡임
+  for(const f of FF){f.vx+=(Math.sin(t*.7+f.ph)*3-f.vx)*.02;f.vy+=(Math.cos(t*.9+f.ph*1.3)*2-f.vy)*.02;f.x+=f.vx*dt;f.y+=f.vy*dt;if(f.x<-5)f.x=W+5;if(f.x>W+5)f.x=-5;if(f.y<255)f.vy+=1;if(f.y>395)f.vy-=1;
+    const a=Math.max(0,Math.sin(t*f.bl+f.ph));if(a<.05)continue;const g=x.createRadialGradient(f.x,f.y,0,f.x,f.y,5);g.addColorStop(0,`rgba(220,255,150,${.85*a})`);g.addColorStop(1,'rgba(220,255,150,0)');x.fillStyle=g;x.fillRect(f.x-5,f.y-5,10,10);p(`rgba(244,255,192,${a})`,f.x,f.y);}
+}
+let raf=0,cv=null,last=0,t0=0;
+function start(canvas,fps=24){cv=canvas;cv.width=W;cv.height=H;const x=cv.getContext('2d');x.imageSmoothingEnabled=false;t0=performance.now();last=t0;
+  const loop=now=>{raf=requestAnimationFrame(loop);if(document.hidden)return;if(now-last<1000/fps)return;const dt=Math.min(.1,(now-last)/1000);last=now;frame(x,(now-t0)/1000,dt);};frame(x,0,0);raf=requestAnimationFrame(loop);}
+function stop(){cancelAnimationFrame(raf);raf=0;}
+function still(t=3){const [c,x]=mk();frame(x,t,0);return c.toDataURL();}
+return {start,stop,still,frame,W,H};})();
+
+// 원정 지도 (난이도 4곳: 마을·숲·화산·하늘 신전) — 채도 낮춘 양피지
+const HOME_MAP=(()=>{try{let sd=11;const rnd=()=>{sd=(sd*16807)%2147483647;return sd/2147483647;};const c=document.createElement('canvas');c.width=320;c.height=90;const x=c.getContext('2d'),W=320,H=90,px=(col,X,Y,w=1,h=1)=>{x.fillStyle=col;x.fillRect(X,Y,w,h);};
+  for(let y=0;y<H;y++)for(let X=0;X<W;X++){const n=rnd(),e=Math.min(X,W-1-X,y,H-1-y);px(e<2?'#2a3a2a':n<.06?'#c8c49a':'#d8d4aa',X,y);}
+  x.strokeStyle='#7a6a3a';x.setLineDash([4,3]);x.lineWidth=2;x.beginPath();x.moveTo(40,62);x.bezierCurveTo(80,30,100,75,120,52);x.bezierCurveTo(150,30,180,72,200,52);x.bezierCurveTo(230,32,260,68,280,48);x.stroke();x.setLineDash([]);
+  px('#8a5a3a',30,48,10,5);px('#c0a880',31,53,8,6);px('#8a5a3a',44,51,8,4);px('#c0a880',45,55,6,5);
+  for(const [tx,ty] of [[108,50],[118,44],[128,52]]){x.fillStyle='#4a7a4a';x.beginPath();x.moveTo(tx,ty-9);x.lineTo(tx-5,ty+2);x.lineTo(tx+5,ty+2);x.fill();}
+  x.fillStyle='#6a5a50';x.beginPath();x.moveTo(186,60);x.lineTo(197,38);x.lineTo(203,38);x.lineTo(214,60);x.fill();px('#c86a3a',197,36,6,3);
+  px('#eae6d0',270,40,20,2);for(const q of [271,279,287])px('#dcd8c0',q,42,2,11);px('#eae6d0',268,53,24,2);return c.toDataURL();}catch(e){return '';}})();
+// 메인 화면이 떠 있을 때만 배경을 움직임 (게임 중·다른 창·화면 꺼짐이면 멈춤)
+{const cvB=document.getElementById('homeBg');let on=false;
+ try{document.documentElement.style.setProperty('--stageImg',`url(${CSBG.still(3)})`);if(HOME_MAP)document.documentElement.style.setProperty('--mapImg',`url(${HOME_MAP})`);}catch(e){}
+ setInterval(()=>{const want=!!cvB&&ov.classList.contains('on')&&ov.classList.contains('home');if(want===on)return;on=want;cvB.style.display=on?'block':'none';try{if(on)CSBG.start(cvB,24);else CSBG.stop();}catch(e){}},250);}
 resize();newRun();startScreen();bootPatch();appGate();requestAnimationFrame(loop);
 // v307: 시작 화면(판 진행 중 아님)에선 1분마다, 판 중엔 3분마다 확인 — 배포 직후(Pages 반영 약 40초) 열어서 옛 버전을 「최신」으로 보는 시간을 줄임
 checkUpd();{let n=0;setInterval(()=>{if(STOPPED)return;n++;if(!S||S.mode==='start'||S.mode==='over'||!S.started||n%3===0)checkUpd();},60000);}
