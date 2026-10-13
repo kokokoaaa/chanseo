@@ -6341,13 +6341,17 @@ function fxAct(F,x,y){const p=S.p,[m,r]=F.g,o0=S.dsrc;S.dsrc='fusion';S.fxD=(S.f
   case 'haste':p.fxR=Math.max(p.fxRT>0?p.fxR||0:0,m);p.fxRT=2;break;
   case 'rage':p.fxDm=Math.max(p.fxDT>0?p.fxDm||0:0,m);p.fxDT=3;break;}}
   finally{S.dsrc=o0;S.fxD--;}}
+// v331: 합체의 「T초마다」 → 행동 발동 (T초는 최소 간격으로만). 회복·보호막 = 2번 맞을 때, 골드 = 처치, 나머지 = 기본 공격 N번(T초 1.2배쯤)
+const fzTr=F=>F.act==='heal'||F.act==='shield'?['hurt',2]:F.act==='gold'?['kill',Math.round(F.v*1.5)]:['atk',Math.max(2,Math.round(F.v*1.2))];
+function fzEv(k){const L_=S&&S.fxL;if(!L_)return;const N=S.fzN=S.fzN||{},G=S.fzG=S.fzG||{};for(const F of L_){if(F.tr!=='t'||G[F.id])continue;const T=fzTr(F);if(T[0]!==k)continue;N[F.id]=(N[F.id]||0)+1;if(N[F.id]>=T[1]){N[F.id]=0;G[F.id]=1;}}}
+const fzGo=F=>{const G=S.fzG;if(!G||!G[F.id])return false;G[F.id]=0;return true;};
 function fxRun(tr,t,dt){const L_=S.fxL;if(!L_||!L_.length||(S.fxD||0)>1)return;const p=S.p,cd=S.fxCd||(S.fxCd={});
   for(const F of L_){if(F.tr!==tr)continue;
     if(tr==='k'||tr==='c'){if(Math.random()<F.v)fxAct(F,t.x,t.y);}
     else if(tr==='n'){if(p.shots%F.v===0)fxAct(F,t.x,t.y);}
     else if(tr==='h'){if(!(cd[F.id]>S.t)){cd[F.id]=S.t+F.v;fxAct(F,p.x,p.y);}}
     else if(tr==='d')fxAct(F,p.x,p.y);
-    else if(tr==='t'){cd[F.id]=(cd[F.id]||0)+dt;if(cd[F.id]>=F.v){cd[F.id]=0;const e=['fire','poison','boom','vine','frost'].includes(F.act)&&F.g[1]<120?nearestE(p,300):null;fxAct(F,e?e.x:p.x,e?e.y:p.y);}}}}
+    else if(tr==='t'){cd[F.id]=(cd[F.id]||0)+dt;if(cd[F.id]>=F.v&&fzGo(F)){cd[F.id]=0;const e=['fire','poison','boom','vine','frost'].includes(F.act)&&F.g[1]<120?nearestE(p,300):null;fxAct(F,e?e.x:p.x,e?e.y:p.y);}}}}
 const DSRC_N={fusion:'합체 능력',undead:'망자(원혼·뼈창·해골 폭발)',base:'기본 공격',summon:'소환물',shadow:'분신',fire:'화상',poison:'독',thunder:'번개',elem:'원소',nature:'덩굴',grav:'중력장',wave:'충격파',alchemy:'물약',holy:'신성'};
 const dShare=k=>{const c=S.dcat||{};let t=0;for(const q in c)t+=c[q];return t>0?(c[k]||0)/t:0;};
 
@@ -6597,9 +6601,10 @@ const AG_ON={st_shadow:()=>typeof shadowOn==='function'&&shadowOn(),st_wave:()=>
 function agEv(k){if(!S)return;const N=S.agN=S.agN||{},G=S.agG=S.agG||{};for(const id in AG_TR){const T=AG_TR[id];if(T[0]!==k||G[id])continue;if(!(AG_ON[id]?AG_ON[id]():has(id)))continue;N[id]=(N[id]||0)+1;if(N[id]>=T[1]){N[id]=0;G[id]=1;}}}
 const agGo=id=>{const G=S.agG;if(!G||!G[id])return false;G[id]=0;return true;};
 // 설명 글: 앞의 「N초마다」를 발동 조건으로, 「공속이 오를수록 더 자주」는 최소 간격 안내로
+for(const f of [...FUSIONS,...VFUSIONS]){if(!f.fx||!/^t:/.test(f.fx)||!f.d)continue;const F=fxParse(f),T=fzTr(F);f.d=f.d.replace(/(\d+(?:\.\d+)?)초마다 /,(m,x)=>UW_TN[T[0]](T[1])+' ')+(/초에 한 번까지/.test(f.d)?'':` (${F.v}초에 한 번까지)`);}
 for(const a of [...AUGS,...VIPS]){const T=AG_TR[a.id];if(!T||!a.d)continue;let sec=null;a.d=a.d.replace(/(\d+(?:\.\d+)?)초마다 /,(m,x)=>{sec=x;return UW_TN[T[0]](T[1])+' ';}).replace(/\. 공속이 오를수록 더 자주/,'');if(sec)a.d+=` (${sec}초에 한 번까지)`;}
 const uwV=()=>{if(!S||!S.cls||!UWV[S.cls]&&!UW_D[S.cls])return -1;const n=uwVn(S.cls);for(let v=0;v<n;v++)if(has(uwAid(S.cls,v)))return v;return -1;};
-function uwEv(k){try{agEv(k);}catch(e){}try{const v=uwV();if(v<0)return;const T=UW_TR[S.cls+(v>0?v:'')];if(!T||T[0]!==k)return;S.uwN=(S.uwN||0)+1;if(S.uwN>=T[1]){S.uwN=0;S.uwGo=1;}}catch(e){}}
+function uwEv(k){try{agEv(k);fzEv(k);}catch(e){}try{const v=uwV();if(v<0)return;const T=UW_TR[S.cls+(v>0?v:'')];if(!T||T[0]!==k)return;S.uwN=(S.uwN||0)+1;if(S.uwN>=T[1]){S.uwN=0;S.uwGo=1;}}catch(e){}}
 function uwTick(p,dt,v){const c=S.cls,V=v>0&&UWV[c]&&UWV[c][v],T0=V?V[3]:UW_T[c];if(V&&!T0)return;S.uwT=(S.uwT??0)-dt;if(S.uwT>0||!S.uwGo)return;S.uwGo=0;S.uwT=T0*tmul();const D=pDmg()*UW_K,nm=V?V[1]:UW_D[c][0],ex=(x,y,r,m,col)=>exL(nm,null,x,y,r,D*m,col),near=R=>S.en.filter(o=>o.alive&&!o.phase&&d2(o,p)<R*R),pick=(L,n)=>L.sort(()=>Math.random()-.5).slice(0,n),heal=f=>{p.hp=Math.min(p.maxHp,p.hp+p.maxHp*f);},slow=(L,t)=>{for(const o of L)if(!o.boss)o.slowT=Math.max(o.slowT||0,t);},inR=(x,y,r)=>S.en.filter(o=>o.alive&&d2(o,{x,y})<(r+(o.r||12))**2);
   const frz=(L,t)=>{for(const o of L)if(!o.boss){o.slowT=Math.max(o.slowT||0,t);o.frozen=true;}},top=R=>{const L=near(R);return L.length?L.reduce((a,b)=>b.hp>a.hp?b:a):null;},zap=(o,m,col)=>{S.bolts.push({x1:o.x+rand(-30,30),y1:o.y-240,x2:o.x,y2:o.y,life:.18,col});},shield=f=>bxAdd(p.maxHp*f*2,p.maxHp*f);
   if(V){const k=c+v;
@@ -9094,6 +9099,7 @@ const PATCH_NOTES=[
     ['change','🗡 처치: 블랙홀(20마리) · 독구름(15) · 돈다발 폭탄(15) / 기본 공격: 천둥(10번) · 지뢰(3번) · 부적 발사(5번) · 원소 폭풍(6번) · 번개 토템(4번)'],
     ['change','💨 대시할 때: 노바 · 마법 포탑 · 그림자 소환 / 🛡 맞을 때: 전쟁 함성(2번) · 서리 폭발 · 충격파 발생'],
     ['change','🎓 직업·왕실: 눈보라(처치 12) · 프리즘 폭발(처치 12) · 화살 소나기(기본 공격 6번) · 곰 변신(3번 맞을 때) · 👑 대천사(2번 맞을 때)'],
+    ['change','💞 합체 증강 27개의 「새 능력: N초마다」도 행동 발동이에요: 공격형은 기본 공격 N번마다 · 회복·보호막은 2번 맞을 때마다 · 골드는 처치 수마다'],
     ['change','🌀 소환수·장판의 공격 간격(부적 정령·도깨비불·업화 등)은 원래 그대로예요']]},
   {v:330,t:'🌟 마스터리 세 갈래',items:[
     ['new','🌟 <b>마스터리 세 갈래를 모두 찍을 수 있어요</b>. 갈래마다 세부 갈래 2개 중 하나를 골라 끝까지 가면 핵심 능력 — 모두 찍으면 <b>핵심 능력 3개</b>'],
