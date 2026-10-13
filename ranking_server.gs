@@ -1,4 +1,13 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v8.1
+// 찬서 명예의 전당 서버 (Google Apps Script) v8.3
+//
+// v8.2 → v8.3 바뀐 점 (게임 v356)
+// - 결투 출전(arena): 보관함 캐릭터를 결투장에 올려 다른 사람이 상대로 고를 수 있음. 이름·직업마다 하나, 다시 올리면 늘 새것으로 바뀜
+//   점수 = 그 캐릭터가 세운 판 점수(kills 칸). 이름 주인만 arenaDel 로 내릴 수 있음
+//
+// v8.1 → v8.2 바뀐 점 (게임 v356)
+// - 기간별 명예의 전당 (월간·주간·일간): 게임이 기록을 올릴 때 diff 뒤에 「|D20261013」(그날)·「|W20261012」(그 주 월요일)·「|M202610」(그 달)을 붙여 한 번씩 더 보냄
+//   → 그 기간 안에서 이름·직업마다 가장 좋은 기록이 따로 남음. 점수는 앞쪽 난이도로 계산
+// - 목록에는 지금 기간(한국 시각)의 기간 기록만 나감. 지난 기간 줄은 기록이 올라올 때 가끔 정리해서 지움
 //
 // v8.0 → v8.1 바뀐 점 (게임 v310)
 // - 기록 외형 채우기(fill)에 ow=1이면 이름 주인이 자기 기록의 외형을 지금 장비 모습으로 덮어쓸 수 있음 (예전엔 비어 있을 때만)
@@ -187,7 +196,7 @@ const OLD_SHEET = 'ranking_v2';
 const HEAD = ['name', 'diff', 'cls', 'time', 'lvl', 'kills', 'bosses', 'score', 'comment', 'at', 'hero', 'hh', 'dw', 'kh'];
 const LIST_COLS = 10; // 목록에 필요한 칸 (name ~ at)
 const CACHE_KEY = 'list_v43';
-const DIFFS = { normal: 1, hard: 1.5, hell: 2.2, god: 3.2, nightmare: 4, bossrush: 4, raid: 1, raid_golem: 1, raid_frost: 1, raid_storm: 1, raid_brood: 1, raid_void: 1 };
+const DIFFS = { normal: 1, hard: 1.5, hell: 2.2, god: 3.2, nightmare: 4, bossrush: 4, raid: 1, raid_golem: 1, raid_frost: 1, raid_storm: 1, raid_brood: 1, raid_void: 1, arena: 1 };
 
 function book_() {
   const a = SpreadsheetApp.getActiveSpreadsheet();
@@ -200,8 +209,16 @@ function book_() {
   return b;
 }
 
-// "knight:nightm" 처럼 예전에 잘린 난이도도 알아봄
+// v8.2 기간 키 (한국 시각): D=그날, W=그 주 월요일, M=그 달
+const PER_RE = /^(D\d{8}|W\d{8}|M\d{6})$/;
+function perKey_(p, t) { const d = new Date((t || Date.now()) + 9 * 3600e3), y = d.getUTCFullYear(), m = d.getUTCMonth() + 1, dd = d.getUTCDate(), z = n => String(n).padStart(2, '0');
+  if (p === 'M') return 'M' + y + z(m); if (p === 'D') return 'D' + y + z(m) + z(dd);
+  const w = new Date(Date.UTC(y, m - 1, dd - ((d.getUTCDay() + 6) % 7))); return 'W' + w.getUTCFullYear() + z(w.getUTCMonth() + 1) + z(w.getUTCDate()); }
+const curPers_ = () => [perKey_('D'), perKey_('W'), perKey_('M')];
+const baseDiff_ = d => String(d || '').split('|')[0];
+// "knight:nightm" 처럼 예전에 잘린 난이도도 알아봄 (v8.2: 뒤에 |기간 이 붙어 있으면 그대로 살림)
 function diffOf_(d, cls) {
+  { const sp = String(d || '').split('|'); if (sp.length === 2 && PER_RE.test(sp[1])) return diffOf_(sp[0], cls) + '|' + sp[1]; }
   let k = String(d || '');
   if (!k) { const c = String(cls || '').split('#')[0]; k = c.indexOf(':') >= 0 ? c.split(':')[1] : 'normal'; }
   if (DIFFS[k]) return k;
@@ -278,14 +295,24 @@ function clean_(d, at) {
 }
 
 // 게임과 같은 최종 점수: (기본 + 플레이 보너스) × 난이도 배율 × (1 − 0.1 × 자동 비율). 보너스·자동 비율은 cls의 ~칸에 들어 있음
-function score_(r) {
+function score_(r0) {
+  const r = { ...r0, diff: baseDiff_(r0.diff) };
   if (String(r.diff).indexOf('raid') === 0) return Math.max(0, r.lvl * 1000000 - Math.min(999999, r.time));
+  // v8.3 결투 출전 캐릭터: 점수는 그 캐릭터가 세운 판 점수 (kills 칸에 실어 보냄)
+  if (r.diff === 'arena') return r.kills;
   const seg = String(r.cls || '').split('~'), bonus = Math.min(BONUS_MAX, Math.max(0, isFinite(+seg[1]) ? +seg[1] : 0)), ap = Math.min(1, Math.max(0, (+seg[2] || 0) / 100)), v2 = false; // v2(제곱 시간 점수)는 v5.3에서 폐지: 게임 화면과 같게 모든 기록 v1 식
   const base = r.diff === 'bossrush'
     ? r.bosses * 2500 + lvPts_(r) + r.time * 2
     : timePts_(r.diff === 'nightmare' && +r.at >= SC3_AT ? r.time + Math.round(r.time * (NM_TK - 1)) : r.time, v2) * SC_TW + softC_(r.kills * 2, SC_KC) + lvPts_(r) + (nmV4_(r) ? 0 : r.bosses * (v2 ? 800 : 400) + (r.bosses >= 4 ? 3000 : 0));
   const sm = r.diff === 'nightmare' && +r.at >= SC3_AT ? NM_SM : r.diff === 'bossrush' && +r.at >= BR_AT ? BR_SM : 1;
   return Math.round(Math.round((base + bonus) * (DIFFS[r.diff] || 1)) * sm * (1 - 0.1 * ap));
+}
+// v8.2 지난 기간(일간·주간·월간) 기록 줄 지우기: 한 시간에 한 번까지
+function prunePer_(s) {
+  try { const c = CacheService.getScriptCache(); if (c.get('perPrune')) return; c.put('perPrune', '1', 3600);
+    const last = s.getLastRow(); if (last < 2) return; const cur = curPers_(), v = s.getRange(2, 2, last - 1, 1).getValues();
+    for (let i = v.length - 1; i >= 0; i--) { const p = String(v[i][0]).split('|')[1]; if (p && cur.indexOf(p) < 0) s.deleteRow(i + 2); }
+  } catch (err) {}
 }
 function rows_(s) {
   const v = s.getDataRange().getValues();
@@ -309,6 +336,7 @@ function listJson_() {
   const hc = HEAD.indexOf('hh') + 1, ex = s.getLastColumn() >= hc + 1 ? s.getRange(2, hc, last - 1, 2).getValues() : [];
   const all = v.map((r, i) => { const o = Object.fromEntries(HEAD.slice(0, LIST_COLS).map((h, j) => [h, r[j]]));
       return { name: String(o.name), diff: fixDiff_(o), cls: String(o.cls), at: +o.at || 0, time: +o.time, lvl: +o.lvl, kills: +o.kills, bosses: +o.bosses, comment: String(o.comment || ''), score: score_({ diff: fixDiff_(o), cls: String(o.cls), time: +o.time || 0, lvl: +o.lvl || 0, kills: +o.kills || 0, bosses: +o.bosses || 0, at: +o.at || 0 }), h: ex[i] && ex[i][0] ? 1 : 0, dw: ex[i] ? String(ex[i][1] || '') : '' }; })
+    .filter(r => { const p = String(r.diff).split('|')[1]; return !p || curPers_().indexOf(p) >= 0; })
     .sort((a, b) => b.score - a.score);
   const per = {};
   return JSON.stringify(all.filter(r => (per[r.diff] = (per[r.diff] || 0) + 1) <= 50));
@@ -356,7 +384,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 81, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 83, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -711,9 +739,16 @@ function doPost(e) {
       names.forEach((x, i) => { if (String(x[0]) === nm) { s.getRange(i + 2, c).setValue(dw); n++; } });
       return out_({ ok: true, result: 'dw', n });
     }
+    // v8.3 결투 출전 내리기: 이름 주인만 (위에서 확인됨), 그 직업의 출전 줄을 지움
+    if (d.arenaDel) {
+      const last = s.getLastRow(); let n = 0;
+      if (last > 1) { const v = s.getRange(2, 1, last - 1, 3).getValues(); for (let i = v.length - 1; i >= 0; i--) if (String(v[i][0]) === nm0 && String(v[i][1]) === 'arena' && clsB_(v[i][2]) === String(d.cls || '')) { s.deleteRow(i + 2); n++; } }
+      return out_({ ok: true, result: 'arenaDel', n });
+    }
     // 기록 시각: 게임이 보낸 값(그 판을 한 시각)을 씀. 지금보다 미래거나 너무 옛날이면 서버 시각
     const at0 = +d.at || 0, r = clean_(d, at0 > 1.7e12 && at0 <= Date.now() + 60000 ? at0 : 0);
     if (delBlocked_(r.name, r.diff, r.at, r.cls)) return out_({ ok: false, result: 'deleted' });
+    prunePer_(s);
     const last = s.getLastRow();
     const keys = last > 1 ? s.getRange(2, 1, last - 1, 3).getValues().map(x => recKey_(x[0], fixDiff_({ diff: x[1], cls: x[2] }), x[2])) : [];
     const i = keys.indexOf(recKey_(r.name, r.diff, r.cls));
@@ -725,7 +760,7 @@ function doPost(e) {
     // 예전 줄도 같은 최종 점수식으로 다시 계산해서 비교 (저장된 score 칸은 예전 서버가 보너스 없이 쓴 값일 수 있음)
     const ov = s.getRange(row, 1, 1, LIST_COLS).getValues()[0], oo = Object.fromEntries(HEAD.slice(0, LIST_COLS).map((h, j) => [h, ov[j]]));
     const oldScore = score_({ diff: fixDiff_(oo), cls: String(oo.cls), time: +oo.time || 0, lvl: +oo.lvl || 0, kills: +oo.kills || 0, bosses: +oo.bosses || 0, at: +oo.at || 0 });
-    if (r.score > oldScore) {
+    if (r.score > oldScore || r.diff === 'arena') { /* 출전 캐릭터는 다시 등록하면 늘 새것으로 */
       { const full = s.getRange(row, 1, 1, HEAD.length).getValues()[0], at = h => full[HEAD.indexOf(h)]; if (!r.dw) r.dw = at('dw') || ''; if (!r.hero && at('hero')) { r.hero = at('hero'); r.hh = at('hh'); } }
       s.getRange(row, 1, 1, HEAD.length).setValues([HEAD.map(h => r[h])]);
       return out_({ ok: true, result: 'best' });
