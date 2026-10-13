@@ -9083,7 +9083,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
 const PATCH_NOTES=[
   {v:329,t:'🎨 화면 다듬기',items:[
     ['change','🌲 판을 시작하면 첫 증강을 고를 때부터 <b>게임 배경</b>이 보여요 (성채 배경은 메인 화면과 거기서 연 창에서만)'],
-    ['change','✨ 접속 중 목록·채팅에서 <b>꾸민 이름</b>이 번져서 깨져 보이던 문제를 고쳤어요','bug']]},
+    ['change','✨ 접속 중 목록·채팅에서 <b>꾸민 이름</b>이 번져서 깨져 보이던 문제를 고쳤어요','bug'],
+    ['change','👤 다른 사람 프로필의 장비 이름·아이콘이 <b>내 직업 기준</b>으로 나오던 문제를 고쳤어요 (광전사 왼손이 「기본 보주」로 보이던 것)','bug']]},
   {v:328,t:'⚔ 유니크 무기 능력 개편',items:[
     ['change','⚔ <b>유니크 무기 능력 34종</b>이 「N초마다」 대신 <b>행동으로 발동</b>해요: 기본 공격 N번 · 적 N마리 처치 · 치명타 N번 · 대시할 때 · 맞을 때'],
     ['change','⏱ 같은 능력이 너무 자주 터지지 않게 최소 간격이 있어요 (예전 주기 그대로, 공속이 빠를수록 짧아짐) — 예전보다 자주 터지진 않고, 터지는 때가 행동에 맞춰져요'],
@@ -13378,14 +13379,16 @@ function profBest(n){const k=onlKey(n),o={};for(const r of (BOARD||[]))if(r&&onl
 function profTip(n,p,done){const av=p?profAv(p,64):null,A=p&&p.title&&ACH.find(a=>a.k===p.title);
   return `<div style="display:flex;gap:10px;align-items:center">${av?`<img src="${av.src}" style="width:${av.css}px;height:${av.css}px;image-rendering:pixelated">`:''}<div><b>${esc(n)}</b>${A?`<div style="color:#ffd76a;font-size:12px">🏷 ${esc(A.n)}</div>`:''}${p?`<div>${CLASSES[p.cls].n} · ⚔ 전투력 <b style="color:#ffe27a">${p.pw.toLocaleString()}</b></div><div>⏱ 플레이 ${ptTxt(p.pt)} · ⚒ 장비 ${Object.keys(p.eq).length}/14 · 🏆 ${p.achs?p.achs.length:p.ach}/${ACH.length}</div><small style="color:var(--muted)">눌러서 계정 정보 보기</small>`:done?'<small style="color:var(--muted)">계정 정보가 아직 없어요<br>(그 사람이 접속한 뒤 1~2분 지나면 보여요)</small>':'<small style="color:var(--muted)"><span class="ldspin"></span>계정 정보를 불러오는 중… (몇 초 걸릴 수 있어요)</small>'}</div></div>`;}
 // 장비 칸 + 마우스 올림 설명 + 장비 합산 효과 (계정 정보 · 명예의 전당 공용). det = 장비 상세(부위→아이템), eq = 등급·강화만 있는 예전 정보
+// v329: 다른 사람 장비는 그 사람 직업 기준으로 이름·아이콘을 지음 (광전사 왼손이 보는 사람 직업의 「보주」로 보이던 문제)
+const withCls=(c,f)=>{if(!c||!CLASSES[c])return f();const o=FCLS;FCLS=c;try{return f();}finally{FCLS=o;}};
 function gearPanel(cls,det,eq,av,note){det=det||{};eq=eq||{};const p={cls};if(!Object.keys(eq).length)for(const k in det)eq[k]={r:det[k].r,lv:det[k].lv};p.eq=eq;p.det=det;
   const PI={};for(const k of GEAR_KEYS){const e=p.eq[k];if(!e)continue;PI[k]=p.det[k]||{s:slotT(k),r:e.r,lv:e.lv,b:1,a:[],est:1};}
   const cell=k=>{const e=p.eq[k],it=PI[k];return `<div class="pslot${e?'':' em'}${egC(it)}" ${it?`data-pk="${k}"`:''} style="grid-area:${SLOT_POS[k]};--rc:${e?(it&&it.u?UNQ_COL:GR[e.r].col):'#555'}"><span>${it?itIcoH(it,p.cls):GEAR[slotT(k)].ico}</span>${e&&e.lv?`<b>+${e.lv}</b>`:''}<small>${SLOT_N[k]}</small></div>`;};
   const TOT=gearTotalsOf(PI,p.cls),tks=Object.keys(TOT).filter(k=>Math.abs(TOT[k])>1e-4),est=Object.values(PI).some(x=>x.est);
   const totH=tks.length?`<div class="ptot"><b>📊 장비 합산 효과</b>${tks.map(k=>{const nm=(ST_N[k]||[k])[0];return `<div class="strow"><span>${nm}</span><b>${stTxt(k,TOT[k]).replace(nm+' ','')}</b></div>`;}).join('')}${est?'<small>옵션·세트 정보가 없는 예전 프로필이라 주 능력치만 계산했어요</small>':''}</div>`:'';
-  const html=`<div class="pwrap"><div class="pgrid">${GEAR_KEYS.map(cell).join('')}<div class="pmid">${av?`<img src="${av.src}" style="width:${av.css}px;height:${av.css}px;image-rendering:pixelated">`:''}</div></div>${totH}</div>${note?`<small style="color:var(--muted);display:block;text-align:center">${note}</small>`:''}`;
+  const html=`<div class="pwrap"><div class="pgrid">${withCls(p.cls,()=>GEAR_KEYS.map(cell).join(''))}<div class="pmid">${av?`<img src="${av.src}" style="width:${av.css}px;height:${av.css}px;image-rendering:pixelated">`:''}</div></div>${totH}</div>${note?`<small style="color:var(--muted);display:block;text-align:center">${note}</small>`:''}`;
   const scP={};for(const k in det){const x=det[k];if(x&&x.set&&SETS[x.set])scP[x.set]=(scP[x.set]||0)+1;}
-  const bind=w=>w.querySelectorAll('[data-pk]').forEach(el=>ftipBind(el,()=>{const it=PI[el.dataset.pk];if(!it)return null;const t=itTip(it,scP);return [t[0].replace(/<div class="ftc[^"]*">[\s\S]*?<\/div>/,'')+(it.est?'<small style="color:var(--muted)">(예전 정보: 옵션 정보 없음)</small>':''),t[1]];}));
+  const bind=w=>w.querySelectorAll('[data-pk]').forEach(el=>ftipBind(el,()=>{const it=PI[el.dataset.pk];if(!it)return null;const t=withCls(p.cls,()=>itTip(it,scP));return [t[0].replace(/<div class="ftc[^"]*">[\s\S]*?<\/div>/,'')+(it.est?'<small style="color:var(--muted)">(예전 정보: 옵션 정보 없음)</small>':''),t[1]];}));
   return {html,bind,n:Object.keys(PI).length};}
 // 프로필 창 닫기: 게임 중에 열어서 멈췄으면 다시 이어서
 function hsClose(w){w.remove();if(w._pz){w._pz=0;if(PAUSED&&S&&S.mode==='play')togglePause(false,true);}}
