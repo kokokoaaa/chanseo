@@ -1,4 +1,7 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v8.9
+// 찬서 명예의 전당 서버 (Google Apps Script) v9.0
+//
+// v8.9 → v9.0 바뀐 점 (게임 v378)
+// - AI 모험가가 접속한 사람에게 먼저 말을 걺: tgt(말 걸 사람), gr=1(방금 들어온 사람에게 인사)
 //
 // v8.8 → v8.9 바뀐 점 (게임 v377)
 // - AI 모험가가 지금 접속한 사람 목록(on)을 보고 그 사람들에게 말을 걸고 대답함 (나간 사람에겐 말 안 검)
@@ -438,7 +441,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 89, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 90, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -715,7 +718,7 @@ function ai_(q) {
     method: 'post', contentType: 'application/json', muteHttpExceptions: true,
     headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01' },
     payload: JSON.stringify({ model: AI_MODEL, max_tokens: 200, thinking: { type: 'disabled' }, system: sys,
-      messages: [{ role: 'user', content: '최근 채팅:\n' + ctx.join('\n') + '\n\n' + (q.said ? '방금 「' + str_(q.me, 12) + '」가 이렇게 말했어: ' + String(q.said || '').slice(0, 200) + (q.named == 1 ? '\n(너를 직접 불렀어. 그 사람에게 대답해)' : q.cut == 1 ? '\n(너는 다른 사람들 대화에 옆에서 끼어드는 거야. 그 대화를 대신 이어받지 말고, 끼어드는 티가 나게 짧게 네 입장에서 한마디만 해)' : '\n(대답해도 되고, 다른 사람에게 말을 걸어도 돼)') : '채팅이 조용해. 지금 아무도 너랑 대화하고 있지 않아. 그러니 혼잣말처럼 한마디만 해 (지금 하는 게임·감상·푸념·혼자 하는 다짐 같은 것, 「~네」「~다」「~함」처럼). 남의 말에 대꾸하듯 말하지 말고, 질문으로 끝내지 마. 가끔(5번에 1번쯤)만 접속 목록에 있는 사람에게 짧게 말을 걸어도 돼.') + '\n\n「' + B[0] + '」로서 칠 한 줄:' }] })
+      messages: [{ role: 'user', content: '최근 채팅:\n' + ctx.join('\n') + '\n\n' + (q.said ? '방금 「' + str_(q.me, 12) + '」가 이렇게 말했어: ' + String(q.said || '').slice(0, 200) + (q.named == 1 ? '\n(너를 직접 불렀어. 그 사람에게 대답해)' : q.cut == 1 ? '\n(너는 다른 사람들 대화에 옆에서 끼어드는 거야. 그 대화를 대신 이어받지 말고, 끼어드는 티가 나게 짧게 네 입장에서 한마디만 해)' : '\n(대답해도 되고, 다른 사람에게 말을 걸어도 돼)') : (q.tgt ? (q.gr == 1 ? '「' + str_(q.tgt, 12) + '」님이 방금 채팅방에 들어왔어. 네 말투로 반갑게 인사하고, 가볍게 한마디 걸어 (그 사람이 오늘 뭐 할지, 요즘 뭐 키우는지 같은 것). 한 줄만.' : '채팅에 「' + str_(q.tgt, 12) + '」님이 접속해 있는데 한동안 조용해. 그 사람에게 자연스럽게 말을 걸어서 대화를 이끌어 내: 그 사람이 하는 게임(직업·기록·요즘 뭐 하는지)이나 근황을 가볍게 묻거나, 네 얘기를 하면서 의견을 물어봐. 최근 채팅에서 그 사람과 하던 얘기가 있으면 이어서. 한 줄만.') : '채팅이 조용해. 지금 아무도 너랑 대화하고 있지 않아. 그러니 혼잣말처럼 한마디만 해 (지금 하는 게임·감상·푸념·혼자 하는 다짐 같은 것, 「~네」「~다」「~함」처럼). 남의 말에 대꾸하듯 말하지 말고, 질문으로 끝내지 마. 가끔(5번에 1번쯤)만 접속 목록에 있는 사람에게 짧게 말을 걸어도 돼.')) + '\n\n「' + B[0] + '」로서 칠 한 줄:' }] })
   });
   if (res.getResponseCode() !== 200) return { err: 'api', code: res.getResponseCode(), msg: res.getContentText().slice(0, 300) };
   let j = null; try { j = JSON.parse(res.getContentText()); } catch (err) {}

@@ -9407,6 +9407,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:378,t:'💬 사람 먼저',items:[
+    ['change','💬 다른 모험가들이 접속한 사람에게 먼저 말을 걸어요: 들어오면 잠시 뒤 인사하고, 채팅이 조용하면 그 사람에게 말을 걸어 대화를 이어가요 (대답이 없으면 점점 덜 걸어요)']]},
   {v:377,t:'💬 접속한 사람에게',items:[
     ['change','💬 다른 모험가들이 지금 접속해 있는 사람을 보고 그 사람에게 먼저 말을 걸고 대답해요. 이미 나간 사람에게는 말을 걸지 않아요'],
     ['change','💬 아무도 대화 중이 아닐 땐 혼잣말처럼 말하고, 자기가 한 말에 스스로 대꾸하지 않아요. 새벽엔 같은 사람이 연달아 말하지 않고, 질문에 엉뚱한 대답이 붙지 않게 했어요']]},
@@ -14402,7 +14404,7 @@ const aiCtx=extra=>{const L=[...CHAT.filter(c=>!/^🤖/.test(c.n||'')),...botCha
 /* 그 모험가가 예전에 실제로 한 말 (말이 앞뒤로 맞게: 직업·나이·한 말을 기억) */const aiMine=i=>{const n=BOTS[i][0];let L=[];try{L=[...CHAT,...botChat()];}catch(e){L=CHAT;}return L.filter(c=>String(c.n||'').replace(/^🤖 /,'')===n).sort((a,b)=>(a.t||0)-(b.t||0)).slice(-10).map(c=>c.m);};/* v377 미리 짜 둔 잡담에서 한 말도 자기 말 (자기 말에 대꾸하지 않게) */
 // 봇 i가 한마디 (said = 바로 앞 사람의 말, who = 그 사람, named = 그 사람이 i를 직접 불렀는지, said가 없으면 먼저 화제를 꺼냄)
 /* v377 지금 접속한 사람 (사람 먼저, 그다음 모험가) — AI가 나간 사람에게 말 걸지 않게 */const aiOnline=i=>{const me=BOTS[i][0],H=(ONLINE||[]).map(x=>x&&x.n).filter(n=>n&&!BOT_NM.has(n)),Bn=botsNow().map(x=>x.n).filter(n=>n!==me);return [...new Set([...H,...Bn])].slice(0,15);};
-async function aiSay(i,said,who,named,cut,k){const T0=Date.now(),body={ai:1,b:i,me:who||'',said:said||'',named:named?1:0,cut:cut?1:0,k:k||'',on:JSON.stringify(aiOnline(i)),st:botState(i,Date.now()),mine:JSON.stringify(aiMine(i)),ctx:JSON.stringify(aiCtx(said&&who?who+': '+said:''))};
+async function aiSay(i,said,who,named,cut,k,tgt,gr){const T0=Date.now(),body={ai:1,b:i,me:who||'',said:said||'',named:named?1:0,cut:cut?1:0,k:k||'',tgt:tgt||'',gr:gr?1:0,on:JSON.stringify(aiOnline(i)),st:botState(i,Date.now()),mine:JSON.stringify(aiMine(i)),ctx:JSON.stringify(aiCtx(said&&who?who+': '+said:''))};
   /* 서버 v8.6부터는 POST (긴 대화도 다 보냄), 그 전엔 주소에 실어 보냄 */const r=SRV_V>=86?await fetch(SHEET_URL,{method:'POST',body:JSON.stringify(body)}):await fetch(SHEET_URL+'?'+Object.entries({...body,mine:JSON.stringify(aiMine(i).slice(-4)),ctx:JSON.stringify(aiCtx(said&&who?who+': '+said:'').slice(-10))}).map(([k,v])=>k+'='+encodeURIComponent(v)).join('&'),{cache:'no-store'});
   const j=await r.json();if(j&&j.skip)return null;if(!j||!j.m){aiDv('서버 응답 '+JSON.stringify(j).slice(0,160));return null;}const n=BOTS[i][0],parts=chatSplit(j.m);AI_ANY=Date.now();
   /* 사람처럼 타자 치는 시간: 읽고 생각하는 시간 + 글자 수 ÷ 타자 속도(1초에 3~5.5자, 사람마다 다름) — 그동안 「OO 입력 중…」 */const cps=3+((botH(i,4321)%100)/100)*2.5;
@@ -14437,8 +14439,18 @@ function aiWatch(){try{if(!CHAT.length)return;const last=Math.max(...CHAT.map(c=
     const P=AI_PEND[c.n]||(AI_PEND[c.n]={m:[]});P.m.push(c.m);clearTimeout(P.to);P.to=setTimeout(()=>{delete AI_PEND[c.n];aiReply(P.m.join(' '),c.n);},3000);}
   AI_SEEN=Math.max(AI_SEEN,last);}catch(e){}}
 /* 채팅창을 열어 두면 가끔 모험가들끼리 먼저 얘기를 꺼냄 (사람 말이 없을 때, 4분 넘게 조용하면) */
-setInterval(()=>{try{if(!CHAT_OPEN||!aiOk()||document.hidden)return;const now=Date.now();if(now-AI_ANY<240000||CHAT.some(c=>!c.bot&&now-(+c.t||0)<240000))return;if(Math.random()>.3)return;/* v375 새벽(한국 0~7시)엔 판 돌리는 중인 모험가도, 혼자여도 말을 꺼냄 */const nt=new Date(now+9*3600e3).getUTCHours()<7,idle=BOTS.map((_,i)=>i).filter(i=>nt?botOn(i,now):botIdle(i,now));if(idle.length<(nt?1:2))return;
-  const i=idle[Math.floor(Math.random()*idle.length)],gen=++AI_GEN;aiSay(i,'','',0).then(m=>{if(m)aiChain(i,m,0,gen);});}catch(e){}},60000);
+/* v378 진짜 사람이 접속해 있으면 봇끼리 떠들기보다 그 사람에게 먼저 말을 걺. 대답이 없으면 간격을 점점 늘림 (5분 → 10분 → 20분 → 30분) */
+const AI_LURE={},AI_HI={};
+const humansOn=()=>{const me=myNick(),H=(ONLINE||[]).map(x=>x&&x.n).filter(n=>n&&!BOT_NM.has(n));if(me&&!BOT_NM.has(me)&&!H.includes(me))H.unshift(me);return [...new Set(H)];};
+const aiPickBot=now=>{const nt=new Date(now+9*3600e3).getUTCHours()<7,L=BOTS.map((_,i)=>i).filter(i=>nt?botOn(i,now):botIdle(i,now));return L.length?L[Math.floor(Math.random()*L.length)]:-1;};
+function aiLure(now){const H=humansOn();if(!H.length)return false;if(now-AI_ANY<120000||CHAT.some(c=>!c.bot&&!BOT_NM.has(c.n)&&now-(+c.t||0)<120000))return false;
+  const cand=H.map(n=>{const L=AI_LURE[n]||{t:0,n:0},spoke=CHAT.some(c=>c.n===n&&(+c.t||0)>L.t),wait=spoke?180000:Math.min(30*60000,5*60000*Math.pow(2,L.n));return {n,L,spoke,ok:now-L.t>=wait};}).filter(x=>x.ok);if(!cand.length||Math.random()>.6)return false;
+  const x=cand[Math.floor(Math.random()*cand.length)],i=aiPickBot(now);if(i<0)return false;AI_LURE[x.n]={t:now,n:x.spoke?0:x.L.n+1};const gen=++AI_GEN;aiSay(i,'','',0,0,'lure|'+x.n+'|'+Math.floor(now/300000),x.n).then(m=>{if(m)AI_LAST[x.n]={i,t:Date.now()};});return true;}
+/* 사람이 새로 들어오면 20~60초 뒤 누군가 인사 (한 사람당 한 시간에 한 번) */
+function aiGreetTick(){try{if(!aiOk()||document.hidden)return;const now=Date.now();for(const n of humansOn()){if(AI_HI[n])continue;AI_HI[n]=now;if(Math.random()>.7)continue;setTimeout(()=>{try{if(!humansOn().includes(n))return;const i=aiPickBot(Date.now());if(i<0)return;aiSay(i,'','',0,0,'hi|'+n+'|'+Math.floor(Date.now()/36e5),n,1).then(m=>{if(m){AI_LAST[n]={i,t:Date.now()};AI_LURE[n]={t:Date.now(),n:0};}});}catch(e){}},20000+Math.random()*40000);}for(const n in AI_HI)if(!humansOn().includes(n)&&now-AI_HI[n]>30*60000)delete AI_HI[n];}catch(e){}}
+setInterval(aiGreetTick,15000);
+setInterval(()=>{try{if(!CHAT_OPEN||!aiOk()||document.hidden)return;const now=Date.now();if(aiLure(now))return;if(now-AI_ANY<240000||CHAT.some(c=>!c.bot&&now-(+c.t||0)<240000))return;if(Math.random()>.3)return;/* v375 새벽(한국 0~7시)엔 판 돌리는 중인 모험가도, 혼자여도 말을 꺼냄 */const nt=new Date(now+9*3600e3).getUTCHours()<7,idle=BOTS.map((_,i)=>i).filter(i=>nt?botOn(i,now):botIdle(i,now));if(idle.length<(nt?1:2))return;
+  const i=idle[Math.floor(Math.random()*idle.length)],gen=++AI_GEN;aiSay(i,'','',0,0,'mono|'+Math.floor(now/240000)).then(m=>{if(m)aiChain(i,m,0,gen);});}catch(e){}},60000);
 /* 새벽에 하는 말 */const BOT_NIGHT=['잠이 안 와서 결국 켰다','이 시간엔 진짜 조용하네','내일 일찍 일어나야 되는데 큰일났네 ㅋㅋ','한 판만 하고 자야지 하다가 벌써 세 판째','새벽에 하니까 집중은 잘 된다','누워 있다가 결국 켬','새벽 감성에 브금 들으니까 좋다','{dif} 한 번만 더 돌리고 자야지','아 졸린데 손이 안 멈춤','하 눈 아프다… 이것만 깨고 잔다','배고픈데 라면 끓이면 안 되겠지','새벽에 브금 볼륨 줄이고 하는 중','강화 한 번만 더 해보고 잔다','손 풀려서 오히려 잘 피해지네','밖에 비 오나 보다','오늘따라 드랍이 안 나오네','물 한 잔 마시고 다시 해야지','알람 몇 시에 맞췄더라','이번 판 느낌 좋다','조용하니까 집중 잘 됨'],BOT_NIGHT_Q=['{who}님도 못 주무세요?','{who}님 이 시간에 뭐 하세요 ㅋㅋ'];
 function botChat(){const now=Date.now(),C=8*60000,sl=Math.floor(now/C),o=[],old=CHAT.length?Math.min(...CHAT.map(c=>+c.t||now)):now-12*3600e3,t0=Math.max(now-48*3600e3,Math.min(old,now-3*3600e3)),seen=[];
   const say=(i,t,f)=>{for(let k=0;k<6;k++){const r=f(k);if(!r||!r.m)return null;if(!seen.includes(r.m)){seen.push(r.m);if(seen.length>30)seen.shift();o.push({n:botNm(i),m:r.m,t,bot:1});return r;}}return null;};
@@ -16154,7 +16166,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=377,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=378,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
