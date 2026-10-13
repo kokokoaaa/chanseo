@@ -8568,7 +8568,7 @@ function hud(){
   mini.style.display=S.mode==='start'?'none':'block';
   if(S.mode!=='start'&&++miniT%4===0)drawMini();
   dashBtn.style.display=play?'block':'none';{const sb=$('skBtn');sb.style.display=play&&SKILLS[S.cls]?'block':'none';const ub=$('ulBtn');ub.style.display=play&&ULTS[S.cls]&&!dfM().duel?'block':'none';}
-  $('statBtn').style.display=S.mode==='start'?'none':'block';{const oh=$('onlHud');oh.style.display=S.mode==='start'?'none':'block';if(S.mode!=='start'&&(++HUD_LT%15===1)){/* 화면 배치 읽기는 15프레임에 한 번만 (매 프레임 읽으면 레이아웃을 다시 계산해서 렉) */const hb=$('hud').getBoundingClientRect(),pb=(oh.offsetParent||document.body).getBoundingClientRect(),tp=Math.round(hb.bottom-pb.top-4)+'px';if(oh.style.top!==tp)oh.style.top=tp;}}$('cxBtn').style.display=S.mode==='start'?'none':'block';{const rb=$('rtBtn'),v=runRetryOk()?'block':'none';if(rb.style.display!==v)rb.style.display=v;};
+  $('statBtn').style.display=S.mode==='start'?'none':'block';{const oh=$('onlHud');oh.style.display=S.mode==='start'?'none':'block';if(S.mode!=='start'&&(++HUD_LT%15===1)){/* 화면 배치 읽기는 15프레임에 한 번만 (매 프레임 읽으면 레이아웃을 다시 계산해서 렉) */const hb=$('hud').getBoundingClientRect(),pb=(oh.offsetParent||document.body).getBoundingClientRect(),tp=Math.round(hb.bottom-pb.top-4)+'px';if(oh.style.top!==tp)oh.style.top=tp;}}$('cxBtn').style.display=S.mode==='start'?'none':'block';{const rb=$('rtBtn'),v=runRetryOk()?'block':'none';if(rb.style.display!==v)rb.style.display=v;if(HUD_LT%15===1)hudBtnPos();};
   $('autoBar').style.display=S.mode==='start'?'none':'flex';
 
   const lv=$('live');
@@ -9117,6 +9117,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:337,t:'📐 버튼 간격',items:[
+    ['change','📐 오른쪽 위 「🔄 다시하기 · 📖 도감 · 스탯」 버튼 사이 간격을 똑같이 맞췄어요'],
+  ]},
   {v:336,t:'🖼 배경 구경 · 🤖 AI 모험가 일정',items:[
     ['fix','📲 게임을 시작하고 <b>첫 증강을 고르는 중</b>에 새 버전이 나오면 메인 화면으로 튕기던 문제를 고쳤어요. 이제 그 판이 끝나고 메인으로 돌아갈 때 업데이트돼요'],
     ['change','🤖 AI 모험가가 <b>말이 되게</b> 움직여요: 한 번에 2~3명 정도만 들어오고, 시작 화면 → 한 판(실제 시간대로 「악몽 3분째 → 4분째…」, 보스 러시는 단계가 올라감) → 대장간 → 다음 판 순서로 진행해요. 채팅도 그때 접속해 있는 모험가만 해요'],
@@ -13346,6 +13349,9 @@ function beginRunD(d,cls){const p=pickDiff;pickDiff=d;try{beginRun(cls);}finally
 // 이 판 다시하기: 같은 직업·난이도(보스 러시 포함)로 처음부터 (증강도 새로 고름). 지금 판은 기록·보상 없이 끝. 레이드·결투·실험실은 제외
 // 전투 중뿐 아니라 첫 증강·레벨업 카드·상점 화면에서도 (증강을 다시 고르고 싶을 때). 끝난 판·쓰러지는 중·부활 선택·관전은 제외
 const RT_NO=['start','over','dying','revive','spec','labm','labr'];
+// 오른쪽 위 버튼(스탯·도감·다시하기) 간격을 실제 폭에 맞춰 8px로 똑같이 (좁은 화면은 CSS에서 세로로 쌓음)
+function hudBtnPos(){const st=$('statBtn'),cx=$('cxBtn'),rt=$('rtBtn');if(innerWidth<=520){if(cx&&cx.style.right){cx.style.right='';rt.style.right='';}return;}if(!st||!cx||!rt||!st.offsetWidth)return;const r0=parseFloat(getComputedStyle(st).right)||12,c=r0+st.offsetWidth+8,d=c+cx.offsetWidth+8;
+  if(cx.style.right!==c+'px')cx.style.right=c+'px';if(rt.style.right!==d+'px')rt.style.right=d+'px';}
 const runRetryOk=()=>!!(S&&!RT_NO.includes(S.mode)&&S.cls&&CLASSES[S.cls]&&S.p&&S.p.alive&&!S.goDone&&!raidOn()&&!duelOn()&&!labOn());
 async function runRetry(){if(!runRetryOk())return;const pz=PAUSED;if(!pz)togglePause(true,true);
   const ok=await uiConfirm('🔄 이 판을 처음부터 다시 할까요?\n같은 직업·같은 난이도로 다시 시작하고, 증강도 처음부터 새로 골라요.\n지금 판은 기록·보상 없이 사라져요.','다시 하기');
@@ -14934,7 +14940,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=336,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=337,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
