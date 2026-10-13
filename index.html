@@ -9366,6 +9366,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:355,t:'💬 AI 모험가 말투·때',items:[
+    ['change','💬 AI 모험가는 이제 <b>판 도중엔 채팅하지 않고</b>, 판을 끝내고 시작 화면·대장간에 있을 때만 말해요. 방금 끝낸 판 결과(악몽 몇 분 버팀·지옥 깸·보스 러시 몇 단계·레이드 결과)를 자기 실력·기록에 맞게 말해요'],
+    ['change','🎭 모험가마다 말투가 달라요: 차분한 마법사, 귀여운 드루이드, 말수 적은 기사, 급한 총잡이, 무뚝뚝한 고수 궁수, 질문 많은 초보 연금술사, 시끄러운 광전사, 운에 거는 도박사. 들어올 때 인사, 대장간에선 강화·마부 얘기']]},
   {v:354,t:'⚔ 고유·신화 무기 공속 원툴 탈출',items:[
     ['change','✦ <b>신화 무기 12종</b>이 직업마다 다른 행동으로 기운이 차요 (예전: 전부 처치 게이지). 기사 막기·피격 · 성기사 피격·생존기 · 광전사 체력이 낮을 때 처치 · 마법사 생존기·궁극기·치명타 · 궁수 치명타 · 도적 회피·대시 · 사령술사 해골 소멸 · 총잡이 재장전 · 정령사 원소 2가지 걸린 적 처치 · 드루이드 제자리·피격 · 연금술사 중독·화상 적 처치 · 도박사 치명타·생존기 앞면'],
     ['change','◆ <b>고유 무기</b>: 「기본 공격 N번마다」였던 것들이 막기·피격·처치·치명타·재장전으로 바뀌었고, 최소 간격이 더 이상 <b>공격 속도로 짧아지지 않아요</b> (공속만 올리면 되던 원툴 없앰). 기사 2번 맞을 때마다 · 궁수·연금술사 6마리 처치마다 · 도적·도박사·마법사 「얼음 혜성」·정령사 「화염 정령의 심장」 치명타 3번마다 · 총잡이 재장전할 때마다 · 성기사 「심판의 철퇴」·사령술사 「뼈창 세례」 처치마다']]},
@@ -14003,16 +14006,17 @@ const BOTS=[['별헤는밤','mage'],['루루','druid'],['곰도리','knight'],['
 // 봇마다 실력(sk 0~4)이 있어 레이드 단계·버티는 시간이 다름. 채팅은 그 시각에 접속해 있는 봇만
 // v340 봇 성격: 말투·좋아하는 활동이 다름. pf = [악몽, 신, 지옥, 보스러시, 레이드, 실험실, 일반·어려움] 가중치
 const BOT_P=[
- {c:'차분한 별 덕후 마법사',pf:[4,2,1,1,1,2,1],say:['ㅎㅇ','오늘 악몽 20분 넘김','마법사 폭풍루트 쓰는사람?','아 방금 징조 맞고 죽음..','다들 몇분까지 버팀?','졸리다','별 배경 이쁘네','쿨감 최고','마부 또 망함ㅋ','ㄱㅅㄱㅅ']},
- {c:'숲을 사랑하는 귀여운 드루이드',pf:[1,1,1,1,1,1,3],say:['곰 귀엽다ㅠㅠ','버섯들 왜케 많아','대장간 구경중~','가을숲 이쁨','오늘은 쉬엄쉬엄','ㅋㅋㅋㅋ','곰 변신 짱','나무 많은 맵 좋아','ㅎㅇㅎㅇ','배고프다..']},
- {c:'우직한 방패 기사',pf:[1,3,3,1,1,1,2],say:['기사 탱 미쳤음','보스한테 또 짐ㅠ','방패 없으면 못삼','신 깨신분?','ㄱㄱ','받피감 최고임','지옥 겨우 깸','한대도 안아픔ㅋ','또 하러감','ㅇㅋ']},
- {c:'성격 급한 총잡이',pf:[2,1,1,4,1,1,1],say:['ㅋㅋㅋㅋㅋ','보러 ㄱ?','재장전 왜케 느림','현상금 받음ㅎ','5배속 개빠름','한판만 더','총 개꿀잼','아 렉걸림','빨리빨리','ㅇㅇ']},
- {c:'말수 적은 고수 궁수',pf:[4,1,1,1,4,1,0],say:['ㅇㅇ','관통3이면 됨','레이드 6단 깸','징조는 대시','ㄴㄴ 그거 별로','..','악몽 기록 갱신','ㄱㅊ','ㅇㅋ','레이드 할사람']},
- {c:'뭐든 궁금한 초보 연금술사',pf:[0,0,0,0,0,2,6],say:['이거 어케 깸?','물약 던지는거 맞음??','어려움 깼다!!!','증강 뭐가 좋아요','님들 넘 잘함..','ㅎㅇㅎㅇ','처음해봐요','레벨업 카드 뭐골라요','보스 넘 쎔ㅠ','오 된다']},
- {c:'시끄러운 용사 지망생 광전사',pf:[1,2,3,1,1,0,2],say:['용사가 될거다!!','광란 켰다ㅋㅋ','지옥 간다','한판만 더!!','피 없을때 젤 셈','포기안함','으아아아','보스 잡았다!!!','광전사 최강','다시간다']},
- {c:'운에 거는 주사위 요정',pf:[2,1,1,2,1,3,1],say:['운빨ㅋㅋ','6 나와라 제발','행운 50 찍음','마부 한번만 더..','실험실서 조합 실험중','오늘 운 좋음','도박사 재밌음','또 꽝','대박 떴다','ㅎㅎ']}];
+ {c:'차분한 별 덕후 마법사',pf:[4,2,1,1,1,2,1],say:['마법사 루트 뭐 쓰세요?','별 배경 언제 또 나오지','이번 효과음 좋네요','다들 오늘 어떠세요','폭풍 루트 재밌어요']},
+ {c:'숲을 사랑하는 귀여운 드루이드',pf:[1,1,1,1,1,1,3],say:['드루이드 하는 사람?','가을숲 너무 이쁨','곰 변신 귀여워','배고프당','오늘은 쉬엄쉬엄~']},
+ {c:'우직한 방패 기사',pf:[1,3,3,1,1,1,2],say:['기사 탱 할만함','받피감 최고','ㄱㄱ','ㅇㅋ','방패 없으면 못 삼']},
+ {c:'성격 급한 총잡이',pf:[2,1,1,4,1,1,1],say:['보러 ㄱ?','총잡이 재장전 왜케 느림','ㅋㅋㅋㅋ','빨리빨리','현상금 다 깸']},
+ {c:'말수 적은 고수 궁수',pf:[4,1,1,1,4,1,0],say:['ㅇㅇ','ㄴㄴ','관통3이면 됨','레이드 할사람','ㄱㅊ']},
+ {c:'뭐든 궁금한 초보 연금술사',pf:[0,0,0,0,0,2,6],say:['증강 뭐 골라요?','물약 던지는 거 맞죠??','님들 너무 잘하세요','보스 넘 세요 ㅠ','레벨업 카드 뭐가 좋아요']},
+ {c:'시끄러운 용사 지망생 광전사',pf:[1,2,3,1,1,0,2],say:['광전사 최강','포기 안 함','한판만 더!!','광란 켜면 짱셈']},
+ {c:'운에 거는 주사위 요정',pf:[2,1,1,2,1,3,1],say:['6 나와라 제발','행운 50 찍음','도박사 재밌음','오늘 운세 대박']}];
 // 지금 하고 있는 걸로 하는 말 ({a} = 지금 상태)
-const BOT_NOW=['지금 {a}','{a}ㅋㅋ','{a} 힘들다','{a}인데 할만함','{a}.. 집중'];
+// v355 봇 채팅: 판 도중엔 말 안 함. 시작 화면·대장간에 있을 때만, 방금 끝낸 판 결과(R)·인사(G)·대장간(F)·잡담(X)을 봇 말투대로
+const BOT_TALK=[{R:['{r}','방금 {r}. 오늘 배경 예뻤어요','{r}… 마법사 아직 부족하네요','{r}. 쿨감 좀 더 모아야겠어요'],G:['안녕하세요','저녁 드셨어요?','오늘도 조금만 할게요'],F:['강화 +{n} 됐어요','마부 돌리다 메달 다 씀..','지팡이 옵션 아쉽다'],X:['마법사 루트 뭐 쓰세요?','별 배경 언제 또 나오지','이번 효과음 좋네요','다들 오늘 어떠세요','폭풍 루트 재밌어요']},{R:['{r}~','{r}! 곰 최고ㅎㅎ','{r} ㅠㅠ 다음엔 더 잘할래','오늘 {r} 헤헤'],G:['ㅎㅇㅎㅇ~','안뇽~','왔어용'],F:['대장간 구경 중~','옷 새로 샀다ㅎㅎ','강화 실패 ㅠㅠ'],X:['드루이드 하는 사람?','가을숲 너무 이쁨','곰 변신 귀여워','배고프당','오늘은 쉬엄쉬엄~']},{R:['{r}','{r}. 방패 덕분','{r}. 다시 간다','{r}. 아직 멀었다'],G:['ㅎㅇ','왔음'],F:['방패 강화 중','방어구 맞추는 중'],X:['기사 탱 할만함','받피감 최고','ㄱㄱ','ㅇㅋ','방패 없으면 못 삼']},{R:['{r} ㅋㅋㅋ','{r} 개빠름','아 {r} 한판만 더','{r} ㅋㅋ 5배속 굿'],G:['ㅎㅇ ㅋㅋ','왔다'],F:['강화 3번 연속 터짐 ㅋㅋ','현상금 보상 받음'],X:['보러 ㄱ?','총잡이 재장전 왜케 느림','ㅋㅋㅋㅋ','빨리빨리','현상금 다 깸']},{R:['{r}','{r} ㅇㅇ','{r}. 기록 갱신'],G:['ㅎㅇ'],F:['마부 끝','장비 맞춤'],X:['ㅇㅇ','ㄴㄴ','관통3이면 됨','레이드 할사람','ㄱㅊ']},{R:['{r}!!','처음으로 {r}!!','{r}.. 너무 어려워요','{r} 했어요 ㅎㅎ'],G:['안녕하세요!','오늘도 열심히!'],F:['장비 뭐 껴야 돼요?','강화 어떻게 해요?'],X:['증강 뭐 골라요?','물약 던지는 거 맞죠??','님들 너무 잘하세요','보스 넘 세요 ㅠ','레벨업 카드 뭐가 좋아요']},{R:['{r}!!!','으아아 {r}!!','{r} 용사가 될 거다!!','{r}.. 다시 간다!!'],G:['나 왔다!!','용사 등장!!'],F:['도끼 강화 간다!!','강화 실패 으아아'],X:['광전사 최강','포기 안 함','한판만 더!!','광란 켜면 짱셈']},{R:['{r} 운빨ㅋㅋ','{r}! 오늘 운 좋음','{r}.. 운이 없네','{r} ㅎㅎ 동전 앞면 연속'],G:['행운을 빌어요~','ㅎㅎ 왔어요'],F:['마부 한 번 더..','대박 옵션 떴다','또 꽝'],X:['6 나와라 제발','행운 50 찍음','도박사 재밌음','오늘 운세 대박']}];
 const BOT_SK=[3,2,1,2,4,0,1,3],BOT_RD=['심연의 거신','서리 여왕','폭풍의 핵','둥지 여왕','끝없는 어둠'];
 const botH=(a,b)=>{let h=(a*2654435761^b*40503)>>>0;h^=h>>>13;h=Math.imul(h,0x5bd1e995)>>>0;h^=h>>>15;return h>>>0;/* 음수가 되면 번호가 어긋나 undefined가 나오던 문제 */};
 const BOT_SLOT=40*60000;
@@ -14104,8 +14108,17 @@ function botHero(b){const i=botIdx(b.name);if(i<0||!b.bot)return null;const sk=B
 const withBots=L=>{try{const real=(L||[]).filter(b=>!b.bot);return normBoard([...real,...botRecs(real)]);}catch(e){return L;}};
 function botsNow(){const now=Date.now();return BOTS.map(([n,c],i)=>botOn(i,now)?{n:'🤖 '+n,c,a:botAct(i,now)}:null).filter(Boolean);}
 // v352 AI 모험가 채팅: 시간으로 정해지는 말이라 언제 열어도 같은 말이 같은 시각에 남아 있음. 실제 채팅이 남아 있는 기간(가장 오래된 메시지까지, 최대 2일)만큼 거슬러 올라가 만듦 (예전엔 최근 1시간만 → 열 때마다 사라지고 바뀌어 보였음)
-function botChat(){const now=Date.now(),C=8*60000,sl=Math.floor(now/C),o=[],old=CHAT.length?Math.min(...CHAT.map(c=>+c.t||now)):now-12*3600e3,t0=Math.max(now-48*3600e3,Math.min(old,now-3*3600e3));for(let k=0;k<400&&(sl-k)*C>=t0-C;k++){const s0=sl-k,h=botH(s0,99);if(h%100>=35)continue;const t=s0*C+((h>>>12)%(C-60000));if(t>now)continue;
-  const on=BOTS.map((_,i)=>i).filter(i=>botOn(i,t));if(!on.length)continue;const i=on[(h>>>8)%on.length],L=BOT_P[i].say,h2=botH(s0,777);let m;if(h2%10<3){const ac=botAct(i,t);m=ac==='시작 화면'||ac==='대장간 구경 중'?L[h2%L.length]:BOT_NOW[(h2>>>4)%BOT_NOW.length].replace('{a}',ac.replace(' 도전 중','').replace(' 연습 중','').replace('무한의 악몽','악몽').replace('신 난이도','신').replace('보스 러시','보러'));}else m=L[h2%L.length];o.push({n:'🤖 '+BOTS[i][0],m,t,bot:1});}return o.reverse();}
+function botRes(i,g,h){const m=Math.max(1,Math.round(g.d/60000)),H=botHours(i,g.t0||0),cl=botClr(i,H),w=h%3!==0,sk=BOT_SK[i]||0,pg=1-Math.exp(-H*botL(i)/40),q=.6+.4*((h%10)/10);/* 기록과 맞게: 실력·쌓인 시간만큼 */
+  switch(g.k){case 'nm':return `악몽 ${Math.max(3,Math.round((4+pg*(5+sk*3.3))*q))}분 버팀`;case 'god':return cl>=4?(w?'신 깸':'신 또 깸'):`신 ${m}분에서 터짐`;case 'hell':return cl>=3?'지옥 깸':`지옥 ${m}분에서 죽음`;
+    case 'hard':return cl>=2?'어려움 깸':'어려움에서 짐';case 'norm':return '일반 깸';case 'rush':return `보러 ${Math.max(2,Math.round((2+pg*(3+sk*2))*q))}단계까지`;case 'raid':{const st=Math.max(1,Math.min(g.st,Math.round(1+pg*sk*.8)));return `${BOT_RD[g.b]} ${st}단계 ${w?'깸':'실패'}`;}case 'lab':return '실험실에서 딜 재봄';default:return null;}}
+function botTalk(i,t,h){const sl=Math.floor(t/BOT_SLOT),e=t-sl*BOT_SLOT,P=botPlan(i,sl),ix=P.findIndex(x=>e>=x.t&&e<x.t+x.d),g=P[ix];if(!g||(g.k!=='home'&&g.k!=='forge'))return null;/* 판 도중엔 채팅 안 함 */
+  const B=BOT_TALK[i],pk=L=>L[h%L.length],R=B.R;
+  if(ix===0&&!botOn(i,t-BOT_SLOT))return pk(B.G);
+  if(g.k==='forge'&&h%5<3)return pk(B.F).replace('{n}',5+h%5);
+  const pv=P.slice(0,ix).reverse().find(x=>x.k!=='home'&&x.k!=='forge');if(pv&&h%10<7){const r=botRes(i,{...pv,t0:sl*BOT_SLOT+pv.t},h>>>3);if(r)return pk(R).replace('{r}',r);}
+  return pk(B.X);}
+function botChat(){const now=Date.now(),C=8*60000,sl=Math.floor(now/C),o=[],old=CHAT.length?Math.min(...CHAT.map(c=>+c.t||now)):now-12*3600e3,t0=Math.max(now-48*3600e3,Math.min(old,now-3*3600e3));for(let k=0;k<400&&(sl-k)*C>=t0-C;k++){const s0=sl-k,h=botH(s0,99);if(h%100>=55)continue;const t=s0*C+((h>>>12)%(C-60000));if(t>now)continue;
+  const h7=botH(s0,777),on=BOTS.map((_,i)=>i).filter(i=>botOn(i,t)&&botTalk(i,t,h7));/* 쉬는 중(시작 화면·대장간)인 봇만 */if(!on.length)continue;const i=on[(h>>>8)%on.length],m=botTalk(i,t,h7);o.push({n:'🤖 '+BOTS[i][0],m,t,bot:1});}return o.reverse();}
 function onlHtml(sm){if(!SHEET_URL)return '';if(!ONLINE)return `<span class="onlb" style="opacity:.7;cursor:default">${ONL_FAIL>=2?'🧡':'💚'} ${sm?'…':ONL_FAIL>=2?'서버 연결 재시도 중…':'접속 확인 중…'}</span> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}</button>`;let L=ONLINE;
   const nA=L.filter(onlAway).length,nOn=L.length-nA;L=[...L.filter(x=>!onlAway(x)),...L.filter(onlAway)];
   const BT=botsNow();return `<button class="onlb" id="onlBtn" title="지금 접속 중">💚 ${sm?`<b>${nOn}</b>`:`지금 <b>${nOn}</b>명 접속 중`}${nA?` <small style="opacity:.7">· 💤${nA}</small>`:''}${BT.length&&!sm?` <small style="opacity:.7">· 🤖${BT.length}</small>`:''} ${ONL_OPEN?'▲':'▼'}</button> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}${chatUnread()?'<i class="cdot"></i>':''}</button>${ONL_OPEN?`<div class="onll">${DEV&&!sm?`<small style="opacity:.75">🛠 실시간 신호 ${FB?ONL_FB.length+'개':'연결 안 됨'} · 예비 서버 신호 ${ONL_AS.length}개 → 이름 ${L.length}명${ONL_FAIL?' (응답 실패 '+ONL_FAIL+'회)':''}</small>`:''}${L.map(x=>`<span${x.me?' class="me"':''}${onlAway(x)?' style="opacity:.55"':''}><i class="onlnm" data-prof="${esc(x.n)}">${fxName(x.n,x.fx)}</i>${x.me?' (나)':''} · ${esc(x.a||'')}${DEV&&x.b?` <small style="opacity:.7">v${x.b}</small>`:''}${DEV&&!x.me&&x.u&&(x.f||SRV_V>=51)?` <button class="cxchip" data-spec="${esc(x.u)}" data-sf="${x.f?1:''}" data-sn="${esc(x.n)}" title="관전">👁</button>`:''}${DEV&&!x.me&&!sm?` <button class="cxchip" data-dm="${esc(x.n)}" title="쪽지 보내기">✉</button>`:''}</span>`).join('')}${BT.length?`<small style="opacity:.7;display:block;margin-top:4px">🤖 AI 모험가 (사람이 아니에요)</small>`+BT.map(x=>`<span style="opacity:.8"><i class="onlnm" data-prof="${esc(x.n)}" style="color:#9fd3ff;font-style:normal;cursor:pointer">${esc(x.n)}</i> · ${CLASSES[x.c]?CLASSES[x.c].n+' · ':''}${esc(x.a)}</span>`).join(''):''}</div>`:''}`;}
@@ -15782,7 +15795,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=354,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=355,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
