@@ -5161,7 +5161,7 @@ const CLASSES={
     stats:{hp:210,maxHp:210,speed:178,dmg:20,rate:1.85,range:200,bspd:430,armor:12,block:.08},fav:['holy','guard','card'],dis:['curse'],
     cards:['힘의 물약','숫돌','튼튼한 체력','가죽 갑옷','붕대','철벽 자세'],lvd:'체력 +2, 공격력 +0.8%, 방어력 +0.2',lv:p=>{p.maxHp+=2;p.hp+=2;p.dmgP=(p.dmgP||0)+.008;p.armor+=.2;}},
   necro:{lock:true,n:'사령술사',role:'해골 소환',d:'쓰러진 적을 해골 병사로 일으키는 술사',passive:'해골 소환: 처치 시 25% 확률, 그리고 약 2초마다(해골이 절반보다 적으면 1초마다) 해골 병사 소환 (최대 5기, 12초, 공격력 100%로 근접 공격). 해골은 주변 근접 적을 끌어당기는 방패 역할 (체력 = 내 최대 체력 50%, 받는 피해 절반). 해골 방패로 사령술사의 해골은 더 멀리(110)서 적을 붙잡음 (한 기당 4마리, 정예는 안 붙잡힘)',atk:.35,
-    stats:{hp:155,maxHp:155,speed:185,dmg:16,rate:2.1,range:300,bspd:500,armor:7},fav:['undead','summon','curse'],dis:['holy'],
+    stats:{hp:170,maxHp:170,speed:185,dmg:16,rate:2.1,range:300,bspd:500,armor:9},fav:['undead','summon','curse'],dis:['holy'],
     cards:['힘의 물약','숫돌','조준경','튼튼한 체력','전투 본능','흡혈 송곳니'],lvd:'공격력 +0.8%, 체력 +1',lv:p=>{p.dmgP=(p.dmgP||0)+.008;p.maxHp+=1;p.hp+=1;}},
   gunner:{lock:true,n:'총잡이',role:'매그넘 저격',d:'한 발 한 발이 묵직한 매그넘 리볼버 총잡이',passive:'매그넘 리볼버: 모든 탄이 일반 공격의 2배 피해 + 관통 1. 6발 쏘면 0.8초 재장전 (탄창 6발 고정, 재장전은 공격 속도와 무관). 구르며 재장전: 재장전하는 동안 회피 +25% (회피 상한 안에서). 저지력으로 맞은 일반 몹이 뒤로 크게 밀려남 (정예·보스 제외)',atk:.18,
     stats:{hp:160,maxHp:160,speed:200,dmg:12,rate:1.8,range:300,bspd:820,crit:.1,critM:2.1},fav:['rapid','sniper','summon'],dis:['nature'],
@@ -9406,6 +9406,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:371,t:'💀 사령술사 · 👥 모험가 기록',items:[
+    ['buff','💀 사령술사 기본 체력 155 → 170, 방어력 7 → 9 (초반에 몰려서 너무 쉽게 죽던 것)'],
+    ['change','👥 다른 모험가들의 명예의 전당 점수를 정해 둔 범위가 아니라, 그 모험가의 장비·진도로 실제로 돌려 본 점수보다 조금 낮게 매겨요 (사람 기록보다는 항상 아래)']]},
   {v:370,t:'😡 분노 3분',items:[
     ['change','😡 무한의 악몽: 10분에 적들이 분노한 뒤 원래 난이도까지 <b>3분</b>에 걸쳐 올라가요 (예전 1분)']]},
   {v:369,t:'👥 모험가 진도',items:[
@@ -14243,20 +14246,22 @@ function botRecs(real,from){const out=[],HB={},now=Date.now(),all=!from;from=fro
     const fz=(H,h0,tau)=>H<=h0?0:1-Math.exp(-(H-h0)/tau);
     /* 판마다 실력(쌓인 시간)·그날 운으로 점수를 매기고 가장 좋은 판 = 기록. 부캐 판은 따로 (판 4개 중 하나꼴로 부캐를 키움) */
     const altOf=x=>{const A=botAlts(i).length?(BOT_ALT[i]||[]).filter((c,j)=>x.H*L>=BOT_ALTH(j)):[];return A.length&&x.h%4===0?A[(x.h>>>4)%A.length]:null;};
-    const best=(k,h0,tau,alt)=>{let o=null;for(const x of RN){if(x.k!==k||(altOf(x)||null)!==(alt||null))continue;const v=fz(x.H*(alt?.65:1),h0,tau)*(.74+.26*x.q);if(!o||v>o.v)o={v,at:x.end};}return o;};
-    const push=(c2,B)=>{const g=best('god',8/L,10/L,c2),m=best('nm',14/L,18/L,c2),u=c2?null:best('rush',16/L,14/L);
-      if(g){rs(g.at);const f=g.v;out.push({...B,f,at:g.at,diff:'god',time:Math.round(150+f*(150+sk*60)+r()*60),lvl:Math.round(14+f*(12+sk*4)+r()*3),kills:Math.round(900+f*(1600+sk*1200)+r()*500),bosses:Math.min(4,Math.floor(f*(1.5+sk*.7)+r()*.8))});}
-      if(m){rs(m.at);const f=m.v;out.push({...B,f,at:m.at,diff:'nightmare',time:Math.round(240+f*(300+sk*200)+r()*120),lvl:Math.round(15+f*(12+sk*6)+r()*4),kills:Math.round(1500+f*(2500+sk*3200)+r()*900),bosses:Math.round(f*(1+sk*1.3)+r())});}
-      if(u){rs(u.at);const f=u.v;out.push({...B,f,at:u.at,diff:'bossrush',time:Math.round(120+f*(140+sk*80)+r()*50),lvl:Math.round(10+f*(8+sk*4)+r()*3),kills:Math.round(150+f*(200+sk*200)),bosses:Math.round(2+f*(3+sk*2)+r()*1.5)});}};
+    /* v371 점수 = 그 판 시점 스펙(쌓인 시간·장비·강화)으로 실제로 돌려 본 점수(BOT_SIM)의 0.7~0.9배 — 실제보다 조금 낮게 */const best=(k,alt)=>{const T=BOT_SIM[k==='nm'?'nightmare':k==='rush'?'bossrush':'god'];let o=null;for(const x of RN){if(x.k!==k||(altOf(x)||null)!==(alt||null))continue;const e=x.H*L*(alt?.65:1),sc=botSimAt(T,e)*(.7+.2*x.q);if(!o||sc>o.sc)o={sc,v:Math.min(1,e/20),at:x.end};}return o;};
+    const push=(c2,B)=>{const g=best('god',c2),m=best('nm',c2),u=c2?null:best('rush');
+      if(g){rs(g.at);const f=g.v;out.push({...B,f,sc:g.sc,at:g.at,diff:'god',time:Math.round(150+f*(150+sk*60)+r()*60),lvl:Math.round(14+f*(12+sk*4)+r()*3),kills:Math.round(900+f*(1600+sk*1200)+r()*500),bosses:Math.min(4,Math.floor(f*(1.5+sk*.7)+r()*.8))});}
+      if(m){rs(m.at);const f=m.v;out.push({...B,f,sc:m.sc,at:m.at,diff:'nightmare',time:Math.round(240+f*(300+sk*200)+r()*120),lvl:Math.round(15+f*(12+sk*6)+r()*4),kills:Math.round(1500+f*(2500+sk*3200)+r()*900),bosses:Math.round(f*(1+sk*1.3)+r())});}
+      if(u){rs(u.at);const f=u.v;out.push({...B,f,sc:u.sc,at:u.at,diff:'bossrush',time:Math.round(120+f*(140+sk*80)+r()*50),lvl:Math.round(10+f*(8+sk*4)+r()*3),kills:Math.round(150+f*(200+sk*200)),bosses:Math.round(2+f*(3+sk*2)+r()*1.5)});}};
     push(null,base);
     (BOT_ALT[i]||[]).forEach(c2=>{if(!RN.some(x=>altOf(x)===c2))return;const q=botProf(i,c2);if(!q)return;const dt=GEAR_KEYS.map(k=>itEnc(q.det[k]||null)).join(':').replace(/:+$/,'');push(c2,{...base,cls:c2,gear:q.dr?'!'+q.dr:'',gd:dt,alt:1});});
     /* 레이드: 실제로 간 레이드 판에서 깬 단계 중 가장 높은 것 (botRes 결과 문장과 같은 계산) */const RB=['golem','frost','storm','brood','void'],RP={};
     for(const x of RN){if(x.k!=='raid')continue;const pg=1-Math.exp(-x.H*L/40),hh=x.h>>>3,st=Math.max(1,Math.min(x.st,Math.round(1+pg*sk*.8))),ok=hh%3!==0,lv=ok?st:st-1;if(lv<1)continue;const o=RP[x.b];if(!o||lv>o.lv)RP[x.b]={lv,at:x.end};}
     rs(i*7919);const CK=Object.keys(CLASSES).filter(c=>c!==cls),bt=[0,1].map(()=>({cls:CK.splice(Math.floor(r()*CK.length),1)[0],skin:'',look:'new',dr:DR_K.map(k=>k==='wpn'?'cc':k==='shd'?(r()<.5?'--':String(1+Math.floor(r()*Math.min(3,sk)))+Math.floor(r()*3)):String(Math.max(1,Math.min(3,Math.floor(sk*.6+r()*1.6))))+Math.floor(r()*3)).join('')}));
     for(const b in RP){rs(RP[b].at);out.push({...base,at:RP[b].at,diff:'raid_'+RB[b],lvl:RP[b].lv,time:Math.round(150+r()*140),bteam:bt,comment:['','수고하셨습니다~','겨우 깼다 ㅋㅋ','','팀원 덕분에 깸','다음 단계 간다','','힐 없었으면 죽었음'][(RP[b].at/60000+b)%8|0]});}
-    /* 점수는 정해 둔 범위 안에서 실력이 높을수록 위쪽 (신 7~10만 · 악몽 35~40만 · 보스 러시 20~30만), 사람 최신 최고 기록보다 조금 아래 */for(const o of out){const R=BOT_SCR[o.diff];if(!R||o.fsc!=null)continue;rs(o.at+1);const top=R[0]+(R[1]-R[0])*Math.min(1,sk/4*.7+r()*.3),hb=HB[o.diff]&&(HB[o.diff].r||HB[o.diff].a);let v=top*(.3+.7*(o.f||0))*(o.alt?.85:1);if(hb)v=Math.min(v,hb*(.86+.06*r()));o.fsc=Math.round(v/10)*10;delete o.f;}});
+    /* 점수: 그 스펙으로 실제 나오는 점수보다 조금 낮게, 사람 최신 최고 기록보다는 항상 아래 */for(const o of out){if(o.sc==null||o.fsc!=null)continue;rs(o.at+1);const hb=HB[o.diff]&&(HB[o.diff].r||HB[o.diff].a);let v=o.sc*(o.alt?.85:1);if(hb)v=Math.min(v,hb*(.86+.06*r()));o.fsc=Math.round(v/10)*10;delete o.f;delete o.sc;}});
   return out;}
-const BOT_SCR={god:[70000,100000],nightmare:[350000,400000],bossrush:[200000,300000]};
+/* v371 봇 스펙(그 시점 장비 + 진도만큼의 영구 강화)으로 실제 자동 플레이해서 잰 점수 (4직업 × 1·4·14일차, 가운데값). [실력 보정 누적 시간, 점수] */
+const BOT_SIM={god:[[0,45000],[2,53000],[7,70000],[20,82000],[40,90000]],nightmare:[[0,120000],[2,145000],[7,200000],[20,215000],[40,230000]],bossrush:[[0,28000],[2,32000],[7,34000],[20,44000],[40,50000]]};
+const botSimAt=(T,e)=>{if(e<=T[0][0])return T[0][1];for(let j=1;j<T.length;j++)if(e<=T[j][0]){const [a,x]=T[j-1],[b,y]=T[j];return x+(y-x)*(e-a)/(b-a);}return T[T.length-1][1];};
 // v341 봇 기록의 능력치·증강 (기록 정보 창에서 보임): 실력·난이도에 맞춰 고정으로 지어냄. 증강은 그 직업 전용 + 직업이 좋아하는 계열에서
 function botHero(b){const i=botIdx(b.name);if(i<0||!b.bot)return null;const sk=BOT_SK[i]||0,cls=b.cls,C=CLASSES[cls]||CLASSES.knight;let sd=botH(i+77,String(b.diff).length*131+7)|0;
   const r=()=>{sd=(sd+0x6D2B79F5)|0;let t=Math.imul(sd^sd>>>15,1|sd);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
@@ -16105,7 +16110,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=370,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=371,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
