@@ -9257,6 +9257,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:349,t:'🤖 AI 모험가 현실적으로',items:[
+    ['change','🤖 AI 모험가도 하루하루 실제로 하는 것처럼: 모험가마다 게임을 시작한 날이 다르고, 처음엔 악몽 기록만 있다가 며칠 지나면 신·보스 러시·레이드 기록이 차례로 생겨요. 점수·레이드 단계·도전과제 수도 날이 지날수록 조금씩 늘어요']]},
   {v:348,t:'🏆 레이드 시상대 가운데 맞춤',items:[
     ['bug','🏆 레이드 시상대·순위 목록: 활·날개 등으로 몸이 그림 한쪽에 그려져 대장이 왕관·이름표보다 왼쪽·오른쪽으로 쏠려 보이던 것. 이제 그림마다 <b>발·몸통 위치를 재서 가운데</b>에 세워요 (동료도 같은 기준)']]},
   {v:347,t:'📜 의뢰 목표 조정',items:[
@@ -13720,6 +13722,8 @@ function botAct(i,now){const sl=Math.floor(now/BOT_SLOT),e=now-sl*BOT_SLOT,P=bot
     case 'rush':return `보스 러시 ${1+Math.floor(mn/1.6)}단계`;case 'raid':return `${BOT_RD[g.b]} ${g.st}단계 도전 중`;case 'lab':return '실험실 연습 중';case 'hard':return `어려움 ${Math.min(10,mn+1)}분째`;case 'norm':return `일반 ${Math.min(10,mn+1)}분째`;case 'forge':return '대장간 구경 중';default:return '시작 화면';}}
 // v338 봇 프로필: 봇마다 고정된 계정 정보 (실력에 맞는 장비·강화·외형·오라·날개·칭호·도전과제, 플레이 시간은 날마다 조금씩 늘어남). 실제 인벤토리는 건드리지 않음
 const BOT_PC={},botIdx=n=>{const m=String(n||'').replace(/^🤖\s*/,'');return BOTS.findIndex(b=>b[0]===m);};
+// v349 봇은 하루하루 실제로 하는 것처럼: 봇마다 게임을 시작한 날이 다르고(출시 후 0~6일째), 지난 날 수만큼 도전과제·기록이 조금씩 늘어남
+const BOT_D0=20728,botAge=i=>Math.floor(Date.now()/864e5)-BOT_D0-((i*3)%7),botProg=i=>Math.max(0,Math.min(1,botAge(i)/28));
 function botProf(i){const day=Math.floor(Date.now()/864e5),ck=i+'|'+day;if(BOT_PC[ck])return BOT_PC[ck];const [,cls]=BOTS[i],sk=BOT_SK[i];let sd=botH(i+11,4242)|0;
   const rnd=()=>{sd=(sd+0x6D2B79F5)|0;let t=Math.imul(sd^sd>>>15,1|sd);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;},pick=L=>L[Math.floor(rnd()*L.length)];
   const W=[[55,40,5,0],[25,50,22,3],[8,37,43,12],[0,20,50,30],[0,4,40,56]][sk],I={items:[],eqs:{[cls]:{}}};
@@ -13733,7 +13737,7 @@ function botProf(i){const day=Math.floor(Date.now()/864e5),ck=i+'|'+day;if(BOT_P
   let pg=0;for(const k of GEAR_KEYS){const it=eqI(k);if(it)pg+=itPow(it);}
   const pm=Math.round((12+sk*22+rnd()*15))*20,pr=Math.round((sk*900+rnd()*700)),pw=pm+pg+pr;
   /* 게임이 2026-10-02에 나왔으니 그때부터 하루 0.2~1.4시간 정도 */const pt=Math.round(Math.max(1,day-20728)*(700+sk*1100+rnd()*600));
-  const AL=ACH.filter(a=>(!a.hid||sk>=3)&&(!a.hard||sk>=3)),nA=Math.min(AL.length,Math.round(AL.length*(.06+sk*.08+rnd()*.04))),got=new Set(AL.map((a,j)=>[a,j/AL.length*(a.hard?2.2:1)+rnd()*.6]).sort((x,y)=>x[1]-y[1]).slice(0,nA).map(x=>x[0].k));
+  const AL=ACH.filter(a=>(!a.hid||sk>=3)&&(!a.hard||sk>=3)),nA=Math.min(AL.length,Math.round(AL.length*(.04+sk*.05+rnd()*.03)*(.35+.65*botProg(i)))),got=new Set(AL.map((a,j)=>[a,j/AL.length*(a.hard?2.2:1)+rnd()*.6]).sort((x,y)=>x[1]-y[1]).slice(0,nA).map(x=>x[0].k));
   let achS='';for(let j=0;j<ACH.length;j+=6){let v=0;for(let b=0;b<6;b++){const a=ACH[j+b];if(a&&got.has(a.k))v|=1<<b;}achS+=B64[v];}
   const GL=ACH.filter(a=>got.has(a.k)),title=GL.length&&rnd()<.85?(GL.filter(a=>a.hard||a.rw).length?pick(GL.filter(a=>a.hard||a.rw)):pick(GL)).k:'';
   const C=c=>COS.filter(x=>x.cat===c&&!x.ach),skin=(rnd(),''),/* v344: 코스튬은 장비를 덮어서 장비창과 겉모습이 안 맞아 보였음 → 봇은 코스튬 없이 장비 모습 그대로 (오라·날개·칭호는 유지) */au=[rnd()<sk*.18?(pick(C('wing'))||{}).k:'',rnd()<.2+sk*.15?(pick(C('aura'))||{}).k:''].filter(Boolean).join('+');
@@ -13743,11 +13747,12 @@ function botProf(i){const day=Math.floor(Date.now()/864e5),ck=i+'|'+day;if(BOT_P
 // v340 봇 명예의 전당 기록: 봇마다 실력에 맞는 판 기록(신·악몽·보스러시, 실력 있으면 레이드). 점수는 게임 공식(calcScore)으로. 🤖 이름이라 사람과 구분, 누르면 봇 프로필
 function botRecs(){const out=[];BOTS.forEach(([n,cls],i)=>{const sk=BOT_SK[i],p=botProf(i);if(!p)return;let sd=botH(i+31,9090)|0;const r=()=>{sd=(sd+0x6D2B79F5)|0;let t=Math.imul(sd^sd>>>15,1|sd);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
     const det=GEAR_KEYS.map(k=>itEnc(p.det[k]||null)).join(':').replace(/:+$/,''),base={name:'🤖 '+n,cls,skin:p.skin,aura:p.aura,gear:p.dr?'!'+p.dr:'',look:'new',gd:det,title:p.title,build:BUILD,bot:1,at:Date.UTC(2026,9,3+Math.floor(r()*10)),comment:BOT_P[i].say[Math.floor(r()*BOT_P[i].say.length)]};
-    if(sk>=1)out.push({...base,diff:'god',time:Math.round(240+sk*80+r()*90),lvl:Math.round(22+sk*5+r()*4),kills:Math.round(1800+sk*1400+r()*800),bosses:Math.min(4,1+Math.floor(sk*.8+r()))});
-    out.push({...base,diff:'nightmare',time:Math.round(420+sk*210+r()*180),lvl:Math.round(20+sk*6+r()*5),kills:Math.round(2500+sk*3500+r()*1500),bosses:Math.round(1+sk*1.3+r())});
-    if(sk>=1)out.push({...base,diff:'bossrush',time:Math.round(200+sk*90+r()*60),lvl:Math.round(15+sk*4+r()*3),kills:Math.round(300+sk*200),bosses:Math.round(3+sk*2+r()*2)});
-    if(sk>=2){/* 레이드 종합 1만 점 아래: 보스 단계 합이 9 이하 */const rb=['golem','frost','storm','brood','void'].filter(()=>r()<.4+sk*.12);let bud=Math.min(9,sk*2+Math.floor(r()*2));if(!rb.length)rb.push('golem');const lv=rb.map(()=>0);for(let q=0;q<bud;q++)lv[q%rb.length]++;const CK=Object.keys(CLASSES).filter(c=>c!==cls),bt=[0,1].map(()=>({cls:CK.splice(Math.floor(r()*CK.length),1)[0],skin:'',look:'new',dr:DR_K.map(k=>k==='wpn'?'cc':k==='shd'?(r()<.5?'--':String(1+Math.floor(r()*Math.min(3,sk)))+Math.floor(r()*3)):String(Math.max(1,Math.min(3,Math.floor(sk*.6+r()*1.6))))+Math.floor(r()*3)).join('')}));rb.forEach((rk,j)=>{if(lv[j])out.push({...base,diff:'raid_'+rk,lvl:lv[j],time:Math.round(150+r()*140),bteam:bt,comment:[cls,...bt.map(q=>q.cls)].map(c=>CLASSES[c].n).join(', ')});});}
-    /* 점수는 정해 둔 범위 안에서 실력이 높을수록 위쪽 (신 7~10만 · 악몽 35~40만 · 보스 러시 20~30만) */for(const o of out){const R=BOT_SCR[o.diff];if(R)o.fsc=Math.round((R[0]+(R[1]-R[0])*Math.min(1,sk/4*.55+r()*.45))/10)*10;}});
+    const ag=botAge(i),pg=botProg(i);if(ag<0)return;/* v349: 아직 게임 시작 전 */const at=d=>Date.UTC(2026,9,2+((i*3)%7)+Math.max(0,Math.min(ag,d)));
+    if(sk>=1&&ag>=3)out.push({...base,at:at(ag-Math.floor(r()*2)),diff:'god',time:Math.round(240+sk*80+r()*90),lvl:Math.round(22+sk*5+r()*4),kills:Math.round(1800+sk*1400+r()*800),bosses:Math.min(4,1+Math.floor(sk*.8+r()))});
+    if(ag>=1)out.push({...base,at:at(ag-Math.floor(r()*2)),diff:'nightmare',time:Math.round(420+sk*210+r()*180),lvl:Math.round(20+sk*6+r()*5),kills:Math.round(2500+sk*3500+r()*1500),bosses:Math.round(1+sk*1.3+r())});
+    if(sk>=1&&ag>=5)out.push({...base,at:at(ag-Math.floor(r()*3)),diff:'bossrush',time:Math.round(200+sk*90+r()*60),lvl:Math.round(15+sk*4+r()*3),kills:Math.round(300+sk*200),bosses:Math.round(3+sk*2+r()*2)});
+    if(sk>=2&&ag>=7){/* 레이드 종합 1만 점 아래: 보스 단계 합이 9 이하, 날이 지날수록 늘어남 */const rb=['golem','frost','storm','brood','void'].filter(()=>r()<.25+sk*.1+pg*.2);let bud=Math.max(1,Math.min(9,Math.round((sk*2+Math.floor(r()*2))*(.4+.6*pg))));if(!rb.length)rb.push('golem');const lv=rb.map(()=>0);for(let q=0;q<bud;q++)lv[q%rb.length]++;const CK=Object.keys(CLASSES).filter(c=>c!==cls),bt=[0,1].map(()=>({cls:CK.splice(Math.floor(r()*CK.length),1)[0],skin:'',look:'new',dr:DR_K.map(k=>k==='wpn'?'cc':k==='shd'?(r()<.5?'--':String(1+Math.floor(r()*Math.min(3,sk)))+Math.floor(r()*3)):String(Math.max(1,Math.min(3,Math.floor(sk*.6+r()*1.6))))+Math.floor(r()*3)).join('')}));rb.forEach((rk,j)=>{if(lv[j])out.push({...base,at:at(ag-Math.floor(r()*3)),diff:'raid_'+rk,lvl:lv[j],time:Math.round(150+r()*140),bteam:bt,comment:[cls,...bt.map(q=>q.cls)].map(c=>CLASSES[c].n).join(', ')});});}
+    /* 점수는 정해 둔 범위 안에서 실력이 높을수록 위쪽 (신 7~10만 · 악몽 35~40만 · 보스 러시 20~30만) */for(const o of out){const R=BOT_SCR[o.diff];if(R)o.fsc=Math.round((R[0]+(R[1]-R[0])*Math.min(1,(sk/4*.55+r()*.45)*(.55+.45*pg)))/10)*10;}});
   return out;}
 const BOT_SCR={god:[70000,100000],nightmare:[350000,400000],bossrush:[200000,300000]};
 // v341 봇 기록의 능력치·증강 (기록 정보 창에서 보임): 실력·난이도에 맞춰 고정으로 지어냄. 증강은 그 직업 전용 + 직업이 좋아하는 계열에서
@@ -15365,7 +15370,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=348,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=349,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
