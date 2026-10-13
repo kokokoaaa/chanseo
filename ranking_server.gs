@@ -1,4 +1,8 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v8.3
+// 찬서 명예의 전당 서버 (Google Apps Script) v8.4
+//
+// v8.3 → v8.4 바뀐 점 (게임 v357)
+// - AI 모험가 대답: 사람이 채팅하면 그 사람 게임이 ?ai=1&b=봇번호&ctx=최근채팅 을 부르고, 서버가 Claude(Haiku)로 그 봇 말투의 한 줄을 만들어 돌려줌
+//   스크립트 속성 ANTHROPIC_KEY 가 있어야 켜짐 (없으면 꺼짐, 키는 코드에 넣지 않음). 하루 최대 AI_DAY번, 전체 AI_GAP초 간격
 //
 // v8.2 → v8.3 바뀐 점 (게임 v356)
 // - 레이드 고용 수수료: 레이드에 명예의 전당 캐릭터를 동료로 데려가면 수수료 메달이 「고용 메달」 시트에 쌓임
@@ -382,7 +386,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 83, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 84, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -598,6 +602,45 @@ function devList_(q) {
 
 // 후원 응원 메시지 ('후원' 시트, 최근 300줄까지만 남김)
 const SUP_SHEET = '후원';
+// v8.4 AI 모험가 대답 (Claude Haiku). 키는 스크립트 속성 ANTHROPIC_KEY
+const AI_DAY = 300, AI_GAP = 8, AI_MODEL = 'claude-haiku-5-5';
+const AI_BOTS = [
+  ['별헤는밤', '차분하고 다정한 존댓말을 쓰는 별 좋아하는 마법사 유저. 말끝이 부드럽고 가끔 별·밤하늘 얘기'],
+  ['루루', '귀엽고 발랄한 드루이드 유저. ~당 ~용 ㅎㅎ 같은 말투, 곰 변신·숲·간식 좋아함'],
+  ['곰도리', '말수 적고 무뚝뚝한 기사 유저. 반말 단답(ㅇㅇ, ㄱㄱ, ㅇㅋ), 탱커 자부심'],
+  ['bunny99', '성격 급하고 장난스러운 총잡이 유저. ㅋㅋ 많이 씀, 반말, 배속·보스 러시 좋아하고 남 놀리기 좋아함'],
+  ['달빛', '고수인데 말이 아주 짧은 궁수 유저. 반말 두세 단어, 핵심만, 가끔 훈수'],
+  ['포션장인', '게임을 막 시작한 초보 연금술사 유저. 존댓말, 질문 많고 잘 놀라고 감탄함'],
+  ['도윤이형', '시끄럽고 열정 넘치는 광전사 유저. 느낌표 많음!!, 허세, 형이라고 자칭'],
+  ['럭키세븐', '운에 모든 걸 거는 도박사 유저. 운·확률·행운·주사위 얘기, 가볍고 능청스러운 반말']];
+function aiOn_() { try { return !!PropertiesService.getScriptProperties().getProperty('ANTHROPIC_KEY'); } catch (err) { return false; } }
+function ai_(q) {
+  const key = (() => { try { return PropertiesService.getScriptProperties().getProperty('ANTHROPIC_KEY') || ''; } catch (err) { return ''; } })();
+  if (!key) return { err: 'off' };
+  const b = Math.floor(+q.b), B = AI_BOTS[b];
+  if (!B) return { err: 'bot' };
+  const c = CacheService.getScriptCache(), day = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyyMMdd'), dk = 'ai_n_' + day;
+  const n = +(c.get(dk) || 0); if (n >= AI_DAY) return { err: 'day' };
+  if (c.get('ai_gap')) return { err: 'gap' };
+  c.put('ai_gap', '1', AI_GAP); c.put(dk, String(n + 1), 90000);
+  let ctx = []; try { ctx = JSON.parse(String(q.ctx || '[]')); } catch (err) {}
+  ctx = (Array.isArray(ctx) ? ctx : []).slice(-10).map(x => String(x || '').replace(/\s+/g, ' ').slice(0, 100)).filter(Boolean);
+  if (!ctx.length) return { err: 'ctx' };
+  const sys = '너는 한국 모바일·PC 게임 「찬서 : 찬붕이의 뱀서」(뱀파이어 서바이버류 판타지 액션 게임) 전체 채팅에 있는 유저 「' + B[0] + '」야. 성격: ' + B[1] + '.\n' +
+    '게임 정보: 직업 12개(기사·마법사·궁수·도적·성기사·사령술사·총잡이·정령사·광전사·드루이드·연금술사·도박사), 난이도 일반·어려움·지옥·신, 엔드 컨텐츠 무한의 악몽·보스 러시·레이드(보스 5종 1~10단계)·결투·실험실, 대장간(강화·마법부여), 증강 카드, 명예의 전당.\n' +
+    '규칙: 실제 사람처럼 채팅창에 한 줄만 써. 40자 이내, 짧게. 이모지 쓰지 마(ㅋㅋ ㅎㅎ ㅠㅠ ~ !! 는 괜찮아). 따옴표·이름표 없이 말만. 반말·장난·티격태격·가벼운 비속어는 괜찮아. 다른 사람이 욕설·성적인 말·혐오 표현을 해도 맞장구치거나 따라 하지 말고 대충 무시하거나 게임 얘기로 돌려. 너 스스로는 그런 말 하지 마(어린이도 있어). 개인정보(나이·학교·사는 곳·연락처)는 묻지도 말하지도 마. 모르는 건 아는 척하지 말고 대충 넘겨. 방금 마지막 말에 자연스럽게 반응해.';
+  const res = UrlFetchApp.fetch('https://api.anthropic.com/v1/messages', {
+    method: 'post', contentType: 'application/json', muteHttpExceptions: true,
+    headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+    payload: JSON.stringify({ model: AI_MODEL, max_tokens: 120, thinking: { type: 'disabled' }, system: sys,
+      messages: [{ role: 'user', content: '최근 채팅:\n' + ctx.join('\n') + '\n\n「' + B[0] + '」로서 다음에 칠 한 줄:' }] })
+  });
+  if (res.getResponseCode() !== 200) return { err: 'api', code: res.getResponseCode() };
+  let j = null; try { j = JSON.parse(res.getContentText()); } catch (err) {}
+  if (!j || j.stop_reason === 'refusal') return { err: 'none' };
+  const t = (j.content || []).filter(x => x.type === 'text').map(x => x.text).join(' ').replace(/\s+/g, ' ').replace(/^["'「]|["'」]$/g, '').replace(new RegExp('^' + B[0] + '\\s*[:：]\\s*'), '').trim().slice(0, 60);
+  return t ? { m: t, n: B[0] } : { err: 'none' };
+}
 // v8.3 레이드 고용 수수료
 const GIFT_SHEET = '고용 메달';
 function giftSheet_() { const ss = book_(); let s = ss.getSheetByName(GIFT_SHEET); if (!s) { s = ss.insertSheet(GIFT_SHEET); s.getRange(1, 1, 1, 6).setValues([['at', 'to', 'from', 'm', 'cls', 'rb']]); s.getRange('B:C').setNumberFormat('@'); } return s; }
@@ -643,6 +686,7 @@ function doGet(e) {
   if (q.snap) return out_(snap_(q));
   if (q.ping) return ping_(q);
   if (q.gifts) return out_(giftTake_(q));
+  if (q.ai) return out_(ai_(q));
   if (q.prof) { let pf = ''; try { pf = CacheService.getScriptCache().get('pf_' + dmKey_(q.prof)) || ''; } catch (err) {} return out_({ pf }); }
   if (q.cload) return cload_(q);
   if (q.dels) return out_({ dels: delList_() });
