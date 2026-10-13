@@ -3153,7 +3153,7 @@ const AUGS=[
   {id:'thunder',t:'p',n:'천둥',tags:['thunder','thunder'],d:'6초마다 화면 안 무작위 적 3명에게 낙뢰 (공격력 3.5배). 공속이 오를수록 더 자주. 번개 2개로 계산'},
   {id:'mine',t:'s',n:'지뢰',tags:['summon','blitz'],d:'2초마다 발밑에 지뢰. 적이 밟으면 폭발 (공격력 180%). 공속이 오를수록 더 자주'},
   {id:'adrenaline',t:'s',n:'아드레날린',tags:['blitz'],d:'대시 후 3초간 공격력 +30%, 이동 속도 +20%'},
-  {id:'bloodrage',t:'p',n:'피의 열광',tags:['curse','curse'],d:'공격 속도 +40%. 적중할 때마다 체력 0.3 회복. 저주 2개로 계산'},
+  {id:'bloodrage',t:'p',n:'피의 열광',tags:['curse','curse'],d:'공격 속도 +40%. 적중할 때마다 최대 체력의 0.05% 회복. 저주 2개로 계산'},
   {id:'shieldbash',t:'g',n:'보호막 충격',tags:['guard'],d:'보호막이 깨질 때 주변 충격파 (반경 120, 공격력 300%), 3초간 공격력 +30%'},
   {id:'regenarmor',t:'s',n:'재생 장갑',tags:['guard'],d:'방어력 1당 초당 체력 재생 +0.03 (방어력 100이면 초당 +3)'},
   {id:'gravity',t:'g',n:'중력장',tags:['frost','roulette'],d:'내 주변 150 안의 적 이동 속도 −30%'},
@@ -3243,9 +3243,9 @@ const AUGS=[
   {id:'frostflask',t:'s',n:'냉각 플라스크',tags:['alchemy','frost'],d:'물약이 항상 둔화를 걸고, 물약 피해 +20%'},
   {id:'luckyshot',t:'s',n:'행운의 탄',tags:['coin','rapid'],d:'동전 앞면이 나온 탄환은 관통 +2'},
   {id:'elemcoin',t:'s',n:'원소 동전',tags:['coin','elem'],d:'동전 앞면이 나온 탄환에 무작위 원소 효과 (화상·둔화·연쇄)'},
-  {id:'warpaint',t:'s',n:'전투 문신',tags:['fury','nature'],d:'광란 중첩당 초당 체력 재생 +0.1 (최대 체력 따라 커짐)'},
+  {id:'warpaint',t:'s',n:'전투 문신',tags:['fury','nature'],d:'광란 중첩당 초당 체력 재생 +0.2 (최대 체력 따라 커짐)'},
   {id:'stormfury',t:'g',n:'폭풍의 분노',tags:['fury','thunder'],d:'광란 10 이상일 때 처치하면 35% 확률로 번개 연쇄 2'},
-  {id:'stigma',t:'s',n:'성흔',tags:['holy','mark'],d:'표식된 적이 죽으면 체력 1% 회복, 표식된 적에게 빛 피해 +20%'},
+  {id:'stigma',t:'s',n:'성흔',tags:['holy','mark'],d:'표식된 적이 죽으면 체력 2% 회복, 표식된 적에게 빛 피해 +20%'},
   {id:'doublehead',t:'s',n:'양면 앞면',tags:['coin','dice'],d:'동전 앞면 확률 +8%'},
   {id:'coinguard',t:'s',n:'뒷면 보험',tags:['coin','guard'],d:'동전 뒷면이 나오면 보호막 +4 (최대 체력 따라 커짐)'},
   {id:'coinshower',t:'g',n:'동전 비',tags:['coin','jackpot'],d:'앞면마다 15% 확률로 동전 3개 추가 발사 (공격력 70%)'},
@@ -3274,7 +3274,7 @@ const AUGS=[
   {id:'thornseed',t:'g',n:'가시 씨앗',tags:['nature'],d:'5초마다 주변 적 2명 자리에 덩굴 지대 (3초, 범위 60, 초당 공격력 80%, 둔화)'},
   {id:'barkskin',t:'s',n:'나무껍질',tags:['nature','guard'],d:'방어력 +10. 덩굴 지대 안에 서 있으면 받는 피해 −20%',f:p=>{p.armor+=5;}},
   {id:'spore',t:'s',n:'포자',tags:['nature','poison'],d:'덩굴 지대 안의 적이 중독됨'},
-  {id:'worldtree',t:'p',n:'세계수',tags:['nature','nature'],d:'최대 체력 +20%, 초당 체력 재생 +3 (최대 체력 따라 커짐), 덩굴 범위 +30%. 자연 2개로 계산',f:p=>{p.hpP=(p.hpP||0)+.1;}},
+  {id:'worldtree',t:'p',n:'세계수',tags:['nature','nature'],d:'최대 체력 +20%, 초당 체력 재생 +6 (최대 체력 따라 커짐), 체력 재생 1초 한도 +0.6%p, 덩굴 범위 +30%. 자연 2개로 계산',f:p=>{p.hpP=(p.hpP||0)+.1;}},
   {id:'d_bramble',cls:'druid',t:'s',n:'가시 장벽',tags:['nature'],d:'[드루이드 전용] 덩굴 지대 범위·피해 +50%'},
   {id:'d_bear',cls:'druid',t:'g',n:'곰 변신',tags:['nature','guard'],d:'[드루이드 전용] 10초마다 4초간 곰 변신: 받는 피해 −40%, 공격력 +60%'},
   {id:'d_root',cls:'druid',t:'g',n:'뿌리 속박',tags:['nature','frost'],d:'[드루이드 전용] 덩굴 위에 1.5초 머문 적은 1초간 뿌리에 묶임(보스는 안 묶임). 묶인 적·덩굴 위에 오래 있던 보스는 받는 피해 +40%'},
@@ -7358,7 +7358,7 @@ function onPHit(b,t){
   if(ex('sniper'))dmg*=1+ex('sniper')*.05;
   if(has('combo')&&!b.child){if(p.cmbE===t)p.cmbN=Math.min(lv3('combo',10,15,20),(p.cmbN||0)+1);else{p.cmbE=t;p.cmbN=0;}dmg*=1+(has('f_barrage')?.09:.06)*p.cmbN;}
   {let cr=!!b.sure||S.p.shadowT>0||S.p.skCrT>0&&S.p.skInvT<=0||Math.random()<critC()+(S.cls==='elem'&&mky(1)&&chilled(t)?.2:0)+(tag('mark')>=6&&t.mkT>S.t?.25:0)+(has('glacier')&&chilled(t)?lv3('glacier',.2,.25,.3):0)+(has('marksman')?rangeE()/100*lv3('marksman',.012,.017,.022):0);if(!cr&&has('second')&&Math.random()<lv3('second',.3,.45,.6))cr=true;xHit(t,b,cr);if(cr)uwEv('crit');
-   if(has('bloodrage')&&p.alive)healK(.3);
+   if(has('bloodrage')&&p.alive)healK(p.maxHp*.0005*healM()); // v343: 고정 0.3 → 최대 체력 0.05% (후반에 의미 없던 회복)
    if(cr&&tag('rapid')>=6&&!b.child)pBullet(p.x,p.y,Math.atan2(t.y-p.y,t.x-p.x)+rand(-.1,.1),pDmg()*.6*rpM(),{sub:'속사 시너지',child:true,r:3});
    if(cr&&!b.child){if(S.cls==='knight'&&mky(1)){S.dsub='처단의 일격';explode(t.x,t.y,70,pDmg(),'#ffd0a0');S.dsub=null;}if(S.cls==='mage'&&mky(1)&&!t.boss){t.slowT=Math.max(t.slowT||0,1.5);t.frozen=true;}if(S.cls==='paladin'&&mky(0))exL('심판의 낙인','holy',t.x,t.y,60,pDmg()*.8*holyM(),'#fff3a0');if(S.cls==='gambler'&&mky(1)){dmg*=1.4;if(Math.random()<.1){const a0=Math.atan2(b.vy,b.vx);for(const da of [-.5,0,.5])pBullet(t.x,t.y,a0+da,pDmg()*.7,{child:true,sub:'에이스',card:true,hit:new Set([t]),life:.7,r:5});}}}
    if(cr){if(S.cls==='rogue'&&!b.child){if(mk(1)){const n=t.vsU>S.t?t.vsN||0:0;dmg*=1+.1*n;t.vsN=Math.min(5,n+1);t.vsU=S.t+4;}if(mky(1)&&t.pt>0)dmg*=1.4;}dmg*=critMul()*(has('glacier')&&chilled(t)?1.5:1)*(has('f_bullseye')?1+rangeE()/100*.033:1);col='#ffd76a';if(b.hollow&&!b.hb){b.hb=1;explode(t.x,t.y,70,pDmg()*lv3('g_hollow',1.2,1.5,1.8),'#ffd76a');}if(has('luckydie')&&Math.random()<lv3('luckydie',.05,.07,.09)*(has('f_jackdie')?2:1)){dmg*=has('f_jackdie')?4:3;label='대박 '+Math.round(dmg);}if(has('highbet')&&Math.random()<.1)dmg*=2;if(has('deadeye'))p.deT=1;fxRun('c',t);if(has('f_shatter')&&chilled(t))explode(t.x,t.y,70,pDmg(),'#9fe8ff');if(has('overload')&&Math.random()<lv3('overload',.15,.2,.25)*(has('f_tesla2')?2:1))lightning(t,3);if(has('stunner')&&!t.boss)t.slowT=Math.max(t.slowT||0,lv3('stunner',.6,.9,1.2));if(has('reroll2')&&!b.child)pBullet(p.x,p.y,Math.atan2(t.y-p.y,t.x-p.x),b.dmg*.7,{sub:'한 번 더',child:true});if(has('toxicburst')&&t.ps>0){explode(t.x,t.y,80,pDmg()*1.5,'#8ee06a');for(const o of S.en)if(o.alive&&d2(o,t)<80*80)poisonE(o);}if(has('burn')){t.burnT=3;t.burnD=Math.max(t.burnD||0,pDmg()*lv3('burn',.4,.6,.8));if(has('f_frostfire'))t.slowT=Math.max(t.slowT||0,1);}}}
@@ -7435,7 +7435,7 @@ function onKill(e){xKill(e);uwEv('kill');if(e.ps>0&&x8('xr_brood')&&S.p&&S.p.ali
   if(has('corrode')&&e.ps>0)healK(rgHpM());
   if(tag('curse')>=2)p.curT=2;
   if(tag('holy')>=6&&p.alive)healK(p.maxHp*.01);
-  if(e.mkT>S.t){if(has('stigma')&&p.alive)healK(p.maxHp*.01*healM());
+  if(e.mkT>S.t){if(has('stigma')&&p.alive)healK(p.maxHp*.02*healM());
     if(has('markburst')){const r=80*(has('f_execution')?1.5:1)*(has('f_lastjudge')?1.5:1);explode(e.x,e.y,r,pDmg()*lv3('markburst',1.5,2,2.5),'#ff5a6a');if(has('f_execution'))for(const o of S.en)if(o.alive&&d2(o,e)<r*r)markE(o);}
     if(tag('mark')>=4){const ex2=new Set([e]);for(let i=0;i<2;i++){const o=nearestE(e,260,ex2);if(!o)break;ex2.add(o);markE(o);}}}
   // 폭풍의 분노: 번개로 죽은 적이 번개를 한 번까지만 더 부름 (무한 연쇄 방지)
@@ -7773,7 +7773,7 @@ function update(dt){
     if(S.arena){const A=S.arena;{const dr=(A.tr-A.r)*Math.min(1,dt*.8);A.r+=A.nm&&dr<0?Math.max(dr,-140*dt):dr;}/* 악몽 결계는 1초에 140씩만 좁혀 옴 (걸어서 따라갈 수 있게) */const m=A.r-p.r-4;if(A.duel){/* 결투장은 둥근 벽 */const cl=(o,mm)=>{const dx=o.x-A.x,dy=o.y-A.y,dd=Math.hypot(dx,dy);if(dd>mm){o.x=A.x+dx/dd*mm;o.y=A.y+dy/dd*mm;}};cl(p,m);if(S.boss&&S.boss.alive)cl(S.boss,A.r-(S.boss.r||18)-4);for(const k of S.skel||[])cl(k,A.r-18);}else{p.x=clamp(p.x,A.x-m,A.x+m);p.y=clamp(p.y,A.y-m,A.y+m);/* v290: 해골도 결계 밖으로 못 나감 */const km=A.r-18;for(const k of [...(S.skel||[]),...(S.allies||[]).flatMap(a=>a.sk||[])]){k.x=clamp(k.x,A.x-km,A.x+km);k.y=clamp(k.y,A.y-km,A.y+km);}}
       // 결계는 몹에게도 벽: 밖에 있거나 밖에서 생긴 잡몹은 결계 안쪽 가장자리로 밀려 들어옴 (어두운 바깥에서 돌아다니지 않게)
       for(const e of S.en){if(!e.alive||e.boss)continue;const me=Math.max(10,A.r-e.r);if(e.x<A.x-me||e.x>A.x+me||e.y<A.y-me||e.y>A.y+me){/* 결계 밖에서 생긴 적은 걸어 들어오게 둠 (가장자리에 바로 나타나면 피할 틈이 없음). 5초 넘게 밖에 있거나 한 번 들어온 적은 가장자리로 */if(!e.inA&&!A.duel&&(e.oT=(e.oT||0)+dt)<5){const a=Math.atan2(A.y-e.y,A.x-e.x);e.x+=Math.cos(a)*60*dt;e.y+=Math.sin(a)*60*dt;continue;}e.x=clamp(e.x,A.x-me,A.x+me);e.y=clamp(e.y,A.y-me,A.y+me);}else e.inA=1;}}
-    {const bR=p.maxHp*.001*mlv('regen')+((tag('nature')>=2?1.5:0)+(has('warpaint')?(p.fy||0)*lv3('warpaint',.08,.1,.15):0)+(has('worldtree')?3:0)+(has('bastion')&&nearTurret()?3*(has('f_citadel')?2:1):0)+(has('sanctuary')?lv3('sanctuary',1.5,2,3):0))*rgHpM()+(has('yggdrasil')&&inVine(p)?p.maxHp*.02:0)+(has('f_ancient')&&inVine(p)?p.maxHp*.02:0);const rgM=has('f_hydra')?3:(has('thick')&&hitRec()?3:1)*(has('troll')&&p.noHitT>3?3:1);if(p.regen||bR||has('f_immortal'))healR((p.regen*rgM*(p.skRgT>0?5:1)*rgHpM()*(has('d_photo')?1.5:1)*(season()===0?2:1)+bR+(has('f_immortal')?p.maxHp*.01:0))*dt*healM());}
+    {const bR=p.maxHp*.001*mlv('regen')+((tag('nature')>=2?1.5:0)+(has('warpaint')?(p.fy||0)*lv3('warpaint',.15,.2,.3):0)+(has('worldtree')?6:0)+(has('bastion')&&nearTurret()?3*(has('f_citadel')?2:1):0)+(has('sanctuary')?lv3('sanctuary',1.5,2,3):0))*rgHpM()+(has('yggdrasil')&&inVine(p)?p.maxHp*.02:0)+(has('f_ancient')&&inVine(p)?p.maxHp*.02:0);const rgM=has('f_hydra')?3:(has('thick')&&hitRec()?3:1)*(has('troll')&&p.noHitT>3?3:1);if(p.regen||bR||has('f_immortal'))healR((p.regen*rgM*(p.skRgT>0?5:1)*rgHpM()*(has('d_photo')?1.5:1)*(season()===0?2:1)+bR+(has('f_immortal')?p.maxHp*.01:0))*dt*healM());}
     lsTick(dt);p.noHitT+=dt;{const bm=barrierMax(),bc=Math.max(bm,p.bxM||0);if(p.barrier>bc)p.barrier=bc;if(!(p.barrier>0))p.bxM=0;if(p.noHitT>(has('f_insure')?1.5:3)&&p.barrier<bm)p.barrier=Math.min(bm,p.barrier+bm*.35*dt);}
     if(S.buffT.jack>0)p.inv=Math.max(p.inv,.05);
     p.hurtT=Math.max(0,(p.hurtT||0)-dt);p.atkT=Math.max(0,(p.atkT||0)-dt);p.shadowT=Math.max(0,(p.shadowT||0)-dt);p.swingT=Math.max(0,(p.swingT||0)-dt);if(p.rageT>0){p.rageT-=dt;if(p.rageT<=0)p.rage=0;}
@@ -11238,7 +11238,7 @@ const LS_K=.5*1.05*1.05,LS_BUFF=1.05*1.05/* v288·v297: 흡혈 전체 +5%씩 두
 // 처치·적중 회복 (흡혈 제외: 처치 시 회복·적중 회복·합체 증강의 회복 효과 등): 다 합쳐 1초에 최대 체력의 KH_MAX(레이드 KH_RAID)까지 — 잡몹을 많이 잡을수록 무한히 회복하지 않게
 const KH_MAX=.03,KH_RAID=.02;
 // 재생 상한: 시간당 자동 회복(체력 재생·문신·성역·세계수 등)을 다 합쳐 1초에 최대 체력의 RG_MAX까지 (레이드 RG_RAID)
-const RG_MAX=.025*1.05,RG_RAID=.0125*1.05,RG_BUFF=1.05;/* v297: 체력 재생 +5% (회복량·1초 한도) */const rgCapF=()=>raidOn()?RG_RAID:RG_MAX+ccap('rg');
+const RG_MAX=.025*1.05,RG_RAID=.0125*1.05,RG_BUFF=1.05;/* v297: 체력 재생 +5% (회복량·1초 한도) */const rgCapF=()=>raidOn()?RG_RAID:RG_MAX+ccap('rg')+(has('worldtree')?.006:0);
 // 회복 실측: 최근 5초 동안 회복하려던 양(w) · 한도 안에서 허락된 양(c) · 실제로 찬 체력(g)
 function hStat(k,w,c,g){const H=S.hS||(S.hS={}),o=H[k]||(H[k]={w:0,c:0,g:0,L:[]});o.w+=w;o.c+=c;o.g+=g;}
 function hRoll(dt){S.hT=(S.hT||0)+dt;if(S.hT<1)return;S.hT=0;for(const o of Object.values(S.hS||{})){o.L.push([o.w,o.c,o.g]);if(o.L.length>5)o.L.shift();o.w=o.c=o.g=0;}}
