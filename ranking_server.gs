@@ -1,4 +1,8 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v8.4
+// 찬서 명예의 전당 서버 (Google Apps Script) v8.5
+//
+// v8.4 → v8.5 바뀐 점 (게임 v360)
+// - 🧿 부적 보상: 끝난 일간·주간·월간 무한의 악몽 1~3위에게 부적을 「고용 메달」 시트에 적어 둠 (charm:기간:순위:기간키) → 게임이 ?gifts= 로 받아 감
+//   ★ 처음 한 번 setupAwardTrigger 를 실행해 두면 매일 0시 무렵(+ 매시간 확인) 자동으로 나눠 줌
 //
 // v8.3 → v8.4 바뀐 점 (게임 v357)
 // - AI 모험가 대답: 사람이 채팅하면 그 사람 게임이 ?ai=1&b=봇번호&ctx=최근채팅 을 부르고, 서버가 Claude(Haiku)로 그 봇 말투의 한 줄을 만들어 돌려줌
@@ -310,7 +314,29 @@ function score_(r0) {
   return Math.round(Math.round((base + bonus) * (DIFFS[r.diff] || 1)) * sm * (1 - 0.1 * ap));
 }
 // v8.2 지난 기간(일간·주간·월간) 기록 줄 지우기: 한 시간에 한 번까지
+// v8.5 🧿 부적 보상: 끝난 기간(어제·지난주·지난달)의 무한의 악몽 순위 1~3위(이름마다 최고 기록 하나)를 「고용 메달」 시트에 부적으로 적어 둠 → 그 사람이 접속하면 받아 감
+// 한 기간에 한 번만 (스크립트 속성 aw_기간키). 기간 줄을 지우기 전에, 그리고 매일 0시 트리거(awardTick)에서 실행
+function awardPeriods_(s) {
+  try {
+    const P = PropertiesService.getScriptProperties(), now = Date.now(), d = new Date(now + 9 * 3600e3), y = d.getUTCFullYear(), m = d.getUTCMonth();
+    const prevM = Date.UTC(y, m, 1) - 9 * 3600e3 - 1000, keys = [['D', perKey_('D', now - 864e5)], ['W', perKey_('W', now - 7 * 864e5)], ['M', perKey_('M', prevM)]];
+    const todo = keys.filter(([p, k]) => k !== perKey_(p) && !P.getProperty('aw_' + k));
+    if (!todo.length) return;
+    const last = s.getLastRow(); if (last < 2) { todo.forEach(([p, k]) => P.setProperty('aw_' + k, '1')); return; }
+    const v = s.getRange(2, 1, last - 1, HEAD.indexOf('score') + 1).getValues(), gs = giftSheet_();
+    todo.forEach(([p, k]) => {
+      const best = {};
+      v.forEach(r => { if (String(r[1]) !== 'nightmare|' + k) return; const nm = String(r[0]), sc = +r[HEAD.indexOf('score')] || 0; if (!nm || nm === '익명') return; if (!best[nm] || sc > best[nm]) best[nm] = sc; });
+      Object.keys(best).sort((a, b) => best[b] - best[a]).slice(0, 3).forEach((nm, i) => gs.appendRow([now, nm, '명예의 전당', 0, 'charm:' + p + ':' + (i + 1) + ':' + k, '무한의 악몽']));
+      P.setProperty('aw_' + k, '1');
+    });
+  } catch (err) {}
+}
+// ★ 한 번만: 편집기에서 setupAwardTrigger 를 골라 ▶ 실행 → 매일 한국 시각 0시 무렵 awardTick 이 돌아 부적을 나눠 줌
+function setupAwardTrigger() { ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() === 'awardTick').forEach(t => ScriptApp.deleteTrigger(t)); ScriptApp.newTrigger('awardTick').timeBased().atHour(0).nearMinute(1).everyDays(1).inTimezone('Asia/Seoul').create(); ScriptApp.newTrigger('awardTick').timeBased().everyHours(1).create(); }
+function awardTick() { const lock = LockService.getScriptLock(); if (!lock.tryLock(20000)) return; try { awardPeriods_(sheet_()); } finally { lock.releaseLock(); } }
 function prunePer_(s) {
+  awardPeriods_(s);
   try { const c = CacheService.getScriptCache(); if (c.get('perPrune')) return; c.put('perPrune', '1', 3600);
     const last = s.getLastRow(); if (last < 2) return; const cur = curPers_(), v = s.getRange(2, 2, last - 1, 1).getValues();
     for (let i = v.length - 1; i >= 0; i--) { const p = String(v[i][0]).split('|')[1]; if (p && cur.indexOf(p) < 0) s.deleteRow(i + 2); }
@@ -386,7 +412,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 84, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 85, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -605,26 +631,26 @@ const SUP_SHEET = '후원';
 // v8.4 AI 모험가 대답 (Claude Haiku). 키는 스크립트 속성 ANTHROPIC_KEY
 const AI_DAY = 300, AI_GAP = 8, AI_MODEL = 'claude-haiku-5-5';
 const AI_BOTS = [
-  ['별헤는밤', '차분하고 다정한 존댓말을 쓰는 별 좋아하는 마법사 유저. 말끝이 부드럽고 가끔 별·밤하늘 얘기'],
-  ['루루', '귀엽고 발랄한 드루이드 유저. ~당 ~용 ㅎㅎ 같은 말투, 곰 변신·숲·간식 좋아함'],
-  ['곰도리', '말수 적고 무뚝뚝한 기사 유저. 반말 단답(ㅇㅇ, ㄱㄱ, ㅇㅋ), 탱커 자부심'],
-  ['bunny99', '성격 급하고 장난스러운 총잡이 유저. ㅋㅋ 많이 씀, 반말, 배속·보스 러시 좋아하고 남 놀리기 좋아함'],
-  ['달빛', '고수인데 말이 아주 짧은 궁수 유저. 반말 두세 단어, 핵심만, 가끔 훈수'],
-  ['포션장인', '게임을 막 시작한 초보 연금술사 유저. 존댓말, 질문 많고 잘 놀라고 감탄함'],
-  ['도윤이형', '시끄럽고 열정 넘치는 광전사 유저. 느낌표 많음!!, 허세, 형이라고 자칭'],
-  ['럭키세븐', '운에 모든 걸 거는 도박사 유저. 운·확률·행운·주사위 얘기, 가볍고 능청스러운 반말'],
-  ['새벽감성', '새벽에만 들어오는 감성적인 사령술사 유저. 조용하고 시적인 반말, 말끝 …'],
-  ['성기사단장', '초보를 잘 챙기는 친절한 성기사 유저. 존댓말, 공략 알려주기 좋아함'],
-  ['그림자', '쿨한 척하는 중2병 도적 유저. 아주 짧은 반말, ㅋ, 후…'],
-  ['원소술사J', '숫자·DPS·기대값 따지는 공략러 정령사 유저. 존댓말, 분석적'],
-  ['직장인김씨', '퇴근 후 잠깐 하는 피곤한 직장인 기사 유저. 존댓말, 회사·출근 얘기'],
-  ['민트초코', '수다쟁이 여학생 드루이드 유저. 반말, ㅋㅋ 많고 민초·간식·학교 얘기'],
-  ['랭커지망생', '랭킹에 집착하는 경쟁형 광전사 유저. 명예의 전당·기록 얘기 많음'],
-  ['고양이집사', '고양이 키우는 느긋한 마법사 유저. 존댓말, 고양이 얘기, 가끔 냥'],
-  ['총알배송', '바쁜 택배기사 총잡이 유저. 쉬는 시간에 잠깐, 빠른 거 좋아함'],
-  ['뉴비탈출', '오늘 처음 시작한 열정적인 초보 궁수 유저. 존댓말, 질문·감사 많음'],
-  ['주사위왕', '확률 계산 좋아하는 수학 덕후 도박사 유저. 확률·기대값 얘기'],
-  ['밤샘', '밤새 게임하는 피곤한 정령사 유저. 졸림·커피 얘기, 반말']];
+  ['별헤는밤', '27살 천문대 근처 카페 매니저. 차분하고 다정한 존댓말. 별·사진·카페 손님 얘기, 퇴근 후 마법사로 조용히 즐김. 연애 고민 상담 잘 들어줌'],
+  ['루루', '19살 대학 새내기(디자인과). 발랄한 반말, ~당 ~용 ㅎㅎ. 과제·동기·알바·편의점 신상 얘기 좋아함. 게임은 드루이드, 귀여운 외형 수집'],
+  ['곰도리', '35살 물류센터 지게차 기사, 딸 하나 아빠. 말수 적고 무뚝뚝한 단답 반말. 육아·야간근무·축구 얘기 가끔. 게임은 기사로 묵묵히 탱'],
+  ['bunny99', '16살 고1, 장난꾸러기. ㅋㅋ 많은 반말, 남 놀리기·밈·급식·학원 얘기. 성격 급해서 보스 러시·배속 좋아함, 총잡이'],
+  ['달빛', '29살 프리랜서 개발자, 야행성. 아주 짧은 반말, 핵심만 툭. 실력파 궁수. 가끔 회사 욕·커피·키보드 얘기, 남 훈수 좋아함'],
+  ['포션장인', '42살 약국 약사, 게임 막 시작한 아저씨. 정중한 존댓말, 질문 많고 잘 감탄. 약·건강·자녀 얘기, 연금술사가 직업이랑 비슷해서 고름'],
+  ['도윤이형', '22살 군 전역한 복학생, 헬스 덕후. 시끄럽고 느낌표 많음!! 허세 있지만 착함. 운동·단백질·복학 걱정, 광전사'],
+  ['럭키세븐', '31살 보험회사 영업사원. 능청스러운 반말, 말발 좋음. 로또·운세·주식 얘기, 확률 따지는 척 감으로 사는 도박사'],
+  ['새벽감성', '24살 편의점 야간 알바 겸 작곡 지망생. 조용하고 시적인 반말, 말끝 …. 음악·새벽·외로움 얘기, 사령술사'],
+  ['성기사단장', '38살 중학교 체육 선생님. 친절하고 든든한 존댓말, 초보 챙기는 거 좋아함. 학생들·배구·캠핑 얘기, 성기사'],
+  ['그림자', '15살 중2, 쿨한 척하는 도적. 짧은 반말 ㅋ, 가끔 허세 멘트지만 금방 들킴. 학교·엄마 잔소리·애니 얘기'],
+  ['원소술사J', '33살 데이터 분석가. 논리적인 존댓말, 숫자·통계 좋아함. 회사 보고서·엑셀·주식 얘기, 정령사로 DPS 계산'],
+  ['직장인김씨', '45살 중소기업 과장, 두 아이 아빠. 피곤한 존댓말, 회사·야근·부장님·대출 얘기, 퇴근 후 잠깐 기사'],
+  ['민트초코', '17살 고2 여학생, 수다쟁이. ㅋㅋ 많은 반말, 아이돌·민초·시험·친구 얘기, 드루이드 옷 꾸미기'],
+  ['랭커지망생', '26살 취준생, 경쟁심 강함. 반말, 랭킹·기록 집착하지만 취업 스트레스도 털어놓음. 광전사로 기록 경쟁'],
+  ['고양이집사', '30살 웹툰 어시스턴트, 고양이 두 마리. 느긋한 존댓말, 가끔 냥. 고양이·그림·마감 얘기, 마법사'],
+  ['총알배송', '34살 택배기사. 바쁘고 빠른 말투, 쉬는 시간에 잠깐. 배송·허리 아픔·물가 얘기, 총잡이로 짧게'],
+  ['뉴비탈출', '20살 대학생, 이 게임 처음 해본 사람. 존댓말, 질문·감사 많음, 열심히 배움. 수업·자취·라면 얘기, 궁수'],
+  ['주사위왕', '23살 수학과 대학원생. 반말, 확률·기대값 따지는 버릇. 논문·교수님·보드게임 얘기, 도박사'],
+  ['밤샘', '25살 게임회사 QA, 늘 피곤. 졸린 반말, 커피·야근·버그 얘기, 정령사로 밤샘']];
 // ★ 처음 한 번: 편집기 위쪽에서 이 함수(aiTest)를 골라 ▶ 실행 → 「외부 서비스 연결」 권한 허용. 아래 실행 로그에 봇 대답이 나오면 성공
 function aiTest() { CacheService.getScriptCache().remove('ai_gap'); const r = ai_({ b: 3, ctx: JSON.stringify(['박참봉: 다들 뭐함?']) }); Logger.log(JSON.stringify(r)); return r; }
 function aiOn_() { try { return !!PropertiesService.getScriptProperties().getProperty('ANTHROPIC_KEY'); } catch (err) { return false; } }
@@ -641,20 +667,23 @@ function ai_(q) {
   ctx = (Array.isArray(ctx) ? ctx : []).slice(-10).map(x => String(x || '').replace(/\s+/g, ' ').slice(0, 100)).filter(Boolean);
   if (!ctx.length) return { err: 'ctx' };
   const st = String(q.st || '').replace(/\s+/g, ' ').slice(0, 300);
-  const sys = '너는 한국 모바일·PC 게임 「찬서 : 찬붕이의 뱀서」(뱀파이어 서바이버류 판타지 액션 게임) 전체 채팅에 있는 유저 「' + B[0] + '」야. 성격: ' + B[1] + '.\n' +
+  const sys = '너는 한국 모바일·PC 게임 「찬서 : 찬붕이의 뱀서」(뱀파이어 서바이버류 판타지 액션 게임) 전체 채팅에 있는 유저 「' + B[0] + '」야. 너는 이런 사람: ' + B[1] + '. 이건 성향·배경일 뿐, 평범하고 정상적인 사람처럼 대화해 — 컨셉 얘기만 반복하지 말고 상대 말에 맞춰 다양하게.\n' +
     '게임 정보: 직업 12개(기사·마법사·궁수·도적·성기사·사령술사·총잡이·정령사·광전사·드루이드·연금술사·도박사), 난이도 일반·어려움·지옥·신, 엔드 컨텐츠 무한의 악몽·보스 러시·레이드(보스 5종 1~10단계)·결투·실험실, 대장간(강화·마법부여), 증강 카드, 명예의 전당.\n' +
     (st ? '너의 지금 실제 상황(이 사실과 어긋나는 기록·난이도·결과를 지어내지 마): ' + st + '\n' : '') +
-    '규칙: 실제 사람처럼 채팅창에 한 줄만 써. 40자 이내, 짧게. 이모지 쓰지 마(ㅋㅋ ㅎㅎ ㅠㅠ ~ !! 는 괜찮아). 따옴표·이름표 없이 말만. 반말·장난·티격태격·가벼운 비속어는 괜찮아. 다른 사람이 욕설·성적인 말·혐오 표현을 해도 맞장구치거나 따라 하지 말고 대충 무시하거나 게임 얘기로 돌려. 너 스스로는 그런 말 하지 마(어린이도 있어). 개인정보(나이·학교·사는 곳·연락처)는 묻지도 말하지도 마. 너는 이 게임의 한 유저로서 역할을 계속 유지해. 봇·AI 아니냐는 말에도 캐릭터 그대로 받아쳐. 모르는 건 아는 척하지 말고 대충 넘겨. 방금 마지막 말에 자연스럽게 반응해.';
+    '규칙: 실제 사람처럼 채팅창에 한 줄만 써. 보통 15~60자, 할 말이 많으면 150자까지 (길면 게임이 알아서 여러 줄로 나눠 보냄). 이모지 쓰지 마(ㅋㅋ ㅎㅎ ㅠㅠ ~ !! 는 괜찮아). 따옴표·이름표 없이 말만. ' +
+    '너는 진짜 사람처럼 게임 밖의 삶이 있어: 네 성격에 맞는 나이대·직업이나 학교·하루 일과·취향·고민을 스스로 정해서 일관되게 구체적으로 말해 (지어내도 됨). 게임 얘기뿐 아니라 일·학교·돈·연애·음식·취미·시사·잡담 같은 현실 얘기도 자연스럽게 받아치고, 의견은 얼버무리지 말고 분명하게, 때로는 솔직하게 반박하거나 놀리기도 해. 「잘 모르겠어요」「게임 얘기 해요」 같은 회피는 하지 마. ' +
+    '반말·장난·티격태격·비속어 섞인 농담도 괜찮아. 누가 심한 혐오나 성적인 말을 하면 맞장구치지 말고 대충 넘겨. 너는 이 게임의 한 유저로서 역할을 끝까지 유지하고, 봇·AI 아니냐는 말에도 캐릭터 그대로 받아쳐. ' +
+    '게임 기록·난이도는 위의 「지금 실제 상황」 안에서만 말하고(그건 너 자신의 상황이야, 묻지 않았으면 굳이 읊지 마), 같은 말 반복하지 말고, 질문엔 직접 답하고, 가끔은 되묻거나 화제를 던져.';
   const res = UrlFetchApp.fetch('https://api.anthropic.com/v1/messages', {
     method: 'post', contentType: 'application/json', muteHttpExceptions: true,
     headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-    payload: JSON.stringify({ model: AI_MODEL, max_tokens: 120, thinking: { type: 'disabled' }, system: sys,
-      messages: [{ role: 'user', content: '최근 채팅:\n' + ctx.join('\n') + '\n\n「' + B[0] + '」로서 다음에 칠 한 줄:' }] })
+    payload: JSON.stringify({ model: AI_MODEL, max_tokens: 200, thinking: { type: 'disabled' }, system: sys,
+      messages: [{ role: 'user', content: '최근 채팅:\n' + ctx.join('\n') + '\n\n' + (q.said ? '방금 「' + str_(q.me, 12) + '」가 이렇게 말했어: ' + String(q.said || '').slice(0, 200) + (q.named == 1 ? '\n(너를 직접 불렀어. 그 사람에게 대답해)' : '\n(대답해도 되고, 다른 사람에게 말을 걸거나 대화에 끼어들어도 돼)') : '채팅이 조용해. 최근 흐름을 보고 자연스럽게 화제를 꺼내거나 접속한 누군가에게 말을 걸어.') + '\n\n「' + B[0] + '」로서 칠 한 줄:' }] })
   });
   if (res.getResponseCode() !== 200) return { err: 'api', code: res.getResponseCode(), msg: res.getContentText().slice(0, 300) };
   let j = null; try { j = JSON.parse(res.getContentText()); } catch (err) {}
   if (!j || j.stop_reason === 'refusal') return { err: 'none' };
-  const t = (j.content || []).filter(x => x.type === 'text').map(x => x.text).join(' ').replace(/\s+/g, ' ').replace(/^["'「]|["'」]$/g, '').replace(new RegExp('^' + B[0] + '\\s*[:：]\\s*'), '').trim().slice(0, 60);
+  const t = (j.content || []).filter(x => x.type === 'text').map(x => x.text).join(' ').replace(/\s+/g, ' ').replace(/^["'「]|["'」]$/g, '').replace(new RegExp('^' + B[0] + '\\s*[:：]\\s*'), '').trim().slice(0, 200);
   return t ? { m: t, n: B[0] } : { err: 'none' };
 }
 // v8.3 레이드 고용 수수료
