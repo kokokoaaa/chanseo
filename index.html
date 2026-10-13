@@ -9415,6 +9415,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:382,t:'💬 모험가 성격',items:[
+    ['change','💬 「닥쳐·말 걸지 마」나 무례한 말에 모험가마다 성격대로 반응해요. 공격적·비판적·사회성 부족한 모험가(알빠노·진지충·달빛·bunny99 등)는 절대 안 듣고 맞받아치거나 계속 말을 걸고, 나머지는 서운해하거나 받아치되 먼저 말은 안 걸어요']]},
   {v:381,t:'⚔ 결투 기록 · 💛 후원자 임명',items:[
     ['new','⚔ 명예의 전당 <b>결투</b> 탭에서 기록을 누르면 결투에 쓴 캐릭터의 <b>최종 능력치·장비</b>가 보여요 (그 모험가가 이 버전으로 게임을 켜거나 결투하면 채워져요)'],
     ['new','🛠 (관리자) 🖥 기기 기록 화면에서 <b>💛 후원자 임명·해제</b>. 임명된 사람이 게임을 켜면 후원자 칭호·외형·부적 2종이 자동 지급돼요'],
@@ -14496,15 +14498,16 @@ function aiWatch(){try{if(!CHAT.length)return;const last=Math.max(...CHAT.map(c=
 /* v378 진짜 사람이 접속해 있으면 봇끼리 떠들기보다 그 사람에게 먼저 말을 걺. 대답이 없으면 간격을 점점 늘림 (5분 → 10분 → 20분 → 30분) */
 const AI_LURE={},AI_HI={};
 const humansOn=()=>{const me=myNick(),H=(ONLINE||[]).map(x=>x&&x.n).filter(n=>n&&!BOT_NM.has(n));if(me&&!BOT_NM.has(me)&&!H.includes(me))H.unshift(me);return [...new Set(H)];};
-const aiPickBot=now=>{const nt=new Date(now+9*3600e3).getUTCHours()<7,L=BOTS.map((_,i)=>i).filter(i=>(nt?botOn(i,now):botIdle(i,now))&&botOn(i,now+300000)&&now-(AI_INIT[i]||0)>15*60000);return L.length?L[Math.floor(Math.random()*L.length)]:-1;};
+const aiPickBot=(now,stub)=>{const nt=new Date(now+9*3600e3).getUTCHours()<7,L=BOTS.map((_,i)=>i).filter(i=>(nt?botOn(i,now):botIdle(i,now))&&botOn(i,now+300000)&&now-(AI_INIT[i]||0)>15*60000&&(!stub||BOT_STUB.has(BOTS[i][0])));return L.length?L[Math.floor(Math.random()*L.length)]:-1;};
 /* v380 말 걸기·인사는 그 사람 자신의 게임만 보냄 (여러 사람 게임이 같은 사람에게 따로 보내 같은 말이 반복되던 문제). 같은 모험가는 15분에 한 번만 먼저 말을 걺 *//* v381 「말 걸지 마·닥쳐·조용히」라고 한 사람에겐 1시간 동안 먼저 말을 안 걺 (대답은 함) */const AI_DND_RE=/말\s*(좀\s*)?걸지\s*마|말\s*걸지\s*말|닥쳐|닥치|조용히\s*(좀|해)|그만\s*(좀\s*)?(말|떠들)|꺼져|귀찮게\s*하지\s*마|말\s*시키지\s*마/;
 const aiDnd=n=>CHAT.some(c=>c.n===n&&Date.now()-(+c.t||0)<3600e3&&AI_DND_RE.test(String(c.m||'')));
-const aiSelfH=()=>{const me=myNick();return me&&!BOT_NM.has(me)&&!aiDnd(me)?[me]:[];},AI_INIT={};
+/* v382 공격적·비판적·사회성 부족한 모험가는 「말 걸지 마」를 안 들음 (그래도 가끔만) */const BOT_STUB=new Set(['bunny99','달빛','도윤이형','원소술사J','랭커지망생','보리아빠','캣맘나비','알빠노','진지충']);
+const aiSelfH=()=>{const me=myNick();return me&&!BOT_NM.has(me)?[me]:[];},AI_INIT={};
 function aiLure(now){const H=aiSelfH();if(!H.length)return false;if(now-AI_ANY<120000||CHAT.some(c=>!c.bot&&!BOT_NM.has(c.n)&&now-(+c.t||0)<120000))return false;
   const cand=H.map(n=>{const L=AI_LURE[n]||{t:0,n:0},spoke=CHAT.some(c=>c.n===n&&(+c.t||0)>L.t),wait=spoke?360000:Math.min(60*60000,8*60000*Math.pow(2,L.n));return {n,L,spoke,ok:now-L.t>=wait};}).filter(x=>x.ok);if(!cand.length||Math.random()>.6)return false;
-  const x=cand[Math.floor(Math.random()*cand.length)],i=aiPickBot(now);if(i<0)return false;AI_INIT[i]=now;AI_LURE[x.n]={t:now,n:x.spoke?0:x.L.n+1};const gen=++AI_GEN;aiSay(i,'','',0,0,'lure|'+x.n+'|'+Math.floor(now/300000),x.n).then(m=>{if(m)AI_LAST[x.n]={i,t:Date.now()};});return true;}
+  const x=cand[Math.floor(Math.random()*cand.length)],dnd=aiDnd(x.n);if(dnd&&Math.random()>.35)return false;const i=aiPickBot(now,dnd);if(i<0)return false;AI_INIT[i]=now;AI_LURE[x.n]={t:now,n:x.spoke?0:x.L.n+1};const gen=++AI_GEN;aiSay(i,'','',0,0,'lure|'+x.n+'|'+Math.floor(now/300000),x.n).then(m=>{if(m)AI_LAST[x.n]={i,t:Date.now()};});return true;}
 /* 사람이 새로 들어오면 20~60초 뒤 누군가 인사 (한 사람당 한 시간에 한 번) */
-function aiGreetTick(){try{if(!aiOk()||document.hidden)return;const now=Date.now();for(const n of aiSelfH()){if(AI_HI[n])continue;AI_HI[n]=now;/* 다시 열어도 2시간 안엔 또 인사 안 함 */let lt=0;try{lt=+localStorage.getItem('chanseo_aihi')||0;}catch(e){}if(now-lt<2*3600e3||Math.random()>.7)continue;setTimeout(()=>{try{if(!humansOn().includes(n))return;const i=aiPickBot(Date.now());if(i<0)return;AI_INIT[i]=Date.now();try{localStorage.setItem('chanseo_aihi',String(Date.now()));}catch(e){}aiSay(i,'','',0,0,'hi|'+n+'|'+Math.floor(Date.now()/36e5),n,1).then(m=>{if(m){AI_LAST[n]={i,t:Date.now()};AI_LURE[n]={t:Date.now(),n:0};}});}catch(e){}},20000+Math.random()*40000);}for(const n in AI_HI)if(!humansOn().includes(n)&&now-AI_HI[n]>30*60000)delete AI_HI[n];}catch(e){}}
+function aiGreetTick(){try{if(!aiOk()||document.hidden)return;const now=Date.now();for(const n of aiSelfH()){if(AI_HI[n])continue;AI_HI[n]=now;/* 다시 열어도 2시간 안엔 또 인사 안 함 */let lt=0;try{lt=+localStorage.getItem('chanseo_aihi')||0;}catch(e){}if(now-lt<2*3600e3||Math.random()>.7)continue;setTimeout(()=>{try{if(!humansOn().includes(n))return;const i=aiPickBot(Date.now(),aiDnd(n));if(i<0)return;AI_INIT[i]=Date.now();try{localStorage.setItem('chanseo_aihi',String(Date.now()));}catch(e){}aiSay(i,'','',0,0,'hi|'+n+'|'+Math.floor(Date.now()/36e5),n,1).then(m=>{if(m){AI_LAST[n]={i,t:Date.now()};AI_LURE[n]={t:Date.now(),n:0};}});}catch(e){}},20000+Math.random()*40000);}for(const n in AI_HI)if(!humansOn().includes(n)&&now-AI_HI[n]>30*60000)delete AI_HI[n];}catch(e){}}
 setInterval(aiGreetTick,15000);
 setInterval(()=>{try{if(!CHAT_OPEN||!aiOk()||document.hidden)return;const now=Date.now();if(aiLure(now))return;if(now-AI_ANY<240000||CHAT.some(c=>!c.bot&&now-(+c.t||0)<240000))return;/* v379 나 말고 접속한 사람이 없으면 혼잣말을 더 드물게 */if(Math.random()>(humansOn().length>1?.3:.15))return;/* v375 새벽(한국 0~7시)엔 판 돌리는 중인 모험가도, 혼자여도 말을 꺼냄 */const nt=new Date(now+9*3600e3).getUTCHours()<7,idle=BOTS.map((_,i)=>i).filter(i=>nt?botOn(i,now):botIdle(i,now));if(idle.length<(nt?1:2))return;
   const i=idle[Math.floor(Math.random()*idle.length)],gen=++AI_GEN;aiSay(i,'','',0,0,'mono|'+Math.floor(now/240000)).then(m=>{if(m)aiChain(i,m,0,gen);});}catch(e){}},60000);
@@ -16236,7 +16239,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=381,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=382,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
