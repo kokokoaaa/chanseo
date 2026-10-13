@@ -9407,6 +9407,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:376,t:'📦 택배 정보',items:[
+    ['change','📦 택배함에서 장비 이름에 마우스를 올리면(폰은 누르면) 그 장비 정보가 보여요 (받을 택배·보낸/받은 기록 모두, 기록은 이번 버전부터)']]},
   {v:375,t:'🌙 새벽 채팅',items:[
     ['change','🌙 새벽에 접속한 모험가도 채팅을 해요: 판을 돌리다가도 가끔 한마디하고, 말을 걸면 대답해요']]},
   {v:374,t:'📦 택배',items:[
@@ -12388,25 +12390,27 @@ async function itSendL(L0){const L=L0.filter(x=>x&&!x.lk&&!eqIds().has(x.id));if
   return gone.size===1?`📤 ${esc(itName([...gone][0]))}, ${esc(to)}님에게 보냈어!`:`📤 장비 ${gone.size}개를 ${esc(to)}님에게 보냈어!`;}
 /* v374 📦 택배: 받은 장비는 바로 가방에 넣지 않고 택배함에 쌓아 둠 → 대장간 📦 택배에서 「아이템 받기」 */
 const mbox=()=>META.mbox||(META.mbox=[]),mlog=()=>META.mlog||(META.mlog=[]);
-const mlogAdd=(dir,who,L)=>{mlog().unshift({t:Date.now(),dir,who:String(who||'').slice(0,12),it:L.map(x=>({n:itName(x),c:itCol(x)}))});if(mlog().length>80)META.mlog.length=80;};
+const mlogAdd=(dir,who,L)=>{mlog().unshift({t:Date.now(),dir,who:String(who||'').slice(0,12),it:L.map(x=>({n:itName(x),c:itCol(x),x:itMailStrip(x)}))});if(mlog().length>80)META.mlog.length=80;};
 function itMailGet(G){let n=0;const who=new Set();for(const g of G){let X=null;try{X=JSON.parse(g.it);}catch(e){}const XL=(Array.isArray(X)?X:[X]).filter(x=>x&&GEAR[x.s]&&x.r>=0&&x.r<=6);if(!XL.length)continue;mbox().push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),at:+g.at||Date.now(),from:String(g.from||'모험가').slice(0,12),items:XL});n+=XL.length;who.add(g.from);}
   if(n){saveMeta();try{chime([659,784,988],'triangle');}catch(e){}toast(`📦 택배가 도착했어요! ${[...who].join(', ')}님 · 장비 ${n}개 — 대장간 📦 택배에서 받으세요`,5);try{if(document.getElementById('invG'))openForge();}catch(e){}}}
 /* 택배함 창: 받을 택배 + 보낸·받은 기록 */
 function mboxOpen(){let w=document.getElementById('mboxW');if(w)w.remove();w=document.createElement('div');w.id='mboxW';w.style.cssText='position:fixed;inset:0;z-index:32000;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px';
-  const fd=t=>{const d=new Date(t);return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;},nm=x=>`<b style="color:${x.c||itCol(x)}">${esc(x.n||itName(x))}</b>`;
+  const fd=t=>{const d=new Date(t);return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;},nm=(x,k)=>`<b class="mbit" data-mbt="${k}" style="color:${x.c||itCol(x)};cursor:help;text-decoration:underline dotted">${esc(x.n||itName(x))}</b>`;
   const P=mbox(),Lg=mlog();
   w.innerHTML=`<div style="background:#0f2a20;border:2px solid var(--brass);border-radius:14px;padding:16px;max-width:620px;width:100%;max-height:88vh;overflow:auto;color:var(--ivory)">
    <div style="font-weight:bold;font-size:18px;margin-bottom:10px">📦 택배함</div>
-   ${P.length?`<div style="display:flex;flex-direction:column;gap:8px">${P.map((q,i)=>`<div style="border:1px solid rgba(255,215,106,.5);border-radius:10px;padding:10px;background:rgba(255,215,106,.06)"><div>📦 <b>${esc(q.from)}</b>님이 보낸 택배 <small style="opacity:.7">· ${fd(q.at)} · ${q.items.length}개</small></div><div style="margin:6px 0;font-size:14px;line-height:1.5">${q.items.map(x=>itIco(x)+' '+nm(x)).join(' · ')}</div><button class="btn primary" data-mbget="${i}" style="margin:0">🎁 아이템 받기</button></div>`).join('')}</div>${P.length>1?`<button class="btn" data-mbget="all" style="margin:8px 0 0">🎁 모두 받기</button>`:''}`:'<div style="opacity:.75">받을 택배가 없어요.</div>'}
+   ${P.length?`<div style="display:flex;flex-direction:column;gap:8px">${P.map((q,i)=>`<div style="border:1px solid rgba(255,215,106,.5);border-radius:10px;padding:10px;background:rgba(255,215,106,.06)"><div>📦 <b>${esc(q.from)}</b>님이 보낸 택배 <small style="opacity:.7">· ${fd(q.at)} · ${q.items.length}개</small></div><div style="margin:6px 0;font-size:14px;line-height:1.5">${q.items.map((x,j)=>itIco(x)+' '+nm(x,'p'+i+'_'+j)).join(' · ')}</div><button class="btn primary" data-mbget="${i}" style="margin:0">🎁 아이템 받기</button></div>`).join('')}</div>${P.length>1?`<button class="btn" data-mbget="all" style="margin:8px 0 0">🎁 모두 받기</button>`:''}`:'<div style="opacity:.75">받을 택배가 없어요.</div>'}
    <div style="font-weight:bold;margin:16px 0 6px">📜 보낸·받은 기록</div>
-   ${Lg.length?`<div style="display:flex;flex-direction:column;gap:4px;font-size:13px">${Lg.map(r=>`<div style="padding:6px 8px;border-radius:8px;background:rgba(255,255,255,.04)">${r.dir==='out'?'📤 <b>'+esc(r.who)+'</b>님에게 보냄':'📥 <b>'+esc(r.who)+'</b>님에게 받음'} <small style="opacity:.7">· ${fd(r.t)}</small><br>${r.it.map(nm).join(' · ')}</div>`).join('')}</div>`:'<div style="opacity:.75;font-size:13px">아직 기록이 없어요.</div>'}
+   ${Lg.length?`<div style="display:flex;flex-direction:column;gap:4px;font-size:13px">${Lg.map((r,ri)=>`<div style="padding:6px 8px;border-radius:8px;background:rgba(255,255,255,.04)">${r.dir==='out'?'📤 <b>'+esc(r.who)+'</b>님에게 보냄':'📥 <b>'+esc(r.who)+'</b>님에게 받음'} <small style="opacity:.7">· ${fd(r.t)}</small><br>${r.it.map((x,j)=>nm(x,'l'+ri+'_'+j)).join(' · ')}</div>`).join('')}</div>`:'<div style="opacity:.75;font-size:13px">아직 기록이 없어요.</div>'}
    <button class="btn ghost" data-mbclose="1" style="margin-top:12px">닫기</button></div>`;
-  const close=()=>{w.remove();document.removeEventListener('keydown',key,true);try{if(document.getElementById('invG'))openForge();}catch(e){}},key=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();close();}};
+  const close=()=>{try{ftipHide();}catch(e){}w.remove();document.removeEventListener('keydown',key,true);try{if(document.getElementById('invG'))openForge();}catch(e){}},key=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();close();}};
   w.onclick=e=>{if(e.target===w||e.target.closest('[data-mbclose]')){close();return;}const b=e.target.closest('[data-mbget]');if(!b)return;const idx=b.dataset.mbget==='all'?mbox().map((_,i)=>i):[+b.dataset.mbget];
     const I=inv(),need=idx.reduce((a,i)=>a+(mbox()[i]?mbox()[i].items.length:0),0),room=(INV_MAX-bagN())+(WH_MAX-whN());if(need>room){uiAlert(`가방과 창고에 자리가 모자라요 (필요 ${need}칸 · 남은 ${room}칸)`);return;}
     for(const i of idx.sort((a,b)=>b-a)){const q=mbox()[i];if(!q)continue;for(const x of q.items){x.id=I.n++;if(bagN()<INV_MAX){delete x.w;x.p=invFree('bag');}else{x.w=1;x.p=invFree('wh');}I.items.push(x);}mlogAdd('in',q.from,q.items);mbox().splice(i,1);}
-    invTouch();saveMeta();try{chime([523,659,784],'triangle');}catch(e){}toast(`🎁 장비 ${need}개를 가방에 넣었어요`);mboxOpen();};
-  document.addEventListener('keydown',key,true);document.body.appendChild(w);}
+    invTouch();saveMeta();try{chime([523,659,784],'triangle');}catch(e){}try{ftipHide();}catch(e){}toast(`🎁 장비 ${need}개를 가방에 넣었어요`);mboxOpen();};
+  document.addEventListener('keydown',key,true);document.body.appendChild(w);
+  /* 장비 이름에 마우스를 올리면(폰은 누르면) 장비 정보 */const itOf=k=>{const m=/^([pl])(\d+)_(\d+)$/.exec(k||'');if(!m)return null;if(m[1]==='p'){const q=mbox()[+m[2]];return q&&q.items[+m[3]];}const r=mlog()[+m[2]],e=r&&r.it[+m[3]];return e&&e.x?{...e.x}:null;};
+  w.querySelectorAll('[data-mbt]').forEach(el=>{ftipBind(el,()=>{const it=itOf(el.dataset.mbt);return it?[itTip(it),itCol(it)]:null;});el.addEventListener('click',ev=>{if(!matchMedia('(hover:none)').matches)return;ev.stopPropagation();const it=itOf(el.dataset.mbt);if(it)uiAlert(String(itTip(it)).replace(/<br>/g,'\n').replace(/<[^>]+>/g,''));});});}
 async function giftPoll(){const nk=myNick();if(!SHEET_URL||SRV_V<83||!nk||!MYKEY)return;try{const r=await fetch(SHEET_URL+'?gifts='+encodeURIComponent(nk)+'&k='+encodeURIComponent(MYKEY),{cache:'no-store'});const j=await r.json();const G0=(j&&j.gifts)||[];if(!G0.length)return;
   /* 🧿 부적 보상 (cls = charm:기간:순위:기간키) */const CG=G0.filter(g=>/^charm:/.test(g.cls||'')),MG=G0.filter(g=>g.cls==='item'&&g.it),G=G0.filter(g=>!/^charm:/.test(g.cls||'')&&g.cls!=='item');if(MG.length)itMailGet(MG);const got=[];for(const g of CG){const [,k,r,key]=String(g.cls).split(':');if(charmAdd(k,+r,key))got.push(charmName({k,r:+r})+` — ${charmFrom({k,r:+r,key})}`);}
   if(got.length){try{chime([523,659,784,1047],'triangle');}catch(e){}uiAlert(`🏆 명예의 전당 보상!\n${got.join('\n')}\n\n대장간 가방에 한 칸씩 들어 있어요. 가방·창고에 들고만 있어도 효과가 있어요`);}
@@ -16145,7 +16149,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=375,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=376,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
