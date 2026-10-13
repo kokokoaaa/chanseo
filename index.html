@@ -9406,6 +9406,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:369,t:'👥 모험가 진도',items:[
+    ['change','👥 다른 모험가들의 판 길이가 실제와 같아졌어요 (일반 ~3분 · 어려움 ~6분 · 지옥 ~9분 · 신 ~12분)'],
+    ['change','👥 다른 모험가들이 실제 사람처럼 빨리 성장해요: 하루 안에 일반 → 신까지 깨고 악몽에 들어가요']]},
   {v:368,t:'😡 악몽 10분',items:[
     ['change','🌙 무한의 악몽 처음 10분은 빌드업 시간: 적(보스 포함) 체력 −15% · 공격력 −30%, 6분부터 강해지는 속도도 절반'],
     ['change','😡 10분이 되면 「적들이 분노하기 시작합니다!」 알림과 함께 1분에 걸쳐 원래 난이도로 올라가요 (10분 이후는 예전과 같아요)']]},
@@ -14173,19 +14176,20 @@ const botOn=(i,t)=>{const sl=Math.floor(t/BOT_SLOT);return botSched(i,Math.floor
 function botHours(i,t=Date.now()){const sl=Math.floor(t/BOT_SLOT),d=Math.floor(sl/36),k=i+'|'+d;let pre=BOT_HC[k];if(pre==null){pre=0;for(let q=botD0(i);q<d;q++)for(const s of botPlay(i,q))pre+=botRunMs(i,q*36+s)/36e5;BOT_HC[k]=pre;}
   let today=0;for(const s of botPlay(i,d)){if(s<sl%36)today+=botRunMs(i,d*36+s)/36e5;else if(s===sl%36)today+=botRunMs(i,sl,t-sl*BOT_SLOT)/36e5;}return pre+today;}
 // 깬 난이도: 0 없음 · 1 일반 · 2 어려움 · 3 지옥 · 4 신 (필요 시간 ÷ 실력)
-const BOT_CLR=[1.5,4,8,14],botClr=(i,H)=>BOT_CLR.filter(h=>H>=h/botL(i)).length;
+/* v369 실제 사람처럼: 판을 돈 시간 기준 일반 ~5분 · 어려움 ~15분 · 지옥 ~35분 · 신 ~1시간이면 깸 (실력 보정) — 하루치 플레이면 악몽까지 */const BOT_CLR=[.08,.25,.55,1],botClr=(i,H)=>BOT_CLR.filter(h=>H>=h/botL(i)).length;
 // 한 슬롯 안의 일정: [시작(ms), 길이(ms), 종류, 값들]
 function botPlan(i,sl){const P=[],H=k=>botH(sl*31+k,i*13+5),sk=BOT_SK[i];if(!botPlay(i,Math.floor(sl/36)).has(sl%36)){/* 접속만 하고 게임은 안 하는 칸: 로비·대장간 구경, 새벽엔 반쯤은 잠수 */const kh=((sl%36)*40/60+9)%24;if(kh>=0&&kh<7&&H(1)%2)return [{t:0,d:BOT_SLOT,k:'away'}];return [{t:0,d:BOT_SLOT*.6|0,k:H(2)%3?'home':'forge'},{t:BOT_SLOT*.6|0,d:BOT_SLOT-(BOT_SLOT*.6|0),k:'home'}];}let t=0,k=0;const add=(d,o)=>{if(o.k!=='home'&&o.k!=='forge'&&t+d>BOT_SLOT-60000)o={k:'home'};/* 접속이 끝나기 전에 못 끝낼 판은 시작 안 함 */P.push({t,d,...o});t+=d;};
   add((1+H(k++)%3)*60000,{k:'home'});
-  /* 아직 못 연 곳은 안 감: 신을 깨야 악몽·보스 러시, 악몽을 좀 해야 레이드 */const hr=botHours(i,sl*BOT_SLOT),cl=botClr(i,hr),ok=[cl>=4,cl>=3,cl>=2,cl>=4,cl>=4&&hr>=(14+6)/botL(i),cl>=2,true],pf=BOT_P[i].pf.map((w,j)=>ok[j]?w:0);if(cl<4)pf[6]+=2;const ps=pf.reduce((a,b)=>a+b,0);
+  /* 아직 못 연 곳은 안 감: 신을 깨야 악몽·보스 러시, 악몽을 좀 해야 레이드 */const hr=botHours(i,sl*BOT_SLOT),cl=botClr(i,hr),ok=[cl>=4,cl>=3,cl>=2,cl>=4,cl>=4&&hr>=(BOT_CLR[3]+2.5)/botL(i),cl>=2,true],pf=BOT_P[i].pf.map((w,j)=>ok[j]?w:0);if(cl<4)pf[6]+=2;const ps=pf.reduce((a,b)=>a+b,0);
+  /* v369 판 길이를 실제와 같게: 장마다 2분 30초 + 보스전 (일반 1장 ~3분 · 어려움 2장 ~6분 · 지옥 3장 ~9분 · 신 4장 ~12분). 아직 못 깨는 난이도는 중간에 죽음 */const bRun=(L,kn)=>{const full=(L*2.5+L*.5+(H(k++)%40)/40)*60000,win=cl>=L;add(win?full:Math.max(60000,full*(.3+(H(k++)%60)/100)),{k:kn,win:win?1:0});};
   while(t<BOT_SLOT&&k<40){let r=H(k++)%ps,ai=0;while(r>=pf[ai]){r-=pf[ai];ai++;}const m=60000;
     if(ai===0)add((6+sk*3+H(k++)%9)*m,{k:'nm'});
-    else if(ai===1)add((4+H(k++)%7)*m,{k:'god'});
-    else if(ai===2)add((5+H(k++)%6)*m,{k:'hell'});
+    else if(ai===1)bRun(4,'god');
+    else if(ai===2)bRun(3,'hell');
     else if(ai===3)add((5+sk*2+H(k++)%7)*m,{k:'rush'});
     else if(ai===4)add((3+H(k++)%4)*m,{k:'raid',b:H(k++)%5,st:Math.max(1,Math.min(10,1+sk*2+H(k++)%3))});
     else if(ai===5)add((2+H(k++)%4)*m,{k:'lab'});
-    else add((5+H(k++)%6)*m,{k:cl>=1&&H(k++)%2?'hard':'norm'});/* 일반을 깨야 어려움 */
+    else{const hd=cl>=1&&(cl>=2||H(k++)%3);bRun(hd?2:1,hd?'hard':'norm');}/* 일반을 깨야 어려움 */
     add((1+H(k++)%3)*m,{k:H(k++)%2?'forge':'home'});}
   return P;}
 function botAct(i,now){const sl=Math.floor(now/BOT_SLOT),e=now-sl*BOT_SLOT,P=botPlan(i,sl);const g=P.find(x=>e>=x.t&&e<x.t+x.d)||P[P.length-1],mn=Math.max(0,Math.floor((e-g.t)/60000));
@@ -14269,8 +14273,9 @@ const withBots=L=>{try{const A=(L||[]).filter(b=>!b.bot);BOARD_P=A.filter(b=>b.p
 function botsNow(){const now=Date.now();return BOTS.map(([n,c],i)=>botOn(i,now)?{n,c,a:botAct(i,now)}:null).filter(Boolean);}
 // v352 AI 모험가 채팅: 시간으로 정해지는 말이라 언제 열어도 같은 말이 같은 시각에 남아 있음. 실제 채팅이 남아 있는 기간(가장 오래된 메시지까지, 최대 2일)만큼 거슬러 올라가 만듦 (예전엔 최근 1시간만 → 열 때마다 사라지고 바뀌어 보였음)
 function botRes(i,g,h){const m=Math.max(1,Math.round(g.d/60000)),H=botHours(i,g.t0||0),cl=botClr(i,H),w=h%3!==0,sk=BOT_SK[i]||0,pg=1-Math.exp(-H*botL(i)/40),q=.6+.4*((h%10)/10);/* 기록과 맞게: 실력·쌓인 시간만큼 */
-  switch(g.k){case 'nm':return `악몽 ${Math.max(3,Math.round((4+pg*(5+sk*3.3))*q))}분 버팀`;case 'god':return cl>=4?(w?'신 깸':'신 또 깸'):`신 ${m}분에서 터짐`;case 'hell':return cl>=3?'지옥 깸':`지옥 ${m}분에서 죽음`;
-    case 'hard':return cl>=2?'어려움 깸':'어려움에서 짐';case 'norm':return cl>=1?'일반 깸':`일반 ${m}분에서 죽음`;case 'rush':return `보러 ${Math.max(2,Math.round((2+pg*(3+sk*2))*q))}단계까지`;case 'raid':{const st=Math.max(1,Math.min(g.st,Math.round(1+pg*sk*.8)));return `${BOT_RD[g.b]} ${st}단계 ${w?'깸':'실패'}`;}case 'lab':return '실험실에서 딜 재봄';default:return null;}}
+  /* 깼는지는 판을 짤 때 정한 대로 (판 길이와 맞게) */const W=L=>g.win!=null?!!g.win:cl>=L;
+  switch(g.k){case 'nm':return `악몽 ${Math.max(3,Math.round((4+pg*(5+sk*3.3))*q))}분 버팀`;case 'god':return W(4)?(w?'신 깸':'신 또 깸'):`신 ${m}분에서 터짐`;case 'hell':return W(3)?'지옥 깸':`지옥 ${m}분에서 죽음`;
+    case 'hard':return W(2)?'어려움 깸':`어려움 ${m}분에서 짐`;case 'norm':return W(1)?'일반 깸':`일반 ${m}분에서 죽음`;case 'rush':return `보러 ${Math.max(2,Math.round((2+pg*(3+sk*2))*q))}단계까지`;case 'raid':{const st=Math.max(1,Math.min(g.st,Math.round(1+pg*sk*.8)));return `${BOT_RD[g.b]} ${st}단계 ${w?'깸':'실패'}`;}case 'lab':return '실험실에서 딜 재봄';default:return null;}}
 // v356 채팅 다양화: 빈칸 문장({cls} 직업 · {boss} 레이드 보스 · {dif} 난이도 · {who} 같이 접속한 사람 · {n} 숫자) + 봇끼리 묻고 답하기 + 사람 채팅에 가끔 대꾸. 최근에 한 말은 다시 안 함
 // Q: [주제, 질문] · A: 주제별 대답 · Y: 사람 말에 대꾸 (h 인사 · q 질문 · k 웃음 · e 그 밖) · Z: 말 끝 붙임
 const BOT_TK2=[
@@ -14339,7 +14344,7 @@ function botReply(i,m,who,h){const Y=BOT_TK2[i].Y,s=String(m||''),c=/안녕|ㅎ�
 // v357 AI 모험가 대답: 내가 채팅하면 지금 접속해 쉬고 있는 봇 하나가 가끔 (서버가 Claude로 그 봇 말투 한 줄을 만듦) → 실제 채팅에 남아서 모두에게 같게 보임
 // 봇의 실제 상황 (AI가 없는 기록을 지어내지 않게): 지금 하는 것 · 오늘·누적 플레이 시간 · 깬 난이도 · 이번 접속에서 끝낸 판 결과
 function botState(i,t){try{const H=botHours(i,t),cl=botClr(i,H),sl=Math.floor(t/BOT_SLOT),e=t-sl*BOT_SLOT,P=botPlanC(i,sl),done=P.filter(x=>x.t+x.d<=e&&x.k!=='home'&&x.k!=='forge').slice(-3).map(x=>botRes(i,{...x,t0:sl*BOT_SLOT+x.t},botH(Math.floor((sl*BOT_SLOT+x.t+x.d)/1000),i*7+3)>>>3)).filter(Boolean);
-  const ac=botAct(i,t),busy=!/시작 화면|장비 정리|자리 비움/.test(ac);return `${busy?`지금: ${ac} · `:''}오늘 처음 시작한 게임, 지금까지 총 ${H.toFixed(1)}시간 플레이 · 깬 난이도: ${['아직 없음(일반 도전 중)','일반','어려움','지옥','신'][cl]}${cl>=4?' (무한의 악몽·보스 러시 열림)':''} · 이번 접속에서 한 판: ${done.length?done.join(', '):'아직 없음'}`;}catch(e){return '';}}
+  const ac=botAct(i,t),busy=!/시작 화면|장비 정리|자리 비움/.test(ac);return `${busy?`지금: ${ac} · `:''}${(()=>{const kd=x=>Math.floor((x+9*3600e3)/864e5),d=kd(t)-kd(BOT_T0(i));return d<=0?'오늘 처음 시작한 게임':d===1?'어제 처음 시작한 게임':d+'일 전에 시작한 게임';})()}, 지금까지 총 ${H.toFixed(1)}시간 플레이 · 깬 난이도: ${['아직 없음(일반 도전 중)','일반','어려움','지옥','신'][cl]}${cl>=4?' (무한의 악몽·보스 러시 열림)':''} · 이번 접속에서 한 판: ${done.length?done.join(', '):'아직 없음'}`;}catch(e){return '';}}
 /* 이름 일부로 불러도 알아들음: 「원소술사야」→원소술사J, 「버니」·「bunny」→bunny99, 「성기사단장님」 */
 function botCalled(i,m){const n=BOTS[i][0],s=String(m).toLowerCase(),K=[n,n.replace(/[A-Za-z0-9]+$/,''),n.replace(/[0-9]+$/,''),n.length>=4?n.slice(0,3):''].map(x=>x.toLowerCase()).filter(x=>x.length>=2);if(n==='bunny99')K.push('버니','바니');return K.some(k=>s.includes(k));}
 // 80자가 넘는 말은 문장·띄어쓰기에서 나눠 여러 줄로
@@ -16098,7 +16103,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=368,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=369,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
