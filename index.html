@@ -9404,6 +9404,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:363,t:'💬 채팅',items:[
+    ['change','💬 다른 모험가가 한 말에도 대화가 이어져요'],
+    ['change','💬 둘이 얘기할 때 옆에서 누가 한마디 거들 수 있어요 (대화를 가로채지는 않아요)']]},
   {v:362,t:'💬 채팅',items:[
     ['change','💬 채팅창 아래에 「✎ OO 입력 중…」이 보여요'],
     ['change','👥 접속 목록의 「대장간 구경 중」을 「장비 정리 중」으로']]},
@@ -14290,9 +14293,9 @@ const aiOk=()=>!!SHEET_URL&&SRV_V>=84&&SRV_AI;
 const aiCtx=extra=>{const L=[...CHAT.filter(c=>!/^🤖/.test(c.n||'')),...botChat()].sort((a,b)=>a.t-b.t).slice(-20).map(c=>String(c.n).replace(/^🤖 /,'')+': '+c.m);if(extra&&!L.some(x=>x===extra))L.push(extra);return L.slice(-20);};
 /* 그 모험가가 예전에 실제로 한 말 (말이 앞뒤로 맞게: 직업·나이·한 말을 기억) */const aiMine=i=>CHAT.filter(c=>String(c.n||'').replace(/^🤖 /,'')===BOTS[i][0]).slice(-10).map(c=>c.m);
 // 봇 i가 한마디 (said = 바로 앞 사람의 말, who = 그 사람, named = 그 사람이 i를 직접 불렀는지, said가 없으면 먼저 화제를 꺼냄)
-async function aiSay(i,said,who,named,cut){const T0=Date.now(),body={ai:1,b:i,me:who||'',said:said||'',named:named?1:0,cut:cut?1:0,st:botState(i,Date.now()),mine:JSON.stringify(aiMine(i)),ctx:JSON.stringify(aiCtx(said&&who?who+': '+said:''))};
+async function aiSay(i,said,who,named,cut,k){const T0=Date.now(),body={ai:1,b:i,me:who||'',said:said||'',named:named?1:0,cut:cut?1:0,k:k||'',st:botState(i,Date.now()),mine:JSON.stringify(aiMine(i)),ctx:JSON.stringify(aiCtx(said&&who?who+': '+said:''))};
   /* 서버 v8.6부터는 POST (긴 대화도 다 보냄), 그 전엔 주소에 실어 보냄 */const r=SRV_V>=86?await fetch(SHEET_URL,{method:'POST',body:JSON.stringify(body)}):await fetch(SHEET_URL+'?'+Object.entries({...body,mine:JSON.stringify(aiMine(i).slice(-4)),ctx:JSON.stringify(aiCtx(said&&who?who+': '+said:'').slice(-10))}).map(([k,v])=>k+'='+encodeURIComponent(v)).join('&'),{cache:'no-store'});
-  const j=await r.json();if(!j||!j.m){aiDv('서버 응답 '+JSON.stringify(j).slice(0,160));return null;}const n=BOTS[i][0],parts=chatSplit(j.m);AI_ANY=Date.now();
+  const j=await r.json();if(j&&j.skip)return null;if(!j||!j.m){aiDv('서버 응답 '+JSON.stringify(j).slice(0,160));return null;}const n=BOTS[i][0],parts=chatSplit(j.m);AI_ANY=Date.now();
   /* 사람처럼 타자 치는 시간: 읽고 생각하는 시간 + 글자 수 ÷ 타자 속도(1초에 3~5.5자, 사람마다 다름) — 그동안 「OO 입력 중…」 */const cps=3+((botH(i,4321)%100)/100)*2.5;
   for(let q=0;q<parts.length;q++){const think=q?400+Math.random()*900:1500+Math.random()*3500,type=parts[q].length/cps*1000*(.85+Math.random()*.3),wait=Math.max(600,think+type-(q?0:Date.now()-T0));
     AI_TYPING={n,until:Date.now()+wait};if(CHAT_OPEN)chatPaint();await new Promise(r=>setTimeout(r,wait));AI_TYPING=null;
@@ -14301,14 +14304,29 @@ async function aiSay(i,said,who,named,cut){const T0=Date.now(),body={ai:1,b:i,me
   AI_ANY=Date.now();if(CHAT_OPEN)chatPaint();
   return j.m;}
 // 여러 명이 이어서: 앞 사람 말에 다른 모험가가 끼어듦 (점점 드물게, 최대 3번). 사람이 새로 말하면 그쪽이 우선
-let AI_LAST=null,AI_ANY=0,AI_GEN=0,AI_TYPING=null;
-async function aiChain(last,line,depth,gen){if(depth>=2||gen!==AI_GEN)return;if(Math.random()>[.35,.15][depth])return;const now=Date.now(),idle=BOTS.map((_,i)=>i).filter(i=>botIdle(i,now)&&i!==last);if(!idle.length)return;
-  await new Promise(r=>setTimeout(r,3000+Math.random()*7000));if(gen!==AI_GEN)return;const j=idle[Math.floor(Math.random()*idle.length)],m=await aiSay(j,line,BOTS[last][0],botCalled(j,line),1);if(m)aiChain(j,m,depth+1,gen);}
-async function aiReply(m){try{if(!SHEET_URL)return;if(!aiOk()){aiDv(SRV_V<84?`서버가 v${SRV_V} (v8.4 아님)`:'서버에 ANTHROPIC_KEY 없음');return;}const gen=++AI_GEN,now=Date.now(),idle=BOTS.map((_,i)=>i).filter(i=>botIdle(i,now)),onl=BOTS.map((_,i)=>i).filter(i=>botOn(i,now));
-  /* 이름을 부르면 접속만 해 있어도 (판 사이에 잠깐) 대답 */let named=onl.filter(i=>botCalled(i,m));/* 방금(4분 안) 나랑 얘기하던 모험가는 이름을 안 불러도 이어서 */if(!named.length&&AI_LAST&&now-AI_LAST.t<240000&&onl.includes(AI_LAST.i)&&!onl.some(j=>j!==AI_LAST.i&&botCalled(j,m)))named=[AI_LAST.i];const on=idle.length?idle:named;if(!on.length){aiDv('접속 중인 모험가 없음');return;}
-  const ask=/\?|봇|ai|AI|누구|있어|있나|ㅎㅇ|안녕|하이|해봐|대답|얘들|애들|다들/.test(m);if(!named.length&&Math.random()>(ask?.97:.8)){aiDv('이번엔 대답 안 함 (확률)');return;}
+let AI_LAST={},AI_ANY=0,AI_GEN=0,AI_TYPING=null;
+// 다른 사람 대화에 옆에서 한마디 끼어듦 (대화를 대신 이어받지 않음). 둘이 얘기 중일 땐 한 번만, 여럿이 떠들 땐 가끔 한 번 더
+async function aiChain(last,line,depth,gen,one){if(depth>=(one?1:2)||gen!==AI_GEN)return;if(Math.random()>(one?.2:[.35,.15][depth]))return;const now=Date.now(),idle=BOTS.map((_,i)=>i).filter(i=>botIdle(i,now)&&i!==last);if(!idle.length)return;
+  await new Promise(r=>setTimeout(r,3000+Math.random()*7000));if(gen!==AI_GEN)return;const j=idle[Math.floor(Math.random()*idle.length)],m=await aiSay(j,line,BOTS[last][0],botCalled(j,line),1);if(m)aiChain(j,m,depth+1,gen,one);}
+const BOT_NM=new Set(BOTS.map(b=>b[0]));
+/* 사람(나 말고)들 이름을 부른 말이면 모험가가 끼지 않음 */function aiHumanCalled(m,who){const s=String(m).toLowerCase(),now=Date.now(),H=new Set(CHAT.filter(c=>!BOT_NM.has(c.n)&&!/^🤖/.test(c.n||'')&&now-(+c.t||0)<30*60000).map(c=>c.n));if(myNick())H.add(myNick());H.delete(who);return [...H].some(n=>[n,n.replace(/[A-Za-z0-9]+$/,''),n.replace(/[0-9]+$/,'')].map(x=>x.toLowerCase()).filter(x=>x.length>=2).some(k=>s.includes(k)));}
+/* who: 말한 사람 (없으면 나). 다른 유저 말에도 대답 — 같은 말에 여러 게임이 동시에 부탁해도 서버가 한 번만 대답하게 막음 */
+async function aiReply(m,who){try{if(!SHEET_URL)return;if(!aiOk()){if(!who)aiDv(SRV_V<84?`서버가 v${SRV_V} (v8.4 아님)`:'서버에 ANTHROPIC_KEY 없음');return;}who=who||myNick()||'모험가';const gen=++AI_GEN,now=Date.now(),idle=BOTS.map((_,i)=>i).filter(i=>botIdle(i,now)),onl=BOTS.map((_,i)=>i).filter(i=>botOn(i,now));
+  /* 이름을 부르면 접속만 해 있어도 (판 사이에 잠깐) 대답 */let named=onl.filter(i=>botCalled(i,m));if(!named.length&&aiHumanCalled(m,who)){aiDv('사람끼리 하는 말');return;}
+  /* 이름을 안 불러도 이어지는 대화: 방금(4분 안) 이 사람과 얘기하던 모험가, 아니면 방금(3분 안) 채팅에서 말한 모험가에게 하는 말로 봄 (다 같이 부르는 말은 제외) */
+  const all=/얘들|애들|다들|누구|있어\?|있나|ㅎㅇ|안녕|하이|여러분|님들/.test(m);let cont=null;
+  if(!named.length&&!all){const L=AI_LAST[who];if(L&&now-L.t<240000&&onl.includes(L.i))cont=L.i;else{const lb=[...CHAT].reverse().find(c=>now-(+c.t||0)<180000&&(BOT_NM.has(c.n)||!(c.n===who)));const bi=lb&&BOT_NM.has(lb.n)?BOTS.findIndex(b=>b[0]===lb.n):-1;if(bi>=0&&onl.includes(bi))cont=bi;}}
+  if(cont!=null)named=[cont];const on=idle.length?idle:named;if(!on.length){aiDv('접속 중인 모험가 없음');return;}
+  const ask=all||/\?|봇|ai|AI|해봐|대답/.test(m);if(!named.length&&Math.random()>(ask?.97:.8)){aiDv('이번엔 대답 안 함 (확률)');return;}
   const i=named.length?named[0]:on[Math.floor(Math.random()*on.length)];await new Promise(r=>setTimeout(r,800+Math.random()*2500));if(gen!==AI_GEN)return;
-  const said=await aiSay(i,m,myNick()||'모험가',named.includes(i));if(!said)return;AI_LAST={i,t:Date.now()};/* 둘이 얘기하는 중(이름 부름·이어지는 대화)엔 다른 사람이 끼지 않음 */if(!named.length)aiChain(i,said,0,gen);}catch(e){aiDv('오류 '+(e&&e.message||e));}}
+  const said=await aiSay(i,m,who,named.includes(i),0,who+'|'+m);if(!said)return;AI_LAST[who]={i,t:Date.now()};
+  /* 둘이 얘기 중이면 다른 모험가는 가끔 옆에서 한마디만 (대화를 이어받지 않음) */aiChain(i,said,0,gen,named.length>0);}catch(e){aiDv('오류 '+(e&&e.message||e));}}
+/* 다른 유저가 한 말을 보고 대답 (불러온 뒤에 새로 올라온 말만, 이어서 보낸 여러 줄은 합쳐서 한 번) */
+let AI_SEEN=null;const AI_PEND={};
+function aiWatch(){try{if(!CHAT.length)return;const last=Math.max(...CHAT.map(c=>+c.t||0));if(AI_SEEN==null){AI_SEEN=last;return;}if(SRV_V<87||!aiOk())return;const me=myNick()||'모험가',now=Date.now();
+  for(const c of CHAT){const t=+c.t||0;if(t<=AI_SEEN)continue;if(BOT_NM.has(c.n)||/^🤖/.test(c.n||'')||c.n===me||(FB&&FB.uid&&c.u===FB.uid)||now-t>90000)continue;
+    const P=AI_PEND[c.n]||(AI_PEND[c.n]={m:[]});P.m.push(c.m);clearTimeout(P.to);P.to=setTimeout(()=>{delete AI_PEND[c.n];aiReply(P.m.join(' '),c.n);},3000);}
+  AI_SEEN=Math.max(AI_SEEN,last);}catch(e){}}
 /* 채팅창을 열어 두면 가끔 모험가들끼리 먼저 얘기를 꺼냄 (사람 말이 없을 때, 4분 넘게 조용하면) */
 setInterval(()=>{try{if(!CHAT_OPEN||!aiOk()||document.hidden)return;const now=Date.now();if(now-AI_ANY<240000||CHAT.some(c=>!c.bot&&now-(+c.t||0)<240000))return;if(Math.random()>.3)return;const idle=BOTS.map((_,i)=>i).filter(i=>botIdle(i,now));if(idle.length<2)return;
   const i=idle[Math.floor(Math.random()*idle.length)],gen=++AI_GEN;aiSay(i,'','',0).then(m=>{if(m)aiChain(i,m,0,gen);});}catch(e){}},60000);
@@ -14465,7 +14483,7 @@ function fbStart(){const db=FB.db,me=FB.uid;
   db.ref('.info/connected').on('value',c=>{FB_CONN=c.val()===true;if(FB_CONN){try{db.ref('online/'+me).onDisconnect().remove();}catch(e){}fbPres();}});
   db.ref('online/'+me).onDisconnect().remove();fbPres();setInterval(()=>{if(!STOPPED)fbPres();},20000); // 다른 탭에 있어도 신호 유지 (자리 비움은 5분 무입력으로 판단)
   db.ref('online').on('value',s=>{FB_SEEN=Date.now();const v=s.val()||{},now=fbNow();ONL_FB=Object.keys(v).filter(k=>v[k]&&now-(+v[k].t||0)<100000).map(k=>({n:String(v[k].n||'모험가').slice(0,12),a:String(v[k].a||'').slice(0,24),fx:String(v[k].fx||''),b:+v[k].b||0,u:k,f:1,s:Math.max(0,Math.round((now-(+v[k].t||0))/1000)),me:k===me?1:0}));onlSet();});
-  db.ref('chat').orderByChild('t').limitToLast(60).on('value',s=>{const L=[];s.forEach(c=>{const x=c.val();if(x&&x.m)L.push({t:+x.t||0,n:String(x.n||'모험가').slice(0,12),m:String(x.m).slice(0,80),fx:String(x.fx||''),u:x.u});});L.sort((a,b)=>a.t-b.t);CHAT=L;if(L.length)CHAT_CT=Math.max(CHAT_CT,L[L.length-1].t);if(CHAT_OPEN)chatPaint();else onlPaint();});
+  db.ref('chat').orderByChild('t').limitToLast(60).on('value',s=>{const L=[];s.forEach(c=>{const x=c.val();if(x&&x.m)L.push({t:+x.t||0,n:String(x.n||'모험가').slice(0,12),m:String(x.m).slice(0,80),fx:String(x.fx||''),u:x.u});});L.sort((a,b)=>a.t-b.t);CHAT=L;if(L.length)CHAT_CT=Math.max(CHAT_CT,L[L.length-1].t);aiWatch();if(CHAT_OPEN)chatPaint();else onlPaint();});
   setTimeout(()=>{try{db.ref('chat').orderByChild('t').endAt(fbNow()-86400000).limitToFirst(40).once('value',s=>s.forEach(c=>{c.ref.remove().catch(()=>{});}));}catch(e){}},8000);
   // 관전당하는 쪽: 누가 보기 시작하면 0.5초마다 내 상태를 올림 (보는 사람이 15초 넘게 신호가 없으면 멈춤)
   db.ref('watch/'+me).on('value',s=>{const v=s.val();FB_WATCHT=v&&v.t?+v.t:0;if(v&&!FB_SNAP)FB_SNAP=setInterval(()=>{if(!FB_WATCHT||fbNow()-FB_WATCHT>15000){clearInterval(FB_SNAP);FB_SNAP=null;return;}try{db.ref('snap/'+me).set({d:JSON.stringify(specSnap()),t:firebase.database.ServerValue.TIMESTAMP});}catch(e){}},250);});
@@ -14859,7 +14877,7 @@ function chatPaint(){let box=document.getElementById('chatBox');
   if(atEnd||!L.dataset.init){L.scrollTop=L.scrollHeight;L.dataset.init=1;}try{profBind(L);}catch(e){}/* 채팅 이름: 마우스를 올리면 프로필, 누르면 프로필 창 */chatMark();onlPaint();}
 async function chatFetch(say){if(!SHEET_URL)return;const u=SHEET_URL+'?chat=1'+(say!=null?'&say='+encodeURIComponent(say)+'&id='+onlId()+'&n='+encodeURIComponent(myNick()||'모험가')+'&k='+encodeURIComponent(MYKEY)+'&fx='+myFx():'');
   const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),15000):0,sq=++CHAT_SEQ;CHAT_BUSY++;
-  try{const r=await fetch(u,{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();if(j&&Array.isArray(j.msgs)&&sq>CHAT_APPLIED){CHAT_APPLIED=sq;CHAT=j.msgs;if(CHAT.length)CHAT_CT=Math.max(CHAT_CT,CHAT[CHAT.length-1].t);}chatPaint();return j;}catch(e){return null;}finally{clearTimeout(to);CHAT_BUSY--;}}
+  try{const r=await fetch(u,{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();if(j&&Array.isArray(j.msgs)&&sq>CHAT_APPLIED){CHAT_APPLIED=sq;CHAT=j.msgs;if(CHAT.length)CHAT_CT=Math.max(CHAT_CT,CHAT[CHAT.length-1].t);aiWatch();}chatPaint();return j;}catch(e){return null;}finally{clearTimeout(to);CHAT_BUSY--;}}
 let CHAT_SENDING=null;
 let CHAT_MULTI=0;
 async function chatSend(){const i=$('chIn'),m=String(i.value||'').trim();if(!m)return;
@@ -16023,7 +16041,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=362,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=363,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});

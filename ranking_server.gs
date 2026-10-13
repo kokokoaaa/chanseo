@@ -1,4 +1,7 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v8.6
+// 찬서 명예의 전당 서버 (Google Apps Script) v8.7
+//
+// v8.6 → v8.7 바뀐 점 (게임 v363)
+// - 다른 유저 말에도 모험가가 대답. 같은 말에 여러 사람 게임이 동시에 부탁해도 한 번만 대답하게 막음 (k = 말한 사람|말 내용, 2분)
 //
 // v8.5 → v8.6 바뀐 점 (게임 v362)
 // - AI 대답을 POST로도 받음 (최근 대화 20줄 + 그 모험가가 예전에 한 말 → 말이 앞뒤로 맞게). 모험가별 말투 규칙
@@ -415,7 +418,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 86, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 87, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -632,7 +635,7 @@ function devList_(q) {
 // 후원 응원 메시지 ('후원' 시트, 최근 300줄까지만 남김)
 const SUP_SHEET = '후원';
 // v8.4 AI 모험가 대답 (Claude Haiku). 키는 스크립트 속성 ANTHROPIC_KEY
-const AI_DAY = 300, AI_GAP = 8, AI_MODEL = 'claude-haiku-5-5';
+const AI_DAY = 300, AI_GAP = 5, AI_MODEL = 'claude-haiku-5-5';
 const AI_BOTS = [
   ['별헤는밤', '27살 천문대 근처 카페 매니저. 다정하고 차분함. 별·사진·카페 손님 얘기, 연애 고민 잘 들어줌. 게임은 마법사', '존댓말(~요). 문장 끝에 마침표나 물결(~)을 씀. ㅋㅋ 안 씀, 웃을 땐 「ㅎㅎ」 아주 가끔'],
   ['루루', '19살 디자인과 새내기. 발랄함. 과제·동기·알바·편의점 신상 얘기. 드루이드', '반말. 「~당」「~용」「헐」「대박」. 웃음은 「ㅎㅎ」, 느낌표 자주'],
@@ -664,6 +667,7 @@ function ai_(q) {
   if (!B) return { err: 'bot' };
   const c = CacheService.getScriptCache(), day = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyyMMdd'), dk = 'ai_n_' + day;
   const n = +(c.get(dk) || 0); if (n >= AI_DAY) return { err: 'day' };
+  if (q.k) { const kk = 'aik_' + Utilities.base64EncodeWebSafe(Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, String(q.k).slice(0, 300), Utilities.Charset.UTF_8)); const lk = LockService.getScriptLock(); let got = false; try { got = lk.tryLock(3000); } catch (err) {} try { if (c.get(kk)) return { skip: 1 }; c.put(kk, '1', 120); } finally { if (got) lk.releaseLock(); } }
   if (c.get('ai_gap')) return { err: 'gap' };
   c.put('ai_gap', '1', AI_GAP); c.put(dk, String(n + 1), 90000);
   let ctx = []; try { ctx = JSON.parse(String(q.ctx || '[]')); } catch (err) {}
