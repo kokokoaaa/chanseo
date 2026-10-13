@@ -9258,7 +9258,9 @@ const PATCH_NOTES=[
   {v:344,t:'🩸 광전사 흡혈 · 전투 문신',items:[
     ['change','🩸 <b>광전사</b>: 카드·장비·강화·증강으로 얻은 흡혈이 이제 <b>절반으로 줄지 않고 그대로</b> 적용돼요 (다른 직업은 그대로 절반). 흡혈로 버티는 직업인데 회복이 1초 한도의 1/5도 못 쓰던 문제'],
     ['change','🩹 <b>전투 문신</b>: 광란이 안 쌓여 있어도 초당 재생 +1.5, 광란 중첩당 +0.2 더 (예전엔 광란이 쌓여야만 효과)'],
-    ['change','🏆 레이드 명예의 전당: 팀원 3명이 발끝을 맞춰 어깨가 닿게 붙어 서고, 대장의 날개·오라 같은 효과는 동료 <b>뒤로</b> 가요. 아래 순위 목록도 줄마다 같은 폭에 가운데 정렬']]},
+    ['change','🏆 레이드 명예의 전당: 팀원 3명이 발끝을 맞춰 어깨가 닿게 붙어 서고, 대장의 날개·오라 같은 효과는 동료 <b>뒤로</b> 가요. 아래 순위 목록도 줄마다 같은 폭에 가운데 정렬'],
+    ['bug','📋 기록 창 오른쪽 상자가 기록마다 「장비 합산」·「최종 능력치」로 달랐던 것: 이제 항상 <b>최종 능력치</b> (정보가 없는 기록은 「정보 없음」, 내 레이드 기록은 보관함의 그 직업 캐릭터 능력치). 레이드 기록 점수가 7,000,000점처럼 크게 나오던 것도 종합 점수(단계×1,000+빠른 처치)로'],
+    ['change','🤖 AI 모험가는 코스튬을 입지 않아요 (코스튬이 장비를 덮어서 장비창과 겉모습이 안 맞아 보였어요). 오라·날개·칭호는 그대로']]},
   {v:343,t:'🏆 레이드 시상대 정돈 · 🩹 흡혈·재생 증강 상향',items:[
     ['bug','🏆 레이드 명예의 전당: 동료 그림이 늘어나 깨지던 문제를 고쳤어요. 동료가 대장과 <b>같은 크기로 양옆에 붙어</b> 서고(아래 순위 목록도 가로로 나란히), <b>그 판 장비 모습</b>으로 보여요 (예전 내 기록은 보관함의 그 직업 캐릭터 모습)'],
     ['change','🩹 흡혈·재생 증강 상향 (측정해 보니 다른 방어 증강보다 확실히 약했던 것): <b>피의 열광</b> 적중 회복 0.3 → 최대 체력의 0.05% · <b>전투 문신</b> 광란 중첩당 재생 0.1 → 0.2 · <b>세계수</b> 재생 +3 → +6, 재생 1초 한도 +0.6%p · <b>성흔</b> 표식 처치 회복 1% → 2%']]},
@@ -13721,7 +13723,7 @@ function botProf(i){const day=Math.floor(Date.now()/864e5),ck=i+'|'+day;if(BOT_P
   const AL=ACH.filter(a=>(!a.hid||sk>=3)&&(!a.hard||sk>=3)),nA=Math.min(AL.length,Math.round(AL.length*(.06+sk*.08+rnd()*.04))),got=new Set(AL.map((a,j)=>[a,j/AL.length*(a.hard?2.2:1)+rnd()*.6]).sort((x,y)=>x[1]-y[1]).slice(0,nA).map(x=>x[0].k));
   let achS='';for(let j=0;j<ACH.length;j+=6){let v=0;for(let b=0;b<6;b++){const a=ACH[j+b];if(a&&got.has(a.k))v|=1<<b;}achS+=B64[v];}
   const GL=ACH.filter(a=>got.has(a.k)),title=GL.length&&rnd()<.85?(GL.filter(a=>a.hard||a.rw).length?pick(GL.filter(a=>a.hard||a.rw)):pick(GL)).k:'';
-  const C=c=>COS.filter(x=>x.cat===c&&!x.ach),skin=rnd()<.25+sk*.15?(pick(C('skin'))||{}).k||'':'',au=[rnd()<sk*.18?(pick(C('wing'))||{}).k:'',rnd()<.2+sk*.15?(pick(C('aura'))||{}).k:''].filter(Boolean).join('+');
+  const C=c=>COS.filter(x=>x.cat===c&&!x.ach),skin=(rnd(),''),/* v344: 코스튬은 장비를 덮어서 장비창과 겉모습이 안 맞아 보였음 → 봇은 코스튬 없이 장비 모습 그대로 (오라·날개·칭호는 유지) */au=[rnd()<sk*.18?(pick(C('wing'))||{}).k:'',rnd()<.2+sk*.15?(pick(C('aura'))||{}).k:''].filter(Boolean).join('+');
   let dr='';try{if(DLOOK_ON(cls))dr=dressEnc(dressFrom(cls,I));}catch(e){}
   const det=GEAR_KEYS.map(k=>itEnc(eqI(k))).join(':').replace(/:+$/,'');
   const p=profParse([cls,skin,au,'n',title,ge,pw,pt,got.size,[pm,pg,pr].join('.'),dr,achS,det].join('~'));if(p){p.bot=1;p.cc=BOT_P[i].c;}return BOT_PC[ck]=p;}
@@ -14468,7 +14470,7 @@ let HOF_B=[];
 function hofTipHtml(b){const A=b.title&&ACH.find(a=>a.k===b.title),cn=k=>{const x=k&&COS.find(q=>q.k===k);return x?x.n:'';},G=gearDecode(b.gear),D=b.dw,f=x=>`${Math.floor(x/60)}분 ${Math.floor(x%60)}초`;
   const gl=G?GEAR_KEYS.filter(k=>G[k]>1).map(k=>`${GEAR[slotT(k)].ico}+${G[k]-1}`).join(' '):'';
   return `<b>${esc(b.name||'이름 없음')}</b>${A?` <span style="color:#ffd76a">「${A.n}」</span>`:''}
-  <div>${CLASSES[b.cls]?CLASSES[b.cls].n:'?'} · ${DIFF[b.diff]?DIFF[b.diff].n:(r=>r?'레이드 '+r.n:'')(RAIDS.find(r=>'raid_'+r.k===b.diff))} · ${b.score.toLocaleString()}점</div>
+  <div>${CLASSES[b.cls]?CLASSES[b.cls].n:'?'} · ${DIFF[b.diff]?DIFF[b.diff].n:(r=>r?'레이드 '+r.n:'')(RAIDS.find(r=>'raid_'+r.k===b.diff))} · ${(/^raid/.test(String(b.diff))?raidPts(b):b.score).toLocaleString()}점</div>
   ${/^raid/.test(b.diff)?`<div>🗿 ${b.lvl}단계 · ${f(b.time)} 만에 처치${b.comment?` · 🤝 ${esc(String(b.comment).slice(0,40))}`:''}</div>`:`<div>Lv ${b.lvl} · ${f(b.time)} · 처치 ${(+b.kills||0).toLocaleString()} · 보스 ${+b.bosses||0}</div>`}
   ${+b.at>1.6e12?`<div>📅 ${(d=>`${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`)(new Date(+b.at))}에 세운 기록</div>`:''}
   <div>⚔ 결투 ${D?`<b>${D.w}승 ${D.d}무 ${D.l}패</b>`:'기록 없음'}${b.h?' · <span style="color:#7be08f">결투 상대 가능</span>':''}</div>
@@ -14491,11 +14493,14 @@ async function hofStatOpen(b){if(!b)return;let w=document.getElementById('hofSt'
   const det={};String(b.gd||'').split(':').forEach((x,i)=>{const k=GEAR_KEYS[i];if(k){const it=itDec(k,x);if(it)det[k]=it;}});const hasG=Object.keys(det).length;
   const mkG=side=>{if(hasG)G=gearPanel(b.cls,det,null,profAv(RP,120),'🎒 클리어 당시 장비 · 마우스를 올리면 설명',side!=null?{side}:{});
     else{const A=profAv(RP,120);G={n:1,html:`<div class="pwrap">${A?`<img src="${A.src}" alt="" style="width:${A.css}px;height:${A.css}px;image-rendering:pixelated">`:''}${side!=null?`<div class="ptot">${side}</div>`:'<div style="color:var(--muted);text-align:center">🎒 이 기록에는 클리어 당시<br>장비 정보가 없어요</div>'}</div>`,bind:()=>{}};}};
-  mkG(null);
-  if(!b.h&&!b.bot){paint('<div style="color:var(--muted);text-align:center;margin-top:6px">📊 이 기록에는 능력치 정보가 없어요<br><small>(능력치는 무한의 악몽·보스 러시 기록에만 함께 저장돼요)</small></div>');return;}
-  paint('<div style="color:var(--muted);text-align:center">📊 능력치 불러오는 중…</div>');
-  const h=b.bot?botHero(b):await hofHero({hof:b,n:b.name});if(!document.body.contains(w))return;
-  if(!h){paint('<div style="color:var(--muted);text-align:center">능력치를 불러오지 못했어요. 잠시 뒤 다시 눌러 보세요</div>');return;}
+  const STX=m=>`<b>📊 최종 능력치</b><div style="color:var(--muted);font-size:12px;margin-top:6px;line-height:1.5">${m}</div>`;
+  mkG(STX('불러오는 중…'));
+  // v344: 내 레이드 기록은 보관함에 있는 그 직업 캐릭터 능력치로 (레이드 기록엔 능력치가 따로 안 남음)
+  if(!b.h&&!b.bot&&/^raid/.test(String(b.diff||''))&&b.name===myNick()){const mh=(()=>{try{return myHeroes().filter(x=>x.cls===b.cls).sort((x,y)=>(y.score||0)-(x.score||0))[0];}catch(e){return null;}})();if(mh){b={...b,_mh:mh};}}
+  if(!b.h&&!b.bot&&!b._mh){mkG(STX('이 기록에는 능력치 정보가 없어요<br>(능력치는 무한의 악몽·보스 러시 기록에 함께 저장돼요)'));paint('');return;}
+  paint('');
+  const h=b.bot?botHero(b):b._mh?b._mh:await hofHero({hof:b,n:b.name});if(!document.body.contains(w))return;
+  if(!h){mkG(STX('능력치를 불러오지 못했어요. 잠시 뒤 다시 눌러 보세요'));paint('');return;}
   // v340: 장비 옆 상자 = 그 판의 최종 능력치 (장비 합산 대신). 아래 증강은 종류별로, 마우스를 올리면 효과
   const stH=`<b>📊 최종 능력치</b>${HERO_ST.filter(k=>h.st&&h.st[k]!=null).map(k=>`<div class="strow"><span>${k}</span><b>${h.st[k]}</b></div>`).join('')||'<small>정보 없음</small>'}${h.dps?`<div class="strow"><span>최대 DPS</span><b style="color:#ffe27a">${fmtN(h.dps)}</b></div>`:''}${h.aw?`<div class="strow"><span>🔥 각성</span><b>${h.aw}</b></div>`:''}`;
   mkG(stH);
