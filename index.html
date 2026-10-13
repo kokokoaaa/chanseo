@@ -722,7 +722,7 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 #ov.home .rlist .ri{background:#174034!important;border:1px solid #2f6a52!important;border-radius:8px!important;box-shadow:none!important}
 #ov.home .rlist .ri.r1{border-color:#d6b45a!important}
 #ov.home .rlist .ri .rsc{color:#e0b84a!important;font-family:'Gugi','Do Hyeon',sans-serif}
-#ov.home .stagebg{background:var(--stageImg,none) 50% 58%/auto 175% no-repeat,#0e2a22!important;image-rendering:pixelated;border:1px solid #2f6a52;box-shadow:inset 0 0 30px rgba(0,0,0,.35)!important}
+#ov.home .stagebg{background:transparent!important;border:none;box-shadow:none!important}
 #ov.home .stagebg .valance,#ov.home .stagebg .curtL,#ov.home .stagebg .curtR,#ov.home .stagebg .spot,#ov.home .stagebg .conf{display:none!important}
 #ov.home .stagebg .carpet{background:#0c241c!important;box-shadow:inset 0 2px 0 #2f6a52!important}
 #ov.home .hRep canvas{background:#0c241c;border:2px solid #d6b45a;border-radius:8px}
@@ -9017,7 +9017,7 @@ const PATCH_NOTES=[
   {v:316,t:'🏰 숲속 성채',items:[
     ['new','🏰 메인 화면이 <b>숲속 성채</b>로 바뀌었어요: 호수 위의 성, 눈 덮인 산, 달밤 숲. 구름이 흘러가고 달이 빛나고, 반딧불이 날아다니고, 깃발이 펄럭이고, 호수에 성이 비쳐 일렁여요','look'],
     ['change','🟩 메인 화면 버튼을 모두 <b>단색</b>으로 바꿔 잘 보이게 했어요. 색은 눈이 편한 초록 계열, 고른 것은 금색','look'],
-    ['change','🗺 난이도 고르기가 <b>원정 지도</b> 위로 (마을 → 숲 → 화산 → 신전). 명예의 전당 단상 뒤도 같은 성 풍경이에요','look']]},
+    ['change','🗺 난이도 고르기가 <b>원정 지도</b> 위로 (마을 → 숲 → 화산 → 신전). 명예의 전당은 커튼 없이 깔끔하게','look']]},
   {v:315,t:'📜 의뢰인의 네 갈래 길',items:[
     ['change','📜 의뢰인이 <b>첫 보스를 잡으면</b> 바로 나타나요 (예전: 2분 30초. 일반 난이도는 1분 30초). 의뢰를 다 하면 그 판에서 곧바로 다시 와서 보상과 다음 의뢰를 줘요'],
     ['new','📜 1배속 의뢰가 <b>네 갈래 길</b>로 바뀌었어요. 의뢰인을 처음 만나면 길을 골라요: <b>⚔ 사냥꾼</b>(처치·정예·지옥 보스·노히트 보스) · <b>🧭 탐험가</b>(돌발 이벤트·이스터에그·악몽 탐사) · <b>🧘 수련자</b>(레벨·완벽한 회피·지옥 클리어·악몽 버티기) · <b>💰 상인</b>(골드·상인 거래·지옥 이상 대량 처치)'],
@@ -14783,7 +14783,7 @@ const HOME_MAP=(()=>{try{let sd=11;const rnd=()=>{sd=(sd*16807)%2147483647;retur
   px('#eae6d0',270,40,20,2);for(const q of [271,279,287])px('#dcd8c0',q,42,2,11);px('#eae6d0',268,53,24,2);return c.toDataURL();}catch(e){return '';}})();
 // 메인 화면이 떠 있을 때만 배경을 움직임 (게임 중·다른 창·화면 꺼짐이면 멈춤)
 {const cvB=document.getElementById('homeBg');let on=false;
- try{document.documentElement.style.setProperty('--stageImg',`url(${CSBG.still(3)})`);if(HOME_MAP)document.documentElement.style.setProperty('--mapImg',`url(${HOME_MAP})`);}catch(e){}
+ try{if(HOME_MAP)document.documentElement.style.setProperty('--mapImg',`url(${HOME_MAP})`);}catch(e){}
  setInterval(()=>{const want=!!cvB&&ov.classList.contains('on')&&ov.classList.contains('home');if(want===on)return;on=want;cvB.style.display=on?'block':'none';try{if(on)CSBG.start(cvB,24);else CSBG.stop();}catch(e){}},250);}
 resize();newRun();startScreen();bootPatch();appGate();requestAnimationFrame(loop);
 // v307: 시작 화면(판 진행 중 아님)에선 1분마다, 판 중엔 3분마다 확인 — 배포 직후(Pages 반영 약 40초) 열어서 옛 버전을 「최신」으로 보는 시간을 줄임
