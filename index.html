@@ -10790,9 +10790,9 @@ const Q_RT={/* v346: 목표 하나하나가 너무 쉬웠음 (악몽 10분이면
     {n:'인내의 시험',d:'무한의 악몽 한 판에서 {g}분 버티기',k:'surv',g:18,only:'nightmare',rw:'m1500+b3'},
     {n:'끝없는 수련',d:'무한의 악몽 한 판에서 {g}분 버티기',k:'surv',g:22,only:'nightmare',rw:'e1+b8+m2000'}]},
   merc:{n:'상인',i:'💰',d:'골드를 모으고 상인과 거래하는 길',fin:'🏅 메달 8,000 + 아직 없는 외형 1개',steps:[
-    {n:'첫 장사',d:'무한의 악몽 한 판에서 골드 {g} 벌기 (쓴 골드도 포함)',k:'gold',g:60000,only:'nightmare',rw:'m800+b2'},
+    {n:'첫 장사',d:'무한의 악몽 한 판에서 골드 {g} 벌기',k:'gold',g:60000,only:'nightmare',rw:'m800+b2'},
     {n:'단골손님',d:'무한의 악몽에서 상인에게 {g}번 사기',k:'buy',g:40,only:'nightmare',rw:'m1000+b2'},
-    {n:'큰손',d:'무한의 악몽 한 판에서 골드 {g} 벌기 (쓴 골드도 포함)',k:'gold',g:100000,only:'nightmare',rw:'m1500+b3'},
+    {n:'큰손',d:'무한의 악몽 한 판에서 골드 {g} 벌기',k:'gold',g:100000,only:'nightmare',rw:'m1500+b3'},
     {n:'황금 사냥',d:'무한의 악몽 한 판에서 적 {g}마리 처치',k:'killRun',g:25000,only:'nightmare',rw:'m8000+cos'}]}};
 const Q_ONE=new Set(['lvl','surv','gold','killRun','clear']),Q_DO={normal:0,hard:1,hell:2,god:3,nightmare:4};
 const qD=()=>{const Q=META.quest=META.quest||{st:0,acc:0,pr:0,cyc:0};if(Q.v!==2){/* 예전 5단계 의뢰 → 루트 고르기부터 (끝낸 횟수 cyc는 그대로) */Q.v=2;Q.rt=null;Q.st=0;Q.acc=0;Q.pr=0;Q.cy=Q.cy||{};}return Q;};
