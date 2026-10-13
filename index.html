@@ -14287,9 +14287,11 @@ function botCalled(i,m){const n=BOTS[i][0],s=String(m).toLowerCase(),K=[n,n.repl
 function chatSplit(t,n=80){t=String(t||'').trim();const out=[];while(t.length>n){let k=-1;for(const re of [/[.!?~…ㅋㅎ]\s/g,/[,]\s/g,/\s/g]){let mm;re.lastIndex=0;while((mm=re.exec(t))&&mm.index<n)k=mm.index+1;if(k>n*.4)break;}if(k<=0)k=n;out.push(t.slice(0,k).trim());t=t.slice(k).trim();}if(t)out.push(t);return out;}
 const aiDv=t=>{if(DEV)toast('🛠 AI 대답: '+t);};
 const aiOk=()=>!!SHEET_URL&&SRV_V>=84&&SRV_AI;
-const aiCtx=extra=>{const L=[...CHAT.filter(c=>!/^🤖/.test(c.n||'')),...botChat()].sort((a,b)=>a.t-b.t).slice(-12).map(c=>String(c.n).replace(/^🤖 /,'')+': '+c.m);if(extra&&!L.some(x=>x===extra))L.push(extra);return L.slice(-12);};
+const aiCtx=extra=>{const L=[...CHAT.filter(c=>!/^🤖/.test(c.n||'')),...botChat()].sort((a,b)=>a.t-b.t).slice(-20).map(c=>String(c.n).replace(/^🤖 /,'')+': '+c.m);if(extra&&!L.some(x=>x===extra))L.push(extra);return L.slice(-20);};
+/* 그 모험가가 예전에 실제로 한 말 (말이 앞뒤로 맞게: 직업·나이·한 말을 기억) */const aiMine=i=>CHAT.filter(c=>String(c.n||'').replace(/^🤖 /,'')===BOTS[i][0]).slice(-10).map(c=>c.m);
 // 봇 i가 한마디 (said = 바로 앞 사람의 말, who = 그 사람, named = 그 사람이 i를 직접 불렀는지, said가 없으면 먼저 화제를 꺼냄)
-async function aiSay(i,said,who,named,cut){const T0=Date.now();const r=await fetch(SHEET_URL+'?ai=1&b='+i+'&me='+encodeURIComponent(who||'')+'&said='+encodeURIComponent(said||'')+'&named='+(named?1:0)+(cut?'&cut=1':'')+'&st='+encodeURIComponent(botState(i,Date.now()))+'&ctx='+encodeURIComponent(JSON.stringify(aiCtx(said&&who?who+': '+said:''))),{cache:'no-store'});
+async function aiSay(i,said,who,named,cut){const T0=Date.now(),body={ai:1,b:i,me:who||'',said:said||'',named:named?1:0,cut:cut?1:0,st:botState(i,Date.now()),mine:JSON.stringify(aiMine(i)),ctx:JSON.stringify(aiCtx(said&&who?who+': '+said:''))};
+  /* 서버 v8.6부터는 POST (긴 대화도 다 보냄), 그 전엔 주소에 실어 보냄 */const r=SRV_V>=86?await fetch(SHEET_URL,{method:'POST',body:JSON.stringify(body)}):await fetch(SHEET_URL+'?'+Object.entries({...body,mine:JSON.stringify(aiMine(i).slice(-4)),ctx:JSON.stringify(aiCtx(said&&who?who+': '+said:'').slice(-10))}).map(([k,v])=>k+'='+encodeURIComponent(v)).join('&'),{cache:'no-store'});
   const j=await r.json();if(!j||!j.m){aiDv('서버 응답 '+JSON.stringify(j).slice(0,160));return null;}const n=BOTS[i][0],parts=chatSplit(j.m);AI_ANY=Date.now();
   /* 사람처럼 타자 치는 시간: 읽고 생각하는 시간 + 글자 수 ÷ 타자 속도(1초에 3~5.5자, 사람마다 다름) — 그동안 「OO 입력 중…」 */const cps=3+((botH(i,4321)%100)/100)*2.5;
   for(let q=0;q<parts.length;q++){const think=q?400+Math.random()*900:1500+Math.random()*3500,type=parts[q].length/cps*1000*(.85+Math.random()*.3),wait=Math.max(600,think+type-(q?0:Date.now()-T0));

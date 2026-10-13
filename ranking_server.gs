@@ -1,4 +1,7 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v8.5
+// 찬서 명예의 전당 서버 (Google Apps Script) v8.6
+//
+// v8.5 → v8.6 바뀐 점 (게임 v362)
+// - AI 대답을 POST로도 받음 (최근 대화 20줄 + 그 모험가가 예전에 한 말 → 말이 앞뒤로 맞게). 모험가별 말투 규칙
 //
 // v8.4 → v8.5 바뀐 점 (게임 v360)
 // - 🧿 부적 보상: 끝난 일간·주간·월간 무한의 악몽 1~3위에게 부적을 「고용 메달」 시트에 적어 둠 (charm:기간:순위:기간키) → 게임이 ?gifts= 로 받아 감
@@ -412,7 +415,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 85, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 86, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -664,11 +667,15 @@ function ai_(q) {
   if (c.get('ai_gap')) return { err: 'gap' };
   c.put('ai_gap', '1', AI_GAP); c.put(dk, String(n + 1), 90000);
   let ctx = []; try { ctx = JSON.parse(String(q.ctx || '[]')); } catch (err) {}
-  ctx = (Array.isArray(ctx) ? ctx : []).slice(-10).map(x => String(x || '').replace(/\s+/g, ' ').slice(0, 100)).filter(Boolean);
+  ctx = (Array.isArray(ctx) ? ctx : []).slice(-20).map(x => String(x || '').replace(/\s+/g, ' ').slice(0, 100)).filter(Boolean);
   if (!ctx.length) return { err: 'ctx' };
   const st = String(q.st || '').replace(/\s+/g, ' ').slice(0, 300);
+  let mine = []; try { mine = JSON.parse(String(q.mine || '[]')); } catch (err) {}
+  mine = (Array.isArray(mine) ? mine : []).slice(-10).map(x => String(x || '').replace(/\s+/g, ' ').slice(0, 120)).filter(Boolean);
   const sys = '너는 한국 모바일·PC 게임 「찬서 : 찬붕이의 뱀서」(뱀파이어 서바이버류 판타지 액션 게임) 전체 채팅에 있는 유저 「' + B[0] + '」야. 너는 이런 사람: ' + B[1] + '. 말투(꼭 지켜): ' + (B[2] || '') + '. 이건 성향·배경일 뿐, 평범하고 정상적인 사람처럼 대화해 — 컨셉 얘기만 반복하지 말고 상대 말에 맞춰 다양하게.\n' +
     '게임 정보: 직업 12개(기사·마법사·궁수·도적·성기사·사령술사·총잡이·정령사·광전사·드루이드·연금술사·도박사), 난이도 일반·어려움·지옥·신, 엔드 컨텐츠 무한의 악몽·보스 러시·레이드(보스 5종 1~10단계)·결투·실험실, 대장간(강화·마법부여), 증강 카드, 명예의 전당.\n' +
+    (mine.length ? '네가 예전에 이 채팅에서 실제로 한 말(이것과 절대 모순되지 말고, 한 말은 기억하고 이어가):\n- ' + mine.join('\n- ') + '\n' : '') +
+    '일관성: 네 이름·나이·직업·사는 모습·성격은 위 설정 그대로 절대 바꾸지 마. 이미 밝힌 사실(직업, 연봉 같은 걸 말했는지 안 했는지 등)을 뒤집거나 「~일 수도 있고요」처럼 얼버무려 번복하지 마. 비밀로 하기로 했으면 끝까지 비밀, 말했으면 같은 내용으로.\n' +
     (st ? '너의 지금 실제 상황(이 사실과 어긋나는 기록·난이도·결과를 지어내지 마): ' + st + '\n' : '') +
     '규칙: 실제 사람처럼 채팅창에 한 줄만 써. 보통 15~60자, 할 말이 많으면 150자까지 (길면 게임이 알아서 여러 줄로 나눠 보냄). 이모지 쓰지 마. ㅋㅋ·ㅎㅎ 같은 웃음 표시는 네 말투 설명에 있는 만큼만 써 — 다른 사람 말투를 따라 하지 마. 따옴표·이름표 없이 말만. ' +
     '너는 진짜 사람처럼 게임 밖의 삶이 있어: 네 성격에 맞는 나이대·직업이나 학교·하루 일과·취향·고민을 스스로 정해서 일관되게 구체적으로 말해 (지어내도 됨). 게임 얘기뿐 아니라 일·학교·돈·연애·음식·취미·시사·잡담 같은 현실 얘기도 자연스럽게 받아치고, 의견은 얼버무리지 말고 분명하게, 때로는 솔직하게 반박하거나 놀리기도 해. 「잘 모르겠어요」「게임 얘기 해요」 같은 회피는 하지 마. ' +
@@ -759,6 +766,8 @@ function doGet(e) {
 }
 
 function doPost(e) {
+  // v8.6 AI 대답은 잠금 없이 (몇 초 걸려서 다른 요청을 막지 않게). 대화가 길어 주소(GET)에 다 안 들어가서 POST로
+  { let d0 = null; try { d0 = JSON.parse(e.postData.contents); } catch (err) {} if (d0 && d0.ai) return out_(ai_(d0)); }
   const lock = LockService.getScriptLock();
   let got = false; try { got = lock.tryLock(15000); } catch (err) {}
   if (!got) return out_({ ok: false, err: 'busy' });
