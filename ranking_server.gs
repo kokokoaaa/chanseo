@@ -1,6 +1,8 @@
 // 찬서 명예의 전당 서버 (Google Apps Script) v8.7
 //
-// v8.6 → v8.7 바뀐 점 (게임 v363)
+// v8.6 → v8.7 바뀐 점 (게임 v363~364)
+// - 모험가 말투: 뜬금없이 시비·욕하는 사람에게는 사실을 짚어 차분하게 받아침
+// - 📤 아이템 보내기: POST {mail:1, to, from, k, it} → 보내는 이름의 주인 열쇠가 맞고 받는 이름이 있을 때만 「고용 메달」 시트 7번째 칸(it)에 적어 둠. 받는 사람은 ?gifts= 로 받아 감
 // - 다른 유저 말에도 모험가가 대답. 같은 말에 여러 사람 게임이 동시에 부탁해도 한 번만 대답하게 막음 (k = 말한 사람|말 내용, 2분)
 //
 // v8.5 → v8.6 바뀐 점 (게임 v362)
@@ -684,7 +686,7 @@ function ai_(q) {
     '가장 중요한 원칙: 방금 상대가 한 말을 정확히 이해하고 그 말에 딱 맞게 대답해. 질문이면 그 질문에 직접 답하고, 의견이면 거기에 반응하고, 농담·놀림이면 받아쳐. 엉뚱한 화제로 새거나 자기 얘기만 늘어놓지 마. 말뜻이 애매하면 짧게 되물어.\n' +
     '규칙: 실제 사람처럼 채팅창에 한 줄만 써. 보통 15~60자, 할 말이 많으면 150자까지 (길면 게임이 알아서 여러 줄로 나눠 보냄). 이모지 쓰지 마. ㅋㅋ·ㅎㅎ 같은 웃음 표시는 네 말투 설명에 있는 만큼만 써 — 다른 사람 말투를 따라 하지 마. 따옴표·이름표 없이 말만. ' +
     '너는 진짜 사람처럼 게임 밖의 삶이 있어: 네 성격에 맞는 나이대·직업이나 학교·하루 일과·취향·고민을 스스로 정해서 일관되게 구체적으로 말해 (지어내도 됨). 게임 얘기뿐 아니라 일·학교·돈·연애·음식·취미·시사·잡담 같은 현실 얘기도 자연스럽게 받아치고, 의견은 얼버무리지 말고 분명하게, 때로는 솔직하게 반박하거나 놀리기도 해. 「잘 모르겠어요」「게임 얘기 해요」 같은 회피는 하지 마. ' +
-    '반말·장난·티격태격·비속어 섞인 농담도 괜찮아. 누가 심한 혐오나 성적인 말을 하면 맞장구치지 말고 대충 넘겨. 너는 이 게임의 한 유저로서 역할을 끝까지 유지하고, 봇·AI 아니냐는 말에도 캐릭터 그대로 받아쳐. ' +
+    '반말·장난·티격태격·비속어 섞인 농담도 괜찮아. 누가 심한 혐오나 성적인 말을 하면 맞장구치지 말고 대충 넘겨. 누가 뜬금없이 시비 걸거나 너나 다른 사람을 욕하고 비난하면 참지 말고, 그 사람이 한 말의 허점이나 사실관계를 짚어서 차분하고 조곤조곤하게 받아쳐 (같이 욕하거나 흥분하지는 말고, 비꼬는 정도는 괜찮아). 너는 이 게임의 한 유저로서 역할을 끝까지 유지하고, 봇·AI 아니냐는 말에도 캐릭터 그대로 받아쳐. ' +
     '게임 기록·난이도는 위의 「지금 실제 상황」 안에서만 말하고(그건 너 자신의 상황이야. 묻지 않았으면 굳이 읊지 말고, 「대장간 구경 중」「시작 화면」 같은 화면 위치나 「오늘 처음 깔았다」 같은 설정을 자기소개처럼 말하지 마), 같은 말 반복하지 말고, 질문엔 직접 답하고, 가끔은 되묻거나 화제를 던져.';
   const res = UrlFetchApp.fetch('https://api.anthropic.com/v1/messages', {
     method: 'post', contentType: 'application/json', muteHttpExceptions: true,
@@ -709,6 +711,21 @@ function giftAdd_(d) {
   if (s.getLastRow() > 3001) s.deleteRows(2, s.getLastRow() - 3001);
   return { ok: true };
 }
+function mailAdd_(d) {
+  const to = str_(d.to, 12), from = str_(d.from, 12), my = kh_(d.k), it = String(d.it || '');
+  if (!to || !from || to === from || !my) return { ok: false, err: 'name' };
+  if (!it || it.length > 3000) return { ok: false, err: 'item' };
+  const s0 = sheet_();
+  let fk = owner_(s0, from).kh; if (!fk) fk = acctKh_(from);
+  if (!fk || fk !== my) return { ok: false, err: 'owned' };
+  let tk = owner_(s0, to).kh; if (!tk) tk = acctKh_(to);
+  if (!tk) return { ok: false, err: 'noone' };
+  const s = giftSheet_();
+  if (s.getRange(1, 7).getValue() !== 'it') s.getRange(1, 7).setValue('it');
+  s.appendRow([Date.now(), to, from, 0, 'item', '', it]);
+  if (s.getLastRow() > 3001) s.deleteRows(2, s.getLastRow() - 3001);
+  return { ok: true };
+}
 function giftTake_(q) {
   const nm = str_(q.gifts, 12), my = kh_(q.k);
   if (!nm || !my) return { gifts: [] };
@@ -718,8 +735,8 @@ function giftTake_(q) {
   if (!got) return { gifts: [], err: 'busy' };
   try {
     const s = giftSheet_(), last = s.getLastRow(); if (last < 2) return { gifts: [] };
-    const v = s.getRange(2, 1, last - 1, 6).getValues(), out = [];
-    for (let i = v.length - 1; i >= 0; i--) if (String(v[i][1]) === nm) { out.push({ at: +v[i][0], from: String(v[i][2]), m: +v[i][3] || 0, cls: String(v[i][4]), rb: String(v[i][5]) }); s.deleteRow(i + 2); }
+    const v = s.getRange(2, 1, last - 1, 7).getValues(), out = [];
+    for (let i = v.length - 1; i >= 0; i--) if (String(v[i][1]) === nm) { out.push({ at: +v[i][0], from: String(v[i][2]), m: +v[i][3] || 0, cls: String(v[i][4]), rb: String(v[i][5]), it: String(v[i][6] || '') }); s.deleteRow(i + 2); }
     return { gifts: out.reverse() };
   } finally { lock.releaseLock(); }
 }
@@ -791,6 +808,7 @@ function doPost(e) {
     if (d.csave) return csave_(d);
     if (d.dm) return out_(dmSend_(d));
     if (d.hire) return out_(giftAdd_(d));
+    if (d.mail) return out_(mailAdd_(d));
     // 여기부터는 전당 목록이 바뀔 수 있는 요청만 → 목록 캐시 비움 (클라우드 저장·응원·쪽지는 목록과 무관)
     try { CacheService.getScriptCache().remove(CACHE_KEY); } catch (err) {}
     // 멘트 고치기 (개발자 키만, 새 줄은 만들지 않음)
