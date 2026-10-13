@@ -3850,7 +3850,7 @@ function doFuse(f){
   const dl={};for(const a of S.augs)if((a.id===f.a||a.id===f.b)&&a.dl)for(const k in a.dl)dl[k]=(dl[k]||0)+a.dl[k];
   const src=S.augs.filter(a=>a.id===f.a||a.id===f.b),allGr=src.length>0&&src.every(a=>a.gr);S.augs=S.augs.filter(a=>a.id!==f.a&&a.id!==f.b);const o=fusionObj(f);o.pq=pq;o.dl=dl;if(allGr&&o.t!=='v')o.gr=1;S.augs.push(o);if(f.f)fRec(o,f.f);tagCount();
   const col=f.vip?'#ffd76a':'#ff4fd8';S.flash=.35;const p=S.p;S.rings.push({x:p.x,y:p.y,r:10,max:f.vip?320:200,life:.6,col});S.fused=(S.fused||0)+1;
-  augFx(`${f.vip?'👑 왕실 합체!':'💥 합체!'} ${f.n}`,f.d,col,true,.5);return o;
+  {const nm=id=>{const x=augDef(id)||[...AUGS,...VIPS].find(q=>q.id===id);return x?projTxt(x.n):id;};/* v345: 무엇과 무엇이 합쳐졌는지 같이 보여 줌 (모르는 사이에 합체된 것처럼 보이지 않게) */augFx(`${f.vip?'👑 왕실 합체!':'💥 합체!'} ${f.n}`,`${nm(f.a)} + ${nm(f.b)} → ${f.d}`,col,true,.5);}return o;
 }
 function tryFuse(fromAug){
   const el=fusable();
@@ -9255,6 +9255,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:345,t:'💥 합체 알림',items:[
+    ['change','💥 합체될 때 <b>무엇과 무엇이 합쳐졌는지</b> 같이 보여요 (예: 프로스트 노바 + 얼음 파쇄 → 얼음 감옥). 자동 선택으로 고른 증강이 모르는 사이에 합체돼도 알 수 있게']]},
   {v:344,t:'🩸 광전사 흡혈 · 전투 문신',items:[
     ['change','🩸 <b>광전사</b>: 카드·장비·강화·증강으로 얻은 흡혈이 이제 <b>절반으로 줄지 않고 그대로</b> 적용돼요 (다른 직업은 그대로 절반). 흡혈로 버티는 직업인데 회복이 1초 한도의 1/5도 못 쓰던 문제'],
     ['change','🩹 <b>전투 문신</b>: 광란이 안 쌓여 있어도 초당 재생 +1.5, 광란 중첩당 +0.2 더 (예전엔 광란이 쌓여야만 효과)'],
@@ -15349,7 +15351,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=344,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=345,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
