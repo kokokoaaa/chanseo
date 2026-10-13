@@ -728,7 +728,7 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 #ov.home .hRep canvas{background:#0c241c;border:2px solid #d6b45a;border-radius:8px}
 #ov.home .hRep .hri b{font-family:'Gugi','Do Hyeon',sans-serif;color:#eef3e6!important}
 #ov.home #quickGo{background:#e0b84a!important;color:#2a2208!important;border:none!important;border-radius:10px!important;box-shadow:0 4px 0 #8a6a1a!important;font-family:'Gugi','Do Hyeon',sans-serif}
-#ov.home .hSect{font-family:'Gugi','Do Hyeon',sans-serif;color:#e0b84a!important;letter-spacing:3px!important;border-bottom:1px solid rgba(214,180,90,.35);padding-bottom:3px}
+#ov.home .hSect{font-family:'Gugi','Do Hyeon',sans-serif;color:#e0b84a!important;letter-spacing:3px!important;font-size:22px!important;margin:6px 0 2px!important;border-bottom:1px solid rgba(214,180,90,.35);padding-bottom:3px}
 #ov.home #dsel{background:var(--mapImg,none) 0 0/100% 100%,#d8d4aa!important;image-rendering:pixelated;min-height:110px;align-items:start;padding:8px 8px 0;border-radius:10px;border:2px solid #d6b45a;box-sizing:border-box}
 #ov.home #dsel .btn{background:#1f5240!important;border:2px solid #eef3e6!important;border-radius:50%!important;width:64px!important;height:64px!important;padding:0!important;min-height:0!important;justify-self:center;box-shadow:0 3px 0 rgba(0,0,0,.45)!important;color:#eef3e6!important}
 #ov.home #dsel .btn.primary{background:#e0b84a!important;color:#2a2208!important;border-color:#fff!important}
@@ -741,7 +741,8 @@ summary{cursor:pointer;font-family:'Do Hyeon',sans-serif;font-size:18px}
 #ov.home .hDock{background:rgba(10,30,24,.6)!important;border-top:2px solid #d6b45a!important;box-shadow:0 -4px 14px rgba(0,0,0,.4)!important}
 #ov.home .hDock .btn i{background:#1f5240!important;border:2px solid #2f6a52!important;border-radius:50%!important;box-shadow:none!important}
 #ov.home .hDock .btn b{color:#eef3e6!important}
-#ov.home .hDon .dt b{color:#eef3e6!important}#ov.home .hDon .dt small{color:#a8c4b2!important}
+#ov.home .hDon .dt b{color:#eef3e6!important}
+#ov.home .hSect small{font-size:13px!important;letter-spacing:0!important;font-family:'Gowun Dodum',sans-serif}#ov.home .hDon .dt small{color:#a8c4b2!important}
 
 #ov.home{text-shadow:-1px -1px 0 #04120d,1px -1px 0 #04120d,-1px 1px 0 #04120d,1px 1px 0 #04120d,0 2px 4px rgba(0,0,0,.8)}
 #ov.home .hsub,#ov.home .sub,#ov.home small,#ov.home .rsub,#ov.home .hUnlock,#ov.home .hSect small{color:#d4e6da!important}
@@ -9019,7 +9020,7 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
-  {v:316,t:'🏰 숲속 성채',items:[
+  {v:317,t:'🏰 숲속 성채',items:[
     ['new','🏰 메인 화면이 <b>숲속 성채</b>로 바뀌었어요: 호수 위의 성, 눈 덮인 산, 달밤 숲. 구름이 흘러가고 달이 빛나고, 반딧불이 날아다니고, 깃발이 펄럭이고, 호수에 성이 비쳐 일렁여요','look'],
     ['change','🟩 메인 화면 버튼을 모두 <b>단색</b>으로 바꿔 잘 보이게 했어요. 색은 눈이 편한 초록 계열, 고른 것은 금색','look'],
     ['change','🗺 난이도 고르기가 <b>원정 지도</b> 위로 (마을 → 숲 → 화산 → 신전). 명예의 전당은 커튼 없이 깔끔하게','look']]},
@@ -14588,7 +14589,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=316,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=317,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
