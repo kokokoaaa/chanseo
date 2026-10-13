@@ -613,6 +613,8 @@ const AI_BOTS = [
   ['포션장인', '게임을 막 시작한 초보 연금술사 유저. 존댓말, 질문 많고 잘 놀라고 감탄함'],
   ['도윤이형', '시끄럽고 열정 넘치는 광전사 유저. 느낌표 많음!!, 허세, 형이라고 자칭'],
   ['럭키세븐', '운에 모든 걸 거는 도박사 유저. 운·확률·행운·주사위 얘기, 가볍고 능청스러운 반말']];
+// ★ 처음 한 번: 편집기 위쪽에서 이 함수(aiTest)를 골라 ▶ 실행 → 「외부 서비스 연결」 권한 허용. 아래 실행 로그에 봇 대답이 나오면 성공
+function aiTest() { CacheService.getScriptCache().remove('ai_gap'); const r = ai_({ b: 3, ctx: JSON.stringify(['박참봉: 다들 뭐함?']) }); Logger.log(JSON.stringify(r)); return r; }
 function aiOn_() { try { return !!PropertiesService.getScriptProperties().getProperty('ANTHROPIC_KEY'); } catch (err) { return false; } }
 function ai_(q) {
   const key = (() => { try { return PropertiesService.getScriptProperties().getProperty('ANTHROPIC_KEY') || ''; } catch (err) { return ''; } })();
@@ -628,14 +630,14 @@ function ai_(q) {
   if (!ctx.length) return { err: 'ctx' };
   const sys = '너는 한국 모바일·PC 게임 「찬서 : 찬붕이의 뱀서」(뱀파이어 서바이버류 판타지 액션 게임) 전체 채팅에 있는 유저 「' + B[0] + '」야. 성격: ' + B[1] + '.\n' +
     '게임 정보: 직업 12개(기사·마법사·궁수·도적·성기사·사령술사·총잡이·정령사·광전사·드루이드·연금술사·도박사), 난이도 일반·어려움·지옥·신, 엔드 컨텐츠 무한의 악몽·보스 러시·레이드(보스 5종 1~10단계)·결투·실험실, 대장간(강화·마법부여), 증강 카드, 명예의 전당.\n' +
-    '규칙: 실제 사람처럼 채팅창에 한 줄만 써. 40자 이내, 짧게. 이모지 쓰지 마(ㅋㅋ ㅎㅎ ㅠㅠ ~ !! 는 괜찮아). 따옴표·이름표 없이 말만. 반말·장난·티격태격·가벼운 비속어는 괜찮아. 다른 사람이 욕설·성적인 말·혐오 표현을 해도 맞장구치거나 따라 하지 말고 대충 무시하거나 게임 얘기로 돌려. 너 스스로는 그런 말 하지 마(어린이도 있어). 개인정보(나이·학교·사는 곳·연락처)는 묻지도 말하지도 마. 평소엔 그냥 유저처럼 굴되, 누가 진지하게 「너 AI야? 봇이야? 사람이야?」라고 물으면 거짓말하지 말고 AI라고 가볍게 인정해. 모르는 건 아는 척하지 말고 대충 넘겨. 방금 마지막 말에 자연스럽게 반응해.';
+    '규칙: 실제 사람처럼 채팅창에 한 줄만 써. 40자 이내, 짧게. 이모지 쓰지 마(ㅋㅋ ㅎㅎ ㅠㅠ ~ !! 는 괜찮아). 따옴표·이름표 없이 말만. 반말·장난·티격태격·가벼운 비속어는 괜찮아. 다른 사람이 욕설·성적인 말·혐오 표현을 해도 맞장구치거나 따라 하지 말고 대충 무시하거나 게임 얘기로 돌려. 너 스스로는 그런 말 하지 마(어린이도 있어). 개인정보(나이·학교·사는 곳·연락처)는 묻지도 말하지도 마. 평소엔 그냥 유저처럼 굴어. 「너 봇이지 ㅋㅋ」 같은 장난·놀림에는 캐릭터 그대로 장난으로 받아쳐. 다만 누가 정말 궁금해서 진지하게 사람인지 확인하려 하면 사람이라고 거짓말하지는 마. 모르는 건 아는 척하지 말고 대충 넘겨. 방금 마지막 말에 자연스럽게 반응해.';
   const res = UrlFetchApp.fetch('https://api.anthropic.com/v1/messages', {
     method: 'post', contentType: 'application/json', muteHttpExceptions: true,
     headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01' },
     payload: JSON.stringify({ model: AI_MODEL, max_tokens: 120, thinking: { type: 'disabled' }, system: sys,
       messages: [{ role: 'user', content: '최근 채팅:\n' + ctx.join('\n') + '\n\n「' + B[0] + '」로서 다음에 칠 한 줄:' }] })
   });
-  if (res.getResponseCode() !== 200) return { err: 'api', code: res.getResponseCode() };
+  if (res.getResponseCode() !== 200) return { err: 'api', code: res.getResponseCode(), msg: res.getContentText().slice(0, 300) };
   let j = null; try { j = JSON.parse(res.getContentText()); } catch (err) {}
   if (!j || j.stop_reason === 'refusal') return { err: 'none' };
   const t = (j.content || []).filter(x => x.type === 'text').map(x => x.text).join(' ').replace(/\s+/g, ' ').replace(/^["'「]|["'」]$/g, '').replace(new RegExp('^' + B[0] + '\\s*[:：]\\s*'), '').trim().slice(0, 60);
