@@ -9165,7 +9165,7 @@ function gameOver(win){
     if((d==='god'||d==='hell')&&tkNeed()>0){META.tk=(META.tk||0)+1;unl.push('🎟 직업 봉인 해제권 +1');}}
   unlocked=unl.join(' · ');
   const hsnap=heroOk()?(()=>{try{return heroSnap();}catch(e){return null;}})():null;
-  const sec=runSec(),score=runScore(),medals=runMedals(score);try{mstGain(sec);}catch(e){}try{achCheck(null);}catch(e){}try{if(S.qAll!==false){qAdd('surv',Math.floor(((S.gt||0)+(S.bt||0))/60));qAdd('lvl',S.lvl||1);qAdd('gold',Math.floor(S.goldE||0));qAdd('killRun',S.st.kills||0);if(S.win)qAdd('clear',1);}}catch(e){}META.medals+=medals;META.total+=medals;saveMeta();CH_PEND=true;setTimeout(()=>{try{csUpload(true);}catch(e){}},4000);
+  const sec=runSec(),score=runScore(),medals=runMedals(score);try{mstGain(sec);}catch(e){}try{achCheck(null);}catch(e){}try{if(S.qAll!==false){qAdd('surv',Math.floor(((S.gt||0)+(S.bt||0))/60));qAdd('lvl',S.lvl||1);qAdd('gold',Math.floor(S.goldE||0));qAdd('spend',Math.max(0,Math.floor((S.goldE||0)-(S.gold||0))));qAdd('killRun',S.st.kills||0);if(S.win)qAdd('clear',1);}}catch(e){}META.medals+=medals;META.total+=medals;saveMeta();CH_PEND=true;setTimeout(()=>{try{csUpload(true);}catch(e){}},4000);
   if(sec>best){best=sec;try{localStorage.setItem('chipdungeon_best_v5',String(best));}catch(e){}}
   const fmt=x=>`${Math.floor(x/60)}분 ${x%60}초`;
   // v335 결과 화면: 다시 하기·캐릭터 선택·캐릭터 저장 버튼을 맨 위로 (스크롤 없이 누르게)
@@ -9257,8 +9257,12 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:347,t:'📜 의뢰 목표 조정',items:[
+    ['change','📜 탐험가: 돌발 이벤트 4번 · 이스터에그 2번 · 마지막은 악몽 18분 버티기'],
+    ['change','📜 수련자: 악몽 한 판 15분 → 마지막 18분 버티기'],
+    ['change','📜 상인: 한 판 골드 100,000 벌기 → 상인에게 20번 사기 → 한 판 골드 300,000 벌기 → 마지막은 <b>한 판에 골드 500,000 쓰기</b>']]},
   {v:346,t:'📜 의뢰 목표 상향',items:[
-    ['change','📜 <b>의뢰 목표를 크게 올렸어요</b> (악몽 10분이면 골드가 3~6만이라 예전 목표는 바로 깨졌어요). 모두 <b>무한의 악몽</b> 기준이에요<br>⚔ 사냥꾼: 한 판 적 20,000 처치 · 정예 300 · 보스 20 · 노히트 보스 3번<br>🧭 탐험가: 돌발 이벤트 10 · 이스터에그 4 · A·S급 이벤트 4 · 한 판 20분 버티기<br>🧘 수련자: 한 판 레벨 40 · 완벽한 회피 50 · 한 판 18분 · 한 판 22분<br>💰 상인: 한 판에 번 골드 60,000 · 상인 구매 40 · 한 판에 번 골드 100,000 · 한 판 적 25,000 처치']]},
+    ['change','📜 <b>의뢰 목표를 크게 올렸어요</b> (악몽 10분이면 골드가 3~6만이라 예전 목표는 바로 깨졌어요). 모두 <b>무한의 악몽</b> 기준이에요<br>⚔ 사냥꾼: 한 판 적 20,000 처치 · 정예 300 · 보스 20 · 노히트 보스 3번<br>🧭 탐험가: 돌발 이벤트 4 · 이스터에그 2 · A·S급 이벤트 4 · 한 판 18분 버티기<br>🧘 수련자: 한 판 레벨 40 · 완벽한 회피 50 · 한 판 15분 · 한 판 18분<br>💰 상인: 한 판 골드 100,000 벌기 · 상인 구매 20 · 한 판 골드 300,000 벌기 · 한 판 골드 500,000 쓰기']]},
   {v:345,t:'💥 합체 알림 · ℹ 게이지 설명',items:[
     ['change','💥 합체될 때 <b>무엇과 무엇이 합쳐졌는지</b> 같이 보여요 (예: 프로스트 노바 + 얼음 파쇄 → 얼음 감옥). 자동 선택으로 고른 증강이 모르는 사이에 합체돼도 알 수 있게'],
     ['change','ℹ 화면 위쪽 장비 증강 게이지(⭐·🌩·✨ 등 %)와 마법사 주문 표시(🔥 화염구·❄ 얼음 구체·⚡ 번개 구체)에 마우스를 올리면(터치는 누르면) 무슨 효과인지·게이지가 얼마나 찼는지 설명이 떠요']]},
@@ -10780,21 +10784,21 @@ const Q_RT={/* v346: 목표 하나하나가 너무 쉬웠음 (악몽 10분이면
     {n:'우두머리 사냥',d:'무한의 악몽에서 보스 {g}마리 처치',k:'boss',g:20,only:'nightmare',rw:'m1500+b3'},
     {n:'완벽한 사냥',d:'무한의 악몽에서 보스를 한 대도 안 맞고 {g}번 처치',k:'nohit',g:3,only:'nightmare',rw:'uq+m2500+b4'}]},
   expl:{n:'탐험가',i:'🧭',d:'숨겨진 것을 찾고 돌발 상황을 해결하는 길',fin:'◆ 유니크 방어구·장신구 1개',steps:[
-    {n:'돌발 상황 해결',d:'무한의 악몽에서 돌발 이벤트 {g}번 성공',k:'ev',g:10,only:'nightmare',rw:'m800+b2'},
-    {n:'숨은 이야기',d:'이스터에그 {g}번 찾기',k:'egg',g:4,rw:'m1000+b2'},
+    {n:'돌발 상황 해결',d:'무한의 악몽에서 돌발 이벤트 {g}번 성공',k:'ev',g:4,only:'nightmare',rw:'m800+b2'},
+    {n:'숨은 이야기',d:'이스터에그 {g}번 찾기',k:'egg',g:2,rw:'m1000+b2'},
     {n:'위험한 의뢰',d:'무한의 악몽에서 어려운 돌발 이벤트(A·S급) {g}번 성공',k:'evA',g:4,only:'nightmare',rw:'m1500+b3'},
-    {n:'악몽 탐사',d:'무한의 악몽 한 판에서 {g}분 버티기',k:'surv',g:20,only:'nightmare',rw:'uqi+m2500+b3'}]},
+    {n:'악몽 탐사',d:'무한의 악몽 한 판에서 {g}분 버티기',k:'surv',g:18,only:'nightmare',rw:'uqi+m2500+b3'}]},
   sage:{n:'수련자',i:'🧘',d:'몸놀림과 끈기를 단련하는 길',fin:'✦ 신화 정수 1개 + 강화의 축복 8장',steps:[
     {n:'성장',d:'무한의 악몽 한 판에서 레벨 {g} 달성',k:'lvl',g:40,only:'nightmare',rw:'m800+b2'},
     {n:'바람의 몸놀림',d:'무한의 악몽에서 완벽한 회피 {g}번 (큰 공격을 대시로 피하기)',k:'pd',g:50,only:'nightmare',rw:'m1000+b2'},
-    {n:'인내의 시험',d:'무한의 악몽 한 판에서 {g}분 버티기',k:'surv',g:18,only:'nightmare',rw:'m1500+b3'},
-    {n:'끝없는 수련',d:'무한의 악몽 한 판에서 {g}분 버티기',k:'surv',g:22,only:'nightmare',rw:'e1+b8+m2000'}]},
+    {n:'인내의 시험',d:'무한의 악몽 한 판에서 {g}분 버티기',k:'surv',g:15,only:'nightmare',rw:'m1500+b3'},
+    {n:'끝없는 수련',d:'무한의 악몽 한 판에서 {g}분 버티기',k:'surv',g:18,only:'nightmare',rw:'e1+b8+m2000'}]},
   merc:{n:'상인',i:'💰',d:'골드를 모으고 상인과 거래하는 길',fin:'🏅 메달 8,000 + 아직 없는 외형 1개',steps:[
-    {n:'첫 장사',d:'무한의 악몽 한 판에서 골드 {g} 벌기',k:'gold',g:60000,only:'nightmare',rw:'m800+b2'},
-    {n:'단골손님',d:'무한의 악몽에서 상인에게 {g}번 사기',k:'buy',g:40,only:'nightmare',rw:'m1000+b2'},
-    {n:'큰손',d:'무한의 악몽 한 판에서 골드 {g} 벌기',k:'gold',g:100000,only:'nightmare',rw:'m1500+b3'},
-    {n:'황금 사냥',d:'무한의 악몽 한 판에서 적 {g}마리 처치',k:'killRun',g:25000,only:'nightmare',rw:'m8000+cos'}]}};
-const Q_ONE=new Set(['lvl','surv','gold','killRun','clear']),Q_DO={normal:0,hard:1,hell:2,god:3,nightmare:4};
+    {n:'첫 장사',d:'무한의 악몽 한 판에서 골드 {g} 벌기',k:'gold',g:100000,only:'nightmare',rw:'m800+b2'},
+    {n:'단골손님',d:'무한의 악몽에서 상인에게 {g}번 사기',k:'buy',g:20,only:'nightmare',rw:'m1000+b2'},
+    {n:'큰손',d:'무한의 악몽 한 판에서 골드 {g} 벌기',k:'gold',g:300000,only:'nightmare',rw:'m1500+b3'},
+    {n:'큰 손님',d:'무한의 악몽 한 판에서 골드 {g} 쓰기',k:'spend',g:500000,only:'nightmare',rw:'m8000+cos'}]}};
+const Q_ONE=new Set(['lvl','surv','gold','spend','killRun','clear']),Q_DO={normal:0,hard:1,hell:2,god:3,nightmare:4};
 const qD=()=>{const Q=META.quest=META.quest||{st:0,acc:0,pr:0,cyc:0};if(Q.v!==2){/* 예전 5단계 의뢰 → 루트 고르기부터 (끝낸 횟수 cyc는 그대로) */Q.v=2;Q.rt=null;Q.st=0;Q.acc=0;Q.pr=0;Q.cy=Q.cy||{};}return Q;};
 const qRt=()=>{const Q=qD();return Q_RT[Q.rt]||null;},qS=()=>{const R=qRt();return R?R.steps[qD().st]||null:null;};
 const qCy=()=>{const Q=qD();return (Q.cy||{})[Q.rt]||0;},qCyM=c=>Math.min(2,1+.25*(c||0)),qGoal=()=>{const s=qS();if(!s)return 1;return s.k==='clear'?s.g:Math.ceil(s.g*qCyM(qCy()));};
@@ -10830,7 +10834,7 @@ function bnIntro(){if(!S||S.bnShown||!rushOn()||!S.started)return;S.bnShown=1;if
 function qStep(dt){if(!S||S.mode!=='play')return;if(rushOn()&&(S.gt||0)+(S.bt||0)>2)bnIntro();if((AUTO.speed||1)>SPD_Q&&!DEV)S.qAll=false; // 개발자 모드는 배속이어도 의뢰인이 나옴 (시험용)
   if(S.qn){const q=S.qn;q.life-=dt;if(q.life<=0){S.qn=null;S.qnT=60;toast('📜 의뢰인이 떠났어요');return;}const p=S.p;if(p.alive&&Math.hypot(p.x-q.x,p.y-q.y)<46+p.r){S.qn=null;S.qSeen=1;if(AUTO.pick){toast('자동 모드: 의뢰인 건너뜀');return;}openQuest();return true;}return;}
   // 버틴 시간·레벨 의뢰도 판 도중에 바로 완료 (끝날 때까지 기다리지 않음)
-  if(S.qAll!==false&&qOk()){qAdd('surv',Math.floor(((S.gt||0)+(S.bt||0))/60));qAdd('lvl',S.lvl||1);qAdd('gold',Math.floor(S.goldE||0));qAdd('killRun',S.st.kills||0);}
+  if(S.qAll!==false&&qOk()){qAdd('surv',Math.floor(((S.gt||0)+(S.bt||0))/60));qAdd('lvl',S.lvl||1);qAdd('gold',Math.floor(S.goldE||0));qAdd('spend',Math.max(0,Math.floor((S.goldE||0)-(S.gold||0))));qAdd('killRun',S.st.kills||0);}
   // 판 도중 한 번이라도 배속을 쓰면 그 판엔 의뢰인이 안 나옴. 의뢰를 다 하면(qForce) 같은 판에서 곧바로 다시 나타남
   if(S.qSeen||!qOk()||S.qAll===false||!(S.qForce||(S.st.bosses||0)>0||(S.diff==='normal'&&(S.gt||0)>=90)))return; // v315: 첫 보스를 잡으면 나타남 (보스가 판 끝 하나뿐인 일반은 1분 30초)const Q=qD();if(Q.acc&&!qReady())return;
   S.qnT=(S.qnT??5)-dt;if(S.qnT>0)return;S.qnT=20;S.qForce=0;
@@ -15356,7 +15360,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=346,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=347,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
