@@ -1,4 +1,9 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v9.2
+// 찬서 명예의 전당 서버 (Google Apps Script) v9.3
+//
+// v9.2 → v9.3 바뀐 점 (게임 v381)
+// - 말 걸지 말라고 한 사람에게 먼저 말 걸 땐 성격대로(눈치 없는 캐릭터만 알고 거는 티) 아니면 패스
+// - 관리자가 후원자를 임명·해제 (POST donorSet, GET ?donors) → 게임이 그 이름에게 후원자 칭호·외형·부적을 자동 지급
+// - 결투 전적과 함께 결투에 쓴 캐릭터(능력치·장비)를 「결투 캐릭터」 시트에 저장, ?hero=이름&diff=duel 로 읽음
 //
 // v9.1 → v9.2 바뀐 점 (게임 v380)
 // - AI 모험가 6명 추가 (보리아빠·캣맘나비·전노고무통현대령·알빠노·앙메르띠·진지충). 게임의 BOTS 순서와 같아야 함
@@ -451,7 +456,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 92, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 93, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -740,7 +745,7 @@ function ai_(q) {
     method: 'post', contentType: 'application/json', muteHttpExceptions: true,
     headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01' },
     payload: JSON.stringify({ model: AI_MODEL, max_tokens: 200, thinking: { type: 'disabled' }, system: sys,
-      messages: [{ role: 'user', content: '최근 채팅:\n' + ctx.join('\n') + '\n\n' + (q.said ? '방금 「' + str_(q.me, 12) + '」가 이렇게 말했어: ' + String(q.said || '').slice(0, 200) + (q.named == 1 ? '\n(너를 직접 불렀어. 그 사람에게 대답해)' : q.cut == 1 ? '\n(너는 다른 사람들 대화에 옆에서 끼어드는 거야. 그 대화를 대신 이어받지 말고, 끼어드는 티가 나게 짧게 네 입장에서 한마디만 해)' : '\n(이 말이 너와 상관없거나 다른 사람끼리 하는 대화라 끼어들 이유가 없으면 다른 말 없이 「(패스)」라고만 써. 너한테 한 말이거나 전체에게 한 말이면 대답해)') : (q.tgt ? (q.gr == 1 ? '「' + str_(q.tgt, 12) + '」님이 방금 채팅방에 들어왔어. 네 말투로 짧게 인사해 (「ㅎㅇ」「오 OO님 ㅎㅇ」「왔어요?」 정도). 인사랑 질문을 한 번에 다 넣지 말고 짧게 하나만, 10자 안팎.' : '채팅에 「' + str_(q.tgt, 12) + '」님이 접속해 있는데 한동안 조용해. 그 사람에게 툭 한마디 걸어 (「OO님 뭐함?」「OO님 무슨 직업 키워요?」「악몽 몇 분까지 가요?」처럼 짧은 질문 하나). 자기소개·인사·설명 붙이지 말고 짧게, 20자 안팎. 최근 채팅에서 그 사람과 하던 얘기가 있으면 그걸 짧게 이어서.') : '채팅이 조용해. 지금 아무도 너랑 대화하고 있지 않아. 그러니 혼잣말처럼 한마디만 해 (지금 하는 게임·감상·푸념·혼자 하는 다짐 같은 것, 「~네」「~다」「~함」처럼). 남의 말에 대꾸하듯 말하지 말고, 질문으로 끝내지 마. 가끔(5번에 1번쯤)만 접속 목록에 있는 사람에게 짧게 말을 걸어도 돼.')) + '\n\n「' + B[0] + '」로서 칠 한 줄:' }] })
+      messages: [{ role: 'user', content: '최근 채팅:\n' + ctx.join('\n') + '\n\n' + (q.said ? '방금 「' + str_(q.me, 12) + '」가 이렇게 말했어: ' + String(q.said || '').slice(0, 200) + (q.named == 1 ? '\n(너를 직접 불렀어. 그 사람에게 대답해)' : q.cut == 1 ? '\n(너는 다른 사람들 대화에 옆에서 끼어드는 거야. 그 대화를 대신 이어받지 말고, 끼어드는 티가 나게 짧게 네 입장에서 한마디만 해)' : '\n(이 말이 너와 상관없거나 다른 사람끼리 하는 대화라 끼어들 이유가 없으면 다른 말 없이 「(패스)」라고만 써. 너한테 한 말이거나 전체에게 한 말이면 대답해)') : (q.tgt ? (q.gr == 1 ? '「' + str_(q.tgt, 12) + '」님이 방금 채팅방에 들어왔어. (최근 채팅에서 이 사람이 말 걸지 말라고 했으면 「(패스)」라고만 써) 네 말투로 짧게 인사해 (「ㅎㅇ」「오 OO님 ㅎㅇ」「왔어요?」 정도). 인사랑 질문을 한 번에 다 넣지 말고 짧게 하나만, 10자 안팎.' : '(먼저 확인: 최근 채팅에서 「' + str_(q.tgt, 12) + '」님이 말 걸지 말라거나 닥치라고 했으면, 네 성격이 눈치 없거나 시비조라서 그래도 말을 거는 사람이면 그걸 알고 거는 티를 내고(「말 걸지 말라며 ㅋㅋ」), 아니면 「(패스)」라고만 써) 채팅에 「' + str_(q.tgt, 12) + '」님이 접속해 있는데 한동안 조용해. 그 사람에게 툭 한마디 걸어 (「OO님 뭐함?」「OO님 무슨 직업 키워요?」「악몽 몇 분까지 가요?」처럼 짧은 질문 하나). 자기소개·인사·설명 붙이지 말고 짧게, 20자 안팎. 최근 채팅에서 그 사람과 하던 얘기가 있으면 그걸 짧게 이어서.') : '채팅이 조용해. 지금 아무도 너랑 대화하고 있지 않아. 그러니 혼잣말처럼 한마디만 해 (지금 하는 게임·감상·푸념·혼자 하는 다짐 같은 것, 「~네」「~다」「~함」처럼). 남의 말에 대꾸하듯 말하지 말고, 질문으로 끝내지 마. 가끔(5번에 1번쯤)만 접속 목록에 있는 사람에게 짧게 말을 걸어도 돼.')) + '\n\n「' + B[0] + '」로서 칠 한 줄:' }] })
   });
   if (res.getResponseCode() !== 200) return { err: 'api', code: res.getResponseCode(), msg: res.getContentText().slice(0, 300) };
   let j = null; try { j = JSON.parse(res.getContentText()); } catch (err) {}
@@ -749,6 +754,9 @@ function ai_(q) {
   if (/^\(?\s*패스\s*\)?\.?$/.test(t)) return { skip: 1 };
   return t ? { m: t, n: B[0] } : { err: 'none' };
 }
+function donors_() { try { const L = JSON.parse(PropertiesService.getScriptProperties().getProperty('DONORS') || '[]'); return Array.isArray(L) ? L.map(x => String(x)).filter(Boolean) : []; } catch (err) { return []; } }
+// v9.3 결투 캐릭터 시트: 이름 · 시각 · 캐릭터(hero)
+function duelHeroSheet_() { const ss = book_(); let s = ss.getSheetByName('결투 캐릭터'); if (!s) { s = ss.insertSheet('결투 캐릭터'); s.getRange(1, 1, 1, 3).setValues([['name', 'at', 'hero']]); s.getRange('A:A').setNumberFormat('@'); } return s; }
 // v8.3 레이드 고용 수수료
 const GIFT_SHEET = '고용 메달';
 function giftSheet_() { const ss = book_(); let s = ss.getSheetByName(GIFT_SHEET); if (!s) { s = ss.insertSheet(GIFT_SHEET); s.getRange(1, 1, 1, 6).setValues([['at', 'to', 'from', 'm', 'cls', 'rb']]); s.getRange('B:C').setNumberFormat('@'); } return s; }
@@ -822,6 +830,8 @@ function doGet(e) {
     if (owned && q.k) failAdd_(nm);
     return out_({ owned });
   }
+  if (q.donors) return out_({ dn: donors_() });
+  if (q.hero && String(q.diff) === 'duel') { try { const hs = duelHeroSheet_(), hl = hs.getLastRow(); if (hl < 2) return out_({ hero: '' }); const hn = hs.getRange(2, 1, hl - 1, 1).getValues(), i = hn.findIndex(x => String(x[0]) === String(q.hero)); return out_({ hero: i < 0 ? '' : String(hs.getRange(i + 2, 3).getValue() || '') }); } catch (err) { return out_({ hero: '' }); } }
   if (q.hero) {
     // 이름·난이도로 줄만 찾고, 그 한 줄의 hero 칸만 읽음
     const s = sheet_(), last = s.getLastRow();
@@ -858,6 +868,8 @@ function doPost(e) {
     if (d.dm) return out_(dmSend_(d));
     if (d.hire) return out_(giftAdd_(d));
     if (d.mail) return out_(mailAdd_(d));
+    // v9.3 관리자: 후원자 임명·해제 (스크립트 속성 DONORS에 이름 목록)
+    if (d.donorSet) { if (!devOk_(d.dk)) return out_({ ok: false, err: 'key' }); const nm = str_(d.name, 12); if (!nm) return out_({ ok: false }); let L = donors_(); L = L.filter(x => x !== nm); if (d.on) L.push(nm); PropertiesService.getScriptProperties().setProperty('DONORS', JSON.stringify(L.slice(-200))); return out_({ ok: true, dn: L }); }
     // 여기부터는 전당 목록이 바뀔 수 있는 요청만 → 목록 캐시 비움 (클라우드 저장·응원·쪽지는 목록과 무관)
     try { CacheService.getScriptCache().remove(CACHE_KEY); } catch (err) {}
     // 멘트 고치기 (개발자 키, 또는 v9.2부터 그 이름의 주인), 새 줄은 만들지 않음. cls를 주면 그 직업 기록만
@@ -929,6 +941,8 @@ function doPost(e) {
     if (d.dwOnly) {
       const dw = dw_(d.dw), nm = str_(d.name, 12), last = s.getLastRow();
       if (!dw || !nm || last < 2) return out_({ ok: false });
+      // v9.3 결투에 쓴 캐릭터의 능력치·장비 (명예의 전당 결투 탭에서 누르면 보임)
+      if (d.hero) { try { const hs = duelHeroSheet_(), hv = String(d.hero || '').replace(/[^A-Za-z0-9+\/=:]/g, '').slice(0, 45000), hl = hs.getLastRow(); let hr = -1; if (hl >= 2) { const hn = hs.getRange(2, 1, hl - 1, 1).getValues(); hr = hn.findIndex(x => String(x[0]) === nm); } if (hv) { if (hr >= 0) hs.getRange(hr + 2, 2, 1, 2).setValues([[Date.now(), hv]]); else hs.appendRow([nm, Date.now(), hv]); } } catch (err) {} }
       const c = HEAD.indexOf('dw') + 1, names = s.getRange(2, 1, last - 1, 1).getValues();
       let n = 0;
       names.forEach((x, i) => { if (String(x[0]) === nm) { s.getRange(i + 2, c).setValue(dw); n++; } });
