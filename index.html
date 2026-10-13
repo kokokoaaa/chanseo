@@ -9407,6 +9407,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:377,t:'💬 접속한 사람에게',items:[
+    ['change','💬 다른 모험가들이 지금 접속해 있는 사람을 보고 그 사람에게 먼저 말을 걸고 대답해요. 이미 나간 사람에게는 말을 걸지 않아요'],
+    ['change','💬 아무도 대화 중이 아닐 땐 혼잣말처럼 말하고, 자기가 한 말에 스스로 대꾸하지 않아요. 새벽엔 같은 사람이 연달아 말하지 않고, 질문에 엉뚱한 대답이 붙지 않게 했어요']]},
   {v:376,t:'📦 택배 정보',items:[
     ['change','📦 택배함에서 장비 이름에 마우스를 올리면(폰은 누르면) 그 장비 정보가 보여요 (받을 택배·보낸/받은 기록 모두, 기록은 이번 버전부터)']]},
   {v:375,t:'🌙 새벽 채팅',items:[
@@ -14396,9 +14399,10 @@ function chatSplit(t,n=80){t=String(t||'').trim();const out=[];while(t.length>n)
 const aiDv=t=>{if(DEV)toast('🛠 AI 대답: '+t);};
 const aiOk=()=>!!SHEET_URL&&SRV_V>=84&&SRV_AI;
 const aiCtx=extra=>{const L=[...CHAT.filter(c=>!/^🤖/.test(c.n||'')),...botChat()].sort((a,b)=>a.t-b.t).slice(-20).map(c=>String(c.n).replace(/^🤖 /,'')+': '+c.m);if(extra&&!L.some(x=>x===extra))L.push(extra);return L.slice(-20);};
-/* 그 모험가가 예전에 실제로 한 말 (말이 앞뒤로 맞게: 직업·나이·한 말을 기억) */const aiMine=i=>CHAT.filter(c=>String(c.n||'').replace(/^🤖 /,'')===BOTS[i][0]).slice(-10).map(c=>c.m);
+/* 그 모험가가 예전에 실제로 한 말 (말이 앞뒤로 맞게: 직업·나이·한 말을 기억) */const aiMine=i=>{const n=BOTS[i][0];let L=[];try{L=[...CHAT,...botChat()];}catch(e){L=CHAT;}return L.filter(c=>String(c.n||'').replace(/^🤖 /,'')===n).sort((a,b)=>(a.t||0)-(b.t||0)).slice(-10).map(c=>c.m);};/* v377 미리 짜 둔 잡담에서 한 말도 자기 말 (자기 말에 대꾸하지 않게) */
 // 봇 i가 한마디 (said = 바로 앞 사람의 말, who = 그 사람, named = 그 사람이 i를 직접 불렀는지, said가 없으면 먼저 화제를 꺼냄)
-async function aiSay(i,said,who,named,cut,k){const T0=Date.now(),body={ai:1,b:i,me:who||'',said:said||'',named:named?1:0,cut:cut?1:0,k:k||'',st:botState(i,Date.now()),mine:JSON.stringify(aiMine(i)),ctx:JSON.stringify(aiCtx(said&&who?who+': '+said:''))};
+/* v377 지금 접속한 사람 (사람 먼저, 그다음 모험가) — AI가 나간 사람에게 말 걸지 않게 */const aiOnline=i=>{const me=BOTS[i][0],H=(ONLINE||[]).map(x=>x&&x.n).filter(n=>n&&!BOT_NM.has(n)),Bn=botsNow().map(x=>x.n).filter(n=>n!==me);return [...new Set([...H,...Bn])].slice(0,15);};
+async function aiSay(i,said,who,named,cut,k){const T0=Date.now(),body={ai:1,b:i,me:who||'',said:said||'',named:named?1:0,cut:cut?1:0,k:k||'',on:JSON.stringify(aiOnline(i)),st:botState(i,Date.now()),mine:JSON.stringify(aiMine(i)),ctx:JSON.stringify(aiCtx(said&&who?who+': '+said:''))};
   /* 서버 v8.6부터는 POST (긴 대화도 다 보냄), 그 전엔 주소에 실어 보냄 */const r=SRV_V>=86?await fetch(SHEET_URL,{method:'POST',body:JSON.stringify(body)}):await fetch(SHEET_URL+'?'+Object.entries({...body,mine:JSON.stringify(aiMine(i).slice(-4)),ctx:JSON.stringify(aiCtx(said&&who?who+': '+said:'').slice(-10))}).map(([k,v])=>k+'='+encodeURIComponent(v)).join('&'),{cache:'no-store'});
   const j=await r.json();if(j&&j.skip)return null;if(!j||!j.m){aiDv('서버 응답 '+JSON.stringify(j).slice(0,160));return null;}const n=BOTS[i][0],parts=chatSplit(j.m);AI_ANY=Date.now();
   /* 사람처럼 타자 치는 시간: 읽고 생각하는 시간 + 글자 수 ÷ 타자 속도(1초에 3~5.5자, 사람마다 다름) — 그동안 「OO 입력 중…」 */const cps=3+((botH(i,4321)%100)/100)*2.5;
@@ -14435,7 +14439,7 @@ function aiWatch(){try{if(!CHAT.length)return;const last=Math.max(...CHAT.map(c=
 /* 채팅창을 열어 두면 가끔 모험가들끼리 먼저 얘기를 꺼냄 (사람 말이 없을 때, 4분 넘게 조용하면) */
 setInterval(()=>{try{if(!CHAT_OPEN||!aiOk()||document.hidden)return;const now=Date.now();if(now-AI_ANY<240000||CHAT.some(c=>!c.bot&&now-(+c.t||0)<240000))return;if(Math.random()>.3)return;/* v375 새벽(한국 0~7시)엔 판 돌리는 중인 모험가도, 혼자여도 말을 꺼냄 */const nt=new Date(now+9*3600e3).getUTCHours()<7,idle=BOTS.map((_,i)=>i).filter(i=>nt?botOn(i,now):botIdle(i,now));if(idle.length<(nt?1:2))return;
   const i=idle[Math.floor(Math.random()*idle.length)],gen=++AI_GEN;aiSay(i,'','',0).then(m=>{if(m)aiChain(i,m,0,gen);});}catch(e){}},60000);
-/* 새벽에 하는 말 */const BOT_NIGHT=['잠이 안 와서 한 판 하러 왔어요','이 시간엔 진짜 조용하네','내일 출근인데 큰일났다 ㅋㅋ','한 판만 하고 자야지 하다가 벌써 세 판째','새벽에 하니까 집중은 잘 되네요','{who}님도 못 주무세요?','누워 있다가 결국 켰어요','새벽 감성에 브금 들으니까 좋다','{dif} 한 번만 더 돌리고 잘게요','아 졸린데 손이 안 멈춰'];
+/* 새벽에 하는 말 */const BOT_NIGHT=['잠이 안 와서 결국 켰다','이 시간엔 진짜 조용하네','내일 일찍 일어나야 되는데 큰일났네 ㅋㅋ','한 판만 하고 자야지 하다가 벌써 세 판째','새벽에 하니까 집중은 잘 된다','누워 있다가 결국 켬','새벽 감성에 브금 들으니까 좋다','{dif} 한 번만 더 돌리고 자야지','아 졸린데 손이 안 멈춤','하 눈 아프다… 이것만 깨고 잔다'],BOT_NIGHT_Q=['{who}님도 못 주무세요?','{who}님 이 시간에 뭐 하세요 ㅋㅋ'];
 function botChat(){const now=Date.now(),C=8*60000,sl=Math.floor(now/C),o=[],old=CHAT.length?Math.min(...CHAT.map(c=>+c.t||now)):now-12*3600e3,t0=Math.max(now-48*3600e3,Math.min(old,now-3*3600e3)),seen=[];
   const say=(i,t,f)=>{for(let k=0;k<6;k++){const r=f(k);if(!r||!r.m)return null;if(!seen.includes(r.m)){seen.push(r.m);if(seen.length>30)seen.shift();o.push({n:botNm(i),m:r.m,t,bot:1});return r;}}return null;};
   /* v375 새벽(한국 0~7시)엔 접속한 사람이 적으니 판 돌리는 중에도 가끔 한마디 */const kNight=t=>{const h=new Date(t+9*3600e3).getUTCHours();return h<7;},idleAt=t=>BOTS.map((_,i)=>i).filter(i=>kNight(t)?botOn(i,t):botIdle(i,t));
@@ -14443,9 +14447,10 @@ function botChat(){const now=Date.now(),C=8*60000,sl=Math.floor(now/C),o=[],old=
   /* 반복 금지 목록은 6시간 단위로 새로 시작 → 채팅 창을 언제 열어도 같은 시각엔 같은 말 (여는 때에 따라 달라지지 않게) */const BLK=6*3600e3,s1=Math.floor(Math.floor(t0/BLK)*BLK/C);for(let s0=s1;s0<=sl;s0++){if((s0*C)%BLK===0)seen.length=0;const h=botH(s0,99);
     for(const x of HR)if(x.T>=s0*C&&x.T<(s0+1)*C){const on=idleAt(x.T);if(!on.length)continue;const i=on[(x.hh>>>8)%on.length];say(i,x.T,k=>({m:botReply(i,x.c.m,x.c.n,x.hh+k*7919)}));}
     if(h%100>=(kNight(s0*C)?70:55))continue;const t=s0*C+((h>>>12)%(C-60000));if(t>now)continue;if(CHAT.some(c=>!c.bot&&c.t&&t>=c.t-60000&&t<c.t+6*60000))continue;/* 사람이 말하고 있을 땐 정해진 잡담은 쉼 */
-    const on=idleAt(t);if(!on.length)continue;const i=on[(h>>>8)%on.length],who=on.filter(j=>j!==i).map(botNm)[0]||null,h7=botH(s0,777);
-    const r=kNight(t)&&h7%3===0?say(i,t,k=>({m:botFill(BOT_NIGHT[(h7+k)%BOT_NIGHT.length],i,h7+k,who)})):say(i,t,k=>botTalk(i,t,h7+k*104729,who));
-    /* 질문이면 다른 봇이 1~3분 뒤 대답 (가끔은 아무도 안 받음) */if(r&&r.q&&h%3){const T=t+60000+(h>>>3)%120000;if(T<=now){const on2=idleAt(T).filter(j=>j!==i);if(on2.length){const j=on2[(h>>>10)%on2.length],A=BOT_TK2[j].A[r.q]||BOT_TK2[j].A.x;say(j,T,k=>({m:botFill(A[((h>>>5)+k)%A.length],j,h+k,botNm(i))}));}}}}
+    const on=idleAt(t);if(!on.length)continue;const i=on[(h>>>8)%on.length],hum=now-t<10*60000?(ONLINE||[]).map(x=>x&&x.n).filter(n=>n&&!BOT_NM.has(n)):[],who=hum.length&&h%2?hum[(h>>>4)%hum.length]:(on.filter(j=>j!==i).map(botNm)[0]||null),h7=botH(s0,777);
+    /* 새벽: 혼잣말 위주. 콕 집어 묻는 말은 진짜 사람이 접속해 있을 때만. 같은 사람이 10분 안에 또 말하지 않음 */if(kNight(t)&&o.some(x=>x.n===botNm(i)&&t-x.t<10*60000))continue;
+    const r=kNight(t)?(hum.length&&h7%4===0?say(i,t,k=>({m:botFill(BOT_NIGHT_Q[(h7+k)%BOT_NIGHT_Q.length],i,h7+k,hum[(h7>>>3)%hum.length])})):h7%2===0?say(i,t,k=>({m:botFill(BOT_NIGHT[(h7+k)%BOT_NIGHT.length],i,h7+k,null)})):say(i,t,k=>botTalk(i,t,h7+k*104729,null))):say(i,t,k=>botTalk(i,t,h7+k*104729,who));
+    /* 질문이면 다른 봇이 1~3분 뒤 대답 (가끔은 아무도 안 받음) */if(r&&r.q&&h%3){const T=t+60000+(h>>>3)%120000;if(T<=now){const on2=idleAt(T).filter(j=>j!==i);if(on2.length){const j=on2[(h>>>10)%on2.length],A=BOT_TK2[j].A[r.q];/* v377 주제가 안 맞는 대답(아무 말)은 안 붙임 */if(A&&A.length)say(j,T,k=>({m:botFill(A[((h>>>5)+k)%A.length],j,h+k,botNm(i))}));}}}}
   return o.filter(x=>x.t>=t0);}
 function onlHtml(sm){if(!SHEET_URL)return '';if(!ONLINE)return `<span class="onlb" style="opacity:.7;cursor:default">${ONL_FAIL>=2?'🧡':'💚'} ${sm?'…':ONL_FAIL>=2?'서버 연결 재시도 중…':'접속 확인 중…'}</span> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}</button>`;let L=ONLINE;
   const BT=botsNow(),nA=L.filter(onlAway).length+BT.filter(onlAway).length,nOn=L.length+BT.length-nA;L=[...L.filter(x=>!onlAway(x)),...L.filter(onlAway)];
@@ -16149,7 +16154,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=376,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=377,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
