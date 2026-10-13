@@ -1,0 +1,17 @@
+{
+  "name": "찬서 : 찬붕이의 뱀서",
+  "short_name": "찬서",
+  "description": "찬붕이의 뱀서 — 판타지 서바이벌 게임",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#072219",
+  "theme_color": "#0e3a2c",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
