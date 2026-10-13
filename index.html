@@ -5459,7 +5459,7 @@ const endless=()=>!!dfM().endless;
 // 최대 체력 = 기본 체력(절대 수치 합) × (1 + 체력 % 합계). 공격력 %처럼 합연산이라 나중에 오르는 체력에도 계속 적용됨
 // 코드 곳곳의 p.maxHp+=X(절대 수치)는 그대로 두고, 매 프레임 차이를 기본 체력으로 옮겨 다시 곱함
 const hpPct=()=>{const p=S.p;return (p.hpP||0)+awakeN()*awHp()+(has('k_bulwark')?armorEff()/10*lv3('k_bulwark',.008,.01,.012):0)+(has('p_aegis')?tag('holy')*lv3('p_aegis',.06,.08,.1):0)+(has('b_hide')?(S.st.kills||0)/100*lv3('b_hide',.008,.01,.012):0);};
-function hpSync(){const p=S.p;if(!p)return;const m=Math.max(.2,1+hpPct())*Math.max(.2,1+(p.chP||0))*(1+.02*mlv('hp'))*gearM.hp();if(p.hpB==null){p.hpB=p.maxHp;p.hpLM=p.maxHp;}
+function hpSync(){const p=S.p;if(!p)return;/* v366 관전 중엔 보는 사람의 강화로 다시 계산하지 않고, 관전 대상이 보낸 최대 체력 그대로 */if(S.mode==='spec'&&typeof SPEC!=='undefined'&&SPEC&&SPEC.mhp>0){p.maxHp=SPEC.mhp;if(SPEC.hpv!=null)p.hp=SPEC.hpv;return;}const m=Math.max(.2,1+hpPct())*Math.max(.2,1+(p.chP||0))*(1+.02*mlv('hp'))*gearM.hp();if(p.hpB==null){p.hpB=p.maxHp;p.hpLM=p.maxHp;}
   if(p.maxHp!==p.hpLM)p.hpB=Math.max(1,p.hpB+(p.maxHp-p.hpLM));
   const nm=Math.max(1,Math.round(p.hpB*m));const pk=Math.max(p.hpPk||0,p.maxHp);if(nm!==p.maxHp){if(nm>pk)p.hp+=nm-pk;p.maxHp=nm;}p.hpPk=Math.max(pk,nm);p.hp=Math.min(p.hp,p.maxHp);p.hpLM=p.maxHp;}
 // 한 방 상한(최대 체력 대비). 악몽은 두 갈래:
@@ -9404,6 +9404,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:366,t:'🔮 레이드 속성 부여 · 관전 체력',items:[
+    ['bug','👀 관전할 때 체력이 관전하는 사람 기준으로 보이던 문제: 관전 대상의 실제 최대 체력으로 보여요. 골드도 관전 대상 것으로 보여요 (상대도 v366 이상일 때)'],
+    ['bug','🔮 무기 속성 부여가 레이드에서 적용되지 않던 문제: 이제 그 직업이 낀 무기의 속성으로 싸워요 (보스 약점 ×1.35 · 저항 ×0.7 · 파쇄는 저항 무시)']]},
   {v:365,t:'🧿 부적 · 📤 한꺼번에 보내기',items:[
     ['change','🧿 부적이 가방 칸을 하나씩 차지하는 아이템이 됐어요. 마우스를 올리면(폰은 누르면) 효과·남은 시간이 보이고, 끌어서 옮길 수 있어요 (가방·창고에 있으면 효과)'],
     ['new','🧿 보스 러시·레이드(종합)도 일간·주간·월간 1~3위에게 부적을 줘요'],
@@ -11517,6 +11520,7 @@ function beginRaid(bi,st,ids){const L=raidHL();let hs=ids.map(id=>L.find(h=>h.id
   newRun();S.diff='raid';S.raidB=bi;S.raidS=st;S.raidAw=heroAw(me);S.st.kills=me.kills||0; // 처치 수로 커지는 증강(수확·두꺼운 가죽)이 그대로
   for(const k of PKEYS)if(me.p[k]!==undefined)S.p[k]=me.p[k];for(const k in (me.s||{}))if(me.s[k]!==undefined&&k!=='diff')S[k]=me.s[k];S.cls=me.cls;S.diff='raid';
   S.augs=(me.augs||[]).map(augDes).filter(Boolean);
+  /* v366 무기 속성 부여를 레이드에도: 지금 그 직업이 낀 무기의 속성 (없으면 저장할 때 무기의 속성) */{let cur=null,snap=null;try{const w=eqItemC('sword',me.cls);cur=w&&w.en||null;}catch(e){}try{const x=String(me.gd||'').split(':')[0],it=x?itDec('sword',x):null;snap=it&&it.en||null;}catch(e){}S.wEn=(me.hire?snap:cur||snap)||null;}
   tagCount();S.noAug=true;S.started=true;S.raidMe=me.id;S.raidTok=RAID_TOK;S.raidIds=hs.map(h=>h.id);
   const p=S.p;p.x=WW/2;p.y=WH/2+40;hpSync();p.hp=p.maxHp;p.inv=2;p.alive=true;p.barrier=barrierMax();
   S.allies=hs.slice(1).map(allyOf);for(const a of S.allies)a.y=WH/2+60;/* v290: 레이드 시작 때 해골을 미리 채움 (결투처럼) */{const p=S.p;let n=0;while(skelMax()>0&&(S.skel||[]).length<skelMax()&&n<40){raiseSkel(p.x+rand(-80,80),p.y+rand(-80,80));n++;}for(const a of S.allies)if(a.cls==='necro'){a.sk=[];for(let i=0;i<4;i++)a.sk.push({x:a.x+rand(-40,40),y:a.y+rand(-40,40),life:12,cd:rand(0,.7),f:1,mv:0,ox:Math.random()*6,sw:0});}}raidRoles();S.rushT=1.5;S.mode='play';hide();
@@ -14796,7 +14800,7 @@ const ET_K=Object.keys(ET);let SNAP_ON=false;
 function specStStr(){const n=performance.now();if(S._sst&&n-S._sstT<2000)return S._sst;let o='';try{hpSync();o=HERO_ST.map(k=>{const r=PREV_ST.find(x=>x[0]===k);if(!r)return '';const v=r[1]();return v!=null&&isFinite(v)?(+v).toFixed(r[2])+(r[3]||''):'';}).join('|')+'|'+Math.round(S.dpsMax||S.dps||0);}catch(e){}S._sst=o;S._sstT=n;return o;}
 function specSnap(){if(!S||S.mode==='start'||!S.p)return {m:'start',n:myNick(),pc:typeof pickCls!=='undefined'?pickCls:'',pd:typeof pickDiff!=='undefined'?pickDiff:''};const p=S.p,R2=760*760;
   const es=S.en.filter(e=>e.alive&&!e.phase&&(e.x-p.x)**2+(e.y-p.y)**2<R2).sort((a,b)=>(b.boss?1:0)-(a.boss?1:0)||((a.x-p.x)**2+(a.y-p.y)**2)-((b.x-p.x)**2+(b.y-p.y)**2)).slice(0,28);for(const e of es)if(!e._sid)e._sid=(S._sidN=(S._sidN||0)+1);
-  return {m:S.mode==='play'||S.mode==='dying'?'play':S.mode,n:myNick(),c:S.cls,x:Math.round(p.x),y:Math.round(p.y),h:Math.round(Math.max(0,p.hp)/p.maxHp*100),l:S.lvl,t:Math.round((S.gt||0)+(S.bt||0)),k:S.st.kills||0,bi:S.biome||0,d:S.diff||'normal',
+  return {m:S.mode==='play'||S.mode==='dying'?'play':S.mode,n:myNick(),c:S.cls,x:Math.round(p.x),y:Math.round(p.y),h:Math.round(Math.max(0,p.hp)/p.maxHp*100),l:S.lvl,go:Math.round(S.gold||0),t:Math.round((S.gt||0)+(S.bt||0)),k:S.st.kills||0,bi:S.biome||0,d:S.diff||'normal',
     e:es.map(e=>[ET_K.indexOf(e.type),Math.round(e.x-p.x),Math.round(e.y-p.y),Math.round(e.hp/e.maxHp*100),e._sid].join(',')).join(';'),a:S.arena?[Math.round(S.arena.x-p.x),Math.round(S.arena.y-p.y),Math.round(S.arena.r)].join(','):'',ti:META.title||'',cs:(META.cos&&META.cos.eq&&META.cos.eq.skin)||'',au:auraStr(),hf:(META.cos&&META.cos.eq&&META.cos.eq.hof)||'',g:gearCode(),dr:myDrStr(S.cls),ag:(S.augs||[]).map(a=>a.id+':'+(a.lv||1)).join(','),sp:AUTO.speed||1,st:specStStr()};}
 async function snapLoop(){if(SNAP_ON||!SHEET_URL)return;SNAP_ON=true;
   try{while(SNAP_ON){const d=encodeURIComponent(JSON.stringify(specSnap()));let w=0;try{const r=await fetch(SHEET_URL+'?snap=1&id='+onlId()+'&d='+d,{cache:'no-store'});const j=await r.json();w=j&&j.w;}catch(e){w=1;}
@@ -14819,9 +14823,10 @@ function specApply(s){const sp=SPEC;if(!sp||!s||typeof s!=='object')return;/* �
   const now=performance.now();if(sp.lt){const g=Math.min(2000,Math.max(120,now-sp.lt));sp.dur=sp.dur?sp.dur*.7+g*.3:g;}sp.lt=now;
   {const A=auraList(s.au);SPEC_OV={ti:s.ti||'',skin:s.cs||'',aura:(A.find(x=>x.cat==='aura')||{}).k||'',wing:(A.find(x=>x.cat==='wing')||{}).k||'',hof:s.hf||'',dr:/^[0-9a-z\-]{14}$/.test(s.dr||'')?dressDec(s.dr):null};};GEAR_OVR=s.g?gearDecode(s.g):null;
   if(s.ag!==sp.ag){sp.ag=s.ag;const F=[...FUSIONS,...VFUSIONS];S.augs=(s.ag||'').split(',').filter(Boolean).map(q=>{let [id,lv]=q.split(':');if(id==='f_mplasma')id='f_plasma';const f=F.find(x=>x.id===id);if(f)return fusionObj(f);const a=augDef(id)||DRAGON.find(x=>x.id===id);return a?{...a,lv:+lv||1}:null;}).filter(Boolean);try{tagCount();}catch(e){}augBarKey='';}
-  if(S.cls!==s.c&&CLASSES[s.c]){applyClass(s.c);}S.biome=s.bi||0;S.lvl=s.l;S.gt=s.t;S.bt=0;S.st.kills=s.k;S.diff=s.d;
+  if(S.cls!==s.c&&CLASSES[s.c]){applyClass(s.c);}S.biome=s.bi||0;S.lvl=s.l;S.gt=s.t;if(isFinite(+s.go)&&s.go!=null)S.gold=Math.max(0,+s.go);S.bt=0;S.st.kills=s.k;S.diff=s.d;
   const p=S.p,go=(o,x,y)=>{if(o.tx==null){o.x=x;o.y=y;}o.fx0=o.x;o.fy0=o.y;o.tx=x;o.ty=y;o.t0=now;};
-  go(p,s.x,s.y);p.hp=p.maxHp*s.h/100;
+  {const v=typeof s.st==='string'?s.st.split('|'):null,mi=HERO_ST.indexOf('최대 체력'),mh=v&&mi>=0?parseFloat(v[mi]):NaN;if(mh>0){sp.mhp=mh;p.maxHp=mh;}}
+  go(p,s.x,s.y);p.hp=p.maxHp*s.h/100;sp.hpv=p.hp;
   S.arena=s.a?(()=>{const [ax,ay,ar]=s.a.split(',').map(Number);return {x:s.x+ax,y:s.y+ay,r:ar,tr:ar};})():null;
   const L=(s.e||'').split(';').filter(Boolean).map(q=>q.split(',').map(Number)),old=new Map();for(const e of S.en)old.set(e._sid,e);S.en=[];
   L.forEach(([ti,dx,dy,hp,sid],i)=>{const ty=ET_K[ti];if(!ty||!MDEF[ET[ty].spr||ty]&&!MDEF[ty])return;let e=old.get(sid==null?'i'+i:sid);if(e&&e.type!==ty)e=null;
@@ -16086,7 +16091,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=365,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=366,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
