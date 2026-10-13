@@ -7528,7 +7528,7 @@ const DASH_MAX=60,dashDist=()=>(120+Math.min(DASH_MAX,S.p.dashD||0))*(has('xs_st
 const XG={x_star:{i:'⭐',n:'별 조각',need:7,cd:3},x_storm:{i:'🌩',n:'폭풍의 눈 충전',need:600,cd:1.2},xs_star:{i:'☄',n:'유성우',need:30,cd:5},xr_frost:{i:'👑',n:'서리 왕관',need:16,cd:5},xr_storm:{i:'⚡',n:'과부하',need:45,cd:0},xr_void:{i:'🌀',n:'공허',need:40,cd:4},m_star:{i:'✨',n:'별빛',need:40,cd:5},mw_knight:{i:'✦',n:'왕의 일격',need:40,cd:5},mw_paladin:{i:'✦',n:'천상의 심판',need:40,cd:5},mw_berserk:{i:'✦',n:'피의 회오리',need:40,cd:5},mw_mage:{i:'✦',n:'원소 붕괴',need:40,cd:5},mw_archer:{i:'✦',n:'별사냥',need:40,cd:5},mw_rogue:{i:'✦',n:'그림자 처형',need:40,cd:5},mw_necro:{i:'✦',n:'망령의 수확',need:40,cd:5},mw_gunner:{i:'✦',n:'탄창 폭주',need:40,cd:5},mw_elem:{i:'✦',n:'정령 공명',need:40,cd:5},mw_druid:{i:'✦',n:'세계수의 축복',need:40,cd:5},mw_alch:{i:'✦',n:'현자의 폭발',need:40,cd:5},mw_gambler:{i:'✦',n:'잭팟',need:40,cd:5}};
 const xNeed=k=>XG[k].need*((k==='xr_frost'||k==='xr_storm'||k==='xr_void')&&x8(k)?.5:1);
 function xgAdd(k,v){if(S.xgLock||!has(k))return false;const G=S.xg||(S.xg={}),C=S.xgC||(S.xgC={}),n=xNeed(k);G[k]=Math.min(n,(G[k]||0)+v);if(G[k]>=n&&!(C[k]>S.t)){G[k]=0;C[k]=S.t+(XG[k].cd||0)*(x8(k)?.5:1);return true;}return false;}
-function xgHtml(){if(!S||!S.xgOn)return '';const G=S.xg||{};let h='';for(const k in XG)if(has(k)){const n=xNeed(k),v=Math.min(1,(G[k]||0)/n);h+=` <span style="color:#ffd9a0" title="${XG[k].n}">· ${XG[k].i}${Math.floor(v*100)}%</span>`;}
+function xgHtml(){if(!S||!S.xgOn)return '';const G=S.xg||{};let h='';for(const k in XG)if(has(k)){const n=xNeed(k),v=Math.min(1,(G[k]||0)/n);h+=` <span style="color:#ffd9a0" data-tip="xg:${k}">· ${XG[k].i}${Math.floor(v*100)}%</span>`;}
   const p=S.p;if(p&&p.xoU>S.t)h+=` <span style="color:#ffe04a">· ⚡과부하 ${Math.ceil(p.xoU-S.t)}초</span>`;if(p&&p.xsmU>S.t)h+=` <span style="color:#d07aff">· 🌪장막</span>`;if(p&&p.xvR>0)h+=` <span style="color:#b9a6ff">· 🌑${p.xvR}</span>`;return h;}
 const xLock=f=>{const o=S.xgLock;S.xgLock=1;try{f();}finally{S.xgLock=o;}};
 // 게이지형 발동
@@ -8659,18 +8659,20 @@ function mstBarH(){const c=S&&S.cls,T=MST[c];if(!T||raidOn()||duelOn()||labOn())
   addEventListener('touchstart',e=>{if(!bar.contains(e.target)&&!syn.contains(e.target))hideT();},{passive:true});}
 // 오른쪽 위 소환물 배지에 마우스를 올리거나(터치는 탭) 적용되는/안 되는 스탯 설명
 const BF_TIP={
+  msch:()=>{const sc=mSchool(),lk=mLock()>=0;return `<b>${['🔥 화염구','❄ 얼음 구체','⚡ 번개 구체'][sc]}</b> · 마법사가 지금 쏘는 주문<br>${['맞으면 폭발(범위가 다른 주문보다 넓음)하고 주변 적에게 화상. 불타는 적은 주는 피해가 줄어듦','맞으면 폭발하고 주변 적에게 냉기 1중첩. 냉기가 쌓이면 적이 얼어붙음 (얼음 파쇄·동상과 잘 맞음)','다른 주문보다 빨리 날아가고, 맞으면 폭발 + 주변 적 2명에게 번개, 번개 맞은 적은 잠깐 경직'][sc]}<br><small style="opacity:.8">${lk?'처음 고른 화염·냉기·번개 증강으로 이 판의 주문이 정해졌어요 (다른 속성 증강은 안 나와요)':'아직 속성 증강이 없어서 기본 화염구예요. 처음 고르는 화염·냉기·번개 증강으로 주문이 정해져요'}</small>`;},
   skel:()=>`<b>💀 해골 병사</b><br>적용: 최종 공격력 (사령술사 100%, 그 외 60%), 뼈 가루(해골 피해 %), 소환·망자 시너지, 표식, 흡혈<br>체력: 내 최대 체력 50%, 내 방어력으로 피해 감소<br><b>적용 안 됨</b>: 공격 속도 (0.7초마다 1대 고정), 치명타, 정비 키트, 탄속·동전·거인의 힘 등 탄환 전용 효과`,
   turret:()=>`<b>🗼 포탑</b><br>적용: 최종 공격력의 50%, 소환 시너지, 치명타, 대부분의 탄환 적중 효과, 사거리·탄속, 공격 속도 %의 60% (최대 2.5배 빠르게)<br><b>적용 안 됨</b>: 탄환 수·관통, 연타, 연쇄 번개, 분열, 화염 2개 화상, 직업 기본 폭발(마법사·연금술사)`,
   drone:()=>`<b>✨ 부적 정령</b><br>적용: 최종 공격력의 60%, 소환 시너지, 치명타, 대부분의 탄환 적중 효과, 공격 속도 %의 60% (최대 2.5배 빠르게)<br><b>적용 안 됨</b>: 탄환 수·관통, 연타, 연쇄 번개, 분열, 화염 2개 화상, 직업 기본 폭발`,
   clone:()=>`<b>👥 분신</b><br>적용: 최종 공격력의 40%, 그림자 시너지·분신 피해 %, 치명타, 대부분의 탄환 적중 효과, 사거리<br><b>적용 안 됨</b>: 공격 속도 (0.5초마다 고정, 소환 6개·밤의 군주로만 빨라짐), 탄환 수·관통, 연타, 연쇄 번개, 분열`};
 let BFM={x:-1,y:-1},bfPin=null;
 addEventListener('mousemove',e=>{BFM.x=e.clientX;BFM.y=e.clientY;});
-document.addEventListener('pointerdown',e=>{const t=e.target.closest&&e.target.closest('#buffs [data-tip]');bfPin=t&&e.pointerType!=='mouse'?{k:t.dataset.tip,x:e.clientX,y:e.clientY,t:performance.now()+4000}:null;},true);
+document.addEventListener('pointerdown',e=>{const t=[...document.querySelectorAll('#buffs [data-tip],#left [data-tip]')].find(q=>{const r=q.getBoundingClientRect();return r.width&&e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom;});bfPin=t&&e.pointerType!=='mouse'?{k:t.dataset.tip,x:e.clientX,y:e.clientY,t:performance.now()+4000}:null;},true);
 function bfTipTick(){const T=$('bfTip');let k=null,x=0,y=0;
   if(bfPin&&performance.now()<bfPin.t){k=bfPin.k;x=bfPin.x;y=bfPin.y;}
-  else if(BFM.x>=0){const el=document.elementFromPoint(BFM.x,BFM.y),t=el&&el.closest&&el.closest('#buffs [data-tip]');if(t){k=t.dataset.tip;x=BFM.x;y=BFM.y;}}
-  if(!k||!BF_TIP[k]){if(T.style.display!=='none')T.style.display='none';return;}
-  if(T._k!==k){T.innerHTML=BF_TIP[k]();T._k=k;}T.style.display='block';
+  else if(BFM.x>=0){for(const t of document.querySelectorAll('#buffs [data-tip],#left [data-tip]')){const r=t.getBoundingClientRect();if(r.width&&BFM.x>=r.left&&BFM.x<=r.right&&BFM.y>=r.top&&BFM.y<=r.bottom){k=t.dataset.tip;x=BFM.x;y=BFM.y;break;}}}
+  const tf=k&&k.startsWith('xg:')?(()=>{const id=k.slice(3),X=XG[id];if(!X)return null;const a=augDef(id)||[...AUGS,...VIPS].find(q=>q.id===id),G=(S.xg||{})[id]||0,n=xNeed(id);return ()=>`<b>${X.i} ${X.n}</b>${a?` · 「${esc(projTxt(a.n))}」`:''}<br>${a?augD?augD(a):a.d:''}<br><small style="opacity:.8">게이지 ${Math.floor(G)}/${Math.round(n)} — 다 차면 발동</small>`;})():k&&BF_TIP[k];
+  if(!tf){if(T.style.display!=='none')T.style.display='none';return;}
+  if(T._k!==k||k.startsWith('xg:')){const h=tf();if(T.innerHTML!==h)T.innerHTML=h;T._k=k;}T.style.display='block';
   const w=T.offsetWidth,h=T.offsetHeight;T.style.left=Math.max(8,Math.min(innerWidth-w-8,x-w-12))+'px';T.style.top=Math.max(8,Math.min(innerHeight-h-8,y+14))+'px';}
 // 누적 피해 패널: 판 시작부터 지금까지 출처별 피해 합계, 많은 순. 0.5초마다 갱신. 머리글을 누르면 접기/펴기
 let DPSBOX=(()=>{try{return localStorage.getItem('chanseo_dpsbox')!=='0';}catch(e){return true;}})();
@@ -8722,7 +8724,7 @@ function hud(){
   if(rushOn()&&((AUTO.speed||1)<=SPD_Q||DEV)&&S.qAll!==false){const B=bnD(),b=bnS();bf.push(`<span style="color:#ffd76a">💰 현상수배 「${b.n}」 ${b.k==='stage'?`${S.chap||0}/${bnGoal()}단계`:`${Math.min(B.pr,bnGoal())}/${bnGoal()}`}</span>`);}
   if(skelMax()>0)bf.push(`<span data-tip="skel" style="color:#8cff9a">💀 해골 ${(S.skel||[]).length}/${skelMax()}${skelRaw()>SKEL_CAP_F()?` · 초과 ${skelRaw()-SKEL_CAP_F()} → 해골 피해 ×${(skelRaw()/SKEL_CAP_F()).toFixed(2)}`:''}</span>`);if(has('turret'))bf.push(`<span data-tip="turret" style="color:#9fd3ff">🗼 포탑 ${(S.turrets||[]).length}기 · 다음 ${Math.max(0,S.tuT||0).toFixed(0)}초</span>`);if(shadowOn())bf.push(`<span data-tip="clone" style="color:#c9a0ff">👥 분신 ${(S.clones||[]).length}/${shMax()}</span>`);if(droneN()>0)bf.push(`<span data-tip="drone" style="color:#9fe8ff">✨ 부적 정령 ${droneN()}기</span>`);{const vn=S.zones.filter(z=>z.kind==='vine').length;if(vn||S.cls==='druid'||tag('nature')>=1||has('thornseed'))bf.push(`<span style="color:#d8ff6a">🌿 덩굴 ${vn}/14</span>`);}
   if(p.cfS>=2)bf.push(`<span style="color:#ffd76a">앞면 ${p.cfS}연속</span>`);
-  if(S.cls==='mage'){const sc=mSchool();bf.push(`<span style="color:${MAGE_COL[sc]}">${['🔥 화염구','❄ 얼음 구체','⚡ 번개 구체'][sc]}</span>`);}
+  if(S.cls==='mage'){const sc=mSchool();bf.push(`<span data-tip="msch" style="color:${MAGE_COL[sc]}">${['🔥 화염구','❄ 얼음 구체','⚡ 번개 구체'][sc]}</span>`);}
   if(has('gb_chips'))bf.push(`<span style="color:#ffd76a">💰 부적 ${S.chip||0}/20</span>`);if(has('gb_wheel')&&S.whE>S.t)bf.push(`<span style="color:#ffd76a">🎡 ${['공격력','공격 속도','치명타','폭발','골드'][S.whR]} ${Math.ceil(S.whE-S.t)}초</span>`);if(has('gb_martin')&&p.cfT)bf.push(`<span style="color:#ff4fd8">마틴게일 ×${Math.pow(lv3('gb_martin',1.5,1.65,1.8),p.cfT).toFixed(1)}</span>`);
   if(UPD.ver>BUILD)bf.push(`<span style="color:#7be08f">🔄 새 패치 v${UPD.ver} · 판 끝나면 적용</span>`);
   if(p.bearT>0)bf.push(`<span style="color:#c98a52">곰 변신 ${p.bearT.toFixed(1)}초</span>`);if(has('d_seasons')){const sn=season();bf.push(`<span style="color:${['#ffb0d0','#ffd76a','#e09a4a','#bfe8ff'][sn]}">${['🌸 봄','☀️ 여름','🍂 가을','❄️ 겨울'][sn]} ${Math.ceil(8-(S.t%8))}초</span>`);}
@@ -9255,8 +9257,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
-  {v:345,t:'💥 합체 알림',items:[
-    ['change','💥 합체될 때 <b>무엇과 무엇이 합쳐졌는지</b> 같이 보여요 (예: 프로스트 노바 + 얼음 파쇄 → 얼음 감옥). 자동 선택으로 고른 증강이 모르는 사이에 합체돼도 알 수 있게']]},
+  {v:345,t:'💥 합체 알림 · ℹ 게이지 설명',items:[
+    ['change','💥 합체될 때 <b>무엇과 무엇이 합쳐졌는지</b> 같이 보여요 (예: 프로스트 노바 + 얼음 파쇄 → 얼음 감옥). 자동 선택으로 고른 증강이 모르는 사이에 합체돼도 알 수 있게'],
+    ['change','ℹ 화면 위쪽 장비 증강 게이지(⭐·🌩·✨ 등 %)와 마법사 주문 표시(🔥 화염구·❄ 얼음 구체·⚡ 번개 구체)에 마우스를 올리면(터치는 누르면) 무슨 효과인지·게이지가 얼마나 찼는지 설명이 떠요']]},
   {v:344,t:'🩸 광전사 흡혈 · 전투 문신',items:[
     ['change','🩸 <b>광전사</b>: 카드·장비·강화·증강으로 얻은 흡혈이 이제 <b>절반으로 줄지 않고 그대로</b> 적용돼요 (다른 직업은 그대로 절반). 흡혈로 버티는 직업인데 회복이 1초 한도의 1/5도 못 쓰던 문제'],
     ['change','🩹 <b>전투 문신</b>: 광란이 안 쌓여 있어도 초당 재생 +1.5, 광란 중첩당 +0.2 더 (예전엔 광란이 쌓여야만 효과)'],
