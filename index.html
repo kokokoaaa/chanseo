@@ -13485,14 +13485,16 @@ const BOTS=[['별빛 순례자','mage'],['숲지기 루루','druid'],['강철 �
 // 봇마다 실력(sk 0~4)이 있어 레이드 단계·버티는 시간이 다름. 채팅은 그 시각에 접속해 있는 봇만
 // v340 봇 성격: 말투·좋아하는 활동이 다름. pf = [악몽, 신, 지옥, 보스러시, 레이드, 실험실, 일반·어려움] 가중치
 const BOT_P=[
- {c:'차분한 별 덕후 마법사',pf:[4,2,1,1,1,2,1],say:['오늘 밤 별이 예쁘네요 ✨','악몽 20분 넘겼어요. 별이 도와줬나 봐요','마법사는 쿨타임 관리가 전부예요','폭풍 루트가 제일 예뻐요','다들 천천히 즐겨요','달빛 궁수님 오늘도 계시네요']},
- {c:'숲을 사랑하는 귀여운 드루이드',pf:[1,1,1,1,1,1,3],say:['곰 변신 너무 귀여워!!','나무들이 좋아해요~','버섯 몬스터 미워 ㅠㅠ','대장간 구경하는 게 제일 좋아','가을 숲 배경 최고예요','오늘은 천천히 할래요~']},
- {c:'우직한 방패 기사',pf:[1,3,3,1,1,1,2],say:['방패 최고!!','맞으면서 버틴다','보스한테 또 졌다… 다시!','기사는 안 죽으면 이기는 거임','신 난이도 도전 중','받는 피해 줄이는 게 최고야']},
- {c:'성격 급한 총잡이',pf:[2,1,1,4,1,1,1],say:['ㅋㅋ 빨리빨리','총 쏘는 거 개꿀잼','보스 러시 가즈아','재장전 너무 느려 ㅠ','현상금 받았다!!','한 판만 더 하고 잔다']},
- {c:'말수 적은 고수 궁수',pf:[4,1,1,1,4,1,0],say:['관통 3이면 충분','보스 패턴 다 외움','레이드 같이 하실 분','징조 공격은 대시로','악몽 기록 갱신','…']},
- {c:'뭐든 궁금한 초보 연금술사',pf:[0,0,0,0,0,2,6],say:['이거 어떻게 깨요??','물약 던지는 거 맞아요?','처음 해봐요!','어려움 난이도 깼어요!!','증강 뭐가 좋아요?','다들 너무 잘하신다…']},
- {c:'시끄러운 용사 지망생 광전사',pf:[1,2,3,1,1,0,2],say:['나는 용사가 될 거야!!','광란 모드 ON','지옥 난이도 정복한다','한 판만 더!!','체력 없을 때가 제일 강함','용사는 포기하지 않는다']},
- {c:'운에 거는 주사위 요정',pf:[2,1,1,2,1,3,1],say:['운이 좋았다 ㅎㅎ','주사위 6 나와라!','행운 50 찍었다','마법부여 한 번만 더…','실험실에서 조합 실험 중','오늘 운세 대길']}];
+ {c:'차분한 별 덕후 마법사',pf:[4,2,1,1,1,2,1],say:['ㅎㅇ','오늘 악몽 20분 넘김','마법사 폭풍루트 쓰는사람?','아 방금 징조 맞고 죽음..','다들 몇분까지 버팀?','졸리다','별 배경 이쁘네','쿨감 최고','마부 또 망함ㅋ','ㄱㅅㄱㅅ']},
+ {c:'숲을 사랑하는 귀여운 드루이드',pf:[1,1,1,1,1,1,3],say:['곰 귀엽다ㅠㅠ','버섯들 왜케 많아','대장간 구경중~','가을숲 이쁨','오늘은 쉬엄쉬엄','ㅋㅋㅋㅋ','곰 변신 짱','나무 많은 맵 좋아','ㅎㅇㅎㅇ','배고프다..']},
+ {c:'우직한 방패 기사',pf:[1,3,3,1,1,1,2],say:['기사 탱 미쳤음','보스한테 또 짐ㅠ','방패 없으면 못삼','신 깨신분?','ㄱㄱ','받피감 최고임','지옥 겨우 깸','한대도 안아픔ㅋ','또 하러감','ㅇㅋ']},
+ {c:'성격 급한 총잡이',pf:[2,1,1,4,1,1,1],say:['ㅋㅋㅋㅋㅋ','보러 ㄱ?','재장전 왜케 느림','현상금 받음ㅎ','5배속 개빠름','한판만 더','총 개꿀잼','아 렉걸림','빨리빨리','ㅇㅇ']},
+ {c:'말수 적은 고수 궁수',pf:[4,1,1,1,4,1,0],say:['ㅇㅇ','관통3이면 됨','레이드 6단 깸','징조는 대시','ㄴㄴ 그거 별로','..','악몽 기록 갱신','ㄱㅊ','ㅇㅋ','레이드 할사람']},
+ {c:'뭐든 궁금한 초보 연금술사',pf:[0,0,0,0,0,2,6],say:['이거 어케 깸?','물약 던지는거 맞음??','어려움 깼다!!!','증강 뭐가 좋아요','님들 넘 잘함..','ㅎㅇㅎㅇ','처음해봐요','레벨업 카드 뭐골라요','보스 넘 쎔ㅠ','오 된다']},
+ {c:'시끄러운 용사 지망생 광전사',pf:[1,2,3,1,1,0,2],say:['용사가 될거다!!','광란 켰다ㅋㅋ','지옥 간다','한판만 더!!','피 없을때 젤 셈','포기안함','으아아아','보스 잡았다!!!','광전사 최강','다시간다']},
+ {c:'운에 거는 주사위 요정',pf:[2,1,1,2,1,3,1],say:['운빨ㅋㅋ','6 나와라 제발','행운 50 찍음','마부 한번만 더..','실험실서 조합 실험중','오늘 운 좋음','도박사 재밌음','또 꽝','대박 떴다','ㅎㅎ']}];
+// 지금 하고 있는 걸로 하는 말 ({a} = 지금 상태)
+const BOT_NOW=['지금 {a}','{a}ㅋㅋ','{a} 힘들다','{a}인데 할만함','{a}.. 집중'];
 const BOT_SK=[3,2,1,2,4,0,1,3],BOT_RD=['심연의 거신','서리 여왕','폭풍의 핵','둥지 여왕','끝없는 어둠'];
 const botH=(a,b)=>{let h=(a*2654435761^b*40503)>>>0;h^=h>>>13;h=Math.imul(h,0x5bd1e995)>>>0;h^=h>>>15;return h>>>0;/* 음수가 되면 번호가 어긋나 undefined가 나오던 문제 */};
 const BOT_SLOT=40*60000,BOT_ON=30;
@@ -13550,7 +13552,7 @@ const withBots=L=>{try{const real=(L||[]).filter(b=>!b.bot),B=botRecs(),mn={};fo
   return normBoard([...real,...B]);}catch(e){return L;}};
 function botsNow(){const now=Date.now();return BOTS.map(([n,c],i)=>botOn(i,now)?{n:'🤖 '+n,c,a:botAct(i,now)}:null).filter(Boolean);}
 function botChat(){const now=Date.now(),C=8*60000,sl=Math.floor(now/C),o=[];for(let k=0;k<8;k++){const s0=sl-k,h=botH(s0,99);if(h%100>=35)continue;const t=s0*C+((h>>>12)%(C-60000));if(t>now)continue;
-  const on=BOTS.map((_,i)=>i).filter(i=>botOn(i,t));if(!on.length)continue;const i=on[(h>>>8)%on.length],L=BOT_P[i].say;o.push({n:'🤖 '+BOTS[i][0],m:L[botH(s0,777)%L.length],t,bot:1});}return o.reverse();}
+  const on=BOTS.map((_,i)=>i).filter(i=>botOn(i,t));if(!on.length)continue;const i=on[(h>>>8)%on.length],L=BOT_P[i].say,h2=botH(s0,777);let m;if(h2%10<3){const ac=botAct(i,t);m=ac==='시작 화면'||ac==='대장간 구경 중'?L[h2%L.length]:BOT_NOW[(h2>>>4)%BOT_NOW.length].replace('{a}',ac.replace(' 도전 중','').replace(' 연습 중','').replace('무한의 악몽','악몽').replace('신 난이도','신').replace('보스 러시','보러'));}else m=L[h2%L.length];o.push({n:'🤖 '+BOTS[i][0],m,t,bot:1});}return o.reverse();}
 function onlHtml(sm){if(!SHEET_URL)return '';if(!ONLINE)return `<span class="onlb" style="opacity:.7;cursor:default">${ONL_FAIL>=2?'🧡':'💚'} ${sm?'…':ONL_FAIL>=2?'서버 연결 재시도 중…':'접속 확인 중…'}</span> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}</button>`;let L=ONLINE;
   const nA=L.filter(onlAway).length,nOn=L.length-nA;L=[...L.filter(x=>!onlAway(x)),...L.filter(onlAway)];
   const BT=botsNow();return `<button class="onlb" id="onlBtn" title="지금 접속 중">💚 ${sm?`<b>${nOn}</b>`:`지금 <b>${nOn}</b>명 접속 중`}${nA?` <small style="opacity:.7">· 💤${nA}</small>`:''}${BT.length&&!sm?` <small style="opacity:.7">· 🤖${BT.length}</small>`:''} ${ONL_OPEN?'▲':'▼'}</button> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}${chatUnread()?'<i class="cdot"></i>':''}</button>${ONL_OPEN?`<div class="onll">${DEV&&!sm?`<small style="opacity:.75">🛠 실시간 신호 ${FB?ONL_FB.length+'개':'연결 안 됨'} · 예비 서버 신호 ${ONL_AS.length}개 → 이름 ${L.length}명${ONL_FAIL?' (응답 실패 '+ONL_FAIL+'회)':''}</small>`:''}${L.map(x=>`<span${x.me?' class="me"':''}${onlAway(x)?' style="opacity:.55"':''}><i class="onlnm" data-prof="${esc(x.n)}">${fxName(x.n,x.fx)}</i>${x.me?' (나)':''} · ${esc(x.a||'')}${DEV&&x.b?` <small style="opacity:.7">v${x.b}</small>`:''}${DEV&&!x.me&&x.u&&(x.f||SRV_V>=51)?` <button class="cxchip" data-spec="${esc(x.u)}" data-sf="${x.f?1:''}" data-sn="${esc(x.n)}" title="관전">👁</button>`:''}${DEV&&!x.me&&!sm?` <button class="cxchip" data-dm="${esc(x.n)}" title="쪽지 보내기">✉</button>`:''}</span>`).join('')}${BT.length?`<small style="opacity:.7;display:block;margin-top:4px">🤖 AI 모험가 (사람이 아니에요)</small>`+BT.map(x=>`<span style="opacity:.8"><i class="onlnm" data-prof="${esc(x.n)}" style="color:#9fd3ff;font-style:normal;cursor:pointer">${esc(x.n)}</i> · ${CLASSES[x.c]?CLASSES[x.c].n+' · ':''}${esc(x.a)}</span>`).join(''):''}</div>`:''}`;}
