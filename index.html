@@ -9258,7 +9258,7 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
   {v:346,t:'📜 의뢰 목표 상향',items:[
-    ['change','📜 <b>의뢰 목표를 크게 올렸어요</b> (보상이 유니크 장비·신화 정수인데 너무 쉬웠어요). 길 하나에 10판 넘게 공들여야 끝나요<br>⚔ 사냥꾼: 처치 5,000→<b>20,000</b> · 정예 100→<b>400</b> · 지옥 이상 보스 3→<b>10</b> · 노히트 보스 1→<b>지옥 이상에서 3번</b><br>🧭 탐험가: 돌발 이벤트 2→<b>8</b> · 이스터에그 1→<b>3</b> · A·S급 이벤트 1→<b>4</b> · 악몽 8분→<b>15분</b><br>🧘 수련자: 레벨 25→<b>35</b> · 완벽한 회피 5→<b>30</b> · 지옥 이상 클리어 1→<b>3</b> · 악몽 10분→<b>18분</b><br>💰 상인: 한 판 골드 3,000→<b>8,000</b> · 상인 구매 6→<b>25</b> · 한 판 골드 12,000→<b>20,000</b> · 지옥 이상 한 판 처치 6,000→<b>9,000</b><br>이미 진행 중인 의뢰는 지금까지 쌓은 진행은 그대로, 목표만 새 기준이에요']]},
+    ['change','📜 <b>의뢰 목표를 크게 올렸어요</b> (악몽 10분이면 골드가 3~6만이라 예전 목표는 바로 깨졌어요). 모두 <b>무한의 악몽</b> 기준이에요<br>⚔ 사냥꾼: 한 판 적 20,000 처치 · 정예 300 · 보스 20 · 노히트 보스 3번<br>🧭 탐험가: 돌발 이벤트 10 · 이스터에그 4 · A·S급 이벤트 4 · 한 판 20분 버티기<br>🧘 수련자: 한 판 레벨 40 · 완벽한 회피 50 · 한 판 18분 · 한 판 22분<br>💰 상인: 한 판 골드 60,000 · 상인 구매 40 · 한 판 골드 100,000 · 한 판 적 25,000 처치']]},
   {v:345,t:'💥 합체 알림 · ℹ 게이지 설명',items:[
     ['change','💥 합체될 때 <b>무엇과 무엇이 합쳐졌는지</b> 같이 보여요 (예: 프로스트 노바 + 얼음 파쇄 → 얼음 감옥). 자동 선택으로 고른 증강이 모르는 사이에 합체돼도 알 수 있게'],
     ['change','ℹ 화면 위쪽 장비 증강 게이지(⭐·🌩·✨ 등 %)와 마법사 주문 표시(🔥 화염구·❄ 얼음 구체·⚡ 번개 구체)에 마우스를 올리면(터치는 누르면) 무슨 효과인지·게이지가 얼마나 찼는지 설명이 떠요']]},
@@ -10773,27 +10773,27 @@ function openMastery(){cosPreviewHide();ftipHide();const ks=Object.keys(CLASSES)
 // ===== 1~3배속 의뢰: 판 내내 1~3배속으로 하다가 첫 보스를 잡으면 의뢰인이 맵에 나타남 (판마다 한 번, 의뢰를 다 하면 같은 판에 다시). 길(루트)마다 4개 의뢰 → 루트 보상 =====
 // v314: 의뢰 루트 4갈래 — 처음 만날 때(또는 루트를 끝낼 때마다) 루트를 골라 4개 의뢰를 차례로. 마지막 의뢰를 끝내면 루트 보상
 // k: 진행 종류 (누적: kill·elite·boss·nohit·ev·evA·egg·pd·buy / 한 판 최고: lvl·surv·gold·killRun·clear), df: 이 난이도 이상에서만, only: 이 난이도에서만
-const Q_RT={/* v346: 보상(유니크·신화 정수)에 비해 목표 하나하나가 너무 쉬웠음 → 대부분 지옥·신·악몽 조건을 붙여 '잘해야' 깰 수 있게 */
+const Q_RT={/* v346: 목표 하나하나가 너무 쉬웠음 (악몽 10분이면 골드 3~6만) → 의뢰인이 나오는 무한의 악몽 기준으로, 잘해야 깰 수 있게 */
   hunt:{n:'사냥꾼',i:'⚔',d:'몬스터와 보스를 사냥하는 길',fin:'◆ 유니크 무기 (그 판 직업)',steps:[
-    {n:'학살자',d:'신 난이도 이상 한 판에서 적 {g}마리 처치',k:'killRun',g:12000,df:'god',rw:'m800+b2'},
+    {n:'학살자',d:'무한의 악몽 한 판에서 적 {g}마리 처치',k:'killRun',g:20000,only:'nightmare',rw:'m800+b2'},
     {n:'정예 사냥',d:'무한의 악몽에서 정예 몬스터 {g}마리 처치',k:'elite',g:300,only:'nightmare',rw:'m1000+b2'},
-    {n:'우두머리 사냥',d:'신 난이도 이상에서 보스 {g}마리 처치',k:'boss',g:10,df:'god',rw:'m1500+b3'},
-    {n:'완벽한 사냥',d:'신 난이도 이상에서 보스를 한 대도 안 맞고 {g}번 처치',k:'nohit',g:3,df:'god',rw:'uq+m2500+b4'}]},
+    {n:'우두머리 사냥',d:'무한의 악몽에서 보스 {g}마리 처치',k:'boss',g:20,only:'nightmare',rw:'m1500+b3'},
+    {n:'완벽한 사냥',d:'무한의 악몽에서 보스를 한 대도 안 맞고 {g}번 처치',k:'nohit',g:3,only:'nightmare',rw:'uq+m2500+b4'}]},
   expl:{n:'탐험가',i:'🧭',d:'숨겨진 것을 찾고 돌발 상황을 해결하는 길',fin:'◆ 유니크 방어구·장신구 1개',steps:[
-    {n:'돌발 상황 해결',d:'지옥 이상에서 돌발 이벤트 {g}번 성공',k:'ev',g:6,df:'hell',rw:'m800+b2'},
+    {n:'돌발 상황 해결',d:'무한의 악몽에서 돌발 이벤트 {g}번 성공',k:'ev',g:10,only:'nightmare',rw:'m800+b2'},
     {n:'숨은 이야기',d:'이스터에그 {g}번 찾기',k:'egg',g:4,rw:'m1000+b2'},
-    {n:'위험한 의뢰',d:'신 난이도 이상에서 어려운 돌발 이벤트(A·S급) {g}번 성공',k:'evA',g:3,df:'god',rw:'m1500+b3'},
-    {n:'악몽 탐사',d:'무한의 악몽 한 판에서 {g}분 버티기',k:'surv',g:18,only:'nightmare',rw:'uqi+m2500+b3'}]},
+    {n:'위험한 의뢰',d:'무한의 악몽에서 어려운 돌발 이벤트(A·S급) {g}번 성공',k:'evA',g:4,only:'nightmare',rw:'m1500+b3'},
+    {n:'악몽 탐사',d:'무한의 악몽 한 판에서 {g}분 버티기',k:'surv',g:20,only:'nightmare',rw:'uqi+m2500+b3'}]},
   sage:{n:'수련자',i:'🧘',d:'몸놀림과 끈기를 단련하는 길',fin:'✦ 신화 정수 1개 + 강화의 축복 8장',steps:[
-    {n:'성장',d:'한 판에서 레벨 {g} 달성',k:'lvl',g:40,rw:'m800+b2'},
-    {n:'바람의 몸놀림',d:'완벽한 회피 {g}번 (큰 공격을 대시로 피하기)',k:'pd',g:50,rw:'m1000+b2'},
-    {n:'신의 시험',d:'신 난이도 클리어 {g}번',k:'clear',g:2,df:'god',rw:'m1500+b3'},
-    {n:'끝없는 수련',d:'무한의 악몽 한 판에서 {g}분 버티기',k:'surv',g:20,only:'nightmare',rw:'e1+b8+m2000'}]},
+    {n:'성장',d:'무한의 악몽 한 판에서 레벨 {g} 달성',k:'lvl',g:40,only:'nightmare',rw:'m800+b2'},
+    {n:'바람의 몸놀림',d:'무한의 악몽에서 완벽한 회피 {g}번 (큰 공격을 대시로 피하기)',k:'pd',g:50,only:'nightmare',rw:'m1000+b2'},
+    {n:'인내의 시험',d:'무한의 악몽 한 판에서 {g}분 버티기',k:'surv',g:18,only:'nightmare',rw:'m1500+b3'},
+    {n:'끝없는 수련',d:'무한의 악몽 한 판에서 {g}분 버티기',k:'surv',g:22,only:'nightmare',rw:'e1+b8+m2000'}]},
   merc:{n:'상인',i:'💰',d:'골드를 모으고 상인과 거래하는 길',fin:'🏅 메달 8,000 + 아직 없는 외형 1개',steps:[
-    {n:'첫 장사',d:'한 판에서 골드 {g} 모으기',k:'gold',g:15000,rw:'m800+b2'},
-    {n:'단골손님',d:'상인에게 {g}번 사기',k:'buy',g:40,rw:'m1000+b2'},
-    {n:'큰손',d:'한 판에서 골드 {g} 모으기',k:'gold',g:30000,rw:'m1500+b3'},
-    {n:'황금 사냥',d:'신 난이도 이상 한 판에서 적 {g}마리 처치',k:'killRun',g:12000,df:'god',rw:'m8000+cos'}]}};
+    {n:'첫 장사',d:'무한의 악몽 한 판에서 골드 {g} 모으기',k:'gold',g:60000,only:'nightmare',rw:'m800+b2'},
+    {n:'단골손님',d:'무한의 악몽에서 상인에게 {g}번 사기',k:'buy',g:40,only:'nightmare',rw:'m1000+b2'},
+    {n:'큰손',d:'무한의 악몽 한 판에서 골드 {g} 모으기',k:'gold',g:100000,only:'nightmare',rw:'m1500+b3'},
+    {n:'황금 사냥',d:'무한의 악몽 한 판에서 적 {g}마리 처치',k:'killRun',g:25000,only:'nightmare',rw:'m8000+cos'}]}};
 const Q_ONE=new Set(['lvl','surv','gold','killRun','clear']),Q_DO={normal:0,hard:1,hell:2,god:3,nightmare:4};
 const qD=()=>{const Q=META.quest=META.quest||{st:0,acc:0,pr:0,cyc:0};if(Q.v!==2){/* 예전 5단계 의뢰 → 루트 고르기부터 (끝낸 횟수 cyc는 그대로) */Q.v=2;Q.rt=null;Q.st=0;Q.acc=0;Q.pr=0;Q.cy=Q.cy||{};}return Q;};
 const qRt=()=>{const Q=qD();return Q_RT[Q.rt]||null;},qS=()=>{const R=qRt();return R?R.steps[qD().st]||null:null;};
@@ -10802,7 +10802,7 @@ const qTxt=()=>{const s=qS();return s?s.d.replace('{g}',qGoal().toLocaleString()
 const qReady=()=>{const Q=qD();return !!(Q.acc&&qS()&&Q.pr>=qGoal());};
 const qOk=()=>!!S&&S.started&&((AUTO.speed||1)<=SPD_Q||DEV)&&!raidOn()&&!duelOn()&&!rushOn();
 const qRwTxt=r=>r.includes('+')?r.split('+').map(x=>qRwTxt(x)).join(' + '):r==='uq'?'◆ 유니크 무기 (그 판 직업)':r==='uqi'?'◆ 유니크 방어구·장신구':r==='cos'?'👕 아직 없는 외형 1개':r[0]==='e'?`✦ 신화 정수 ${r.slice(1)}개`:r[0]==='m'?`🏅 메달 ${Math.round(+r.slice(1)*qCyM(qCy())).toLocaleString()}`:`🕊 강화의 축복 ${r.slice(1)}장`;
-function qAdd(k,n){const Q=qD(),st=qS();if(!Q.acc||!st||!qOk()||st.k!==k)return;/* v346: 「한 판에서 ○」 의뢰는 받은 판 다음 판부터 셈 (같은 판에서 쌓인 골드·레벨로 줄줄이 깨지던 문제) */if(Q_ONE.has(k)&&Q.aRun&&Q.aRun===S.qRun)return;if(st.df&&(Q_DO[S.diff]??-1)<Q_DO[st.df])return;if(st.only&&S.diff!==st.only)return;const g=qGoal(),b=Q.pr;Q.pr=Q_ONE.has(k)?Math.max(Q.pr,n):Q.pr+n;if(b<g&&Q.pr>=g){toast(`📜 의뢰 「${st.n}」 완료! 곧 의뢰인이 보상을 주러 와요`);if(S&&!S.qn){S.qSeen=0;S.qnT=6;S.qForce=1;}chime([523,659,784,1047],'triangle');}}
+function qAdd(k,n){const Q=qD(),st=qS();if(!Q.acc||!st||!qOk()||st.k!==k)return;if(st.df&&(Q_DO[S.diff]??-1)<Q_DO[st.df])return;if(st.only&&S.diff!==st.only)return;const g=qGoal(),b=Q.pr;Q.pr=Q_ONE.has(k)?Math.max(Q.pr,n):Q.pr+n;if(b<g&&Q.pr>=g){toast(`📜 의뢰 「${st.n}」 완료! 곧 의뢰인이 보상을 주러 와요`);if(S&&!S.qn){S.qSeen=0;S.qnT=6;S.qForce=1;}chime([523,659,784,1047],'triangle');}}
 // 판 진행 중: 등장·소멸·접촉
 // v327 보스 러시 현상수배: 1~3배속으로 하는 보스 러시에서만 진행. 현상금 5개를 차례로 해내면 한 바퀴 (바퀴마다 목표·메달 증가)
 // 하나를 해내면 그 판에서 곧바로 현상금을 받음. 진행 상황은 판 시작 알림 + 오른쪽 위 상태 줄
