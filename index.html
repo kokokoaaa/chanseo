@@ -6596,8 +6596,8 @@ function autoSkill(){const p=S.p;if((p.skCd||0)>0||!p.alive)return;const danger=
 // v298: 고유 무기 증강 피해 2.5배 (프리즘 증강 이상 체감되게)
 const UW_K=2.5;
 // v331 주기형 증강 → 행동 발동: 타이머는 최소 간격(예전 주기 그대로)만 맡고, 0이 됐을 때 행동 신호가 와 있어야 발동
-const AG_TR={blackhole:['kill',20],venomcloud:['kill',15],nova:['dash',1],thunder:['atk',10],mine:['atk',3],chipshot:['atk',5],goldbomb:['kill',15],battlecry:['hurt',2],stormcall:['atk',6],frostnova:['hurt',1],turret:['dash',1],tesla:['atk',4],st_shadow:['dash',1],st_wave:['hurt',1],m_blizzard:['kill',12],d_bear:['hurt',3],e_prism:['kill',12],a_rain:['atk',6],archangel:['hurt',2]};
-const AG_ON={st_shadow:()=>typeof shadowOn==='function'&&shadowOn(),st_wave:()=>typeof waveOn==='function'&&waveOn()};
+const AG_TR={blackhole:['kill',20],venomcloud:['kill',15],nova:['dash',1],thunder:['atk',10],mine:['atk',3],chipshot:['atk',5],goldbomb:['kill',15],battlecry:['hurt',2],stormcall:['atk',6],frostnova:['hurt',1],turret:['dash',1],tesla:['atk',4],st_shadow:['dash',1],st_wave:['hurt',1],m_blizzard:['kill',12],d_bear:['hurt',3],e_prism:['kill',12],a_rain:['atk',6],archangel:['hurt',2],thornseed:['kill',8],st_nature:['kill',8],p_beacon:['atk',5]};
+const AG_ON={thornseed:()=>has('thornseed')||(typeof tag==='function'&&tag('nature')>=1),st_nature:()=>false/* 설명 글만 (실제 신호는 thornseed가 받음) */,p_beacon:()=>has('p_beacon')&&S.cls==='paladin',st_shadow:()=>typeof shadowOn==='function'&&shadowOn(),st_wave:()=>typeof waveOn==='function'&&waveOn()};
 function agEv(k){if(!S)return;const N=S.agN=S.agN||{},G=S.agG=S.agG||{};for(const id in AG_TR){const T=AG_TR[id];if(T[0]!==k||G[id])continue;if(!(AG_ON[id]?AG_ON[id]():has(id)))continue;N[id]=(N[id]||0)+1;if(N[id]>=T[1]){N[id]=0;G[id]=1;}}}
 const agGo=id=>{const G=S.agG;if(!G||!G[id])return false;G[id]=0;return true;};
 // 설명 글: 앞의 「N초마다」를 발동 조건으로, 「공속이 오를수록 더 자주」는 최소 간격 안내로
@@ -7524,7 +7524,7 @@ function update(dt){
     if(has('tracker')){let n=0;for(const e of S.en)if(e.alive&&e.mkT>S.t)n++;S.mkN=n;}
     if(waveOn()){S.wvT=(S.wvT??4)-dt;if(S.wvT<=0&&agGo('st_wave')){S.wvT=Math.max(1,(tag('wave')>=2?4:5)-(has('quake')?lv3('quake',.5,1,1.5):0)-(has('f_epicenter')?1:0)-(has('tectonic')?2:0))*cdM();doWave();if(tag('wave')>=6)S.wv2=.3;}
       if(S.wv2>0){S.wv2-=dt;if(S.wv2<=0)doWave();}}
-    if(has('thornseed')||tag('nature')>=1){const ts=has('thornseed');S.tsT=(S.tsT??5)-dt;if(S.tsT<=0){S.tsT=(ts?(has('f_overgrow')?3:5):6)*cdM();const c=S.en.filter(e=>e.alive&&!e.phase&&d2(e,p)<300*300);for(let i=0;i<(ts?(has('f_overgrow')?3:2):1)+(has('f_worldroot')?3:0)&&c.length;i++){const e=c.splice(Math.floor(Math.random()*c.length),1)[0];vineAt(e.x,e.y,ts?lv3('thornseed',.6,.8,1):.6);}}}
+    if(has('thornseed')||tag('nature')>=1){const ts=has('thornseed');S.tsT=(S.tsT??5)-dt;if(S.tsT<=0&&agGo('thornseed')){S.tsT=(ts?(has('f_overgrow')?3:5):6)*cdM();const c=S.en.filter(e=>e.alive&&!e.phase&&d2(e,p)<300*300);for(let i=0;i<(ts?(has('f_overgrow')?3:2):1)+(has('f_worldroot')?3:0)&&c.length;i++){const e=c.splice(Math.floor(Math.random()*c.length),1)[0];vineAt(e.x,e.y,ts?lv3('thornseed',.6,.8,1):.6);}}}
     if(has('gb_wheel')){S.whT=(S.whT??2)-dt;if(S.whT<=0){S.whT=8;S.whR=Math.floor(Math.random()*5);S.whE=S.t+4;const N=['🔴 공격력 +'+Math.round(40*whK())+'%','⚫ 공격 속도 +'+Math.round(30*whK())+'%','💚 치명타 +'+Math.round(20*whK())+'%','💛 공격마다 폭발','💰 골드'][S.whR];ftext(p.x,p.y-44,'회전: '+N,'#ffd76a',16);if(S.whR===4){const g=price(14*whK());S.gold+=g;}}}
     if(has('d_photo')&&p.alive){S.phoT=(S.phoT||0)+dt;if(S.phoT>=3){S.phoT=0;vineAt(p.x,p.y,lv3('d_photo',.4,.5,.6));}}
     if(has('d_seasons')){const sn=season();if(sn!==S.lastSn){S.lastSn=sn;ftext(p.x,p.y-40,['🌸 봄','☀️ 여름','🍂 가을','❄️ 겨울'][sn],['#ffb0d0','#ffd76a','#e09a4a','#bfe8ff'][sn],16);}}
@@ -7572,7 +7572,7 @@ function update(dt){
     if(S.cls==='paladin'&&mky(2)){S.mkPw=(S.mkPw??4)-dt;if(S.mkPw<=0){S.mkPw=4;const ar=110*(1+(p.auraM||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1);S.rings.push({x:p.x,y:p.y,r:10,max:ar,life:.4,col:'#ffd76a'});for(const e of S.en)if(e.alive&&!e.phase&&d2(e,p)<(ar+e.r)**2){S.dsrc='holy';dmgEs('응징의 파동',e,pDmg()*2*holyM(),'#ffd76a');S.dsrc=null;if(!e.boss){const a=Math.atan2(e.y-p.y,e.x-p.x);e.x+=Math.cos(a)*40;e.y+=Math.sin(a)*40;}}}}
     if(S.cls==='paladin'||has('halo')){S.auT=(S.auT??.5)-dt;if(S.auT<=0){S.auT=.5;const sn=has('p_sanct')?Math.min(10,S.en.reduce((c,e)=>c+(e.alive&&!e.boss&&d2(e,p)<200*200?1:0),0)):0,ar=110*(1+(p.auraM||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1)*(1+.05*sn),ad=S.cls==='paladin'?pDmg()*.5*(1+(p.auraD||0))*(1+sn*lv3('p_sanct',.03,.04,.05))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1)*holyM()*(has('p_sun')?1+Math.floor((S.sunN||0)/300)*lv3('p_sun',.015,.02,.025):1):0,hd=has('halo')?pDmg()*.3*holyM():0;
       if(has('p_martyr')&&(p.mtyr||0)>0&&S.cls==='paladin'){const v=p.mtyr*pDmg()*lv3('p_martyr',1.2,1.6,2)*holyM();p.mtyr=0;S.rings.push({x:p.x,y:p.y,r:10,max:ar,life:.35,col:'#fff3a0'});for(const e of S.en)if(e.alive&&d2(e,p)<(ar+e.r)**2){S.dsrc='holy';dmgEs('순교자',e,v,'#fff3a0');S.dsrc=null;}}
-      if(has('p_beacon')&&S.cls==='paladin'){p.bcT=(p.bcT||0)+.5;if(p.bcT>=5){p.bcT=0;let bt=null;for(const e of S.en)if(e.alive&&!e.phase&&d2(e,p)<(ar+e.r)**2&&(!bt||e.hp>bt.hp))bt=e;if(bt){exL('단죄의 빛','holy',bt.x,bt.y,70,pDmg()*lv3('p_beacon',3,4,5)*holyM(),'#fff3a0');S.bolts.push({x1:bt.x,y1:bt.y-260,x2:bt.x,y2:bt.y,life:.2});}}}
+      if(has('p_beacon')&&S.cls==='paladin'){p.bcT=(p.bcT||0)+.5;if(p.bcT>=5&&agGo('p_beacon')){p.bcT=0;let bt=null;for(const e of S.en)if(e.alive&&!e.phase&&d2(e,p)<(ar+e.r)**2&&(!bt||e.hp>bt.hp))bt=e;if(bt){exL('단죄의 빛','holy',bt.x,bt.y,70,pDmg()*lv3('p_beacon',3,4,5)*holyM(),'#fff3a0');S.bolts.push({x1:bt.x,y1:bt.y-260,x2:bt.x,y2:bt.y,life:.2});}}}
       for(const e of S.en){if(!e.alive)continue;const dd=d2(e,p);let v=0;if(ad&&dd<(ar+e.r)**2)v+=ad;if(hd&&dd<((has('f_seraph')?210:140)+e.r)**2)v+=hd;if(v){S.dsrc='holy';dmgEs('신성 오라·후광',e,v,null,null,true);S.dsrc=null;if(ad&&has('p_sun'))S.sunN=(S.sunN||0)+1;if(ad&&S.cls==='paladin'&&mk(2)&&dd<(ar+e.r)**2)burnE(e,pDmg()*.2,2);}}}}
     if(has('inferno')){S.inT=(S.inT??1)-dt;if(S.inT<=0){S.inT=1;for(const e of S.en)if(e.alive&&d2(e,p)<120*120)burnE(e,pDmg()*.2,2);}}
     if(has('nova')){S.novaT=(S.novaT??10)-dt;if(S.novaT<=0&&agGo('nova')){S.novaT=(10-(has('f_supernova')?3:0))*tmul();explode(p.x,p.y,180,pDmg()*lv3('nova',7,9,11),'#ffd76a');S.shake=Math.max(S.shake,.2);if(has('f_supernova'))thunderStrike(6);}}
@@ -9102,6 +9102,7 @@ const PATCH_NOTES=[
     ['change','⚡ 「N초마다」 터지던 증강 14개가 <b>행동으로 발동</b>해요 (최소 간격은 예전 주기 그대로라 더 자주 터지진 않아요)'],
     ['change','🗡 처치: 블랙홀(20마리) · 독구름(15) · 돈다발 폭탄(15) / 기본 공격: 천둥(10번) · 지뢰(3번) · 부적 발사(5번) · 원소 폭풍(6번) · 번개 토템(4번)'],
     ['change','💨 대시할 때: 노바 · 마법 포탑 · 그림자 소환 / 🛡 맞을 때: 전쟁 함성(2번) · 서리 폭발 · 충격파 발생'],
+    ['change','🌿 가시 씨앗·덩굴 지대(처치 8) · ☀ 단죄의 빛(기본 공격 5번)도 행동 발동이에요'],
     ['change','🎓 직업·왕실: 눈보라(처치 12) · 프리즘 폭발(처치 12) · 화살 소나기(기본 공격 6번) · 곰 변신(3번 맞을 때) · 👑 대천사(2번 맞을 때)'],
     ['change','💞 합체 증강 27개의 「새 능력: N초마다」도 행동 발동이에요: 공격형은 기본 공격 N번마다 · 회복·보호막은 2번 맞을 때마다 · 골드는 처치 수마다'],
     ['change','🌀 소환수·장판의 공격 간격(부적 정령·도깨비불·업화 등)은 원래 그대로예요']]},
