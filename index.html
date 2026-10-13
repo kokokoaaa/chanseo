@@ -12823,7 +12823,7 @@ const LV_AT=1791609893000,lvPts=r=>(+r.lvl||0)*30*((+r.at||0)>=LV_AT?LVF:1)*(nmV
 const scoreOf0=r=>{if(String(r.diff||'').startsWith('raid'))return Math.max(0,(+r.lvl||0)*1000000-Math.min(999999,+r.time||0));const b=+r.bosses||0,d=DIFF[r.diff]||DIFF.normal,v2=false;if(d.rush)return Math.round((b*2500+lvPts(r)+(+r.time||0)*2+(+r.bonus||0))*(d.sc||1));return Math.round((timePts((+r.time||0)+nmShift(r),v2)*SC_TW+softC((+r.kills||0)*2,SC_KC)+lvPts(r)+(nmV4(r)?0:b*(v2?800:400)+(b>=4?3000:0))+(+r.bonus||0))*(d.sc||1));};
 // 보스 러시 새 규칙(BR_AT 이후 기록): 보스가 훨씬 빨리 세지고 공용 패턴이 섞여 판이 짧아진 만큼 최종 점수 ×BR_SM
 const BR_AT=1791547600000,BR_SM=2,brV2=r=>r.diff==='bossrush'&&(+r.at||0)>=BR_AT;
-const AUTO_SC=.1,scoreOf=r=>Math.round(scoreOf0(r)*(nmV3(r)?NM_SM:brV2(r)?BR_SM:1)*(1-AUTO_SC*Math.min(1,Math.max(0,+r.ap||0))));
+const AUTO_SC=.1,scoreOf=r=>r&&r.bot&&r.fsc?r.fsc:Math.round(scoreOf0(r)*(nmV3(r)?NM_SM:brV2(r)?BR_SM:1)*(1-AUTO_SC*Math.min(1,Math.max(0,+r.ap||0))));
 // 플레이 보너스: 직접 찾아내고 해내는 것(황금 용·숨겨진 몬스터·이스터에그·이벤트 성공·보스 노히트)과 최고 DPS에 주는 추가 점수 (난이도 배율 전 점수)
 // v100: 보너스가 기록 점수의 절반 넘게 차지해서 절반 정도로 줄임 (예전 기록과 차이가 너무 벌어지지 않게)
 const BONUS_PTS={dragon:3000,hidden:400,egg:500,eggNew:1000,evC:200,evB:400,evA:800,evS:1500,nohit:800,dodge:150};
@@ -13440,7 +13440,7 @@ function mergeMine(list){const m=myRecs();for(const k in m){const r=m[k];const s
 const regForm=()=>(RDB&&RMYID)||SHEET?`<div class="nick col">${myNick()?`<input id="nickIn" type="hidden" value="${esc(myNick())}"><div style="font-size:15px">👤 <b>${esc(myNick())}</b> 이름으로 올라가요 <small style="color:var(--muted)">(이름은 시작 화면 👤에서 바꿀 수 있어요)</small></div>`:`<input id="nickIn" maxlength="12" placeholder="이름 (12자까지) · 한 번 정하면 다음부터 자동" value="">`}<div class="row"><input id="cmtIn" maxlength="40" placeholder="한마디 남기기 (40자까지, 비워도 돼요)"><button class="btn" id="rsub">등록</button></div></div><p class="sub" id="rmsg" style="margin-top:6px">${myNick()?'등록을 누르면':'이름과 한마디를 쓰고 등록을 누르면'} 메인 화면 명예의 전당에 올라가요. 이름·직업마다 가장 높은 점수만 남아요 (다른 직업 기록은 점수가 낮아도 따로 올라가요) (한마디는 처음 올리거나 더 좋은 기록일 때 바뀌어요).</p>`:`<p class="sub">${RSTATE==='loading'?'랭킹 서버에 연결하는 중이에요…':'랭킹 서버(구글 시트)에 연결하지 못했어요. 인터넷 연결을 확인하거나 잠시 뒤 다시 시도해 주세요.'}</p><button class="btn ghost" id="rRetry">↻ 랭킹 서버 다시 연결</button>`;
 // 명예의 전당: 지난번 받은 목록을 먼저 보여주고, 뒤에서 새로 받아 바꿈 (15초 넘으면 한 번 더 시도)
 const BOARD_KEY='chanseo_board';
-function setBoardFrom(j){BOARD_DW=!!(j.length&&'dw' in j[0]);BOARD=mergeMine(normBoard(j).map(b=>({...b,id:'s_'+b.name+'_'+b.diff})));SHEET=true;RSTATE='on';refreshBoard();}
+function setBoardFrom(j){BOARD_DW=!!(j.length&&'dw' in j[0]);BOARD=withBots(mergeMine(normBoard(j).map(b=>({...b,id:'s_'+b.name+'_'+b.diff}))));SHEET=true;RSTATE='on';refreshBoard();}
 // 지금 접속 중인 사람: 1분마다 서버에 신호(이름·하는 것)를 보내고, 최근 2분 안에 신호를 보낸 사람 목록을 받음
 // 접속자 목록은 💚 버튼으로만 열고 닫음 (열어 둔 상태는 다음에 켜도 유지)
 let SRV_V=0,ONLINE=null,ONL_FAIL=0,ONL_RT=0,ONL_OPEN=(()=>{try{return localStorage.getItem('chanseo_onl_open')==='1';}catch(e){return false;}})();
@@ -13521,6 +13521,18 @@ function botProf(i){const day=Math.floor(Date.now()/864e5),ck=i+'|'+day;if(BOT_P
   let dr='';try{if(DLOOK_ON(cls))dr=dressEnc(dressFrom(cls,I));}catch(e){}
   const det=GEAR_KEYS.map(k=>itEnc(eqI(k))).join(':').replace(/:+$/,'');
   const p=profParse([cls,skin,au,'n',title,ge,pw,pt,got.size,[pm,pg,pr].join('.'),dr,achS,det].join('~'));if(p){p.bot=1;p.cc=BOT_P[i].c;}return BOT_PC[ck]=p;}
+// v340 봇 명예의 전당 기록: 봇마다 실력에 맞는 판 기록(신·악몽·보스러시, 실력 있으면 레이드). 점수는 게임 공식(calcScore)으로. 🤖 이름이라 사람과 구분, 누르면 봇 프로필
+function botRecs(){const out=[];BOTS.forEach(([n,cls],i)=>{const sk=BOT_SK[i],p=botProf(i);if(!p)return;let sd=botH(i+31,9090)|0;const r=()=>{sd=(sd+0x6D2B79F5)|0;let t=Math.imul(sd^sd>>>15,1|sd);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
+    const det=GEAR_KEYS.map(k=>itEnc(p.det[k]||null)).join(':').replace(/:+$/,''),base={name:'🤖 '+n,cls,skin:p.skin,aura:p.aura,gear:p.dr?'!'+p.dr:'',look:'new',gd:det,title:p.title,build:BUILD,bot:1,at:Date.UTC(2026,9,3+Math.floor(r()*10)),comment:BOT_P[i].say[Math.floor(r()*BOT_P[i].say.length)]};
+    if(sk>=1)out.push({...base,diff:'god',time:Math.round(240+sk*80+r()*90),lvl:Math.round(22+sk*5+r()*4),kills:Math.round(1800+sk*1400+r()*800),bosses:Math.min(4,1+Math.floor(sk*.8+r()))});
+    out.push({...base,diff:'nightmare',time:Math.round(420+sk*210+r()*180),lvl:Math.round(20+sk*6+r()*5),kills:Math.round(2500+sk*3500+r()*1500),bosses:Math.round(1+sk*1.3+r())});
+    if(sk>=1)out.push({...base,diff:'bossrush',time:Math.round(200+sk*90+r()*60),lvl:Math.round(15+sk*4+r()*3),kills:Math.round(300+sk*200),bosses:Math.round(3+sk*2+r()*2)});
+    if(sk>=2)['golem','frost','storm','brood','void'].forEach((rk,j)=>{if(r()<.35+sk*.12)out.push({...base,diff:'raid_'+rk,lvl:Math.max(1,Math.min(10,sk*2-1+Math.floor(r()*2))),time:Math.round(150+r()*140)});});});
+  return out;}
+// 봇은 실제 사람 기록보다 아래: 그 난이도(레이드는 보스별)의 사람 최저 기록에 실력 비율(약 30~85%)을 곱한 점수·단계
+const withBots=L=>{try{const real=(L||[]).filter(b=>!b.bot),B=botRecs(),mn={};for(const b of real){const v=/^raid_/.test(b.diff)?(+b.lvl||0):(b.score||0);if(v>0&&(mn[b.diff]==null||v<mn[b.diff]))mn[b.diff]=v;}
+  for(const b of B){const i=botIdx(b.name),k=(BOT_SK[i]||0),f=.3+k*.12+(botH(i+5,b.diff.length*97)%100)/2000;if(mn[b.diff]==null)continue;if(/^raid_/.test(b.diff))b.lvl=Math.max(1,Math.min(b.lvl,mn[b.diff]-1));else b.fsc=Math.max(100,Math.round(mn[b.diff]*f));}
+  return normBoard([...real,...B]);}catch(e){return L;}};
 function botsNow(){const now=Date.now();return BOTS.map(([n,c],i)=>botOn(i,now)?{n:'🤖 '+n,c,a:botAct(i,now)}:null).filter(Boolean);}
 function botChat(){const now=Date.now(),C=8*60000,sl=Math.floor(now/C),o=[];for(let k=0;k<8;k++){const s0=sl-k,h=botH(s0,99);if(h%100>=35)continue;const t=s0*C+((h>>>12)%(C-60000));if(t>now)continue;
   const on=BOTS.map((_,i)=>i).filter(i=>botOn(i,t));if(!on.length)continue;const i=on[(h>>>8)%on.length],L=BOT_P[i].say;o.push({n:'🤖 '+BOTS[i][0],m:L[botH(s0,777)%L.length],t,bot:1});}return o.reverse();}
@@ -14195,7 +14207,7 @@ const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
   RDB=await window.claude.use('db');const U=await window.claude.use('user');
   if(!RDB){loadSheet();return;}
   if(U)RMYID=await U.id();
-  RDB.collection('scores').orderBy('time','desc').limit(100).onSnapshot(sn=>{BOARD=normBoard(sn.docs.map(d=>({id:d.id,...d.data()})));RSTATE='on';refreshBoard();},()=>{RSTATE='err';refreshBoard();});
+  RDB.collection('scores').orderBy('time','desc').limit(100).onSnapshot(sn=>{BOARD=withBots(normBoard(sn.docs.map(d=>({id:d.id,...d.data()}))));RSTATE='on';refreshBoard();},()=>{RSTATE='err';refreshBoard();});
 }catch(e){loadSheet();}})();
 let HOF_ALL=false,HOF_DIFF=null,HOF_RB='all';
 // 레이드 종합: 이름마다 보스 5종 각각의 최고 기록으로 (단계 × 1,000 + 빠른 처치 보너스 300 − 초, 0 이상) 합산. 예전 레이드(1~5단계 거신)는 넣지 않음
