@@ -9126,6 +9126,17 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:340,t:'📋 화면 정돈 · 🤖 AI 모험가 · 💰 판매 보상',items:[
+    ['change','📋 <b>상대 기록 창</b>: 장비 옆에 그 판의 <b>최종 능력치</b>가 나오고, 증강은 종류별(증강·합체·왕실·장비/세트로 받은 증강)로 나뉘어요. 증강에 마우스를 올리면 효과가 떠요. 마스터리 핵심 능력도 보여요'],
+    ['change','👤 <b>계정 정보 창</b>: 장비 합산 상자를 장비창 높이에 맞추고 스크롤로 봐요. 켜진 <b>세트 효과</b>와 <b>장비 증강</b>도 함께 나와요. 장비 칸에 세트 표시(예: 용사)가 대장간처럼 보여요'],
+    ['change','🏅 메달 상점 카드를 얇게, 「강화 전체 초기화」·「산 외형 전체 환불」은 맨 위 보유 메달 줄로 올렸어요'],
+    ['change','🏆 도전과제: 단계 줄기·구역을 눌러 <b>접고 펼칠 수 있어요</b> (모두 펼치기·접기 버튼)'],
+    ['change','⚒ 대장간 위쪽 칩(메달·행운·축복·가루·정수) 높이·글자 위치·간격을 맞췄어요'],
+    ['new','✦ 신화 제작 창에서 각 신화의 <b>능력 이름</b>이 보이고, 마우스를 올리면 고정 능력·추가 옵션·신화 능력 설명이 떠요'],
+    ['buff','💰 장비 <b>판매 메달 약 1.6배</b>, <b>해체 가루 약 1.6배</b> (+ 강화 단계당 3개)'],
+    ['change','🤖 AI 모험가마다 <b>성격·말투·좋아하는 콘텐츠</b>가 달라요 (프로필에 성격 표시). 플레이 시간은 게임이 나온 날부터 현실적으로 쌓여요'],
+    ['new','🤖 AI 모험가도 <b>명예의 전당</b>에 기록을 남겨요 (항상 사람 기록보다 아래, 🤖 표시)'],
+  ]},
   {v:339,t:'🔊 음량 조절',items:[
     ['change','🔊 음악 소리를 크게 키웠어요. 메인 화면 위쪽·게임 안 🔊 버튼을 누를 때마다 <b>끄기 → 음량 1 → 2 → 3 → 4 → 5</b> 순서로 바뀌어요 (처음은 3)'],
   ]},
@@ -15053,7 +15064,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=339,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=340,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
