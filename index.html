@@ -9114,6 +9114,10 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:334,t:'🔄 다시하기 버튼 · 🤖 수정',items:[
+    ['fix','🔄 「이 판 다시하기」가 전투 중에만 보여서, <b>첫 증강 고르는 화면·레벨업 카드 화면</b>에서는 안 보이던 문제를 고쳤어요. 이제 증강을 고르다가도 바로 다시 할 수 있어요'],
+    ['fix','🤖 AI 모험가 채팅에 「undefined」가 나오던 문제, 레이드가 「18단계」처럼 없는 단계로 나오던 문제를 고쳤어요 (이제 「서리 여왕 7단계 도전 중」처럼 보스 이름과 1~10단계)'],
+  ]},
   {v:333,t:'🔄 이 판 다시하기 · ✨ 마법부여 · 🤖 AI 모험가',items:[
     ['new','🔄 <b>이 판 다시하기</b>: 오른쪽 위 「🔄 다시하기」(도감 왼쪽) 또는 스탯 창 맨 위 버튼으로, 같은 직업·같은 난이도로 처음부터 다시 시작해요. 증강도 새로 골라요 (지금 판은 기록·보상 없이 끝나요. 레이드·결투·실험실은 제외)'],
     ['change','📋 스탯 창의 저장·저장하고 메인으로·정산 버튼을 <b>맨 위로</b> 올렸어요 (스크롤 안 해도 돼요)'],
@@ -13324,7 +13328,9 @@ function beginRunD(d,cls){const p=pickDiff;pickDiff=d;try{beginRun(cls);}finally
 // 보스 러시: 레이드·결투처럼 따로 여는 화면에서 직업을 골라 바로 시작
 
 // 이 판 다시하기: 같은 직업·난이도(보스 러시 포함)로 처음부터 (증강도 새로 고름). 지금 판은 기록·보상 없이 끝. 레이드·결투·실험실은 제외
-const runRetryOk=()=>!!(S&&S.mode==='play'&&S.cls&&CLASSES[S.cls]&&S.p&&S.p.alive&&!raidOn()&&!duelOn()&&!labOn());
+// 전투 중뿐 아니라 첫 증강·레벨업 카드·상점 화면에서도 (증강을 다시 고르고 싶을 때). 끝난 판·쓰러지는 중·부활 선택·관전은 제외
+const RT_NO=['start','over','dying','revive','spec','labm','labr'];
+const runRetryOk=()=>!!(S&&!RT_NO.includes(S.mode)&&S.cls&&CLASSES[S.cls]&&S.p&&S.p.alive&&!S.goDone&&!raidOn()&&!duelOn()&&!labOn());
 async function runRetry(){if(!runRetryOk())return;const pz=PAUSED;if(!pz)togglePause(true,true);
   const ok=await uiConfirm('🔄 이 판을 처음부터 다시 할까요?\n같은 직업·같은 난이도로 다시 시작하고, 증강도 처음부터 새로 골라요.\n지금 판은 기록·보상 없이 사라져요.','다시 하기');
   if(!ok||!runRetryOk()){if(!pz)togglePause(false,true);return;}
@@ -13416,11 +13422,12 @@ function onlMerge(L){const m=new Map();for(const x of L){const k=(x.n==='모험�
   return [...m.values()].sort((a,b)=>(b.me||0)-(a.me||0)||(onlAway(a)?1:0)-(onlAway(b)?1:0)||onlKey(a.n).localeCompare(onlKey(b.n)));}
 // v333 AI 모험가(봇): 서버 없이 시간으로 정해지는 규칙이라 모든 기기에서 같은 때 같은 봇이 보임. 🤖 표시, 접속 인원·명예의 전당에는 안 들어감
 const BOTS=[['별빛 순례자','mage'],['숲지기 루루','druid'],['강철 곰돌','knight'],['번개 토끼','gunner'],['달빛 궁수','archer'],['꼬마 연금술사','alch'],['용사 지망생','berserk'],['주사위 요정','gambler']];
-const BOT_ACT=['시작 화면','무한의 악몽 {n}분째','보스 러시 {n}단계','지옥 도전 중','신 난이도 {n}분째','대장간 구경 중','레이드 {n}단계 준비 중','실험실 연습 중'];
+// 활동마다 숫자 범위 [최소, 최대] (레이드는 1~10단계 + 보스 이름)
+const BOT_ACT=[['시작 화면'],['무한의 악몽 {n}분째',5,24],['보스 러시 {n}단계',2,12],['지옥 도전 중'],['신 난이도 {n}분째',3,19],['대장간 구경 중'],['{r} {n}단계 도전 중',1,10],['실험실 연습 중']],BOT_RD=['심연의 거신','서리 여왕','폭풍의 핵','둥지 여왕','끝없는 어둠'];
 const BOT_SAY=['안녕 모험가들!','악몽 10분 넘기기 어렵다…','보스 러시 현상금 받았다!','오늘도 1배속으로 의뢰 하는 중','유니크 귀걸이 떴다','곰 변신 최고','눈보라 너무 예뻐','다들 화이팅!','방금 신화 정수 모았어','징조 공격 완벽 회피 성공!','마스터리 세 갈래 다 찍었다','오늘은 정령사로 해 봐야지','보스 패턴 외웠다!','성채 배경 예쁘다'];
-const botH=(a,b)=>{let h=(a*2654435761^b*40503)>>>0;h^=h>>>13;h=Math.imul(h,0x5bd1e995)>>>0;h^=h>>>15;return h;};
+const botH=(a,b)=>{let h=(a*2654435761^b*40503)>>>0;h^=h>>>13;h=Math.imul(h,0x5bd1e995)>>>0;h^=h>>>15;return h>>>0;/* 음수가 되면 문장 번호가 어긋나 undefined가 나오던 문제 */};
 const BOT_SLOT=8*60000;
-function botsNow(){const sl=Math.floor(Date.now()/BOT_SLOT);return BOTS.map(([n,c],i)=>{const h=botH(sl,i+1);if(h%100>=45)return null;const a=BOT_ACT[(h>>>8)%BOT_ACT.length].replace('{n}',5+(h>>>16)%20);return {n:'🤖 '+n,c,a};}).filter(Boolean);}
+function botsNow(){const sl=Math.floor(Date.now()/BOT_SLOT);return BOTS.map(([n,c],i)=>{const h=botH(sl,i+1);if(h%100>=45)return null;const A=BOT_ACT[(h>>>8)%BOT_ACT.length],a=A[0].replace('{n}',A.length>1?A[1]+(h>>>16)%(A[2]-A[1]+1):'').replace('{r}',BOT_RD[(h>>>4)%BOT_RD.length]);return {n:'🤖 '+n,c,a};}).filter(Boolean);}
 function botChat(){const now=Date.now(),sl=Math.floor(now/BOT_SLOT),o=[];for(let k=0;k<8;k++){const s0=sl-k,h=botH(s0,99);if(h%100>=35)continue;const i=(h>>>8)%BOTS.length,t=s0*BOT_SLOT+((h>>>12)%(BOT_SLOT-60000));if(t>now)continue;o.push({n:'🤖 '+BOTS[i][0],m:BOT_SAY[botH(s0,777)%BOT_SAY.length],t,bot:1});}return o.reverse();}
 function onlHtml(sm){if(!SHEET_URL)return '';if(!ONLINE)return `<span class="onlb" style="opacity:.7;cursor:default">${ONL_FAIL>=2?'🧡':'💚'} ${sm?'…':ONL_FAIL>=2?'서버 연결 재시도 중…':'접속 확인 중…'}</span> <button class="onlb chatb" data-chat="1" title="전체 채팅">💬${sm?'':' 채팅'}</button>`;let L=ONLINE;
   const nA=L.filter(onlAway).length,nOn=L.length-nA;L=[...L.filter(x=>!onlAway(x)),...L.filter(onlAway)];
@@ -14893,7 +14900,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=333,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=334,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
