@@ -1,4 +1,8 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v8.7
+// 찬서 명예의 전당 서버 (Google Apps Script) v8.8
+//
+// v8.7 → v8.8 바뀐 점 (게임 v365)
+// - 📤 아이템 보내기: 여러 개를 한 번에 (it = 장비 배열, 최대 40개씩)
+// - 🧿 부적 보상을 보스 러시·레이드(종합)에도: 일간·주간·월간 1~3위. 부적 기간키 앞에 BR- / RD- 를 붙여 구분
 //
 // v8.6 → v8.7 바뀐 점 (게임 v363~364)
 // - 모험가 말투: 뜬금없이 시비·욕하는 사람에게는 사실을 짚어 차분하게 받아침
@@ -328,15 +332,26 @@ function awardPeriods_(s) {
   try {
     const P = PropertiesService.getScriptProperties(), now = Date.now(), d = new Date(now + 9 * 3600e3), y = d.getUTCFullYear(), m = d.getUTCMonth();
     const prevM = Date.UTC(y, m, 1) - 9 * 3600e3 - 1000, keys = [['D', perKey_('D', now - 864e5)], ['W', perKey_('W', now - 7 * 864e5)], ['M', perKey_('M', prevM)]];
-    const todo = keys.filter(([p, k]) => k !== perKey_(p) && !P.getProperty('aw_' + k));
+    // v8.8 모드: 무한의 악몽(nm) · 보스 러시(br) · 레이드 종합(rd = 보스마다 최고 (단계×1000 + 빠른 처치 보너스 최대 300)의 합)
+    const MODES = [['nm', '', '무한의 악몽'], ['br', 'BR-', '보스 러시'], ['rd', 'RD-', '레이드']];
+    const todo = [];
+    keys.forEach(([p, k]) => { if (k === perKey_(p)) return; MODES.forEach(([md, pre, lab]) => { const ak = 'aw_' + (md === 'nm' ? '' : md + '_') + k; if (!P.getProperty(ak)) todo.push({ p, k, md, pre, lab, ak }); }); });
     if (!todo.length) return;
-    const last = s.getLastRow(); if (last < 2) { todo.forEach(([p, k]) => P.setProperty('aw_' + k, '1')); return; }
-    const v = s.getRange(2, 1, last - 1, HEAD.indexOf('score') + 1).getValues(), gs = giftSheet_();
-    todo.forEach(([p, k]) => {
+    const last = s.getLastRow(); if (last < 2) { todo.forEach(t => P.setProperty(t.ak, '1')); return; }
+    const iS = HEAD.indexOf('score'), iT = HEAD.indexOf('time'), iL = HEAD.indexOf('lvl');
+    const v = s.getRange(2, 1, last - 1, iS + 1).getValues(), gs = giftSheet_();
+    todo.forEach(t => {
       const best = {};
-      v.forEach(r => { if (String(r[1]) !== 'nightmare|' + k) return; const nm = String(r[0]), sc = +r[HEAD.indexOf('score')] || 0; if (!nm || nm === '익명') return; if (!best[nm] || sc > best[nm]) best[nm] = sc; });
-      Object.keys(best).sort((a, b) => best[b] - best[a]).slice(0, 3).forEach((nm, i) => gs.appendRow([now, nm, '명예의 전당', 0, 'charm:' + p + ':' + (i + 1) + ':' + k, '무한의 악몽']));
-      P.setProperty('aw_' + k, '1');
+      if (t.md === 'rd') {
+        const per = {};
+        v.forEach(r => { const mm = /^raid_(\w+)\|(.+)$/.exec(String(r[1])); if (!mm || mm[2] !== t.k) return; const nm = String(r[0]); if (!nm || nm === '익명') return; const pt = (+r[iL] || 0) * 1000 + Math.max(0, 300 - (+r[iT] || 0)); const o = per[nm] || (per[nm] = {}); if (!o[mm[1]] || pt > o[mm[1]]) o[mm[1]] = pt; });
+        Object.keys(per).forEach(nm => { best[nm] = Object.keys(per[nm]).reduce((a, b) => a + per[nm][b], 0); });
+      } else {
+        const df = (t.md === 'nm' ? 'nightmare|' : 'bossrush|') + t.k;
+        v.forEach(r => { if (String(r[1]) !== df) return; const nm = String(r[0]), sc = +r[iS] || 0; if (!nm || nm === '익명') return; if (!best[nm] || sc > best[nm]) best[nm] = sc; });
+      }
+      Object.keys(best).filter(nm => best[nm] > 0).sort((a, b) => best[b] - best[a]).slice(0, 3).forEach((nm, i) => gs.appendRow([now, nm, '명예의 전당', 0, 'charm:' + t.p + ':' + (i + 1) + ':' + t.pre + t.k, t.lab]));
+      P.setProperty(t.ak, '1');
     });
   } catch (err) {}
 }
@@ -420,7 +435,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 87, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 88, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -714,7 +729,7 @@ function giftAdd_(d) {
 function mailAdd_(d) {
   const to = str_(d.to, 12), from = str_(d.from, 12), my = kh_(d.k), it = String(d.it || '');
   if (!to || !from || to === from || !my) return { ok: false, err: 'name' };
-  if (!it || it.length > 3000) return { ok: false, err: 'item' };
+  if (!it || it.length > 40000) return { ok: false, err: 'item' };
   const s0 = sheet_();
   let fk = owner_(s0, from).kh; if (!fk) fk = acctKh_(from);
   if (!fk || fk !== my) return { ok: false, err: 'owned' };
