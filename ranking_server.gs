@@ -1,4 +1,8 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v7.9
+// 찬서 명예의 전당 서버 (Google Apps Script) v8.0
+//
+// v7.9 → v8.0 바뀐 점 (게임 v309) — 보안
+// - 개발자 키를 코드에서 지우고 스크립트 속성 DEV_KEY 에서 읽음 (예전 키는 공개 저장소에 노출돼 있었음 → 새 키로 바뀜)
+//   설정: Apps Script 편집기 → 왼쪽 ⚙ 프로젝트 설정 → 스크립트 속성 → 속성 추가: 이름 DEV_KEY, 값은 따로 받은 64자리 키
 //
 // v7.8 → v7.9 바뀐 점 (게임 v304)
 // - 결투 전적(dw)에 결투에 쓴 캐릭터(직업·옷차림·외형·이름)를 함께 저장: "3-0-0-c:mage:옷차림:외형:이름" → "w3d0l0|mage|옷차림|외형|이름"
@@ -349,7 +353,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 79, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 80, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -359,7 +363,7 @@ function dmSheet_() { const ss = book_(); let s = ss.getSheetByName(DM_SHEET); i
 function dmFor_(nm) { const s = dmSheet_(), last = s.getLastRow(); if (last < 2) return []; const v = s.getRange(2, 1, last - 1, 5).getValues();
   return v.filter(r => dmKey_(r[1]) === nm && !r[4]).map(r => ({ id: String(r[0]), m: String(r[2]), at: +r[3] || 0 })).slice(-10); }
 function dmSend_(d) {
-  if (String(d.dk || '') !== DEV_KEY) return { ok: false, err: 'key' };
+  if (!devOk_(d.dk)) return { ok: false, err: 'key' };
   const to = dmKey_(d.to), msg = String(d.msg || '').replace(/\s+/g, ' ').trim().slice(0, 300).replace(/^[=+\-@]+/, '');
   if (!to || !msg) return { ok: false, err: 'bad' };
   const s = dmSheet_(), id = String(Date.now()) + Math.floor(Math.random() * 1000);
@@ -372,7 +376,7 @@ function dmAck_(q) { const id = String(q.dmack || ''), s = dmSheet_(), last = s.
   { const own = ownerKh_(str_(q.n, 12)); if (own && own !== kh_(q.k)) return { ok: false, err: 'owned' }; }
   const v = s.getRange(2, 1, last - 1, 2).getValues(), i = v.findIndex(r => String(r[0]) === id && dmKey_(r[1]) === dmKey_(q.n)); if (i < 0) return { ok: false };
   s.getRange(i + 2, 5).setValue(Date.now());return { ok: true }; }
-function dmList_(q) { if (String(q.dk || '') !== DEV_KEY) return { err: 'key' }; const s = dmSheet_(), last = s.getLastRow(); if (last < 2) return { dms: [] };
+function dmList_(q) { if (!devOk_(q.dk)) return { err: 'key' }; const s = dmSheet_(), last = s.getLastRow(); if (last < 2) return { dms: [] };
   const n = Math.min(50, last - 1), v = s.getRange(last - n + 1, 1, n, 5).getValues();
   return { dms: v.map(r => ({ id: String(r[0]), to: String(r[1]), m: String(r[2]), at: +r[3] || 0, rd: +r[4] || 0 })).reverse() }; }
 
@@ -469,7 +473,10 @@ function failAdd_(nm) { try { const c = CacheService.getScriptCache(), k = failK
 function ownerSet_(nm, kh) { try { CacheService.getScriptCache().put('own_' + Utilities.base64EncodeWebSafe(nm), kh || '-', 600); } catch (err) {} }
 
 // 기기별 접속 기록 ('기기' 시트: dev · name · ua · first · last · cnt). 개발자 키가 맞을 때만 목록을 줌
-const DEV_SHEET = '기기', DEV_KEY = '166989976870112', DEV_MAXROWS = 5000;
+const DEV_SHEET = '기기', DEV_MAXROWS = 5000;
+// v8.0 보안: 개발자 키는 코드에 적지 않고 스크립트 속성 DEV_KEY 에서만 읽음 (이 파일은 공개 저장소에 있음). 속성이 없으면 개발자 기능은 전부 막힘
+function devKey_() { try { return String(PropertiesService.getScriptProperties().getProperty('DEV_KEY') || ''); } catch (e) { return ''; } }
+function devOk_(k) { const K = devKey_(); return K.length >= 32 && String(k || '') === K; }
 function devSheet_() { const ss = book_(); let s = ss.getSheetByName(DEV_SHEET); if (!s) { s = ss.insertSheet(DEV_SHEET); s.getRange(1, 1, 1, 6).setValues([['dev', 'name', 'ua', 'first', 'last', 'cnt']]); s.getRange('A:C').setNumberFormat('@'); } return s; }
 function devLog_(id, n, ua) {
   if (!id || !n || n === '모험가') return;
@@ -488,7 +495,7 @@ function devLog_(id, n, ua) {
 }
 // 간이 관전: watch_대상 = 보는 사람 id (20초 유지), snap_대상 = 대상의 최근 상태 (30초 유지)
 function spec_(q) {
-  if (String(q.dk || '') !== DEV_KEY) return { err: 'key' };
+  if (!devOk_(q.dk)) return { err: 'key' };
   const c = CacheService.getScriptCache(), u = String(q.spec).replace(/[^A-Za-z0-9]/g, '').slice(0, 16), me = String(q.me || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 16);
   if (!u || !me) return { err: 'id' };
   const wk = 'watch_' + u, cur = c.get(wk);
@@ -499,7 +506,7 @@ function spec_(q) {
 }
 // 이름 주인 초기화 (개발자 키): 그 이름 기록들의 kh 칸을 비움 → 다음에 그 이름으로 기록을 올리는 기기가 새 주인
 function unownAll_(q) {
-  if (String(q.dk || '') !== DEV_KEY) return { err: 'key' };
+  if (!devOk_(q.dk)) return { err: 'key' };
   const lock = LockService.getScriptLock();try { lock.waitLock(10000); } catch (err) { return { err: 'busy' }; }
   try { const s = sheet_(), last = s.getLastRow(), kc = HEAD.indexOf('kh') + 1, names = new Set();let n = 0;
     if (last >= 2) { const v = s.getRange(2, 1, last - 1, 1).getValues();v.forEach(r => names.add(String(r[0])));s.getRange(2, kc, last - 1, 1).clearContent();n = last - 1; }
@@ -510,7 +517,7 @@ function unownAll_(q) {
   } finally { lock.releaseLock(); }
 }
 function unown_(q) {
-  if (String(q.dk || '') !== DEV_KEY) return { err: 'key' };
+  if (!devOk_(q.dk)) return { err: 'key' };
   const nm = str_(q.unown, 12);if (!nm) return { err: 'name' };
   const lock = LockService.getScriptLock();try { lock.waitLock(8000); } catch (err) { return { err: 'busy' }; }
   try { const s = sheet_(), own = owner_(s, nm), kc = HEAD.indexOf('kh') + 1;
@@ -533,7 +540,7 @@ const clsB_ = c => String(c || '').split(/[:#@]/)[0];
 const recKey_ = (nm, df, c) => String(nm) + '\u0001' + df + (/^raid/.test(String(df)) ? '' : '\u0001' + clsB_(c));
 const delBlocked_ = (nm, df, at, c) => delList_().some(x => x.n === nm && (x.d === df || x.d === df + '|' + clsB_(c)) && (+at || 0) <= x.t);
 function delrec_(q) {
-  if (String(q.dk || '') !== DEV_KEY) return { err: 'key' };
+  if (!devOk_(q.dk)) return { err: 'key' };
   const nm = str_(q.delrec, 12), df = String(q.diff || '');if (!nm || !df) return { err: 'name' };
   const lock = LockService.getScriptLock();try { lock.waitLock(8000); } catch (err) { return { err: 'busy' }; }
   try { const s = sheet_(), last = s.getLastRow();if (last < 2) return { ok: 1, n: 0 };
@@ -554,7 +561,7 @@ function snap_(q) {
   return { w: 1 };
 }
 function devList_(q) {
-  if (String(q.dk || '') !== DEV_KEY) return { err: 'key' };
+  if (!devOk_(q.dk)) return { err: 'key' };
   const s = devSheet_(), last = s.getLastRow();
   if (last < 2) return { rows: [] };
   return { rows: s.getRange(2, 1, last - 1, 6).getValues().map(r => ({ d: String(r[0]), n: String(r[1]), ua: String(r[2]), f: +r[3] || 0, l: +r[4] || 0, c: +r[5] || 0 })) };
@@ -629,7 +636,7 @@ function doPost(e) {
     try { CacheService.getScriptCache().remove(CACHE_KEY); } catch (err) {}
     // 멘트 고치기 (개발자 키만, 새 줄은 만들지 않음)
     if (d.cmEdit) {
-      if (String(d.dk || '') !== DEV_KEY) return out_({ ok: false, err: 'key' });
+      if (!devOk_(d.dk)) return out_({ ok: false, err: 'key' });
       const nm = str_(d.name, 12), df = String(d.diff || ''), last = s.getLastRow();
       if (!nm || !df || last < 2) return out_({ ok: false });
       const v = s.getRange(2, 1, last - 1, LIST_COLS).getValues(), cc = HEAD.indexOf('comment') + 1;let n = 0;
@@ -639,7 +646,7 @@ function doPost(e) {
     // 관리자가 이름 비밀번호를 직접 정함 (개발자 키): 지금 주인과 상관없이 그 이름의 열쇠를 이름+비밀번호 열쇠로 바꿈
     // (주인을 지운 사이에 그 사람의 다른 기기가 자동 저장으로 이름을 다시 가져가 버리는 경우를 막기 위해)
     if (d.rekey && d.dk) {
-      if (String(d.dk) !== DEV_KEY) return out_({ ok: false, err: 'key' });
+      if (!devOk_(d.dk)) return out_({ ok: false, err: 'key' });
       const nm = str_(d.name, 12), nk = kh_(d.nk);
       if (!nm || nm === '익명' || !nk) return out_({ ok: false, err: 'bad' });
       const o = owner_(s, nm), kc = HEAD.indexOf('kh') + 1;

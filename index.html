@@ -3828,15 +3828,18 @@ function rollCard(T,r,bonus){if(!T.v)return {...T,r:T.fr||r,u:null};const k=(PCT
 let S=null,best=0,AUTO={pick:false,move:false};
 try{Object.assign(AUTO,JSON.parse(localStorage.getItem('chipdungeon_auto')||'{}'));}catch(e){}
 // 개발자 모드: 자동 선택·자동 이동은 개발자만. 시작 화면 버전 글씨를 5번 연달아 누르면 암호 입력 (암호 원문은 코드에 없고 해시만 비교)
-const DEV_H=7621682056880371,devHash=(str,seed=7)=>{let h1=0xdeadbeef^seed,h2=0x41c6ce57^seed;for(let i=0,ch;i<str.length;i++){ch=str.charCodeAt(i);h1=Math.imul(h1^ch,2654435761);h2=Math.imul(h2^ch,1597334677);}h1=Math.imul(h1^(h1>>>16),2246822507);h1^=Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507);h2^=Math.imul(h1^(h1>>>13),3266489909);return 4294967296*(2097151&h2)+(h1>>>0);};
+/* v309 보안: 개발자 암호는 SHA-256 해시만 (예전 숫자 해시는 몇 초면 거꾸로 찾을 수 있었음). 서버 키(DEV_K)는 암호에서 따로 만들고, 저장해 둔 키도 해시가 맞아야만 개발자 모드가 켜짐 (localStorage 값만 바꿔서 켜던 구멍 막음) */
+const DEV_H1='8c537011751179ed1ee8b6b71cd5f6b8d269d766fcfe9112938f372d722da209',DEV_H2='da0cf0e340a21c9139cbed22eac317302aef4848780deee621ef04252a3b80f7',sha256h=async t=>{try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(t)));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}catch(e){return '';}};
 // 개발자 모드는 이번에 켠 창에서만: 껐다 켜면(새로 열면) 다시 일반 모드 (예전 버전이 남긴 저장값은 지움)
 // 개발자 모드: 한 번 암호를 넣으면 이 브라우저에 기억 (끌 때까지 유지). 기기 기록·관전용 키(DEV_K)도 같이 기억
 // DEV_LK: 개발자 모드면 판 시작 행운 상한 (밸런스 측정 스크립트는 끔). Tab 창 버튼은 지금 판의 행운만 0으로 (예전 버전이 저장해 둔 설정은 지움)
-let DEV=false,DEV_K='',DEV_LK=true;try{localStorage.removeItem('chanseo_devlk');}catch(e){}try{if(localStorage.getItem('chanseo_dev')===String(DEV_H)){DEV=true;DEV_K=localStorage.getItem('chanseo_dk')||'';}}catch(e){}
+let DEV=false,DEV_K='',DEV_LK=true;try{localStorage.removeItem('chanseo_devlk');localStorage.removeItem('chanseo_dev');}catch(e){}
+// 저장해 둔 서버 키가 진짜인지(해시 비교) 확인된 뒤에만 개발자 모드 (확인은 비동기라 켜진 뒤 버튼·화면을 다시 그림)
+(async()=>{let k='';try{k=localStorage.getItem('chanseo_dk')||'';}catch(e){}if(!k)return;if(await sha256h(k)!==DEV_H2){try{localStorage.removeItem('chanseo_dk');}catch(e){}return;}DEV=true;DEV_K=k;try{Object.assign(AUTO,JSON.parse(localStorage.getItem('chipdungeon_auto')||'{}'));}catch(e){}setTimeout(()=>{try{refreshAutoBtns();}catch(e){}try{if(!S||S.mode==='start')startScreen();}catch(e){}},0);})();
 if(!DEV){AUTO.pick=false;}
 let devTap=[];async function devTapVer(){const t=Date.now();devTap=devTap.filter(x=>t-x<2500);devTap.push(t);if(devTap.length<5)return;devTap=[];
   if(DEV){if(await uiConfirm('개발자 모드를 끌까요? (자동 선택·자동 이동 버튼이 사라져요)')){DEV=false;AUTO.pick=false;AUTO.move=false;if(META.title&&!tOwn(META.title)){META.title='';saveMeta();}try{localStorage.removeItem('chanseo_dev');localStorage.removeItem('chanseo_dk');}catch(e){}saveAuto();refreshAutoBtns();if(!S||S.mode==='start')startScreen();toast('개발자 모드 OFF');}return;}
-  const pw=await uiPrompt('개발자 암호');if(pw==null)return;if(devHash(String(pw).trim())===DEV_H){DEV=true;DEV_K=String(devHash(String(pw).trim(),99));try{localStorage.setItem('chanseo_dev',String(DEV_H));localStorage.setItem('chanseo_dk',DEV_K);}catch(e){}SUP_DONE=false;setTimeout(supCheck,300);refreshAutoBtns();if(typeof startScreen==='function'&&(!S||S.mode==='start'))startScreen();toast('🛠 개발자 모드 ON (끌 때까지 유지돼요)');}else toast('암호가 틀렸어요');}
+  const pw=await uiPrompt('개발자 암호');if(pw==null)return;const pt=String(pw).trim();if(await sha256h(pt)===DEV_H1){DEV=true;DEV_K=await sha256h(pt+':srv');try{localStorage.setItem('chanseo_dk',DEV_K);}catch(e){}SUP_DONE=false;setTimeout(supCheck,300);refreshAutoBtns();if(typeof startScreen==='function'&&(!S||S.mode==='start'))startScreen();toast('🛠 개발자 모드 ON (끌 때까지 유지돼요)');}else toast('암호가 틀렸어요');}
 // 게임 안 대화창 (브라우저 팝업 대신): uiConfirm → 예/아니오, uiPrompt → 글자 또는 null, uiAlert → 확인
 // v302: 개발자용 목록 선택 창 (선택지가 많을 때). 고른 값, 닫으면 null
 function devPick(title,opts){return new Promise(res=>{let w=document.getElementById('devPick');if(w)w.remove();w=document.createElement('div');w.id='devPick';w.style.cssText='position:fixed;inset:0;z-index:32000;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px';
@@ -14450,7 +14453,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=308,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=309,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
