@@ -8007,7 +8007,8 @@ function update(dt){
   S.en=S.en.filter(e=>e.alive);
   // 넉백 등으로 몬스터가 맵 밖으로 밀려나가지 않게 (보스는 bossAI에서 따로 처리)
   for(const e of S.en)if(!e.boss){if(e.x<e.r)e.x=e.r;else if(e.x>WW-e.r)e.x=WW-e.r;if(e.y<e.r)e.y=e.r;else if(e.y>WH-e.r)e.y=WH-e.r;}
-  skTick(dt);ultTick(dt);thrTick(dt);if(AUTO.move&&DEV){if(AUTO.hi)aiDefend(dt);else{aiDodge();autoSkill();if((S.p.ulCd||0)<=0&&(bossOn()||S.en.filter(e=>e.alive).length>25))useUlt();}} // 개발자 자동: 측정용(예전 방식) / 고점용(aiDefend) // 개발자 자동: 생존기·궁극기도 알아서
+  skTick(dt);ultTick(dt);thrTick(dt);if(AUTO.move&&DEV){if(AUTO.hi)aiDefend(dt);else{aiDodge();autoSkill();if((S.p.ulCd||0)<=0&&(bossOn()||S.en.filter(e=>e.alive).length>25))useUlt();}}
+  /* v372 일반 자동 이동: 패턴 예고는 10번 중 7번꼴로 대시로 피함 (다 피하진 못함), 체력 40% 아래 위험할 때만 생존기. 이벤트·궁극기는 직접 */else if(AUTO.move&&!S.manualNow&&S.p.alive){easyDodge();if(S.p.hp<S.p.maxHp*.4)autoSkill();} // 개발자 자동: 측정용(예전 방식) / 고점용(aiDefend) // 개발자 자동: 생존기·궁극기도 알아서
   nmRingTick(dt);omenTick(dt);nwTick(dt);updBoss(dt);hbTick(dt);if(p.rdm)p.rdm*=Math.exp(-dt/3);eggTick(dt);if(S.gold>(S.maxGold||0))S.maxGold=S.gold;if(S.npc){S.npc.t+=dt;if(S.npc.t>4.6)S.npc=null;}
   // 사령술사 해골 궁수대: 해골 3기 중 1기가 1초마다 뼈 화살
   if(has('n_archers')&&S.skel&&p.alive){S.naT=(S.naT??1)-dt;if(S.naT<=0){S.naT=1;S.skel.forEach((k,i)=>{if(i%3!==0||k.life<=0)return;const e=nearestE(k,p.range);if(e)pBullet(k.x,k.y,Math.atan2(e.y-k.y,e.x-k.x),pDmg()*lv3('n_archers',.5,.6,.8)*undM(),{child:true,sub:'해골 궁수대',pierce:1,r:3,life:.9,bone:true,src:'undead'});});}}
@@ -9406,6 +9407,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:372,t:'🤖 자동 이동',items:[
+    ['change','🤖 자동 이동이 더 잘 피해요: 더 자주 판단하고, 보스 패턴 예고는 10번 중 7번꼴로 대시로 피하고(다 피하진 못해요), 체력이 40% 아래일 때 위험하면 생존기(E)를 써요'],
+    ['change','🤖 자동 이동은 사냥·생존에만 신경 써요 (이벤트는 직접). 자동으로 움직인 비율만큼 점수가 깎이는 건 그대로예요']]},
   {v:371,t:'💀 사령술사 · 👥 모험가 기록',items:[
     ['buff','💀 사령술사 기본 체력 155 → 170, 방어력 7 → 9 (초반에 몰려서 너무 쉽게 죽던 것)'],
     ['change','👥 다른 모험가들의 명예의 전당 점수를 정해 둔 범위가 아니라, 그 모험가의 장비·진도로 실제로 돌려 본 점수보다 조금 낮게 매겨요 (사람 기록보다는 항상 아래)']]},
@@ -15375,7 +15379,7 @@ const AUTO_DM=1.12,autoPen=()=>AUTO.move&&!DEV&&!!S&&S.mode==='play'&&!S.manualN
 // v300: 자동 이동 공통 — 예고 장판 안에 서 있는지 (t초 안에 터지는 것만). 터지기 직전(0.13초)이면 대시 (대시 중엔 패턴 피해 없음, 보스 러시처럼 예고가 짧아 걸어서 못 빠져나가는 큰 원도 피함)
 const inTele=(t,p)=>{if(t.k==='c')return Math.hypot(t.x-p.x,t.y-p.y)<t.r+p.r;const ux=Math.cos(t.a),uy=Math.sin(t.a),px2=p.x-t.x,py2=p.y-t.y,u=clamp(px2*ux+py2*uy,0,t.len);return Math.hypot(px2-ux*u,py2-uy*u)<t.w/2+p.r;};
 function autoTrapDash(v){const p=S.p;if(!p||p.dashCd>0||p.dashT>0)return;if(!S.tele.some(t=>t.dmg&&t.t<=.13&&inTele(t,p)))return;const l=Math.hypot(v[0],v[1]);if(l>.01){p.lmx=v[0]/l;p.lmy=v[1]/l;}dash();}
-function easyMoveVec(dt){S.emT=(S.emT||0)-dt;const p=S.p;let near=false;for(const e of S.en)if(e.alive&&d2(e,p)<(e.r+p.r+60)**2){near=true;break;}if(near&&S.emT>.25)S.emT=.25;if(S.emT>.1&&S.tele.some(t=>t.dmg&&inTele(t,p)))S.emT=.1;/* v300: 예고 장판 안이면 0.1초마다 다시 판단 */if(S.emT>.15&&((S.boss&&S.boss.alive&&d2(S.boss,p)<(S.boss.r+p.r+160)**2)||S.pr.some(b=>!b.mine&&d2(b,p)<200*200)))S.emT=.15;/* 보스가 가깝거나 탄환이 근처면 0.15초마다 */if(S.emT>0&&S.emV)return S.emV;S.emT=near?.25:.9;S.easyAI=1;try{S.emV=autoMoveVec0();}finally{S.easyAI=0;}return S.emV;}
+function easyMoveVec(dt){S.emT=(S.emT||0)-dt;const p=S.p;let near=false;for(const e of S.en)if(e.alive&&d2(e,p)<(e.r+p.r+60)**2){near=true;break;}if(near&&S.emT>.15)S.emT=.15;if(S.emT>.06&&S.tele.some(t=>t.dmg&&inTele(t,p)))S.emT=.06;/* v300: 예고 장판 안이면 0.1초마다 다시 판단 */if(S.emT>.15&&((S.boss&&S.boss.alive&&d2(S.boss,p)<(S.boss.r+p.r+160)**2)||S.pr.some(b=>!b.mine&&d2(b,p)<200*200)))S.emT=.1;/* 보스가 가깝거나 탄환이 근처면 0.15초마다 */if(S.emT>0&&S.emV)return S.emV;S.emT=near?.15:.5;S.easyAI=1;try{S.emV=autoMoveVec0();}finally{S.easyAI=0;}return S.emV;}
 // 개발자 자동 '야영' 모드: 가만히 있어야 세지는 증강이 있으면 켤 때 물어봄. 켜면 이벤트가 있을 때만 움직이고, 평소엔 맵(보스전은 결계) 끝에서 정지.
 // 예고 공격 위에 있거나 체력이 45% 아래면 그때만 평소처럼 피함
 const STILL_AUGS=[];
@@ -15449,6 +15453,7 @@ function aiDefend(dt){const p=S.p;for(const e of S.en){if(!e.boss)continue;if(e.
     if(skR&&((p.hp<p.maxHp*.35&&(nb>=2||hit!=null))||(p.hp<p.maxHp*.55&&nb>=6))){useSkill();return;}
     if(ulR&&((p.hp<p.maxHp*.2&&(nb>=3||lethal))||(p.hp<p.maxHp*.4&&nb>=8))){useUlt();return;}}
   if(ulR&&S.ulHeld>25&&!lethal&&(bossOn()||S.en.filter(e=>e.alive).length>30))useUlt();}
+function easyDodge(){const p=S.p;if(p.dashCd>0||p.dashT>0)return;for(const t of S.tele){if(!aiTeleHurts(t)||t.t>.1)continue;if(t._ed==null)t._ed=Math.random()<.7?1:0;if(!t._ed)continue;let inn;if(t.k==='c')inn=d2(t,p)<(t.r+p.r)**2;else{const ux=Math.cos(t.a),uy=Math.sin(t.a),px=p.x-t.x,py=p.y-t.y,u=clamp(px*ux+py*uy,0,t.len);inn=Math.hypot(px-ux*u,py-uy*u)<t.w/2+p.r;}if(inn){dash();return;}}}
 function aiDodge(){const p=S.p;if(!AI_W.pd||p.dashCd>0||p.dashT>0)return;for(const t of S.tele){if(!aiTeleHurts(t)||t.t>.08)continue;let inn;if(t.k==='c')inn=d2(t,p)<(t.r+p.r)**2;else{const ux=Math.cos(t.a),uy=Math.sin(t.a),px=p.x-t.x,py=p.y-t.y,u=clamp(px*ux+py*uy,0,t.len);inn=Math.hypot(px-ux*u,py-uy*u)<t.w/2+p.r;}if(inn){dash();return;}}}
 function autoMoveVec0(){
   const p=S.p,N=16,STEP=100,M=70;
@@ -15460,7 +15465,7 @@ function autoMoveVec0(){
   // 오라형(성기사 신성 오라·후광): 오라 범위 안쪽에 적이 들어오도록 바짝 붙음. 체력이 낮을 때만 평소처럼 거리 유지
   const auR=S.cls==='paladin'?SR(110)*(1+(p.auraM||0))*(has('p_aura')?1+lv3('p_aura',.3,.5,.7):1):has('halo')?SR(has('f_seraph')?210:140):0;
   const mel=meleeOn(),pr=mel?meleeR():p.range,desired=auR&&!low?clamp(auR*.6,55,200):clamp(pr*(low?.85:.72),95,290),reach=auR&&!low?Math.max(pr*.88,auR*.9):pr*.88;
-  const shots=S.pr.filter(b=>!b.mine&&d2(b,p)<(S.easyAI?140:260)**2);
+  const shots=S.pr.filter(b=>!b.mine&&d2(b,p)<(S.easyAI?200:260)**2);
   let goal=null;
   // 이벤트 목표(상자·균열·유물·제단)로 이동. 체력이 낮거나 보스전이면 무시
   let evG=null;if(S.ev&&!low&&!bossOn&&!S.easyAI){const ev=S.ev;if((ev.k==='chest'&&!ev.open)||ev.k==='rift'||ev.k==='shrine'||ev.k==='fountain'||(ev.k==='altar'&&!ev.rolled))evG=ev;else if(ev.k==='relic'||ev.k==='bombs'){let bd=1e12;for(const o of (ev.rel||ev.bombs))if(!(o.got||o.done)){const d=d2(o,p);if(d<bd){bd=d;evG=o;}}}}
@@ -16110,7 +16115,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=371,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=372,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
