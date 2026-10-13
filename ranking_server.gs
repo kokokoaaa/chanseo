@@ -1,8 +1,8 @@
 // 찬서 명예의 전당 서버 (Google Apps Script) v8.3
 //
 // v8.2 → v8.3 바뀐 점 (게임 v356)
-// - 결투 출전(arena): 보관함 캐릭터를 결투장에 올려 다른 사람이 상대로 고를 수 있음. 이름·직업마다 하나, 다시 올리면 늘 새것으로 바뀜
-//   점수 = 그 캐릭터가 세운 판 점수(kills 칸). 이름 주인만 arenaDel 로 내릴 수 있음
+// - 레이드 고용 수수료: 레이드에 명예의 전당 캐릭터를 동료로 데려가면 수수료 메달이 「고용 메달」 시트에 쌓임
+//   (POST {hire:1, to, from, m, cls, rb}). 받는 사람은 ?gifts=이름&k=열쇠 로 받아 가고, 받아 간 줄은 지워짐 (이름 주인 열쇠가 맞을 때만)
 //
 // v8.1 → v8.2 바뀐 점 (게임 v356)
 // - 기간별 명예의 전당 (월간·주간·일간): 게임이 기록을 올릴 때 diff 뒤에 「|D20261013」(그날)·「|W20261012」(그 주 월요일)·「|M202610」(그 달)을 붙여 한 번씩 더 보냄
@@ -196,7 +196,7 @@ const OLD_SHEET = 'ranking_v2';
 const HEAD = ['name', 'diff', 'cls', 'time', 'lvl', 'kills', 'bosses', 'score', 'comment', 'at', 'hero', 'hh', 'dw', 'kh'];
 const LIST_COLS = 10; // 목록에 필요한 칸 (name ~ at)
 const CACHE_KEY = 'list_v43';
-const DIFFS = { normal: 1, hard: 1.5, hell: 2.2, god: 3.2, nightmare: 4, bossrush: 4, raid: 1, raid_golem: 1, raid_frost: 1, raid_storm: 1, raid_brood: 1, raid_void: 1, arena: 1 };
+const DIFFS = { normal: 1, hard: 1.5, hell: 2.2, god: 3.2, nightmare: 4, bossrush: 4, raid: 1, raid_golem: 1, raid_frost: 1, raid_storm: 1, raid_brood: 1, raid_void: 1 };
 
 function book_() {
   const a = SpreadsheetApp.getActiveSpreadsheet();
@@ -298,8 +298,6 @@ function clean_(d, at) {
 function score_(r0) {
   const r = { ...r0, diff: baseDiff_(r0.diff) };
   if (String(r.diff).indexOf('raid') === 0) return Math.max(0, r.lvl * 1000000 - Math.min(999999, r.time));
-  // v8.3 결투 출전 캐릭터: 점수는 그 캐릭터가 세운 판 점수 (kills 칸에 실어 보냄)
-  if (r.diff === 'arena') return r.kills;
   const seg = String(r.cls || '').split('~'), bonus = Math.min(BONUS_MAX, Math.max(0, isFinite(+seg[1]) ? +seg[1] : 0)), ap = Math.min(1, Math.max(0, (+seg[2] || 0) / 100)), v2 = false; // v2(제곱 시간 점수)는 v5.3에서 폐지: 게임 화면과 같게 모든 기록 v1 식
   const base = r.diff === 'bossrush'
     ? r.bosses * 2500 + lvPts_(r) + r.time * 2
@@ -600,6 +598,31 @@ function devList_(q) {
 
 // 후원 응원 메시지 ('후원' 시트, 최근 300줄까지만 남김)
 const SUP_SHEET = '후원';
+// v8.3 레이드 고용 수수료
+const GIFT_SHEET = '고용 메달';
+function giftSheet_() { const ss = book_(); let s = ss.getSheetByName(GIFT_SHEET); if (!s) { s = ss.insertSheet(GIFT_SHEET); s.getRange(1, 1, 1, 6).setValues([['at', 'to', 'from', 'm', 'cls', 'rb']]); s.getRange('B:C').setNumberFormat('@'); } return s; }
+function giftAdd_(d) {
+  const to = str_(d.to, 12), from = str_(d.from, 12) || '모험가', m = Math.round(+d.m || 0);
+  if (!to || to === '익명' || to === from || !(m > 0) || m > 1000) return { ok: false };
+  const s = giftSheet_();
+  s.appendRow([Date.now(), to, from, m, String(d.cls || '').replace(/[^a-z]/g, '').slice(0, 12), str_(d.rb, 20)]);
+  if (s.getLastRow() > 3001) s.deleteRows(2, s.getLastRow() - 3001);
+  return { ok: true };
+}
+function giftTake_(q) {
+  const nm = str_(q.gifts, 12), my = kh_(q.k);
+  if (!nm || !my) return { gifts: [] };
+  let kh = owner_(sheet_(), nm).kh; if (!kh) kh = acctKh_(nm);
+  if (!kh || kh !== my) return { gifts: [], err: 'owned' };
+  const lock = LockService.getScriptLock(); let got = false; try { got = lock.tryLock(10000); } catch (err) {}
+  if (!got) return { gifts: [], err: 'busy' };
+  try {
+    const s = giftSheet_(), last = s.getLastRow(); if (last < 2) return { gifts: [] };
+    const v = s.getRange(2, 1, last - 1, 6).getValues(), out = [];
+    for (let i = v.length - 1; i >= 0; i--) if (String(v[i][1]) === nm) { out.push({ at: +v[i][0], from: String(v[i][2]), m: +v[i][3] || 0, cls: String(v[i][4]), rb: String(v[i][5]) }); s.deleteRow(i + 2); }
+    return { gifts: out.reverse() };
+  } finally { lock.releaseLock(); }
+}
 function supSheet_() { const ss = book_(); let s = ss.getSheetByName(SUP_SHEET); if (!s) { s = ss.insertSheet(SUP_SHEET); s.getRange(1, 1, 1, 3).setValues([['at', 'name', 'msg']]); s.getRange('B:C').setNumberFormat('@'); } return s; }
 function supList_(after) {
   const s = supSheet_(), last = s.getLastRow();
@@ -619,6 +642,7 @@ function doGet(e) {
   if (q.delrec) return out_(delrec_(q));
   if (q.snap) return out_(snap_(q));
   if (q.ping) return ping_(q);
+  if (q.gifts) return out_(giftTake_(q));
   if (q.prof) { let pf = ''; try { pf = CacheService.getScriptCache().get('pf_' + dmKey_(q.prof)) || ''; } catch (err) {} return out_({ pf }); }
   if (q.cload) return cload_(q);
   if (q.dels) return out_({ dels: delList_() });
@@ -663,6 +687,7 @@ function doPost(e) {
     }
     if (d.csave) return csave_(d);
     if (d.dm) return out_(dmSend_(d));
+    if (d.hire) return out_(giftAdd_(d));
     // 여기부터는 전당 목록이 바뀔 수 있는 요청만 → 목록 캐시 비움 (클라우드 저장·응원·쪽지는 목록과 무관)
     try { CacheService.getScriptCache().remove(CACHE_KEY); } catch (err) {}
     // 멘트 고치기 (개발자 키만, 새 줄은 만들지 않음)
@@ -739,12 +764,6 @@ function doPost(e) {
       names.forEach((x, i) => { if (String(x[0]) === nm) { s.getRange(i + 2, c).setValue(dw); n++; } });
       return out_({ ok: true, result: 'dw', n });
     }
-    // v8.3 결투 출전 내리기: 이름 주인만 (위에서 확인됨), 그 직업의 출전 줄을 지움
-    if (d.arenaDel) {
-      const last = s.getLastRow(); let n = 0;
-      if (last > 1) { const v = s.getRange(2, 1, last - 1, 3).getValues(); for (let i = v.length - 1; i >= 0; i--) if (String(v[i][0]) === nm0 && String(v[i][1]) === 'arena' && clsB_(v[i][2]) === String(d.cls || '')) { s.deleteRow(i + 2); n++; } }
-      return out_({ ok: true, result: 'arenaDel', n });
-    }
     // 기록 시각: 게임이 보낸 값(그 판을 한 시각)을 씀. 지금보다 미래거나 너무 옛날이면 서버 시각
     const at0 = +d.at || 0, r = clean_(d, at0 > 1.7e12 && at0 <= Date.now() + 60000 ? at0 : 0);
     if (delBlocked_(r.name, r.diff, r.at, r.cls)) return out_({ ok: false, result: 'deleted' });
@@ -760,7 +779,7 @@ function doPost(e) {
     // 예전 줄도 같은 최종 점수식으로 다시 계산해서 비교 (저장된 score 칸은 예전 서버가 보너스 없이 쓴 값일 수 있음)
     const ov = s.getRange(row, 1, 1, LIST_COLS).getValues()[0], oo = Object.fromEntries(HEAD.slice(0, LIST_COLS).map((h, j) => [h, ov[j]]));
     const oldScore = score_({ diff: fixDiff_(oo), cls: String(oo.cls), time: +oo.time || 0, lvl: +oo.lvl || 0, kills: +oo.kills || 0, bosses: +oo.bosses || 0, at: +oo.at || 0 });
-    if (r.score > oldScore || r.diff === 'arena') { /* 출전 캐릭터는 다시 등록하면 늘 새것으로 */
+    if (r.score > oldScore) {
       { const full = s.getRange(row, 1, 1, HEAD.length).getValues()[0], at = h => full[HEAD.indexOf(h)]; if (!r.dw) r.dw = at('dw') || ''; if (!r.hero && at('hero')) { r.hero = at('hero'); r.hh = at('hh'); } }
       s.getRange(row, 1, 1, HEAD.length).setValues([HEAD.map(h => r[h])]);
       return out_({ ok: true, result: 'best' });
