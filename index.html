@@ -9121,6 +9121,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:339,t:'🔊 음량 조절',items:[
+    ['change','🔊 음악 소리를 크게 키웠어요. 메인 화면 위쪽·게임 안 🔊 버튼을 누를 때마다 <b>끄기 → 음량 1 → 2 → 3 → 4 → 5</b> 순서로 바뀌어요 (처음은 3)'],
+  ]},
   {v:338,t:'🤖 AI 모험가 프로필',items:[
     ['new','🎵 메인 화면에 <b>잔잔한 음악</b> 「성채의 밤」이 흘러요 (화음·하프·종소리, 약 80초마다 멜로디가 바뀜). 위쪽 「🎵 음악」 버튼으로 켜고 끌 수 있어요 (게임 안 음악 설정과 같이 움직여요)'],
     ['change','📐 메인 화면 위쪽 버튼(메달·접속·채팅·이름 등) 높이와 간격을 똑같이 맞췄어요'],
@@ -10205,7 +10208,7 @@ function startScreen(){REP_PEND=null;FCLS=null;SEL_RUSH=false;try{metaMig2();}ca
   const dBtn=k=>{const op=diffOpen(k),cl=(META.clears||{})[k];return `<button class="btn ${k===pickDiff?'primary':''} ${cl?'dclr':''}" data-diff="${k}" ${op?'':'disabled'} title="${op?'':DIFF[DKEYS[DKEYS.indexOf(k)-1]].n+' 클리어 시 열림'}"><b class="dn">${op?'':'🔒'}${DIFF[k].n}</b>${cl?'<span class="dcl">✔ 클리어</span>':op?'<span class="dcl new">도전!</span>':''}</button>`;};
   const mBtn=(id,ico,n,sub)=>`<button class="btn ghost" id="${id}" title="${String(sub).replace(/"/g,'&quot;')}"><i>${ico}</i><b>${n}</b><small>${sub}</small></button>`;
   show(`
-  <div class="hTop"><h1>찬서 <span>: 찬붕이의 뱀서</span></h1><div id="verLbl">v${BUILD} · ${updLabel()}</div>${APP_INST()?'':`<button class="btn" id="appInst" style="margin:0 0 0 8px;padding:3px 10px;min-height:0;font-size:13px" title="바탕화면·홈 화면에 앱으로 설치 (자동 업데이트·오프라인)">📲 앱 설치</button>`}<button class="btn" id="bgView" style="margin:0 0 0 8px;padding:3px 10px;min-height:0;font-size:13px" title="메뉴를 숨기고 배경만 보기 (아무 곳이나 누르면 돌아와요)">🖼 배경 구경</button><button class="btn" id="homeBgm" style="margin:0 0 0 8px;padding:3px 10px;min-height:0;font-size:13px" title="음악 켜기·끄기">${BGM.on?'🎵 음악 켜짐':'🔇 음악 꺼짐'}</button><div class="grow"></div>
+  <div class="hTop"><h1>찬서 <span>: 찬붕이의 뱀서</span></h1><div id="verLbl">v${BUILD} · ${updLabel()}</div>${APP_INST()?'':`<button class="btn" id="appInst" style="margin:0 0 0 8px;padding:3px 10px;min-height:0;font-size:13px" title="바탕화면·홈 화면에 앱으로 설치 (자동 업데이트·오프라인)">📲 앱 설치</button>`}<button class="btn" id="bgView" style="margin:0 0 0 8px;padding:3px 10px;min-height:0;font-size:13px" title="메뉴를 숨기고 배경만 보기 (아무 곳이나 누르면 돌아와요)">🖼 배경 구경</button><button class="btn" id="homeBgm" style="margin:0 0 0 8px;padding:3px 10px;min-height:0;font-size:13px" title="누를 때마다 음량: 끄기 → 1 → 2 → 3 → 4 → 5">${bgmLbl()}</button><div class="grow"></div>
    <div class="hChip">🏅 <b>${META.medals.toLocaleString()}</b></div><div id="onl" class="onl">${onlHtml()}</div><div class="nickbar"><button class="onlb" id="nickBtn">👤 ${myNick()?`<b>${esc(myNick())}</b> ✏`:'내 이름 정하기'}</button></div>
    ${DEV?'<div class="donrow"><button id="supBox" class="donb" style="animation:none">💌</button> <button id="devLog" class="donb" style="animation:none">🖥</button></div>':''}</div>
   <div class="hMain">
@@ -10247,7 +10250,7 @@ function startScreen(){REP_PEND=null;FCLS=null;SEL_RUSH=false;try{metaMig2();}ca
   if(sv)$o('cont').onclick=()=>continueGame(sv);
   $o('go').onclick=()=>{if(SEL_RUSH){SEL_RUSH=false;beginRunD('bossrush',pickCls);}else beginRun(pickCls);};
   if($('bgView'))$('bgView').onclick=bgViewOn;
-  if($('homeBgm'))$('homeBgm').onclick=e=>{BGM.on=!BGM.on;try{localStorage.setItem('chanseo_bgm',BGM.on?'1':'0');}catch(er){}refreshBgmBtn();e.currentTarget.textContent=BGM.on?'🎵 음악 켜짐':'🔇 음악 꺼짐';};
+  if($('homeBgm'))$('homeBgm').onclick=()=>bgmCycle();
   if($('appInst'))$('appInst').onclick=()=>WEB?appInstall():appGate(1);
   $o('meta').onclick=()=>openMeta();if($('mstBtn'))$o('mstBtn').onclick=openMastery;$o('cosBtn').onclick=()=>openMeta(1);if($('hRepCv')){gearLiveStart($('hRepCv'));repPickBind('mr',$('hRepCv'),startScreen);}onlPaint();if($('donBtn'))$o('donBtn').onclick=openDonate;if($('donArt'))drawDonArt($('donArt'));donPlace();if($('supBox'))$o('supBox').onclick=openSupBox;if($('devLog'))$o('devLog').onclick=()=>openDevLog();if($('nickBtn'))$o('nickBtn').onclick=openNick;$o('forgeBtn').onclick=openForge;$o('heroBtn').onclick=openHeroes;if($('raidBtn'))$o('raidBtn').onclick=openRaid;if($('rushBtn'))$o('rushBtn').onclick=()=>{SEL_RUSH=true;if(!clsOpen(pickCls))pickCls=Object.keys(CLASSES).find(clsOpen)||'knight';openSel();};if($('duelBtn'))$o('duelBtn').onclick=openDuel;if($('labBtn'))$o('labBtn').onclick=openLab;$o('sync').onclick=openSync;if($('guideBtn'))$o('guideBtn').onclick=()=>openGuide('a');if($('patchBtn'))$o('patchBtn').onclick=()=>openPatch(true);if($('verLbl')){$o('verLbl').onclick=devTapVer;$('verLbl').style.userSelect='none';}$o('codex').onclick=()=>openCodex();$o('achBtn').onclick=openAch;
   refreshBoard();
@@ -14553,7 +14556,9 @@ function refreshAutoBtns(){$('zoomBtn').textContent='🔭 '+(ZOOM+1);if((AUTO.sp
 $('speedBtn').addEventListener('click',cycleSpeed);
 /* ---------- BGM ---------- */
 // 파일 없이 WebAudio로 만드는 부적튠. 실제 시간 기준으로 스케줄해서 게임 배속과 무관. 필드 곡 / 보스 곡 자동 전환
-const BGM={on:(()=>{try{return localStorage.getItem('chanseo_bgm')!=='0';}catch(e){return true;}})(),cur:null,step:0,next:0,g:null,noise:null};
+// v339 음량: 0(끄기)~5단계. 예전 켜기/끄기 설정은 3단계/끄기로 옮김
+const BGM_GV=[0,.7,1.1,1.6,2.2,3];
+const BGM={vol:(()=>{try{const v=localStorage.getItem('chanseo_bgmv');if(v!=null&&v!=='')return Math.max(0,Math.min(5,+v||0));return localStorage.getItem('chanseo_bgm')==='0'?0:3;}catch(e){return 3;}})(),cur:null,step:0,next:0,g:null,noise:null};
 const mf=n=>440*Math.pow(2,(n-69)/12);
 const TRACKS={
   field:{bpm:116,prog:[[57,60,64],[53,57,60],[48,52,55],[55,59,62]],
@@ -14589,20 +14594,24 @@ function bgmTick(){if(document.hidden)return;
   const want=home?'home':BGM.on&&S&&S.started&&S.mode!=='over'&&S.mode!=='dying'&&!S.win?(S.bossI>=0?'boss':'field'):null;
   if(!want){BGM.cur=null;return;}
   if(want==='home'){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();}catch(e){return;}if(AC.state==='suspended'){AC.resume().catch(()=>{});return;}
-    if(!BGM.g){BGM.g=AC.createGain();BGM.g.gain.value=.5;BGM.g.connect(AC.destination);const b=AC.createBuffer(1,AC.sampleRate*.5,AC.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;BGM.noise=b;}
+    if(!BGM.g){BGM.g=AC.createGain();BGM.g.gain.value=BGM_GV[BGM.vol];{const cp=AC.createDynamicsCompressor();cp.threshold.value=-10;cp.ratio.value=6;BGM.g.connect(cp).connect(AC.destination);}const b=AC.createBuffer(1,AC.sampleRate*.5,AC.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;BGM.noise=b;}
     if(BGM.cur!=='home'){BGM.cur='home';BGM.step=0;BGM.next=AC.currentTime+.3;}const e=60/HOME_T.bpm/2;if(BGM.next<AC.currentTime-.2)BGM.next=AC.currentTime+.05;
     while(BGM.next<AC.currentTime+.2){homeStep(BGM.step,BGM.next);BGM.next+=e;BGM.step++;}return;}
   try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();}catch(e){return;}
   if(AC.state==='suspended')AC.resume();
-  if(!BGM.g){BGM.g=AC.createGain();BGM.g.gain.value=.5;BGM.g.connect(AC.destination);const b=AC.createBuffer(1,AC.sampleRate*.5,AC.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;BGM.noise=b;}
+  if(!BGM.g){BGM.g=AC.createGain();BGM.g.gain.value=BGM_GV[BGM.vol];{const cp=AC.createDynamicsCompressor();cp.threshold.value=-10;cp.ratio.value=6;BGM.g.connect(cp).connect(AC.destination);}const b=AC.createBuffer(1,AC.sampleRate*.5,AC.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;BGM.noise=b;}
   if(want!==BGM.cur){BGM.cur=want;BGM.step=0;BGM.next=AC.currentTime+.08;}
   const T=TRACKS[want],beat=60/T.bpm/2;
   if(BGM.next<AC.currentTime-.2)BGM.next=AC.currentTime+.05;
   while(BGM.next<AC.currentTime+.15){bgmStep(T,BGM.step,BGM.next);BGM.next+=beat;BGM.step++;}
 }
 setInterval(bgmTick,30);
-const refreshBgmBtn=()=>{const b=$('bgmBtn');b.textContent=BGM.on?'🎵':'🔇';b.classList.toggle('on',BGM.on);b.title=BGM.on?'BGM 끄기':'BGM 켜기';};
-$('bgmBtn').addEventListener('click',()=>{BGM.on=!BGM.on;try{localStorage.setItem('chanseo_bgm',BGM.on?'1':'0');}catch(e){}refreshBgmBtn();});refreshBgmBtn();
+BGM.on=BGM.vol>0;
+const bgmLbl=()=>BGM.vol?'🔊 음량 '+BGM.vol:'🔇 음악 끄기';
+const refreshBgmBtn=()=>{const b=$('bgmBtn');b.textContent=BGM.vol?'🔊'+BGM.vol:'🔇';b.classList.toggle('on',BGM.on);b.title='음량 바꾸기 (끄기 → 1 → … → 5)';const h=$('homeBgm');if(h)h.textContent=bgmLbl();};
+// 누를 때마다 끄기 → 1 → 2 → 3 → 4 → 5 → 끄기
+function bgmCycle(){BGM.vol=(BGM.vol+1)%6;BGM.on=BGM.vol>0;try{localStorage.setItem('chanseo_bgmv',String(BGM.vol));localStorage.setItem('chanseo_bgm',BGM.on?'1':'0');}catch(e){}if(BGM.g&&AC)BGM.g.gain.setTargetAtTime(BGM_GV[BGM.vol],AC.currentTime,.05);refreshBgmBtn();}
+$('bgmBtn').addEventListener('click',e=>{e.currentTarget.blur();bgmCycle();});refreshBgmBtn();
 // 브라우저는 처음 누르기 전엔 소리를 막음 → 첫 클릭·키 입력 때 소리 장치를 깨움 (메인 화면 곡이 바로 나오게)
 {const wake=()=>{try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();}catch(e){}};addEventListener('pointerdown',wake,{capture:true});addEventListener('keydown',wake,{capture:true});}
 // 개발자 테스트: 대시·생존기(E)·궁극기(R) 쿨타임 없이 계속 쓰기 (이번에 켠 창에서만)
@@ -14992,7 +15001,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=338,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=339,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
