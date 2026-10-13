@@ -8972,6 +8972,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:310,t:'🏆 내 기록은 지금 모습으로',items:[
+    ['change','🏆 명예의 전당의 <b>내 기록</b>은 그 판 때 장비가 아니라 <b>지금 그 직업 장비 모습</b>으로 보여요 (예전 판에 기본 장비로 저장된 기록도). 다른 사람 화면에도 보이게 서버에 바꿔 올려요 (서버 v8.1)']]},
   {v:308,t:'✦ 신화 정수 · 신화 제작',items:[
     ['new','✦ 레이드 <b>7~10단계</b>를 깨면 <b>신화 정수</b>를 얻어요. 첫 클리어 1·2·3·4개, 다시 깨면 7단계 15% · 8단계 30% · 9단계 50% · 10단계 75% 확률로 1개'],
     ['new','⚒ 대장간 「신화 제작」: 신화 정수 7개 + 메달 6,000 + 같은 부위 전설 장비 3개로 <b>원하는 부위의 신화 장비</b>를 만들어요 (검·왕관·갑주·망토·각반·장화·방패)']]},
@@ -12941,7 +12943,7 @@ function duelHeroTag(){try{const R=META.duel||{},by=R.by||{},L=myHeroes().filter
   L.sort((a,b)=>(by[b.id].w-by[a.id].w)||((b.id===R.lastMe)-(a.id===R.lastMe)));const h=L[0],old=recLook(h),dr=!old&&/^[0-9a-z\-]{14}$/.test(h.dr||'')?h.dr:'';
   return [h.cls,dr,String(h.skin||'').replace(/[^A-Za-z0-9_]/g,'').slice(0,24),String(heroName(h)).replace(/[:|]/g,'').slice(0,16)].join(':');}catch(e){return '';}}
 let BOARD_DW=false; // 서버가 결투 전적 칸을 아는지 (v4.2 이상)
-function normBoard(list){return list.map(b=>({...b,dw:dwOf(b.dw),diff:dOf(b),fx:fxOk(clsS(b).split('#')[1]||b.fx||''),bonus:bonusOf(b),ap:apOf(b),title:titleOf(b),aura:auraOf(b),gear:(g=>String(g).includes('!')||!segOf(b,10)?g:g+'!'+segOf(b,10))(gearOf(b)),look:lookOf(b),frame:frameOf(b),build:buildOf(b),team:teamOf(b),gd:b.gd||segOf(b,11),skin:skinOf(b),cls:clsS(b).split('#')[0].split(':')[0],name:String(b.name||''),time:+b.time||0,lvl:+b.lvl||0,kills:+b.kills||0,bosses:+b.bosses||0,comment:String(b.comment||''),score:calcScore(b)})).map(b=>{/* v307: 외형이 저장 안 된 내 기록(예전 판)은 지금 그 직업 장비 모습으로 (다른 기기에서도 같은 계정이면 같게 보임) */try{if(b.name&&b.name===myNick()&&CLASSES[b.cls]&&!String(b.gear||'').includes('!')&&b.look!=='old'){const d=myDrStr(b.cls);if(/^[0-9a-z\-]{14}$/.test(d))return {...b,gear:String(b.gear||'')+'!'+d,look:'new',drMine:1};}}catch(e){}return b;}).sort((a,b)=>b.score-a.score);}
+function normBoard(list){return list.map(b=>({...b,dw:dwOf(b.dw),diff:dOf(b),fx:fxOk(clsS(b).split('#')[1]||b.fx||''),bonus:bonusOf(b),ap:apOf(b),title:titleOf(b),aura:auraOf(b),gear:(g=>String(g).includes('!')||!segOf(b,10)?g:g+'!'+segOf(b,10))(gearOf(b)),look:lookOf(b),frame:frameOf(b),build:buildOf(b),team:teamOf(b),gd:b.gd||segOf(b,11),skin:skinOf(b),cls:clsS(b).split('#')[0].split(':')[0],name:String(b.name||''),time:+b.time||0,lvl:+b.lvl||0,kills:+b.kills||0,bosses:+b.bosses||0,comment:String(b.comment||''),score:calcScore(b)})).map(b=>{/* v307: 외형이 저장 안 된 내 기록(예전 판)은 지금 그 직업 장비 모습으로 (다른 기기에서도 같은 계정이면 같게 보임) *//* v310: 외형이 저장돼 있어도(그 판 때 기본 장비 등) 내 기록은 지금 그 직업 장비 모습으로 → 서버에도 덮어씀 */try{if(b.name&&b.name===myNick()&&CLASSES[b.cls]&&b.look!=='old'){const d=myDrStr(b.cls),g=String(b.gear||''),cur=g.split('!')[1]||'';if(/^[0-9a-z\-]{14}$/.test(d)&&cur!==d)return {...b,gear:g.split('!')[0]+'!'+d,look:'new',drMine:1};}}catch(e){}return b;}).sort((a,b)=>b.score-a.score);}
 // 내 등록 기록 백업: 서버가 어떤 기록(예: 새 난이도)을 반영하지 못해도 내 화면에서는 사라지지 않게. 서버에 더 높은 기록이 있으면 서버 것을 씀
 const myRecs=()=>{try{return JSON.parse(localStorage.getItem('chanseo_myrec')||'{}');}catch(e){return {};}};
 const saveMyRec=r=>{try{const m=myRecs();const old=m[r.diff];if(!old||scoreOf({...r})>=scoreOf({...old}))m[r.diff]=r;localStorage.setItem('chanseo_myrec',JSON.stringify(m));}catch(e){}};
@@ -13614,13 +13616,13 @@ async function recFill(){if(RECFILL||!SHEET_URL||SRV_V<74||!BOARD||!BOARD.length
   const m=myRecs(),me=myNick();let ch=0;
   for(const b of BOARD){if(b.local||!b.name||b.name==='익명'||!CLASSES[b.cls])continue;const rk=keyFor(b.name);if(!rk)continue;
     const hasDr=String(b.gear||'').includes('!')&&!b.drMine,hasGd=!!b.gd;if(hasDr&&hasGd)continue;
-    const id='2|'+b.name+'|'+b.diff+'|'+(+b.at||0);if(sent[id])continue;/* v307: 예전엔 옛 시기 기록을 건너뛰고 「보냄」으로 표시했음 → 표시 키를 바꿔 한 번 다시 시도 */
+    const id='3|'+b.name+'|'+b.diff+'|'+(+b.at||0)+(b.drMine?'|'+String(b.gear).split('!')[1]:'');if(sent[id])continue;/* v307: 예전엔 옛 시기 기록을 건너뛰고 「보냄」으로 표시했음 → 표시 키를 바꿔 한 번 다시 시도 */
     const L=m[b.diff],same=L&&L.name===b.name&&Math.abs((+L.at||0)-(+b.at||0))<60000?L:null,lsg=i=>same?segOf(same,i):'';
-    let dr=hasDr&&!b.drMine?'':lsg(10)||(b.name===me&&b.look!=='old'?myDrStr(b.cls):'');if(!/^[0-9a-z\-]{14}$/.test(dr))dr='';
+    let dr=b.drMine?(String(b.gear).split('!')[1]||''):hasDr?'':lsg(10)||(b.name===me&&b.look!=='old'?myDrStr(b.cls):'');if(!/^[0-9a-z\-]{14}$/.test(dr))dr='';
     const gd=hasGd?'':lsg(11);
     if(!dr&&!gd){sent[id]=1;continue;}
-    try{const r=await fetch(SHEET_URL,{method:'POST',body:JSON.stringify({fill:1,name:b.name,diff:b.diff,at:b.at,k:rk,dr,gd})});const j=await r.json();
-      if(j&&j.ok){sent[id]=1;if(!j.n)continue;ch=1;if(dr&&!b.drMine)b.gear=String(b.gear||'')+'!'+dr;b.drMine=0;if(gd)b.gd=gd;
+    try{const r=await fetch(SHEET_URL,{method:'POST',body:JSON.stringify({fill:1,name:b.name,diff:b.diff,at:b.at,k:rk,dr,gd,ow:b.drMine?1:0,cls:b.cls})});const j=await r.json();
+      if(j&&j.ok){sent[id]=1;if(!j.n)continue;ch=1;if(dr&&!b.drMine)b.gear=String(b.gear||'')+'!'+dr;if(gd)b.gd=gd;
         if(same){const sg=String(same.cls||'').split('~');while(sg.length<12)sg.push('');if(dr&&!sg[10])sg[10]=dr;if(gd&&!sg[11])sg[11]=gd;while(sg.length>1&&sg[sg.length-1]==='')sg.pop();same.cls=sg.join('~');}}
       else if(j&&j.result==='owned')sent[id]=1;}catch(e){}}
   try{localStorage.setItem('chanseo_fill',JSON.stringify(sent));if(ch)localStorage.setItem('chanseo_myrec',JSON.stringify(m));}catch(e){}
@@ -14453,7 +14455,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=309,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=310,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});

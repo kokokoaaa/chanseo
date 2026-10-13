@@ -1,4 +1,7 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v8.0
+// 찬서 명예의 전당 서버 (Google Apps Script) v8.1
+//
+// v8.0 → v8.1 바뀐 점 (게임 v310)
+// - 기록 외형 채우기(fill)에 ow=1이면 이름 주인이 자기 기록의 외형을 지금 장비 모습으로 덮어쓸 수 있음 (예전엔 비어 있을 때만)
 //
 // v7.9 → v8.0 바뀐 점 (게임 v309) — 보안
 // - 개발자 키를 코드에서 지우고 스크립트 속성 DEV_KEY 에서 읽음 (예전 키는 공개 저장소에 노출돼 있었음 → 새 키로 바뀜)
@@ -353,7 +356,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 80, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 81, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -674,7 +677,10 @@ function doPost(e) {
         const sg = String(x[2]).split('~');
         while (sg.length < 12) sg.push('');
         let ch = false;
-        if (dr && !sg[10]) { sg[10] = dr; ch = true; }
+        // v8.1: 주인이 「지금 모습으로 바꾸기」(ow)를 보내면 직업이 같은 기록의 외형을 덮어씀
+        // 직업(cls)을 보내면 그 직업 기록에만 (직업마다 따로 저장된 기록에 다른 직업 모습이 들어가지 않게)
+        if (d.cls && String(sg[0]).split(/[:#@]/)[0] !== String(d.cls)) return;
+        if (dr && (!sg[10] || d.ow)) { if (sg[10] !== dr) { sg[10] = dr; ch = true; } }
         if (gd && !sg[11]) { sg[11] = gd; ch = true; }
         if (!ch) return;
         while (sg.length > 1 && sg[sg.length - 1] === '') sg.pop();
