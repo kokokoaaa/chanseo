@@ -839,7 +839,7 @@ body.ovfull .card.aug{padding:8px 8px;gap:4px;min-height:0}body.ovfull .card.aug
   <div id="st"></div>
   <button id="statBtn">스탯 (Tab)</button><button id="cxBtn">📖 도감</button><button id="rtBtn" title="이 판을 처음부터 다시 (증강도 새로 골라요)">🔄 다시하기</button><div id="onlHud"></div>
   <div id="autoBar"><button id="autoPickBtn">자동 선택 OFF</button><button id="autoMoveBtn">자동 이동 OFF</button><button id="noCdBtn" style="display:none">쿨타임 무시 OFF</button><span id="spdW"><button id="speedBtn">x1</button><span id="spdNote">📜 의뢰는 3배속까지만 받을 수 있어요</span></span><button id="zoomBtn" title="시야 넓이 (Y)">🔭 1</button><button id="pauseBtn" title="일시정지 (T)">⏸</button><button id="bgmBtn">🎵</button><button id="sfxBtn">🔔</button><button id="oriBtn" title="화면 방향 고정 (폰)" style="display:none">🔄</button></div>
-  <div id="pauseEl"><div class="pzBox"><div class="pzT">⏸ 일시정지</div><div class="pzS">천천히 생각해도 돼요. 몬스터도 시간도 멈춰 있어요</div><button class="btn primary" id="pzGo">▶ 계속하기 <small>(T)</small></button></div></div>
+  <div id="pauseEl"><div class="pzBox"><div class="pzT">⏸ 일시정지</div><div class="pzS">천천히 생각해도 돼요. 몬스터도 시간도 멈춰 있어요<br><small style="opacity:.7">창을 끌어서 옮길 수 있어요 (두 번 누르면 가운데로)</small></div><button class="btn primary" id="pzGo">▶ 계속하기 <small>(T)</small></button></div></div>
 </div>
 <script>
 window.addEventListener('error',function(e){if(!e.filename&&/^Script error\.?$/i.test(String(e.message||'')))return;var d=document.getElementById('errbox');if(!d){d=document.createElement('div');d.id='errbox';d.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:99;background:#300;color:#fdd;font:13px/1.4 monospace;padding:8px 10px;border:1px solid #f66;border-radius:6px;white-space:pre-wrap;max-height:40%;overflow:auto';document.body.appendChild(d);}d.textContent+='오류: '+(e.message||e)+' ('+(e.lineno||'?')+':'+(e.colno||'?')+')\n';});
@@ -5824,7 +5824,8 @@ const DOOM_K=[['tot',10],['hun',12],['eye',14]];/* v423 화면 시계 10분·12�
 function doomTick(dt){if(!endless()||rushOn()||!S.p.alive||S.win||dfM().raid||dfM().duel||dfM().lab)return;const m=doomMin();if(m<DOOM_K[0][1]){S.dmT=null;return;}
   /* 최근 20초 처치 속도 (굶주린 영혼 목표 수) */S.khT=(S.khT||0)+dt;if(S.khT>=1){S.khT=0;(S.kh=S.kh||[]).push((S.st.kills||0)-(S.kPet||0));/* 눈의 석화 처치는 빼고 */if(S.kh.length>21)S.kh.shift();}
   if(S.dmCard){S.dmCard.t-=dt/(AUTO.speed||1);if(S.dmCard.t<=0)S.dmCard=null;}
-  if(S.tot)totTick(dt);else if(S.hun)hunTick(dt);else if(S.eye)eyeTick(dt);else{S.dmT=(S.dmT??10)-dt;if(S.dmT>0||S.nw||(S.nwT!=null&&S.nwT<6))return;
+  /* v428 보스가 나오면 굶주린 영혼은 벌 없이 사라짐 (보스전엔 처치할 잡몹이 없어서), 보스 등장 연출 중엔 새 패턴을 시작하지 않음 */if(S.hun&&(bossOn()||S.bannerT>0)){S.hun=null;S.dmCard=null;S.dmT=rand(20,30);}
+  if(S.tot)totTick(dt);else if(S.hun)hunTick(dt);else if(S.eye)eyeTick(dt);else{S.dmT=(S.dmT??10)-dt;if(S.dmT>0||S.nw||(S.nwT!=null&&S.nwT<6)||S.bannerT>0)return;
     const av=DOOM_K.filter(([k,m0])=>m>=m0&&!(k==='hun'&&bossOn())).map(([k])=>k),pool=av.length>1?av.filter(k=>k!==S.dmLast):av,k=pool[Math.floor(Math.random()*pool.length)];S.dmLast=k;
     if(k==='tot')totStart();else if(k==='hun')hunStart();else eyeStart();}}
 function doomEnd(ok,k){const m=doomMin(),late=m>=DOOM_LATE;S.dmT=late?Math.max(20,38-1.5*(m-DOOM_LATE))*rand(.85,1.15):rand(55,70);
@@ -5929,7 +5930,7 @@ function drawTot(){const p=S.p;
     ctx.restore();}
   if(S.hun)drawHunger();}
 // 👁 심연의 눈: 화면 위 가운데 (화면 좌표). 어둠 속 촉수·눈꺼풀·속눈썹·홍채 결·세로 동공·핏줄
-function drawDoomCard(){const c=S&&S.dmCard;if(!c)return;const cw=ctx.canvas.width,ch=ctx.canvas.height,sc=Math.min(cw/900,ch/600),a=Math.max(0,Math.min(1,c.t*3,(c.T-c.t)*6)),bw=Math.min(cw*.92,820*sc),bh=170*sc,bx=(cw-bw)/2,by=ch*.36;ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=a;
+function drawDoomCard(){const c=S&&S.dmCard;if(!c)return;const cw=ctx.canvas.width,ch=ctx.canvas.height,dpr=window.devicePixelRatio||1,sc=Math.min(cw/1500,ch/1000,.62*dpr),a=Math.max(0,Math.min(1,c.t*3,(c.T-c.t)*6)),bw=Math.min(cw*.94,1000*sc),bh=170*sc,bx=(cw-bw)/2,by=ch*.12;/* v428 크기 줄이고 위쪽으로 (화면 가운데를 가리지 않게) */ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=a;
   ctx.fillStyle='rgba(12,4,18,.86)';ctx.beginPath();ctx.roundRect?ctx.roundRect(bx,by,bw,bh,18*sc):ctx.rect(bx,by,bw,bh);ctx.fill();ctx.strokeStyle=c.col;ctx.lineWidth=3*sc;ctx.stroke();
   ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=c.col;ctx.font=`bold ${Math.round(46*sc)}px 'Do Hyeon',sans-serif`;ctx.fillText('☠ 즉사 패턴 · '+c.s,cw/2,by+46*sc);
   ctx.fillStyle='#f4e8ff';ctx.font=`${Math.round(23*sc)}px 'Do Hyeon',sans-serif`;ctx.fillText(c.d,cw/2,by+98*sc);if(c.l2){ctx.fillStyle='#ffd27a';ctx.font=`bold ${Math.round(22*sc)}px 'Do Hyeon',sans-serif`;ctx.fillText(c.l2,cw/2,by+136*sc);}ctx.restore();}
@@ -9668,6 +9669,10 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:429,t:'☠ 즉사 패턴 알림 · 일시정지 창',items:[
+    ['change','☠ 즉사 패턴 알림 카드를 작게 줄이고 화면 위쪽으로 옮겼어요 (가운데 싸움이 가려지지 않게)'],
+    ['change','☠ 보스 등장 연출 중엔 즉사 패턴이 시작하지 않고, 보스가 나오면 굶주린 영혼은 벌 없이 사라져요'],
+    ['new','⏸ 일시정지 창을 끌어서 옮길 수 있어요 (위치 기억 · 두 번 누르면 가운데로)']]},
   {v:426,t:'♾ 고점 돌파 쌓임 표시',items:[
     ['new','♾ 판 동안 쌓이는 고점 돌파 증강(받아치기 투지·업화의 정수·만발의 사수 등 20종)은 증강 칸 오른쪽 아래와 화면 오른쪽 위(누적 피해 위)에 지금 효과가 떠요 (예: ♾ 받아치기 · 투지 74 → 공격력 +28%)']]},
   {v:425,t:'🩸 굶주린 영혼 완화',items:[
@@ -16505,6 +16510,12 @@ let statsOpen=false;
 let PAUSED=false;
 function togglePause(on,sys){if(!sys){CHAT_PZ=false;ST_PZ=false;}on=on==null?!PAUSED:on;if(on&&(!S||S.mode!=='play'||statsOpen))return;PAUSED=on;joy=null;for(const k in keys)keys[k]=false;$('pauseEl').classList.toggle('on',PAUSED);}
 $('pauseBtn').onclick=()=>togglePause();$('pzGo').onclick=()=>togglePause(false);
+/* v428 일시정지 창: 끌어서 옮기기 (버튼 빼고 아무 데나 잡고 끌기) · 위치는 이 기기에 기억 */{const B=document.querySelector('#pauseEl .pzBox');let o={x:0,y:0};try{o=JSON.parse(localStorage.getItem('chanseo_pzpos')||'{"x":0,"y":0}')||{x:0,y:0};}catch(e){}
+  const ap=()=>{const mx=innerWidth/2-40,my=innerHeight/2-40;o.x=Math.max(-mx,Math.min(mx,+o.x||0));o.y=Math.max(-my,Math.min(my,+o.y||0));B.style.transform=`translate(${o.x}px,${o.y}px)`;};ap();B.style.cursor='move';B.style.touchAction='none';
+  let d=null;B.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;e.preventDefault();e.stopPropagation();d={px:e.clientX,py:e.clientY,x:o.x,y:o.y};try{B.setPointerCapture(e.pointerId);}catch(x){}});
+  B.addEventListener('pointermove',e=>{if(!d)return;o.x=d.x+e.clientX-d.px;o.y=d.y+e.clientY-d.py;ap();});
+  const up=()=>{if(!d)return;d=null;try{localStorage.setItem('chanseo_pzpos',JSON.stringify(o));}catch(x){}};B.addEventListener('pointerup',up);B.addEventListener('pointercancel',up);
+  B.addEventListener('dblclick',e=>{if(e.target.closest('button'))return;o={x:0,y:0};ap();up();});addEventListener('resize',ap);}
 const stEl=$('st');
 // 스탯·도감 창: 제목줄을 잡고 끌면 창이 움직임 (게임 중 다시 열어도 그 자리)
 let ST_OFF={x:0,y:0};
@@ -16671,7 +16682,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=427,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=429,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
