@@ -14270,8 +14270,12 @@ function botSched(i,d){const k=i+'|'+d;if(BOT_SC[k])return BOT_SC[k];let S0=new 
 const BOT_INS={};function botInsom(d){if(BOT_INS[d])return BOT_INS[d];const n=1+(botH(d,777)%3===0?1:0),W=BOTS.map((b,j)=>/밤샘|새벽/.test(b[0])?3:1),out=[];let k=0;while(out.length<n&&k<20){let r=botH(d*7+k,991)%W.reduce((a,b)=>a+b,0),j=0;while(r>=W[j]){r-=W[j];j++;}if(!out.includes(j))out.push(j);k++;}return BOT_INS[d]=out;}
 /* 게임을 실제로 하는 칸 (진도·플레이 시간에 쌓임) */const botPlay=(i,d)=>{botSched(i,d);return BOT_PS[i+'|'+d];};
 const botOn0=(i,t)=>{const sl=Math.floor(t/BOT_SLOT);return botSched(i,Math.floor(sl/36)).has(sl%36);};
-/* v379 접속한 모험가가 0명인 시간은 없게: 아무도 없으면 그 시간대에 한 명이 들어와 있음 (새벽엔 밤 체질 모험가가 잘 걸림) */const BOT_FILL={};const botFill1=sl=>{if(BOT_FILL[sl]!=null)return BOT_FILL[sl];const t=sl*BOT_SLOT+1;let f=-1;/* 접속해 있어도 새벽 잠수(💤)뿐이면 0명과 같음 */const kh=((sl%36)*40/60+9)%24,act=j=>botOn0(j,t)&&!(!botPlay(j,Math.floor(sl/36)).has(sl%36)&&kh<7&&botH(sl*31+1,j*13+5)%2);if(!BOTS.some((_,j)=>act(j))){const d=Math.floor(sl/36),W=BOTS.map((b,j)=>botD0(j)>d?0:/밤샘|새벽/.test(b[0])?3:1);if(!W.some(x=>x))W[0]=1;let r=botH(sl,4243)%W.reduce((a,b)=>a+b,0),j=0;while(r>=W[j]){r-=W[j];j++;}f=j;}const ks=Object.keys(BOT_FILL);if(ks.length>400)for(const k of ks.slice(0,200))delete BOT_FILL[k];return BOT_FILL[sl]=f;};
-const botOn=(i,t)=>botOn0(i,t)||botFill1(Math.floor(t/BOT_SLOT))===i;
+/* v379 접속한 모험가가 0명인 시간은 없게 / v391 새벽(0~7시) 말고는 3~4명은 접속해 있게: 모자라면 그 시간대(40분)에 몇 명을 더 들여보냄 (새벽엔 밤 체질 모험가가 잘 걸림) */const BOT_FILL={};const botFillS=sl=>{if(BOT_FILL[sl])return BOT_FILL[sl];const t=sl*BOT_SLOT+1,d=Math.floor(sl/36);/* 접속해 있어도 새벽 잠수(💤)뿐이면 0명과 같음 */const kh=((sl%36)*40/60+9)%24,act=j=>botOn0(j,t)&&!(!botPlay(j,d).has(sl%36)&&kh<7&&botH(sl*31+1,j*13+5)%2);
+  const need=kh<7?1:3+botH(sl,77)%2,F=[];let n=BOTS.filter((_,j)=>act(j)).length;const W=BOTS.map((b,j)=>botD0(j)>d||botOn0(j,t)?0:kh<7&&/밤샘|새벽/.test(b[0])?3:1);let k=0;
+  while(n<need&&W.some(x=>x)){let r=botH(sl+k*7919,4243)%W.reduce((a,b)=>a+b,0),j=0;while(r>=W[j]){r-=W[j];j++;}F.push(j);W[j]=0;n++;k++;}
+  const ks=Object.keys(BOT_FILL);if(ks.length>400)for(const q of ks.slice(0,200))delete BOT_FILL[q];return BOT_FILL[sl]=F;};
+const botFill1=sl=>{const F=botFillS(sl);return F.length?F[0]:-1;};
+const botOn=(i,t)=>botOn0(i,t)||botFillS(Math.floor(t/BOT_SLOT)).includes(i);
 // 지금까지 쌓인 플레이 시간 (시간 단위)
 /* v365: 실제로 판을 돈 시간만 (로비·대장간·잠수 시간은 안 셈) */const botRunMs=(i,sl,upto)=>{if(upto!=null&&upto<=0)return 0;let m=0;for(const x of botPlanC(i,sl)){if(x.k==='home'||x.k==='forge'||x.k==='away')continue;const b=Math.min(x.t+x.d,upto==null?Infinity:upto);if(b>x.t)m+=b-x.t;}return m;};
 function botHours(i,t=Date.now()){const sl=Math.floor(t/BOT_SLOT),d=Math.floor(sl/36),k=i+'|'+d;let pre=BOT_HC[k];if(pre==null){pre=0;for(let q=botD0(i);q<d;q++)for(const s of botPlay(i,q))pre+=botRunMs(i,q*36+s)/36e5;BOT_HC[k]=pre;}
@@ -14279,7 +14283,7 @@ function botHours(i,t=Date.now()){const sl=Math.floor(t/BOT_SLOT),d=Math.floor(s
 // 깬 난이도: 0 없음 · 1 일반 · 2 어려움 · 3 지옥 · 4 신 (필요 시간 ÷ 실력)
 /* v369 실제 사람처럼: 판을 돈 시간 기준 일반 ~5분 · 어려움 ~15분 · 지옥 ~35분 · 신 ~1시간이면 깸 (실력 보정) — 하루치 플레이면 악몽까지 */const BOT_CLR=[.08,.25,.55,1],botClr=(i,H)=>BOT_CLR.filter(h=>H>=h/botL(i)).length;
 // 한 슬롯 안의 일정: [시작(ms), 길이(ms), 종류, 값들]
-function botPlan(i,sl){const P=[],H=k=>botH(sl*31+k,i*13+5),sk=BOT_SK[i];if(!botPlay(i,Math.floor(sl/36)).has(sl%36)){/* 접속만 하고 게임은 안 하는 칸: 로비·대장간 구경, 새벽엔 반쯤은 잠수 */const kh=((sl%36)*40/60+9)%24;if(kh>=0&&kh<7&&H(1)%2&&botFill1(sl)!==i)return [{t:0,d:BOT_SLOT,k:'away'}];/* v387 사람처럼 가끔 잠깐 자리를 비웠다 돌아옴 (혼자 지키는 모험가는 빼고) */if(H(3)%3===0&&botFill1(sl)!==i){const a=(BOT_SLOT*(.25+(H(4)%30)/100))|0,d=(BOT_SLOT*(.15+(H(5)%20)/100))|0;return [{t:0,d:a,k:H(2)%3?'home':'forge'},{t:a,d,k:'away'},{t:a+d,d:BOT_SLOT-a-d,k:'home'}];}return [{t:0,d:BOT_SLOT*.6|0,k:H(2)%3?'home':'forge'},{t:BOT_SLOT*.6|0,d:BOT_SLOT-(BOT_SLOT*.6|0),k:'home'}];}let t=0,k=0;const add=(d,o)=>{if(o.k!=='home'&&o.k!=='forge'&&t+d>BOT_SLOT-60000)o={k:'home'};/* 접속이 끝나기 전에 못 끝낼 판은 시작 안 함 */P.push({t,d,...o});t+=d;};
+function botPlan(i,sl){const P=[],H=k=>botH(sl*31+k,i*13+5),sk=BOT_SK[i];if(!botPlay(i,Math.floor(sl/36)).has(sl%36)){/* 접속만 하고 게임은 안 하는 칸: 로비·대장간 구경, 새벽엔 반쯤은 잠수 */const kh=((sl%36)*40/60+9)%24;if(kh>=0&&kh<7&&H(1)%2&&!botFillS(sl).includes(i))return [{t:0,d:BOT_SLOT,k:'away'}];/* v387 사람처럼 가끔 잠깐 자리를 비웠다 돌아옴 (혼자 지키는 모험가는 빼고) */if(H(3)%3===0&&!botFillS(sl).includes(i)){const a=(BOT_SLOT*(.25+(H(4)%30)/100))|0,d=(BOT_SLOT*(.15+(H(5)%20)/100))|0;return [{t:0,d:a,k:H(2)%3?'home':'forge'},{t:a,d,k:'away'},{t:a+d,d:BOT_SLOT-a-d,k:'home'}];}return [{t:0,d:BOT_SLOT*.6|0,k:H(2)%3?'home':'forge'},{t:BOT_SLOT*.6|0,d:BOT_SLOT-(BOT_SLOT*.6|0),k:'home'}];}let t=0,k=0;const add=(d,o)=>{if(o.k!=='home'&&o.k!=='forge'&&t+d>BOT_SLOT-60000)o={k:'home'};/* 접속이 끝나기 전에 못 끝낼 판은 시작 안 함 */P.push({t,d,...o});t+=d;};
   add((1+H(k++)%3)*60000,{k:'home'});
   /* 아직 못 연 곳은 안 감: 신을 깨야 악몽·보스 러시, 악몽을 좀 해야 레이드 */const hr=botHours(i,sl*BOT_SLOT),cl=botClr(i,hr),ok=[cl>=4,cl>=3,cl>=2,cl>=4,cl>=4&&hr>=(BOT_CLR[3]+2.5)/botL(i),cl>=2,true],pf=BOT_P[i].pf.map((w,j)=>ok[j]?w:0);if(cl<4)pf[6]+=2;const ps=pf.reduce((a,b)=>a+b,0);
   /* v369 판 길이를 실제와 같게: 장마다 2분 30초 + 보스전 (일반 1장 ~3분 · 어려움 2장 ~6분 · 지옥 3장 ~9분 · 신 4장 ~12분). 아직 못 깨는 난이도는 중간에 죽음 */const bRun=(L,kn)=>{const full=(L*2.5+L*.5+(H(k++)%40)/40)*60000,win=cl>=L;add(win?full:Math.max(60000,full*(.3+(H(k++)%60)/100)),{k:kn,win:win?1:0});};
@@ -16260,7 +16264,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=390,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=391,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
