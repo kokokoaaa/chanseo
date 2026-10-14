@@ -9670,6 +9670,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:434,t:'🔑 이름 비밀번호 실수 방지',items:[
+    ['fix','🔑 이미 비밀번호가 있는 이름에 다른 비밀번호를 치면 더 이상 바꾸자고 묻지 않아요 (잘못 친 비밀번호로 바뀌어 다른 기기에서 「비밀번호가 맞지 않아요」가 뜨던 문제)'],
+    ['new','🔑 비밀번호를 바꾸려면 👤 내 이름 → 「🔑 비밀번호 바꾸기」 — 지금 비밀번호 확인 후 새 비밀번호를 두 번 입력해요']]},
   {v:433,t:'🧿 순위 부적 한 계정 하나',items:[
     ['change','🧿 명예의 전당 순위 부적은 한 계정이 한 기간(일간·주간·월간)에 하나만 받아요 — 무한의 악몽·보스 러시·레이드 중 3위 안에 든 가장 높은 순위 하나. 3위 밖은 그대로 못 받아요']]},
   {v:431,t:'👑 왕실 합체 짝 받기',items:[
@@ -14529,7 +14532,7 @@ const keyFor=n=>n===myNick()?MYKEY:nKeys()[n]||'';
 // 서버가 바쁠 때(동시 요청이 몰림) 한 번 실패해도 바로 「연결 못 함」이 뜨지 않게 1.5초 뒤 한 번 더 물어봄
 async function nameOwned3(nm,key){const r=await nameOwned3a(nm,key);if(r!==null)return r;await new Promise(z=>setTimeout(z,1500));return nameOwned3a(nm,key);}
 async function nameOwned3a(nm,key){const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),10000):0;
-  try{const r=await fetch(SHEET_URL+'?own='+encodeURIComponent(nm)+'&k='+encodeURIComponent(key||MYKEY),{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();return j&&'owned' in j?!!j.owned:null;}catch(e){return null;}finally{clearTimeout(to);}}
+  try{const r=await fetch(SHEET_URL+'?own='+encodeURIComponent(nm)+'&k='+encodeURIComponent(key||MYKEY)+'&dv='+(()=>{try{return onlId();}catch(e){return '';}})(),{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();return j&&'owned' in j?!!j.owned:null;}catch(e){return null;}finally{clearTimeout(to);}}
 // 개발자 모드: 명예의 전당 기록이 몇 번째 버전에서 나왔는지. v100부터는 기록에 저장, 그 전은 기록 시각 ↔ 배포 시각(초 − 1791000000, BUILD) 표로 추정
 const BUILD_AT=[[339464,2],[339689,3],[339998,4],[340233,5],[341524,6],[344191,7],[347478,8],[359468,9],[359867,10],[361917,11],[362237,12],[367440,13],[368584,14],[370091,15],[374613,16],[375742,17],[379539,18],[381722,19],[383512,20],[384757,21],[385054,22],[385423,23],[385724,24],[387694,25],[388384,26],[389114,27],[389689,28],[390004,29],[390416,30],[410725,31],[411274,32],[414292,33],[415053,34],[429735,35],[430942,36],[433707,38],[434562,39],[434643,40],[435612,41],[436078,42],[436475,43],[436614,44],[437417,45],[437470,46],[437948,47],[438396,48],[439410,49],[440981,50],[443769,51],[444186,52],[444449,53],[444846,54],[445352,55],[446021,56],[446660,57],[447060,58],[447459,59],[447677,60],[447839,61],[449847,62],[449967,63],[450055,64],[450832,66],[451364,67],[452069,68],[457582,69],[458404,70],[458835,71],[459738,72],[460371,73],[461108,74],[465967,75],[466787,76],[467738,77],[468207,78],[469021,79],[471199,80],[471386,81],[471615,82],[471813,83],[471972,84],[472174,85],[472364,86],[472501,87],[472657,88],[473000,89],[473101,90],[473359,91],[473601,92],[473786,93],[474319,94],[477467,95]];
 function recVer(b){if(b.build)return 'v'+b.build;const t=(+b.at||0)/1000-1791000000;if(!b.at)return '';if(t<BUILD_AT[0][0])return 'v2 이전';let v=BUILD_AT[0][1];for(const [s,n] of BUILD_AT){if(s<=t)v=n;else break;}return '~v'+v;}
@@ -15385,7 +15388,7 @@ async function openCsBak(nm){if(!DEV)return;if(SRV_V<106){uiAlert('서버 v10.6�
   const bk=(j.baks||[]).map(b=>`<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:7px 10px;border:1px solid rgba(255,255,255,.2);border-radius:10px;margin:4px 0"><span style="flex:1;min-width:200px"><b>${ft(b.at)} 저장본</b> <small style="opacity:.75">(${esc(b.why)} · 백업 ${ft(b.t)})</small><br><small>🏅 ${b.md.toLocaleString()} · ${kb(b.len)}</small></span><button class="btn" data-cbr="${b.t}">이 백업으로 되돌리기</button></div>`).join('')||'<p class="sub">아직 백업이 없어요 (다음 저장부터 쌓여요)</p>';
   const lg=(j.log||[]).map(x=>`<div style="font-size:12.5px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.08);color:${/거절/.test(x.w)?'#ff9a9a':/되돌리기|직접/.test(x.w)?'#ffd76a':'var(--ivory)'}">${ft(x.t)} · <b>${esc(x.w)}</b> · 🏅 ${x.om.toLocaleString()} → ${x.md.toLocaleString()} · ${kb(x.ol)} → ${kb(x.len)}${x.base!=null?` · 기준 ${ft(x.base)}`:''} · 기기 ${esc(x.dev||'?')}</div>`).join('')||'<p class="sub">기록 없음</p>';
   show(`<div class="shophead"><h2>☁ 「${esc(nm)}」 저장 기록</h2><button class="btn" id="cbBack">돌아가기</button></div>
-  <p class="sub">지금 서버 저장본: <b>${cur}</b></p><h3>서버 백업 (최근 12개)</h3>${bk}<h3>저장 기록 (최근 40개)</h3><p class="sub" style="margin:0 0 4px">거절 = 그 기기 데이터가 서버 저장본과 이어져 있지 않아서 막은 저장 (예전 버전·다른 기기)</p>${lg}`);
+  <p class="sub">지금 서버 저장본: <b>${cur}</b>${j.own!=null?` · 지금 주인 열쇠 <b>${esc(j.own||'없음')}</b>…`:''}</p>${(()=>{const L=j.olog||[];if(SRV_V<108)return '';return `<h3>🔑 주인 열쇠 기록 (최근 40개)</h3><p class="sub" style="margin:0 0 4px">열쇠는 앞 6자리만. 「열쇠 틀림」이 같은 열쇠로 반복되면 예전 비밀번호, 매번 다르면 오타예요</p>`+(L.map(x=>`<div style="font-size:12.5px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.08);color:${/틀림/.test(x.w)?'#ff9a9a':/관리자|바꾸기|가져감/.test(x.w)?'#ffd76a':'var(--ivory)'}">${ft(x.t)} · <b>${esc(x.w)}</b> · ${esc(x.o||'-')} → ${esc(x.n||'-')} · 기기 ${esc(x.dev||'?')}</div>`).join('')||'<p class="sub">기록 없음</p>');})()}<h3>서버 백업 (최근 12개)</h3>${bk}<h3>저장 기록 (최근 40개)</h3><p class="sub" style="margin:0 0 4px">거절 = 그 기기 데이터가 서버 저장본과 이어져 있지 않아서 막은 저장 (예전 버전·다른 기기)</p>${lg}`);
   $('cbBack').onclick=()=>openDevLog();
   ov.querySelectorAll('[data-cbr]').forEach(b=>b.onclick=async()=>{const t=+b.dataset.cbr,x=(j.baks||[]).find(q=>q.t===t);if(!x)return;
     if(!await uiConfirm(`「${nm}」 서버 데이터를 ${ft(x.at)} 저장본(🏅 ${x.md.toLocaleString()})으로 되돌릴까요?\n지금 서버 저장본도 먼저 백업돼요.\n그 사람은 다음에 게임을 켜면 서버 데이터를 불러올지 고르는 창이 떠요.`,'되돌리기'))return;
@@ -15519,7 +15522,7 @@ function openNick(){cosPreviewHide();const cur=myNick();
   show(`<div class="shophead"><h2>👤 내 이름</h2><button class="btn" id="nkBack">돌아가기</button></div>
   <p class="sub">이 이름으로 <b>💚 접속 중</b> 목록에 보이고, 게임이 끝나면 <b>명예의 전당</b>에 이 이름으로 올라가요. 이름을 바꾸면 예전 이름의 기록은 그 이름으로 남아요.</p>
   <div class="nick col"><input id="nkIn" maxlength="12" placeholder="이름 (12자까지)" value="${esc(cur)}"><input id="nkPin" type="password" maxlength="12" placeholder="이름 비밀번호 (4자 이상 · 선택)" autocomplete="off"><button class="btn primary" id="nkSave">저장</button></div>
-  <p class="sub" style="margin-top:4px">🔑 <b>이름 비밀번호</b>를 정해 두면 <b>다른 컴퓨터·폰</b>에서도 같은 이름+비밀번호로 내 이름을 쓸 수 있어요. 비밀번호를 잊으면 다른 컴퓨터에서는 못 써요 (지금 컴퓨터는 그대로 돼요).</p><p class="sub" id="nkMsg" style="margin-top:6px"></p>${DEV?'<div style="text-align:center;margin-top:8px"><button class="btn" id="devIdR" style="border-color:#ff6a6a;color:#ffb0b0">🛠 아이디 초기화 (개발자 · 이 기기 내 계정)</button></div>':''}`);if($('devIdR'))$('devIdR').onclick=devIdReset;
+  <p class="sub" style="margin-top:4px">🔑 <b>이름 비밀번호</b>를 정해 두면 <b>다른 컴퓨터·폰</b>에서도 같은 이름+비밀번호로 내 이름을 쓸 수 있어요. 비밀번호를 잊으면 다른 컴퓨터에서는 못 써요 (지금 컴퓨터는 그대로 돼요).</p><div style="text-align:center;margin-top:6px"><button class="btn ghost" id="nkChg" style="width:auto;min-height:0;padding:5px 14px">🔑 비밀번호 바꾸기 (지금 이름)</button></div><p class="sub" id="nkMsg" style="margin-top:6px"></p>${DEV?'<div style="text-align:center;margin-top:8px"><button class="btn" id="devIdR" style="border-color:#ff6a6a;color:#ffb0b0">🛠 아이디 초기화 (개발자 · 이 기기 내 계정)</button></div>':''}`);if($('devIdR'))$('devIdR').onclick=devIdReset;
   const msg=t=>{$('nkMsg').textContent=t;},wait=t=>{$('nkMsg').innerHTML=`<span class="ldspin"></span><b style="color:#ffd76a">${t}</b><br><small>⏳ 인터넷 상태에 따라 10초 넘게 걸릴 수 있어요. 창을 닫지 말고 잠시만 기다려 주세요.</small>`;};
   const save=async()=>{const n=String($('nkIn').value||'').trim().replace(/\s+/g,' ').slice(0,12);if(!n){msg('이름을 써 주세요.');return;}if(n==='익명'||n==='모험가'){msg('다른 이름을 써 주세요.');return;}
     const pin=String($('nkPin').value||'').trim();if(pin&&pin.length<4){msg('비밀번호는 4자 이상으로 써 주세요.');return;}
@@ -15533,8 +15536,8 @@ function openNick(){cosPreviewHide();const cur=myNick();
         if(own===null){msg('랭킹 서버에 연결하지 못했어요. 인터넷 연결을 확인하고 다시 저장해 주세요.');return;}
         if(pin){const nk=pinKey(n,pin);
           if(!own){// 지금 이 컴퓨터가 주인이거나 주인이 없음 → 비밀번호 열쇠로 바꾸고, 서버에 정말 바뀌었는지 확인
-            /* v419 이미 비밀번호가 있는 이름(이 기기가 주인)에 다른 비밀번호를 치면 그냥 바꾸지 않고 확인 (잘못 쳐서 다른 기기들이 못 들어가던 문제) */if(/^p/.test(MYKEY||'')&&MYKEY!==nk&&!(await uiConfirm(`「${n}」은(는) 이미 비밀번호가 있는 이름이에요.\n비밀번호를 지금 입력한 것으로 바꿀까요?\n바꾸면 다른 기기·폰에서도 새 비밀번호로 들어가야 해요.\n(그냥 이 이름을 쓰려는 거면 비밀번호 칸을 비우고 저장하세요)`,'비밀번호 바꾸기'))){msg('비밀번호를 바꾸지 않았어요. 이 기기에서 쓰던 이름이면 비밀번호 칸을 비우고 저장하세요.');return;}
-            wait('비밀번호를 서버에 저장하고 있어요…');try{await fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({name:n,rekey:1,k:MYKEY,nk})});}catch(e){}
+            /* v434 이 기기가 비밀번호로 쓰던 이름에 다른 비밀번호를 치면 바꾸지 않음 (잘못 쳐서 확인을 누르면 다른 기기들이 못 들어가던 일이 반복됨) — 바꾸기는 아래 「🔑 비밀번호 바꾸기」로만 */if(/^p/.test(MYKEY||'')&&MYKEY!==nk){msg(`입력한 비밀번호가 「${n}」 비밀번호와 달라요. 그대로 쓰려면 비밀번호 칸을 비우고 저장하세요. 정말 비밀번호를 바꾸려면 아래 「🔑 비밀번호 바꾸기」를 누르세요.`);return;}
+            wait('비밀번호를 서버에 저장하고 있어요…');try{await fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({name:n,rekey:1,k:MYKEY,nk,dv:(()=>{try{return onlId();}catch(e){return '';}})()})});}catch(e){}
             const ok=await nameOwned3(n,nk);
             if(ok!==false){msg(ok===null?'비밀번호를 서버에 저장했는지 확인하지 못했어요. 인터넷 연결을 확인하고 다시 저장해 주세요.':'서버에 비밀번호가 저장되지 않았어요. 잠시 뒤 다시 저장해 주세요.');return;}
             setMyKey(nk);toast2='🔑 이름 비밀번호를 정했어요 · '+n+(SRV_V>=56?' (데이터가 서버에 자동 저장돼요)':'');offer=nk;}
@@ -15555,6 +15558,13 @@ function openNick(){cosPreviewHide();const cur=myNick();
       try{for(const k of SYNC_KEYS)if(k!=='chanseo_key')localStorage.removeItem(k);localStorage.setItem('chipdungeon_nick',n);}catch(e){}csBaseClr();nKeySet(n,MYKEY);setTimeout(()=>location.reload(),400);return;}
     const fin=()=>{try{localStorage.setItem('chipdungeon_nick',n);}catch(e){}nKeySet(n,MYKEY);toast(toast2);onlPing();CH_PEND=true;startScreen();if(offer==='up')setTimeout(()=>csUpload(true),300);};
     if(offer&&offer!=='up')csOffer(n,offer,fin);else fin();};
+  /* v434 비밀번호 바꾸기: 지금 이름의 주인 기기에서만, 지금 비밀번호 확인 + 새 비밀번호 두 번 */$('nkChg').onclick=async()=>{const n=myNick();if(!n||n==='익명'||n==='모험가'){msg('먼저 이름을 정해 주세요.');return;}if(!SHEET||SRV_V<48){msg('랭킹 서버에 연결된 뒤 해 주세요.');return;}
+    const own=await nameOwned3(n);if(own!==false){msg(own===null?'서버에 연결하지 못했어요.':`이 기기는 지금 「${n}」의 주인으로 확인되지 않아요. 먼저 이름+비밀번호로 들어온 뒤 바꿀 수 있어요.`);return;}
+    if(/^p/.test(MYKEY||'')){const o=await uiPrompt(`「${n}」의 지금 비밀번호를 입력하세요`,'');if(o==null)return;if(pinKey(n,String(o).trim())!==MYKEY){msg('지금 비밀번호가 맞지 않아요. 비밀번호는 바뀌지 않았어요.');return;}}
+    const a=await uiPrompt('새 비밀번호 (4자 이상)','');if(a==null)return;const b=await uiPrompt('새 비밀번호를 한 번 더','');if(b==null)return;const p1=String(a).trim(),p2=String(b).trim();if(p1.length<4){msg('비밀번호는 4자 이상으로 써 주세요.');return;}if(p1!==p2){msg('두 번 쓴 새 비밀번호가 달라요. 비밀번호는 바뀌지 않았어요.');return;}
+    const nk=pinKey(n,p1);if(nk===MYKEY){msg('지금과 같은 비밀번호예요.');return;}if(!await uiConfirm(`「${n}」 비밀번호를 바꿀까요?\n바꾸면 다른 컴퓨터·폰에서도 새 비밀번호로 들어가야 해요.`,'비밀번호 바꾸기'))return;
+    wait('비밀번호를 바꾸고 있어요…');try{await fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({name:n,rekey:1,k:MYKEY,nk,dv:(()=>{try{return onlId();}catch(e){return '';}})()})});}catch(e){}
+    const ok=await nameOwned3(n,nk);if(ok!==false){msg('서버에 새 비밀번호가 저장되지 않았어요. 잠시 뒤 다시 해 주세요.');return;}setMyKey(nk);nKeySet(n,nk);msg(`🔑 「${n}」 비밀번호를 바꿨어요. 다른 기기에서는 새 비밀번호로 들어가세요.`);};
   $('nkSave').onclick=save;['nkIn','nkPin'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.isComposing||e.keyCode===229)return;if(e.key==='Enter')save();}));$('nkBack').onclick=startScreen;setTimeout(()=>{try{$('nkIn').focus();}catch(e){}},50);}
 // 관리자 쪽지 (서버 v6.3): 접속 신호 응답으로 받은 안 읽은 쪽지를 화면 가운데 팝업으로. 「확인」을 누르면 읽음 처리 (게임 중이면 잠깐 멈춤)
 const DM_SEEN=new Set();
@@ -16689,7 +16699,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=433,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=434,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
