@@ -5784,7 +5784,7 @@ function nwTick(dt){if(!endless()||rushOn()||!S.p.alive||S.win||dfM().raid||dfM(
   // 예고 중엔 잡몹이 빛의 원 안으로 못 들어옴 (원 경계 밖으로 밀어냄). 원 안에 있으면 적 공격도 안 받음 (hurtP)
   if(S.nw)for(const e of S.en){if(!e.alive||e.boss)continue;for(const q of S.nw.safe){const dx=e.x-q.x,dy=e.y-q.y,d=Math.hypot(dx,dy)||1,m=q.r+(e.r||10);if(d<m){e.x=q.x+dx/d*m;e.y=q.y+dy/d*m;}}}
   const m=nmMin();if(m<NW_M0)return;const p=S.p,k=m-NW_M0;
-  if(!S.nw){S.nwT=(S.nwT??6)-dt;if(S.nwT>0)return;
+  if(!S.nw){S.nwT=(S.nwT??6)-dt;if(S.nwT>0||S.tot)return;
     const n=Math.max(1,3-Math.floor(k/2)),r=Math.max(52,92-7*k),T=Math.max(2.2,3.2-.15*k),A=S.arena,safe=[];
     for(let i=0;i<n;i++){for(let tr=0;tr<20;tr++){const a=Math.random()*TAU,d=rand(170,360),x=p.x+Math.cos(a)*d,y=p.y+Math.sin(a)*d,pad=r+20;
         if(x<pad||y<pad||x>WW-pad||y>WH-pad)continue;if(A&&(Math.abs(x-A.x)>Math.min(A.r,A.tr||A.r)-pad||Math.abs(y-A.y)>Math.min(A.r,A.tr||A.r)-pad))continue;if(inSolid(x,y,r*.5))continue;if(safe.some(q=>Math.hypot(q.x-x,q.y-y)<r*2.4))continue;safe.push({x,y,r});break;}}
@@ -5807,6 +5807,45 @@ function killP(why){const p=S.p;if(!p.alive)return;if(labOn()&&S.lab&&S.lab.god)
   if(has('phoenix')&&S.phoenixCd<=0){S.phoenixCd=has('f_phoenixfire')?110:180;p.hp=p.maxHp*.4;p.inv=2.5;S.flash=.4;for(const e of S.en)if(e.alive)dmgEs('불사조',e,pDmg()*6,'#ff8a4a');toast('불사조');achUnlock('h_1hp');return;}
   p.hp=0;const rc=reviveCost();if(S.gold>=rc&&!labOn()&&!raidOn()&&!duelOn()){/* v304: 레이드(전용 부활 기회)·결투에서는 골드 부활 없음 */if(AUTO.pick){S.gold-=rc;S.revives++;p.hp=p.maxHp*.5;p.inv=2.5;S.rings.push({x:p.x,y:p.y,r:10,max:160,life:.4,col:'#ffd76a'});toast('자동 부활');return;}openRevive(rc);return;}
   p.alive=false;p.deadAt=S.t;burst(p.x,p.y,'#f1e7cf',30);setTimeout(gameOver,700);S.mode='dying';if(!raidOn()&&!duelOn()&&!labOn())clearSave();}
+// v419 ⛓ 영혼 결속 (무한의 악몽 극후반, 14분부터): 저주의 토템 2~3개가 사슬로 내 영혼을 묶음. 시간 안에 토템마다 다가가 잠깐 서 있어(0.8초) 정화해야 함
+// 하나라도 남으면 사슬이 영혼을 끌어가 즉사 (대시 무적·보호막 무시, 부활 수단은 작동). 악몽의 파동과 겹치지 않음
+const TOT_M0=8,TOT_R=62,TOT_CH=.8;
+function totTick(dt){if(!endless()||rushOn()||!S.p.alive||S.win||dfM().raid||dfM().duel||dfM().lab)return;const m=nmMin();if(m<TOT_M0){S.totT=null;return;}const p=S.p,k=m-TOT_M0;
+  if(!S.tot){S.totT=(S.totT??12)-dt;if(S.totT>0||S.nw||(S.nwT!=null&&S.nwT<6))return;
+    const n=2+(k>=4?1:0),T=Math.max(10,15-.5*k),A=S.arena,pts=[];
+    for(let i=0;i<n;i++){for(let tr=0;tr<40;tr++){const a=Math.random()*TAU,d=rand(260,470),x=p.x+Math.cos(a)*d,y=p.y+Math.sin(a)*d,pad=70;
+        if(x<pad||y<pad||x>WW-pad||y>WH-pad)continue;if(A&&(Math.abs(x-A.x)>Math.min(A.r,A.tr||A.r)-pad||Math.abs(y-A.y)>Math.min(A.r,A.tr||A.r)-pad))continue;if(inSolid(x,y,30))continue;if(pts.some(q=>Math.hypot(q.x-x,q.y-y)<220))continue;pts.push({x,y,pr:0,done:0});break;}}
+    if(!pts.length)return;S.tot={t:T,T,pts};S.totN=(S.totN||0)+1;S.shake=Math.max(S.shake,.25);for(const q of pts)S.rings.push({x:q.x,y:q.y,r:10,max:90,life:.5,col:'#b56bff'});
+    S.hidBanner={s:'⛓ 영혼 결속!',d:'저주의 토템이 영혼을 묶었어요 · 시간 안에 토템마다 다가가 정화하세요 (못 하면 즉사)',col:'#c58bff',t:Math.min(4,T)/(AUTO.speed||1),T:Math.min(4,T)/(AUTO.speed||1)};return;}
+  const w=S.tot;w.t-=dt;
+  for(const q of w.pts){if(q.done)continue;const inR=Math.hypot(p.x-q.x,p.y-q.y)<TOT_R+p.r;q.pr=inR?q.pr+dt:Math.max(0,q.pr-dt*.5);
+    if(q.pr>=TOT_CH){q.done=1;burst(q.x,q.y,'#e0c2ff',22);S.rings.push({x:q.x,y:q.y,r:10,max:140,life:.45,col:'#e0c2ff'});ftext(q.x,q.y-50,'정화!','#e0c2ff',18);sfx('level');}}
+  if(w.pts.every(q=>q.done)){S.tot=null;S.totT=Math.max(40,70-4*k)*rand(.9,1.1);S.st.totOk=(S.st.totOk||0)+1;p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.08*healM());ftext(p.x,p.y-44,'⛓ 사슬이 풀렸다!','#e0c2ff',18);S.flash=Math.max(S.flash||0,.1);return;}
+  if(w.t<=0){S.tot=null;S.totT=Math.max(40,70-4*k)*rand(.9,1.1);S.flash=Math.max(S.flash||0,.3);S.shake=Math.max(S.shake,.7);for(const q of w.pts)if(!q.done){S.bolts.push({x1:q.x,y1:q.y,x2:p.x,y2:p.y,life:.35});burst(q.x,q.y,'#7a2bd0',18);}
+    burst(p.x,p.y,'#b56bff',30);killP('영혼 결속');}}
+const totVec=()=>{const p=S.p,w=S.tot;let q=null,bd=1e18;for(const c of w.pts){if(c.done)continue;const d=d2(c,p);if(d<bd){bd=d;q=c;}}if(!q)return [0,0];const dx=q.x-p.x,dy=q.y-p.y,l=Math.hypot(dx,dy);if(l<TOT_R*.45)return [0,0];
+  if(p.dashCd<=0&&l>220&&w.t<w.pts.filter(c=>!c.done).length*2.2){p.lmx=dx/l;p.lmy=dy/l;dash();}return [dx/l,dy/l];};
+function drawTot(){const w=S.tot;if(!w)return;const p=S.p,k=1-w.t/w.T,pul=.5+.5*Math.sin(S.t*(w.t<3?22:9));ctx.save();
+  // 화면 가장자리 보라 어둠 (남은 시간이 줄수록 짙게)
+  ctx.globalAlpha=.12+.25*k;ctx.fillStyle='#2a0846';ctx.beginPath();ctx.rect(camX-80,camY-80,W+160,H+160);ctx.moveTo(p.x+260,p.y);ctx.arc(p.x,p.y,260,0,TAU,true);ctx.fill('evenodd');ctx.globalAlpha=1;
+  for(const q of w.pts){
+    // 사슬: 토템 → 내 몸 (흔들리는 고리)
+    if(!q.done){const dx=p.x-q.x,dy=p.y-q.y,L=Math.hypot(dx,dy)||1,n=Math.max(3,Math.floor(L/16)),nx=-dy/L,ny=dx/L;ctx.strokeStyle=`rgba(190,120,255,${.55+.35*pul})`;ctx.lineWidth=2.5;ctx.beginPath();
+      for(let i=0;i<=n;i++){const f=i/n,sw=Math.sin(f*Math.PI)*Math.sin(S.t*6+f*8)*10*(1-k*.6),x=q.x+dx*f+nx*sw,y=q.y-40+(dy+40)*f+ny*sw;i?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.stroke();
+      ctx.fillStyle='#e8d0ff';for(let i=1;i<n;i+=2){const f=i/n,sw=Math.sin(f*Math.PI)*Math.sin(S.t*6+f*8)*10*(1-k*.6);ctx.beginPath();ctx.arc(q.x+dx*f+nx*sw,q.y-40+(dy+40)*f+ny*sw,2.2,0,TAU);ctx.fill();}}
+    // 정화 범위
+    ctx.globalAlpha=q.done?.15:.18+.12*pul;ctx.fillStyle=q.done?'#e0c2ff':'#7a2bd0';ctx.beginPath();ctx.arc(q.x,q.y,TOT_R,0,TAU);ctx.fill();ctx.globalAlpha=1;
+    ctx.strokeStyle=q.done?'rgba(224,194,255,.5)':'#b56bff';ctx.lineWidth=2;ctx.setLineDash([6,5]);ctx.beginPath();ctx.arc(q.x,q.y,TOT_R,0,TAU);ctx.stroke();ctx.setLineDash([]);
+    if(!q.done&&q.pr>0){ctx.strokeStyle='#fff';ctx.lineWidth=5;ctx.beginPath();ctx.arc(q.x,q.y,TOT_R-6,-Math.PI/2,-Math.PI/2+TAU*Math.min(1,q.pr/TOT_CH));ctx.stroke();}
+    // 토템 기둥 (검은 돌 + 보라 룬)
+    const h=58,bw=18;ctx.fillStyle=q.done?'#5a5466':'#1c1426';ctx.fillRect(q.x-bw/2,q.y-h,bw,h);ctx.fillStyle=q.done?'#6e6680':'#2e2240';ctx.fillRect(q.x-bw/2-4,q.y-6,bw+8,8);ctx.beginPath();ctx.moveTo(q.x-bw/2-3,q.y-h);ctx.lineTo(q.x,q.y-h-14);ctx.lineTo(q.x+bw/2+3,q.y-h);ctx.fill();
+    if(!q.done){ctx.shadowColor='#c58bff';ctx.shadowBlur=14;ctx.fillStyle=`rgba(210,150,255,${.6+.4*pul})`;for(let i=0;i<3;i++){ctx.fillRect(q.x-3,q.y-h+8+i*16,6,9);}ctx.shadowBlur=0;}
+    else{ctx.strokeStyle='#e0c2ff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(q.x-6,q.y-h+6);ctx.lineTo(q.x+3,q.y-h*.55);ctx.lineTo(q.x-4,q.y-14);ctx.stroke();}}
+  // 내 머리 위 남은 시간
+  ctx.font="bold 22px 'Do Hyeon',sans-serif";ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='rgba(30,0,50,.9)';const tx='⛓ '+Math.ceil(w.t)+' · '+w.pts.filter(q=>q.done).length+'/'+w.pts.length;ctx.strokeText(tx,p.x,p.y-p.r-42);ctx.fillStyle=w.t<3?'#ff6a8a':'#e8d0ff';ctx.fillText(tx,p.x,p.y-p.r-42);
+  // 화면 밖 토템 방향 화살표
+  for(const q of w.pts){if(q.done||(q.x>camX&&q.x<camX+W&&q.y>camY&&q.y<camY+H))continue;const a=Math.atan2(q.y-p.y,q.x-p.x),ax=p.x+Math.cos(a)*78,ay=p.y+Math.sin(a)*78;ctx.fillStyle='#c58bff';ctx.beginPath();ctx.moveTo(ax+Math.cos(a)*14,ay+Math.sin(a)*14);ctx.lineTo(ax+Math.cos(a+2.5)*10,ay+Math.sin(a+2.5)*10);ctx.lineTo(ax+Math.cos(a-2.5)*10,ay+Math.sin(a-2.5)*10);ctx.fill();}
+  ctx.restore();}
 function drawNW(){const w=S.nw;if(!w)return;const k=1-w.t/w.T,pul=.5+.5*Math.sin(S.t*14);ctx.save();
   // 화면 전체 붉은 막 + 안전지대만 뚫림
   ctx.fillStyle=`rgba(120,0,20,${.18+.32*k})`;ctx.beginPath();ctx.rect(camX-80,camY-80,W+160,H+160);for(const q of w.safe){ctx.moveTo(q.x+q.r,q.y);ctx.arc(q.x,q.y,q.r,0,TAU,true);}ctx.fill('evenodd');
@@ -7928,7 +7967,7 @@ function update(dt){
     if(keys['a']||keys['arrowleft'])mx--;if(keys['d']||keys['arrowright'])mx++;
     if(joy){const dx=joy.x-joy.sx,dy=joy.y-joy.sy,d=Math.hypot(dx,dy);if(d>6){const k=Math.min(d,50)/50;mx=dx/d*k;my=dy/d*k;}}
     S.manualNow=!!(mx||my);
-    if(AUTO.move&&!mx&&!my){const v=S.nw?nwVec():S.rdoom?rdoomVec():S.robj?robjVec():DEV?autoMoveVec():easyMoveVec(dt);mx=v[0];my=v[1];try{autoTrapDash(v);}catch(e){}}
+    if(AUTO.move&&!mx&&!my){const v=S.nw?nwVec():S.tot?totVec():S.rdoom?rdoomVec():S.robj?robjVec():DEV?autoMoveVec():easyMoveVec(dt);mx=v[0];my=v[1];try{autoTrapDash(v);}catch(e){}}
     if(autoPen())S.amT=(S.amT||0)+dt;
     if(p.skRootT>0){mx=0;my=0;}
     const ml=Math.hypot(mx,my);if(ml>1){mx/=ml;my/=ml;}
@@ -8045,7 +8084,7 @@ function update(dt){
   for(const e of S.en)if(!e.boss){if(e.x<e.r)e.x=e.r;else if(e.x>WW-e.r)e.x=WW-e.r;if(e.y<e.r)e.y=e.r;else if(e.y>WH-e.r)e.y=WH-e.r;}
   skTick(dt);ultTick(dt);thrTick(dt);if(AUTO.move&&DEV){if(AUTO.hi)aiDefend(dt);else{aiDodge();autoSkill();if((S.p.ulCd||0)<=0&&(bossOn()||S.en.filter(e=>e.alive).length>25))useUlt();}}
   /* v372 일반 자동 이동: 패턴 예고는 10번 중 7번꼴로 대시로 피함 (다 피하진 못함), 체력 40% 아래 위험할 때만 생존기. 이벤트·궁극기는 직접 */else if(AUTO.move&&!S.manualNow&&S.p.alive){easyDodge();if(S.p.hp<S.p.maxHp*(.4+.2*easyK()))autoSkill();} // 개발자 자동: 측정용(예전 방식) / 고점용(aiDefend) // 개발자 자동: 생존기·궁극기도 알아서
-  nmRingTick(dt);omenTick(dt);nwTick(dt);updBoss(dt);hbTick(dt);if(p.rdm)p.rdm*=Math.exp(-dt/3);eggTick(dt);if(S.gold>(S.maxGold||0))S.maxGold=S.gold;if(S.npc){S.npc.t+=dt;if(S.npc.t>4.6)S.npc=null;}
+  nmRingTick(dt);omenTick(dt);nwTick(dt);totTick(dt);updBoss(dt);hbTick(dt);if(p.rdm)p.rdm*=Math.exp(-dt/3);eggTick(dt);if(S.gold>(S.maxGold||0))S.maxGold=S.gold;if(S.npc){S.npc.t+=dt;if(S.npc.t>4.6)S.npc=null;}
   // 사령술사 해골 궁수대: 해골 3기 중 1기가 1초마다 뼈 화살
   if(has('n_archers')&&S.skel&&p.alive){S.naT=(S.naT??1)-dt;if(S.naT<=0){S.naT=1;S.skel.forEach((k,i)=>{if(i%3!==0||k.life<=0)return;const e=nearestE(k,p.range);if(e)pBullet(k.x,k.y,Math.atan2(e.y-k.y,e.x-k.x),pDmg()*lv3('n_archers',.5,.6,.8)*undM(),{child:true,sub:'해골 궁수대',pierce:1,r:3,life:.9,bone:true,src:'undead'});});}}
   // 궁수 화살비: 6초마다 적이 가장 몰린 곳
@@ -8579,7 +8618,7 @@ function draw(){
     // 회복: 흰 원 위 빨간 십자 (구급 표시)
     if(it.k==='heal'){const y0=it.y+bob;ctx.fillStyle='#e0303a';ctx.fillRect(it.x-3.5,y0-9,7,18);ctx.fillRect(it.x-9,y0-3.5,18,7);ctx.fillStyle='rgba(255,255,255,.55)';ctx.fillRect(it.x-3.5,y0-9,2,7);}
     else{ctx.font='19px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🧲',it.x,it.y+bob+1);}}
-  drawBossGround();drawNW();drawRDoom();drawRObj();if(S.rdev)drawRDev();drawRWaves();drawSkFx(0);
+  drawBossGround();drawNW();drawTot();drawRDoom();drawRObj();if(S.rdev)drawRDev();drawRWaves();drawSkFx(0);
   {const vis=S.en.filter(e=>!(e.x<camX-60||e.x>camX+W+60||e.y<camY-80||e.y>camY+H+60));
    ctx.fillStyle='rgba(0,0,0,.33)';ctx.beginPath();for(const e of vis){ctx.moveTo(e.x+2+e.r,e.y+e.r*.85);ctx.ellipse(e.x+2,e.y+e.r*.85,e.r,e.r*.38,0,0,TAU);}ctx.fill();
    const L=[];for(const e of vis)L.push([e.y+e.r*.9,0,e]);for(const t of TREEV)L.push([t.y,1,t]);if(S.rob&&raidOn()){for(const o of S.rob)L.push([o.y+o.r*.4,4,o]);for(const o of S.rdec||[])if(o.x>camX-o.w&&o.x<camX+W+o.w&&o.y>camY-60&&o.y<camY+H+o.h)L.push([o.y,5,o]);}L.push([S.p.y+S.p.r+3,2,null]);if(S.qn)L.push([S.qn.y+12,6,S.qn]);if(S.allies)for(const a of S.allies)L.push([a.y+a.r+3,3,a]);L.sort((a,b)=>a[0]-b[0]);
@@ -15195,7 +15234,7 @@ const rpCyc=n=>{const L=RPT.filter(r=>r.who===n).sort((a,b)=>a.t-b.t);let u=0,by
 const muteUntil=n=>(!n||isAdm(n))?0:rpCyc(n).u;
 const muted=(n,t)=>{const u=muteUntil(n);return u&&(t||fbNowS())<u&&(t||fbNowS())>=u-RP_MUTE?u:0;};
 const fbNowS=()=>{try{return fbNow();}catch(e){return Date.now();}};
-async function chatReport(who,by,isBot){if(!FB||!FB.db||!who||!by||who===by||isAdm(who))return false;const now=fbNowS();if(muted(who)||rpCyc(who).by.has(by))return false;
+async function chatReport(who,by,isBot){if(!FB||!FB.db||!who||!by||who===by||isAdm(who))return false;if(isBot&&!BOT_NM.has(who))return false;/* v419 봇(다른 모험가 AI)은 사람을 신고하지 않음 — 봇끼리만 */const now=fbNowS();if(muted(who)||rpCyc(who).by.has(by))return false;
   const before=!!muted(who);try{await fbTO(FB.db.ref('chat').push({u:FB.uid,n:'⚑',m:'RP|'+who+'|'+by+(isBot?'|b':''),fx:'',d:onlId(),t:firebase.database.ServerValue.TIMESTAMP}),8000);}catch(e){return false;}
   RPT.push({t:now,who,by});if(!before&&muted(who)){try{await FB.db.ref('chat').push({u:FB.uid,n:'🚨 알림',m:`${who}님이 신고 누적으로 1시간 채팅 금지`,fx:'',d:onlId(),t:firebase.database.ServerValue.TIMESTAMP});}catch(e){}}return true;}
 function chatPaint(){let box=document.getElementById('chatBox');
@@ -16395,7 +16434,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=418,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=419,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
