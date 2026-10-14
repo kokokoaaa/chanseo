@@ -4019,8 +4019,8 @@ const CARDS=[
   {src:()=>coinOn(),cls:'gambler',n:'판돈',g:'동전 던지기',v:[[5,10,0]],t:v=>`앞면이 나온 공격의 피해 +${v[0]}%`,a:(p,v)=>{p.hdD=(p.hdD||0)+v[0]/100;}},
   {n:'숫돌',v:[[.5,1.1,1]],t:v=>`공격력 +${v[0]}`,a:(p,v)=>{p.dmg+=v[0];}},
   {n:'힘의 물약',v:[[4,8,1]],t:v=>`공격력 +${v[0]}%`,a:(p,v)=>{p.cdP=(p.cdP||0)+v[0]/100;}},
-  {req:()=>rawRate()<RATE_CAP()||rateUnc(),n:'손목 단련',v:[[.04,.09,2]],t:v=>`공격 속도 +${v[0]}회/초`,a:(p,v)=>{p.rate+=v[0];}},
-  {req:()=>rawRate()<RATE_CAP()||rateUnc(),n:'날랜 손놀림',v:[[4,8,1]],t:v=>`공격 속도 +${v[0]}%`,a:(p,v)=>{p.crP=(p.crP||0)+v[0]/100;}},
+  {req:()=>rawRate()<RATE_CAP()*.98||rateUnc(),n:'손목 단련',v:[[.04,.09,2]],t:v=>`공격 속도 +${v[0]}회/초`,a:(p,v)=>{p.rate+=v[0];}},
+  {req:()=>rawRate()<RATE_CAP()*.98||rateUnc(),n:'날랜 손놀림',v:[[4,8,1]],t:v=>`공격 속도 +${v[0]}%`,a:(p,v)=>{p.crP=(p.crP||0)+v[0]/100;}},
   {n:'튼튼한 체력',v:[[8,16,0]],t:v=>`최대 체력 +${v[0]}`,a:(p,v)=>{p.maxHp+=v[0];p.hp+=v[0];}},
   {n:'가죽 갑옷',v:[[5,9,0]],t:v=>`방어력 +${v[0]}`,a:(p,v)=>{p.armor+=v[0];}},
   {req:()=>spdRoom()||has('k_charger'),n:'가벼운 장화',v:[[4,7,1]],t:v=>`이동 속도 +${v[0]}%`,a:(p,v)=>{p.speed*=1+v[0]/100;}},
@@ -4034,7 +4034,7 @@ const CARDS=[
   {req:()=>!pureMelee()&&(has('a_gale')||bspdB()<.99),n:'가속 탄',v:[[10,18,0]],t:v=>`탄속 +${v[0]}%`,a:(p,v)=>{p.bspd*=1+v[0]/100;}},
   {req:()=>!rushOn(),n:'배움의 서',v:[[8,13,1]],t:v=>`경험치 획득 +${v[0]}%`,a:(p,v)=>{p.xpM=(p.xpM||1)+v[0]/100;}},
   {req:()=>!rushOn(),n:'황금 주머니',v:[[10,17,0]],t:v=>`골드 획득 +${v[0]}%`,a:(p,v)=>{p.goldM+=v[0]/100;}},
-  {req:()=>S.p.dodge<DODGE_CAP_F()||has('r_phantom'),n:'날렵한 몸놀림',v:[[2.5,4.5,1]],t:v=>`회피 +${v[0]}%`,a:(p,v)=>{p.dodge+=v[0]/100;}},
+  {req:()=>!dodgeFull()||has('r_phantom'),n:'날렵한 몸놀림',v:[[2.5,4.5,1]],t:v=>`회피 +${v[0]}%`,a:(p,v)=>{p.dodge+=v[0]/100;}},
   {n:'강철 심장',v:[[3,6,0]],t:v=>`최대 체력 +${v[0]}%`,a:(p,v)=>{p.chP=(p.chP||0)+v[0]/100;}},
   {n:'붕대',v:[[1.5,2.5,1]],t:v=>`초당 체력 재생 +${v[0]}`,a:(p,v)=>{p.regen+=v[0];}},
   {req:()=>(S.p.dashD||0)<DASH_MAX,n:'먼 도약',v:[[15,25,0]],t:v=>`대시 거리 +${v[0]} (기본 120, 최대 +${DASH_MAX})`,a:(p,v)=>{p.dashD=Math.min(DASH_MAX,(p.dashD||0)+v[0]);}},
@@ -4044,7 +4044,7 @@ const CARDS=[
   {req:()=>orbitN()>0,n:'회전 부적 연마',g:'회전 부적',v:[[6,12,0],[2,4,0]],t:v=>`회전 부적 피해 +${v[0]}%, 회전 반경 +${v[1]}%`,a:(p,v)=>{p.orbM*=1+v[0]/100;p.orbR*=1+v[1]/100;}},
   {n:'유리 대포',v:[[6.5,10.5,1]],t:v=>`공격력 +${v[0]}%, 최대 체력 −8%`,a:(p,v)=>{p.cdP=(p.cdP||0)+v[0]/100;p.chP=(p.chP||0)-.08;}},
   {n:'무거운 갑옷',v:[[6,10,0]],t:v=>`방어력 +${v[0]}, 이동 속도 −4%`,a:(p,v)=>{p.armor+=v[0];p.speed*=.96;}},
-  {req:()=>rawRate()<RATE_CAP()||rateUnc(),n:'광기',v:[[6.5,10.5,1]],t:v=>`공격 속도 +${v[0]}%, 받는 피해 +8%`,a:(p,v)=>{p.crP=(p.crP||0)+v[0]/100;p.vuln*=1.08;}},
+  {req:()=>rawRate()<RATE_CAP()*.98||rateUnc(),n:'광기',v:[[6.5,10.5,1]],t:v=>`공격 속도 +${v[0]}%, 받는 피해 +8%`,a:(p,v)=>{p.crP=(p.crP||0)+v[0]/100;p.vuln*=1.08;}},
   {n:'거인의 심장',v:[[8,14,0],[.6,1,1]],t:v=>{/* v303: 재생이 한도면 최대 체력만 */const rf=S&&S.p&&regenFull();return rf?`최대 체력 +${v[0]}`:`최대 체력 +${v[0]}, 초당 체력 재생 +${v[1]}`;},a:(p,v)=>{p.maxHp+=v[0];p.hp+=v[0];if(!regenFull())p.regen+=v[1];}},
   {n:'철벽 자세',v:[[2.5,4,1],[6,10,0]],t:v=>`방어력 +${v[0]}, 최대 체력 +${v[1]}`,a:(p,v)=>{p.armor+=v[0];p.maxHp+=v[1];p.hp+=v[1];}},
   {req:()=>spdRoom()||has('k_charger')||dashCdRaw()>DASH_MIN_F()+.03,n:'질주 본능',v:[[2,3.5,1],[3,5,1]],t:v=>{/* v303: 이동 속도가 한도면 대시만 */const sf=S&&S.p&&!spdRoom()&&!has('k_charger'),df=dashCdRaw()>DASH_MIN_F()+.03;return sf?`대시 재사용 −${v[1]}%`:df?`이동 속도 +${v[0]}%, 대시 재사용 −${v[1]}%`:`이동 속도 +${v[0]}%`;},a:(p,v)=>{if(!(!spdRoom()&&!has('k_charger')))p.speed*=1+v[0]/100;p.dashMul*=1-v[1]/100;}},
@@ -5335,10 +5335,11 @@ const critMRaw=()=>S.p.critM+ex('dice')*.15+Math.max(0,critRaw()-CRIT_CAP)*.5,cr
 const critMul=()=>critMExtra()+critMBase();
 const critFull=()=>critRaw()>=CRIT_CAP,critMFull=()=>critMBase()>=CRIT_DMG_CAP_F()-1e-9;
 // v295: 상점 능력치도 레벨업 카드와 같은 기준으로 한도면 못 삼 (고점 돌파 증강이 있으면 계속 살 수 있음) · 근접 직업은 탄환 +1발이 의미 없어 안 팖
-/* v380 레벨업 화면에 보여 줄 「한도에 닿아 카드가 안 나오는 능력치」 */const capList=()=>{const L=[];try{if(critFull()&&!has('r_vital'))L.push('치명타 확률');if(critMFull()&&!has('g_deadeye'))L.push('치명타 피해');if(luckFull())L.push('행운');if(S.p.dodge>=DODGE_CAP_F()&&!has('r_phantom'))L.push('회피');if(rawRate()>=RATE_CAP()*.98&&!rateUnc())L.push('공격 속도');if(lsFull())L.push('흡혈');if(regenFull())L.push('체력 재생');if((S.p.pierce||0)>=PIERCE_CAP&&!has('a_pierce'))L.push('관통');if(S.p.range>=RANGE_CAP())L.push('사거리');}catch(e){}return L;};
-const stackCapped=x=>(x.k==='crit'&&critFull()&&!has('r_vital'))||(x.k==='critm'&&critMFull()&&!has('g_deadeye'))||(x.k==='luck'&&luckFull())||(x.k==='dodge'&&S.p.dodge>=DODGE_CAP_F()&&!has('r_phantom'))||(x.k==='rate'&&rawRate()>=RATE_CAP()*.98&&!rateUnc())||(x.k==='ls'&&lsFull())||(x.k==='multi'&&MELEE_CLS.includes(S.cls));
+/* v380 레벨업 화면에 보여 줄 「한도에 닿아 카드가 안 나오는 능력치」 */const capList=()=>{const L=[];try{if(critFull()&&!has('r_vital'))L.push('치명타 확률');if(critMFull()&&!has('g_deadeye'))L.push('치명타 피해');if(luckFull())L.push('행운');if(dodgeFull()&&!has('r_phantom'))L.push('회피');if(rawRate()>=RATE_CAP()*.98&&!rateUnc())L.push('공격 속도');if(lsFull())L.push('흡혈');if(regenFull())L.push('체력 재생');if((S.p.pierce||0)>=PIERCE_CAP&&!has('a_pierce'))L.push('관통');if(S.p.range>=RANGE_CAP())L.push('사거리');}catch(e){}return L;};
+const stackCapped=x=>(x.k==='crit'&&critFull()&&!has('r_vital'))||(x.k==='critm'&&critMFull()&&!has('g_deadeye'))||(x.k==='luck'&&luckFull())||(x.k==='dodge'&&dodgeFull()&&!has('r_phantom'))||(x.k==='rate'&&rawRate()>=RATE_CAP()*.98&&!rateUnc())||(x.k==='ls'&&lsFull())||(x.k==='multi'&&MELEE_CLS.includes(S.cls));
 // 피격 기준 조건: 흡혈·재생 때문에 '체력 ○% 이하'는 거의 안 켜져서, '맞은 뒤 ○초' / '최근 받은 피해량'으로 판정
 const hitRec=(sec=2.5)=>S.t-(S.p.hitT??-99)<sec;
+/* v441 카드가 나올지 정하는 회피 = 기본 회피 + 장비 회피 + 도박사 행운 몫 (잠깐 켜지는 효과는 뺌). 예전엔 기본 회피만 봐서 장비로 한도를 채워도 회피 카드가 계속 나왔음. 한도 98%부터 한도로 봄 */const dodgeFull=()=>{try{return S.p.dodge+gearM.dodge()+(S.cls==='gambler'?Math.max(0,Math.min(50,(S.p.luck||0)+gLk()))*.006:0)>=DODGE_CAP_F()*.98;}catch(e){return S.p.dodge>=DODGE_CAP_F();}};
 const dodgeC=()=>Math.min(DODGE_CAP_F(),S.p.dodge+gearM.dodge()+(S.cls==='gambler'?Math.max(0,Math.min(50,(S.p.luck||0)+gLk()))*.006:0)+(has('f_ghoststep')&&S.p.ghT>0?.3:0)+(S.cls==='gunner'&&S.p.rlT>0?.25:0)/* 총잡이: 구르며 재장전 (v276) */)+(has('r_smoke')&&S.zones.some(z=>z.kind==='smoke'&&d2(z,S.p)<z.r*z.r)?lv3('r_smoke',.2,.3,.4):0);
 function armorEff(){const p=S.p;let a=(blessOn('guard')?60:0)+(has('bank')?Math.min(50,Math.floor(S.gold/300)*2):0)+p.armor+ex('guard')*8+Math.max(0,p.dodge-DODGE_CAP_F())*200+(has('bonewall')&&S.skel?S.skel.length*lv3('bonewall',3,4,5):0)+(has('d_bark')?(S.vineN||0)*lv3('d_bark',.07,.1,.13):0);if(has('iron'))a*=lv3('iron',1.35,1.5,1.65);if(has('ironclad'))a*=2;if(has('bastion')&&nearTurret())a+=lv3('bastion',27,40,54)/* v401 +35% */*(has('f_citadel')?2:1);return a;}
 // 증강이 주는 임시 보호막: 기본 상한(barrierMax)보다 커도 그 증강의 상한까지는 유지
@@ -9673,6 +9674,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:441,t:'🔒 한도 카드 정리',items:[
+    ['fix','🔒 장비 회피로 회피 한도를 채워도 회피 카드(날렵한 몸놀림)가 계속 나오던 문제 — 이제 장비 회피까지 합쳐서 한도 98%부터 안 나와요'],
+    ['fix','🔒 공격 속도가 「한도 도달」로 표시되는데 공격 속도 카드가 나오던 문제 (표시와 같은 기준으로 맞춤)']]},
   {v:440,t:'✦ 장비 증강 합체 · 🤝 레이드 동료 표시',items:[
     ['change','✦ 장비에서 받은 증강과 합체하면 합체 증강이 ✦ 장비 칸에 들어가요 — 장비가 준 보너스 칸이 그대로 남고, 고른 증강이 쓰던 일반 칸이 하나 비어서 증강을 하나 더 받을 수 있어요'],
     ['fix','🤝 고용한 동료와 깬 레이드 기록에 동료가 빠질 수 있던 문제 (판을 이어서 불러온 경우 등)']]},
@@ -16737,7 +16741,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=440,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=441,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
