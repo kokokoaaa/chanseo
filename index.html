@@ -787,6 +787,19 @@ summary{cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-weight:700;fon
 .idet details.ifold:not([open])>summary small{color:#ffd76a!important}
 
 </style>
+<style>/* v390 폰 가로 화면(높이 500 이하): 위쪽 정보창·버튼 작게, 게임 중 창은 화면을 꽉 채우고 정보창은 숨김 */
+@media (max-height:500px){
+#hud{font-size:12px;padding:3px 8px;gap:1px 8px;padding-right:300px}#hud .bar{width:110px;height:14px}#hud .bar span{font-size:11px;line-height:14px}
+#statBtn,#cxBtn,#rtBtn{top:3px;padding:2px 7px;font-size:12px;border-radius:6px}#statBtn{right:6px}#cxBtn{right:82px}#rtBtn{right:146px}
+#autoBar{top:29px;right:6px;gap:3px}#autoBar button{padding:1px 6px;font-size:11px;border-radius:6px}#autoBar #speedBtn{font-size:12px}
+#onlHud{top:36px;left:6px}#onlHud .onlb{padding:2px 6px;font-size:12px}#buffs{top:56px;font-size:12px}#toast{top:56px;font-size:14px}
+#mini{width:84px;height:84px;bottom:96px}#dash{width:64px;height:64px;font-size:16px;bottom:14px;right:10px}#skBtn,#ulBtn{width:52px;height:52px;font-size:20px}
+.aico{width:28px;height:30px}.aico i{font-size:13px}.aico span{font-size:8.5px}#botLeft{bottom:8px;gap:3px}
+body.ovfull #hud,body.ovfull #statBtn,body.ovfull #cxBtn,body.ovfull #rtBtn,body.ovfull #autoBar,body.ovfull #onlHud,body.ovfull #botLeft,body.ovfull #augTip,body.ovfull #mini,body.ovfull #buffs,body.ovfull #bfTip,body.ovfull #dash,body.ovfull #skBtn,body.ovfull #ulBtn,body.ovfull #xp,body.ovfull #toast{visibility:hidden!important}
+body.ovfull #ov{padding:8px 10px}body.ovfull #ov .panel{padding:12px 14px;margin-bottom:12px}body.ovfull #ov .panel h2{font-size:20px;margin:0 0 4px}
+body.ovfull .card.aug{padding:8px 8px;gap:4px;min-height:0}body.ovfull .card.aug{font-size:14px}.dpsbox{padding:3px 8px!important;font-size:11.5px!important;min-width:0!important;max-width:240px!important}.dpsbox b{font-size:12px!important}body.ovfull .aemb{width:40px;height:40px;font-size:22px}
+}
+</style>
 </head>
 <body>
 <div id="wrap">
@@ -8911,10 +8924,10 @@ function hud(){
 
 /* ---------- overlays ---------- */
 // 게임 중 오버레이(레벨업·증강·상점 등)는 왼쪽 위 정보창 높이만큼 아래에서 시작 → 정보창이 가려지거나 겹치지 않음
-function ovPad(){const h=$('hud'),bl=$('botLeft'),inG=S&&S.mode!=='start',on=ov.classList.contains('on')&&inG,top=on?h.offsetHeight+'px':'',w=on&&bl?(bl.offsetHeight+16)+'px':'';
+/* v390 폰 가로(높이 500 이하): 정보창 높이만큼 내리면 창이 너무 좁아짐 → 창을 화면 맨 위부터 꽉 채우고 정보창·버튼은 잠깐 숨김 */function ovPad(){const h=$('hud'),bl=$('botLeft'),inG=S&&S.mode!=='start',sm=innerHeight<=500,on=ov.classList.contains('on')&&inG,top=on&&!sm?h.offsetHeight+'px':'',w=on&&bl&&!sm?(bl.offsetHeight+16)+'px':'';document.body.classList.toggle('ovfull',!!(sm&&inG&&(on||($('st')&&$('st').classList.contains('on')))));
   // 창(오버레이) 자체를 위쪽 정보창 아래에서 시작 → 스크롤해도 내용이 정보창 밑으로 들어가 가려지지 않음
-  if(ov.style.top!==top){ov.style.top=top;ov.style.paddingTop=on?'10px':'';}h.classList.toggle('ovon',!!on);if(ov.style.paddingBottom!==w)ov.style.paddingBottom=w;
-  const st=$('st');if(st){const so=st.classList.contains('on')&&inG,sv=so?h.offsetHeight+'px':'';if(st.style.top!==sv){st.style.top=sv;st.style.paddingTop=so?'10px':'';}}}
+  if(ov.style.top!==top){ov.style.top=top;ov.style.paddingTop=on&&!sm?'10px':'';}h.classList.toggle('ovon',!!on);if(ov.style.paddingBottom!==w)ov.style.paddingBottom=w;
+  const st=$('st');if(st){const so=st.classList.contains('on')&&inG,sv=so&&!sm?h.offsetHeight+'px':'';if(st.style.top!==sv){st.style.top=sv;st.style.paddingTop=so&&!sm?'10px':'';}}}
 // 바깥(어두운 곳) 클릭으로 닫기: 누른 곳과 뗀 곳이 모두 바깥일 때만 (창 안에서 드래그하다 바깥에서 놓으면 닫히던 문제)
 let DOWN_T=null;addEventListener('pointerdown',e=>{DOWN_T=e.target;},true);const bgHit=(e,el)=>e.target===el&&DOWN_T===el;
 // 창 닫기 통일: 「돌아가기·뒤로·닫기」 버튼은 숨기고 오른쪽 위 ✕ 하나로. 창 바깥(어두운 곳)을 눌러도 같은 동작
@@ -16247,7 +16260,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=389,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=390,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
