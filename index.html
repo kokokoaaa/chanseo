@@ -9132,6 +9132,7 @@ function hud(){
   if(p.fy>0)bf.push(`<span style="color:#ff6a4a">광란 ${p.fy}</span>`);
   if(p.rage>0)bf.push(`<span style="color:#ff6a4a">분노 ${p.rage}</span>`);
   if(raidOn()){const M=raidMembers();bf.push(`<span style="color:#d8b0ff">🗿 부활 기회 ${S.raidTok||0} · ${M.map(m=>`${roleOf(m.cls).ico}${m.me?'나':(m.o.name||'')}${m.o.alive?'':'💀'}`).join(' · ')}</span>`);if((S.raidTeam||1)>1)bf.push(`<span style="color:#ffd76a">⚗ 팀 피해 +${Math.round((S.raidTeam-1)*100)}%</span>`);}
+  /* v427 ♾ 고점 돌파 쌓임: 오른쪽 위에 한 줄씩 (증강 이름 · 쌓인 수 → 효과) */for(const a of S.augs){const x=augStk(a.id);if(x)bf.push(`<span style="color:#9fe8ff">♾ ${a.n} · ${x[0]} ${Math.floor(x[1]).toLocaleString()} → ${x[3]} ${augStkV(x)}</span>`);}
   bf.push(dpsPanel());
   {const show=play||((S.mode==='aug'||S.mode==='stat')&&innerWidth>=760),h=show?rateTxt(bf.join('')):'',B=$('buffs');if(B._h!==h){B.innerHTML=h;B._h=h;}B.classList.toggle('over',!play);bfTipTick();}
   dashBtn.classList.toggle('cd',p.dashCd>0);{const sb=$('skBtn'),K=SKILLS[S.cls];if(K){const c=p.skCd||0;sb.classList.toggle('cd',c>0);const ic=K.ico,sub=c>0?Math.ceil(c)+'초':'E';if(sb._k!==ic+sub){sb._k=ic+sub;$('skIco').textContent=ic;$('skSub').textContent=sub;}}}{const ub=$('ulBtn'),U=ULTS[S.cls];if(U){const c=p.ulCd||0;ub.classList.toggle('cd',c>0);ub.classList.toggle('rdy',c<=0);const sub=c>0?Math.ceil(c)+'초':'R';if(ub._k!==U.ico+sub){ub._k=U.ico+sub;$('ulIco').textContent=U.ico;$('ulSub').textContent=sub;}}}
@@ -9668,7 +9669,7 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
   {v:426,t:'♾ 고점 돌파 쌓임 표시',items:[
-    ['new','♾ 판 동안 쌓이는 고점 돌파 증강(받아치기 투지·업화의 정수·만발의 사수 등 20종)은 증강 칸 오른쪽 아래에 지금 효과(+N%)가 떠요. 마우스를 올리면 쌓인 수까지 보여요']]},
+    ['new','♾ 판 동안 쌓이는 고점 돌파 증강(받아치기 투지·업화의 정수·만발의 사수 등 20종)은 증강 칸 오른쪽 아래와 화면 오른쪽 위(누적 피해 위)에 지금 효과가 떠요 (예: ♾ 받아치기 · 투지 74 → 공격력 +28%)']]},
   {v:425,t:'🩸 굶주린 영혼 완화',items:[
     ['change','🩸 굶주린 영혼에게 먹여야 할 처치 수를 줄였어요 (근접·마법사로는 너무 빡빡했음): 최근 처치 속도 × 시간 × 0.45 (20분부터 0.6), 최소 10마리']]},
   {v:424,t:'🛡 탱커의 힘 · 토템 멀리 · 물약 창',items:[
@@ -16670,7 +16671,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=426,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=427,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
