@@ -3101,7 +3101,7 @@ const AUGS=[
   {id:'k_charge',cls:'knight',t:'g',n:'방패 돌진',tags:['guard','blitz'],d:'[기사 전용] 대시로 부딪힌 적에게 공격력 3배 피해와 밀쳐내기'},
   {id:'k_holy',uc:2,cls:'knight',t:'s',n:'수호 기사',tags:['guard'],d:'[기사 전용] 방어력 4당 공격력 +1%, 상한 없음'},
   {id:'m_archmage',uc:2,cls:'mage',t:'s',n:'대마법사',tags:[],d:'[마법사 전용] 레벨 1당 공격력 약 +2.6%, 상한 없음'},
-  {id:'a_gale',uc:2,cls:'archer',t:'s',n:'질풍 화살',tags:['sniper'],d:'[궁수 전용] 탄속 보너스 상한 없음, 효율 1.6배 (기본보다 빠른 1%당 탄환 피해 +0.8%)'},
+  {id:'a_gale',uc:2,cls:'archer',t:'s',n:'질풍 화살',tags:['sniper'],d:'[궁수 전용] 탄속 보너스 상한 없음, 효율 1.6배 (기본보다 빠른 1%당 탄환 피해 +1%)'},
   {id:'r_vital',uc:2,cls:'rogue',t:'s',n:'급소 해부',tags:['curse'],d:'[도적 전용] 치명타 확률 1%당 치명타 피해 +1.5% (100% 넘는 확률도 계산 · 치명타 확률 카드가 계속 나와요), 상한 없음'},
   {id:'p_zeal',uc:1,cls:'paladin',t:'s',n:'신앙의 무게',tags:['guard'],d:'[성기사 전용] 최대 체력 100당 공격력 +10%, 상한 없음 (오라 포함 모든 피해)'},
   {id:'n_harvest',uc:1,cls:'necro',t:'s',n:'망자의 수확',tags:['curse'],d:'[사령술사 전용] 이번 판 처치 500마리당 공격력 +2%, 상한 없음 (해골 포함)'},
@@ -3216,8 +3216,8 @@ const AUGS=[
   {id:'boots',t:'s',n:'날쌘 장화',tags:['blitz'],d:'이동 속도 +16%. 움직이는 동안 받는 피해 −12%',f:p=>{p.speed*=1.08;}},
   {id:'tailwind',t:'g',n:'뒷바람',tags:['blitz'],d:'이동 속도 10당 공격 속도 +2%'},
   {id:'rifling',t:'s',n:'강선',tags:['sniper'],d:'탄속 +50%, 사거리 +12%. 탄환 관통 +1',f:p=>{p.bspd*=1.22;p.range*=1.06;p.rfN=(p.rfN||0)+1;if(p.rfN%2)p.pierce+=1;}},
-  {id:'velocity',t:'g',n:'질풍탄',tags:['sniper','card'],d:'탄속 100당 탄환 피해 +5% (최대 +100%)'},
-  {id:'railgun',t:'p',n:'천공탄',tags:['sniper','sniper'],d:'탄속 +80%, 관통 +2. 원거리 2개로 계산',f:p=>{p.bspd*=1.34;p.pierce+=1;}},
+  {id:'velocity',t:'g',n:'질풍탄',tags:['sniper','card'],d:'탄속 100당 탄환 피해 +7.5% (최대 +100%)'},
+  {id:'railgun',t:'p',n:'천공탄',tags:['sniper','sniper'],d:'탄속 +80%, 관통 +2, 탄환 피해 +30%. 원거리 2개로 계산',f:p=>{p.bspd*=1.34;p.pierce+=1;}},
   {id:'scope',t:'s',n:'조준경',tags:['sniper'],d:'사거리 +25%. 사거리 100당 피해 +1.6%',f:p=>{p.range*=1.12;}},
   {id:'longshot',t:'g',n:'원거리 숙련',tags:['sniper'],d:'사거리 100당 공격력 +6%'},
   {id:'heart',t:'g',n:'거인의 심장',tags:['guard'],d:'최대 체력 +20%. 1.5초 동안 크게 안 맞았으면 다음 피격 피해 −40%',f:p=>{p.hpP=(p.hpP||0)+.1;}},
@@ -3396,7 +3396,7 @@ const AUGS=[
   {id:'turret',t:'g',n:'마법 포탑',tags:['summon'],d:'8초마다 발밑에 포탑 설치. 6초간 0.4초마다 사격 (공격력 50%). 공속이 오를수록 더 자주'},
   {id:'turret2',t:'s',n:'포탑 증설',tags:['summon'],d:'포탑을 설치할 때 1개 더 설치, 포탑 지속 +2초'},
   {id:'boltturret',t:'g',n:'관통 포탑탄',tags:['summon','card'],d:'포탑 탄환 관통 +2, 피해 +40%'},
-  {id:'overwatch',t:'s',n:'감시탑',tags:['summon','sniper'],d:'포탑 사거리 +50%, 포탑 탄속 +50%'},
+  {id:'overwatch',t:'s',n:'감시탑',tags:['summon','sniper'],d:'포탑 사거리 +50%, 포탑 탄속 +50%, 포탑 피해 +30%'},
   {id:'bastion',t:'g',n:'보루',tags:['summon','guard'],d:'포탑 120 안에 있으면 방어력 +40, 초당 체력 재생 +4 (최대 체력 따라 커짐)'},
   {id:'selfdestruct',t:'p',n:'자폭 포탑',tags:['summon','summon'],d:'포탑이 사라질 때 대폭발 (범위 130, 공격력 4배). 소환 2개로 계산'},
   {id:'wisp',t:'s',n:'도깨비불',tags:['summon','fire'],d:'도깨비불 1기가 따라다니며 1초마다 불덩이 (공격력 80%, 화상)'},
@@ -7270,7 +7270,7 @@ function dmgE(e,amt,col,label,quiet){
   else if(e.boss&&!e.hid2&&!quiet&&S.p.alive){e.pkN=(e.pkN||0)+1;if(e.pkN>=BOSS_PK){e.pkN=0;bossKillProc(e);}}
 }
 function poisonE(e,st=1){const cap=((tag('poison')>=6?10:1)+(has('f_plaguebullet')?3:0)+(has('virulence')?3:0))*(x8('xr_brood')?2:1);e.ps=Math.min(cap,Math.max(e.ps,0)+(e.ps>=cap?0:st));if(e.ps<1)e.ps=1;e.pt=3;}
-const bspdB=()=>{const b=Math.max(0,S.p.bspd/(CLASSES[S.cls].stats.bspd||560)-1)*.5;return has('a_gale')?b*lv3('a_gale',1.3,1.6,2):Math.min(1,b);};
+const bspdB=()=>{const b=Math.max(0,S.p.bspd/(CLASSES[S.cls].stats.bspd||560)-1)*.65/* v402 .5→.65 */;return has('a_gale')?b*lv3('a_gale',1.3,1.6,2):Math.min(1,b);};
 function pBullet(x,y,ang,dmg,o={}){const p=S.p;if((duelOn()||labOn())&&!S.duelSp)return;if(S.cls==='archer'&&!o.melee)S.arN=(S.arN||0)+1;/* 결투 카운트다운 중엔 탄이 안 나감 (소환물 포함) */if(o.child&&(S.chN2||0)>=CHILD_CAP)return;if(o.child)S.chN2=(S.chN2||0)+1;const b=Object.assign({x,y,vx:Math.cos(ang)*p.bspd,vy:Math.sin(ang)*p.bspd,mine:true,dmg,life:1.2,pierce:pierceE(),hit:new Set(),r:3,roll:0},o);if(S.cls==='mage'&&mSchool()===2&&!o.mbomb){b.vx*=1.8;b.vy*=1.8;b.life/=1.6;}if(S.cls==='mage'&&mSchool()===0&&!o.child)b.pierce=0; /* 화염구는 첫 적에서 터짐 */ /* 번개 마법사: 주문이 1.8배 빠르게 (사거리는 비슷하게) */S.pr.push(b);}
 function explode(x,y,rad,dmg,col='#ffb347'){sfx('boom');if(has('catalyst'))rad*=1+lv3('catalyst',.15,.2,.25);
   S.rings.push({x,y,r:6,max:rad,life:.3,col});burst(x,y,col,12);
@@ -7383,9 +7383,10 @@ function playerFire(tg){
   let n=p.multi+(tag('card')>=6?2:0)+(has('bulletstorm')?3:0)+(has('g_twin')?1:0);if(has('bulletstorm'))shock*=.85;
   if(has('focus'))shock*=n<=1?1+lv3('focus',.35,.5,.65):1.1;
   if(has('giant'))shock*=1+lv3('giant',.15,.25,.35);
-  // 탄속 보너스: 직업 기본 탄속보다 빠른 만큼(1%당) 기본 공격 탄환 피해 +0.5% (최대 +100%). 탄속 카드·증강이 딜 선택지가 되게
+  // 탄속 보너스: 직업 기본 탄속보다 빠른 만큼(1%당) 기본 공격 탄환 피해 +0.65% (최대 +100%). 탄속 카드·증강이 딜 선택지가 되게
   if(!meleeOn())shock*=1+bspdB();
-  if(has('velocity')&&!meleeOn())shock*=1+Math.min(has('f_accel')?1.5:1,p.bspd/100*lv3('velocity',.035,.05,.065)*(has('f_accel')?2:1));
+  /* v402 천공탄: 탄환 피해 +30% */if(has('railgun')&&!meleeOn())shock*=1+lv3('railgun',.25,.3,.35);
+  if(has('velocity')&&!meleeOn())shock*=1+Math.min(has('f_accel')?1.5:1,p.bspd/100*lv3('velocity',.055,.075,.095)/* v402 +50% */*(has('f_accel')?2:1));
   if(p.ocN>0){shock*=lv3('overcharge',1.8,2.2,2.6);p.ocN--;}
   if(has('goldbullet'))shock*=1+Math.min(lv3('goldbullet',.3,.45,.6)*(has('f_compound')?2:1),Math.floor(S.gold/100)*.03);
   let ax=tg.x,ay=tg.y;if(duelOn()&&tg===S.boss&&tg.mvx!=null&&!(S.freezeT>0)){const t=Math.hypot(tg.x-p.x,tg.y-p.y)/Math.max(200,p.bspd||400);ax+=tg.mvx*t;ay+=tg.mvy*t;} // 결투: 상대가 움직이는 쪽을 예측해서 조준 (상대도 나를 예측해서 쏨)
@@ -7833,7 +7834,7 @@ function update(dt){
     if(S.echoQ&&S.echoQ.length){for(const q of S.echoQ){q.t-=dt;if(q.t<=0)for(let i=0;i<q.n;i++)pBullet(p.x,p.y,q.a+(i-(q.n-1)/2)*.13,q.d,{sub:'메아리',child:true,r:4});}S.echoQ=S.echoQ.filter(q=>q.t>0);}
     if(droneN()>0){S.drT=(S.drT||0)-dt;if(S.drT<=0){S.drT=(has('f_fleet')?.4:.6)*tmul()*sumR();for(const q of dronePos()){const e=sumTarget(q,p.range*1.1);if(e)pBullet(q.x,q.y,Math.atan2(e.y-q.y,e.x-q.x),pDmg()*.6*sumM(),{child:true,r:3,src:'summon',sub:'정령'});}}}
     if(has('turret')){S.tuT=(S.tuT??2)-dt;if(S.tuT<=0&&agGo('turret')){S.tuT=(has('f_overclock')?4:8)*tmul();const n=1+(has('turret2')?lv3('turret2',1,1,2):0),lf=(lv3('turret',5,6,8)+(has('turret2')?2:0)+(p.tuL||0))*(has('f_citadel')?2:1);S.tuN=(S.tuN||0)+n;for(let k=0;k<n;k++){const a=k*TAU/n+S.t;(S.turrets=S.turrets||[]).push({x:p.x+(n>1?Math.cos(a)*40:0),y:p.y+(n>1?Math.sin(a)*40:0),life:lf,cd:0});}}}
-    if(S.turrets&&S.turrets.length){const rg=p.range*(has('overwatch')?1+lv3('overwatch',.4,.5,.6):1);for(const u of S.turrets){u.life-=dt;u.cd-=dt;if(u.cd<=0){u.cd=(has('f_sentry')?.2:.4)*sumR()*tmul();const e=sumTarget(u,rg);if(e){const an=Math.atan2(e.y-u.y,e.x-u.x);u.a=an;u.fT=.12;const _an=an,bs=S.p.bspd*(has('overwatch')?1.5:1);pBullet(u.x,u.y,an,pDmg()*.5*sumM()*(S.cls==='gunner'?1.7:1)*(has('g_engineer')?1+(S.tuN||0)*lv3('g_engineer',.002,.0025,.003):1)*(has('boltturret')?1+lv3('boltturret',.3,.4,.5):1),{child:true,r:3,src:'summon',sub:'포탑',pierce:has('boltturret')?2:0,vx:Math.cos(an)*bs,vy:Math.sin(an)*bs});}}
+    if(S.turrets&&S.turrets.length){const rg=p.range*(has('overwatch')?1+lv3('overwatch',.4,.5,.6):1);for(const u of S.turrets){u.life-=dt;u.cd-=dt;if(u.cd<=0){u.cd=(has('f_sentry')?.2:.4)*sumR()*tmul();const e=sumTarget(u,rg);if(e){const an=Math.atan2(e.y-u.y,e.x-u.x);u.a=an;u.fT=.12;const _an=an,bs=S.p.bspd*(has('overwatch')?1.5:1);pBullet(u.x,u.y,an,pDmg()*.5*sumM()*(has('overwatch')?1.3:1)/* v402 감시탑 포탑 피해 +30% */*(S.cls==='gunner'?1.7:1)*(has('g_engineer')?1+(S.tuN||0)*lv3('g_engineer',.002,.0025,.003):1)*(has('boltturret')?1+lv3('boltturret',.3,.4,.5):1),{child:true,r:3,src:'summon',sub:'포탑',pierce:has('boltturret')?2:0,vx:Math.cos(an)*bs,vy:Math.sin(an)*bs});}}
       if(u.life<=0&&has('selfdestruct'))explode(u.x,u.y,130,pDmg()*4*sumM(),'#ffb347');}S.turrets=S.turrets.filter(u=>u.life>0);}
     if(has('wisp')){S.wiT=(S.wiT??1)-dt;if(S.wiT<=0){S.wiT=(has('f_willo')?.5:1)*sumR();const w=wispPos(),e=sumTarget(w,p.range);if(e)pBullet(w.x,w.y,Math.atan2(e.y-w.y,e.x-w.x),pDmg()*lv3('wisp',.6,.8,1)*sumM(),{sub:'도깨비불',child:true,r:4,burn:true,src:'summon'});}}
     if(shadowOn()){S.shT=(S.shT??6)-dt;if(S.shT<=0&&agGo('st_shadow')){S.shT=6*cdM();spawnClone();}}
@@ -9441,6 +9442,11 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:402,t:'💨 탄속 증강 상향',items:[
+    ['buff','💨 탄속 보너스: 기본보다 빠른 1%당 탄환 피해 +0.5% → <b>+0.65%</b> (탄속 카드·증강 전부 이득)'],
+    ['buff','💨 「질풍탄」 탄속 100당 탄환 피해 +5% → <b>+7.5%</b>'],
+    ['buff','🎯 「천공탄」 탄환 피해 <b>+30%</b> 추가'],
+    ['buff','🗼 「감시탑」 포탑 피해 <b>+30%</b> 추가']]},
   {v:401,t:'⚖ 증강·카드 조정',items:[
     ['nerf','🏹 「화살 소나기」 4.5초 → 6.5초마다'],
     ['nerf','🌪 「원소 폭풍」 4초 → 5.3초마다'],
@@ -16258,7 +16264,7 @@ function renderStats(){
     row(projTxt('탄환')+' 수',n+'발'),
     row('관통',Math.min(p.pierce,PIERCE_CAP)+` <small>/ ${PIERCE_CAP}</small>`,p.pierce>PIERCE_CAP?(has('a_pierce')?`초과 ${p.pierce-PIERCE_CAP}은 꿰뚫는 화살 공격력에만 계산`:`초과 ${p.pierce-PIERCE_CAP}은 효과 없음`):p.pierce>=PIERCE_CAP?(has('a_pierce')?'최대치. 넘는 관통은 꿰뚫는 화살 공격력으로':'최대치. 관통 카드·증강이 더 안 나와요'):''),
     row('사거리',Math.round(rangeE())+` <small>/ ${RANGE_CAP()}</small>`,p.range>RANGE_CAP()?`초과 ${Math.round(p.range-RANGE_CAP())}은 효과 없음`:p.range>=RANGE_CAP()?'최대치. 사거리 카드·조준경이 더 안 나와요':'',`적이 다가오기 전에 먼저 공격하는 안전 거리. 딜을 직접 올리지는 않고, 원거리 시너지(원거리 숙련·저격수·조준경 등: 사거리 100당 피해)와 소환물의 탐지 범위에 쓰임. 최대 ${RANGE_CAP()} (원거리 550 · 근접 300)까지만 늘어나고, 최대가 되면 사거리 카드·조준경은 더 나오지 않음`),
-    row(projTxt(' 탄속').trim(),Math.round(p.bspd)+(has('a_gale')?' <small>/ 상한 없음</small>':` <small>/ ${Math.round((CLASSES[S.cls].stats.bspd||560)*3)}</small>`),bspdB()>0?`기본보다 빠른 만큼 탄환 피해 +${Math.round(bspdB()*100)}%${has('a_gale')?' (질풍 화살: 상한 없음)':bspdB()>=.99?' · 최대치 도달 (가속 탄 카드 안 나옴)':' / 최대 +100%'}`:'기본 탄속보다 빠르면 1%당 탄환 피해 +0.5% (최대 +100%)')]),
+    row(projTxt(' 탄속').trim(),Math.round(p.bspd)+(has('a_gale')?' <small>/ 상한 없음</small>':` <small>/ ${Math.round((CLASSES[S.cls].stats.bspd||560)*3)}</small>`),bspdB()>0?`기본보다 빠른 만큼 탄환 피해 +${Math.round(bspdB()*100)}%${has('a_gale')?' (질풍 화살: 상한 없음)':bspdB()>=.99?' · 최대치 도달 (가속 탄 카드 안 나옴)':' / 최대 +100%'}`:'기본 탄속보다 빠르면 1%당 탄환 피해 +0.65% (최대 +100%)')]),
     ...clsRows(row),
     row('기대 초당 피해',Math.round(pureMelee()?pDmg()*rate*MELEE_DM*(1+critC()*(critMul()-1)):dps),pureMelee()?'적 1마리 기준 근접 피해 (×1.6 근접 보정 포함). 회전 베기, 폭발, 독 제외':'탄환 기본 피해 기준. 회전 부적, 폭발, 독 제외')
   ].join('');
@@ -16329,7 +16335,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=401,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=402,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
