@@ -9455,6 +9455,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:413,t:'👤 이름 되찾기',items:[
+    ['bug','👤 다른 이름으로 하다가 원래 이름으로 돌아올 때, 비밀번호가 맞지 않다며 막히던 문제 → 이 기기에서 쓰던 이름이면 그대로 돌아와요 (비밀번호 칸은 비워 둬도 돼요)']]},
   {v:412,t:'⚒ 대장장이 말풍선',items:[
     ['look','⚒ 대장간 대장장이 말풍선 글자를 크고 굵게 (메달 부족 같은 안내가 잘 보이게)']]},
   {v:411,t:'☠ 악몽 결계 · 일시정지 창',items:[
@@ -15240,6 +15242,8 @@ function openNick(){cosPreviewHide();const cur=myNick();
           else{const ok=await nameOwned3(n,nk);
             if(ok===false){setMyKey(nk);toast2='🔑 비밀번호 확인! 이 컴퓨터에서도 '+n+' 이름을 써요';offer=nk;}
             else if(ok===null){msg('랭킹 서버에 연결하지 못했어요. 인터넷 연결을 확인하고 다시 저장해 주세요.');return;}
+            /* v413 비밀번호가 서버와 달라도 이 기기에 그 이름으로 쓰던 열쇠가 남아 있고 서버가 그 열쇠를 주인으로 알면 그대로 엶 (다른 이름으로 바꿨다 돌아올 때) */
+            else if(nKeys()[n]&&nKeys()[n]!==nk&&await nameOwned3(n,nKeys()[n])===false){setMyKey(nKeys()[n]);toast2='👤 이 기기에서 쓰던 「'+n+'」 이름으로 돌아왔어요 (입력한 비밀번호는 서버 비밀번호와 달라요. 다른 기기에서는 원래 비밀번호를 쓰세요)';}
             else{msg(`'${n}'은(는) 다른 기기가 주인으로 등록돼 있어서 이 비밀번호로는 열 수 없어요. (그 기기에서 비밀번호 없이 먼저 쓰였거나, 다른 비밀번호예요) 내 이름이 맞으면 관리자에게 「${n}」 이름 주인 지우기를 부탁한 뒤 다시 해 주세요. 처음 보는 이름이면 다른 사람이 이미 쓰는 이름이에요.`);return;}}}
         else if(own&&n!==cur){msg(`'${n}'은(는) 다른 사람이 이미 쓰고 있는 이름이에요. 내 이름이면 이름 비밀번호를 같이 써 주세요.`);return;}
         else if(own){msg(`'${n}'은(는) 지금 이 컴퓨터에서 주인 확인이 안 돼요. 다른 컴퓨터에서 정한 이름 비밀번호를 같이 써 주세요.`);return;}
@@ -16380,7 +16384,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=412,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=413,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
