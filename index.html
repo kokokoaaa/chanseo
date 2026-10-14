@@ -5816,21 +5816,21 @@ function killP(why){const p=S.p;if(!p.alive)return;if(labOn()&&S.lab&&S.lab.god)
 //  👁 심연의 눈 (14분~): 하늘의 눈이 떠 있는 동안 움직이거나 대시하면 즉사 → 멈춰서 버텨야 함. 대신 그동안 움직이는 잡몹은 돌이 되어 부서짐
 // 20분부터는 극후반: 더 자주, 더 빡빡하게 (토템 수↑·시간↓, 먹일 영혼 수↑, 눈 여러 번). 넘길 때마다 보너스 점수
 // 즉사 = 대시 무적·보호막 무시, 부활 수단(최후의 패·부활 보험·불사조·골드 부활)은 작동
-const DOOM_LATE=14/* nmMin 14 = 게임 20분 */,doomOn=()=>!!(S&&(S.tot||S.hun||S.eye)),gmin=()=>6+nmMin();
-const DOOM_K=[['tot',4],['hun',6],['eye',8]];/* v421 10분·12분·14분부터 (예전 12·15·17분) */
-function doomTick(dt){if(!endless()||rushOn()||!S.p.alive||S.win||dfM().raid||dfM().duel||dfM().lab)return;const m=nmMin();if(m<DOOM_K[0][1]){S.dmT=null;return;}
+const DOOM_LATE=20/* 게임 20분부터 극후반 */,doomOn=()=>!!(S&&(S.tot||S.hun||S.eye)),doomMin=()=>(S.gt||0)/60/* 화면 왼쪽 위 시계와 같은 시간 */,gmin=()=>doomMin();
+const DOOM_K=[['tot',10],['hun',12],['eye',14]];/* v423 화면 시계 10분·12분·14분부터. 예전엔 악몽 압박 수치(nmMin)로 셌는데 10분 전엔 절반 속도로 올라서 실제로는 12분쯤에야 나왔음 */
+function doomTick(dt){if(!endless()||rushOn()||!S.p.alive||S.win||dfM().raid||dfM().duel||dfM().lab)return;const m=doomMin();if(m<DOOM_K[0][1]){S.dmT=null;return;}
   /* 최근 20초 처치 속도 (굶주린 영혼 목표 수) */S.khT=(S.khT||0)+dt;if(S.khT>=1){S.khT=0;(S.kh=S.kh||[]).push((S.st.kills||0)-(S.kPet||0));/* 눈의 석화 처치는 빼고 */if(S.kh.length>21)S.kh.shift();}
   if(S.dmCard){S.dmCard.t-=dt/(AUTO.speed||1);if(S.dmCard.t<=0)S.dmCard=null;}
   if(S.tot)totTick(dt);else if(S.hun)hunTick(dt);else if(S.eye)eyeTick(dt);else{S.dmT=(S.dmT??10)-dt;if(S.dmT>0||S.nw||(S.nwT!=null&&S.nwT<6))return;
     const av=DOOM_K.filter(([k,m0])=>m>=m0&&!(k==='hun'&&bossOn())).map(([k])=>k),pool=av.length>1?av.filter(k=>k!==S.dmLast):av,k=pool[Math.floor(Math.random()*pool.length)];S.dmLast=k;
     if(k==='tot')totStart();else if(k==='hun')hunStart();else eyeStart();}}
-function doomEnd(ok,k){const m=nmMin(),late=m>=DOOM_LATE;S.dmT=late?Math.max(20,38-1.5*(m-DOOM_LATE))*rand(.85,1.15):rand(55,70);
+function doomEnd(ok,k){const m=doomMin(),late=m>=DOOM_LATE;S.dmT=late?Math.max(20,38-1.5*(m-DOOM_LATE))*rand(.85,1.15):rand(55,70);
   if(ok){S.st.doomOk=(S.st.doomOk||0)+1;addBonus('doom',late?1500:600);}}
 /* v419 즉사 패턴 시작: 화면 가운데 큰 설명 카드 (아이콘·이름·규칙 두 줄, 3.5초) */const doomBan=(s,d,col,T,l2)=>{S.dmCard={s,d,l2:l2||'',col,t:3.5,T:3.5};S.shake=Math.max(S.shake,.25);};
 const doomPos=(n,d0,d1,gap)=>{const p=S.p,A=S.arena,pts=[];for(let i=0;i<n;i++){for(let tr=0;tr<50;tr++){const a=Math.random()*TAU,d=rand(d0,d1),x=p.x+Math.cos(a)*d,y=p.y+Math.sin(a)*d,pad=80;
   if(x<pad||y<pad||x>WW-pad||y>WH-pad)continue;if(A&&(Math.abs(x-A.x)>Math.min(A.r,A.tr||A.r)-pad||Math.abs(y-A.y)>Math.min(A.r,A.tr||A.r)-pad))continue;if(inSolid(x,y,34))continue;if(pts.some(q=>Math.hypot(q.x-x,q.y-y)<gap))continue;pts.push({x,y});break;}}return pts;};
 // ⛓ 영혼 결속: 토템은 제자리에 선 적 (맞기만 하고 공격 안 함). 체력 = 지금 내 화력 × 몇 초 (근처에서 집중하면 부술 수 있게)
-function totStart(){const m=nmMin(),late=m>=DOOM_LATE,n=late?(m>=DOOM_LATE+6?4:3):2,T=late?Math.max(11,16-.5*(m-DOOM_LATE)):18,pts=doomPos(n,280,480,240);if(!pts.length){S.dmT=3;return;}
+function totStart(){const m=doomMin(),late=m>=DOOM_LATE,n=late?(m>=DOOM_LATE+6?4:3):2,T=late?Math.max(11,16-.5*(m-DOOM_LATE)):18,pts=doomPos(n,280,480,240);if(!pts.length){S.dmT=3;return;}
   /* 단일 대상 화력(공격력×공격 속도×근접 보정×치명타 평균) 기준: 초반 2.5초·극후반 3.5초 집중하면 부서짐 (DPS 표시는 광역·토템 피해가 섞여서 안 씀) */const one=pDmg()*pRate()*(pureMelee()?MELEE_DM:1)*(1+critC()*(critMul()-1)),hp=Math.max(200,one*(late?3.5:2.5));S.tot={t:T,T,L:[]};
   for(const q of pts){const e=spawnAt('dummyS',q.x,q.y,true);if(!e)continue;Object.assign(e,{tot:1,hx:q.x,hy:q.y,x:q.x,y:q.y,maxHp:hp,hp,dmg:0,spd:0,cd:99,bk:0,elite:false,affs:null,r:24});S.tot.L.push(e);S.rings.push({x:q.x,y:q.y,r:10,max:100,life:.5,col:'#b56bff'});burst(q.x,q.y,'#7a2bd0',16);}
   doomBan('⛓ 영혼 결속',`저주의 토템 ${S.tot.L.length}개가 사슬로 영혼을 묶었어요`,'#c58bff',T,`${Math.round(T)}초 안에 토템을 모두 부수세요 · 못 부수면 즉사 (토템 근처에선 토템을 먼저 공격)`);}
@@ -5841,14 +5841,14 @@ function totTick(dt){const w=S.tot,p=S.p;w.t-=dt;const live=w.L.filter(e=>e.aliv
 // 토템 근처(공격 거리 + 60)에 있으면 토템을 먼저 공격
 const totTarget=fr=>{if(!S.tot)return null;const p=S.p;let b=null,bd=(fr+60)**2;for(const e of S.tot.L){if(!e.alive)continue;const d=d2(e,p);if(d<bd){bd=d;b=e;}}return b;};
 // 🩸 굶주린 영혼: 머리 위에 붙은 영혼에게 시간 안에 처치한 적의 영혼을 먹여야 함. 목표 = 최근 처치 속도 × 시간 × 0.65 (극후반 0.9, 최소 12)
-function hunStart(){const m=nmMin(),late=m>=DOOM_LATE,T=late?Math.max(9,12-.3*(m-DOOM_LATE)):12,K=S.kh||[],kps=K.length>2?(K[K.length-1]-K[0])/(K.length-1):1,need=Math.max(12,Math.round(kps*T*(late?.9:.65)));
+function hunStart(){const m=doomMin(),late=m>=DOOM_LATE,T=late?Math.max(9,12-.3*(m-DOOM_LATE)):12,K=S.kh||[],kps=K.length>2?(K[K.length-1]-K[0])/(K.length-1):1,need=Math.max(12,Math.round(kps*T*(late?.9:.65)));
   S.hun={t:T,T,need,k0:S.st.kills||0,fx:[]};doomBan('🩸 굶주린 영혼',`굶주린 영혼이 머리 위에 붙었어요 · 적 ${need}마리의 영혼을 먹여야 해요`,'#ff6a7a',T,`${Math.round(T)}초 안에 적을 ${need}마리 처치하세요 · 못 먹이면 나를 먹어요 (즉사)`);}
 const hunGot=()=>S.hun?Math.max(0,(S.st.kills||0)-S.hun.k0):0;
 function hunTick(dt){const w=S.hun,p=S.p;w.t-=dt;for(const f of w.fx)f.t+=dt*2.2;w.fx=w.fx.filter(f=>f.t<1);
   if(hunGot()>=w.need){S.hun=null;doomEnd(true,'hun');p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.08*healM());ftext(p.x,p.y-44,'🩸 영혼이 배불러 사라졌다!','#ffb0b8',18);S.rings.push({x:p.x,y:p.y-110,r:10,max:120,life:.5,col:'#ffb0b8'});return;}
   if(w.t<=0){S.hun=null;doomEnd(false,'hun');S.flash=Math.max(S.flash||0,.35);S.shake=Math.max(S.shake,.7);burst(p.x,p.y,'#8a0a20',34);killP('굶주린 영혼');}}
 // 👁 심연의 눈: 감김(움직여도 됨) → 뜨는 중(예고) → 뜸(움직이거나 대시하면 즉사). 2~4번 반복
-function eyeStart(){const m=nmMin(),late=m>=DOOM_LATE;S.eye={n:late?(m>=DOOM_LATE+5?4:3):2,i:0,ph:'warn',t:late?Math.max(1.2,1.8-.05*(m-DOOM_LATE)):2.2,warn:late?Math.max(1.2,1.8-.05*(m-DOOM_LATE)):2.2,gaze:late?1.8:1.4,rest:late?2:2.6};
+function eyeStart(){const m=doomMin(),late=m>=DOOM_LATE;S.eye={n:late?(m>=DOOM_LATE+5?4:3):2,i:0,ph:'warn',t:late?Math.max(1.2,1.8-.05*(m-DOOM_LATE)):2.2,warn:late?Math.max(1.2,1.8-.05*(m-DOOM_LATE)):2.2,gaze:late?1.8:1.4,rest:late?2:2.6};
   doomBan('👁 심연의 눈','하늘의 눈이 떠 있는 동안 움직이거나 대시하면 즉사!','#ff7a7a',3,`눈이 뜨면 멈추세요 (${S.eye.n}번) · 그동안 움직이는 잡몹은 돌이 되어 부서져요`);}
 const eyeGaze=()=>!!(S&&S.eye&&S.eye.ph==='gaze'),eyeNoDash=()=>!!(S&&S.eye&&(S.eye.ph==='gaze'||(S.eye.ph==='warn'&&S.eye.t<.6)));
 function eyeTick(dt){const w=S.eye,p=S.p;w.t-=dt;
@@ -5927,7 +5927,7 @@ function drawTot(){const p=S.p;
 // 👁 심연의 눈: 화면 위 가운데 (화면 좌표). 어둠 속 촉수·눈꺼풀·속눈썹·홍채 결·세로 동공·핏줄
 function drawDoomCard(){const c=S&&S.dmCard;if(!c)return;const cw=ctx.canvas.width,ch=ctx.canvas.height,sc=Math.min(cw/900,ch/600),a=Math.max(0,Math.min(1,c.t*3,(c.T-c.t)*6)),bw=Math.min(cw*.92,820*sc),bh=170*sc,bx=(cw-bw)/2,by=ch*.36;ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=a;
   ctx.fillStyle='rgba(12,4,18,.86)';ctx.beginPath();ctx.roundRect?ctx.roundRect(bx,by,bw,bh,18*sc):ctx.rect(bx,by,bw,bh);ctx.fill();ctx.strokeStyle=c.col;ctx.lineWidth=3*sc;ctx.stroke();
-  ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=c.col;ctx.font=`bold ${Math.round(46*sc)}px 'Do Hyeon',sans-serif`;ctx.fillText('☠ '+c.s,cw/2,by+46*sc);
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=c.col;ctx.font=`bold ${Math.round(46*sc)}px 'Do Hyeon',sans-serif`;ctx.fillText('☠ 즉사 패턴 · '+c.s,cw/2,by+46*sc);
   ctx.fillStyle='#f4e8ff';ctx.font=`${Math.round(23*sc)}px 'Do Hyeon',sans-serif`;ctx.fillText(c.d,cw/2,by+98*sc);if(c.l2){ctx.fillStyle='#ffd27a';ctx.font=`bold ${Math.round(22*sc)}px 'Do Hyeon',sans-serif`;ctx.fillText(c.l2,cw/2,by+136*sc);}ctx.restore();}
 function drawEyeUI(){try{drawDoomCard();}catch(e){}const w=S&&S.eye;if(!w)return;const cw=ctx.canvas.width,ch=ctx.canvas.height,sc=Math.min(cw,ch)/700*.72,cx=cw/2,cy=ch*.2,t=S.t;ctx.save();ctx.setTransform(1,0,0,1,0,0);
   const open=w.ph==='gaze'?1:w.ph==='warn'?Math.max(0,1-w.t/w.warn)*.5:0,ew=150*sc,eh=Math.max(3,68*sc*open);
@@ -9633,6 +9633,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:423,t:'☠ 즉사 패턴 시간 바로잡기',items:[
+    ['fix','☠ 즉사 패턴이 설명(10분)보다 늦게(12분쯤) 나오던 문제를 고쳤어요. 이제 화면 시계 기준 ⛓ 10분 · 🩸 12분 · 👁 14분부터, 20분부터 극후반'],
+    ['change','☠ 즉사 패턴 알림 카드 제목에 「☠ 즉사 패턴」을 붙였어요 (돌발 이벤트 「저주 토템」과 헷갈리지 않게)']]},
   {v:422,t:'🧪 회복 물약',items:[
     ['new','🧪 <b>회복 물약</b>: 장비창에서 메달로 사요 — 하급 🏅50(체력 20%) · 중급 🏅100(40%) · 상급 🏅150(60%) · 최상급 🏅200(80%, 몇 초에 걸쳐 회복) · 엘릭서 🏅500(바로 100%)'],
     ['new','🧪 판마다 <b>3개까지</b> 들고 가요 (장비창 물약 칸에서 1·2·3번 칸 고르기). 판에서 <b>F</b> 키로 1번 칸부터 차례로 마시고, 화면 버튼을 누르면 그 칸 물약을 마셔요. 물약끼리 재사용 20초, 마신 것만 줄어요'],
@@ -16624,7 +16627,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=422,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=423,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
