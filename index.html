@@ -9455,6 +9455,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:414,t:'🧿 부적 여러 개 선택',items:[
+    ['bug','🧿 가방의 <b>부적(🏅 메달 부적 포함)</b>이 여러 개 선택·끌어서 네모 선택에 안 잡히던 문제 → 장비와 같이 골라서 한꺼번에 가방·창고로 옮길 수 있어요 (부적은 판매·해체·보내기 제외)']]},
   {v:413,t:'👤 이름 되찾기',items:[
     ['bug','👤 다른 이름으로 하다가 원래 이름으로 돌아올 때, 비밀번호가 맞지 않다며 막히던 문제 → 이 기기에서 쓰던 이름이면 그대로 돌아와요 (비밀번호 칸은 비워 둬도 돼요)']]},
   {v:412,t:'⚒ 대장장이 말풍선',items:[
@@ -13027,7 +13029,7 @@ function openForge(){itExpire();if(Date.now()-GIFT_T>15000)setTimeout(giftSoon,5
   const sel=I.items.find(x=>x.id===INV_SEL)||null,rc=eqCls(),cmpK=cmpSlot(sel);
   const slot=k=>{const it=eqRaw(k),off=it&&oCls(it)&&oCls(it)!==rc,thb=k==='shield'&&!it&&isTH(eqRaw('sword')),rbb=k==='pants'&&!it&&robeR(rc)&&!!eqRaw('armor');return `<div class="eslot${off?' off':''}${thb||rbb?' thb':''}${k===cmpK?' cmpT':''}" data-slot="${k}" style="grid-area:${SLOT_POS[k]}" ${off?'title="대표 직업이 달라서 효과 없음"':thb?'title="양손 무기 (효과는 오른손에서 한 번만)"':rbb?'title="로브 한 벌 (갑옷 칸이 바지 칸까지 차지 · 효과는 갑옷에서 한 번만)"':''}>${it?itCell(it,null,true):thb?itCell(eqRaw('sword')):rbb?itCell(eqRaw('armor')):`<div class="icell empty"><span class="iph">${k==='sword'&&CW[rc]?CW[rc][0]:GEAR[slotT(k)].ico}</span></div>`}<small>${rbb?'로브 아래':SLOT_N[k]}</small></div>`;};
   charmFix();const tc=INV_TAB==='wh'?'wh':INV_TAB==='cls'?rc:'bag',wh=tc==='wh',MX=cMax(tc),byP=[],byC=[];for(const x of I.items)if(!EQ.has(x.id)&&cOf(x)===tc&&x.p<MX)byP[x.p]=x;for(const x of charmsIn(tc))if(x.p<MX&&!byP[x.p])byC[x.p]=x;
-  const chCell=(x,n)=>{const C=CHARM[x.k];return `<div class="icell r3 chm" draggable="true" data-chi="${META.charms.indexOf(x)}" data-pos="${n}" style="--rc:${C.col}" title="${esc(charmName(x).replace(/^(🧿|💛) /,''))}"><span class="iico">${C.sp?'💛':'🧿'}</span><b class="ilv">${C.luck[x.r-1]?'+'+C.luck[x.r-1]:'🏅+'+Math.round(C.med[x.r-1]*100)+'%'}</b></div>`;};
+  const chCell=(x,n)=>{const C=CHARM[x.k];return `<div class="icell r3 chm${INV_MS&&INV_MS.has('c'+META.charms.indexOf(x))?' msel':''}" draggable="true" data-chi="${META.charms.indexOf(x)}" data-pos="${n}" style="--rc:${C.col}" title="${esc(charmName(x).replace(/^(🧿|💛) /,''))}"><span class="iico">${C.sp?'💛':'🧿'}</span><b class="ilv">${C.luck[x.r-1]?'+'+C.luck[x.r-1]:'🏅+'+Math.round(C.med[x.r-1]*100)+'%'}</b></div>`;};
   const cells=[];for(let n=0;n<MX;n++)cells.push(byP[n]?itCell(byP[n],n):byC[n]?chCell(byC[n],n):itCell(null,n));
   // 장비 합산의 세트 목록: 효과가 켜진 세트(2개 이상)의 켜진 단계만 (1개뿐인 세트·아직 안 켜진 4세트 줄은 안 보임 · 장비 설명창에는 그대로 다 나옴)
   const sc=setCnt(),setRows=Object.keys(sc).filter(k=>SETS[k]&&sc[k]>=2).map(k=>{const T=SETS[k],n=sc[k];const a=n>=4&&T.aug&&AUGS.find(x=>x.id===T.aug);return `<div class="setrow"><b style="color:${T.col}"><span class="augref" data-sref="${k}">${T.n}</span> 세트 ${n}/${setMax(T)}</b>${setTiers(T).filter(([k])=>n>=k).map(([k,b])=>`<span class="on">${k}: ${fxTxt(b)}</span>`).join('')}${a?`<span class="on">✦ 증강 ${augRef(a)}</span>`:''}</div>`;}).join('');
@@ -13067,9 +13069,9 @@ function openForge(){itExpire();if(Date.now()-GIFT_T>15000)setTimeout(giftSoon,5
    <div class="fcol fbag">
     <div class="invtabs"><button class="cxtab ${tc===rc?'on':''}" data-itab="cls">⚔ ${CLASSES[rc].n} ${cN(rc)}/${CB_MAX}</button><button class="cxtab ${tc==='bag'?'on':''}" data-itab="bag">🎒 공용 ${bagN()}/${INV_MAX}</button><button class="cxtab ${wh?'on':''}" data-itab="wh">📦 창고 ${whN()}/${WH_MAX}</button></div>
     <div class="invgrid${INV_MS?' msmode':''}" id="invG">${cells.join('')}</div>
-    ${INV_MS?(()=>{const L=[...INV_MS].map(id=>I.items.find(x=>x.id===id)).filter(x=>x&&!EQ.has(x.id)&&cOf(x)===tc),ok=L.filter(x=>!x.lk),dest=[[rc,'⚔ '+CLASSES[rc].n+' 가방'],['bag','🎒 공용 가방'],['wh','📦 창고']].filter(([c])=>cK(c)!==cK(tc)),nAll=I.items.filter(x=>!EQ.has(x.id)&&cOf(x)===tc).length;
+    ${INV_MS?(()=>{const L=[...INV_MS].map(id=>I.items.find(x=>x.id===id)).filter(x=>x&&!EQ.has(x.id)&&cOf(x)===tc),LC=[...INV_MS].filter(k=>typeof k==='string'&&k[0]==='c').map(k=>META.charms[+k.slice(1)]).filter(x=>x&&cOf(x)===tc),ok=L.filter(x=>!x.lk),dest=[[rc,'⚔ '+CLASSES[rc].n+' 가방'],['bag','🎒 공용 가방'],['wh','📦 창고']].filter(([c])=>cK(c)!==cK(tc)),nAll=I.items.filter(x=>!EQ.has(x.id)&&cOf(x)===tc).length+charmsIn(tc).length;
       /* 여러 개 선택 중에는 아래 도구줄이 선택 도구로 바뀜 (가방 칸은 제자리) */
-      return `<div class="ftool mstool"><div class="mshd"><b>☑ ${L.length}개 선택</b><small>${L.length>ok.length?`🔒 잠긴 ${L.length-ok.length}개는 판매·해체에서 빠져요`:L.length?'옮기거나 한꺼번에 팔·해체·보낼 수 있어요':'장비를 누르거나 빈 곳에서 끌어 네모로 골라요'}</small></div>${dest.map(([c,n])=>`<button class="btn" data-msto="${c}" ${L.length?'':'disabled'}>${ro(n)}</button>`).join('')}<button class="btn ghost" data-msdo="sell" ${ok.length?'':'disabled'}>판매 · 🏅 ${ok.reduce((a,x)=>a+itSell(x),0).toLocaleString()}</button><button class="btn ghost" data-msdo="dis" ${ok.length?'':'disabled'}>해체 · ✨ ${ok.reduce((a,x)=>a+itDust(x),0).toLocaleString()}</button>${SHEET_URL&&SRV_V>=87?`<button class="btn ghost" data-msdo="send" ${ok.length?'':'disabled'}>📤 보내기 ${ok.length}개</button>`:''}<button class="btn ghost" data-msdo="${L.length&&L.length>=nAll?'none0':'all'}" ${nAll?'':'disabled'}>${L.length&&L.length>=nAll?'모두 풀기':'모두 선택'}</button><button class="btn mson" id="iMulti">☑ 선택 끝</button></div>`;})():`<div class="ftool f3"><button class="btn" id="iMulti">☐ 여러 개 선택</button><button class="btn" id="iSort">↕ 정렬</button><button class="btn" id="iAuto" title="칸마다 전투력이 가장 높은 장비를 대충 골라 껴요 (세트는 따로 안 따져요)">⚡ 자동 착용</button></div>`}
+      return `<div class="ftool mstool"><div class="mshd"><b>☑ ${L.length+LC.length}개 선택</b><small>${LC.length?`🧿 부적 ${LC.length}개는 옮기기만 돼요 (판매·해체·보내기 제외)`:L.length>ok.length?`🔒 잠긴 ${L.length-ok.length}개는 판매·해체에서 빠져요`:L.length?'옮기거나 한꺼번에 팔·해체·보낼 수 있어요':'장비를 누르거나 빈 곳에서 끌어 네모로 골라요'}</small></div>${dest.map(([c,n])=>`<button class="btn" data-msto="${c}" ${L.length+LC.length?'':'disabled'}>${ro(n)}</button>`).join('')}<button class="btn ghost" data-msdo="sell" ${ok.length?'':'disabled'}>판매 · 🏅 ${ok.reduce((a,x)=>a+itSell(x),0).toLocaleString()}</button><button class="btn ghost" data-msdo="dis" ${ok.length?'':'disabled'}>해체 · ✨ ${ok.reduce((a,x)=>a+itDust(x),0).toLocaleString()}</button>${SHEET_URL&&SRV_V>=87?`<button class="btn ghost" data-msdo="send" ${ok.length?'':'disabled'}>📤 보내기 ${ok.length}개</button>`:''}<button class="btn ghost" data-msdo="${L.length+LC.length&&L.length+LC.length>=nAll?'none0':'all'}" ${nAll?'':'disabled'}>${L.length+LC.length&&L.length+LC.length>=nAll?'모두 풀기':'모두 선택'}</button><button class="btn mson" id="iMulti">☑ 선택 끝</button></div>`;})():`<div class="ftool f3"><button class="btn" id="iMulti">☐ 여러 개 선택</button><button class="btn" id="iSort">↕ 정렬</button><button class="btn" id="iAuto" title="칸마다 전투력이 가장 높은 장비를 대충 골라 껴요 (세트는 따로 안 따져요)">⚡ 자동 착용</button></div>`}
     <small class="fhint">장비를 끌어서 원하는 칸·탭으로 옮길 수 있어요. 가방 빈 곳에서 끌어 네모를 그리거나 ☐ 여러 개 선택으로 <b>여러 개를 한꺼번에</b> 골라 옮기거나 팔·해체할 수 있어요 (🔒 잠긴 장비는 빠져요).</small>
    </div>
    <div class="fcol fsmith">
@@ -13099,7 +13101,7 @@ function openForge(){itExpire();if(Date.now()-GIFT_T>15000)setTimeout(giftSoon,5
     if(it.s!==slotT(el.dataset.slot)){gearMsg=`그건 「${GEAR_KEYS.filter(k=>slotT(k)===it.s).map(k=>SLOT_N[k]).filter((v,i,a)=>a.indexOf(v)===i).join('·')}」 칸에 끼는 거야!`;re();return;}
     const r=invEquip(it,el.dataset.slot);INV_SEL=it.id;gearMsg=r===true?`${itIco(it)} ${esc(itName(it))}, 잘 어울리는군!`:r;re();};});
   /* 🧿 부적 칸: 마우스를 올리면 설명, 누르면(폰) 설명 창, 끌어서 자리 옮기기 */
-  ov.querySelectorAll('[data-chi]').forEach(el=>{const x=()=>META.charms[+el.dataset.chi];ftipBind(el,()=>x()?[charmOneTip(x()),CHARM[x().k].col]:null);el.onclick=()=>{if(matchMedia('(hover:none)').matches&&x())uiAlert(charmOneTip(x()).replace(/<br>/g,'\n').replace(/<[^>]+>/g,''));};el.ondragstart=e=>{ftipHide();e.dataTransfer.setData('text/plain','ch:'+el.dataset.chi);};});
+  ov.querySelectorAll('[data-chi]').forEach(el=>{const x=()=>META.charms[+el.dataset.chi];ftipBind(el,()=>x()?[charmOneTip(x()),CHARM[x().k].col]:null);el.onclick=e=>{if((INV_MS||e.ctrlKey||e.metaKey||e.shiftKey)&&el.closest('#invG')){/* v414 부적(🏅 메달 부적 포함)도 여러 개 선택 */if(!INV_MS){INV_MS=new Set();INV_MSTAB=tc;}const k='c'+el.dataset.chi;INV_MS.has(k)?INV_MS.delete(k):INV_MS.add(k);re();return;}if(matchMedia('(hover:none)').matches&&x())uiAlert(charmOneTip(x()).replace(/<br>/g,'\n').replace(/<[^>]+>/g,''));};el.ondragstart=e=>{ftipHide();e.dataTransfer.setData('text/plain','ch:'+el.dataset.chi);};});
   const chDrag=e=>{const d=e.dataTransfer.getData('text/plain');return /^ch:\d+$/.test(d)?META.charms[+d.slice(3)]||null:null;};
   ov.querySelectorAll('#invG [data-pos]').forEach(el=>{el.ondragover=e=>e.preventDefault();el.ondrop=e=>{e.preventDefault();e.stopPropagation();const pos=+el.dataset.pos;
     {const ch=chDrag(e);if(ch){if(ch.p===pos)return;const oi=byP[pos],oc=byC[pos],op=ch.p;ch.p=pos;if(oi)oi.p=op;if(oc)oc.p=op;saveMeta();re();return;}}
@@ -13114,11 +13116,12 @@ function openForge(){itExpire();if(Date.now()-GIFT_T>15000)setTimeout(giftSoon,5
     if(cFull(to)){gearMsg=`${cName(to)}이 꽉 찼어!`;re();return;}if(eqSlotOf(it))invUnequipIt(it,to);else cPut(it,to);saveMeta();gearMsg=`${cName(to)}에 넣어 뒀어.`;re();};});
   // 여러 개 선택: 옮기기·판매·해체
   const msItems=()=>INV_MS?[...INV_MS].map(id=>find(id)).filter(x=>x&&!EQ.has(x.id)&&cOf(x)===tc):[];
-  const msMove=to=>{const L=msItems();let n=0;for(const x of L){if(cFull(to))break;cPut(x,to);n++;}saveMeta();INV_MS=null;gearMsg=n<L.length?`${n}개만 ${cName(to)}에 넣었어. 나머지는 자리가 없어!`:`${n}개를 ${cName(to)}에 넣어 뒀어.`;re();};
+  const msCh=()=>INV_MS?[...INV_MS].filter(k=>typeof k==='string'&&k[0]==='c').map(k=>META.charms[+k.slice(1)]).filter(x=>x&&cOf(x)===tc):[];
+  const msMove=to=>{const L=[...msItems(),...msCh()];let n=0;for(const x of L){if(cFull(to))break;cPut(x,to);n++;}saveMeta();INV_MS=null;gearMsg=n<L.length?`${n}개만 ${cName(to)}에 넣었어. 나머지는 자리가 없어!`:`${n}개를 ${cName(to)}에 넣어 뒀어.`;re();};
   $('iMulti').onclick=()=>{INV_MS=INV_MS?null:new Set();INV_MSTAB=tc;gearMsg=INV_MS?'고를 장비를 누르거나, 가방 빈 곳에서 끌어서 네모로 골라 봐!':'';re();};
   ov.querySelectorAll('[data-msto]').forEach(b=>b.onclick=()=>msMove(b.dataset.msto));
   ov.querySelectorAll('[data-msdo]').forEach(b=>b.onclick=async()=>{const k=b.dataset.msdo;
-    if(k==='none'){INV_MS=null;re();return;}if(k==='none0'){INV_MS=new Set();re();return;}if(k==='all'){INV_MS=new Set(I.items.filter(x=>!EQ.has(x.id)&&cOf(x)===tc).map(x=>x.id));re();return;}
+    if(k==='none'){INV_MS=null;re();return;}if(k==='none0'){INV_MS=new Set();re();return;}if(k==='all'){INV_MS=new Set(I.items.filter(x=>!EQ.has(x.id)&&cOf(x)===tc).map(x=>x.id));for(const x of charmsIn(tc))INV_MS.add('c'+META.charms.indexOf(x));re();return;}
     if(k==='send'){const r=await itSendL(msItems());if(r){INV_MS=null;INV_SEL=null;gearMsg=r;re();}return;}
     const L=msItems().filter(x=>!x.lk),dis=k==='dis';if(!L.length)return;const rare=L.filter(x=>x.r>=2||x.lv>=3||x.set||x.sp||x.u||x.cls).length;
     if(!await uiConfirm(`고른 장비 ${L.length}개를 ${dis?'해체':'판매'}할까요?${rare?`\n(영웅 이상·강화·세트·특수 장비 ${rare}개 포함)`:''}`))return;
@@ -13126,11 +13129,11 @@ function openForge(){itExpire();if(Date.now()-GIFT_T>15000)setTimeout(giftSoon,5
     gearMsg=dis?`${L.length}개 해체! 강화 가루 +${d}${t?` → 🕊 축복 ${t}장 만들어 줬어!`:''}`:`${L.length}개, 🏅 ${m}에 사 줄게!`;re();});
   // 가방 빈 곳에서 끌어 네모로 여러 개 고르기 (마우스·터치 모두)
   {const G=$('invG');let st=null,box=null;
-    G.addEventListener('pointerdown',e=>{if(e.button>0)return;const onItem=e.target.closest('[data-iid]');if(onItem&&!INV_MS)return;if(onItem&&INV_MS&&e.pointerType==='mouse')return;const r=G.getBoundingClientRect();st={x:e.clientX,y:e.clientY,r,moved:false,id:e.pointerId};});
+    G.addEventListener('pointerdown',e=>{if(e.button>0)return;const onItem=e.target.closest('[data-iid],[data-chi]');if(onItem&&!INV_MS)return;if(onItem&&INV_MS&&e.pointerType==='mouse')return;const r=G.getBoundingClientRect();st={x:e.clientX,y:e.clientY,r,moved:false,id:e.pointerId};});
     G.addEventListener('pointermove',e=>{if(!st||e.pointerId!==st.id)return;const dx=e.clientX-st.x,dy=e.clientY-st.y;if(!st.moved&&Math.hypot(dx,dy)<8)return;if(!st.moved){st.moved=true;try{G.setPointerCapture(e.pointerId);}catch(er){}box=document.createElement('div');box.className='msbox';G.appendChild(box);ftipHide();}
       e.preventDefault();const x0=Math.min(st.x,e.clientX)-st.r.left+G.scrollLeft,y0=Math.min(st.y,e.clientY)-st.r.top+G.scrollTop;box.style.cssText=`left:${x0}px;top:${y0}px;width:${Math.abs(dx)}px;height:${Math.abs(dy)}px`;st.ex=e.clientX;st.ey=e.clientY;});
     const end=e=>{if(!st)return;const S0=st;st=null;if(box){box.remove();box=null;}if(!S0.moved)return;const x1=Math.min(S0.x,S0.ex),x2=Math.max(S0.x,S0.ex),y1=Math.min(S0.y,S0.ey),y2=Math.max(S0.y,S0.ey);
-      const hit2=[...G.querySelectorAll('[data-iid]')].filter(c=>{const b=c.getBoundingClientRect();return b.right>x1&&b.left<x2&&b.bottom>y1&&b.top<y2;}).map(c=>+c.dataset.iid);
+      const hit2=[...G.querySelectorAll('[data-iid],[data-chi]')].filter(c=>{const b=c.getBoundingClientRect();return b.right>x1&&b.left<x2&&b.bottom>y1&&b.top<y2;}).map(c=>c.dataset.iid!=null?+c.dataset.iid:'c'+c.dataset.chi);
       if(!hit2.length&&!INV_MS)return;if(!INV_MS){INV_MS=new Set();INV_MSTAB=tc;}for(const id of hit2)INV_MS.add(id);INV_CLK={id:0,t:0};gearMsg=`${INV_MS.size}개 골랐어. 아래 버튼으로 옮기거나, 고른 것 하나를 탭으로 끌어 봐!`;re();};
     G.addEventListener('pointerup',end);G.addEventListener('pointercancel',end);}
   $('iOffAll').onclick=async()=>{const L=Object.values(I.eq).map(id=>I.items.find(x=>x.id===id)).filter(Boolean);if(!L.length){gearMsg='벗을 장비가 없어.';re();return;}if(!await uiConfirm(`${CLASSES[rc].n} 장비창의 장비 ${L.length}개를 모두 벗을까요?`))return;let n=0;for(const x of L){const d=unTo(tc);if(!d)break;invUnequipIt(x,d);n++;}gearMsg=`${n}개 벗어서 넣어 뒀어.`;re();};
@@ -16384,7 +16387,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=413,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=414,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
