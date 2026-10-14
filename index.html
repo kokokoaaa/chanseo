@@ -9455,6 +9455,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:416,t:'📤 부적 보내기',items:[
+    ['new','📤 가방의 <b>부적(🏅 메달 부적 포함)도 다른 모험가에게 보낼 수 있어요</b>: ☐ 여러 개 선택으로 골라 「📤 보내기」. 받는 사람은 남은 기간 그대로 받아요 (후원자 부적은 제외)']]},
   {v:415,t:'👁 관전 표시',items:[
     ['new','👁 관전할 때 위쪽 막대에 상대가 <b>몇 배속</b>인지와 <b>🤖 자동 이동 / 🕹 직접 조작</b>이 항상 보여요'],
     ['bug','🧿 가방의 <b>부적(🏅 메달 부적 포함)</b>도 여러 개 선택·끌어서 네모 선택·모두 선택에 잡혀요 (한꺼번에 가방·창고로 옮기기, 판매·해체·보내기는 제외)']]},
@@ -11373,11 +11375,11 @@ const itGrN=it=>{const k=itKind(it);return k==='my'?'신화':k==='set'?'세트':
 // 옵션(기본 능력 굴림 + 추가 옵션)마다 최대치가 나오면 이름 앞 ★ 하나 (전설 풀옵 = ★★★★). 고정 능력인 고유 무기·신화는 없음
 const itStars=it=>{if(!it||it.base||it.u||it.my)return 0;let n=(it.b||1)>=1.2-1e-9?1:0;for(const x of it.a||[]){const Q=affQ(it,x);if(Q&&!Q.fix&&Q.mx)n++;}return n;};
 const starPre=it=>{const n=itStars(it);return n?'★'.repeat(n)+' ':'';};
-const itName=it=>{NM_IT=it;try{return itName0(it);}finally{NM_IT=null;}};
+const itName=it=>{if(it&&it.ch)return charmName(it);/* v416 우편으로 오가는 부적 */NM_IT=it;try{return itName0(it);}finally{NM_IT=null;}};
 const itNameH=it=>{const n=esc(itName(it)),g=setTag(it);return g?n.replace(esc(g),`<span class="stg" style="color:${SETS[it.set].col}">${esc(g)}</span>`):n;};
 const itName0=it=>it.base?(it.bc&&BASE_N[it.bc]&&BASE_K.includes(it.s)?BASE_N[it.bc][BASE_K.indexOf(it.s)]:'기본 '+gNoun(it))+(it.lv?' +'+it.lv:''):starPre(it)+(it.my&&MYTH[it.my]?'✦ 신화 '+MYTH[it.my].n:it.ui&&UQI[it.ui]?(UQI[it.ui].only?'고유 ':'유니크 ')+UQI[it.ui].n:it.u?'유니크 '+UNQ[it.cls][0]+(uwRoute(it.cls,it.uv||0)?' · '+uwRoute(it.cls,it.uv||0):''):setTag(it)?setTag(it)+' '+gNoun(it):itGrN(it)+' '+(it.cls?CW_PRE[it.r]+' '+CW[it.cls][1]:(reN((it.r>=2&&VNAME[it.s]?VNAME[it.s][it.r-2][it.v||0]:(GNAME[it.s]||[])[it.r]),it))))+(it.lv?' +'+it.lv:'');
 const itNameC=(it,c)=>{NM_CLS=c;try{return itName(it);}finally{NM_CLS=null;}};
-const itIco=it=>{NM_IT=it;try{return itIco0(it);}finally{NM_IT=null;}};
+const itIco=it=>{if(it&&it.ch)return CHARM[it.k]&&CHARM[it.k].sp?'💛':'🧿';NM_IT=it;try{return itIco0(it);}finally{NM_IT=null;}};
 // 인벤 아이콘: 낀 모습과 똑같은 도트. 그 부위만 낀 모습 − 맨몸 모습의 차이를 잘라 정수배로 키움 (직업마다 모양이 달라 직업별로 캐시)
 const ICO_PART={helm:'hat',armor:'armor',cloak:'cape',pants:'pants',boots:'boots',sword:'wpn',shield:'shd'},ICO_C={},ICO_NK={},LOOK_N={};
 function heroPix(cls,dr){HERO_DRESS=dr;try{HERO.draw(cls,'walk',0,0,false);}finally{HERO_DRESS=null;}const c=HERO.canvas;return c.getContext('2d').getImageData(0,0,c.width,c.height);}
@@ -11445,7 +11447,7 @@ function ftipHide(){const t=document.getElementById('ftip');if(t)t.style.display
   document.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')return;const el=arEl(e);if(!el)return;arShow(el,e);clearTimeout(arT);arT=setTimeout(ftipHide,2500);});}
 function ftipBind(el,fn){if(matchMedia('(hover:none)').matches)return;el.addEventListener('mouseenter',e=>{const r=fn();if(r)ftipShow(r[0],e,r[1]);});el.addEventListener('mousemove',ftipMove);el.addEventListener('mouseleave',ftipHide);}
 // 장비 설명 (마우스 옆)
-function itTip(it,sc){const col=itCol(it),ST=it.set&&SETS[it.set],a=spAug(it),sl=eqSlotOf(it),sn=ST?((sc||setCnt())[it.set]||0):0;let cmp='';
+function itTip(it,sc){if(it&&it.ch)return charmOneTip(it);const col=itCol(it),ST=it.set&&SETS[it.set],a=spAug(it),sl=eqSlotOf(it),sn=ST?((sc||setCnt())[it.set]||0):0;let cmp='';
   if(!sl){const k=cmpSlot(it),cur=k&&eqRaw(k),two=GEAR_KEYS.filter(q=>slotT(q)===it.s).length>1;if(cur){const d=Math.round(itPow(it)-itPow(cur)+setPowSwap(k,it));cmp=`<div class="ftc ${d>0?'up':d<0?'dn':''}">지금 낀 ${two?`<b>${SLOT_N[k]}</b> `:''}${esc(itName(cur))}보다 전투력 ${d>0?'+':''}${d}</div>`;}if(k&&!cur&&two)cmp=`<div class="ftc">빈 칸 <b>${SLOT_N[k]}</b>에 들어가요</div>`;}
   return [`<div class="fth"><span class="iico">${itIcoH(it)}</span><div><b style="color:${col}">${itNameH(it)}</b><small>${itGrN(it)} ${it.cls?CLASSES[it.cls].n+' 전용 무기':GEAR[it.s].n}${it.thc&&CLASSES[it.thc]?' · '+CLASSES[it.thc].n+' 양손':it.wt&&WT_N[it.wt]?' · '+WT_N[it.wt]:''}${sl?' · 착용 중':''}</small></div></div>${itOnlyH(it)}${itDnH(it)}${it.en?`<div style="color:#c8a8ff;font-weight:bold">🔮 속성 부여: ${enchN(it.en)}${it.en==='Z'?' (적의 저항 무시)':' (속성 없는 피해가 이 속성)'}</div>`:''}<div>⭐ ${itMain(it)}</div>${(it.base?[]:it.a||[]).map(x=>`<div class="faf">✦ ${affH(it,x)}</div>`).join('')}${ST?`<div style="color:${ST.col}">${ST.n} 세트 <b>${sn}/${setMax(ST)}</b></div><div style="font-size:12px;line-height:1.5">${setLines(ST,sn)}</div>`:''}${a?`<div class="fsp">${spLab(it)} · 판 시작 시 「${a.n}」${spDupTxt(it,eqCls())}</div>`:''}${cmp}${DEV?`<small class="fhn">누르면 오른쪽에 고정 · 두 번 누르면 ${sl?'벗기':'착용'}</small>`:''}`,col];}
 // 무기 계열(근거리·원거리 등)이 있는 무기는 지금 직업이 못 끼면 낄 수 있는 직업 모습으로 아이콘을 그림 (궁수 화면에서 대검이 활로 보이던 문제)
@@ -11457,7 +11459,7 @@ const itOnlyH=it=>{const L=itOnly(it);if(!L||!L.length)return '';const ok=L.incl
 const icoCls=(it,c)=>{if(it.thc&&CLASSES[it.thc])return it.thc;if(it.wt&&!it.cls&&!it.bc){const L=wtCls(it.wt);if(L.length&&!L.includes(c))return L[0];}return c;};
 const itIcoH=(it,cls,big)=>{const u=itLook(it,icoCls(it,cls||eqCls()));return u?`<img class="ipx${big?' big':''}" src="${u}" alt="">`:itIco(it);};
 const itIco0=it=>it.cls?CW[it.cls][0]:it.s==='sword'?wlookOf(it)[it.th?3:1]:it.s==='shield'?wlookOf(it)[5]:GEAR[it.s].ico;
-const itCol=it=>{const k=itKind(it);return k==='my'?MY_COL:k==='set'?SETS[it.set].col:k==='uq'?UNQ_COL:GR[it.r].col;};
+const itCol=it=>{if(it&&it.ch)return (CHARM[it.k]||{}).col||'#ffd76a';const k=itKind(it);return k==='my'?MY_COL:k==='set'?SETS[it.set].col:k==='uq'?UNQ_COL:GR[it.r].col;};
 const itTag=it=>(ICO_PART[it.s]&&!lookVis(it)?'<b style="color:#a8a8a8">👁 이 직업은 겉모습에 안 보여요</b> ':'')+(it.s==='armor'&&robeR(eqCls())?'<b style="color:#c8a8ff">🧙 마법사는 로브 한 벌 · 바지 칸까지 · 기본 능력 ×1.5</b> ':'')+(it.thc&&CLASSES[it.thc]?`<b style="color:#ffcf8a">${WT_ICO[it.wt]||''} ${CLASSES[it.thc].n} 전용 양손 무기</b> `:'')+(isTH(it)?'<b style="color:#9fd3ff">양손 무기 · 왼손(방패)과 같이 못 껴요</b> ':'')+itTag0(it);
 const itTag0=it=>it.base?`<b style="color:#c8c8c8">${it.bc&&CLASSES[it.bc]?CLASSES[it.bc].n+' ':''}기본 장비 · ${it.bc&&CLASSES[it.bc]?CLASSES[it.bc].n+'만 낄 수 있어요':'직업 기본 모습'}</b>`:it.my?`<b style="color:${MY_COL}">✦ 신화 장비 · 모든 직업</b>`:uqC(it)?`<b style="color:${UQ_COL}">◆ ${CLASSES[uqC(it)].n} 고유 ${it.s==='sword'?'한손 무기':it.s==='shield'?'왼손 장비':'장비'} · ${CLASSES[uqC(it)].n}만 낄 수 있어요</b>`:it.ui?`<b style="color:${UQ_COL}">◆ 유니크 장비${UQI[it.ui]&&UQI[it.ui].cls?' · '+CLASSES[UQI[it.ui].cls].n+' 빌드 (그 직업일 때만 증강이 켜져요)':''}</b>`:it.u?`<b style="color:${UNQ_COL}">◆ ${CLASSES[it.cls].n} 유니크 무기</b>`:it.cls?`<b style="color:#ffd76a">${CLASSES[it.cls].n} 전용</b>`:it.set?`<b style="color:${SETS[it.set].col}">${SETS[it.set].n} 세트</b>`:'';
 const affTxt=([a,v])=>{const F=GAFX[a];return F?`${F.n} ${F.neg?'−':'+'}${v}${F.u}`:'';};
@@ -12522,27 +12524,27 @@ function raidSelPick(id){const L2=raidHL(),c=(L2.find(h=>h.id===id)||{}).cls,j=R
 function hireSend(h,R){try{fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({hire:1,to:h.hire,from:myNick()||'모험가',m:h.fee,cls:h.cls,rb:R?R.n:''})}).catch(()=>{});}catch(e){}}
 // 내 캐릭터를 누가 고용했으면 그 수수료를 받음 (시작할 때·5분마다, 서버 v8.3부터)
 /* 📤 아이템 보내기: 받는 사람 이름을 적으면 서버 우편함에 넣어 두고, 받는 사람이 다음에 접속할 때 가방으로 들어감 (서버 v8.7) */
-const itMailStrip=it=>{const o=JSON.parse(JSON.stringify(it));for(const k of ['id','p','w','cb','lk'])delete o[k];return o;};
+const itMailStrip=it=>{if(it&&(it.ch||(!it.s&&it.k&&CHARM[it.k]&&it.exp)))return {ch:1,k:it.k,r:it.r,key:String(it.key||''),at:+it.at||0,exp:+it.exp||0};const o=JSON.parse(JSON.stringify(it));for(const k of ['id','p','w','cb','lk'])delete o[k];return o;};
 async function itSend(it){return itSendL([it]);}
 /* 여러 개 한꺼번에 (서버 v8.8부터는 한 번에 묶어 보냄) */
-async function itSendL(L0){const L=L0.filter(x=>x&&!x.lk&&!eqIds().has(x.id)&&(DEV||!x.dn));/* 후원자 전용 장비는 관리자만 보냄 */if(!L.length){uiAlert('보낼 수 있는 장비가 없어요 (잠긴 장비·끼고 있는 장비는 못 보내요)');return null;}
+async function itSendL(L0,C0=[]){const C=C0.filter(x=>x&&CHARM[x.k]&&x.exp>Date.now()&&(DEV||!CHARM[x.k].sp)),L=[...L0.filter(x=>x&&!x.lk&&!eqIds().has(x.id)&&(DEV||!x.dn)),...C];/* 후원자 전용 장비·부적은 관리자만 보냄 · v416 부적도 보냄 */L0=[...L0,...C0];if(!L.length){uiAlert('보낼 수 있는 아이템이 없어요 (잠긴 장비·끼고 있는 장비·후원자 부적은 못 보내요)');return null;}
   const me=myNick();if(!me||!MYKEY){uiAlert('이름을 먼저 정해야 보낼 수 있어요 (명예의 전당에 한 번 올리면 이름이 내 것이 돼요)');return null;}
-  const what=L.length===1?`「${itName(L[0])}」을(를)`:`장비 ${L.length}개를`;
+  const what=L.length===1?`「${itName(L[0])}」을(를)`:`아이템 ${L.length}개를`;
   const to0=await uiPrompt(`📤 ${what} 누구에게 보낼까요?\n받는 모험가 이름을 정확히 적어 주세요`);if(to0==null)return null;const to=String(to0).trim().slice(0,12);if(!to)return null;
   if(to===me){uiAlert('나에게는 보낼 수 없어요');return null;}if(BOT_NM.has(to)){uiAlert(`${to}님은 지금 우편을 받을 수 없어요`);return null;}
-  if(!(await uiConfirm(`${what} ${to}님에게 보낼까요?${L0.length>L.length?`\n(잠긴·끼고 있는 ${L0.length-L.length}개는 빠져요)`:''}\n보내면 되돌릴 수 없어요`,'보내기')))return null;
+  if(!(await uiConfirm(`${what} ${to}님에게 보낼까요?${L0.length>L.length?`\n(잠긴·끼고 있는 장비·후원자 부적 ${L0.length-L.length}개는 빠져요)`:''}\n보내면 되돌릴 수 없어요`,'보내기')))return null;
   const post=async it=>{try{const r=await fetch(SHEET_URL,{method:'POST',body:JSON.stringify({mail:1,to,from:me,k:MYKEY,it})});return await r.json();}catch(e){return null;}};
   const I=inv(),gone=new Set();let err=null;
   const groups=SRV_V>=88?[L.slice(0,40),L.slice(40,80),L.slice(80,120)].filter(g=>g.length):L.map(x=>[x]);
   for(const g of groups){const j=await post(JSON.stringify(g.length===1&&SRV_V<88?itMailStrip(g[0]):g.map(itMailStrip)));if(!j||!j.ok){err=j;break;}g.forEach(x=>gone.add(x));}
-  if(gone.size){mlogAdd('out',to,[...gone]);I.items=I.items.filter(x=>!gone.has(x));invTouch();saveMeta();}
+  if(gone.size){mlogAdd('out',to,[...gone]);I.items=I.items.filter(x=>!gone.has(x));META.charms=(META.charms||[]).filter(x=>!gone.has(x));invTouch();saveMeta();}
   if(err!==null||gone.size<L.length){const j=err;uiAlert((gone.size?`${gone.size}개는 보냈지만 나머지는 못 보냈어요.\n`:'')+(!j?'서버에 연결하지 못했어요. 잠시 뒤 다시 해 주세요':j.err==='noone'?`「${to}」라는 모험가를 찾지 못했어요. 이름을 확인해 주세요`:j.err==='owned'?'내 이름이 확인되지 않았어요 (명예의 전당에 올린 이름이어야 보낼 수 있어요)':'보내지 못했어요'));if(!gone.size)return null;}
-  return gone.size===1?`📤 ${esc(itName([...gone][0]))}, ${esc(to)}님에게 보냈어!`:`📤 장비 ${gone.size}개를 ${esc(to)}님에게 보냈어!`;}
+  return gone.size===1?`📤 ${esc(itName([...gone][0]))}, ${esc(to)}님에게 보냈어!`:`📤 아이템 ${gone.size}개를 ${esc(to)}님에게 보냈어!`;}
 /* v374 📦 택배: 받은 장비는 바로 가방에 넣지 않고 택배함에 쌓아 둠 → 대장간 📦 택배에서 「아이템 받기」 */
 const mbox=()=>META.mbox||(META.mbox=[]),mlog=()=>META.mlog||(META.mlog=[]);
 const mlogAdd=(dir,who,L)=>{mlog().unshift({t:Date.now(),dir,who:String(who||'').slice(0,12),it:L.map(x=>({n:itName(x),c:itCol(x),x:itMailStrip(x)}))});if(mlog().length>80)META.mlog.length=80;};
-function itMailGet(G){let n=0;const who=new Set();for(const g of G){let X=null;try{X=JSON.parse(g.it);}catch(e){}const XL=(Array.isArray(X)?X:[X]).filter(x=>x&&GEAR[x.s]&&x.r>=0&&x.r<=6);if(!XL.length)continue;mbox().push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),at:+g.at||Date.now(),from:String(g.from||'모험가').slice(0,12),items:XL});n+=XL.length;who.add(g.from);}
-  if(n){saveMeta();try{chime([659,784,988],'triangle');}catch(e){}toast(`📦 택배가 도착했어요! ${[...who].join(', ')}님 · 장비 ${n}개 — 대장간 📦 택배에서 받으세요`,5);try{if(document.getElementById('invG'))openForge();}catch(e){}}}
+function itMailGet(G){let n=0;const who=new Set();for(const g of G){let X=null;try{X=JSON.parse(g.it);}catch(e){}const XL=(Array.isArray(X)?X:[X]).filter(x=>x&&(x.ch?CHARM[x.k]&&x.r>=1&&x.r<=3&&+x.exp>Date.now():GEAR[x.s]&&x.r>=0&&x.r<=6));if(!XL.length)continue;mbox().push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),at:+g.at||Date.now(),from:String(g.from||'모험가').slice(0,12),items:XL});n+=XL.length;who.add(g.from);}
+  if(n){saveMeta();try{chime([659,784,988],'triangle');}catch(e){}toast(`📦 택배가 도착했어요! ${[...who].join(', ')}님 · 아이템 ${n}개 — 대장간 📦 택배에서 받으세요`,5);try{if(document.getElementById('invG'))openForge();}catch(e){}}}
 /* 택배함 창: 받을 택배 + 보낸·받은 기록 */
 function mboxOpen(){let w=document.getElementById('mboxW');if(w)w.remove();w=document.createElement('div');w.id='mboxW';w.style.cssText='position:fixed;inset:0;z-index:32000;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px';
   const fd=t=>{const d=new Date(t);return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;},nm=(x,k)=>`<b class="mbit" data-mbt="${k}" style="color:${x.c||itCol(x)};cursor:help;text-decoration:underline dotted">${esc(x.n||itName(x))}</b>`;
@@ -12556,8 +12558,8 @@ function mboxOpen(){let w=document.getElementById('mboxW');if(w)w.remove();w=doc
   const close=()=>{try{ftipHide();}catch(e){}w.remove();document.removeEventListener('keydown',key,true);try{if(document.getElementById('invG'))openForge();}catch(e){}},key=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();close();}};
   w.onclick=e=>{if(e.target===w||e.target.closest('[data-mbclose]')){close();return;}const b=e.target.closest('[data-mbget]');if(!b)return;const idx=b.dataset.mbget==='all'?mbox().map((_,i)=>i):[+b.dataset.mbget];
     const I=inv(),need=idx.reduce((a,i)=>a+(mbox()[i]?mbox()[i].items.length:0),0),room=(INV_MAX-bagN())+(WH_MAX-whN());if(need>room){uiAlert(`가방과 창고에 자리가 모자라요 (필요 ${need}칸 · 남은 ${room}칸)`);return;}
-    for(const i of idx.sort((a,b)=>b-a)){const q=mbox()[i];if(!q)continue;for(const x of q.items){x.id=I.n++;if(bagN()<INV_MAX){delete x.w;x.p=invFree('bag');}else{x.w=1;x.p=invFree('wh');}I.items.push(x);}mlogAdd('in',q.from,q.items);mbox().splice(i,1);}
-    invTouch();saveMeta();try{chime([523,659,784],'triangle');}catch(e){}try{ftipHide();}catch(e){}toast(`🎁 장비 ${need}개를 가방에 넣었어요`);mboxOpen();};
+    for(const i of idx.sort((a,b)=>b-a)){const q=mbox()[i];if(!q)continue;for(const x of q.items){if(x.ch){/* v416 부적: 남은 기간 그대로 내 부적으로 */if(CHARM[x.k]&&+x.exp>Date.now()){const c={k:x.k,r:x.r,key:String(x.key||'')+'@'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),at:Date.now(),exp:+x.exp};const cc=bagN()<INV_MAX?'bag':'wh';cSet(c,cc);c.p=invFree(cc);META.charms=META.charms||[];META.charms.push(c);}continue;}x.id=I.n++;if(bagN()<INV_MAX){delete x.w;x.p=invFree('bag');}else{x.w=1;x.p=invFree('wh');}I.items.push(x);}mlogAdd('in',q.from,q.items);mbox().splice(i,1);}
+    invTouch();saveMeta();try{chime([523,659,784],'triangle');}catch(e){}try{ftipHide();}catch(e){}toast(`🎁 아이템 ${need}개를 가방에 넣었어요`);mboxOpen();};
   document.addEventListener('keydown',key,true);document.body.appendChild(w);
   /* 장비 이름에 마우스를 올리면(폰은 누르면) 장비 정보 */const itOf=k=>{const m=/^([pl])(\d+)_(\d+)$/.exec(k||'');if(!m)return null;if(m[1]==='p'){const q=mbox()[+m[2]];return q&&q.items[+m[3]];}const r=mlog()[+m[2]],e=r&&r.it[+m[3]];return e&&e.x?{...e.x}:null;};
   w.querySelectorAll('[data-mbt]').forEach(el=>{ftipBind(el,()=>{const it=itOf(el.dataset.mbt);return it?[itTip(it),itCol(it)]:null;});el.addEventListener('click',ev=>{if(!matchMedia('(hover:none)').matches)return;ev.stopPropagation();const it=itOf(el.dataset.mbt);if(it)uiAlert(String(itTip(it)).replace(/<br>/g,'\n').replace(/<[^>]+>/g,''));});});}
@@ -13072,7 +13074,7 @@ function openForge(){itExpire();if(Date.now()-GIFT_T>15000)setTimeout(giftSoon,5
     <div class="invgrid${INV_MS?' msmode':''}" id="invG">${cells.join('')}</div>
     ${INV_MS?(()=>{const L=[...INV_MS].map(id=>I.items.find(x=>x.id===id)).filter(x=>x&&!EQ.has(x.id)&&cOf(x)===tc),LC=[...INV_MS].filter(k=>typeof k==='string'&&k[0]==='c').map(k=>META.charms[+k.slice(1)]).filter(x=>x&&cOf(x)===tc),ok=L.filter(x=>!x.lk),dest=[[rc,'⚔ '+CLASSES[rc].n+' 가방'],['bag','🎒 공용 가방'],['wh','📦 창고']].filter(([c])=>cK(c)!==cK(tc)),nAll=I.items.filter(x=>!EQ.has(x.id)&&cOf(x)===tc).length+charmsIn(tc).length;
       /* 여러 개 선택 중에는 아래 도구줄이 선택 도구로 바뀜 (가방 칸은 제자리) */
-      return `<div class="ftool mstool"><div class="mshd"><b>☑ ${L.length+LC.length}개 선택</b><small>${LC.length?`🧿 부적 ${LC.length}개는 옮기기만 돼요 (판매·해체·보내기 제외)`:L.length>ok.length?`🔒 잠긴 ${L.length-ok.length}개는 판매·해체에서 빠져요`:L.length?'옮기거나 한꺼번에 팔·해체·보낼 수 있어요':'장비를 누르거나 빈 곳에서 끌어 네모로 골라요'}</small></div>${dest.map(([c,n])=>`<button class="btn" data-msto="${c}" ${L.length+LC.length?'':'disabled'}>${ro(n)}</button>`).join('')}<button class="btn ghost" data-msdo="sell" ${ok.length?'':'disabled'}>판매 · 🏅 ${ok.reduce((a,x)=>a+itSell(x),0).toLocaleString()}</button><button class="btn ghost" data-msdo="dis" ${ok.length?'':'disabled'}>해체 · ✨ ${ok.reduce((a,x)=>a+itDust(x),0).toLocaleString()}</button>${SHEET_URL&&SRV_V>=87?`<button class="btn ghost" data-msdo="send" ${ok.length?'':'disabled'}>📤 보내기 ${ok.length}개</button>`:''}<button class="btn ghost" data-msdo="${L.length+LC.length&&L.length+LC.length>=nAll?'none0':'all'}" ${nAll?'':'disabled'}>${L.length+LC.length&&L.length+LC.length>=nAll?'모두 풀기':'모두 선택'}</button><button class="btn mson" id="iMulti">☑ 선택 끝</button></div>`;})():`<div class="ftool f3"><button class="btn" id="iMulti">☐ 여러 개 선택</button><button class="btn" id="iSort">↕ 정렬</button><button class="btn" id="iAuto" title="칸마다 전투력이 가장 높은 장비를 대충 골라 껴요 (세트는 따로 안 따져요)">⚡ 자동 착용</button></div>`}
+      return `<div class="ftool mstool"><div class="mshd"><b>☑ ${L.length+LC.length}개 선택</b><small>${LC.length?`🧿 부적 ${LC.length}개는 옮기기·보내기만 돼요 (판매·해체 제외)`:L.length>ok.length?`🔒 잠긴 ${L.length-ok.length}개는 판매·해체에서 빠져요`:L.length?'옮기거나 한꺼번에 팔·해체·보낼 수 있어요':'장비를 누르거나 빈 곳에서 끌어 네모로 골라요'}</small></div>${dest.map(([c,n])=>`<button class="btn" data-msto="${c}" ${L.length+LC.length?'':'disabled'}>${ro(n)}</button>`).join('')}<button class="btn ghost" data-msdo="sell" ${ok.length?'':'disabled'}>판매 · 🏅 ${ok.reduce((a,x)=>a+itSell(x),0).toLocaleString()}</button><button class="btn ghost" data-msdo="dis" ${ok.length?'':'disabled'}>해체 · ✨ ${ok.reduce((a,x)=>a+itDust(x),0).toLocaleString()}</button>${SHEET_URL&&SRV_V>=87?`<button class="btn ghost" data-msdo="send" ${ok.length+LC.length?'':'disabled'}>📤 보내기 ${ok.length+LC.length}개</button>`:''}<button class="btn ghost" data-msdo="${L.length+LC.length&&L.length+LC.length>=nAll?'none0':'all'}" ${nAll?'':'disabled'}>${L.length+LC.length&&L.length+LC.length>=nAll?'모두 풀기':'모두 선택'}</button><button class="btn mson" id="iMulti">☑ 선택 끝</button></div>`;})():`<div class="ftool f3"><button class="btn" id="iMulti">☐ 여러 개 선택</button><button class="btn" id="iSort">↕ 정렬</button><button class="btn" id="iAuto" title="칸마다 전투력이 가장 높은 장비를 대충 골라 껴요 (세트는 따로 안 따져요)">⚡ 자동 착용</button></div>`}
     <small class="fhint">장비를 끌어서 원하는 칸·탭으로 옮길 수 있어요. 가방 빈 곳에서 끌어 네모를 그리거나 ☐ 여러 개 선택으로 <b>여러 개를 한꺼번에</b> 골라 옮기거나 팔·해체할 수 있어요 (🔒 잠긴 장비는 빠져요).</small>
    </div>
    <div class="fcol fsmith">
@@ -13123,7 +13125,7 @@ function openForge(){itExpire();if(Date.now()-GIFT_T>15000)setTimeout(giftSoon,5
   ov.querySelectorAll('[data-msto]').forEach(b=>b.onclick=()=>msMove(b.dataset.msto));
   ov.querySelectorAll('[data-msdo]').forEach(b=>b.onclick=async()=>{const k=b.dataset.msdo;
     if(k==='none'){INV_MS=null;re();return;}if(k==='none0'){INV_MS=new Set();re();return;}if(k==='all'){INV_MS=new Set(I.items.filter(x=>!EQ.has(x.id)&&cOf(x)===tc).map(x=>x.id));for(const x of charmsIn(tc))INV_MS.add('c'+META.charms.indexOf(x));re();return;}
-    if(k==='send'){const r=await itSendL(msItems());if(r){INV_MS=null;INV_SEL=null;gearMsg=r;re();}return;}
+    if(k==='send'){const r=await itSendL(msItems(),msCh());if(r){INV_MS=null;INV_SEL=null;gearMsg=r;re();}return;}
     const L=msItems().filter(x=>!x.lk),dis=k==='dis';if(!L.length)return;const rare=L.filter(x=>x.r>=2||x.lv>=3||x.set||x.sp||x.u||x.cls).length;
     if(!await uiConfirm(`고른 장비 ${L.length}개를 ${dis?'해체':'판매'}할까요?${rare?`\n(영웅 이상·강화·세트·특수 장비 ${rare}개 포함)`:''}`))return;
     const m=L.reduce((a,x)=>a+itSell(x),0),d=L.reduce((a,x)=>a+itDust(x),0),ids=new Set(L.map(x=>x.id));I.items=I.items.filter(x=>!ids.has(x.id));INV_SEL=null;INV_MS=null;let t=0;if(dis)t=dustAdd(d);else{META.medals+=m;META.total=(META.total||0)+m;}invTouch();saveMeta();hit();
@@ -16388,7 +16390,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=415,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=416,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
