@@ -7821,7 +7821,7 @@ function update(dt){
   if(has('insure')){S.insureT-=dt;if(S.insureT<=0){S.insureT=30;p.shield=2+L('insure')+(has('f_insure')?3:0);}}
   p.lastCd=Math.max(0,p.lastCd-dt);S.debtT=Math.max(0,(S.debtT||0)-dt);p.rushT=Math.max(0,(p.rushT||0)-dt);p.qkT=Math.max(0,(p.qkT||0)-dt);p.lsT=Math.max(0,(p.lsT||0)-dt);p.deT=Math.max(0,(p.deT||0)-dt);p.evT=Math.max(0,(p.evT||0)-dt);p.spT=Math.max(0,(p.spT||0)-dt);p.ghT=Math.max(0,(p.ghT||0)-dt);p.amCd=Math.max(0,(p.amCd||0)-dt);p.fxRT=Math.max(0,(p.fxRT||0)-dt);p.fxDT=Math.max(0,(p.fxDT||0)-dt);if(p.alive)fxRun('t',null,dt);
   if(has('fortress')&&p.alive){p.ftT=(p.ftT||0)+dt;if(p.ftT>=1){p.ftT=0;const fr=SR(has('f_bulwark')?165:110);explode(p.x,p.y,fr,pDmg()*lv3('fortress',1,1.5,2),'#9fd3ff');for(const e of S.en){if(!e.alive||e.boss||d2(e,p)>fr*fr)continue;const a=Math.atan2(e.y-p.y,e.x-p.x);e.x+=Math.cos(a)*30;e.y+=Math.sin(a)*30;}}}else p.ftT=0;p.lvJ=Math.max(0,(p.lvJ||0)-dt);p.curT=Math.max(0,(p.curT||0)-dt);p.g2cd=Math.max(0,(p.g2cd||0)-dt);p.h2cd=Math.max(0,(p.h2cd||0)-dt);p.dwT=Math.max(0,(p.dwT||0)-dt);p.mbT=Math.max(0,(p.mbT||0)-dt);p.wcT=Math.max(0,(p.wcT||0)-dt);p.phT=Math.max(0,(p.phT||0)-dt);p.cascT=Math.max(0,(p.cascT||0)-dt);p.revT=Math.max(0,(p.revT||0)-dt);
-  for(const bo of S.bolts)bo.life-=dt;S.bolts=S.bolts.filter(bo=>bo.life>0);S.chN=0;
+  for(const bo of S.bolts)bo.life-=dt;S.bolts=S.bolts.filter(bo=>bo.life>0);S.chN=0;if(S.tchn&&S.tchn.length){for(const c of S.tchn)c.life-=dt;S.tchn=S.tchn.filter(c=>c.life>0&&c.e.alive);}
   if(has('al_homun')&&p.alive){const H=S.hom=S.hom||{x:p.x,y:p.y,t:1};const tx=p.x-p.lmx*36+Math.sin(S.t*2)*14,ty=p.y-30+Math.cos(S.t*2.6)*6;H.x+=(tx-H.x)*Math.min(1,dt*6);H.y+=(ty-H.y)*Math.min(1,dt*6);H.t-=dt;if(H.t<=0){H.t=lv3('al_homun',3,2.5,2)*cdM();const e=nearestE(H,340);if(e){const o=S.dsrc;S.dsrc='alchemy';throwPotion(e.x,e.y,.7,H.x,H.y);S.dsrc=o;}}}
   if(S.flasks&&S.flasks.length){for(const f of S.flasks){f.t+=dt/.65;if(f.t>=1&&!f.done){f.done=1;f.x=f.x1;f.y=f.y1;potionHit(f);}}S.flasks=S.flasks.filter(f=>!f.done);}
   if(p.alive){
@@ -7969,6 +7969,7 @@ function update(dt){
     if(e.pt>0){e.pt-=dt;const dps=(S.pdC||effDmg(S.p))*.3*(1+ex('poison')*.2)*homeM('poison')*(1+(S.p.psD||0))*e.ps*(1+.5*Math.max(0,L('toxic')-1)+.5*Math.max(0,L('r_venom')-1))*(has('plague')?1.2:1)*(has('r_plague')?1+Math.floor((S.rpN||0)/200)*lv3('r_plague',.015,.02,.025):1)*(tag('poison')>=6?2:1)+(has('plaguelord')?Math.min(e.maxHp*.006,pDmg()*(has('f_blackdeath')?3:1.5)):0);e.pTick+=dt;S.dsrc='poison';dmgE(e,dps*dt,null,null,true);S.dsrc=null;if(e.pTick>.5){e.pTick=0;if(e.alive&&!labOn())ftext(e.x,e.y-e.r-4,Math.round(dps*.5),'#8ee06a',12);}if(e.pt<=0)e.ps=0;if(!e.alive)continue;}
     if(S.freezeT>0)continue;
     if(e.boss){bossAI(e,dt);continue;}
+    if(e.tpT>0){const k=Math.min(1,dt/e.tpT);e.x+=(e.tpx-e.x)*k;e.y+=(e.tpy-e.y)*k;e.tpT-=dt;} // 도발로 끌려오는 중
     if(e.dummy){e.x=e.hx;e.y=e.hy;continue;} // 허수아비: 제자리, 공격 안 함 (지속 피해는 위에서 받음)
     // 히든 몹: 시간이 지나면 사라짐
     if(T.hid){e.hl=(e.hl??(T.mimic?45:22))-dt;if(e.hl<=0){e.alive=false;META.hm=META.hm||{};META.hm[e.type]=(META.hm[e.type]||0)+1;S.st.hidMiss=(S.st.hidMiss||0)+1;if(S.st.hidMiss>=3)achUnlock('h_blind');saveMeta();achCheck(null);burst(e.x,e.y,T.col,18);hidBan(['💨 '+T.n+(((T.n.charCodeAt(T.n.length-1)-0xAC00)%28)?'이':'가')+' 사라졌다…','놓쳤어요 · 다음엔 더 빨리 잡아 보세요','#9aa3ad']);continue;}}
@@ -8051,7 +8052,8 @@ function update(dt){
   // 광전사 쌍격: 0.12초 뒤 두 번째 베기
   if(S.twinQ&&S.twinQ.length){for(const q of S.twinQ){q.t-=dt;if(q.t<=0&&p.alive)meleeSwing(q.base,q.d,q.n,{sub:'쌍격'});}S.twinQ=S.twinQ.filter(q=>q.t>0);}
   // 기사 도발: 2초마다 주변 적 끌어당김
-  if(has('k_taunt')&&p.alive){S.tnT=(S.tnT??2)-dt;if(S.tnT<=0){S.tnT=2;S.rings.push({x:p.x,y:p.y,r:SR(220),max:30,life:.35,col:'#ff9a6a'});for(const e of S.en){if(!e.alive||e.boss||d2(e,p)>SR(220)**2)continue;e.x+=(p.x-e.x)*.55;e.y+=(p.y-e.y)*.55;e.tauT=S.t+3;}}}
+  if(has('k_taunt')&&p.alive){S.tnT=(S.tnT??2)-dt;if(S.tnT<=0){S.tnT=2;S.rings.push({x:p.x,y:p.y,r:SR(220),max:30,life:.35,col:'#ff9a6a'});/* v408 도발 연출: 함성 파동 + 끌려오는 적에게 사슬 + 0.22초 동안 끌려옴 (순간이동 대신) */let tn=0;S.tchn=S.tchn||[];for(const e of S.en){if(!e.alive||e.boss||d2(e,p)>SR(220)**2)continue;e.tpx=e.x+(p.x-e.x)*.55;e.tpy=e.y+(p.y-e.y)*.55;e.tpT=.22;e.tauT=S.t+3;if(S.tchn.length<40)S.tchn.push({e,life:.45});tn++;}
+    if(tn){S.rings.push({x:p.x,y:p.y,r:12,max:SR(220),life:.3,col:'#ffb070'});ftext(p.x,p.y-34,'도발!','#ff9a5a',17);S.shake=Math.max(S.shake,.06);}}}
   // 기사의 맹세: 무적이 끝나면 충격파
   if(p.oathCd>0)p.oathCd-=dt;if(p.oathT>0){p.oathT-=dt;p.inv=Math.max(p.inv,.05);if(p.oathT<=0){exL('기사의 맹세',null,p.x,p.y,SR(160),pDmg()*5,'#cfe3ff');S.shake=Math.max(S.shake,.3);}}
   // 황금 용 전용 증강
@@ -8294,6 +8296,8 @@ function drawChip(e){
   ctx.imageSmoothingEnabled=false;const drS=im=>{if(e.bsc){ctx.save();if(e.flt)ctx.filter=e.flt;pxDrawS(im,x,y-air+R*.9,(sz*hk)>>1,(sz-2)*hk,e.bsc/hk);ctx.restore();}else if(hk>1)pxDrawS(im,x,y-air+R*.9,(sz*hk)>>1,(sz-2)*hk,1/hk);else pxDraw(im,x,y-air+R*.9,sz>>1,sz-2);};drS(e.parts?rpSpr(e,spr):spr);if(e.raidK||e.cln)raidDecoF(e,top);
   // 디버프: 몸 색이 그 디버프 색으로 어둡게 물들며 깜빡임 (얼면 더 진하게)
   {const dc=!(e.hit>0&&!e.noFlash)&&debCol(e);if(dc){const ga=ctx.globalAlpha;ctx.globalAlpha=ga*(e.frozen?.85:.3+.45*(.5+.5*Math.sin(S.t*9+e.rot*7)));drS(tintSpr(spr,dc));}}ctx.globalAlpha=1;if(e.parts)rpDraw(e);
+  // v408 도발당한 적: 주황 테두리 + 머리 위 분노 표시 (3초)
+  if(e.tauT>S.t&&!e.boss){const k=.6+.4*Math.sin(S.t*10+e.rot*5);ctx.globalAlpha=.55*k+.2;ctx.strokeStyle='#ff8a4a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,R+3,0,TAU);ctx.stroke();ctx.globalAlpha=1;ctx.font='bold 13px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.lineWidth=3;ctx.strokeStyle='rgba(60,20,0,.85)';ctx.strokeText('!',x,top-2+Math.sin(S.t*12+e.rot)*1.5);ctx.fillStyle='#ff9a5a';ctx.fillText('!',x,top-2+Math.sin(S.t*12+e.rot)*1.5);}
   // 프로스트 노바 냉기 중첩: 머리 위 얼음 결정 (3개가 되면 얼어붙음)
   if(e.nvU>S.t&&e.nvN>0&&!e.boss){ctx.fillStyle='#bfe8ff';ctx.strokeStyle='rgba(20,60,110,.8)';ctx.lineWidth=1;for(let i=0;i<e.nvN;i++){const px=x-(e.nvN-1)*4.5+i*9,py=top-7;ctx.beginPath();ctx.moveTo(px,py-5);ctx.lineTo(px+3.5,py);ctx.lineTo(px,py+5);ctx.lineTo(px-3.5,py);ctx.closePath();ctx.fill();ctx.stroke();}}
   // 소매치기: 금빛 테두리 + 훔친 뒤엔 머리 위 돈주머니와 남은 시간
@@ -8518,6 +8522,7 @@ function draw(){
     ctx.fillStyle='#1a1420';ctx.beginPath();ctx.arc(0,1,8.5,0,TAU);ctx.fill();ctx.fillRect(-3.5,-11,7,6);
     ctx.fillStyle='#e8f0f4';ctx.fillRect(-2.5,-10,5,5);ctx.fillStyle='#a0703a';ctx.fillRect(-2.5,-12,5,2);
     ctx.fillStyle=c;ctx.beginPath();ctx.arc(0,1,7,0,TAU);ctx.fill();ctx.fillStyle='rgba(255,255,255,.75)';ctx.fillRect(-4,-3,2.5,2.5);ctx.restore();}
+  if(S.tchn&&S.tchn.length){const p=S.p;ctx.save();ctx.lineCap='round';for(const c of S.tchn){const e=c.e,a=Math.min(1,c.life/.3),dx=e.x-p.x,dy=e.y-p.y,L=Math.hypot(dx,dy)||1,n=Math.max(2,Math.floor(L/12));ctx.globalAlpha=a*.9;ctx.strokeStyle='#ffb070';ctx.lineWidth=2;ctx.setLineDash([7,5]);ctx.lineDashOffset=-S.t*60;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(e.x,e.y);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#ffd8a8';for(let i=1;i<n;i++){const q=i/n;ctx.fillRect(p.x+dx*q-1.5,p.y+dy*q-1.5,3,3);}}ctx.restore();ctx.globalAlpha=1;}
   ctx.strokeStyle='#bff3ff';ctx.lineWidth=2.5;for(const bo of S.bolts){ctx.globalAlpha=bo.life*5;ctx.beginPath();ctx.moveTo(bo.x1,bo.y1);const mx=(bo.x1+bo.x2)/2+rand(-12,12),my=(bo.y1+bo.y2)/2+rand(-12,12);ctx.lineTo(mx,my);ctx.lineTo(bo.x2,bo.y2);ctx.stroke();}ctx.globalAlpha=1;
   if(S.merch){const tb=S.merch,M=MERCH[tb.k],pulse=1+Math.sin(S.t*6)*.04;ctx.save();ctx.translate(tb.x,tb.y);ctx.scale(pulse,pulse);
     ctx.fillStyle='rgba(0,0,0,.35)';rr(ctx,-42,-24,88,58,12);ctx.fill();
@@ -9447,6 +9452,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:408,t:'🛡 도발 연출',items:[
+    ['change','🛡 <b>기사 도발</b> 연출: 함성 파동과 「도발!」 표시, 끌려오는 적에게 사슬이 이어지고 순간이동 대신 <b>끌려오는 모습</b>이 보여요. 도발당한 적은 3초간 <b>주황 테두리와 ! 표시</b>']]},
   {v:407,t:'⚔ 근접 직업 전투 방식',items:[
     ['new','⚔ <b>근접 전투</b> (기사·성기사·광전사): 잡몹 <b>몸통 피해 감소</b> (기사 −45% · 성기사 −35% · 광전사 −25%)'],
     ['new','🛡 <b>베기 보호막</b>: 적을 벨 때마다 보호막이 차요 (상한 기사 15% · 성기사 12% · 광전사 8%, 2.5초 못 베면 서서히 빠짐)'],
@@ -16353,7 +16360,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=407,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=408,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
