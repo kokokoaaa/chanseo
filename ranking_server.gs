@@ -1,4 +1,16 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v11.5
+// 찬서 명예의 전당 서버 (Google Apps Script) v11.6
+//
+// v11.5 → v11.6 바뀐 점 (게임 v455) — 「서버가 바빠서」·이름 바꾸기·채팅 실패의 원인 제거
+// - 원인: 기록 하나를 올릴 때 지난 일간·주간·월간 줄을 한 줄씩 지우는 정리(한 시간에 한 번)가 기록 요청 안에서, 서버 잠금을 쥔 채로 돌았음.
+//   본 시트(캐릭터 칸이 무거움)에서 수십 줄을 한 줄씩 지우느라 오래 걸리면(실제로 6분 시간 초과 1번) 그동안 다른 저장·기록·이름 바꾸기·채팅이 모두 「바쁨」
+// - 기간(일간·주간·월간) 기록은 따로 가벼운 「기간기록」 시트에 (캐릭터 칸 없음). 처음 쓸 때 본 시트의 지금·지난 기간 줄을 옮겨 옴
+// - 지난 기간 줄 정리·부적 나눠 주기는 기록 요청에서 빼고 매시간 트리거(awardTick)에서만: 기간기록 시트를 한 번에 다시 씀 (줄마다 지우지 않음)
+//   본 시트에 남은 예전 기간 줄은 새벽(한국 2~8시)에 6초씩 덩어리로 지움 (그 전에도 목록·부적에는 안 쓰임)
+// - 게임 v455는 판 끝에 기록 + 기간 3줄을 요청 1번(pers)으로 보냄 (예전 4번이 같은 잠금을 두고 줄 섰음). 예전 게임의 기간 요청도 그대로 받음
+// - 명예의 전당 목록 캐시: 목록이 100KB(캐시 한 칸 한도)를 넘으면 저장이 안 돼서 매번 시트 전체를 다시 읽었음 → 여러 칸에 나눠 5분 저장
+// - 요청마다 걸린 시간을 실행 기록(console)에 남김. 4초 넘게 걸린 요청은 최근 40개를 따로 보관 → 관리자 ?stat=1&dk= (게임 관리자 화면 「🩺 서버 상태」)
+//   잠금을 쥔 요청이 무엇인지도 보임 (6분 시간 초과로 끊기면 끊긴 요청이 「잠금 중」으로 남음)
+// - 클라우드 저장·접속 기록의 시트 호출 수 줄임
 //
 // v11.4 → v11.5 바뀐 점 (게임 v453) — 저장·기록 요청이 몰릴 때 순서를 25초까지 기다림 (예전 15초)
 //
@@ -318,7 +330,31 @@ const SHEET_NAME = 'ranking_v3';
 const OLD_SHEET = 'ranking_v2';
 const HEAD = ['name', 'diff', 'cls', 'time', 'lvl', 'kills', 'bosses', 'score', 'comment', 'at', 'hero', 'hh', 'dw', 'kh'];
 const LIST_COLS = 10; // 목록에 필요한 칸 (name ~ at)
-const CACHE_KEY = 'list_v43';
+const CACHE_KEY = 'list_v116';
+// v11.6 목록 캐시: 캐시 한 칸은 100KB까지라 3만 자씩 나눠 담음 (한글은 한 글자 3바이트). _g = 목록이 바뀐 시각 (만드는 동안 바뀌면 저장 안 함)
+const LC_PART = 30000, LC_TTL = 300;
+function listCacheGet_(c) { try { const n = +(c.get(CACHE_KEY + '_n') || 0); if (!n) return null; const ks = []; for (let i = 0; i < n; i++) ks.push(CACHE_KEY + '_' + i); const m = c.getAll(ks) || {}; let j = ''; for (const k of ks) { if (m[k] == null) return null; j += m[k]; } return j; } catch (err) { return null; } }
+function listCachePut_(c, j) { try { const o = {}; let n = 0; for (let i = 0; i < j.length; i += LC_PART) o[CACHE_KEY + '_' + (n++)] = j.slice(i, i + LC_PART); c.putAll(o, LC_TTL); c.put(CACHE_KEY + '_n', String(n), LC_TTL); } catch (err) { console.log('list cache put err ' + err); } }
+function listCacheClr_() { try { const c = CacheService.getScriptCache(); c.put(CACHE_KEY + '_g', String(Date.now()) + Math.random(), 21600); c.remove(CACHE_KEY + '_n'); } catch (err) {} }
+// v11.6 요청마다 걸린 시간 (실행 기록에 console로). 4초 넘으면 최근 40개를 캐시에 (관리자 ?stat)
+let T0_ = Date.now(), TL_ = [], TR_ = '';
+const tm_ = k => { TL_.push(k + ' ' + (Date.now() - T0_)); };
+function tdone_(kind) {
+  const ms = Date.now() - T0_;
+  try { console.log(kind + ' ' + TR_ + ' ' + ms + 'ms' + (TL_.length ? ' | ' + TL_.join(' · ') : '')); } catch (err) {}
+  if (ms < 4000) return;
+  try { const c = CacheService.getScriptCache(); let L = []; try { L = JSON.parse(c.get('slowlog') || '[]') || []; } catch (e) { L = []; } L.push({ t: T0_, k: kind, r: TR_.slice(0, 60), ms, s: TL_.join(' · ').slice(0, 300) }); c.put('slowlog', JSON.stringify(L.slice(-40)), 21600); } catch (err) {}
+}
+const GET_R = ['sup', 'chat', 'dv', 'spec', 'unownall', 'unown', 'delrec', 'snap', 'ping', 'gifts', 'ai', 'prof', 'cload', 'cbaks', 'accts', 'cbakd', 'acctd', 'dels', 'dmack', 'dms', 'own', 'donors', 'stat', 'hero'];
+function getRoute_(q) { const k = GET_R.find(x => q[x] != null && q[x] !== ''); return k ? k + (k === 'chat' && q.say != null ? ' say' : '') : 'list'; }
+function postRoute_(d) {
+  if (!d) return 'bad';
+  for (const k of ['ai', 'sup', 'csave', 'crestore', 'dm', 'hire', 'mail', 'donorSet', 'cmEdit', 'rekey', 'fill', 'dwOnly', 'perOnly']) if (d[k]) return k + ' ' + String(d.name || '').slice(0, 12) + (k === 'perOnly' ? ' ' + String(d.diff || '') : '');
+  return (isPer_(d.diff) ? 'per ' : 'rec ') + String(d.name || '').slice(0, 12) + ' ' + String(d.diff || '') + (Array.isArray(d.pers) ? ' +' + d.pers.length : '');
+}
+// v11.6 기간(일간·주간·월간) 기록 시트: 캐릭터(hero) 칸 없이 가벼움. 지난 기간 줄은 매시간 트리거가 한 번에 정리
+const PER_SHEET = '기간기록', PER_HEAD = ['name', 'diff', 'cls', 'time', 'lvl', 'kills', 'bosses', 'score', 'comment', 'at', 'kh'];
+const isPer_ = d => String(d || '').indexOf('|') >= 0;
 const DIFFS = { normal: 1, hard: 1.5, hell: 2.2, god: 3.2, nightmare: 4, bossrush: 4, raid: 1, raid_golem: 1, raid_frost: 1, raid_storm: 1, raid_brood: 1, raid_void: 1 };
 
 function book_() {
@@ -338,6 +374,9 @@ function perKey_(p, t) { const d = new Date((t || Date.now()) + 9 * 3600e3), y =
   if (p === 'M') return 'M' + y + z(m); if (p === 'D') return 'D' + y + z(m) + z(dd);
   const w = new Date(Date.UTC(y, m - 1, dd - ((d.getUTCDay() + 6) % 7))); return 'W' + w.getUTCFullYear() + z(w.getUTCMonth() + 1) + z(w.getUTCDate()); }
 const curPers_ = () => [perKey_('D'), perKey_('W'), perKey_('M')];
+// 바로 전 기간 (어제·지난주·지난달): 부적을 나눠 주기 전까지 남겨 둠
+function prevPers_() { const now = Date.now(), d = new Date(now + 9 * 3600e3); return [perKey_('D', now - 864e5), perKey_('W', now - 7 * 864e5), perKey_('M', Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1) - 9 * 3600e3 - 1000)]; }
+const perKeep_ = () => curPers_().concat(prevPers_());
 const baseDiff_ = d => String(d || '').split('|')[0];
 // "knight:nightm" 처럼 예전에 잘린 난이도도 알아봄 (v8.2: 뒤에 |기간 이 붙어 있으면 그대로 살림)
 function diffOf_(d, cls) {
@@ -440,12 +479,14 @@ function awardPeriods_(s) {
     const todo = [];
     keys.forEach(([p, k]) => { if (k === perKey_(p)) return; MODES.forEach(([md, pre, lab]) => { const ak = 'aw_' + (md === 'nm' ? '' : md + '_') + k; if (!P.getProperty(ak)) todo.push({ p, k, md, pre, lab, ak }); }); });
     if (!todo.length) return;
-    const last = s.getLastRow(); if (last < 2) { todo.forEach(t => P.setProperty(t.ak, '1')); return; }
     const iS = HEAD.indexOf('score'), iT = HEAD.indexOf('time'), iL = HEAD.indexOf('lvl'), iK = HEAD.indexOf('kh');
-    const v = s.getRange(2, 1, last - 1, Math.max(iS, iK) + 1).getValues(), gs = giftSheet_();
+    // v11.6 무거운 캐릭터(hero) 칸은 읽지 않음: 순위는 기간 줄만(기간기록 시트, 없으면 본 시트의 기간 줄), 계정 묶기는 본 시트의 이름·열쇠 칸만
+    const v = perRows_(s), gs = giftSheet_();
     // v10.7 같은 계정(이름 주인 열쇠가 같으면 한 계정, 없으면 이름)은 한 기간에 부적 하나만: 모드(악몽·보스 러시·레이드)마다 3위 안에 든 것 중 가장 높은 순위 하나
     //       (같으면 악몽 > 보스 러시 > 레이드). 한 모드 순위도 계정 기준(부계정 이름은 빠짐). 다른 모드 자리는 넘기지 않음 (그 모드 3위 안에 든 사람만 받음)
-    const acct = {}; v.forEach(r => { const nm = String(r[0]), kh = String(r[iK] || ''); if (nm && kh && !acct[nm]) acct[nm] = kh; });
+    const acct = {};
+    { const last = s.getLastRow(); if (last >= 2) { const a = s.getRange(2, 1, last - 1, 1).getValues(), k = s.getLastColumn() > iK ? s.getRange(2, iK + 1, last - 1, 1).getValues() : []; a.forEach((x, i) => { const nm = String(x[0]), kh = k[i] ? String(k[i][0] || '') : ''; if (nm && kh && !acct[nm]) acct[nm] = kh; }); } }
+    v.forEach(r => { const nm = String(r[0]), kh = String(r[iK] || ''); if (nm && kh && !acct[nm]) acct[nm] = kh; });
     const acOf = nm => acct[nm] ? 'k:' + acct[nm] : 'n:' + nm, MO = { nm: 0, br: 1, rd: 2 }, cand = [];
     todo.forEach(t => {
       const best = {};
@@ -469,13 +510,75 @@ function awardPeriods_(s) {
 }
 // ★ 한 번만: 편집기에서 setupAwardTrigger 를 골라 ▶ 실행 → 매일 한국 시각 0시 무렵 awardTick 이 돌아 부적을 나눠 줌
 function setupAwardTrigger() { ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() === 'awardTick').forEach(t => ScriptApp.deleteTrigger(t)); ScriptApp.newTrigger('awardTick').timeBased().atHour(0).nearMinute(1).everyDays(1).inTimezone('Asia/Seoul').create(); ScriptApp.newTrigger('awardTick').timeBased().everyHours(1).create(); }
-function awardTick() { const lock = LockService.getScriptLock(); if (!lock.tryLock(20000)) return; try { awardPeriods_(sheet_()); } finally { lock.releaseLock(); } }
-function prunePer_(s) {
-  awardPeriods_(s);
-  try { const c = CacheService.getScriptCache(); if (c.get('perPrune')) return; c.put('perPrune', '1', 3600);
-    const last = s.getLastRow(); if (last < 2) return; const cur = curPers_(), v = s.getRange(2, 2, last - 1, 1).getValues();
-    for (let i = v.length - 1; i >= 0; i--) { const p = String(v[i][0]).split('|')[1]; if (p && cur.indexOf(p) < 0) s.deleteRow(i + 2); }
-  } catch (err) {}
+// v11.6 부적 나눠 주기 + 지난 기간 줄 정리는 여기서만 (예전엔 기록 요청 안에서 줄마다 지우느라 잠금을 오래 쥐었음)
+function awardTick() {
+  const lock = LockService.getScriptLock(); if (!lock.tryLock(20000)) return;
+  T0_ = Date.now(); TL_ = []; TR_ = 'awardTick';
+  try {
+    const s = sheet_(); awardPeriods_(s); tm_('award');
+    tm_('prune ' + perPrune_());
+    // 본 시트에 남은 예전 기간 줄: 새벽(한국 2~8시)에만, 한 번에 6초까지 덩어리로 (목록·부적에는 이미 안 쓰임)
+    const h = new Date(Date.now() + 9 * 3600e3).getUTCHours(); if (perGet_() && h >= 2 && h < 8) tm_('purge ' + legacyPurge_(s, 6000));
+  } catch (err) { console.log('awardTick err ' + err); } finally { lock.releaseLock(); tdone_('TICK'); }
+}
+function perGet_() { try { return book_().getSheetByName(PER_SHEET); } catch (err) { return null; } }
+const perSc_ = x => score_({ diff: String(x[1]), cls: String(x[2]), time: +x[3] || 0, lvl: +x[4] || 0, kills: +x[5] || 0, bosses: +x[6] || 0, at: +x[9] || 0 });
+// 잠금 안에서만 부름: 기간기록 시트가 없으면 만들고, 본 시트의 지금·지난 기간 줄을 한 번 옮겨 옴 (같은 키는 높은 점수 하나)
+function perSheet_(s) {
+  const ss = book_(); let p = ss.getSheetByName(PER_SHEET); if (p) return p;
+  p = ss.insertSheet(PER_SHEET); p.getRange(1, 1, 1, PER_HEAD.length).setValues([PER_HEAD]); p.getRange('A:C').setNumberFormat('@'); p.getRange('I:I').setNumberFormat('@'); p.getRange('K:K').setNumberFormat('@');
+  try {
+    const last = s.getLastRow();
+    if (last >= 2) {
+      const kc = HEAD.indexOf('kh') + 1, v = s.getRange(2, 1, last - 1, LIST_COLS).getValues(), k = s.getLastColumn() >= kc ? s.getRange(2, kc, last - 1, 1).getValues() : [], keep = perKeep_(), best = {};
+      v.forEach((r, i) => { const pk = String(r[1]).split('|')[1]; if (!pk || keep.indexOf(pk) < 0) return; const row = r.slice(0, LIST_COLS).concat([k[i] ? String(k[i][0] || '') : '']), key = recKey_(r[0], String(r[1]), r[2]), sc = perSc_(row); if (!best[key] || sc > best[key].sc) best[key] = { row, sc }; });
+      const rows = Object.keys(best).map(x => best[x].row);
+      if (rows.length) p.getRange(2, 1, rows.length, PER_HEAD.length).setValues(rows);
+      console.log('기간기록 시트 만듦: 옮긴 줄 ' + rows.length);
+    }
+  } catch (err) { console.log('per migrate err ' + err); }
+  return p;
+}
+// 기간 줄들 (본 시트와 같은 칸 순서, 캐릭터 칸은 빈칸): 기간기록 시트, 없으면 본 시트의 기간 줄
+function perRows_(s) {
+  const iK = HEAD.indexOf('kh'), P = perGet_(), blank = () => HEAD.map(() => '');
+  if (P) { const l = P.getLastRow(); if (l < 2) return []; return P.getRange(2, 1, l - 1, PER_HEAD.length).getValues().map(r => { const o = blank(); for (let j = 0; j < LIST_COLS; j++) o[j] = r[j]; o[iK] = r[PER_HEAD.length - 1]; return o; }); }
+  const last = s.getLastRow(); if (last < 2) return [];
+  const v = s.getRange(2, 1, last - 1, LIST_COLS).getValues(), k = s.getLastColumn() > iK ? s.getRange(2, iK + 1, last - 1, 1).getValues() : [], out = [];
+  v.forEach((r, i) => { if (!isPer_(r[1])) return; const o = blank(); for (let j = 0; j < LIST_COLS; j++) o[j] = r[j]; o[iK] = k[i] ? k[i][0] : ''; out.push(o); });
+  return out;
+}
+// 기간 줄 넣기·갱신 (recs: clean_ 결과, diff = 기본|기간키). 시트를 한 번 읽고, 새 줄은 한 번에 붙임
+function perPut_(s, recs) {
+  if (!recs.length) return [];
+  const p = perSheet_(s), last = p.getLastRow(), v = last >= 2 ? p.getRange(2, 1, last - 1, PER_HEAD.length).getValues() : [], idx = {}, add = [], res = [];
+  v.forEach((x, i) => { idx[recKey_(x[0], String(x[1]), x[2])] = i; });
+  recs.forEach(r => {
+    const row = PER_HEAD.map(h => r[h] == null ? '' : r[h]), i = idx[recKey_(r.name, r.diff, r.cls)];
+    if (i == null) { add.push(row); res.push('new'); return; }
+    if (r.score > perSc_(v[i])) { p.getRange(i + 2, 1, 1, PER_HEAD.length).setValues([row]); res.push('best'); } else res.push('kept');
+  });
+  if (add.length) p.getRange(Math.max(last, 1) + 1, 1, add.length, PER_HEAD.length).setValues(add);
+  return res;
+}
+// 게임 v455: 기록 하나에 기간 키 목록(pers)을 같이 보냄 → 기간 줄들 (지금·지난 기간 키만)
+function perRecs_(d, r) { const keep = perKeep_(), out = [], seen = {}; (Array.isArray(d.pers) ? d.pers : []).slice(0, 6).forEach(k => { k = String(k || ''); if (!PER_RE.test(k) || keep.indexOf(k) < 0 || seen[k]) return; seen[k] = 1; out.push({ ...r, diff: r.diff + '|' + k }); }); return out; }
+// 지난 기간 줄 정리: 남길 줄을 위에 다시 쓰고 아래 남는 칸만 비움 (줄마다 지우지 않음, 중간에 빈 시트가 보이지 않게)
+function perPrune_() {
+  const P = perGet_(); if (!P) return 0; const l = P.getLastRow(); if (l < 2) return 0;
+  const keep = perKeep_(), v = P.getRange(2, 1, l - 1, PER_HEAD.length).getValues(), k = v.filter(r => keep.indexOf(String(r[1]).split('|')[1]) >= 0);
+  if (k.length === v.length) return 0;
+  if (k.length) P.getRange(2, 1, k.length, PER_HEAD.length).setValues(k);
+  P.getRange(2 + k.length, 1, v.length - k.length, PER_HEAD.length).clearContent();
+  listCacheClr_();
+  return v.length - k.length;
+}
+// 본 시트의 예전 기간 줄 지우기: 아래에서 위로, 붙어 있는 줄은 한 번에. ms 동안만
+function legacyPurge_(s, ms) {
+  const t0 = Date.now(), last = s.getLastRow(); if (last < 2) return 0;
+  const v = s.getRange(2, 2, last - 1, 1).getValues(); let n = 0, i = v.length - 1;
+  while (i >= 0 && Date.now() - t0 < ms) { if (!isPer_(v[i][0])) { i--; continue; } let j = i; while (j - 1 >= 0 && isPer_(v[j - 1][0])) j--; s.deleteRows(j + 2, i - j + 1); n += i - j + 1; i = j - 1; }
+  return n;
 }
 function rows_(s) {
   const v = s.getDataRange().getValues();
@@ -492,15 +595,16 @@ const fixDiff_ = r => (String(r.diff) === 'normal' && String(r.cls).indexOf(':bo
 
 function listJson_() {
   const s = sheet_();
-  const last = s.getLastRow();
-  if (last < 2) return '[]';
+  const last = s.getLastRow(), P = perGet_(), cur = curPers_();
   // 목록 칸(name~at)과 캐릭터 표시(hh)만 읽음. 무거운 hero 칸은 안 읽음
-  const v = s.getRange(2, 1, last - 1, LIST_COLS).getValues();
-  const hc = HEAD.indexOf('hh') + 1, ex = s.getLastColumn() >= hc + 1 ? s.getRange(2, hc, last - 1, 2).getValues() : [];
+  const v = last >= 2 ? s.getRange(2, 1, last - 1, LIST_COLS).getValues() : [];
+  const hc = HEAD.indexOf('hh') + 1, ex = last >= 2 && s.getLastColumn() >= hc + 1 ? s.getRange(2, hc, last - 1, 2).getValues() : [];
   const all = v.map((r, i) => { const o = Object.fromEntries(HEAD.slice(0, LIST_COLS).map((h, j) => [h, r[j]]));
       return { name: String(o.name), diff: fixDiff_(o), cls: String(o.cls), at: +o.at || 0, time: +o.time, lvl: +o.lvl, kills: +o.kills, bosses: +o.bosses, comment: String(o.comment || ''), score: score_({ diff: fixDiff_(o), cls: String(o.cls), time: +o.time || 0, lvl: +o.lvl || 0, kills: +o.kills || 0, bosses: +o.bosses || 0, at: +o.at || 0 }), h: ex[i] && ex[i][0] ? 1 : 0, dw: ex[i] ? String(ex[i][1] || '') : '' }; })
-    .filter(r => { const p = String(r.diff).split('|')[1]; return !p || curPers_().indexOf(p) >= 0; })
-    .sort((a, b) => b.score - a.score);
+    .filter(r => { const p = String(r.diff).split('|')[1]; return !p || (!P && cur.indexOf(p) >= 0); }); // v11.6 기간기록 시트가 생기면 본 시트의 예전 기간 줄은 안 씀
+  if (P) { const pl = P.getLastRow(); if (pl >= 2) P.getRange(2, 1, pl - 1, PER_HEAD.length).getValues().forEach(r => { const p = String(r[1]).split('|')[1]; if (!p || cur.indexOf(p) < 0) return;
+    const o = { name: String(r[0]), diff: String(r[1]), cls: String(r[2]), at: +r[9] || 0, time: +r[3], lvl: +r[4], kills: +r[5], bosses: +r[6], comment: String(r[8] || '') }; o.score = perSc_(r); o.h = 0; o.dw = ''; all.push(o); }); }
+  all.sort((a, b) => b.score - a.score);
   const per = {};
   return JSON.stringify(all.filter(r => (per[r.diff] = (per[r.diff] || 0) + 1) <= 50));
 }
@@ -508,7 +612,8 @@ function listJson_() {
 // 열쇠 → 저장용 값 (열쇠 그대로는 저장하지 않음)
 const kh_ = k => { k = String(k || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 64); return k.length >= 16 ? Utilities.base64Encode(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, 'chanseo|' + k)).slice(0, 24) : ''; };
 // 그 이름의 줄 번호들과 주인 열쇠값
-function owner_(s, nm) {
+function owner_(s, nm, pre) {
+  if (pre) { const rows = [];let kh = ''; pre.a.forEach((x, i) => { if (String(x[0]) === nm) { rows.push(i + 2); const v = pre.k[i] ? String(pre.k[i][0] || '') : ''; if (!kh && v && !/^#/.test(v)) kh = v; } }); return { rows, kh }; }
   const last = s.getLastRow(), rows = [];let kh = '';
   if (last < 2) return { rows, kh };
   const names = s.getRange(2, 1, last - 1, 1).getValues(), kc = HEAD.indexOf('kh') + 1;
@@ -516,6 +621,9 @@ function owner_(s, nm) {
   names.forEach((x, i) => { if (String(x[0]) === nm) { rows.push(i + 2); const v = ks[i] ? String(ks[i][0] || '') : ''; if (!kh && v && !/^#/.test(v)) kh = v; } });
   return { rows, kh };
 }
+
+// v11.6 기록 요청에서 본 시트의 이름·난이도·직업(A~C)과 주인 열쇠 칸을 한 번만 읽음 (예전엔 주인 확인·같은 기록 찾기에서 따로 읽었음)
+function mainPre_(s) { const last = s.getLastRow(), kc = HEAD.indexOf('kh') + 1; if (last < 2) return { a: [], k: [] }; return { a: s.getRange(2, 1, last - 1, 3).getValues(), k: s.getLastColumn() >= kc ? s.getRange(2, kc, last - 1, 1).getValues() : [] }; }
 
 // 접속 중인 사람 (캐시에만 저장, 2분 지나면 빠짐)
 const ONLINE_KEY = 'online_v44', ONLINE_SEC = 130;
@@ -547,7 +655,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 115, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 116, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -643,7 +751,7 @@ function csave_(d) {
   if (cur.r && cur.data && base !== cur.at) { clog_(nm, base == null ? '거절(예전 버전)' : '거절(다른 저장본)', lg); return out_({ ok: false, err: 'stale', at: cur.at, md: cur.md }); }
   if (cur.r && cur.data) { const shrink = md < cur.md * 0.7 || data.length < cur.data.length * 0.6; cbakAdd_(nm, cur, d.force ? '직접 덮어쓰기 전' : shrink ? '크게 줄어든 저장 전' : '정기', !!d.force || shrink); }
   if (!own) olog_(nm, '주인 없음 → 저장한 기기가 가져감', cur.kh || '', my, d.dv);
-  const r = acctSetKh_(nm, my), n = acctWrite_(s, r, at, md, data);
+  const r = cur.r && cur.kh === my ? cur.r : acctSetKh_(nm, my), n = acctWrite_(s, r, at, md, data); // v11.6 열쇠가 그대로면 줄을 다시 찾지 않음
   ownerSet_(nm, my);
   clog_(nm, d.force ? '저장(직접)' : '저장', lg);
   return out_({ ok: true, result: 'csave', n, at });
@@ -771,7 +879,7 @@ function devLog_(id, n, ua) {
     const s = devSheet_(), last = s.getLastRow(), now = Date.now();
     const v = last >= 2 ? s.getRange(2, 1, last - 1, 2).getValues() : [];
     const i = v.findIndex(r => String(r[0]) === id && String(r[1]) === n);
-    if (i >= 0) { const r = i + 2, cnt = +s.getRange(r, 6).getValue() || 0; s.getRange(r, 3).setValue(ua); s.getRange(r, 5).setValue(now); s.getRange(r, 6).setValue(cnt + 1); }
+    if (i >= 0) { const r = i + 2, o = s.getRange(r, 3, 1, 4).getValues()[0]; s.getRange(r, 3, 1, 4).setValues([[ua, o[1], now, (+o[3] || 0) + 1]]); } // v11.6 한 번에
     else if (last - 1 < DEV_MAXROWS) s.appendRow([id, n, ua, now, now, 1]);
   } catch (err) {} finally { lock.releaseLock(); }
 }
@@ -794,7 +902,7 @@ function unownAll_(q) {
     if (last >= 2) { const v = s.getRange(2, 1, last - 1, 1).getValues();v.forEach(r => names.add(String(r[0])));s.getRange(2, kc, last - 1, 1).clearContent();n = last - 1; }
     const as = acctSheet_(), al = as.getLastRow();
     if (al >= 2) { as.getRange(2, 1, al - 1, 1).getValues().forEach(r => names.add(String(r[0])));as.getRange(2, 2, al - 1, 1).clearContent(); }
-    names.forEach(nm => ownerSet_(nm, ''));try { CacheService.getScriptCache().remove(CACHE_KEY); } catch (err) {}
+    names.forEach(nm => ownerSet_(nm, ''));try { listCacheClr_(); } catch (err) {}
     return { ok: 1, rows: n, names: names.size };
   } finally { lock.releaseLock(); }
 }
@@ -806,7 +914,7 @@ function unown_(q) {
     olog_(nm, '관리자 주인 초기화', own.kh || acctKh_(nm), '', '');
     for (const r of own.rows) s.getRange(r, kc).setValue('');
     try { const as = acctSheet_(), ar = acctRow_(as, nm); if (ar) as.getRange(ar, 2).setValue(''); } catch (err) {}
-    ownerSet_(nm, '');try { CacheService.getScriptCache().remove(CACHE_KEY); } catch (err) {}
+    ownerSet_(nm, '');try { listCacheClr_(); } catch (err) {}
     return { ok: 1, n: own.rows.length, had: own.kh ? 1 : 0 };
   } finally { lock.releaseLock(); }
 }
@@ -831,10 +939,13 @@ function delrec_(q) {
     const qc = String(q.cls || '');
     v.forEach((r, i) => { const o = Object.fromEntries(HEAD.slice(0, LIST_COLS).map((h, j) => [h, r[j]])); const fd = String(fixDiff_(o)); if (String(o.name) === nm && (fd === df || fd.indexOf(df + '|') === 0) && (!qc || clsB_(o.cls) === qc)) rows.push(i + 2); }); // v11.2 기간(일간·주간·월간) 줄도 같이 지움
     rows.reverse().forEach(rw => s.deleteRow(rw));
+    // v11.6 기간기록 시트의 그 이름·모드(·직업) 줄도 (남길 줄을 위에 다시 쓰고 아래만 비움)
+    let np = 0; try { const P = perGet_(), pl = P ? P.getLastRow() : 0; if (pl >= 2) { const pv = P.getRange(2, 1, pl - 1, PER_HEAD.length).getValues(), kp = pv.filter(r => !(String(r[0]) === nm && (String(r[1]) === df || String(r[1]).indexOf(df + '|') === 0) && (!qc || clsB_(r[2]) === qc))); np = pv.length - kp.length;
+      if (np) { if (kp.length) P.getRange(2, 1, kp.length, PER_HEAD.length).setValues(kp); P.getRange(2 + kp.length, 1, np, PER_HEAD.length).clearContent(); } } } catch (err) { console.log('delrec per err ' + err); }
     delAdd_(nm, qc ? df + '|' + qc : df);
     ownerSet_(nm, owner_(s, nm).kh || acctKh_(nm) || '');
-    try { CacheService.getScriptCache().remove(CACHE_KEY); } catch (err) {}
-    return { ok: 1, n: rows.length };
+    try { listCacheClr_(); } catch (err) {}
+    return { ok: 1, n: rows.length + np };
   } finally { lock.releaseLock(); }
 }
 function snap_(q) {
@@ -842,6 +953,14 @@ function snap_(q) {
   if (!id || !c.get('watch_' + id)) return { w: 0 };
   try { c.put('snap_' + id, String(q.d || '').slice(0, 6000), 30); } catch (err) {}
   return { w: 1 };
+}
+// v11.6 관리자: 서버 상태 (시트마다 줄·칸 수, 4초 넘게 걸린 최근 요청, 지금 잠금을 쥔 요청)
+function stat_(q) {
+  if (!devOk_(q.dk)) return { err: 'key' };
+  const c = CacheService.getScriptCache(); let slow = [], busy = null, lc = 0;
+  try { slow = JSON.parse(c.get('slowlog') || '[]') || []; } catch (err) {} try { busy = JSON.parse(c.get('busy_now') || 'null'); } catch (err) {} try { lc = +(c.get(CACHE_KEY + '_n') || 0); } catch (err) {}
+  const sh = []; try { book_().getSheets().forEach(x => sh.push({ n: x.getName(), r: x.getLastRow(), c: x.getLastColumn() })); } catch (err) {}
+  return { ok: 1, v: 116, now: Date.now(), busy, slow, sh, lc, per: perGet_() ? 1 : 0 };
 }
 function devList_(q) {
   if (!devOk_(q.dk)) return { err: 'key' };
@@ -1028,7 +1147,12 @@ function supList_(after) {
 }
 
 function doGet(e) {
+  T0_ = Date.now(); TL_ = []; const q = (e && e.parameter) || {}; TR_ = getRoute_(q);
+  try { return doGet0_(e); } finally { tdone_('GET'); }
+}
+function doGet0_(e) {
   const q = (e && e.parameter) || {};
+  if (q.stat) return out_(stat_(q));
   if (q.sup) return out_({ msgs: supList_(q.after) });
   if (q.chat) return chat_(q);
   if (q.dv) return out_(devList_(q));
@@ -1067,19 +1191,28 @@ function doGet(e) {
     return out_({ hero: i < 0 ? '' : String(s.getRange(i + 2, HEAD.indexOf('hero') + 1).getValue() || '') });
   }
   const c = CacheService.getScriptCache();
-  let j = c.get(CACHE_KEY);
-  if (!j) { j = listJson_(); try { c.put(CACHE_KEY, j, 60); } catch (err) {} }
+  let j = listCacheGet_(c); tm_(j ? 'cache' : 'nocache');
+  // 만드는 동안 기록이 바뀌었으면(_g가 달라짐) 저장하지 않음 (예전 목록이 5분 동안 남지 않게)
+  if (!j) { let g0 = null; try { g0 = c.get(CACHE_KEY + '_g'); } catch (err) {} j = listJson_(); tm_('build ' + j.length); let g1 = null; try { g1 = c.get(CACHE_KEY + '_g'); } catch (err) {} if (g0 === g1) listCachePut_(c, j); }
   return ContentService.createTextOutput(j).setMimeType(ContentService.MimeType.JSON);
 }
 
 function doPost(e) {
+  T0_ = Date.now(); TL_ = []; let d0 = null; try { d0 = JSON.parse(e.postData.contents); } catch (err) {} TR_ = postRoute_(d0);
+  try { return doPost0_(e, d0); } finally { if (/^(rec|per|cmEdit|fill|dwOnly)/.test(TR_)) listCacheClr_(); tdone_('POST'); } // 목록이 바뀌는 요청은 끝날 때도 목록 캐시를 비움
+}
+function doPost0_(e, d0) {
   // v8.6 AI 대답은 잠금 없이 (몇 초 걸려서 다른 요청을 막지 않게). 대화가 길어 주소(GET)에 다 안 들어가서 POST로
-  { let d0 = null; try { d0 = JSON.parse(e.postData.contents); } catch (err) {} if (d0 && d0.ai) return out_(ai_(d0)); }
+  if (d0 && d0.ai) return out_(ai_(d0));
+  if (!d0) return out_({ ok: false, err: 'bad' });
   const lock = LockService.getScriptLock();
   let got = false; try { got = lock.tryLock(25000); } catch (err) {} // v11.5 15초 → 25초 (판 끝에 저장·기록·기간 기록이 몰리면 기다리다 「바쁨」으로 거절되던 문제)
+  tm_('lock');
   if (!got) return out_({ ok: false, err: 'busy' });
+  // v11.6 지금 잠금을 쥔 요청 (관리자 서버 상태에서 보임). 6분 시간 초과로 끊기면 지워지지 않고 남아서 무엇이 끊겼는지 알 수 있음
+  const bc = CacheService.getScriptCache(); try { bc.put('busy_now', JSON.stringify({ r: TR_.slice(0, 60), t: T0_ }), 400); } catch (err) {}
   try {
-    const d = JSON.parse(e.postData.contents);
+    const d = d0;
     const s = sheet_();
     // 후원 응원 메시지 (이름 확인 없음, 120자까지)
     if (d.sup) {
@@ -1098,7 +1231,7 @@ function doPost(e) {
     // v9.3 관리자: 후원자 임명·해제 (스크립트 속성 DONORS에 이름 목록)
     if (d.donorSet) { if (!devOk_(d.dk)) return out_({ ok: false, err: 'key' }); const nm = str_(d.name, 12); if (!nm) return out_({ ok: false }); let L = donors_(); L = L.filter(x => x !== nm); if (d.on) L.push(nm); PropertiesService.getScriptProperties().setProperty('DONORS', JSON.stringify(L.slice(-200))); return out_({ ok: true, dn: L }); }
     // 여기부터는 전당 목록이 바뀔 수 있는 요청만 → 목록 캐시 비움 (클라우드 저장·응원·쪽지는 목록과 무관)
-    try { CacheService.getScriptCache().remove(CACHE_KEY); } catch (err) {}
+    try { listCacheClr_(); } catch (err) {}
     // 멘트 고치기 (개발자 키, 또는 v9.2부터 그 이름의 주인), 새 줄은 만들지 않음. cls를 주면 그 직업 기록만
     if (d.cmEdit) {
       const nm = str_(d.name, 12), df = String(d.diff || ''), last = s.getLastRow();
@@ -1123,7 +1256,8 @@ function doPost(e) {
     // 관리자가 지운 기록을 옛 기기가 다시 올리는 경우: 이름 주인을 새로 정하기 전에 먼저 거절
     if (!d.rekey && !d.dwOnly) { const a0 = +d.at || 0, r0 = clean_(d, a0 > 1.7e12 && a0 <= Date.now() + 60000 ? a0 : 0); if (delBlocked_(r0.name, r0.diff, r0.at, r0.cls)) return out_({ ok: false, result: 'deleted' }); }
     // 이름 주인 확인: 주인이 있는 이름은 같은 열쇠로만. 주인이 없으면 열쇠와 함께 처음 올린 기기가 주인
-    const nm0 = str_(d.name, 12) || '익명', my = kh_(d.k), own = nm0 === '익명' ? { rows: [], kh: '' } : owner_(s, nm0);
+    const pre = mainPre_(s); tm_('read');
+    const nm0 = str_(d.name, 12) || '익명', my = kh_(d.k), own = nm0 === '익명' ? { rows: [], kh: '' } : owner_(s, nm0, pre);
     if (!own.kh && nm0 !== '익명') own.kh = acctKh_(nm0);
     if (own.kh && own.kh !== my) return out_({ ok: false, result: 'owned' });
     // 예전 기록의 빈 외모 칸 채우기: 주인이 정해진 이름의 주인 열쇠로만, 비어 있는 칸만 (새 줄은 만들지 않음)
@@ -1181,14 +1315,21 @@ function doPost(e) {
     }
     // 기록 시각: 게임이 보낸 값(그 판을 한 시각)을 씀. 지금보다 미래거나 너무 옛날이면 서버 시각
     const at0 = +d.at || 0, r = clean_(d, at0 > 1.7e12 && at0 <= Date.now() + 60000 ? at0 : 0);
+    // v11.6 기간(일간·주간·월간) 줄은 기간기록 시트로 (예전 게임이 따로 보내는 것). 지운 기록이면 그 판의 기간 줄도 거절
+    if (isPer_(r.diff)) {
+      if (delBlocked_(r.name, baseDiff_(r.diff), r.at, r.cls)) return out_({ ok: false, result: 'deleted' });
+      const pr = perPut_(s, [r]); tm_('per'); return out_({ ok: true, result: pr[0] || 'kept' });
+    }
     if (delBlocked_(r.name, r.diff, r.at, r.cls)) return out_({ ok: false, result: 'deleted' });
-    prunePer_(s);
-    const last = s.getLastRow();
-    const keys = last > 1 ? s.getRange(2, 1, last - 1, 3).getValues().map(x => recKey_(x[0], fixDiff_({ diff: x[1], cls: x[2] }), x[2])) : [];
+    // 게임 v455: 최고 기록이 아니라서 기간 순위에만 올리는 판
+    if (d.perOnly) { const pr = perPut_(s, perRecs_(d, r)); tm_('per'); return out_({ ok: true, result: 'per', per: pr }); }
+    const keys = pre.a.map(x => recKey_(x[0], fixDiff_({ diff: x[1], cls: x[2] }), x[2]));
     const i = keys.indexOf(recKey_(r.name, r.diff, r.cls));
+    // 게임 v455: 기간 키(pers)를 같이 보내면 본 기록을 쓴 뒤 같은 요청에서 기간 줄도 씀 (예전엔 요청 4번이 같은 잠금을 두고 줄 섰음)
+    const perAlso = res => { let pr = null; if (Array.isArray(d.pers) && d.pers.length) { try { pr = perPut_(s, perRecs_(d, r)); } catch (err) { console.log('per err ' + err); } tm_('per'); } return out_({ ok: true, result: res, per: pr }); };
     if (i < 0) {
-      s.appendRow(HEAD.map(h => r[h]));
-      return out_({ ok: true, result: 'new' });
+      s.appendRow(HEAD.map(h => r[h])); tm_('main');
+      return perAlso('new');
     }
     const row = i + 2;
     // 예전 줄도 같은 최종 점수식으로 다시 계산해서 비교 (저장된 score 칸은 예전 서버가 보너스 없이 쓴 값일 수 있음)
@@ -1196,14 +1337,16 @@ function doPost(e) {
     const oldScore = score_({ diff: fixDiff_(oo), cls: String(oo.cls), time: +oo.time || 0, lvl: +oo.lvl || 0, kills: +oo.kills || 0, bosses: +oo.bosses || 0, at: +oo.at || 0 });
     if (r.score > oldScore) {
       { const full = s.getRange(row, 1, 1, HEAD.length).getValues()[0], at = h => full[HEAD.indexOf(h)]; if (!r.dw) r.dw = at('dw') || ''; if (!r.hero && at('hero')) { r.hero = at('hero'); r.hh = at('hh'); } }
-      s.getRange(row, 1, 1, HEAD.length).setValues([HEAD.map(h => r[h])]);
-      return out_({ ok: true, result: 'best' });
+      s.getRange(row, 1, 1, HEAD.length).setValues([HEAD.map(h => r[h])]); tm_('main');
+      return perAlso('best');
     }
     if (r.dw) s.getRange(row, HEAD.indexOf('dw') + 1).setValue(r.dw);
     // 점수는 그대로여도 캐릭터 정보가 비어 있으면 채워 둠
     if (r.hero && !String(s.getRange(row, HEAD.indexOf('hero') + 1).getValue() || '')) { s.getRange(row, HEAD.indexOf('hero') + 1).setValue(r.hero); s.getRange(row, HEAD.indexOf('hh') + 1).setValue(1); }
-    return out_({ ok: true, result: 'kept' });
+    tm_('main');
+    return perAlso('kept');
   } finally {
     lock.releaseLock();
+    try { bc.remove('busy_now'); } catch (err) {}
   }
 }
