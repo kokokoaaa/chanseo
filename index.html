@@ -539,7 +539,7 @@ summary{cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-weight:700;fon
 .bar .bf{background:#7fc4f2;opacity:.85}
 #st{position:absolute;inset:0;display:none;align-items:flex-start;justify-content:center;background:rgba(3,14,10,.88);padding:16px;overflow-y:auto;touch-action:auto;z-index:60}
 #st.on{display:flex}
-#pauseEl{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(5,12,9,.55)}#pauseEl.on{display:flex}
+/* v430 일시정지 중에도 위쪽 자동 이동·배속 줄은 누를 수 있게 */body.pz #autoBar{z-index:61}#pauseEl{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(5,12,9,.55)}#pauseEl.on{display:flex}
 #pauseEl .pzBox{background:rgba(11,31,24,.94);border:2px solid var(--brass);border-radius:16px;padding:26px 34px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.6);max-width:min(420px,90vw)}
 #pauseEl .pzT{font-family:'Noto Sans KR',sans-serif;font-weight:700;font-size:42px;color:var(--brass);letter-spacing:2px}#pauseEl .pzS{color:var(--muted);margin:8px 0 18px;font-size:14px}
 #pauseEl #pzGo{display:inline-flex;align-items:center;justify-content:center;gap:6px;width:auto;min-width:170px;height:auto;min-height:0;padding:8px 22px;font-size:17px;line-height:1.2;white-space:nowrap;margin:0 auto}#pauseEl #pzGo small{display:inline;font-size:13px;opacity:.75;color:inherit}
@@ -839,7 +839,7 @@ body.ovfull .card.aug{padding:8px 8px;gap:4px;min-height:0}body.ovfull .card.aug
   <div id="st"></div>
   <button id="statBtn">스탯 (Tab)</button><button id="cxBtn">📖 도감</button><button id="rtBtn" title="이 판을 처음부터 다시 (증강도 새로 골라요)">🔄 다시하기</button><div id="onlHud"></div>
   <div id="autoBar"><button id="autoPickBtn">자동 선택 OFF</button><button id="autoMoveBtn">자동 이동 OFF</button><button id="noCdBtn" style="display:none">쿨타임 무시 OFF</button><span id="spdW"><button id="speedBtn">x1</button><span id="spdNote">📜 의뢰는 3배속까지만 받을 수 있어요</span></span><button id="zoomBtn" title="시야 넓이 (Y)">🔭 1</button><button id="pauseBtn" title="일시정지 (T)">⏸</button><button id="bgmBtn">🎵</button><button id="sfxBtn">🔔</button><button id="oriBtn" title="화면 방향 고정 (폰)" style="display:none">🔄</button></div>
-  <div id="pauseEl"><div class="pzBox"><div class="pzT">⏸ 일시정지</div><div class="pzS">천천히 생각해도 돼요. 몬스터도 시간도 멈춰 있어요<br><small style="opacity:.7">창을 끌어서 옮길 수 있어요 (두 번 누르면 가운데로)</small></div><button class="btn primary" id="pzGo">▶ 계속하기 <small>(T)</small></button></div></div>
+  <div id="pauseEl"><div class="pzBox"><div class="pzT">⏸ 일시정지</div><div class="pzS">천천히 생각해도 돼요. 몬스터도 시간도 멈춰 있어요<br><small style="opacity:.7">창을 끌어서 옮길 수 있어요 (두 번 누르면 가운데로) · 멈춘 동안에도 오른쪽 위 자동 이동·배속은 바꿀 수 있어요</small></div><button class="btn primary" id="pzGo">▶ 계속하기 <small>(T)</small></button></div></div>
 </div>
 <script>
 window.addEventListener('error',function(e){if(!e.filename&&/^Script error\.?$/i.test(String(e.message||'')))return;var d=document.getElementById('errbox');if(!d){d=document.createElement('div');d.id='errbox';d.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:99;background:#300;color:#fdd;font:13px/1.4 monospace;padding:8px 10px;border:1px solid #f66;border-radius:6px;white-space:pre-wrap;max-height:40%;overflow:auto';document.body.appendChild(d);}d.textContent+='오류: '+(e.message||e)+' ('+(e.lineno||'?')+':'+(e.colno||'?')+')\n';});
@@ -9669,6 +9669,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:430,t:'⏸ 일시정지 중 설정',items:[
+    ['new','⏸ 일시정지한 채로 오른쪽 위 자동 이동·배속·시야 버튼을 누를 수 있어요']]},
   {v:429,t:'☠ 즉사 패턴 알림 · 일시정지 창',items:[
     ['change','☠ 즉사 패턴 알림 카드를 작게 줄이고 화면 위쪽으로 옮겼어요 (가운데 싸움이 가려지지 않게)'],
     ['change','☠ 보스 등장 연출 중엔 즉사 패턴이 시작하지 않고, 보스가 나오면 굶주린 영혼은 벌 없이 사라져요'],
@@ -16508,7 +16510,7 @@ function openShop(back,m){
 let statsOpen=false;
 // 일시정지 (T 키 · ⏸ 버튼): 게임만 멈추고 화면 가운데에 반투명 창. 다시 누르거나 계속하기로 풀림
 let PAUSED=false;
-function togglePause(on,sys){if(!sys){CHAT_PZ=false;ST_PZ=false;}on=on==null?!PAUSED:on;if(on&&(!S||S.mode!=='play'||statsOpen))return;PAUSED=on;joy=null;for(const k in keys)keys[k]=false;$('pauseEl').classList.toggle('on',PAUSED);}
+function togglePause(on,sys){if(!sys){CHAT_PZ=false;ST_PZ=false;}on=on==null?!PAUSED:on;if(on&&(!S||S.mode!=='play'||statsOpen))return;PAUSED=on;joy=null;for(const k in keys)keys[k]=false;$('pauseEl').classList.toggle('on',PAUSED);document.body.classList.toggle('pz',PAUSED);}
 $('pauseBtn').onclick=()=>togglePause();$('pzGo').onclick=()=>togglePause(false);
 /* v428 일시정지 창: 끌어서 옮기기 (버튼 빼고 아무 데나 잡고 끌기) · 위치는 이 기기에 기억 */{const B=document.querySelector('#pauseEl .pzBox');let o={x:0,y:0};try{o=JSON.parse(localStorage.getItem('chanseo_pzpos')||'{"x":0,"y":0}')||{x:0,y:0};}catch(e){}
   const ap=()=>{const mx=innerWidth/2-40,my=innerHeight/2-40;o.x=Math.max(-mx,Math.min(mx,+o.x||0));o.y=Math.max(-my,Math.min(my,+o.y||0));B.style.transform=`translate(${o.x}px,${o.y}px)`;};ap();B.style.cursor='move';B.style.touchAction='none';
@@ -16682,7 +16684,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=429,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=430,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
