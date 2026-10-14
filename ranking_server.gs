@@ -1,4 +1,7 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v10.2
+// 찬서 명예의 전당 서버 (Google Apps Script) v10.3
+//
+// v10.2 → v10.3 바뀐 점
+// - AI 모험가 대화 모델을 Haiku → Sonnet으로 (말귀·논리 개선, 토큰당 비용 약 3배)
 //
 // v10.1 → v10.2 바뀐 점
 // - 논리 점검(의도된 컨셉·장난성 모순은 허용): 누가 무슨 말 했는지 구분, 앞뒤 맞는 대답, 남의 화제 끌어오기·자기 모순·없는 말 지어내기 금지
@@ -491,7 +494,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 102, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 103, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -708,7 +711,7 @@ function devList_(q) {
 // 후원 응원 메시지 ('후원' 시트, 최근 300줄까지만 남김)
 const SUP_SHEET = '후원';
 // v8.4 AI 모험가 대답 (Claude Haiku). 키는 스크립트 속성 ANTHROPIC_KEY
-const AI_DAY = 300, AI_GAP = 5, AI_MODEL = 'claude-haiku-5-5';
+const AI_DAY = 300, AI_GAP = 5, AI_MODEL = 'claude-sonnet-5-5' /* v10.3 Haiku → Sonnet (대화 논리·맥락 파악) */;
 const AI_BOTS = [
   ['별헤는밤', '27살 천문대 근처 카페 매니저. 다정하고 차분함. 별·사진·카페 손님 얘기, 연애 고민 잘 들어줌. 게임은 마법사', '존댓말(~요). 문장 끝에 마침표나 물결(~)을 씀. ㅋㅋ 안 씀, 웃을 땐 「ㅎㅎ」 아주 가끔'],
   ['루루', '19살 디자인과 새내기. 발랄함. 과제·동기·알바·편의점 신상 얘기. 드루이드', '반말. 「~당」「~용」「헐」「대박」. 웃음은 「ㅎㅎ」, 느낌표 자주'],
