@@ -801,7 +801,7 @@ body.ovfull #ov{padding:8px 10px}body.ovfull #ov .panel{padding:12px 14px;margin
 body.ovfull .card.aug{padding:8px 8px;gap:4px;min-height:0}body.ovfull .card.aug{font-size:14px}body.ovfull .aemb{width:40px;height:40px;font-size:22px}
 </style>
 <style>/* v392 선택지 4개: 카드 칸을 좌우로 넓힘 */
-.cards.c4{grid-template-columns:repeat(4,minmax(0,1fr))}#ov .panel:has(.cards.c4){max-width:900px}
+.cards.c4{grid-template-columns:repeat(4,minmax(0,1fr))}#ov .panel:has(.cards.c4){max-width:min(1240px,97vw)}.cards.c4{gap:12px}
 @media (max-width:600px){.cards.c4{grid-template-columns:1fr 1fr}}
 </style>
 </head>
@@ -9437,6 +9437,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:393,t:'🃏 카드 창 넓게',items:[
+    ['change','🃏 선택지가 4개가 된 증강·스탯 카드 창을 좌우로 더 넓혀서 잘 보이게']]},
   {v:392,t:'📱 폰 가로 화면 · 🛡 도발',items:[
     ['buff','🛡 기사 「도발」: 끌려온 적은 3초 동안 <b>나에게 주는 피해 -25%</b>(내가 주는 피해 +20%는 그대로) — 탱커답게 버티는 증강으로'],
     ['change','📜 의뢰인은 이제 <b>신 난이도·무한의 악몽</b>에서만 나와요 (첫 보스를 잡으면)'],
@@ -16283,7 +16285,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=392,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=393,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
