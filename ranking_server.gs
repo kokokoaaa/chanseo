@@ -1,4 +1,6 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v11.0
+// 찬서 명예의 전당 서버 (Google Apps Script) v11.1
+//
+// v11.0 → v11.1 바뀐 점 (게임 v444) — 자동 이동 점수 감점(최대 −10%) 없앰. 게임과 같은 점수식 (예전 자동 이동 기록도 감점 없이 다시 계산됨)
 //
 // v10.9 → v11.0 바뀐 점 (게임 v437) — 관리자 화면 정보 보강 (게임 쪽 동작은 그대로)
 // - 계정 목록의 「최고 기록」: 레이드 줄(단계×100만−시간으로 저장)·기간(일간·주간·월간) 줄을 빼고, 명예의 전당과 같은 점수식으로 셈 + 어느 모드인지
@@ -416,7 +418,7 @@ function score_(r0) {
     ? r.bosses * 2500 + lvPts_(r) + r.time * 2
     : timePts_(r.diff === 'nightmare' && +r.at >= SC3_AT ? r.time + Math.round(r.time * (NM_TK - 1)) : r.time, v2) * SC_TW + softC_(r.kills * 2, SC_KC) + lvPts_(r) + (nmV4_(r) ? 0 : r.bosses * (v2 ? 800 : 400) + (r.bosses >= 4 ? 3000 : 0));
   const sm = r.diff === 'nightmare' && +r.at >= SC3_AT ? NM_SM : r.diff === 'bossrush' && +r.at >= BR_AT ? BR_SM : 1;
-  return Math.round(Math.round((base + bonus) * (DIFFS[r.diff] || 1)) * sm * (1 - 0.1 * ap));
+  return Math.round(Math.round((base + bonus) * (DIFFS[r.diff] || 1)) * sm); // v11.1 자동 이동 점수 감점(ap) 없앰
 }
 // v8.2 지난 기간(일간·주간·월간) 기록 줄 지우기: 한 시간에 한 번까지
 // v8.5 🧿 부적 보상: 끝난 기간(어제·지난주·지난달)의 무한의 악몽 순위 1~3위(이름마다 최고 기록 하나)를 「고용 메달」 시트에 부적으로 적어 둠 → 그 사람이 접속하면 받아 감
@@ -537,7 +539,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 110, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 111, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
