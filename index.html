@@ -4020,10 +4020,10 @@ const CARDS=[
   {req:()=>tag('sniper')>0||S.cls==='archer'||has('longshot'),n:'조준경',v:[[6,11,0]],t:v=>`사거리 +${v[0]}%`,a:(p,v)=>{p.range*=1+v[0]/100;}},
   // 보스 러시·레이드엔 잡몹이 없어서 흡수 범위·경험치·골드 획득 카드는 안 나옴
   {req:()=>!rushOn()&&S.p.magnet<MAGNET_CAP,n:'자석',v:[[15,28,0]],t:v=>`경험치·골드 흡수 범위 +${v[0]}%`,a:(p,v)=>{p.magnet*=1+v[0]/100;}},
-  {req:()=>!luckFull(),n:'네잎클로버',v:[[.8,1.6,1]],t:v=>`행운 +${v[0]}. 높은 등급과 좋은 수치가 잘 나옵니다`,a:(p,v)=>{p.luck=Math.min(luckCapX(),Math.round((p.luck+v[0])*10)/10);}},
+  {req:()=>!luckFull(),n:'네잎클로버',v:[[1.6,3.2,1]],t:v=>`행운 +${v[0]}. 높은 등급과 좋은 수치가 잘 나옵니다`,a:(p,v)=>{p.luck=Math.min(luckCapX(),Math.round((p.luck+v[0])*10)/10);}},
   {cc:1,n:'급소 노리기',v:[[2.5,4.5,1]],t:v=>`치명타 확률 +${v[0]}%`,a:(p,v)=>{p.crit+=v[0]/100;}},
   {cm:1,n:'치명상',v:[[30,50,0]],t:v=>`치명타 피해 +${v[0]}%`,a:(p,v)=>{p.critM+=v[0]/100;}},
-  {req:()=>!pureMelee()&&(has('a_gale')||bspdB()<.99),n:'가속 탄',v:[[10,18,0]],t:v=>`탄속 +${v[0]}%`,a:(p,v)=>{p.bspd*=1+v[0]/100;}},
+  {req:()=>!pureMelee()&&(has('a_gale')||bspdB()<.99),n:'가속 탄',v:[[10,18,0],[.3,.6,1]],t:v=>`탄속 +${v[0]}%, 공격력 +${v[1]}`,a:(p,v)=>{p.bspd*=1+v[0]/100;p.dmg+=v[1];}},
   {req:()=>!rushOn(),n:'배움의 서',v:[[8,13,1]],t:v=>`경험치 획득 +${v[0]}%`,a:(p,v)=>{p.xpM=(p.xpM||1)+v[0]/100;}},
   {req:()=>!rushOn(),n:'황금 주머니',v:[[10,17,0]],t:v=>`골드 획득 +${v[0]}%`,a:(p,v)=>{p.goldM+=v[0]/100;}},
   {req:()=>S.p.dodge<DODGE_CAP_F()||has('r_phantom'),n:'날렵한 몸놀림',v:[[2.5,4.5,1]],t:v=>`회피 +${v[0]}%`,a:(p,v)=>{p.dodge+=v[0]/100;}},
@@ -4050,7 +4050,7 @@ const CARDS=[
   {n:'불사의 맹세',v:[[.1,.2,2],[.3,.6,2]],t:v=>`흡혈 +${v[0]}%, 초당 체력 재생 +${v[1]}`,a:(p,v)=>{p.lifesteal+=v[0]/100;p.regen+=v[1];}},
   {fr:'l',n:'다연발',d:'탄환 +1발',f:p=>{p.multi+=1;}},
   {fr:'l',n:'결사',v:[[18,28,0]],t:v=>`공격력 +${v[0]}%, 받는 피해 +50%`,a:(p,v)=>{p.cdP=(p.cdP||0)+v[0]/100;p.vuln*=1.5;}},
-  {fr:'l',req:()=>!luckFull(),n:'럭키 세븐',v:[[1.5,3,1]],t:v=>`행운 +${v[0]}`,a:(p,v)=>{p.luck=Math.min(luckCapX(),Math.round((p.luck+v[0])*10)/10);}},
+  {fr:'l',req:()=>!luckFull(),n:'럭키 세븐',v:[[3,6,1]],t:v=>`행운 +${v[0]}`,a:(p,v)=>{p.luck=Math.min(luckCapX(),Math.round((p.luck+v[0])*10)/10);}},
 ];
 // 0~1 굴림. 행운이 높을수록 1 쪽으로 치우침 (행운 5면 평균 0.5 → 0.62, 행운 10이면 0.69)
 // 행운 상한 50 (v185에서 30 → 50, 행운 1당 효과는 약 0.6배). 모든 행운 효과는 0~상한 구간에 고르게 퍼져 있고 상한을 넘는 행운은 무시됨
@@ -9441,6 +9441,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:400,t:'🍀 행운·탄속 카드',items:[
+    ['buff','🍀 행운 스탯 카드 2배: 「네잎클로버」 행운 +0.8~1.6 → <b>+1.6~3.2</b>, 「럭키 세븐」 +1.5~3 → <b>+3~6</b>'],
+    ['buff','💨 「가속 탄」 스탯 카드에 <b>공격력</b>도 붙어요 (탄속 +10~18% + 공격력 +0.3~0.6, 숫돌의 절반 정도)']]},
   {v:399,t:'⚔ 일반~신 쉽게',items:[
     ['change','⚒ 장비 대장간: 장비를 누를 때마다 창 크기가 바뀌지 않게 고정 (설명이 길면 오른쪽 칸 안에서 스크롤)'],
     ['change','🚨 채팅 신고 버튼을 채팅 줄마다 붙이지 않고, 이름을 눌렀을 때 나오는 창으로 옮겼어요'],
@@ -16315,7 +16318,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=399,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=400,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
