@@ -1,4 +1,6 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v11.4
+// 찬서 명예의 전당 서버 (Google Apps Script) v11.5
+//
+// v11.4 → v11.5 바뀐 점 (게임 v453) — 저장·기록 요청이 몰릴 때 순서를 25초까지 기다림 (예전 15초)
 //
 // v11.3 → v11.4 바뀐 점 (게임 v449) — AI 모험가 대답에 말 건 사람의 상태창(대표 직업·전투력·플레이 시간·업적·칭호·부적)과 장비 13칸을 넣음
 //
@@ -545,7 +547,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 114, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 115, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -1074,7 +1076,7 @@ function doPost(e) {
   // v8.6 AI 대답은 잠금 없이 (몇 초 걸려서 다른 요청을 막지 않게). 대화가 길어 주소(GET)에 다 안 들어가서 POST로
   { let d0 = null; try { d0 = JSON.parse(e.postData.contents); } catch (err) {} if (d0 && d0.ai) return out_(ai_(d0)); }
   const lock = LockService.getScriptLock();
-  let got = false; try { got = lock.tryLock(15000); } catch (err) {}
+  let got = false; try { got = lock.tryLock(25000); } catch (err) {} // v11.5 15초 → 25초 (판 끝에 저장·기록·기간 기록이 몰리면 기다리다 「바쁨」으로 거절되던 문제)
   if (!got) return out_({ ok: false, err: 'busy' });
   try {
     const d = JSON.parse(e.postData.contents);
