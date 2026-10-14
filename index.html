@@ -137,8 +137,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 #autoBar{position:absolute;right:12px;top:48px;z-index:46;display:none;gap:6px}
 #autoBar button{background:rgba(4,18,12,.65);color:var(--muted);border:1px solid rgba(241,231,207,.3);border-radius:8px;padding:5px 10px;font-family:'Noto Sans KR',sans-serif;font-weight:700;font-size:14px;cursor:pointer}
 #autoBar #speedBtn{min-width:44px;font-size:16px}
-#spdW{position:relative;display:inline-flex}#spdNote{display:none;position:absolute;top:calc(100% + 4px);right:0;white-space:nowrap;pointer-events:none;font-size:12px;font-weight:700;color:#ffd08a;background:rgba(40,16,4,.82);border:1px solid rgba(255,160,90,.55);border-radius:6px;padding:2px 7px}#spdNote.on{display:block}
-@media (min-width:521px){body.spdq #buffs{transform:translateY(24px)}}
+#spdNote{display:none;align-self:center;white-space:nowrap;pointer-events:none;font-size:11px;font-weight:700;color:#ffd08a;text-shadow:0 1px 2px #000,0 0 3px #000}#spdNote.on{display:block}
 #autoBar button.on{color:#04120c;background:#7be08f;border-color:#7be08f}
 #buffs{position:absolute;right:12px;top:84px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;pointer-events:none;font-family:'Noto Sans KR',sans-serif;font-weight:700;font-size:15px}
 #buffs{z-index:40}
@@ -154,7 +153,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 #bfTip b{color:var(--brass)}
 #buffs>span{background:rgba(8,20,14,.62);padding:1px 8px;border-radius:9px;line-height:1.35}
 #buffs span{background:rgba(0,0,0,.55);padding:2px 8px;border-radius:6px}
-@media (max-width:520px){#spdNote{top:50%;right:calc(100% + 4px);transform:translateY(-50%);font-size:11px}}
+@media (max-width:520px){#spdNote{position:absolute;right:0;top:calc(100% + 3px);font-size:10px}}
 @media (max-width:520px){#autoBar{flex-direction:column;align-items:flex-end;top:54px}#autoBar button{padding:3px 7px;font-size:12px}#autoBar #speedBtn{font-size:14px}#buffs{top:186px}}
 .shophead{position:sticky;top:-22px;z-index:3;display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--felt);margin:-22px -20px 6px;padding:16px 20px 10px;border-bottom:1px solid rgba(214,169,74,.3);border-radius:16px 16px 0 0}
 .shophead h2{margin:0}
@@ -834,7 +833,7 @@ body.ovfull .card.aug{padding:8px 8px;gap:4px;min-height:0}body.ovfull .card.aug
   <div id="ov"></div>
   <div id="st"></div>
   <button id="statBtn">스탯 (Tab)</button><button id="cxBtn">📖 도감</button><button id="rtBtn" title="이 판을 처음부터 다시 (증강도 새로 골라요)">🔄 다시하기</button><div id="onlHud"></div>
-  <div id="autoBar"><button id="autoPickBtn">자동 선택 OFF</button><button id="autoMoveBtn">자동 이동 OFF</button><button id="noCdBtn" style="display:none">쿨타임 무시 OFF</button><span id="spdW"><button id="speedBtn">x1</button><span id="spdNote">📜 의뢰는 3배속까지만 받을 수 있어요</span></span><button id="zoomBtn" title="시야 넓이 (Y)">🔭 1</button><button id="pauseBtn" title="일시정지 (T)">⏸</button><button id="bgmBtn">🎵</button><button id="sfxBtn">🔔</button><button id="oriBtn" title="화면 방향 고정 (폰)" style="display:none">🔄</button></div>
+  <div id="autoBar"><span id="spdNote">📜 의뢰는 3배속까지만</span><button id="autoPickBtn">자동 선택 OFF</button><button id="autoMoveBtn">자동 이동 OFF</button><button id="noCdBtn" style="display:none">쿨타임 무시 OFF</button><button id="speedBtn">x1</button><button id="zoomBtn" title="시야 넓이 (Y)">🔭 1</button><button id="pauseBtn" title="일시정지 (T)">⏸</button><button id="bgmBtn">🎵</button><button id="sfxBtn">🔔</button><button id="oriBtn" title="화면 방향 고정 (폰)" style="display:none">🔄</button></div>
   <div id="pauseEl"><div class="pzBox"><div class="pzT">⏸ 일시정지</div><div class="pzS">천천히 생각해도 돼요. 몬스터도 시간도 멈춰 있어요</div><button class="btn primary" id="pzGo">▶ 계속하기 <small>(T)</small></button></div></div>
 </div>
 <script>
@@ -9456,7 +9455,7 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
   {v:410,t:'📜 배속 안내',items:[
-    ['change','📜 4·5배속일 때 배속 버튼 아래에 <b>「의뢰는 3배속까지만 받을 수 있어요」</b>가 계속 보여요']]},
+    ['change','📜 4·5배속일 때 배속 버튼 옆에 <b>「의뢰는 3배속까지만」</b> 안내가 계속 보여요']]},
   {v:409,t:'📜 진행 중인 의뢰 표시',items:[
     ['new','📜 판 도중 화면 왼쪽 위에 <b>받아 둔 의뢰와 진행도</b>가 보여요 (완료하면 「의뢰인이 보상을 주러 와요」). 이 판에서 진행되지 않는 경우(난이도·4배속 이상)도 알려 줘요'],
     ['change','📜 받아 둔 의뢰가 진행 중이면 의뢰인은 새로 나오지 않고, 다 하면 보상을 주러 와요']]},
@@ -15785,7 +15784,7 @@ oriPaint();
 // 배속 해금: 처음엔 x1만. 일반·어려움·지옥·신을 클리어할 때마다 x2 → x3 → x4 → x5
 const speedMax=()=>DEV?5:1+['normal','hard','hell','god'].filter(k=>(META.clears||{})[k]).length;
 function cycleSpeed(){const mx=speedMax();if(mx<=1){toast('🔒 배속은 일반 난이도를 클리어하면 열려요');return;}AUTO.speed=((Math.min(AUTO.speed||1,mx))%mx)+1;saveAuto();refreshAutoBtns();toast(AUTO.speed===1?'보통 속도':AUTO.speed+'배속');}
-function refreshAutoBtns(){$('zoomBtn').textContent='🔭 '+(ZOOM+1);if((AUTO.speed||1)>speedMax())AUTO.speed=speedMax();const sb=$('speedBtn');sb.textContent='x'+(AUTO.speed||1);{const n=$('spdNote');const on=(AUTO.speed||1)>SPD_Q;if(n)n.classList.toggle('on',on);document.body.classList.toggle('spdq',on);}sb.classList.toggle('on',(AUTO.speed||1)>1);const a=$('autoPickBtn'),m=$('autoMoveBtn');a.textContent='자동 선택 '+(AUTO.pick?'ON':'OFF');m.textContent='자동 이동 '+(AUTO.move?(DEV?(AUTO.hi?'🏆 고점':'📏 측정'):'ON'+(S&&S.amWarn?' ⚠피격↑':'')):'OFF');a.classList.toggle('on',AUTO.pick);m.classList.toggle('on',AUTO.move);a.style.display=DEV?'':'none';m.style.display='';const nc=$('noCdBtn');nc.style.display=DEV?'':'none';nc.textContent='쿨타임 무시 '+(DEV_NOCD?'ON':'OFF');nc.classList.toggle('on',DEV_NOCD);}
+function refreshAutoBtns(){$('zoomBtn').textContent='🔭 '+(ZOOM+1);if((AUTO.speed||1)>speedMax())AUTO.speed=speedMax();const sb=$('speedBtn');sb.textContent='x'+(AUTO.speed||1);{const n=$('spdNote');const on=(AUTO.speed||1)>SPD_Q;if(n)n.classList.toggle('on',on);}sb.classList.toggle('on',(AUTO.speed||1)>1);const a=$('autoPickBtn'),m=$('autoMoveBtn');a.textContent='자동 선택 '+(AUTO.pick?'ON':'OFF');m.textContent='자동 이동 '+(AUTO.move?(DEV?(AUTO.hi?'🏆 고점':'📏 측정'):'ON'+(S&&S.amWarn?' ⚠피격↑':'')):'OFF');a.classList.toggle('on',AUTO.pick);m.classList.toggle('on',AUTO.move);a.style.display=DEV?'':'none';m.style.display='';const nc=$('noCdBtn');nc.style.display=DEV?'':'none';nc.textContent='쿨타임 무시 '+(DEV_NOCD?'ON':'OFF');nc.classList.toggle('on',DEV_NOCD);}
 $('speedBtn').addEventListener('click',cycleSpeed);
 /* ---------- BGM ---------- */
 // 파일 없이 WebAudio로 만드는 부적튠. 실제 시간 기준으로 스케줄해서 게임 배속과 무관. 필드 곡 / 보스 곡 자동 전환
