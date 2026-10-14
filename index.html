@@ -5713,7 +5713,7 @@ function spawnBoss(i,cont){
   if(S.ev)endEvent(false);S.evBanner=null;
   // 기존 몹은 유지하되 너무 많으면 화면 밖 먼 몹만 정리 (화면에 보이는 몹은 절대 지우지 않음). 보스 등장 시 체력 30% 회복 (보스 러시는 없음, 처치 시 20%)
   const kN=(dfM().bc||35)+5;if(S.en.length>kN){const p0=S.p,vis=e=>Math.abs(e.x-p0.x)<W/2+60&&Math.abs(e.y-p0.y)<H/2+60;
-    const far=S.en.filter(e=>!vis(e)&&!e.elite&&!e.boss&&!ET[e.type].hid&&!e.stole&&!e.hunt&&e!==S.hb).sort((a,b)=>d2(b,p0)-d2(a,p0)),drop=new Set(far.slice(0,Math.max(0,S.en.length-kN)));S.en=S.en.filter(e=>!drop.has(e));}
+    const far=S.en.filter(e=>!vis(e)&&!e.elite&&!e.boss&&!e.tot&&!e.dummy&&!ET[e.type].hid&&!e.stole&&!e.hunt&&e!==S.hb)/* v438 즉사 패턴 토템은 절대 안 지움 (화면 밖 토템이 보스 등장 때 지워져서 못 부수고 즉사하던 문제) */.sort((a,b)=>d2(b,p0)-d2(a,p0)),drop=new Set(far.slice(0,Math.max(0,S.en.length-kN)));S.en=S.en.filter(e=>!drop.has(e));}
   if(!cont&&!rushOn())S.p.hp=Math.min(S.p.maxHp,S.p.hp+S.p.maxHp*.3); // 보스 러시는 등장 회복 없음 (처치 회복만)
   S.bossI=i;S.tele=[];S.hz=[];if(!cont){S.bStart=S.bt||0;S.bHit=0;}
   const j=bossHome(i),lp=Math.max(0,i-3);const a=Math.random()*TAU;spawnAt(bossTypeOf(i),clamp(S.p.x+Math.cos(a)*300,60,WW-60),clamp(S.p.y+Math.sin(a)*300,60,WH-60));
@@ -5841,7 +5841,7 @@ function totStart(){const m=doomMin(),late=m>=DOOM_LATE,n=late?(m>=DOOM_LATE+6?4
   for(const q of pts){const e=spawnAt('dummyS',q.x,q.y,true);if(!e)continue;Object.assign(e,{tot:1,hx:q.x,hy:q.y,x:q.x,y:q.y,maxHp:hp,hp,dmg:0,spd:0,cd:99,bk:0,elite:false,affs:null,r:24});S.tot.L.push(e);S.rings.push({x:q.x,y:q.y,r:10,max:100,life:.5,col:'#b56bff'});burst(q.x,q.y,'#7a2bd0',16);}
   doomBan('⛓ 영혼 결속',`저주의 토템 ${S.tot.L.length}개가 사슬로 영혼을 묶었어요`,'#c58bff',T,`${Math.round(T)}초 안에 토템을 모두 부수세요 · 못 부수면 즉사 (토템 근처에선 토템을 먼저 공격)`);}
 function totBreak(e){e.alive=false;burst(e.x,e.y,'#e0c2ff',26);S.rings.push({x:e.x,y:e.y,r:10,max:150,life:.45,col:'#e0c2ff'});ftext(e.x,e.y-56,'토템 파괴!','#e0c2ff',18);S.shake=Math.max(S.shake,.15);}
-function totTick(dt){const w=S.tot,p=S.p;w.t-=dt;const live=w.L.filter(e=>e.alive);
+function totTick(dt){const w=S.tot,p=S.p;w.t-=dt;const live=w.L.filter(e=>e.alive);/* v438 안전장치: 살아 있는 토템이 적 목록에서 빠졌으면 다시 넣음 */for(const e of live)if(!S.en.includes(e))S.en.push(e);
   if(!live.length){S.tot=null;doomEnd(true,'tot');p.hp=Math.min(p.maxHp,p.hp+p.maxHp*.08*healM());ftext(p.x,p.y-44,'⛓ 사슬이 풀렸다!','#e0c2ff',18);S.flash=Math.max(S.flash||0,.1);return;}
   if(w.t<=0){S.tot=null;for(const e of live){e.alive=false;S.bolts.push({x1:e.x,y1:e.y-40,x2:p.x,y2:p.y,life:.4});burst(e.x,e.y,'#7a2bd0',18);}doomEnd(false,'tot');S.flash=Math.max(S.flash||0,.3);S.shake=Math.max(S.shake,.7);burst(p.x,p.y,'#b56bff',30);killP('영혼 결속');}}
 // 토템 근처(공격 거리 + 60)에 있으면 토템을 먼저 공격
@@ -9671,7 +9671,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
-  {v:438,t:'💨 이동 속도 한도 카드 정리',items:[
+  {v:438,t:'⛓ 토템 사라짐 · 💨 이동 속도 카드',items:[
+    ['fix','⛓ 영혼 결속(토템) 중에 보스가 나오면 화면 밖 토템이 사라져서 부술 수 없는데 시간이 끝나면 즉사하던 문제를 고쳤어요'],
     ['fix','💨 이동 속도가 한도에 거의 닿았는데(화면엔 250/250) 이동 속도 카드·균열 보상이 계속 나오던 문제를 고쳤어요 — 한도 98%부터는 안 나와요 (돌격 기사는 그대로)']]},
   {v:435,t:'🔑 비밀번호 몰래 바뀜 막기',items:[
     ['fix','🔑 이름 비밀번호가 확인 없이 바뀌던 구멍을 서버에서도 막았어요 — 이제 「🔑 비밀번호 바꾸기」로만 바뀌어요']]},
