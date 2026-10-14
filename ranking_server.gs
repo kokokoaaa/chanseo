@@ -1,4 +1,6 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v11.2
+// 찬서 명예의 전당 서버 (Google Apps Script) v11.3
+//
+// v11.2 → v11.3 바뀐 점 (게임 v448) — AI 모험가 대답에 명예의 전당 요약(모드별 1~3위·레이드 보스별 1~2위·말 건 사람 기록)을 넣음
 //
 // v11.1 → v11.2 바뀐 점 (게임 v445) — 관리자 기록 삭제가 일간·주간·월간 줄은 남겨서, 기간 순위·종합에 지운 기록이 계속 보이던 문제
 //
@@ -541,7 +543,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 112, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 113, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -893,6 +895,7 @@ function ai_(q) {
   ctx = (Array.isArray(ctx) ? ctx : []).slice(-20).map(x => String(x || '').replace(/\s+/g, ' ').slice(0, 112)).filter(Boolean);
   if (!ctx.length) return { err: 'ctx' };
   const st = String(q.st || '').replace(/\s+/g, ' ').slice(0, 300);
+  const hof = String(q.hof || '').replace(/\s+/g, ' ').slice(0, 900); // v11.3 명예의 전당 요약
   let mine = []; try { mine = JSON.parse(String(q.mine || '[]')); } catch (err) {}
   mine = (Array.isArray(mine) ? mine : []).slice(-10).map(x => String(x || '').replace(/\s+/g, ' ').slice(0, 120)).filter(Boolean);
   // v8.9 지금 채팅방에 실제로 접속해 있는 사람 (앞쪽일수록 먼저 말 걸 사람)
@@ -929,6 +932,7 @@ function ai_(q) {
     (mine.length ? '네가 예전에 이 채팅에서 실제로 한 말(이것과 절대 모순되지 말고, 한 말은 기억하고 이어가):\n- ' + mine.join('\n- ') + '\n' : '') +
     '일관성: 네 이름·나이·직업·사는 모습·성격은 위 설정 그대로 절대 바꾸지 마. 이미 밝힌 사실(직업, 연봉 같은 걸 말했는지 안 했는지 등)을 뒤집거나 「~일 수도 있고요」처럼 얼버무려 번복하지 마. 비밀로 하기로 했으면 끝까지 비밀, 말했으면 같은 내용으로.\n' +
     (st ? '너의 지금 실제 상황(이 사실과 어긋나는 기록·난이도·결과를 지어내지 마): ' + st + '\n' : '') +
+    (hof ? '명예의 전당 (게임 안에서 누구나 볼 수 있는 실제 기록이고 너도 봤음. 누가 「명예의 전당 봐라」하면 여기서 확인한 걸로 반응해. 모르는 척하거나 「깼냐 안 깼냐」처럼 이미 나와 있는 걸 묻지 말고, 이 내용과 어긋나는 순위·점수·단계를 지어내지 마. 필요할 때만 자연스럽게 언급): ' + hof + '\n' : '') +
     (q.on != null ? '지금 채팅방에 접속해 있는 사람: ' + (onl.length ? onl.join(', ') : '(너 말고 아무도 없음)') + '. 말을 걸거나 대답할 상대는 이 사람들 중에서만 골라 (앞에 적힌 사람일수록 먼저). 최근 채팅에 이름이 있어도 이 목록에 없으면 이미 나간 사람이야 — 그 사람에게 말을 걸거나 대답하지 마 (자연스러우면 「OO님 나가셨네」 정도는 괜찮아). 아무도 없으면 혼잣말처럼 짧게.\n' : '') +
     '최근 채팅에서 「' + B[0] + '」 이름으로 된 줄은 전부 네가 한 말이야. 네 말에 네가 대꾸하거나 맞장구치지 마.\n' +
     rude + fight + tagS + emo +
