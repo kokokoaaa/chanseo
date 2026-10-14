@@ -3987,7 +3987,7 @@ const SR_MAX=.6;function SR(r){return r*(1+Math.min(SR_MAX,(typeof S!=='undefine
 const SR_IDS=['halo','k_cleave','b_cleave','bladestorm','battlecry','warcry','b_roar','b_leap','k_taunt','k_lance','k_oath','fortress','shieldbash','unbreak','armor','icecoin','spikearmor','colossus','frostnova','m_nova','nova','inferno','miasma','goldbomb','vaultbomb','punch','gravity','aftershock','sonicboom','x_sage','x_veil','x_phoenix','x_pegasus','xs_dragon','xr_frost','xr_golem','m_origin','m_wind','w_knight1','v_fort'];
 const selfAoe=()=>['paladin','knight','berserk'].includes(S.cls)||FIELD_CLS.has(S.cls)||tag('wave')>0||tag('guard')>=2||SR_IDS.some(k=>has(k));
 const CARDS=[
-  {req:()=>selfAoe()&&(S.p.selfR||0)<SR_MAX,n:'기운 확장',v:[[4,8,0]],t:v=>`주변 효과 범위 +${v[0]}% (내 주변에서 터지는 오라·베기·폭발·파동·장막 등, 최대 +${SR_MAX*100}%)`,a:(p,v)=>{p.selfR=Math.min(SR_MAX,(p.selfR||0)+v[0]/100);}},
+  {req:()=>selfAoe()&&(S.p.selfR||0)<SR_MAX*.98,n:'기운 확장',v:[[4,8,0]],t:v=>`주변 효과 범위 +${v[0]}% (내 주변에서 터지는 오라·베기·폭발·파동·장막 등, 최대 +${SR_MAX*100}%)`,a:(p,v)=>{p.selfR=Math.min(SR_MAX,(p.selfR||0)+v[0]/100);}},
   {req:()=>(S.p.cdR||0)<.395&&(gravOn()||waveOn()||shadowOn()||has('thornseed')||tag('nature')>=1||has('stormcall')||has('battlecry')||S.cls==='necro'||tag('undead')>=4||has('d_bear')),g:'주기형 효과',n:'시계 태엽',v:[[4,8,0]],t:v=>`${cdNames()} 쿨타임 −${v[0]}% (최대 40%)`,a:(p,v)=>{p.cdR=Math.min(.4,Math.round(((p.cdR||0)+v[0]/100)*1000)/1000);}},
   {req:()=>droneN()>0||has('turret')||has('wisp')||has('dealers')||has('mine'),n:'정비 키트',g:'소환물',v:[[8,15,0]],t:v=>`${sumNames()} 피해 +${v[0]}%`,a:(p,v)=>{p.sumD=(p.sumD||0)+v[0]/100;}},
   {req:()=>has('turret'),n:'포탑 개조',g:'포탑',v:[[.5,1,1]],t:v=>`포탑 지속 +${v[0]}초`,a:(p,v)=>{p.tuL=(p.tuL||0)+v[0];}},
@@ -4000,8 +4000,8 @@ const CARDS=[
   {req:()=>gravOn(),n:'중력자',g:'중력장',v:[[6,12,0]],t:v=>`중력장 범위 +${v[0]}%`,a:(p,v)=>{p.gvR=(p.gvR||0)+v[0]/100;}},
   {req:()=>tag('mark')>=1||has('judge'),n:'표적 지정',g:'표식',v:[[3,6,0]],t:v=>`표식된 적이 받는 추가 피해 +${v[0]}%`,a:(p,v)=>{p.mkD=(p.mkD||0)+v[0]/100;}},
   {req:()=>waveOn(),n:'진동판',g:'충격파',v:[[8,15,0]],t:v=>`충격파 피해 +${v[0]}%`,a:(p,v)=>{p.wvD=(p.wvD||0)+v[0]/100;}},
-  {cls:'knight',n:'방패 손잡이',req:()=>blockRaw()<BLOCK_CAP_F(),v:[[2,4,0]],t:v=>`막기 확률 +${v[0]}%`,a:(p,v)=>{p.block=(p.block||0)+v[0]/100;}},
-  {cls:'paladin',n:'방패 손잡이 ',req:()=>blockRaw()<BLOCK_CAP_F(),v:[[2,4,0]],t:v=>`막기 확률 +${v[0]}%`,a:(p,v)=>{p.block=(p.block||0)+v[0]/100;}},
+  {cls:'knight',n:'방패 손잡이',req:()=>blockRaw()<BLOCK_CAP_F()*.98,v:[[2,4,0]],t:v=>`막기 확률 +${v[0]}%`,a:(p,v)=>{p.block=(p.block||0)+v[0]/100;}},
+  {cls:'paladin',n:'방패 손잡이 ',req:()=>blockRaw()<BLOCK_CAP_F()*.98,v:[[2,4,0]],t:v=>`막기 확률 +${v[0]}%`,a:(p,v)=>{p.block=(p.block||0)+v[0]/100;}},
   {cls:'paladin',n:'성유',g:'성기사 오라',v:[[5,10,0]],t:v=>`신성 오라 범위 +${v[0]}%`,a:(p,v)=>{p.auraM=(p.auraM||0)+v[0]/100;}},
   {cls:'paladin',n:'성가',g:'성기사 오라',v:[[15,26,0]],t:v=>`신성 오라 피해 +${v[0]}%`,a:(p,v)=>{p.auraD=(p.auraD||0)+v[0]/100;}},
   {src:()=>skelMax()>0,cls:'necro',n:'뼈 가루',g:'해골 병사',v:[[8,15,0]],t:v=>`해골 병사 피해 +${v[0]}%`,a:(p,v)=>{p.skD=(p.skD||0)+v[0]/100;}},
@@ -4015,7 +4015,7 @@ const CARDS=[
   {src:()=>has('thornseed')||tag('nature')>=1||has('gravebloom')||has('gravvine'),cls:'druid',n:'가시 독',g:'덩굴 지대',v:[[8,15,0]],t:v=>`덩굴 지대 피해 +${v[0]}%`,a:(p,v)=>{p.vnD=(p.vnD||0)+v[0]/100;}},
   {src:()=>tag('alchemy')>=1,cls:'alch',n:'큰 병',g:'물약 투척',v:[[6,12,0]],t:v=>`물약 범위 +${v[0]}%`,a:(p,v)=>{p.ptR=(p.ptR||0)+v[0]/100;}},
   {src:()=>tag('alchemy')>=1,cls:'alch',n:'농축액',g:'물약 투척',v:[[8,15,0]],t:v=>`물약 피해 +${v[0]}%`,a:(p,v)=>{p.ptD=(p.ptD||0)+v[0]/100;}},
-  {src:()=>coinOn(),cls:'gambler',req:()=>headP()<.8,n:'타짜의 손',g:'동전 던지기',v:[[1,2,1]],t:v=>`동전 앞면 확률 +${v[0]}% (최대 80%)`,a:(p,v)=>{p.hdP=(p.hdP||0)+v[0]/100;}},
+  {src:()=>coinOn(),cls:'gambler',req:()=>headP()<.79,n:'타짜의 손',g:'동전 던지기',v:[[1,2,1]],t:v=>`동전 앞면 확률 +${v[0]}% (최대 80%)`,a:(p,v)=>{p.hdP=(p.hdP||0)+v[0]/100;}},
   {src:()=>coinOn(),cls:'gambler',n:'판돈',g:'동전 던지기',v:[[5,10,0]],t:v=>`앞면이 나온 공격의 피해 +${v[0]}%`,a:(p,v)=>{p.hdD=(p.hdD||0)+v[0]/100;}},
   {n:'숫돌',v:[[.5,1.1,1]],t:v=>`공격력 +${v[0]}`,a:(p,v)=>{p.dmg+=v[0];}},
   {n:'힘의 물약',v:[[4,8,1]],t:v=>`공격력 +${v[0]}%`,a:(p,v)=>{p.cdP=(p.cdP||0)+v[0]/100;}},
@@ -4027,7 +4027,7 @@ const CARDS=[
   // 사거리는 딜을 직접 올리지 않음(안전 거리용) → 원거리 시너지·궁수일 때만 등장
   {req:()=>tag('sniper')>0||S.cls==='archer'||has('longshot'),n:'조준경',v:[[6,11,0]],t:v=>`사거리 +${v[0]}%`,a:(p,v)=>{p.range*=1+v[0]/100;}},
   // 보스 러시·레이드엔 잡몹이 없어서 흡수 범위·경험치·골드 획득 카드는 안 나옴
-  {req:()=>!rushOn()&&S.p.magnet<MAGNET_CAP,n:'자석',v:[[15,28,0]],t:v=>`경험치·골드 흡수 범위 +${v[0]}%`,a:(p,v)=>{p.magnet*=1+v[0]/100;}},
+  {req:()=>!rushOn()&&S.p.magnet<MAGNET_CAP*.98,n:'자석',v:[[15,28,0]],t:v=>`경험치·골드 흡수 범위 +${v[0]}%`,a:(p,v)=>{p.magnet*=1+v[0]/100;}},
   {req:()=>!luckFull(),n:'네잎클로버',v:[[1.6,3.2,1]],t:v=>`행운 +${v[0]}. 높은 등급과 좋은 수치가 잘 나옵니다`,a:(p,v)=>{p.luck=Math.min(luckCapX(),Math.round((p.luck+v[0])*10)/10);}},
   {cc:1,n:'급소 노리기',v:[[2.5,4.5,1]],t:v=>`치명타 확률 +${v[0]}%`,a:(p,v)=>{p.crit+=v[0]/100;}},
   {cm:1,n:'치명상',v:[[30,50,0]],t:v=>`치명타 피해 +${v[0]}%`,a:(p,v)=>{p.critM+=v[0]/100;}},
@@ -4066,7 +4066,7 @@ const CARDS=[
 const LUCK_CAP_B=50,gLk=()=>gearA('luck'),LK=(b=0)=>Math.min(LUCK_CAP_F(),Math.max(0,S.p.luck+b+gLk()));
 // 행운이 최대인지 (장비 행운 포함). 도박사 「판돈 올리기」·「운명의 주사위」는 넘친 행운도 계산하므로 그때는 최대로 보지 않음 → 행운 카드·증강이 계속 나옴
 /* v380 도박사 고점 돌파(판돈 올리기·운명의 주사위)가 있으면 행운 카드·증강이 상한(50)을 넘어서도 실제로 올라감 (예전엔 카드는 나와도 50에서 잘림) */const luckCapX=()=>luckUse()?1e9:LUCK_CAP_F();
-const luckUse=()=>has('gb_allin')||has('gb_dice'),luckFull=()=>!luckUse()&&S.p.luck+gLk()>=LUCK_CAP_F();
+const luckUse=()=>has('gb_allin')||has('gb_dice'),luckFull=()=>!luckUse()&&S.p.luck+gLk()>=LUCK_CAP_F()-.5;
 // 행운은 '높게 나올 확률'만 올림: 행운이 상한이면 35% 확률로 범위 위쪽 절반에서 굴리고, 나머지는 행운 없는 것과 같음
 // 보상으로 받는 행운(행운 고양이·유물): 상한을 넘는 만큼은 버리지 않고 골드로 바꿔 줌. 1당 상점 행운 +1의 기본값(처음 살 때 값, 많이 살수록 오르는 몫은 뺌)
 function gainLuck(v){const p=S.p,add=Math.max(0,Math.min(v,LUCK_CAP_F()-p.luck)),ov=Math.round((v-add)*10)/10;p.luck=Math.round((p.luck+add)*10)/10;const g=ov>0?Math.round(ov*180*Math.sqrt(econ())):0;if(g){S.gold+=g;ftext(p.x,p.y-60,`행운 초과 → +${g} 골드`,'#ffd76a',16);}return {add,ov,g};}
@@ -5335,7 +5335,7 @@ const critMRaw=()=>S.p.critM+ex('dice')*.15+Math.max(0,critRaw()-CRIT_CAP)*.5,cr
 const critMul=()=>critMExtra()+critMBase();
 const critFull=()=>critRaw()>=CRIT_CAP,critMFull=()=>critMBase()>=CRIT_DMG_CAP_F()-1e-9;
 // v295: 상점 능력치도 레벨업 카드와 같은 기준으로 한도면 못 삼 (고점 돌파 증강이 있으면 계속 살 수 있음) · 근접 직업은 탄환 +1발이 의미 없어 안 팖
-/* v380 레벨업 화면에 보여 줄 「한도에 닿아 카드가 안 나오는 능력치」 */const capList=()=>{const L=[];try{if(critFull()&&!has('r_vital'))L.push('치명타 확률');if(critMFull()&&!has('g_deadeye'))L.push('치명타 피해');if(luckFull())L.push('행운');if(dodgeFull()&&!has('r_phantom'))L.push('회피');if(rawRate()>=RATE_CAP()*.98&&!rateUnc())L.push('공격 속도');if(lsFull())L.push('흡혈');if(regenFull())L.push('체력 재생');if((S.p.pierce||0)>=PIERCE_CAP&&!has('a_pierce'))L.push('관통');if(S.p.range>=RANGE_CAP())L.push('사거리');}catch(e){}return L;};
+/* v380 레벨업 화면에 보여 줄 「한도에 닿아 카드가 안 나오는 능력치」 */const capList=()=>{const L=[];try{if(critFull()&&!has('r_vital'))L.push('치명타 확률');if(critMFull()&&!has('g_deadeye'))L.push('치명타 피해');if(luckFull())L.push('행운');if(dodgeFull()&&!has('r_phantom'))L.push('회피');if(rawRate()>=RATE_CAP()*.98&&!rateUnc())L.push('공격 속도');if(lsFull())L.push('흡혈');if(regenFull())L.push('체력 재생');if((S.p.pierce||0)>=PIERCE_CAP&&!has('a_pierce'))L.push('관통');if(S.p.range>=RANGE_CAP()*.98)L.push('사거리');if(S.p.block&&blockRaw()>=BLOCK_CAP_F()*.98)L.push('막기');if(!spdRoom()&&!has('k_charger'))L.push('이동 속도');if(dashCdRaw()<=DASH_MIN_F()+.03)L.push('대시 재사용');if((S.p.dashD||0)>=DASH_MAX)L.push('대시 거리');}catch(e){}return L;};
 const stackCapped=x=>(x.k==='crit'&&critFull()&&!has('r_vital'))||(x.k==='critm'&&critMFull()&&!has('g_deadeye'))||(x.k==='luck'&&luckFull())||(x.k==='dodge'&&dodgeFull()&&!has('r_phantom'))||(x.k==='rate'&&rawRate()>=RATE_CAP()*.98&&!rateUnc())||(x.k==='ls'&&lsFull())||(x.k==='multi'&&MELEE_CLS.includes(S.cls));
 // 피격 기준 조건: 흡혈·재생 때문에 '체력 ○% 이하'는 거의 안 켜져서, '맞은 뒤 ○초' / '최근 받은 피해량'으로 판정
 const hitRec=(sec=2.5)=>S.t-(S.p.hitT??-99)<sec;
@@ -9221,8 +9221,8 @@ const isOff=a=>!DEF_AUGS.has(a.id);
 const poisonSrc=()=>canPoison()||['wheel','m_inferno','fog','venomcloud','f_napalm','f_gas','f_plaguebullet'].some(has);
 const AUG_REQ={v_fort:()=>S.cls==='knight',v_sky:()=>S.cls==='archer',p_crusade:()=>has('p_hammer'),al_reaction:()=>has('al_chain'),g_engineer:()=>has('turret'),n_ossuary:()=>has('n_bone'),m_steam:()=>S.cls==='mage'&&(mLock()===0||mLock()===1)&&tag(M_ELEM[mLock()])>=3,m_superc:()=>S.cls==='mage'&&(mLock()===1||mLock()===2)&&tag(M_ELEM[mLock()])>=3,mv_sun:()=>S.cls==='mage'&&mLock()<=0,mv_ice:()=>S.cls==='mage'&&[-1,1].includes(mLock()),mv_thor:()=>S.cls==='mage'&&[-1,2].includes(mLock()),ricochet:()=>!(S.cls==='mage'&&mLock()!==1),ricoshot:()=>!(S.cls==='mage'&&mLock()!==1),luckycoin:()=>!luckFull(),clover:()=>!luckFull(),gb_lucky:()=>!luckFull(),ghost:()=>S.p.pierce<PIERCE_CAP||has('a_pierce'),piercer:()=>S.p.pierce<PIERCE_CAP||has('a_pierce'),scope:()=>S.p.range<RANGE_CAP(),d_maul:()=>has('d_bear'),agony:()=>canPoison()&&(tag('fire')>0||S.cls==='mage'),n_spearstorm:()=>has('n_bone'),m_shower:()=>has('m_meteor'),p_hret:()=>has('p_hammer'),p_hstorm:()=>has('p_hammer'),b_whirl:()=>has('b_cleave'),
   turret2:()=>has('turret'),boltturret:()=>has('turret'),overwatch:()=>has('turret'),bastion:()=>has('turret'),selfdestruct:()=>has('turret'),
-  clover:()=>S.p.luck<LUCK_CAP_F()-1,fortune:()=>!critFull(),trigger:()=>rawRate()<RATE_CAP(),
-  evade:()=>S.p.dodge<DODGE_CAP_F(),luckydie:()=>!critFull(),
+  clover:()=>!luckFull(),fortune:()=>!critFull(),trigger:()=>rawRate()<RATE_CAP()*.98||rateUnc(),
+  evade:()=>!dodgeFull(),luckydie:()=>!critFull(),
   neuro:poisonSrc,spill:poisonSrc,plague:poisonSrc,contagion:poisonSrc,plaguelord:poisonSrc,
   shieldbash:()=>barrierMax()>0,chipshot:()=>orbitN()>0,corrode:poisonSrc,sawblade:()=>orbitN()>0,virulence:poisonSrc,toxicburst:poisonSrc,highbet:()=>!critMFull(),
   // 신규 시너지 증강은 1개만 가져도 기본 메커니즘이 켜지므로 등장 조건 없음
@@ -9489,7 +9489,7 @@ const lsEst=()=>{try{return (S.dps||0)*lsNow()*LS_BUFF*healM();}catch(e){return 
 /* v303: 지금 DPS로 계산한 흡혈량이 1초 한도를 넘으면(스탯 창 빨간색) 흡혈 카드·상점 흡혈 안 나옴 */
 const lsFull=()=>{try{const H=hRate('ls');return lsEst()>lsCapS()||!!(H&&H.w>0&&H.c/H.w<.7);}catch(e){return false;}};
 // 고점 돌파 증강이 있으면 그 능력치 카드는 상한을 넘어서도 계속 나옴 (넘은 만큼은 그 증강 보너스에만 계산)
-const cardOk=c=>!(REGEN_ONLY.has(c.n)&&regenFull())&&!(LS_ONLY.has(c.n)&&lsFull())&&!(RATE_ONLY.has(c.n)&&rawRate()>=RATE_CAP()*.98&&!rateUnc())&&!(PCT_CARDS.has(c.n)&&!pctOpen())&&!(MELEE_CLS.includes(S.cls)&&(c.n==='가속 탄'||MELEE_CARD_BAN.has(c.n)))&&!(c.cc&&critFull()&&!has('r_vital'))&&!(c.cm&&critMFull()&&!has('g_deadeye'))&&!(c.n==='관통 탄'&&((S.p.pierce>=PIERCE_CAP&&!has('a_pierce'))||rushOn()))&&!(c.n==='조준경'&&S.p.range>=RANGE_CAP())&&(!c.req||c.req());
+const cardOk=c=>!(REGEN_ONLY.has(c.n)&&regenFull())&&!(LS_ONLY.has(c.n)&&lsFull())&&!(RATE_ONLY.has(c.n)&&rawRate()>=RATE_CAP()*.98&&!rateUnc())&&!(PCT_CARDS.has(c.n)&&!pctOpen())&&!(MELEE_CLS.includes(S.cls)&&(c.n==='가속 탄'||MELEE_CARD_BAN.has(c.n)))&&!(c.cc&&critFull()&&!has('r_vital'))&&!(c.cm&&critMFull()&&!has('g_deadeye'))&&!(c.n==='관통 탄'&&((S.p.pierce>=PIERCE_CAP&&!has('a_pierce'))||rushOn()))&&!(c.n==='조준경'&&S.p.range>=RANGE_CAP()*.98)&&(!c.req||c.req());
 // 직업 선호 카드는 ×1.6, 최근 9장 안에 나온 카드는 ×0.3 (같은 카드 반복 방지)
 // 루트 스탯 카드: 열렸다고 계속 뜨지 않고, 그 루트가 최근 내 피해에서 차지하는 비중만큼 자주 뜸 (비중 0이면 드물게)
 const CARD_SRC={'정비 키트':['summon'],'포탑 개조':['summon'],'뼈 가루':['summon','undead'],'영혼 사슬':['summon','undead'],'독샘':['poison'],'연료':['fire'],'축전지':['thunder','elem'],'원소 결정':['elem','fire','thunder'],'정령 공명':['elem'],'씨앗 주머니':['nature'],'가시 독':['nature'],'큰 병':['alchemy'],'농축액':['alchemy'],'진동판':['wave'],'그림자 정수':['shadow'],'중력자':['grav'],'성수':['holy'],'성유':['holy'],'성가':['holy'],'시계 태엽':['grav','nature','wave','shadow','summon','elem']};
@@ -9674,6 +9674,9 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:442,t:'🔒 한도 카드 전체 정리',items:[
+    ['fix','🔒 능력치 한도 전체 점검: 막기·사거리·행운·흡수 범위·주변 효과 범위·동전 앞면 확률도 한도에 거의 닿으면(98%) 카드·증강·상점에 안 나와요. 회피·공격 속도 관련 증강(회피의 달인·방아쇠 등)도 같은 기준'],
+    ['change','🔒 레벨업 화면 「한도 도달」 목록에 막기·이동 속도·대시 재사용·대시 거리도 표시']]},
   {v:441,t:'🔒 한도 카드 정리',items:[
     ['fix','🔒 장비 회피로 회피 한도를 채워도 회피 카드(날렵한 몸놀림)가 계속 나오던 문제 — 이제 장비 회피까지 합쳐서 한도 98%부터 안 나와요'],
     ['fix','🔒 공격 속도가 「한도 도달」로 표시되는데 공격 속도 카드가 나오던 문제 (표시와 같은 기준으로 맞춤)']]},
@@ -15957,7 +15960,7 @@ function autoShop(){
   // 보물 빌드는 보유 골드가 곧 화력이라 절반은 남겨둠
   const keep=tag('house')>=4?S.gold*.5:0,reserve=()=>Math.max(reviveCost(),keep);let guard=0,bought=0;
   while(guard++<60){
-    const pool=STACKS.filter(x=>['atk','rate','hp','arm','crit','critm'].includes(x.k)&&!(x.k==='crit'&&critFull())&&!(x.k==='critm'&&critMFull())&&!(x.k==='rate'&&rawRate()>=RATE_CAP()));
+    const pool=STACKS.filter(x=>['atk','rate','hp','arm','crit','critm'].includes(x.k)&&!(x.k==='crit'&&critFull())&&!(x.k==='critm'&&critMFull())&&!(x.k==='rate'&&rawRate()>=RATE_CAP()*.98&&!rateUnc()));
     const x=pool.sort((a,b)=>stackCost(a)-stackCost(b))[0];if(!x||S.gold-stackCost(x)<=reserve())break;S.gold-=stackCost(x);S.buys[x.k]=(S.buys[x.k]||0)+1;try{qAdd('buy',1);}catch(er){}x.f(S.p);bought++;}
   toast(`자동 모드: 상점에서 ${bought}개 구매`);
 }
@@ -16741,7 +16744,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=441,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=442,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
