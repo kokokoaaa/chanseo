@@ -1,4 +1,7 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v10.3
+// 찬서 명예의 전당 서버 (Google Apps Script) v10.4
+//
+// v10.3 → v10.4 바뀐 점
+// - Sonnet에서 thinking:disabled가 거부되던 오류 수정 (between_tools로 생각 없이 바로 대답)
 //
 // v10.2 → v10.3 바뀐 점
 // - AI 모험가 대화 모델을 Haiku → Sonnet으로 (말귀·논리 개선, 토큰당 비용 약 3배)
@@ -494,7 +497,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 103, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 104, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -812,7 +815,7 @@ function ai_(q) {
   const res = UrlFetchApp.fetch('https://api.anthropic.com/v1/messages', {
     method: 'post', contentType: 'application/json', muteHttpExceptions: true,
     headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-    payload: JSON.stringify({ model: AI_MODEL, max_tokens: 200, thinking: { type: 'disabled' }, system: sys,
+    payload: JSON.stringify({ model: AI_MODEL, max_tokens: 200, thinking: { type: /haiku/.test(AI_MODEL) ? 'disabled' : 'between_tools' } /* v10.4 Sonnet 5.5는 생각 끄기를 between_tools로 */, system: sys,
       messages: [{ role: 'user', content: '최근 채팅:\n' + ctx.join('\n') + '\n\n' + (q.said ? '방금 「' + str_(q.me, 12) + '」가 이렇게 말했어: ' + String(q.said || '').slice(0, 200) + (q.named == 1 ? '\n(너를 직접 불렀어. 그 사람에게 대답해)' : q.cut == 1 ? '\n(너는 다른 사람들 대화에 옆에서 끼어드는 거야. 그 대화를 대신 이어받지 말고, 끼어드는 티가 나게 짧게 네 입장에서 한마디만 해)' : '\n(이 말이 너와 상관없거나 다른 사람끼리 하는 대화라 끼어들 이유가 없으면 다른 말 없이 「(패스)」라고만 써. 너한테 한 말이거나 전체에게 한 말이면 대답해)') : (q.tgt ? (q.gr == 1 ? '「' + str_(q.tgt, 12) + '」님이 방금 채팅방에 들어왔어. (최근 채팅에서 이 사람이 말 걸지 말라고 했으면 ' + (STUB ? '신경 쓰지 말고 성격대로 툭 인사해' : '「(패스)」라고만 써') + ') 네 말투로 짧게 인사해 (「ㅎㅇ」「오 OO님 ㅎㅇ」「왔어요?」 정도). 인사랑 질문을 한 번에 다 넣지 말고 짧게 하나만, 10자 안팎.' : '(먼저 확인: 최근 채팅에서 「' + str_(q.tgt, 12) + '」님이 말 걸지 말라거나 닥치라고 했으면, ' + (STUB ? '넌 그런 말 신경 안 쓰는 성격이니 알고도 거는 티를 내며 걸어 (「말 걸지 말라며 ㅋㅋ」 「알빠노」 식으로)' : '「(패스)」라고만 써') + ') 채팅에 「' + str_(q.tgt, 12) + '」님이 접속해 있는데 한동안 조용해. 그 사람에게 툭 한마디 걸어 — 네 성격·관심사에서 나온 짧은 말 하나 (게임 질문, 네 근황 얘기, 농담, 시비, 아까 그 사람이 한 말 꺼내기 등 매번 다르게). 「뭐함?」 같은 뻔한 말은 피하고, 최근 채팅에서 누가 이미 이 사람에게 한 질문과 겹치면 안 됨. 자기소개·인사·설명 붙이지 말고 짧게, 20자 안팎. 최근 채팅에서 그 사람과 하던 얘기가 있으면 그걸 짧게 이어서.') : '채팅이 조용해. 지금 아무도 너랑 대화하고 있지 않아. 그러니 혼잣말처럼 한마디만 해 (지금 하는 게임·감상·푸념·혼자 하는 다짐 같은 것, 「~네」「~다」「~함」처럼). 남의 말에 대꾸하듯 말하지 말고, 질문으로 끝내지 마. 가끔(5번에 1번쯤)만 접속 목록에 있는 사람에게 짧게 말을 걸어도 돼.')) + '\n\n「' + B[0] + '」로서 칠 한 줄:' }] })
   });
   if (res.getResponseCode() !== 200) return { err: 'api', code: res.getResponseCode(), msg: res.getContentText().slice(0, 300) };
