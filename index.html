@@ -9692,6 +9692,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:460,t:'📋 기록 창 정리',items:[
+    ['change','📋 명예의 전당 기록을 눌렀을 때 위쪽의 「⚒ 강화 +10 +10 …」 줄을 뺐어요 — 아래 장비 칸 그림에 부위마다 강화 수치가 다 나와요']]},
   {v:459,t:'🧪 회복 물약 그림',items:[
     ['look','🧪 <b>회복 물약</b>도 물약병 그림으로: 모두 같은 둥근 병에 빨간 물약, <b>차 있는 양이 회복량</b>이에요 — 하급 20% · 중급 40% · 상급 60% · 최상급 80% (엘릭서는 보라 물약이 가득)']]},
   {v:457,t:'✨ 엘릭서 그림',items:[
@@ -15822,8 +15824,8 @@ function hofAvS(cls,skin,aura,gear,look,anim,px){return withLook(look,()=>{const
     return HOF_AV[key]=c.toDataURL();}catch(e){return '';}});}
 // 명예의 전당: 마우스를 올리면(휴대폰은 누르면) 그 사람의 칭호·꾸미기·장비·결투 전적
 let HOF_B=[];
-function hofTipHtml(b){const A=b.title&&ACH.find(a=>a.k===b.title),cn=k=>{const x=k&&COS.find(q=>q.k===k);return x?x.n:'';},G=gearDecode(b.gear),D=b.dw,f=x=>`${Math.floor(x/60)}분 ${Math.floor(x%60)}초`;
-  const gl=G?GEAR_KEYS.filter(k=>G[k]>1).map(k=>`${GEAR[slotT(k)].ico}+${G[k]-1}`).join(' '):'';
+function hofTipHtml(b,noGl){/* v460 noGl: 기록 상세 창에서는 「⚒ 강화」 줄을 뺌 (아래 장비 칸 그림에 +강화가 다 나옴) */const A=b.title&&ACH.find(a=>a.k===b.title),cn=k=>{const x=k&&COS.find(q=>q.k===k);return x?x.n:'';},G=gearDecode(b.gear),D=b.dw,f=x=>`${Math.floor(x/60)}분 ${Math.floor(x%60)}초`;
+  const gl=G&&!noGl?GEAR_KEYS.filter(k=>G[k]>1).map(k=>`${GEAR[slotT(k)].ico}+${G[k]-1}`).join(' '):'';
   return `<b>${esc(b.name||'이름 없음')}</b>${A?` <span style="color:#ffd76a">「${A.n}」</span>`:''}
   <div>${CLASSES[b.cls]?CLASSES[b.cls].n:'?'} · ${DIFF[b.diff]?DIFF[b.diff].n:(r=>r?'레이드 '+r.n:'')(RAIDS.find(r=>'raid_'+r.k===b.diff))} · ${(/^raid/.test(String(b.diff))?raidPts(b):b.score).toLocaleString()}점</div>
   ${/^raid/.test(b.diff)?`<div>🗿 ${b.lvl}단계 · ${f(b.time)} 만에 처치${rOldCm(b)?(b.comment?` · 🤝 ${esc(String(b.comment).slice(0,40))}`:''):`${(b.team||[]).length?` · 🤝 ${b.team.map(q=>(CLASSES[q.cls]||{}).n||'').filter(Boolean).join(', ')}`:''}${b.comment?` · “${esc(String(b.comment).slice(0,40))}”`:''}`}</div>`:`<div>Lv ${b.lvl} · ${f(b.time)} · 처치 ${(+b.kills||0).toLocaleString()} · 보스 ${+b.bosses||0}</div>`}
@@ -15842,7 +15844,7 @@ const recP=b=>{const g=String(b.gear||''),d=g.split('!')[1]||'';return {cls:b.cl
 async function hofStatOpen(b){if(!b)return;let w=document.getElementById('hofSt');if(!w){w=document.createElement('div');w.id='hofSt';w.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:12px';document.body.appendChild(w);w.onclick=e=>{if(bgHit(e,w))w.remove();};}
   const box=x=>`<div style="background:#0d2a20;border:2px solid var(--brass);border-radius:14px;padding:14px 16px;max-width:640px;width:100%;max-height:86vh;overflow:auto;color:var(--ivory);font-size:14px;line-height:1.55">${x}<div style="text-align:center;margin-top:10px">${cmMine(b)?'<button class="btn" id="hsCm">💬 한마디 '+(b.comment?'고치기':'쓰기')+'</button> ':''}<button class="btn" id="hsX">닫기</button></div></div>`;
   // 그림은 도트 한 칸이 화면의 정수 픽셀이 되게 (92px 그림을 72·120px로 늘리면 도트가 깨져 보였음)
-  const RP=recP(b),av=profAv(RP,72),top=`<div style="display:flex;gap:10px;align-items:center;margin-bottom:6px">${av?`<img src="${av.src}" style="width:${av.css}px;height:${av.css}px;image-rendering:pixelated">`:''}<div>${hofTipHtml(b)}</div></div>`;
+  const RP=recP(b),av=profAv(RP,72),top=`<div style="display:flex;gap:10px;align-items:center;margin-bottom:6px">${av?`<img src="${av.src}" style="width:${av.css}px;height:${av.css}px;image-rendering:pixelated">`:''}<div>${hofTipHtml(b,1)}</div></div>`;
   // 장비: 기록에 클리어 당시 장비 상세가 있을 때만 (없으면 「정보 없음」. 지금 장비를 대신 보여 주지 않음). 외모(옷차림)는 기록에 있는 대로 그림
   const isDuel=!!b.duelHero&&!b.bot;/* v381 결투 탭: 결투에 쓴 캐릭터의 능력치·장비 (기록의 장비가 아님) */
   let G=null;const paint=x=>{w.innerHTML=box(top+(G&&G.n?G.html:'')+x);$('hsX').onclick=()=>w.remove();if($('hsCm'))$('hsCm').onclick=()=>{w.remove();cmEdit(b);};if(G)G.bind(w);};
@@ -16809,7 +16811,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=459,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=460,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
