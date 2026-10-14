@@ -9674,6 +9674,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:446,t:'🤝 레이드 동료 표시',items:[
+    ['fix','🤝 동료와 함께 깬 레이드 기록인데 명예의 전당 단상·목록에 동료가 안 보이던 문제 — 기록에는 동료가 저장돼 있었는데 화면에 그릴 때 빠지고 있었어요. 지금까지 올라간 기록도 동료가 다시 보여요']]},
   {v:444,t:'🤖 자동 이동 제한 해제',items:[
     ['change','🤖 자동 이동이 판 내내 잘 피해요 (예전엔 10분 뒤부터 잘 맞았음). 자동 이동으로 해도 받는 피해·점수 불이익이 없어요. 대신 이벤트·의뢰는 직접 해야 해요']]},
   {v:443,t:'🏆 명예의 전당 자동 등록 보강',items:[
@@ -14599,7 +14601,7 @@ const rOldCm=b=>/^raid/.test(String(b.diff||''))&&!b.bot&&(+b.build||+segOf(b,8)
 function cmTeam(b){if(!rOldCm(b))return [];const me=clsS(b).split('#')[0].split(':')[0],L=String(b.comment||'').split(',').map(x=>x.trim().replace(/\s*Lv\d+$/,'')),out=[];let skip=0;
   const mine=b.name&&b.name===myNick(),H=mine?(()=>{try{return myHeroes();}catch(e){return [];}})():[];
   for(const n of L){const k=Object.keys(CLASSES).find(c=>CLASSES[c].n===n);if(!k)continue;if(k===me&&!skip){skip=1;continue;}const h=H.filter(x=>x.cls===k).sort((x,y)=>(y.score||0)-(x.score||0))[0];out.push({cls:k,skin:h&&h.skin||'',look:'new',dr:h&&/^[0-9a-z\-]{14}$/.test(h.dr||'')?h.dr:''});}return out.slice(0,2);}
-function normBoard(list){return list.map(b=>({...b,per:b.per||(String(b.diff||'').split('|')[1]||''),dw:dwOf(b.dw),diff:dOf(b),fx:fxOk(clsS(b).split('#')[1]||b.fx||''),bonus:bonusOf(b),ap:apOf(b),title:titleOf(b),aura:auraOf(b),gear:(g=>String(g).includes('!')||!segOf(b,10)?g:g+'!'+segOf(b,10))(gearOf(b)),look:lookOf(b),frame:frameOf(b),build:buildOf(b),team:(t=>t.length?t:Array.isArray(b.bteam)?b.bteam:cmTeam(b))(teamOf(b)),gd:b.gd||segOf(b,11),skin:skinOf(b),cls:clsS(b).split('#')[0].split(':')[0],name:String(b.name||''),time:+b.time||0,lvl:+b.lvl||0,kills:+b.kills||0,bosses:+b.bosses||0,comment:String(b.comment||''),score:calcScore(b)})).map(b=>{/* v307: 외형이 저장 안 된 내 기록(예전 판)은 지금 그 직업 장비 모습으로 (다른 기기에서도 같은 계정이면 같게 보임) *//* v310: 내 기록은 「그 판 때」 장비 모습으로 — 예전 서버(직업 칸 120자)에서 외형이 잘려 사라졌거나 다른 모습이 들어간 기록은, 이 기기에 남은 그 판 사본(잘리지 않음)의 외형으로 보여 주고 서버도 고침. 사본이 없으면 서버 기록 그대로 (지금 장비로 지어내지 않음) */try{if(b.name&&b.name===myNick()&&CLASSES[b.cls]){const L=myRecs()[b.diff],same=L&&L.name===b.name&&Math.abs((+L.at||0)-(+b.at||0))<60000?L:null,d=same?segOf(same,10):'',g=String(b.gear||''),cur=g.split('!')[1]||'';if(/^[0-9a-z\-]{14}$/.test(d)&&cur!==d)return {...b,gear:g.split('!')[0]+'!'+d,look:segOf(same,6)==='o'?'old':'new',drMine:1};}}catch(e){}return b;}).sort((a,b)=>b.score-a.score);}
+function normBoard(list){return list.map(b=>({...b,per:b.per||(String(b.diff||'').split('|')[1]||''),dw:dwOf(b.dw),diff:dOf(b),fx:fxOk(clsS(b).split('#')[1]||b.fx||''),bonus:bonusOf(b),ap:apOf(b),title:titleOf(b),aura:auraOf(b),gear:(g=>String(g).includes('!')||!segOf(b,10)?g:g+'!'+segOf(b,10))(gearOf(b)),look:lookOf(b),frame:frameOf(b),build:buildOf(b),team:(t=>t.length?t:Array.isArray(b.team)&&b.team.length?b.team/* v446 두 번 정리될 때(서버 기록 → 내 기록 합치기) 이미 읽어 둔 동료를 지우던 문제 */:Array.isArray(b.bteam)?b.bteam:cmTeam(b))(teamOf(b)),gd:b.gd||segOf(b,11),skin:skinOf(b),cls:clsS(b).split('#')[0].split(':')[0],name:String(b.name||''),time:+b.time||0,lvl:+b.lvl||0,kills:+b.kills||0,bosses:+b.bosses||0,comment:String(b.comment||''),score:calcScore(b)})).map(b=>{/* v307: 외형이 저장 안 된 내 기록(예전 판)은 지금 그 직업 장비 모습으로 (다른 기기에서도 같은 계정이면 같게 보임) *//* v310: 내 기록은 「그 판 때」 장비 모습으로 — 예전 서버(직업 칸 120자)에서 외형이 잘려 사라졌거나 다른 모습이 들어간 기록은, 이 기기에 남은 그 판 사본(잘리지 않음)의 외형으로 보여 주고 서버도 고침. 사본이 없으면 서버 기록 그대로 (지금 장비로 지어내지 않음) */try{if(b.name&&b.name===myNick()&&CLASSES[b.cls]){const L=myRecs()[b.diff],same=L&&L.name===b.name&&Math.abs((+L.at||0)-(+b.at||0))<60000?L:null,d=same?segOf(same,10):'',g=String(b.gear||''),cur=g.split('!')[1]||'';if(/^[0-9a-z\-]{14}$/.test(d)&&cur!==d)return {...b,gear:g.split('!')[0]+'!'+d,look:segOf(same,6)==='o'?'old':'new',drMine:1};}}catch(e){}return b;}).sort((a,b)=>b.score-a.score);}
 // 내 등록 기록 백업: 서버가 어떤 기록(예: 새 난이도)을 반영하지 못해도 내 화면에서는 사라지지 않게. 서버에 더 높은 기록이 있으면 서버 것을 씀
 const myRecs=()=>{try{return JSON.parse(localStorage.getItem('chanseo_myrec')||'{}');}catch(e){return {};}};
 const saveMyRec=r=>{try{const m=myRecs();const old=m[r.diff];if(!old||scoreOf({...r})>=scoreOf({...old}))m[r.diff]=r;localStorage.setItem('chanseo_myrec',JSON.stringify(m));}catch(e){}};
@@ -16750,7 +16752,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=445,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=446,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
