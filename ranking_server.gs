@@ -1,4 +1,12 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v10.8
+// 찬서 명예의 전당 서버 (Google Apps Script) v10.9
+//
+// v10.8 → v10.9 바뀐 점 (게임 v435) — 비밀번호가 몰래 바뀌던 구멍 막기
+// - 이미 주인이 있는 이름의 비밀번호 바꾸기(rekey)는 게임이 「비밀번호 바꾸기 확인」 표시(pc:1)를 보낼 때만 받음.
+//   예전 게임은 주인 기기에서 비밀번호 칸에 다른 값을 넣고 저장만 해도 묻지 않고 비밀번호를 바꿔 버려서, 오타 한 번에 다른 기기가 모두 막혔음
+// - 같은 열쇠로 바꾸라는 요청은 아무것도 바꾸지 않음
+// - 관리자 ?accts=1&dk= → 서버에 있는 모든 계정(계정 시트 + 명예의 전당 이름): 주인 열쇠 앞 6자리(기록 줄·계정 시트, 서로 다르면 표시)·마지막 저장·메달·크기·기록 줄 수
+//   ?acctd=이름&dk= → 그 계정의 저장 데이터 (관리자 화면에서 메달·강화·장비·캐릭터를 풀어서 보여 줌)
+// - 관리자 ?cbaks=이름&dk=&pk=(이름+비밀번호 열쇠) → 그 비밀번호가 지금 주인 열쇠와 맞는지, 기록 줄마다 열쇠가 같은지(섞여 있는지)까지 보여 줌
 //
 // v10.7 → v10.8 바뀐 점 (게임 v434) — 「비밀번호가 맞지 않아요」 원인 추적
 // - 「주인기록」 시트: 이름 주인 열쇠가 바뀔 때마다(처음 가져감·비밀번호 바꾸기·관리자 지정·주인 초기화·저장으로 계정 열쇠 바뀜) 시각·이름·무엇·예전/새 열쇠 앞 6자리·기기
@@ -524,7 +532,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 108, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 109, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -668,7 +676,20 @@ function cbaks_(q) {
   let log = []; try { const s = clogSheet_(), last = s.getLastRow(); if (last >= 2) { const n = Math.min(last - 1, CLOG_MAX + 200); log = s.getRange(last - n + 1, 1, n, 10).getValues().filter(x => String(x[1]) === nm).slice(-40).reverse()
     .map(x => ({ t: +x[0] || 0, w: String(x[2]), at: +x[3] || 0, base: x[4] === '' ? null : +x[4], md: +x[5] || 0, om: +x[6] || 0, len: +x[7] || 0, ol: +x[8] || 0, dev: String(x[9] || '') })); } } catch (err) {}
   let olog = []; try { const s = ologSheet_(), last = s.getLastRow(); if (last >= 2) { const n = Math.min(last - 1, OLOG_MAX + 200); olog = s.getRange(last - n + 1, 1, n, 6).getValues().filter(x => String(x[1]) === nm).slice(-40).reverse().map(x => ({ t: +x[0] || 0, w: String(x[2]), o: String(x[3]), n: String(x[4]), dev: String(x[5]) })); } } catch (err) {}
-  return { ok: 1, cur: cur.r ? { at: cur.at, md: cur.md, len: cur.data.length } : null, baks, log, olog, own: String(ownerKh_(nm) || '').slice(0, 6) };
+  let diag = null; try { const s0 = sheet_(), last = s0.getLastRow(), kc = HEAD.indexOf('kh'); const rows = []; if (last >= 2) { const v = s0.getRange(2, 1, last - 1, kc + 1).getValues(); v.forEach(r => { if (String(r[0]) === nm) rows.push({ d: String(r[1]).slice(0, 24), k: String(r[kc] || '').slice(0, 6) }); }); }
+    const ok6 = String(owner_(s0, nm).kh || '').slice(0, 6), ac6 = String(acctKh_(nm) || '').slice(0, 6), pk = q.pk ? kh_(q.pk) : '';
+    diag = { rows, rec6: ok6, acct6: ac6, mixed: new Set(rows.map(r => r.k).filter(Boolean)).size > 1, pin6: pk.slice(0, 6), match: pk ? pk === ownerKh_(nm) : null }; } catch (err) {}
+  return { ok: 1, cur: cur.r ? { at: cur.at, md: cur.md, len: cur.data.length } : null, baks, log, olog, own: String(ownerKh_(nm) || '').slice(0, 6), diag };
+}
+// v10.9 관리자: 서버에 있는 계정 전체 목록
+function accts_(q) {
+  if (!devOk_(q.dk)) return { err: 'key' };
+  const M = {}, g = nm => M[nm] || (M[nm] = { n: nm, rec: 0, rk: '', rks: {}, ak: '', at: 0, md: 0, len: 0, best: 0, last: 0 });
+  try { const s = sheet_(), last = s.getLastRow(), kc = HEAD.indexOf('kh'), ic = HEAD.indexOf('score'), ia = HEAD.indexOf('at');
+    if (last >= 2) s.getRange(2, 1, last - 1, kc + 1).getValues().forEach(r => { const nm = String(r[0]); if (!nm) return; const o = g(nm); o.rec++; const k = String(r[kc] || ''); if (k && !/^#/.test(k)) { if (!o.rk) o.rk = k; o.rks[k.slice(0, 6)] = 1; } o.best = Math.max(o.best, +r[ic] || 0); o.last = Math.max(o.last, +r[ia] || 0); }); } catch (err) {}
+  try { const s = acctSheet_(), last = s.getLastRow(); if (last >= 2) s.getRange(2, 1, last - 1, 4 + ACCT_MAX).getValues().forEach(r => { const nm = String(r[0]); if (!nm) return; const o = g(nm); o.ak = String(r[1] || ''); o.at = +r[2] || 0; o.md = +r[3] || 0; o.len = r.slice(4).reduce((a, x) => a + String(x || '').length, 0); }); } catch (err) {}
+  const L = Object.keys(M).map(nm => { const o = M[nm]; return { n: nm, rec: o.rec, rk: o.rk.slice(0, 6), ak: o.ak.slice(0, 6), mixed: Object.keys(o.rks).length > 1, at: o.at, md: o.md, len: o.len, best: o.best, last: o.last }; });
+  return { ok: 1, L };
 }
 // 관리자: 백업으로 되돌림. 저장 시각을 지금으로 바꿔서 모든 기기가 「서버 데이터가 바뀜」으로 보고 불러오기를 고르게 함
 function crestore_(d) {
@@ -990,6 +1011,8 @@ function doGet(e) {
   if (q.prof) { let pf = ''; try { pf = CacheService.getScriptCache().get('pf_' + dmKey_(q.prof)) || ''; } catch (err) {} return out_({ pf }); }
   if (q.cload) return cload_(q);
   if (q.cbaks) return out_(cbaks_(q));
+  if (q.accts) return out_(accts_(q));
+  if (q.acctd) { if (!devOk_(q.dk)) return out_({ err: 'key' }); const c = acctCur_(acctSheet_(), str_(q.acctd, 12)); return out_({ ok: 1, at: c.at || 0, md: c.md || 0, data: c.data || '' }); }
   if (q.dels) return out_({ dels: delList_() });
   if (q.dmack) return out_(dmAck_(q));
   if (q.dms) return out_(dmList_(q));
@@ -1104,6 +1127,8 @@ function doPost(e) {
     if (d.rekey) {
       const nk = kh_(d.nk);
       if (!nk || nm0 === '익명') return out_({ ok: false });
+      if (own.kh && nk === own.kh) return out_({ ok: true, result: 'rekey', n: 0, same: 1 });
+      if (own.kh && !d.pc) { olog_(nm0, '거절: 확인 없는 비밀번호 바꾸기(예전 게임)', own.kh, nk, d.dv); return out_({ ok: false, err: 'pc' }); }
       olog_(nm0, '비밀번호 바꾸기(주인 기기)', own.kh || my, nk, d.dv);
       own.rows.forEach(rw => s.getRange(rw, HEAD.indexOf('kh') + 1).setValue(nk));
       acctSetKh_(nm0, nk);
