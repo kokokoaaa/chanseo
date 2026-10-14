@@ -15915,7 +15915,7 @@ function autoMoveVec0(){
     for(const b of shots){const ex=b.vx*.6,ey=b.vy*.6,L2=ex*ex+ey*ey||1,u=clamp(((tx-b.x)*ex+(ty-b.y)*ey)/L2,0,1),d=Math.hypot(b.x+ex*u-tx,b.y+ey*u-ty),R0=(b.r||5)+p.r+22;if(d<R0)sc-=(R0-d)*(S.easyAI?3+3*(S.easyK||0):6);}
     // 보스전: 보스를 사거리의 50~95% 안에 두면 됨 (사거리가 길수록 움직일 여유가 커짐). 체력이 낮으면 70% 이상 거리 유지
     // 주변에 잡몹이 붙어 있으면 보스 거리보다 잡몹 회피를 우선. 보스 몸통 가까이는 언제나 크게 감점
-    if(bossOn){const e=S.boss,cl=(auR||mel)&&!low,minW=e.r+p.r+(cl?(mel?20:40):90),lo=cl?minW:Math.max(minW,p.range*(low?.7:.5)),hi=mel&&!low?Math.max(minW+15,e.r+pr*.8):auR&&!low?Math.max(minW+20,auR+e.r*.8):p.range*.95,db=Math.hypot(e.x-tx,e.y-ty),k=danger>=3?.45:danger>=1?.7:1;
+    if(bossOn){const e=S.boss,cl=(auR||mel)&&!low,minW=e.r+p.r+(cl?(mel?34:40):90)/* v419 근접: 보스 몸통과 20 → 34 (돌진에 부딪혀 쓰러지던 문제) */,lo=cl?minW:Math.max(minW,p.range*(low?.7:.5)),hi=mel&&!low?Math.max(minW+15,e.r+pr*.8):auR&&!low?Math.max(minW+20,auR+e.r*.8):p.range*.95,db=Math.hypot(e.x-tx,e.y-ty),k=danger>=3?.45:danger>=1?.7:1;
       sc-=k*(db<lo?(lo-db)*2.4:db>hi?(db-hi)*3:0);if(db<minW)sc-=(minW-db)*(DEV&&AUTO.hi?9:4);}
     // 보스 예고 공격·장판 회피
     for(const t of S.tele){if(!t.dmg&&t.k==='c')continue;
