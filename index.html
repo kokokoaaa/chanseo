@@ -9674,6 +9674,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:443,t:'🏆 명예의 전당 자동 등록 보강',items:[
+    ['fix','🏆 판이 끝날 때 서버 응답이 늦으면 「서버에 연결하지 못했어요」로 등록이 안 되던 문제 — 이름 확인이 늦어도 기록을 바로 보내고, 응답이 없으면 최대 3번까지 다시 보내요']]},
   {v:442,t:'🔒 한도 카드 전체 정리',items:[
     ['fix','🔒 능력치 한도 전체 점검: 막기·사거리·행운·흡수 범위·주변 효과 범위·동전 앞면 확률도 한도에 거의 닿으면(98%) 카드·증강·상점에 안 나와요. 회피·공격 속도 관련 증강(회피의 달인·방아쇠 등)도 같은 기준'],
     ['change','🔒 레벨업 화면 「한도 도달」 목록에 막기·이동 속도·대시 재사용·대시 거리도 표시']]},
@@ -14552,7 +14554,7 @@ const nKeySet=(n,k)=>{try{const m=nKeys();m[n]=k;localStorage.setItem('chanseo_n
 const keyFor=n=>n===myNick()?MYKEY:nKeys()[n]||'';
 // 서버가 바쁠 때(동시 요청이 몰림) 한 번 실패해도 바로 「연결 못 함」이 뜨지 않게 1.5초 뒤 한 번 더 물어봄
 async function nameOwned3(nm,key){const r=await nameOwned3a(nm,key);if(r!==null)return r;await new Promise(z=>setTimeout(z,1500));return nameOwned3a(nm,key);}
-async function nameOwned3a(nm,key){const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),10000):0;
+async function nameOwned3a(nm,key){const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),20000):0;
   try{const r=await fetch(SHEET_URL+'?own='+encodeURIComponent(nm)+'&k='+encodeURIComponent(key||MYKEY)+'&dv='+(()=>{try{return onlId();}catch(e){return '';}})(),{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();return j&&'owned' in j?!!j.owned:null;}catch(e){return null;}finally{clearTimeout(to);}}
 // 개발자 모드: 명예의 전당 기록이 몇 번째 버전에서 나왔는지. v100부터는 기록에 저장, 그 전은 기록 시각 ↔ 배포 시각(초 − 1791000000, BUILD) 표로 추정
 const BUILD_AT=[[339464,2],[339689,3],[339998,4],[340233,5],[341524,6],[344191,7],[347478,8],[359468,9],[359867,10],[361917,11],[362237,12],[367440,13],[368584,14],[370091,15],[374613,16],[375742,17],[379539,18],[381722,19],[383512,20],[384757,21],[385054,22],[385423,23],[385724,24],[387694,25],[388384,26],[389114,27],[389689,28],[390004,29],[390416,30],[410725,31],[411274,32],[414292,33],[415053,34],[429735,35],[430942,36],[433707,38],[434562,39],[434643,40],[435612,41],[436078,42],[436475,43],[436614,44],[437417,45],[437470,46],[437948,47],[438396,48],[439410,49],[440981,50],[443769,51],[444186,52],[444449,53],[444846,54],[445352,55],[446021,56],[446660,57],[447060,58],[447459,59],[447677,60],[447839,61],[449847,62],[449967,63],[450055,64],[450832,66],[451364,67],[452069,68],[457582,69],[458404,70],[458835,71],[459738,72],[460371,73],[461108,74],[465967,75],[466787,76],[467738,77],[468207,78],[469021,79],[471199,80],[471386,81],[471615,82],[471813,83],[471972,84],[472174,85],[472364,86],[472501,87],[472657,88],[473000,89],[473101,90],[473359,91],[473601,92],[473786,93],[474319,94],[477467,95]];
@@ -15884,7 +15886,7 @@ async function submitScore(nick,comment,run){
     if(sheet){
       // 이 기기에서 주인 확인이 안 되는 이름: 그 자리에서 이름 비밀번호로 확인하고 바로 등록할 수 있게 (이 판은 최근 기록에도 남아 있음)
       const own=nick!=='익명'?await nameOwned3(nick,MYKEY):false;
-      if(own===null){if(btn)btn.disabled=false;say('서버에 연결하지 못했어요. 잠시 뒤 다시 등록해 주세요. (이 판은 📜 내 최근 기록에 남아 있어요)');return;}
+      /* v443 이름 주인 확인이 늦거나 실패해도 기록은 그냥 보냄 (서버가 주인 확인을 다시 해서 아니면 「owned」로 거절함). 예전엔 확인 응답을 못 받으면 보내지도 않고 「서버에 연결하지 못했어요」로 끝났음 */
       if(own){if(btn)btn.disabled=false;if(!msg)return;
         msg.innerHTML=`'${esc(nick)}'은(는) 이 기기에서 주인 확인이 안 되는 이름이에요. <b>내 이름이면 이름 비밀번호</b>를 넣어 주세요.<div style="display:flex;gap:6px;margin:6px 0"><input id="rPin" type="password" autocomplete="off" placeholder="이름 비밀번호" style="flex:1;min-width:0;padding:6px 10px;border-radius:8px;border:1px solid var(--brass);background:rgba(0,0,0,.3);color:var(--ivory)"><button class="btn" id="rPinGo" style="white-space:nowrap">🔑 확인하고 등록</button></div><small style="opacity:.8">비밀번호를 정한 적이 없으면 이름을 처음 쓴 기기에서 👤 내 이름 → 비밀번호를 정해 주세요. 이 판은 🏆 명예의 전당 → 📜 내 최근 기록에 남아 있어서 나중에 등록할 수 있어요.</small>`;
         const go=async()=>{const pin=($('rPin').value||'').trim();if(!pin)return;$('rPinGo').disabled=true;const nk=pinKey(nick,pin),ok=await nameOwned3(nick,nk);
@@ -15892,7 +15894,9 @@ async function submitScore(nick,comment,run){
           else{$('rPinGo').disabled=false;const sm=msg.querySelector('small');if(sm)sm.innerHTML=ok===null?'서버에 연결하지 못했어요. 잠시 뒤 다시 눌러 주세요.':'<b style="color:#ff8a8a">비밀번호가 맞지 않아요.</b> 이름을 처음 쓴 기기에서 정한 비밀번호를 넣어 주세요. 이 판은 📜 내 최근 기록에 남아 있어요.';}};
         $('rPinGo').onclick=go;$('rPin').addEventListener('keydown',e=>{if(e.isComposing||e.keyCode===229)return;if(e.key==='Enter')go();});return;}
       // 응답을 읽어서 거절(이름 주인 다름·지운 기록·서버 바쁨)이면 「등록함」으로 표시하지 않음. 응답을 못 읽으면 예전처럼 보내기만
-      let res=null;try{const x=await fetch(SHEET_URL,{method:'POST',body:JSON.stringify(rec)});res=await x.json();}catch(e){try{await fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(rec)});}catch(e2){}}
+      let res=null;for(let tr=0;tr<3&&!res;tr++){if(tr){say(`서버 응답이 늦어서 다시 보내는 중… (${tr+1}/3)`);await new Promise(z=>setTimeout(z,3000*tr));}try{const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),30000):0;try{const x=await fetch(SHEET_URL,{method:'POST',body:JSON.stringify(rec),signal:ac?ac.signal:undefined});res=await x.json();}finally{clearTimeout(to);}}catch(e){}}
+      if(!res){try{await fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(rec)});}catch(e2){}}
+      if(res&&res.ok===false&&res.result==='owned'&&own===null&&!run._pin){run._pin=1;/* 확인 응답을 못 받았던 경우: 서버가 주인 아님으로 거절 → 비밀번호 칸을 띄움 */const o2=await nameOwned3(nick,MYKEY);if(o2!==false){if(btn)btn.disabled=false;submitScore(nick,comment,{...run});return;}}
       if(res&&res.ok===false){if(btn)btn.disabled=false;say(res.result==='owned'?`'${nick}'은(는) 이 기기에서 주인 확인이 안 되는 이름이에요. 👤 내 이름에서 이름 비밀번호를 넣어 주세요. (이 판은 📜 내 최근 기록에 남아 있어요)`:res.result==='deleted'?'관리자가 지운 기록이라 다시 올릴 수 없어요.':'서버가 바빠서 등록하지 못했어요. 잠시 뒤 다시 등록해 주세요. (이 판은 📜 내 최근 기록에 남아 있어요)');return;}
       postPer(rec);if(better){saveMyRec(rec);recentMark(run);}
       const row=better?{...rec,id:'s_'+nick+'_'+dk}:{...cur,comment};BOARD=normBoard([...(BOARD||[]).filter(b=>!(b.name===nick&&b.diff===dk)),row]).map(b=>({...b,id:b.id||'s_'+b.name}));
@@ -16744,7 +16748,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=442,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=443,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
