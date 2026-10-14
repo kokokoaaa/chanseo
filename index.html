@@ -11405,7 +11405,8 @@ const mstD=c=>{META.mst=META.mst||{};const o=META.mst[c]||(META.mst[c]={x:0});if
   if(!o.v2){o.v2=1;let x=o.x||0,l=0;while(l<6&&x>=[200,350,500,650,850,1100][l]){x-=[200,350,500,650,850,1100][l];l++;}if(o.d>l){o.d=l;if(l<4)o.s=-1;if(l<2)o.b=-1;}}
   if(!o.v3){o.v3=1;/* 예전 한 줄기 → 그 갈래로 그대로 옮김 */o.t=[0,1,2].map(()=>({d:0,s:-1}));o.r=o.d>=1?1:0;if(o.b>=0&&o.d>=2)o.t[o.b]={d:Math.min(5,o.d-1),s:o.d>=4?o.s:-1};delete o.b;delete o.s;mstSync(o);}
   if(!Array.isArray(o.t))o.t=[0,1,2].map(()=>({d:0,s:-1}));return o;};
-const mstLv=c=>{let x=mstD(c).x||0,l=0;while(l<MST_MAX&&x>=mstNeed(l)){x-=mstNeed(l);l++;}return {l,x,need:l<MST_MAX?mstNeed(l):0};};
+/* v454 개발자 모드: 마스터리 무료 찍기 (이 기기에만 저장, 끄면 실제 레벨만큼만 켜짐) */let MST_DEVF=(()=>{try{return localStorage.getItem('chanseo_mstdev')==='1';}catch(e){return false;}})();let MST_REAL=0;const mstDevOn=()=>DEV&&MST_DEVF&&!MST_REAL,mstReal=f=>{MST_REAL=1;try{return f();}finally{MST_REAL=0;}};/* 도전과제·핵심 능력 사용 기록은 무료 찍기와 상관없이 실제 레벨로 */
+const mstLv=c=>{if(mstDevOn())return {l:MST_MAX,x:0,need:0};let x=mstD(c).x||0,l=0;while(l<MST_MAX&&x>=mstNeed(l)){x-=mstNeed(l);l++;}return {l,x,need:l<MST_MAX?mstNeed(l):0};};
 const mstUsed=c=>MST_COST.slice(0,mstD(c).d).reduce((a,b)=>a+b,0);
 const mstFree=c=>mstLv(c).l-mstUsed(c);
 const mstCapN=()=>Object.keys(MST).filter(c=>META.mst&&META.mst[c]&&(META.mst[c].t||[]).some(x=>x.d>=5)).length;
@@ -11418,7 +11419,7 @@ function mstApply(cls){S.mk={};const T=MST[cls];if(!T)return;const p=S.p,V=mstLi
   V.t.forEach((x,b)=>{const B=T.br[b],U=B&&B.sub[x.s];if(!B)return;if(x.d>=1)mstTf(B.tf,p);if(x.d>=2)mstTf(B.tf,p);if(U){if(x.d>=3)mstTf(U.tf,p);if(x.d>=4)mstTf(U.tf,p);if(x.d>=5)S.mk[x.s===0?b:'y'+b]=1;}});}
 // 판이 끝나면 경험치: 버틴 분 × 10 × 난이도 배수 (레이드·결투 제외)
 let MST_RES=null;
-function mstGain(sec){MST_RES=null;if(raidOn()||duelOn()||labOn()||!MST[S.cls])return;const d=S.diff||'normal',g=Math.round(sec/60*12.5/* v392 10 → 12.5 (+25%) */*(MST_DM[d]||1));if(g<=0)return;const o=mstD(S.cls),l0=mstLv(S.cls).l;if(sec>=300){const U=(META.mstUse=META.mstUse||{}),a=U[S.cls]||(U[S.cls]=[]);mstLive(S.cls).t.forEach((x,b)=>{const k=b+'-'+x.s;if(x.d>=5&&!a.includes(k))a.push(k);});}o.x=(o.x||0)+g;const l1=mstLv(S.cls).l;MST_RES={c:S.cls,g,l0,l1};}
+function mstGain(sec){MST_RES=null;if(raidOn()||duelOn()||labOn()||!MST[S.cls])return;const d=S.diff||'normal',g=Math.round(sec/60*12.5/* v392 10 → 12.5 (+25%) */*(MST_DM[d]||1));if(g<=0)return;const o=mstD(S.cls),l0=mstLv(S.cls).l;if(sec>=300){const U=(META.mstUse=META.mstUse||{}),a=U[S.cls]||(U[S.cls]=[]);mstReal(()=>mstLive(S.cls)).t.forEach((x,b)=>{const k=b+'-'+x.s;if(x.d>=5&&!a.includes(k))a.push(k);});}o.x=(o.x||0)+g;const l1=mstLv(S.cls).l;MST_RES={c:S.cls,g,l0,l1};}
 function mstSum(){const R=MST_RES;if(!R)return '';const L=mstLv(R.c);return `<div class="lootsum" style="border-color:#c8a8ff"><b>🌟 ${CLASSES[R.c].n} 마스터리 +${R.g} 경험치</b>${R.l1>R.l0?` <b style="color:#ffd76a">레벨 업! Lv ${R.l0} → ${R.l1} · 한 칸 더 찍을 수 있어요</b>`:` <small>Lv ${L.l}${L.need?` · 다음 레벨까지 ${L.need-L.x}`:' (최고)'}</small>`}${mstFree(R.c)>0?` <small style="color:#ffd76a">· 🌟 마스터리에서 다음 칸을 찍어 보세요</small>`:''}</div>`;}
 // 마스터리 화면: 위에서 아래로 뻗는 나무
 let MST_CLS=null,MST_TIP='';
@@ -11436,7 +11437,7 @@ function openMastery(){cosPreviewHide();ftipHide();const ks=Object.keys(CLASSES)
     rows+=T.br.map((B,b)=>B.sub.map((U,s)=>node(6,b,s,'★ '+U.cn,'핵심 능력',`★ ${U.cn} · ${U.cd}`,B.col)).join('')).join('');}
   show(`<div class="shophead"><h2>🌟 직업 마스터리</h2><button class="btn" id="mBack">돌아가기</button></div>
   <div class="fcls m6"><b>🌟 직업</b>${ks.map(k=>`<button class="fct ${k===c?'on':''}" data-mcls="${k}" ${MST[k]?'':'disabled title="준비 중"'}><i>${WLOOK[k][1]}</i>${CLASSES[k].n}${MST[k]?` <small>Lv${mstLv(k).l}</small>`:' <small>준비 중</small>'}</button>`).join('')}</div>
-  ${T?`<div class="mhead"><div><b style="font-size:18px">${CLASSES[c].n} 마스터리 Lv ${L.l}</b>${L.l<MST_MAX?`<small> · 다음 레벨 ${L.x}/${L.need}</small>`:' <small>(최고 레벨)</small>'}<div class="achbar" style="margin-top:4px"><i style="width:${L.l<MST_MAX?Math.round(L.x/L.need*100):100}%"></i></div></div><div class="mpts">${fr>0?`찍을 수 있는 칸 <b>${fr}</b>`:L.l<MST_MAX?'다음 레벨에 한 칸 더':'모두 찍을 수 있어요'}</div><button class="btn ghost" id="mReset" ${o.d?'':'disabled'}>초기화</button></div>
+  ${T?`<div class="mhead"><div><b style="font-size:18px">${CLASSES[c].n} 마스터리 Lv ${L.l}</b>${L.l<MST_MAX?`<small> · 다음 레벨 ${L.x}/${L.need}</small>`:' <small>(최고 레벨)</small>'}<div class="achbar" style="margin-top:4px"><i style="width:${L.l<MST_MAX?Math.round(L.x/L.need*100):100}%"></i></div></div><div class="mpts">${fr>0?`찍을 수 있는 칸 <b>${fr}</b>`:L.l<MST_MAX?'다음 레벨에 한 칸 더':'모두 찍을 수 있어요'}</div>${DEV?`<button class="btn ghost" id="mDevF" title="개발자 모드 전용: 레벨과 상관없이 모든 칸을 찍을 수 있어요. 끄면 실제 레벨만큼만 켜져요" style="${mstDevOn()?'border-color:#ffd76a;color:#ffd76a':''}">🛠 무료 찍기 ${mstDevOn()?'ON':'OFF'}</button>`:''}<button class="btn ghost" id="mReset" ${o.d?'':'disabled'}>초기화</button></div>
   <div class="mtree" id="mTree"><svg class="mlines" id="mLines"></svg>${rows}</div>
   <div class="mtip" id="mTip">${MST_TIP||'마디에 마우스를 올리면 설명이 나와요. 세 갈래를 모두 찍을 수 있고, 갈래마다 세부 갈래 2개 중 하나를 고르면 다른 쪽은 잠겨요. 초기화하면 다시 고를 수 있어요 (공짜).'}</div>
   <p class="sub">${CLASSES[c].n}(으)로 플레이하면 경험치가 쌓여요 (버틴 시간 × 난이도). 레벨이 오를 때마다 한 칸씩 찍을 수 있어요. 뿌리 1칸 + 갈래마다 5칸이라 <b>16레벨이면 세 갈래의 핵심 능력 3개</b>를 모두 가져요.</p>`:'<p class="sub">이 직업 마스터리는 준비 중이에요.</p>'}`);
@@ -11447,6 +11448,7 @@ function openMastery(){cosPreviewHide();ftipHide();const ks=Object.keys(CLASSES)
   const tip=$('mTip');ov.querySelectorAll('.mnode').forEach(n=>{ftipBind(n,()=>{const st=n.classList.contains('own')?'<span style="color:#7be08f">✔ 찍었어요</span>':n.classList.contains('lock')?'<span style="color:#ff9a9a">🔒 다른 가지를 골라서 잠겼어요</span>':n.classList.contains('can')?'<span style="color:#ffd76a">▶ 눌러서 찍기</span>':'<span style="color:var(--muted)">앞 칸을 먼저 찍거나 레벨을 올려야 해요</span>';const [h,...r]=n.dataset.tip.split(' · ');const dp=+n.dataset.md,nb=n.dataset.mb===''?null:+n.dataset.mb,ns=n.dataset.ms===''?null:+n.dataset.ms,TT=MST[MST_CLS];let fx='';if(devFxOn()&&TT){/* v292: 계산식 숨김 스위치를 따름 */if(dp===6)fx=mstFx(MST_CLS,nb,ns);else{const fnS=(dp===1?TT.root:dp<=3?TT.br[nb]:TT.br[nb].sub[ns]).tf.toString();fx=`<div class="dfx"><b>🛠 계산식</b><code>${esc(fnS)}</code><div class="dxp">💬 판 시작 때 이 능력치를 더함 · 실제로는 바뀐 값의 ${MST_K*100}%만 들어감 (관통·해골 최대·광란 최대·광란 유지는 그대로)</div></div>`;}}
     return [`<div class="mtt" style="color:var(--rc)">${esc(h)}</div><div>${esc(r.join(' · '))}</div><div class="mst">${st}</div>${fx}`,getComputedStyle(n).getPropertyValue('--mc').trim()||'#ffd76a'];});n.onmouseenter=()=>{tip.textContent=n.dataset.tip;};n.onclick=()=>{tip.textContent=n.dataset.tip;MST_TIP=n.dataset.tip;if(!n.classList.contains('can'))return;const dp=+n.dataset.md,b=n.dataset.mb===''?null:+n.dataset.mb,s=n.dataset.ms===''?null:+n.dataset.ms;
     if(dp===1)o.r=1;else{const t=o.t[b];if(dp===4)t.s=s;t.d=dp-1;}mstSync(o);saveMeta();if(dp===6){chime([523,659,784,1047],'triangle');try{achCheck(null);}catch(e){}}openMastery();};});
+  if($('mDevF'))$('mDevF').onclick=()=>{MST_DEVF=!MST_DEVF;try{localStorage.setItem('chanseo_mstdev',MST_DEVF?'1':'0');}catch(e){}toast(MST_DEVF?'🛠 마스터리 무료 찍기: 모든 칸을 레벨과 상관없이 찍을 수 있어요':'🛠 마스터리 무료 찍기 끔: 실제 레벨만큼만 켜져요');openMastery();};
   if($('mReset'))$('mReset').onclick=()=>{o.r=0;o.t=[0,1,2].map(()=>({d:0,s:-1}));mstSync(o);MST_TIP='';META.mrN=(META.mrN||0)+1;saveMeta();achCheck(null);openMastery();};
   // 가지 선: 부모 마디 아래 가운데 → 자식 마디 위 가운데
   requestAnimationFrame(()=>{const tr=$('mTree'),sv=$('mLines');if(!tr||!sv)return;const R0=tr.getBoundingClientRect();sv.setAttribute('width',R0.width);sv.setAttribute('height',R0.height);
@@ -13739,7 +13741,7 @@ const ACH=[
   // v184 추가분은 맨 뒤에 (프로필 도전과제 비트 순서가 예전 버전과 어긋나지 않게)
   {k:'ms_cap',n:'첫 결실',d:'아무 직업이나 마스터리 ★ 핵심 능력 찍기',p:()=>[Math.min(1,mstCapN()),1],c:()=>mstCapN()>=1},
   {k:'ms_4',n:'네 갈래의 스승',d:'4개 직업에서 마스터리 ★ 핵심 능력 찍기',p:()=>[Math.min(4,mstCapN()),4],c:()=>mstCapN()>=4},
-  {k:'ms_all',hard:1,rw:'fr_rainbow',n:'만물의 스승',d:'12개 직업 마스터리를 모두 최고 레벨(6)까지 올리기',p:()=>[Object.keys(MST).filter(c=>mstLv(c).l>=MST_MAX).length,12],c:()=>Object.keys(MST).every(c=>mstLv(c).l>=MST_MAX)},
+  {k:'ms_all',hard:1,rw:'fr_rainbow',n:'만물의 스승',d:'12개 직업 마스터리를 모두 최고 레벨(6)까지 올리기',p:()=>[Object.keys(MST).filter(c=>mstReal(()=>mstLv(c)).l>=MST_MAX).length,12],c:()=>Object.keys(MST).every(c=>mstReal(()=>mstLv(c)).l>=MST_MAX)},
   {k:'ms_six',rw:'tr_aurora',n:'갈림길의 현자',d:'한 직업의 핵심 능력 6가지로 각각 5분 이상 플레이',p:()=>[Math.max(0,...Object.values(META.mstUse||{}).map(a=>a.length)),6],c:()=>Object.values(META.mstUse||{}).some(a=>a.length>=6)},
   {k:'ms_god',hard:1,rw:'au_pillar',n:'나무 끝의 열매',d:'마스터리 핵심 능력을 가진 채로 신 난이도 클리어',c:R=>R&&R.win&&R.diff==='god'&&R.mcap},
   {k:'eq_set',rw:'fr_galaxy',n:'전설의 갑주',d:'레이드·용왕·별의 수호·폭풍 세트 4부위를 모두 끼고 한 판 끝내기',c:R=>R&&R.uset>=4},
@@ -16772,7 +16774,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=453,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=454,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
