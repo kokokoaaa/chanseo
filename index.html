@@ -40,7 +40,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 .aico.gift{position:relative}.aico.gift::after{content:'🎁';position:absolute;top:-8px;right:-6px;font-size:10px;text-shadow:0 0 2px #000}
 .aico.uw{--ac:#ffd76a!important;box-shadow:0 0 8px rgba(255,215,106,.55)}.aico.uw::after{content:'★';color:#ffd76a;text-shadow:0 0 4px #ffb020,0 0 2px #000}
 .augref{text-decoration:underline dotted;text-underline-offset:2px;cursor:help}.nofz{display:block;margin-top:6px;font-size:11.5px;color:#8a7f6a;text-align:center;opacity:.85}.nofz::before{content:'⛔ '}
-.aico.mst{position:relative;border-style:double;border-width:3px}.aico.mst::after{content:'🌳';position:absolute;top:-8px;right:-6px;font-size:10px}.aico.mst.core::after{content:'⭐'}.aico{width:38px;height:40px;border-radius:7px;border:2px solid var(--ac);background:rgba(4,18,12,.78);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Noto Sans KR',sans-serif;font-weight:700;cursor:help;box-shadow:0 0 6px color-mix(in srgb,var(--ac) 45%,transparent);user-select:none;-webkit-user-select:none}
+.aico .astk{position:absolute;right:-4px;bottom:-6px;font-size:9.5px;line-height:1;padding:1px 3px;border-radius:5px;background:#0b2a3a;border:1px solid #7fd0ff;color:#bfefff;font-style:normal;pointer-events:none;white-space:nowrap}.aico{position:relative}.aico.mst{position:relative;border-style:double;border-width:3px}.aico.mst::after{content:'🌳';position:absolute;top:-8px;right:-6px;font-size:10px}.aico.mst.core::after{content:'⭐'}.aico{width:38px;height:40px;border-radius:7px;border:2px solid var(--ac);background:rgba(4,18,12,.78);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Noto Sans KR',sans-serif;font-weight:700;cursor:help;box-shadow:0 0 6px color-mix(in srgb,var(--ac) 45%,transparent);user-select:none;-webkit-user-select:none}
 .aico i{font-style:normal;font-size:17px;line-height:1}
 .aico span{font-size:10px;color:#f1e7cf;line-height:1.1;margin-top:2px;white-space:nowrap;overflow:hidden;max-width:34px}
 .aico.uc{border:2px solid transparent;background:linear-gradient(160deg,#3a0d12,#3a1f06) padding-box,linear-gradient(90deg,#ff2e4d,#ffb000,#fff2a8,#ff7a00,#ff2e4d) border-box;background-size:100% 100%,300% 100%;animation:prz 1.8s linear infinite,ucs 1.1s ease-in-out infinite alternate}
@@ -8991,12 +8991,37 @@ const augSer=a=>{const fl=(a.gr?'g':'')+(a.gift?'f':''),r=[a.id,a.lv,a.q||1,a.pq
 const augDes=([id,lv,q,pq,dl,fl])=>{fl=fl||'';if(id==='f_mplasma')id='f_plasma';const f=[...FUSIONS,...VFUSIONS].find(x=>x.id===id);if(f){const o=fusionObj(f);if(pq)o.pq=pq;if(dl)o.dl=dl;if(fl.includes('g')&&o.t!=='v')o.gr=1;return o;}const a=AUGS.find(x=>x.id===id)||VIPS.find(x=>x.id===id)||DRAGON.find(x=>x.id===id);if(!a)return null;const o={...a,lv,q:q||1,dl:dl||undefined};if(fl.includes('g')||a.t==='x')o.gr=1;if(fl.includes('f'))o.gift=1;return o;};
 // 증강 바 설명창: 레벨업에서 고르지 않은 증강은 어디서 받았는지 한 줄
 const augSrcL=a=>{const t=a.gift?'🎁 상점·행운으로 받은 증강 (일반 칸 사용)':a.src==='uw'?'⚔ 고유 무기 능력 (일반 칸 안 씀)':a.gr?'✦ 장비에서 받은 증강 (일반 칸 안 씀)':a.t==='d'?'🐉 용의 보물 (일반 칸 안 씀)':'';return t?`<small style="color:#9fd4ff;margin-top:4px">${t}</small>`:'';};
+/* v426 ♾ 고점 돌파 증강 중 판 동안 쌓이는 것: [쌓인 수 이름, 쌓인 수, 지금 효과(비율), 효과 이름] → 증강 칸 배지·설명 */
+let AUG_STK_T=0;const AUG_STK={
+  n_harvest:()=>['처치',S.st.kills||0,(S.st.kills||0)/500*lv3('n_harvest',.015,.02,.025),'공격력'],
+  e_pyre:()=>['불탄 처치',S.eF||0,Math.floor((S.eF||0)/150)*lv3('e_pyre',.015,.02,.025),'화염 정령 피해'],
+  e_rime:()=>['얼린 처치',S.eI||0,Math.floor((S.eI||0)/600)*lv3('e_rime',.015,.02,.025),'얼음 정령 피해'],
+  e_tempest:()=>['번개 명중',S.eT||0,Math.floor((S.eT||0)/100)*lv3('e_tempest',.015,.02,.025),'번개 정령 피해'],
+  al_master:()=>['물약 던짐',S.potN||0,(S.potN||0)/(14-2*Math.min(3,L('al_master')))*.01,'공격력'],
+  gb_vault:()=>['앞면',S.hdN||0,Math.floor((S.hdN||0)/100)*lv3('gb_vault',.008,.01,.012),'앞면 피해'],
+  m_pyro:()=>['불탄 처치',S.pyN||0,Math.floor((S.pyN||0)/150)*lv3('m_pyro',.015,.02,.025),'공격력'],
+  m_cryo:()=>['냉기 결정',S.cryN||0,Math.floor((S.cryN||0)/40)*lv3('m_cryo',.0075,.01,.0125),'공격력'],
+  a_myriad:()=>['쏜 화살',S.arN||0,Math.floor((S.arN||0)/300)*lv3('a_myriad',.008,.01,.012),'공격력'],
+  r_plague:()=>['중독 처치',S.rpN||0,Math.floor((S.rpN||0)/200)*lv3('r_plague',.015,.02,.025),'독 피해'],
+  p_sun:()=>['열기',S.sunN||0,Math.floor((S.sunN||0)/300)*lv3('p_sun',.015,.02,.025),'오라 피해'],
+  g_engineer:()=>['포탑',S.tuN||0,(S.tuN||0)*lv3('g_engineer',.002,.0025,.003),'포탑 피해'],
+  k_parry:()=>['투지',S.kpN||0,Math.floor((S.kpN||0)/2)*lv3('k_parry',.0075,.01,.0125),'공격력'],
+  p_crusade:()=>['망치 명중',S.hmN||0,Math.floor((S.hmN||0)/150)*lv3('p_crusade',.015,.02,.025),'망치 피해'],
+  b_hide:()=>['처치',S.st.kills||0,(S.st.kills||0)/100*lv3('b_hide',.008,.01,.012),'최대 체력'],
+  n_ossuary:()=>['뼈창 명중',S.bnN||0,Math.floor((S.bnN||0)/100)*lv3('n_ossuary',.015,.02,.025),'뼈창 피해'],
+  al_reaction:()=>['연쇄 반응',S.rxN||0,Math.floor((S.rxN||0)/200)*lv3('al_reaction',.015,.02,.025),'연쇄 반응 피해'],
+  b_carnage:()=>['피의 축적',S.p.fyO||0,(S.p.fyO||0)/100*lv3('b_carnage',.015,.02,.025),'공격력'],
+  d_overgrowth:()=>['생장',S.vineN||0,(S.vineN||0)/10*lv3('d_overgrowth',.008,.01,.012),'공격력'],
+  d_bark:()=>['생장',S.vineN||0,(S.vineN||0)*lv3('d_bark',.07,.1,.13),'방어력',1]};
+const augStk=id=>{const f=AUG_STK[id];if(!f||!S||!S.p||!has(id))return null;try{return f();}catch(e){return null;}};
+const augStkV=x=>x[4]?'+'+(+x[2].toFixed(1)):'+'+Math.round(x[2]*100)+'%';
+function augStkTick(){const el=$('augBar');if(!el||!S||!S.augs)return;el.querySelectorAll('.aico[data-aid]').forEach(c=>{const x=augStk(c.dataset.aid);if(!x)return;const t=augStkV(x);let b=c.querySelector('.astk');if(!b){b=document.createElement('b');b.className='astk';c.appendChild(b);}if(b.textContent!==t)b.textContent=t;});}
 function renderAugBar(){const el=$('augBar');const k=!S||S.mode==='start'?'':S.augs.map(a=>a.id).join(',')+'|'+MAXA+(vipCan()?'v':'')+'|'+S.cls+JSON.stringify(S.mk||{});if(k===augBarKey)return;augBarKey=k;synKey='';if(!k){el.innerHTML='';return;}
   const cell=(a,i)=>{const col=(TIER[a.t]||{}).col||'#d6a94a',ic=a.t==='d'?'🐉':a.src==='uw'?'⚔':a.uc?'♾':a.vf?'💥':a.t==='f'?'💥':a.t==='v'?'👑':(TAG_ICO[a.tags[0]]||'✦');
     return `<div class="aico${a.t==='v'?' vip':''}${a.uc?' uc':''}${a.gr?' gear':''}${a.src==='uw'?' uw':''}${a.gift?' gift':''}" data-ai="${i}" data-aid="${a.id}" style="--ac:${col}"><i>${ic}</i><span>${a.n.replace(/\s/g,'').slice(0,3)}</span></div>`;};
   const L=S.augs.map((a,i)=>[a,i]),nor=L.filter(([a])=>a.t!=='v'&&a.t!=='d'&&!a.gr),vip=L.filter(([a])=>a.t==='v'),drg=L.filter(([a])=>a.t==='d'),gear=L.filter(([a])=>a.gr&&a.t!=='v'&&a.t!=='d');
   // 일반 증강 8칸(MAXA), 그 오른쪽에 왕실 전용 2칸, 장비 특수 효과 증강(✦ 장비 칸), 용의 보물은 얻었을 때만 맨 오른쪽에 (일반 슬롯 차지 안 함)
-  el.innerHTML=nor.map(([a,i])=>cell(a,i)).join('')+'<div class="aico empty"></div>'.repeat(Math.max(0,MAXA-nor.length))+(vipCan()||vip.length?'<div class="vipgap"></div>'+vip.map(([a,i])=>cell(a,i)).join('')+'<div class="aico empty vip"><i>👑</i></div>'.repeat(Math.max(0,VIP_MAX-vip.length)):'')+(gear.length?'<div class="vipgap"></div>'+gear.map(([a,i])=>cell(a,i)).join(''):'')+(drg.length?'<div class="vipgap"></div>'+drg.map(([a,i])=>cell(a,i)).join(''):'')+mstBarH();}
+  el.innerHTML=nor.map(([a,i])=>cell(a,i)).join('')+'<div class="aico empty"></div>'.repeat(Math.max(0,MAXA-nor.length))+(vipCan()||vip.length?'<div class="vipgap"></div>'+vip.map(([a,i])=>cell(a,i)).join('')+'<div class="aico empty vip"><i>👑</i></div>'.repeat(Math.max(0,VIP_MAX-vip.length)):'')+(gear.length?'<div class="vipgap"></div>'+gear.map(([a,i])=>cell(a,i)).join(''):'')+(drg.length?'<div class="vipgap"></div>'+drg.map(([a,i])=>cell(a,i)).join(''):'')+mstBarH();try{augStkTick();}catch(e){}}
 // 증강 바 맨 오른쪽: 이번 판에 켜진 마스터리 (갈래 능력치 · 6단계 핵심 능력). 마우스를 올리면 설명
 function mstBarH(){const c=S&&S.cls,T=MST[c];if(!T||raidOn()||duelOn()||labOn())return '';const V=mstLive(c),n=(V.r?1:0)+V.t.reduce((a,x)=>a+x.d,0);if(n<1)return '';const x2=(t,k)=>mstTxt(t)+(k>1?' (×2)':'');
   const tip=[`🌳 ${CLASSES[c].n} 마스터리 ${n}칸`,V.r?`뿌리: ${mstTxt(T.root.td)}`:'',...V.t.flatMap((x,b)=>{const B=T.br[b],U=B&&B.sub[x.s];if(!B||x.d<1)return [];return [`${B.ico||''} ${B.n} 갈래: ${x2(B.td,x.d>=2?2:1)}`,U&&x.d>=3?`  ${U.n}: ${x2(U.td,x.d>=4?2:1)}`:'',U&&x.d>=5&&U.cn?`  ⭐ 핵심 「${U.cn}」: ${U.cd}`:''];})].filter(Boolean).join('\n');
@@ -9017,7 +9042,7 @@ function mstBarH(){const c=S&&S.cls,T=MST[c];if(!T||raidOn()||duelOn()||labOn())
 {const bar=document.getElementById('augBar'),tip=document.getElementById('augTip');
   const show=(t)=>{const a=S&&(S.augs.find(x=>x.id===t.dataset.aid)||S.augs[+t.dataset.ai]);if(!a)return;const T=TIER[a.t]||{n:'',col:'#d6a94a'};tip.style.setProperty('--ac',T.col);
     tip.innerHTML=`<b>${a.uc?"♾ ":""}${a.n}</b><small>${a.uc?"<span style=\"color:#ff9a3c\">고점 돌파</span> · ":""}${T.n}${a.tags.length?' · '+[...new Set(a.tags)].map(t=>TAGS[t].n+(a.tags.filter(x=>x===t).length>1?'×2':'')).join(', '):''}</small>${augD(a)}${augSrcL(a)}${a.t==='v'?(()=>{const v=VFUSIONS.find(f=>f.a===a.id);return v?`<small style="color:#ffd76a;margin-top:4px">👑 ${augDef(v.b).n}와 왕실 합체 가능 (함께 가지면 다음 증강 때 합체) → ${v.n}</small>`:'';})():''}${a.t!=='v'&&vipCan()?(()=>{const v=VFUSIONS.find(f=>f.b===a.id);return v?`<small style="color:#ffd76a;margin-top:4px">👑 왕실 ${augDef(v.a).n}와 합체 가능 → ${v.n}${has(v.a)?' (다음 증강 때 합체)':' (상점에서 왕실을 사면)'}</small>`:'';})():''}${DEV?augDevFx(a.id):''}`;
-    tip.innerHTML+=fzInfo(a);
+    tip.innerHTML+=fzInfo(a);{const x=augStk(a.id);if(x)tip.innerHTML+=`<small style="color:#9fe8ff;margin-top:4px">♾ 지금: ${x[0]} ${Math.floor(x[1]).toLocaleString()} → ${x[3]} ${augStkV(x)}</small>`;}
     tip.style.display='block';const r=t.getBoundingClientRect();tip.style.left=Math.min(innerWidth-tip.offsetWidth-8,Math.max(8,r.left))+'px';tip.style.top=Math.max(8,r.top-tip.offsetHeight-8)+'px';};
   const hideT=()=>{tip.style.display='none';};
   // 시너지 알약: 단계별 효과, 현재 단계는 ✔ 표시
@@ -9083,7 +9108,7 @@ function hud(){
   const play=S.mode==='play';
   mini.style.display=S.mode==='start'?'none':'block';
   if(S.mode!=='start'&&++miniT%4===0)drawMini();
-  dashBtn.style.display=play?'block':'none';{const sb=$('skBtn');sb.style.display=play&&SKILLS[S.cls]?'block':'none';const ub=$('ulBtn');ub.style.display=play&&ULTS[S.cls]&&!dfM().duel?'block':'none';}{const pb=$('potBar'),on=play&&potOn();pb.style.display=on?'flex':'none';if(on)potHud(pb);}
+  dashBtn.style.display=play?'block':'none';{const sb=$('skBtn');sb.style.display=play&&SKILLS[S.cls]?'block':'none';const ub=$('ulBtn');ub.style.display=play&&ULTS[S.cls]&&!dfM().duel?'block':'none';}if(play&&(++AUG_STK_T%20===0))augStkTick();{const pb=$('potBar'),on=play&&potOn();pb.style.display=on?'flex':'none';if(on)potHud(pb);}
   $('statBtn').style.display=S.mode==='start'?'none':'block';{const oh=$('onlHud');oh.style.display=S.mode==='start'?'none':'block';if(S.mode!=='start'&&(++HUD_LT%15===1)){/* 화면 배치 읽기는 15프레임에 한 번만 (매 프레임 읽으면 레이아웃을 다시 계산해서 렉) */const hb=$('hud').getBoundingClientRect(),pb=(oh.offsetParent||document.body).getBoundingClientRect(),tp=Math.round(hb.bottom-pb.top-4)+'px';if(oh.style.top!==tp)oh.style.top=tp;}}$('cxBtn').style.display=S.mode==='start'?'none':'block';{const rb=$('rtBtn'),v=runRetryOk()?'block':'none';if(rb.style.display!==v)rb.style.display=v;if(HUD_LT%15===1)hudBtnPos();};
   $('autoBar').style.display=S.mode==='start'?'none':'flex';
 
@@ -9642,6 +9667,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:426,t:'♾ 고점 돌파 쌓임 표시',items:[
+    ['new','♾ 판 동안 쌓이는 고점 돌파 증강(받아치기 투지·업화의 정수·만발의 사수 등 20종)은 증강 칸 오른쪽 아래에 지금 효과(+N%)가 떠요. 마우스를 올리면 쌓인 수까지 보여요']]},
   {v:425,t:'🩸 굶주린 영혼 완화',items:[
     ['change','🩸 굶주린 영혼에게 먹여야 할 처치 수를 줄였어요 (근접·마법사로는 너무 빡빡했음): 최근 처치 속도 × 시간 × 0.45 (20분부터 0.6), 최소 10마리']]},
   {v:424,t:'🛡 탱커의 힘 · 토템 멀리 · 물약 창',items:[
@@ -16643,7 +16670,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=425,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=426,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
