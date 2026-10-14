@@ -289,7 +289,7 @@ body.bgview #ov,body.bgview #toast,body.bgview .chartq,body.bgview #patchPop,bod
 .isetd{margin-top:6px;font-size:12px;line-height:1.5;padding:5px 7px;border-radius:8px;background:rgba(255,255,255,.04)}.isetd.up{box-shadow:inset 3px 0 0 #7be08f}.isetd.dn{box-shadow:inset 3px 0 0 #ff8a8a}.isetd small{color:var(--muted)}.isetd .sdon{color:#7be08f}.isetd .sdoff{color:#ff8a8a}.son{font-weight:bold}
 .fsets,.fcws{display:flex;flex-direction:column;gap:4px;padding:8px 10px;border:1px solid rgba(214,169,74,.35);border-radius:10px;background:rgba(0,0,0,.2);font-size:12px}.setrow{display:flex;flex-direction:column}.setrow span{color:var(--muted)}.setrow span.on{color:#bff0c8}.fcws small{color:var(--muted)}
 .ftool{display:grid;grid-template-columns:1fr 1fr;gap:6px;align-items:stretch}.ftool.f3{grid-template-columns:1fr 1fr 1fr}.ftool select,.ftool .btn{width:100%;min-height:36px;box-sizing:border-box}.ftool select{flex:1 1 90px}.ftool [data-bulk]{flex:1 1 110px}.ftool .btn,.ftool .btn.ghost{margin:0;padding:6px 10px;font-size:13px;white-space:nowrap}.fhint{color:var(--muted);font-size:11px}
-.smith{display:flex;align-items:flex-end;gap:6px}.smith canvas{width:84px;height:94px;image-rendering:pixelated;flex:none;order:2}.smith{justify-content:flex-end}.bubble{position:relative;flex:1;margin-bottom:34px;order:1;padding:9px 12px;border-radius:12px;background:#f6efdc;color:#2a1a10;font-size:13px;line-height:1.5;box-shadow:0 3px 10px rgba(0,0,0,.35)}.bubble:after{content:'';position:absolute;right:-8px;bottom:12px;border:8px solid transparent;border-left-color:#f6efdc;border-right:0}
+.smith{display:flex;align-items:flex-end;gap:6px}.smith canvas{width:84px;height:94px;image-rendering:pixelated;flex:none;order:2}.smith{justify-content:flex-end}.bubble{position:relative;flex:1;margin-bottom:30px;order:1;padding:11px 15px;border-radius:12px;background:#f6efdc;color:#2a1a10;font-size:16.5px;font-weight:700;line-height:1.45;animation:bubPop .25s ease-out;box-shadow:0 3px 10px rgba(0,0,0,.35)}.smith canvas{width:96px;height:107px}@keyframes bubPop{from{transform:scale(.92);opacity:.4}to{transform:none;opacity:1}}.bubble:after{content:'';position:absolute;right:-8px;bottom:12px;border:8px solid transparent;border-left-color:#f6efdc;border-right:0}
 .idet.empty p{color:var(--muted);font-size:13px;margin:6px 0}
 .ibtns{display:grid!important;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}.ibtns .btn{width:100%;margin:0!important;min-height:40px;padding:6px 8px;font-size:13px;display:flex;align-items:center;justify-content:center;transform:none!important}
 .icmp{margin:6px 0;padding:7px 9px;border-radius:8px;background:rgba(0,0,0,.28);border:1px dashed rgba(214,169,74,.45);font-size:12px}.ich{display:flex;flex-direction:column;margin-bottom:3px}.ich span{color:var(--muted);font-size:11px}.icmp .up{color:#7be08f}.icmp .dn{color:#ff8a7a}.icmp table{width:100%;border-collapse:collapse}.icmp th{font-size:11px;color:var(--muted);text-align:left;font-weight:normal}.icmp td{padding:1px 4px 1px 0}.icmp td:first-child{color:var(--ivory)}
@@ -9455,6 +9455,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:412,t:'⚒ 대장장이 말풍선',items:[
+    ['look','⚒ 대장간 대장장이 말풍선 글자를 크고 굵게 (메달 부족 같은 안내가 잘 보이게)']]},
   {v:411,t:'☠ 악몽 결계 · 일시정지 창',items:[
     ['change','☠ <b>악몽 결계</b>가 갑자기 가운데에 생기지 않고 <b>맵 바깥에서부터 줄어들며</b> 조여 와요'],
     ['change','⏸ 일시정지 창의 계속하기 버튼을 한 줄로 작게 (T 단축키도 보이게)']]},
@@ -16378,7 +16380,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=411,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=412,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
