@@ -9357,10 +9357,11 @@ const augReady=()=>{if(S.noAug)return false;if(slotCount()<MAXA)return true;cons
 // 슬롯이 가득 차면: 합체 짝(최대 2) + 나머지는 '교체' 후보 (고르면 기존 증강 하나를 버리고 바꿈)
 // 교체로 버릴 수 있는 증강: 왕실·합체·용·장비/세트 시작 증강(x)·고점 돌파는 제외
 const swappable=()=>S.augs.map((a,i)=>[a,i]).filter(([a])=>a.t!=='v'&&a.t!=='f'&&a.t!=='d'&&a.t!=='x'&&!a.gr&&(!a.f||a.dl)&&!a.uc);
+/* v431 가진 왕실 증강과 바로 합체되는 짝 (칸이 가득 차도 버리지 않고 받음) */const vipPartner=id=>VFUSIONS.find(f=>f.b===id&&has(f.a)&&!has(f.id))||null;
 function fullOptions(){
-  const fz=AUGS.filter(a=>!has(a.id)&&tierOpen(a.t)&&(!a.cls||a.cls===S.cls)&&augReq(a)&&partnerOf(a.id)).sort(()=>Math.random()-.5).slice(0,2).map(a=>({...a,fuseNow:true,q:rollQ()}));
+  const fz=AUGS.filter(a=>!has(a.id)&&tierOpen(a.t)&&(!a.cls||a.cls===S.cls)&&augReq(a)&&(partnerOf(a.id)||vipPartner(a.id))).sort(()=>Math.random()-.5).slice(0,2).map(a=>({...a,fuseNow:true,q:rollQ()}));
   if(!swappable().length)return fz;
-  const sw=augOptions(rollTier()).filter(a=>!fz.some(f=>f.id===a.id)&&!partnerOf(a.id)).slice(0,NOPT-fz.length).map(a=>({...a,swap:true}));
+  const sw=augOptions(rollTier()).filter(a=>!fz.some(f=>f.id===a.id)&&!partnerOf(a.id)).slice(0,NOPT-fz.length).map(a=>vipPartner(a.id)?{...a,fuseNow:true}:{...a,swap:true});
   return [...fz,...sw];
 }
 // 증강 포기 골드: 첫 다시 뽑기보다 넉넉하게 (슬롯이 찰수록 조금 더)
@@ -9388,7 +9389,7 @@ function openAug(free,why,fixed,fixedTier){
   let picking=false;const keyPick=e=>{if(e.repeat||statsOpen||cxGame||(e.target&&/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)))return;if(S.mode!=='aug'||!ov.contains(document.querySelector('.cards')))return;const n=+e.key;if(n>=1&&n<=opts.length){const c=ov.querySelector(`.card[data-i="${n-1}"]`);if(c){e.preventDefault();c.click();}}};if(window.__augKey)document.removeEventListener('keydown',window.__augKey);window.__augKey=keyPick;document.addEventListener('keydown',keyPick);
   ov.querySelectorAll('.card').forEach(b=>b.onclick=ev=>{if(picking)return;picking=true;document.removeEventListener('keydown',keyPick);const fz=ev.target.closest&&ev.target.closest('[data-fz]');b.classList.add('picked');ov.querySelectorAll('.card').forEach(x=>{if(x!==b)x.classList.add('gone');});try{chime([523,784],'triangle');}catch(e){}
     setTimeout(()=>{const a=opts[+b.dataset.i];S.arr=0;S.fuseChoice=fz?fz.dataset.fz:null;
-    if(a.swap&&slotCount()>=MAXA){openSwap(a,opts,free,why);return;}
+    if(a.swap&&slotCount()>=MAXA&&!vipPartner(a.id)){openSwap(a,opts,free,why);return;}
     gainAug(a);
     openNext();},300);});
   if($('augAltC'))$('augAltC').onclick=()=>{if(picking)return;S.arr=0;toast(giveAltStat(ALT_STAT[tier]?tier:'g',true));openNext();};
@@ -9669,6 +9670,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:431,t:'👑 왕실 합체 짝 받기',items:[
+    ['fix','👑 증강 칸이 가득 찼을 때 가진 왕실 증강과 바로 합체되는 증강을 고르면 하나를 버리라고 하던 문제 — 이제 버리지 않고 바로 왕실 합체돼요. 칸이 가득 차도 왕실 합체 짝이 카드에 나와요']]},
   {v:430,t:'⏸ 일시정지 중 설정',items:[
     ['new','⏸ 일시정지한 채로 오른쪽 위 자동 이동·배속·시야 버튼을 누를 수 있어요']]},
   {v:429,t:'☠ 즉사 패턴 알림 · 일시정지 창',items:[
@@ -16684,7 +16687,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=430,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=431,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
