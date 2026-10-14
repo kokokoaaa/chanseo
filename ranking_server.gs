@@ -1,4 +1,11 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v10.5
+// 찬서 명예의 전당 서버 (Google Apps Script) v10.6
+//
+// v10.5 → v10.6 바뀐 점 (게임 v421) — 클라우드 저장 덮어쓰기 사고 막기
+// - 저장(csave)은 그 기기 데이터가 「지금 서버에 있는 저장본」에서 이어진 것일 때만 받음: 게임이 base(불러오거나 마지막으로 올린 서버 저장 시각)를 보내고,
+//   서버의 지금 저장 시각과 다르면 거절(err:'stale'). base를 안 보내는 예전 게임 버전도 거절 → 다른 기기·빈 기기가 모르고 덮어쓰지 못함
+// - 덮어쓰기 전 이전 저장본을 「계정백업」 시트에 남김: 이름마다 최근 12개. 2시간마다 한 번 + 메달·데이터가 크게 줄어드는 저장·직접 덮어쓰기는 항상
+// - 「저장기록」 시트: 저장·거절·되돌리기를 시각·기기·메달·크기와 함께 남김 (최근 4000줄)
+// - 관리자(개발자 키): ?cbaks=이름&dk= → 백업 목록·저장 기록 · POST {crestore:1, dk, name, t} → 그 백업으로 되돌림 (지금 저장본도 먼저 백업)
 //
 // v10.4 → v10.5 바뀐 점 (게임 v397)
 // - 모험가가 누군가에게 시비를 걸면 대답에 s:1 표시 → 게임이 다른 모험가 1~2명을 불러 반응하게 함
@@ -500,7 +507,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 105, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 106, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -590,13 +597,66 @@ function csave_(d) {
   if (own && own !== my) return out_({ ok: false, err: 'owned' });
   const data = String(d.data || '');
   if (!/^CS1:[A-Za-z0-9+/=]+$/.test(data) || data.length > ACCT_CHUNK * ACCT_MAX) return out_({ ok: false, err: 'data' });
-  const s = acctSheet_(), r = acctSetKh_(nm, my), parts = [];
-  for (let i = 0; i < data.length; i += ACCT_CHUNK) parts.push(data.slice(i, i + ACCT_CHUNK));
-  const row = [num_(d.at, 9e15), num_(d.md, 1e12)].concat(parts);
-  while (row.length < 2 + ACCT_MAX) row.push('');
-  s.getRange(r, 3, 1, row.length).setNumberFormat('@').setValues([row.map(String)]);
+  const s = acctSheet_(), cur = acctCur_(s, nm), at = num_(d.at, 9e15), md = num_(d.md, 1e12), base = d.base == null || d.base === '' ? null : num_(d.base, 9e15);
+  const lg = { at, base, md, oldMd: cur.md || 0, len: data.length, oldLen: (cur.data || '').length, dev: d.dv };
+  // v10.6 서버에 저장본이 있으면, 이 기기 데이터가 그 저장본에서 이어진 것일 때만 덮어씀 (base = 기기가 알고 있는 서버 저장 시각)
+  if (cur.r && cur.data && base !== cur.at) { clog_(nm, base == null ? '거절(예전 버전)' : '거절(다른 저장본)', lg); return out_({ ok: false, err: 'stale', at: cur.at, md: cur.md }); }
+  if (cur.r && cur.data) { const shrink = md < cur.md * 0.7 || data.length < cur.data.length * 0.6; cbakAdd_(nm, cur, d.force ? '직접 덮어쓰기 전' : shrink ? '크게 줄어든 저장 전' : '정기', !!d.force || shrink); }
+  const r = acctSetKh_(nm, my), n = acctWrite_(s, r, at, md, data);
   ownerSet_(nm, my);
-  return out_({ ok: true, result: 'csave', n: parts.length });
+  clog_(nm, d.force ? '저장(직접)' : '저장', lg);
+  return out_({ ok: true, result: 'csave', n, at });
+}
+// v10.6 계정 백업 (name · t · at · md · why · len · data1 …) · 저장 기록 (t · name · what · at · base · md · oldMd · len · oldLen · dev)
+const CBAK_SHEET = '계정백업', CBAK_KEEP = 12, CBAK_GAP = 2 * 3600 * 1000, CLOG_SHEET = '저장기록', CLOG_MAX = 4000;
+function cbakSheet_() { const ss = book_(); let s = ss.getSheetByName(CBAK_SHEET); if (!s) { s = ss.insertSheet(CBAK_SHEET); s.getRange(1, 1, 1, 6).setValues([['name', 't', 'at', 'md', 'why', 'len']]); s.getRange('A:A').setNumberFormat('@'); } return s; }
+function clogSheet_() { const ss = book_(); let s = ss.getSheetByName(CLOG_SHEET); if (!s) { s = ss.insertSheet(CLOG_SHEET); s.getRange(1, 1, 1, 10).setValues([['t', 'name', 'what', 'at', 'base', 'md', 'oldMd', 'len', 'oldLen', 'dev']]); s.getRange('B:C').setNumberFormat('@'); s.getRange('J:J').setNumberFormat('@'); } return s; }
+function clog_(nm, what, o) {
+  try { const s = clogSheet_(); s.appendRow([Date.now(), nm, what, o.at || 0, o.base == null ? '' : o.base, o.md || 0, o.oldMd || 0, o.len || 0, o.oldLen || 0, String(o.dev || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 24)]);
+    const last = s.getLastRow(); if (last > CLOG_MAX + 200) s.deleteRows(2, last - 1 - CLOG_MAX); } catch (err) {}
+}
+// 이름의 백업 줄들 [{r, t, at, md, why, len}] (오래된 것부터)
+function cbakRows_(s, nm) { const last = s.getLastRow(); if (last < 2) return []; const v = s.getRange(2, 1, last - 1, 6).getValues(), L = [];
+  v.forEach((x, i) => { if (String(x[0]) === nm) L.push({ r: i + 2, t: +x[1] || 0, at: +x[2] || 0, md: +x[3] || 0, why: String(x[4] || ''), len: +x[5] || 0 }); }); return L.sort((a, b) => a.t - b.t); }
+// 이전 저장본 백업: always가 아니면 그 이름의 마지막 백업이 CBAK_GAP보다 오래됐을 때만. 이름마다 CBAK_KEEP개까지
+function cbakAdd_(nm, cur, why, always) {
+  const s = cbakSheet_(), L = cbakRows_(s, nm), now = Date.now();
+  if (!always && L.length && now - L[L.length - 1].t < CBAK_GAP) return false;
+  if (L.length && L[L.length - 1].at === cur.at) return false; // 같은 저장본은 한 번만
+  const parts = []; for (let i = 0; i < cur.data.length; i += ACCT_CHUNK) parts.push(cur.data.slice(i, i + ACCT_CHUNK));
+  const row = [nm, now, cur.at, cur.md, why, cur.data.length].concat(parts); while (row.length < 6 + ACCT_MAX) row.push('');
+  const nr = s.getLastRow() + 1; s.getRange(nr, 1, 1, row.length).setNumberFormat('@').setValues([row.map(String)]); // 글자 형식 (데이터 조각이 +·=로 시작해도 수식으로 안 읽게)
+  const over = cbakRows_(s, nm); if (over.length > CBAK_KEEP) over.slice(0, over.length - CBAK_KEEP).map(x => x.r).sort((a, b) => b - a).forEach(r => s.deleteRow(r));
+  return true;
+}
+// 지금 서버 저장본 {r, kh, at, md, data} (없으면 r만)
+function acctCur_(s, nm) { const r = acctRow_(s, nm); if (!r) return { r: 0 }; const v = s.getRange(r, 1, 1, 4 + ACCT_MAX).getValues()[0];
+  return { r, kh: String(v[1] || ''), at: +v[2] || 0, md: +v[3] || 0, data: v.slice(4).map(x => String(x || '')).join('') }; }
+function acctWrite_(s, r, at, md, data) { const parts = []; for (let i = 0; i < data.length; i += ACCT_CHUNK) parts.push(data.slice(i, i + ACCT_CHUNK));
+  const row = [at, md].concat(parts); while (row.length < 2 + ACCT_MAX) row.push('');
+  s.getRange(r, 3, 1, row.length).setNumberFormat('@').setValues([row.map(String)]); return parts.length; }
+// 관리자: 백업 목록 + 그 이름의 최근 저장 기록 40줄
+function cbaks_(q) {
+  if (!devOk_(q.dk)) return { err: 'key' };
+  const nm = str_(q.cbaks, 12); if (!nm) return { err: 'name' };
+  const cur = acctCur_(acctSheet_(), nm), baks = cbakRows_(cbakSheet_(), nm).reverse().map(x => ({ t: x.t, at: x.at, md: x.md, why: x.why, len: x.len }));
+  let log = []; try { const s = clogSheet_(), last = s.getLastRow(); if (last >= 2) { const n = Math.min(last - 1, CLOG_MAX + 200); log = s.getRange(last - n + 1, 1, n, 10).getValues().filter(x => String(x[1]) === nm).slice(-40).reverse()
+    .map(x => ({ t: +x[0] || 0, w: String(x[2]), at: +x[3] || 0, base: x[4] === '' ? null : +x[4], md: +x[5] || 0, om: +x[6] || 0, len: +x[7] || 0, ol: +x[8] || 0, dev: String(x[9] || '') })); } } catch (err) {}
+  return { ok: 1, cur: cur.r ? { at: cur.at, md: cur.md, len: cur.data.length } : null, baks, log };
+}
+// 관리자: 백업으로 되돌림. 저장 시각을 지금으로 바꿔서 모든 기기가 「서버 데이터가 바뀜」으로 보고 불러오기를 고르게 함
+function crestore_(d) {
+  if (!devOk_(d.dk)) return { ok: false, err: 'key' };
+  const nm = str_(d.name, 12), t = +d.t || 0; if (!nm || !t) return { ok: false, err: 'name' };
+  const bs = cbakSheet_(), b = cbakRows_(bs, nm).find(x => x.t === t); if (!b) return { ok: false, err: 'none' };
+  const v = bs.getRange(b.r, 1, 1, 6 + ACCT_MAX).getValues()[0], data = v.slice(6).map(x => String(x || '')).join('');
+  if (!/^CS1:/.test(data)) return { ok: false, err: 'data' };
+  const s = acctSheet_(), cur = acctCur_(s, nm);
+  if (cur.r && cur.data) cbakAdd_(nm, cur, '되돌리기 전', true);
+  const r = cur.r || acctSetKh_(nm, ownerKh_(nm) || ''), at = Date.now();
+  acctWrite_(s, r, at, b.md, data);
+  clog_(nm, '관리자 되돌리기', { at, base: cur.at || 0, md: b.md, oldMd: cur.md || 0, len: data.length, oldLen: (cur.data || '').length });
+  return { ok: true, at };
 }
 function cload_(q) {
   const nm = str_(q.cload, 12), my = kh_(q.k);
@@ -902,6 +962,7 @@ function doGet(e) {
   if (q.ai) return out_(ai_(q));
   if (q.prof) { let pf = ''; try { pf = CacheService.getScriptCache().get('pf_' + dmKey_(q.prof)) || ''; } catch (err) {} return out_({ pf }); }
   if (q.cload) return cload_(q);
+  if (q.cbaks) return out_(cbaks_(q));
   if (q.dels) return out_({ dels: delList_() });
   if (q.dmack) return out_(dmAck_(q));
   if (q.dms) return out_(dmList_(q));
@@ -947,6 +1008,7 @@ function doPost(e) {
       return out_({ ok: true, result: 'sup' });
     }
     if (d.csave) return csave_(d);
+    if (d.crestore) return out_(crestore_(d));
     if (d.dm) return out_(dmSend_(d));
     if (d.hire) return out_(giftAdd_(d));
     if (d.mail) return out_(mailAdd_(d));
