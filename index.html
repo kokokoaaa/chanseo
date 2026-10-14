@@ -9437,6 +9437,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:394,t:'🤖 자동 이동 10분',items:[
+    ['bug','🤖 자동 이동 「피격 확률이 올라갑니다」가 화면 시계로 5~7분쯤 뜨던 문제: 보스전 시간까지 세고 있었어요. 이제 화면 시계 <b>10분</b>부터']]},
   {v:393,t:'🃏 카드 창 넓게',items:[
     ['change','🃏 선택지가 4개가 된 증강·스탯 카드 창을 좌우로 더 넓혀서 잘 보이게']]},
   {v:392,t:'📱 폰 가로 화면 · 🛡 도발',items:[
@@ -15538,7 +15540,7 @@ const AUTO_DM=1.12,autoPen=()=>AUTO.move&&!DEV&&!!S&&S.mode==='play'&&!S.manualN
 const inTele=(t,p)=>{if(t.k==='c')return Math.hypot(t.x-p.x,t.y-p.y)<t.r+p.r;const ux=Math.cos(t.a),uy=Math.sin(t.a),px2=p.x-t.x,py2=p.y-t.y,u=clamp(px2*ux+py2*uy,0,t.len);return Math.hypot(px2-ux*u,py2-uy*u)<t.w/2+p.r;};
 function autoTrapDash(v){const p=S.p;if(!p||p.dashCd>0||p.dashT>0)return;if(!S.tele.some(t=>t.dmg&&t.t<=.13&&inTele(t,p)))return;const l=Math.hypot(v[0],v[1]);if(l>.01){p.lmx=v[0]/l;p.lmy=v[1]/l;}dash();}
 /* v379 일반 자동 이동 초반 보정: 10분(빌드업) 전에는 웬만한 패턴·탄환을 다 피하고, 10분 뒤 3분에 걸쳐 예전(조금씩 맞는) 수준으로. 보스 러시·레이드·결투는 처음부터 예전 수준 */
-const easyK=()=>{if(!S||rushOn()||raidOn()||duelOn()||labOn())return 0;const t=(S.gt||0)+(S.bt||0);return t<NM_EASE_T?1:t<NM_EASE_T+NM_EASE_R?1-(t-NM_EASE_T)/NM_EASE_R:0;};
+/* v394 화면 시계(보스전 시간 제외)와 같은 기준: 예전엔 보스전 시간까지 더해서 화면상 5~7분에 경고가 떴음 */const easyK=()=>{if(!S||rushOn()||raidOn()||duelOn()||labOn())return 0;const t=S.gt||0;return t<NM_EASE_T?1:t<NM_EASE_T+NM_EASE_R?1-(t-NM_EASE_T)/NM_EASE_R:0;};
 function easyMoveVec(dt){S.emT=(S.emT||0)-dt;const ek=easyK();const p=S.p;let near=false;for(const e of S.en)if(e.alive&&d2(e,p)<(e.r+p.r+60)**2){near=true;break;}const iN=.15-.07*ek,iT=.06-.025*ek;if(near&&S.emT>iN)S.emT=iN;if(S.emT>iT&&S.tele.some(t=>t.dmg&&inTele(t,p)))S.emT=iT;/* v300: 예고 장판 안이면 0.1초마다 다시 판단 */if(S.emT>.15&&((S.boss&&S.boss.alive&&d2(S.boss,p)<(S.boss.r+p.r+160)**2)||S.pr.some(b=>!b.mine&&d2(b,p)<200*200)))S.emT=.1;/* 보스가 가깝거나 탄환이 근처면 0.15초마다 */if(S.emT>0&&S.emV)return S.emV;S.emT=near?iN:.5-.3*ek;/* 10분 전엔 측정용 자동과 같은 판단 (이벤트는 안 감) */S.easyAI=ek>=1?0:1;S.easyK=ek;S.noEv=1;try{S.emV=autoMoveVec0();}finally{S.easyAI=0;S.noEv=0;}return S.emV;}
 // 개발자 자동 '야영' 모드: 가만히 있어야 세지는 증강이 있으면 켤 때 물어봄. 켜면 이벤트가 있을 때만 움직이고, 평소엔 맵(보스전은 결계) 끝에서 정지.
 // 예고 공격 위에 있거나 체력이 45% 아래면 그때만 평소처럼 피함
@@ -16285,7 +16287,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=393,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=394,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
