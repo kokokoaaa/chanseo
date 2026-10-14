@@ -13810,7 +13810,7 @@ const metaSpent=()=>META.spent!=null?META.spent:Math.round((MSTAT.reduce((q,x)=>
 // 영구 공격력·공격 속도·최대 체력·방어·재생은 판 안 합계에 묻히지 않게 '최종값에 곱하기'로 따로 적용 (pDmg·rawRate·hpSync·hurtP·재생)
 function applyMeta(){const p=S.p;p.hp=p.maxHp;p.lifesteal+=.001*mlv('ls');
   p.crit+=.005*mlv('crit');p.critM+=.04*mlv('critm');p.range*=1+.02*mlv('range');p.speed*=1+.01*mlv('spd');p.dashMul*=1-.02*mlv('dash');p.magnet*=1+.08*mlv('magnet');
-  p.xpM=1+.03*mlv('xp');p.goldM+=.05*mlv('gold');S.gold+=25*mlv('sgold');p.luck+=mlv('luck')+(META.chLk||0)+(META.ach&&META.ach.h_donor?5:0)+(()=>{try{return charmLuck();}catch(e){return 0;}})()/* v419 🧿 부적 행운 (v360부터 판에 안 더해지던 문제) */;if(DEV&&DEV_LK)p.luck=Math.max(p.luck,LUCK_CAP_B);if(DEV&&devLk0()){p.luck=0;S.lk0=1;}if(META.sk.token)p.token=true;if(META.sk.key)S.keys=1;if(META.sk.startCard){bonusStat(2,14);}}
+  p.xpM=1+.03*mlv('xp');p.goldM+=.05*mlv('gold');S.gold+=25*mlv('sgold');p.luck+=mlv('luck')+(META.chLk||0)+(META.ach&&META.ach.h_donor?5:0)+(()=>{try{return charmLuck();}catch(e){return 0;}})()/* v419 🧿 부적 행운 (v360부터 판에 안 더해지던 문제) */;if(DEV&&DEV_LK)p.luck=Math.max(p.luck,LUCK_CAP_B);if(DEV&&devLk0()){p.luck=0;S.lk0=1;setTimeout(()=>toast('🍀 관리자 「행운 0」 설정이 켜져 있어요 — 부적·영구 강화·장비 행운이 모두 0. 능력치 창(Tab)의 행운 버튼으로 끄세요'),1500);}if(META.sk.token)p.token=true;if(META.sk.key)S.keys=1;if(META.sk.startCard){bonusStat(2,14);}}
 // 보스 처치 속도 보너스: 보스마다 기준 시간보다 빨리 잡은 1초당 10점. 보스전 중엔 생존 시간이 멈추므로 실제 걸린 시간은 여기서만 반영
 const BOSS_PAR=[90,90,110,140],BOSS_DM=[.55,.75,1,1];
 
@@ -16503,7 +16503,7 @@ function renderStats(){
     ...(SKILLS[S.cls]?[row('생존기(E) 재사용','−'+Math.round((1-Math.max(.5,p.skM||1))*100)+'% <small>/ −50%</small>',(p.skM||1)<=.55?'최대치 근처. 숨 고르기 카드가 더 안 나와요':`생존기(E) ${SKILLS[S.cls].n}의 재사용 대기시간 감소 (최대 −50%). 숨 고르기 카드·불굴의 의지 등으로 줄어들어요`)]:[]),
     row('회전 부적',orbitN()+'개'),
     row('흡수 범위',Math.round(magE())+` <small>/ ${MAGNET_CAP}</small>`,p.magnet>MAGNET_CAP?`초과 ${Math.round(p.magnet-MAGNET_CAP)}은 효과 없음`:p.magnet>=MAGNET_CAP?'최대치. 자석 카드가 더 안 나와요':''),
-    (()=>{const lt=p.luck+gLk(),cap=LUCK_CAP_F();return row('행운',(+Math.min(lt,cap).toFixed(1))+` <small>/ ${cap}</small>`,lt>cap?(luckUse()?`초과 ${(lt-cap).toFixed(1)}도 판돈 올리기·운명의 주사위에 계산`:`초과 ${(lt-cap).toFixed(1)}은 효과 없음`):luckFull()?'최대치. 행운 카드·증강이 더 안 나와요':'');})(),
+    (()=>{const lt=p.luck+gLk(),cap=LUCK_CAP_F();return row('행운',(+Math.min(lt,cap).toFixed(1))+` <small>/ ${cap}</small>`,S.lk0?'⚠ 관리자 「행운 0」 설정 켜짐: 부적·영구 강화·장비 행운이 모두 0으로 고정돼 있어요. 아래 행운 버튼으로 끄면 다음 판부터 원래대로':lt>cap?(luckUse()?`초과 ${(lt-cap).toFixed(1)}도 판돈 올리기·운명의 주사위에 계산`:`초과 ${(lt-cap).toFixed(1)}은 효과 없음`):luckFull()?'최대치. 행운 카드·증강이 더 안 나와요':'');})(),
     row('부활 비용',reviveCost()+'골드'),
     row('골드 획득','×'+p.goldM.toFixed(2))
   ].join('');
@@ -16550,7 +16550,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=419,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=420,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
