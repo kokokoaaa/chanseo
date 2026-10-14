@@ -9174,7 +9174,7 @@ function openSwap(a,opts,free,why){
 function openStat(keep,rr){
   S.mode='stat';saveGame(true);S.srr=S.srr||0;
   let cards=keep;
-  if(!cards){cards=[];let tries=0;if(!rr){S.curB=S.boostN>0?(S.boostB||6):0;if(S.boostN>0){S.boostN--;if(!S.boostN)S.boostB=0;}}const bonus=Math.max(S.curB||0,S.boost?6:0);while(cards.length<3&&tries<60){tries++;const c=cardOf(boostRar(bonus),bonus);if(!cards.some(x=>x.n===c.n))cards.push(c);}S.boost=false;}
+  if(!cards){cards=[];let tries=0;if(!rr){S.curB=S.boostN>0?(S.boostB||6):0;if(S.boostN>0){S.boostN--;if(!S.boostN)S.boostB=0;}}const bonus=Math.max(S.curB||0,S.boost?6:0);while(cards.length<3&&tries<60){tries++;const c=cardOf(boostRar(bonus),bonus);if(!cards.some(x=>x.n===c.n||cardClash(x,c)))cards.push(c);}S.boost=false;}
   // 스탯 다시뽑기: 연속으로 돌릴수록 1.5배씩 (고르면 처음 가격으로)
   const cost=Math.round(price(15)*Math.pow(1.5,S.srr)),boostC=price(90+S.lvl*12),next=augNextIn();
   const bossSt=S.bossStat;S.bossStat=false;
@@ -9252,6 +9252,7 @@ const CARD_SRC={'정비 키트':['summon'],'포탑 개조':['summon'],'뼈 가�
 function sumNames(){const S_=S;const a=[];if(droneN()>0)a.push('정령');if(has('turret'))a.push('포탑');if(has('wisp'))a.push('도깨비불');if(has('dealers'))a.push('수호령 부적');if(has('mine'))a.push('지뢰');return a.length?a.join('·'):'소환물';}
 function cdNames(){const a=[];if(gravOn())a.push('중력장');if(has('thornseed')||tag('nature')>=1)a.push('덩굴');if(waveOn())a.push('충격파');if(has('stormcall'))a.push('원소 폭풍');if(has('battlecry'))a.push('전쟁 함성');if(shadowOn())a.push('분신');if(S.cls==='necro'||tag('undead')>=4)a.push('해골 소환');if(has('d_bear'))a.push('곰 변신');return a.length?a.join('·'):'주기형 효과';}
 function cardShareW(n){const ks=CARD_SRC[n];if(!ks)return 1;const sh=ks.reduce((q,k)=>q+dShare(k),0);return .35+3*Math.min(.6,sh);}
+/* v392 한 번에 뜨는 카드 3장 중 같은 스탯(예: 대시 재사용)을 올리는 카드는 1장만 — 카드 설명의 「스탯 이름 +/− 숫자」로 비교 */const cardKeys=c=>{const t=String(c&&c.d||'').replace(/<[^>]*>/g,'').replace(/\([^)]*\)/g,''),K=new Set();for(const m of t.matchAll(/([가-힣][가-힣 ]*?)\s*[+−-]\s*[\d.]/g)){const k=m[1].trim().replace(/^.*[,.]\s*/,'');if(k)K.add(k);}return K;},cardClash=(a,b)=>{const A=cardKeys(a);for(const k of cardKeys(b))if(A.has(k))return true;return false;};
 function cardOf(r,bonus=0){const LT=lockedTags(),pool=CARDS.filter(c=>(c.fr?c.fr===r:true)&&!((CARD_TAG[c.n]||[]).length&&(CARD_TAG[c.n]||[]).every(t=>LT.has(t)))&&(!c.cls||c.cls===S.cls||(c.src&&c.src()))&&cardOk(c)),fav=CLASSES[S.cls||'knight'].cards,rec=S.recentC||[],w=c=>(LV_CNT.has(c.n)?LVF:1)*(fav.includes(c.n)||c.cls?1.6:1)*(PCT_CARDS.has(c.n)?.35:1)*cardShareW(c.n)*(rec.includes(c.n)?.3:1)*routeW(CARD_TAG[c.n]||[]);
   let t=pool.reduce((q,c)=>q+w(c),0),x=Math.random()*t,pick=pool[pool.length-1];for(const c of pool){if((x-=w(c))<0){pick=c;break;}}
   S.recentC=[...rec,pick.n].slice(-9);return rollCard(pick,r,bonus);}
@@ -9431,6 +9432,7 @@ const PATCH_NOTES=[
   {v:392,t:'📱 폰 가로 화면 · 🛡 도발',items:[
     ['buff','🛡 기사 「도발」: 끌려온 적은 3초 동안 <b>나에게 주는 피해 -25%</b>(내가 주는 피해 +20%는 그대로) — 탱커답게 버티는 증강으로'],
     ['change','📜 의뢰인은 이제 <b>신 난이도·무한의 악몽</b>에서만 나와요 (첫 보스를 잡으면)'],
+    ['change','🃏 레벨업 카드 3장에 <b>같은 스탯</b>(예: 대시 재사용)을 올리는 카드가 2장 이상 같이 나오지 않아요'],
     ['change','📱 폰 가로 화면: 위쪽 정보창·버튼을 작게, 증강·레벨업 같은 창은 화면을 꽉 채워서 잘리지 않게']]},
   {v:385,t:'🔢 버전 표시',items:[
     ['change','🔢 시작 화면 위쪽에 <b>게임 버전과 서버 버전</b>이 보여요 (폰에서도)'],
@@ -15479,7 +15481,7 @@ function autoAug(tier){
 const BADCARD=['러시안 회전','동전 던지기','모험가의 주사위','결사'];
 const OFFCARD=['숫돌','힘의 물약','날랜 손놀림','손목 단련','치명상','급소 노리기','전투 본능','유리 대포','광기','쾌속 장전','사냥꾼의 눈','다연발','관통 탄'];
 function autoStat(){
-  const bonus=S.boostN>0?(S.boostB||6):S.boost?6:0;const cards=[];let tries=0;while(cards.length<3&&tries<60){tries++;const c=cardOf(boostRar(bonus),bonus);if(!cards.some(x=>x.n===c.n))cards.push(c);}S.boost=false;if(S.boostN>0){S.boostN--;if(!S.boostN)S.boostB=0;}
+  const bonus=S.boostN>0?(S.boostB||6):S.boost?6:0;const cards=[];let tries=0;while(cards.length<3&&tries<60){tries++;const c=cardOf(boostRar(bonus),bonus);if(!cards.some(x=>x.n===c.n||cardClash(x,c)))cards.push(c);}S.boost=false;if(S.boostN>0){S.boostN--;if(!S.boostN)S.boostB=0;}
   // 카드를 잠깐 적용해 보고 전투력·버티는 힘이 가장 많이 오르는 카드 (도박 카드·체력 깎는 카드는 피함). 계산이 안 되는 카드(경험치·자석 등)는 작은 기본 점수
   const ev=new Map(cards.map(c=>[c,RISKY_C.test(c.n)||BADCARD.includes(c.n)?null:ptTry(q=>c.f(q))]));
   const sc=c=>{const d=ev.get(c);let v=({c:1,r:2,e:3.5,l:5}[c.r])*.3-(BADCARD.includes(c.n)||RISKY_C.test(c.n)?8:0)+(c.u!=null?c.u:.4)*.3+Math.random()*.2;
