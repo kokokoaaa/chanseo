@@ -1,4 +1,6 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v11.1
+// 찬서 명예의 전당 서버 (Google Apps Script) v11.2
+//
+// v11.1 → v11.2 바뀐 점 (게임 v445) — 관리자 기록 삭제가 일간·주간·월간 줄은 남겨서, 기간 순위·종합에 지운 기록이 계속 보이던 문제
 //
 // v11.0 → v11.1 바뀐 점 (게임 v444) — 자동 이동 점수 감점(최대 −10%) 없앰. 게임과 같은 점수식 (예전 자동 이동 기록도 감점 없이 다시 계산됨)
 //
@@ -539,7 +541,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 111, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 112, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -821,7 +823,7 @@ function delrec_(q) {
   try { const s = sheet_(), last = s.getLastRow();if (last < 2) return { ok: 1, n: 0 };
     const v = s.getRange(2, 1, last - 1, LIST_COLS).getValues(), rows = [];
     const qc = String(q.cls || '');
-    v.forEach((r, i) => { const o = Object.fromEntries(HEAD.slice(0, LIST_COLS).map((h, j) => [h, r[j]])); if (String(o.name) === nm && fixDiff_(o) === df && (!qc || clsB_(o.cls) === qc)) rows.push(i + 2); });
+    v.forEach((r, i) => { const o = Object.fromEntries(HEAD.slice(0, LIST_COLS).map((h, j) => [h, r[j]])); const fd = String(fixDiff_(o)); if (String(o.name) === nm && (fd === df || fd.indexOf(df + '|') === 0) && (!qc || clsB_(o.cls) === qc)) rows.push(i + 2); }); // v11.2 기간(일간·주간·월간) 줄도 같이 지움
     rows.reverse().forEach(rw => s.deleteRow(rw));
     delAdd_(nm, qc ? df + '|' + qc : df);
     ownerSet_(nm, owner_(s, nm).kh || acctKh_(nm) || '');

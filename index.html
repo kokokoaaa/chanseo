@@ -15866,7 +15866,7 @@ async function hofDel(b){const nm=String(b.name||''),df=b.diff;if(!DEV||!nm)retu
   if(b.local){dropLocal();BOARD=(BOARD||[]).filter(x=>x!==b);refreshBoard();toast('이 기기의 기록을 지웠어요');return;}
   if(!SHEET_URL){toast('서버 주소가 없어요');return;}
   try{const r=await fetch(SHEET_URL+'?delrec='+encodeURIComponent(nm)+'&diff='+encodeURIComponent(df)+(SRV_V>=78&&b.cls&&!/^raid/.test(df)?'&cls='+encodeURIComponent(b.cls):'')+'&dk='+encodeURIComponent(DEV_K),{cache:'no-store'});const j=await r.json();
-    if(j&&j.ok){dropLocal();BOARD=(BOARD||[]).filter(x=>!(x.name===nm&&x.diff===df&&(!(SRV_V>=78&&b.cls&&!/^raid/.test(df))||x.cls===b.cls)));refreshBoard();toast(`🗑 「${nm}」 기록 ${j.n||0}줄 삭제`);}
+    if(j&&j.ok){dropLocal();const gone=x=>x.name===nm&&String(x.diff).split('|')[0]===df&&(!(SRV_V>=78&&b.cls&&!/^raid/.test(df))||String(x.cls).split(/[:#@~]/)[0]===b.cls);/* v445 기간 줄(일간·주간·월간)도 화면에서 같이 뺌 */BOARD=(BOARD||[]).filter(x=>!gone(x));try{BOARD_P=(BOARD_P||[]).filter(x=>!gone(x));}catch(e){}refreshBoard();toast(`🗑 「${nm}」 기록 ${j.n||0}줄 삭제`);}
     else if(Array.isArray(j))uiAlert(`서버가 아직 삭제 기능이 없는 예전 버전으로 응답했어요 (지금 서버 ${SRV_V?'v'+(SRV_V/10).toFixed(1):'버전 확인 안 됨'}).\n\nApps Script에서 코드를 붙여넣은 뒤 꼭\n배포 → 배포 관리 → 연필(수정) → 버전: 「새 버전」 → 배포\n를 눌러야 실제 서버가 바뀌어요. (저장만 하면 예전 버전이 계속 돌아가요)`);
     else toast(j&&j.err==='key'?'개발자 키가 맞지 않아요':j&&j.err?'삭제 실패: '+j.err:'삭제 실패');}
   catch(e){toast('삭제 실패 (인터넷 확인)');}}
@@ -16750,7 +16750,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=444,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=445,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
