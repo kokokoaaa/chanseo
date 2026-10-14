@@ -14500,16 +14500,21 @@ const aiOnline=i=>{const me=BOTS[i][0],H=(ONLINE||[]).map(x=>x&&x.n).filter(n=>n
 /* v379 접속이 끝난 모험가는 말하지 않음 (예약해 둔 인사·대답도 보내기 직전에 다시 확인) */
 async function aiSay(i,said,who,named,cut,k,tgt,gr){if(!botOn(i,Date.now()))return null;const T0=Date.now(),body={ai:1,b:i,me:who||'',said:said||'',named:named?1:0,cut:cut?1:0,k:k||'',tgt:tgt||'',gr:gr?1:0,on:JSON.stringify(aiOnline(i)),st:botState(i,Date.now()),mine:JSON.stringify(aiMine(i)),ctx:JSON.stringify(aiCtx(said&&who?who+': '+said:''))};
   /* 서버 v8.6부터는 POST (긴 대화도 다 보냄), 그 전엔 주소에 실어 보냄 */const r=SRV_V>=86?await fetch(SHEET_URL,{method:'POST',body:JSON.stringify(body)}):await fetch(SHEET_URL+'?'+Object.entries({...body,mine:JSON.stringify(aiMine(i).slice(-4)),ctx:JSON.stringify(aiCtx(said&&who?who+': '+said:'').slice(-10))}).map(([k,v])=>k+'='+encodeURIComponent(v)).join('&'),{cache:'no-store'});
-  const j=await r.json();AI_X=!!(j&&j.x);/* v391 태그 찌꺼기(<...>·[기분 표시)는 채팅에 안 나가게 */if(j&&j.m)j.m=String(j.m).replace(/<\/?[A-Za-z_][^>]*>?/g,'').replace(/\[\s*기분[^\]]*\]?/g,'').replace(/\[[^\]]*$/,'').replace(/\s{2,}/g,' ').trim();if(j&&j.skip)return null;if(!j||!j.m){aiDv('서버 응답 '+JSON.stringify(j).slice(0,160));return null;}const n=BOTS[i][0],parts=chatSplit(j.m);AI_ANY=Date.now();
+  const j=await r.json();AI_X=!!(j&&j.x);/* v391 태그 찌꺼기(<...>·[기분 표시)는 채팅에 안 나가게 */if(j&&j.m)j.m=String(j.m).replace(/<\/?[A-Za-z_][^>]*>?/g,'').replace(/\[\s*(기분|시비|선\s*넘음)[^\]]*\]?/g,'').replace(/\[[^\]]*$/,'').replace(/\s{2,}/g,' ').trim();if(j&&j.skip)return null;if(!j||!j.m){aiDv('서버 응답 '+JSON.stringify(j).slice(0,160));return null;}const n=BOTS[i][0],parts=chatSplit(j.m);AI_ANY=Date.now();
   /* 사람처럼 타자 치는 시간: 읽고 생각하는 시간 + 글자 수 ÷ 타자 속도(1초에 3~5.5자, 사람마다 다름) — 그동안 「OO 입력 중…」 */const cps=3+((botH(i,4321)%100)/100)*2.5;
   for(let q=0;q<parts.length;q++){const think=q?400+Math.random()*900:1500+Math.random()*3500,type=parts[q].length/cps*1000*(.85+Math.random()*.3),wait=Math.max(600,think+type-(q?0:Date.now()-T0));
     AI_TYPING={n,until:Date.now()+wait};if(CHAT_OPEN)chatPaint();await new Promise(r=>setTimeout(r,wait));AI_TYPING=null;if(!botOn(i,Date.now())){if(CHAT_OPEN)chatPaint();return null;}
     if(FB&&FB.db)FB.db.ref('chat').push({u:FB.uid,n,m:parts[q],fx:'',d:onlId(),t:firebase.database.ServerValue.TIMESTAMP});
     else await fetch(SHEET_URL+'?chat=1&say='+encodeURIComponent(parts[q])+'&id='+onlId()+'b'+i+'&n='+encodeURIComponent(n),{cache:'no-store'}).then(()=>chatFetch()).catch(()=>{});}
   AI_ANY=Date.now();if(CHAT_OPEN)chatPaint();
+  /* v397 시비 건 말이면 다른 모험가가 반응 (1분에 한 번까지, 반응끼리 끝없이 이어지지 않게) */if(j.s&&!AI_RXL&&Date.now()-AI_RXT>60000){AI_RXT=Date.now();aiReact(i,j.m);}
   return j.m;}
 // 여러 명이 이어서: 앞 사람 말에 다른 모험가가 끼어듦 (점점 드물게, 최대 3번). 사람이 새로 말하면 그쪽이 우선
 let AI_LAST={},AI_ANY=0,AI_GEN=0,AI_TYPING=null,AI_X=false;
+/* v397 시비에 반응할 모험가: 시비를 고깝게 보는 성격이 먼저, 나머지도 가끔 */let AI_RXT=0,AI_RXL=false;const BOT_CALL=new Set(['진지충','도윤이형','캣맘나비','성기사단장','민트초코','곰도리','별헤는밤','럭키세븐']);
+async function aiReact(i,line){const gen=AI_GEN;AI_RXL=true;try{const now=Date.now(),L=BOTS.map((_,j)=>j).filter(j=>j!==i&&botOn(j,now)&&!botAway(j,now));if(!L.length)return;
+  const pick=()=>{const W=L.map(j=>BOT_CALL.has(BOTS[j][0])?3:1),t=W.reduce((a,b)=>a+b,0);let r=Math.random()*t;for(let k=0;k<L.length;k++){if((r-=W[k])<0){const j=L[k];L.splice(k,1);return j;}}return L.pop();};
+  const n=Math.random()<.3?2:1;for(let q=0;q<n&&L.length;q++){await new Promise(r=>setTimeout(r,3000+Math.random()*6000));if(gen!==AI_GEN)return;const j=pick();await aiSay(j,line,BOTS[i][0],0,1,'react|'+j+'|'+line);}}finally{AI_RXL=false;}}
 /* v389 누가 선 넘는 말을 하면 (서버가 x 표시) 다른 모험가 2~3명이 차례로 참전해서 뭐라 함 */
 async function aiPile(m,who,first,gen){const now=Date.now(),L=BOTS.map((_,i)=>i).filter(i=>i!==first&&botOn(i,now)&&!botAway(i,now)).sort(()=>Math.random()-.5).slice(0,2+(Math.random()<.5?1:0));
   for(const j of L){await new Promise(r=>setTimeout(r,2500+Math.random()*6000));if(gen!==AI_GEN)return;await aiSay(j,m,who,0,1,'pile|'+j+'|'+who+'|'+m);}}
@@ -16294,7 +16299,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=396,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=397,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
