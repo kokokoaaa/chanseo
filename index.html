@@ -9674,6 +9674,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:447,t:'💬 채팅 보내기 보강',items:[
+    ['fix','💬 서버 응답이 늦을 때 채팅이 「보내지 못했어요」로 안 보내지던 문제 — 이름 확인이 늦어도 보내고, 한 번 더 다시 보내요']]},
   {v:446,t:'🤝 레이드 동료 표시',items:[
     ['fix','🤝 동료와 함께 깬 레이드 기록인데 명예의 전당 단상·목록에 동료가 안 보이던 문제 — 기록에는 동료가 저장돼 있었는데 화면에 그릴 때 빠지고 있었어요. 지금까지 올라간 기록도 동료가 다시 보여요']]},
   {v:444,t:'🤖 자동 이동 제한 해제',items:[
@@ -15109,9 +15111,9 @@ function fbStart(){const db=FB.db,me=FB.uid;
   db.ref('watch/'+me).on('value',s=>{const v=s.val();FB_WATCHT=v&&v.t?+v.t:0;if(v&&!FB_SNAP)FB_SNAP=setInterval(()=>{if(!FB_WATCHT||fbNow()-FB_WATCHT>15000){clearInterval(FB_SNAP);FB_SNAP=null;return;}try{db.ref('snap/'+me).set({d:JSON.stringify(specSnap()),t:firebase.database.ServerValue.TIMESTAMP});}catch(e){}},250);});
   if(CHAT_OPEN){clearInterval(CHAT_T);CHAT_T=null;}}
 let FB_NAMEOK={};
-async function fbChatSend(m){const n=myNick()||'모험가',nk=n+'|'+MYKEY;if(n!=='모험가'&&FB_NAMEOK[nk]==null){try{const r=await nameOwned3(n);if(r===null){toast('이름 확인을 못 했어요. 잠시 뒤 다시 보내 주세요');return;}FB_NAMEOK[nk]=!r;}catch(e){toast('이름 확인을 못 했어요. 잠시 뒤 다시 보내 주세요');return;}}
+async function fbChatSend(m){const n=myNick()||'모험가',nk=n+'|'+MYKEY;if(n!=='모험가'&&FB_NAMEOK[nk]==null){/* v447 이름 확인 응답이 늦어도(서버가 바쁨) 채팅은 보냄 — 확인 결과는 다음 번에 다시 물음. 예전엔 「보내지 못했어요」로 끝났음 */try{const r=await nameOwned3(n);if(r!==null)FB_NAMEOK[nk]=!r;}catch(e){}}
   if(FB_NAMEOK[nk]===false)return {ok:false,err:'owned'};if(Date.now()-(FB.lastSay||0)<1500)return {ok:false,err:'fast'};FB.lastSay=Date.now();
-  try{await fbTO(FB.db.ref('chat').push({u:FB.uid,n,m:m.slice(0,80),fx:myFx(),d:onlId(),t:firebase.database.ServerValue.TIMESTAMP}),8000);return {ok:true};}catch(e){return null;}}
+  const msg={u:FB.uid,n,m:m.slice(0,80),fx:myFx(),d:onlId(),t:firebase.database.ServerValue.TIMESTAMP};for(let tr=0;tr<2;tr++){try{await fbTO(FB.db.ref('chat').push(msg),tr?20000:12000);return {ok:true};}catch(e){}}return null;}
 // 보는 쪽 (Firebase 대상): watch/대상 에 내 표시를 5초마다 갱신, snap/대상 을 실시간으로 받음
 async function fbSpecStart(sp){const db=FB.db,wr=db.ref('watch/'+sp.u);try{const cur=(await fbTO(wr.once('value'),6000)).val();if(cur&&cur.by!==FB.uid&&fbNow()-(+cur.t||0)<15000){toast('다른 사람이 이미 보는 중이에요');specStop();return;}}catch(e){}
   const beat=()=>{if(SPEC!==sp)return;wr.set({by:FB.uid,t:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{});};beat();wr.onDisconnect().remove();sp.beat=setInterval(beat,5000);
@@ -16752,7 +16754,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=446,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=447,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
