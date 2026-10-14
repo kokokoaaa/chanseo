@@ -1,4 +1,7 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v10.6
+// 찬서 명예의 전당 서버 (Google Apps Script) v10.7
+//
+// v10.6 → v10.7 바뀐 점 (게임 v433)
+// - 🧿 순위 부적: 같은 계정(같은 이름 비밀번호 열쇠 · 없으면 같은 이름)은 한 기간(일간·주간·월간)에 부적 하나만 — 악몽·보스 러시·레이드 3위 안 중 가장 높은 순위 하나. 3위 밖은 그대로 못 받음
 //
 // v10.5 → v10.6 바뀐 점 (게임 v421) — 클라우드 저장 덮어쓰기 사고 막기
 // - 저장(csave)은 그 기기 데이터가 「지금 서버에 있는 저장본」에서 이어진 것일 때만 받음: 게임이 base(불러오거나 마지막으로 올린 서버 저장 시각)를 보내고,
@@ -410,8 +413,12 @@ function awardPeriods_(s) {
     keys.forEach(([p, k]) => { if (k === perKey_(p)) return; MODES.forEach(([md, pre, lab]) => { const ak = 'aw_' + (md === 'nm' ? '' : md + '_') + k; if (!P.getProperty(ak)) todo.push({ p, k, md, pre, lab, ak }); }); });
     if (!todo.length) return;
     const last = s.getLastRow(); if (last < 2) { todo.forEach(t => P.setProperty(t.ak, '1')); return; }
-    const iS = HEAD.indexOf('score'), iT = HEAD.indexOf('time'), iL = HEAD.indexOf('lvl');
-    const v = s.getRange(2, 1, last - 1, iS + 1).getValues(), gs = giftSheet_();
+    const iS = HEAD.indexOf('score'), iT = HEAD.indexOf('time'), iL = HEAD.indexOf('lvl'), iK = HEAD.indexOf('kh');
+    const v = s.getRange(2, 1, last - 1, Math.max(iS, iK) + 1).getValues(), gs = giftSheet_();
+    // v10.7 같은 계정(이름 주인 열쇠가 같으면 한 계정, 없으면 이름)은 한 기간에 부적 하나만: 모드(악몽·보스 러시·레이드)마다 3위 안에 든 것 중 가장 높은 순위 하나
+    //       (같으면 악몽 > 보스 러시 > 레이드). 한 모드 순위도 계정 기준(부계정 이름은 빠짐). 다른 모드 자리는 넘기지 않음 (그 모드 3위 안에 든 사람만 받음)
+    const acct = {}; v.forEach(r => { const nm = String(r[0]), kh = String(r[iK] || ''); if (nm && kh && !acct[nm]) acct[nm] = kh; });
+    const acOf = nm => acct[nm] ? 'k:' + acct[nm] : 'n:' + nm, MO = { nm: 0, br: 1, rd: 2 }, cand = [];
     todo.forEach(t => {
       const best = {};
       if (t.md === 'rd') {
@@ -422,9 +429,14 @@ function awardPeriods_(s) {
         const df = (t.md === 'nm' ? 'nightmare|' : 'bossrush|') + t.k;
         v.forEach(r => { if (String(r[1]) !== df) return; const nm = String(r[0]), sc = +r[iS] || 0; if (!nm || nm === '익명') return; if (!best[nm] || sc > best[nm]) best[nm] = sc; });
       }
-      Object.keys(best).filter(nm => best[nm] > 0).sort((a, b) => best[b] - best[a]).slice(0, 3).forEach((nm, i) => gs.appendRow([now, nm, '명예의 전당', 0, 'charm:' + t.p + ':' + (i + 1) + ':' + t.pre + t.k, t.lab]));
-      P.setProperty(t.ak, '1');
+      /* 한 모드 안에서는 계정마다 가장 좋은 이름 하나로 순위를 셈 (부계정 이름이 자리를 차지하지 않게) */const seen = {}, L = Object.keys(best).filter(nm => best[nm] > 0).sort((a, b) => best[b] - best[a]).filter(nm => { const ac = acOf(nm); if (seen[ac]) return false; seen[ac] = 1; return true; });
+      L.slice(0, 3).forEach((nm, i) => cand.push({ t, nm, r: i + 1, ac: acOf(nm) }));
     });
+    // 기간(일간·주간·월간)별로 계정마다 가장 좋은 하나만
+    const pick = {};
+    cand.forEach(c => { const key = c.t.p + '|' + c.t.k + '|' + c.ac, o = pick[key]; if (!o || c.r < o.r || (c.r === o.r && MO[c.t.md] < MO[o.t.md])) pick[key] = c; });
+    Object.keys(pick).forEach(key => { const c = pick[key]; gs.appendRow([now, c.nm, '명예의 전당', 0, 'charm:' + c.t.p + ':' + c.r + ':' + c.t.pre + c.t.k, c.t.lab]); });
+    todo.forEach(t => P.setProperty(t.ak, '1'));
   } catch (err) {}
 }
 // ★ 한 번만: 편집기에서 setupAwardTrigger 를 골라 ▶ 실행 → 매일 한국 시각 0시 무렵 awardTick 이 돌아 부적을 나눠 줌
@@ -507,7 +519,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 106, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 107, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
