@@ -14601,7 +14601,11 @@ const keyFor=n=>n===myNick()?MYKEY:nKeys()[n]||'';
 // 서버가 바쁠 때(동시 요청이 몰림) 한 번 실패해도 바로 「연결 못 함」이 뜨지 않게 1.5초 뒤 한 번 더 물어봄
 async function nameOwned3(nm,key){const r=await nameOwned3a(nm,key);if(r!==null)return r;await new Promise(z=>setTimeout(z,1500));return nameOwned3a(nm,key);}
 async function nameOwned3a(nm,key){const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),20000):0;
-  try{const r=await fetch(SHEET_URL+'?own='+encodeURIComponent(nm)+'&k='+encodeURIComponent(key||MYKEY)+'&dv='+(()=>{try{return onlId();}catch(e){return '';}})(),{cache:'no-store',signal:ac?ac.signal:undefined});const j=await r.json();return j&&'owned' in j?!!j.owned:null;}catch(e){return null;}finally{clearTimeout(to);}}
+  /* v462 실패 이유를 남김 (화면에 그대로 보여 줌: 짐작하지 않게) */const t0=Date.now();NAME_ERR='';
+  try{const r=await fetch(SHEET_URL+'?own='+encodeURIComponent(nm)+'&k='+encodeURIComponent(key||MYKEY)+'&dv='+(()=>{try{return onlId();}catch(e){return '';}})(),{cache:'no-store',signal:ac?ac.signal:undefined});const tx=await r.text();let j=null;try{j=JSON.parse(tx);}catch(e){NAME_ERR=`서버 응답이 JSON이 아님 (HTTP ${r.status}, ${Math.round((Date.now()-t0)/100)/10}초): ${tx.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').slice(0,120)}`;return null;}
+    if(j&&'owned' in j)return !!j.owned;NAME_ERR=`서버가 이름 확인 대신 이렇게 답함: ${JSON.stringify(j).slice(0,120)} (${Math.round((Date.now()-t0)/100)/10}초)`;return null;}
+  catch(e){NAME_ERR=(e&&e.name==='AbortError'?'20초 안에 서버 응답 없음':'요청 실패: '+(e&&e.message||e))+` (${Math.round((Date.now()-t0)/100)/10}초)`;return null;}finally{clearTimeout(to);}}
+let NAME_ERR='';
 // 개발자 모드: 명예의 전당 기록이 몇 번째 버전에서 나왔는지. v100부터는 기록에 저장, 그 전은 기록 시각 ↔ 배포 시각(초 − 1791000000, BUILD) 표로 추정
 const BUILD_AT=[[339464,2],[339689,3],[339998,4],[340233,5],[341524,6],[344191,7],[347478,8],[359468,9],[359867,10],[361917,11],[362237,12],[367440,13],[368584,14],[370091,15],[374613,16],[375742,17],[379539,18],[381722,19],[383512,20],[384757,21],[385054,22],[385423,23],[385724,24],[387694,25],[388384,26],[389114,27],[389689,28],[390004,29],[390416,30],[410725,31],[411274,32],[414292,33],[415053,34],[429735,35],[430942,36],[433707,38],[434562,39],[434643,40],[435612,41],[436078,42],[436475,43],[436614,44],[437417,45],[437470,46],[437948,47],[438396,48],[439410,49],[440981,50],[443769,51],[444186,52],[444449,53],[444846,54],[445352,55],[446021,56],[446660,57],[447060,58],[447459,59],[447677,60],[447839,61],[449847,62],[449967,63],[450055,64],[450832,66],[451364,67],[452069,68],[457582,69],[458404,70],[458835,71],[459738,72],[460371,73],[461108,74],[465967,75],[466787,76],[467738,77],[468207,78],[469021,79],[471199,80],[471386,81],[471615,82],[471813,83],[471972,84],[472174,85],[472364,86],[472501,87],[472657,88],[473000,89],[473101,90],[473359,91],[473601,92],[473786,93],[474319,94],[477467,95]];
 function recVer(b){if(b.build)return 'v'+b.build;const t=(+b.at||0)/1000-1791000000;if(!b.at)return '';if(t<BUILD_AT[0][0])return 'v2 이전';let v=BUILD_AT[0][1];for(const [s,n] of BUILD_AT){if(s<=t)v=n;else break;}return '~v'+v;}
@@ -15646,7 +15650,7 @@ function openNick(){cosPreviewHide();const cur=myNick();
     if(!pin&&n!==cur){const ok0=nKeys()[n];if(ok0)setMyKey(ok0);else if(/^p/.test(MYKEY||'')){/* 다른 이름의 비밀번호 열쇠로 새 이름을 가져가지 않게 이 기기 기본 열쇠로 */let dk='';try{dk=localStorage.getItem('chanseo_devkey')||'';}catch(e){}if(!dk){const a=new Uint8Array(20);crypto.getRandomValues(a);dk=[...a].map(x=>x.toString(36).padStart(2,'0')).join('');}setMyKey(dk);}}
     if(SHEET){wait('서버에서 이름을 확인하고 있어요…');$('nkSave').disabled=true;$('nkSave').textContent='⏳ 확인 중…';
       try{const own=await nameOwned3(n);
-        if(own===null){msg('랭킹 서버에 연결하지 못했어요. 인터넷 연결을 확인하고 다시 저장해 주세요.');return;}
+        if(own===null){msg('랭킹 서버에 연결하지 못했어요. 인터넷 연결을 확인하고 다시 저장해 주세요.'+(NAME_ERR?' [원인: '+NAME_ERR+']':''));return;}
         if(pin){const nk=pinKey(n,pin);
           if(!own){// 지금 이 컴퓨터가 주인이거나 주인이 없음 → 비밀번호 열쇠로 바꾸고, 서버에 정말 바뀌었는지 확인
             /* v434 이 기기가 비밀번호로 쓰던 이름에 다른 비밀번호를 치면 바꾸지 않음 (잘못 쳐서 확인을 누르면 다른 기기들이 못 들어가던 일이 반복됨) — 바꾸기는 아래 「🔑 비밀번호 바꾸기」로만 */if(/^p/.test(MYKEY||'')&&MYKEY!==nk){msg(`입력한 비밀번호가 「${n}」 비밀번호와 달라요. 그대로 쓰려면 비밀번호 칸을 비우고 저장하세요. 정말 비밀번호를 바꾸려면 아래 「🔑 비밀번호 바꾸기」를 누르세요.`);return;}
@@ -15656,7 +15660,7 @@ function openNick(){cosPreviewHide();const cur=myNick();
             setMyKey(nk);toast2='🔑 이름 비밀번호를 정했어요 · '+n+(SRV_V>=56?' (데이터가 서버에 자동 저장돼요)':'');offer=nk;}
           else{const ok=await nameOwned3(n,nk);
             if(ok===false){setMyKey(nk);toast2='🔑 비밀번호 확인! 이 컴퓨터에서도 '+n+' 이름을 써요';offer=nk;}
-            else if(ok===null){msg('랭킹 서버에 연결하지 못했어요. 인터넷 연결을 확인하고 다시 저장해 주세요.');return;}
+            else if(ok===null){msg('랭킹 서버에 연결하지 못했어요. 인터넷 연결을 확인하고 다시 저장해 주세요.'+(NAME_ERR?' [원인: '+NAME_ERR+']':''));return;}
             /* v413 비밀번호가 서버와 달라도 이 기기에 그 이름으로 쓰던 열쇠가 남아 있고 서버가 그 열쇠를 주인으로 알면 그대로 엶 (다른 이름으로 바꿨다 돌아올 때) */
             else if(await (async()=>{/* v417 이 기기에 남아 있는 열쇠(그 이름·기기 기본 열쇠·이 기기에서 쓴 다른 이름 열쇠)를 차례로 서버에 확인 */let dk='';try{dk=localStorage.getItem('chanseo_devkey')||'';}catch(e){}const C=[...new Set([nKeys()[n],dk,K0,...Object.values(nKeys())].filter(k=>k&&k!==nk))].slice(0,8);for(const k of C){if(await nameOwned3(n,k)===false){setMyKey(k);return true;}}return false;})()){toast2='👤 이 기기에서 쓰던 「'+n+'」 이름으로 돌아왔어요 (입력한 비밀번호는 서버 비밀번호와 달라요. 다른 기기에서는 원래 비밀번호를 쓰세요)';}
             else{msg(`'${n}'은(는) 다른 기기가 주인으로 등록돼 있어서 이 비밀번호로는 열 수 없어요. (그 기기에서 비밀번호 없이 먼저 쓰였거나, 다른 비밀번호예요) 이 기기에서 쓰던 이름이면 비밀번호 칸을 비우고 저장해 보세요. 그래도 안 되면 관리자에게 「${n}」 이름 비밀번호 다시 정하기를 부탁해 주세요. 처음 보는 이름이면 다른 사람이 이미 쓰는 이름이에요.`);return;}}}
@@ -16815,7 +16819,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=461,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=462,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
