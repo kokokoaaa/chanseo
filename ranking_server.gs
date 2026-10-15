@@ -1,4 +1,8 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v11.8
+// 찬서 명예의 전당 서버 (Google Apps Script) v11.9
+//
+// v11.8 → v11.9 바뀐 점 (게임 v466) — 클라우드 저장 덮어쓰기 방지
+// - 게임이 보내는 「기기 데이터 주인 이름(dn)」이 저장하려는 이름과 다르면 거절 (다른 이름 데이터로 남의 서버 데이터를 덮던 사고 차단)
+// - 계정 시트 17번째 칸에 마지막으로 저장한 기기를 적어 두고, 다른 기기가 저장하면 덮기 전에 항상 백업 (예전엔 2시간마다·크게 줄 때만이라 덮인 데이터가 백업에 없을 수 있었음)
 //
 // v11.7 → v11.8 바뀐 점 — 이름 확인(?own=…&dv=기기)이 관리자 기기 목록(?dv=)으로 먼저 잡혀 {err:'key'}가 오던 문제 (게임 v434~v462). 게임 v463은 od로 보냄
 //
@@ -659,7 +663,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 118, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 119, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -749,13 +753,15 @@ function csave_(d) {
   if (own && own !== my) return out_({ ok: false, err: 'owned' });
   const data = String(d.data || '');
   if (!/^CS1:[A-Za-z0-9+/=]+$/.test(data) || data.length > ACCT_CHUNK * ACCT_MAX) return out_({ ok: false, err: 'data' });
-  const s = acctSheet_(), cur = acctCur_(s, nm), at = num_(d.at, 9e15), md = num_(d.md, 1e12), base = d.base == null || d.base === '' ? null : num_(d.base, 9e15);
+  const s = acctSheet_(), cur = acctCur_(s, nm), at = num_(d.at, 9e15), md = num_(d.md, 1e12), base = d.base == null || d.base === '' ? null : num_(d.base, 9e15), dv = String(d.dv || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 24);
   const lg = { at, base, md, oldMd: cur.md || 0, len: data.length, oldLen: (cur.data || '').length, dev: d.dv };
   // v10.6 서버에 저장본이 있으면, 이 기기 데이터가 그 저장본에서 이어진 것일 때만 덮어씀 (base = 기기가 알고 있는 서버 저장 시각)
   if (cur.r && cur.data && base !== cur.at) { clog_(nm, base == null ? '거절(예전 버전)' : '거절(다른 저장본)', lg); return out_({ ok: false, err: 'stale', at: cur.at, md: cur.md }); }
-  if (cur.r && cur.data) { const shrink = md < cur.md * 0.7 || data.length < cur.data.length * 0.6; cbakAdd_(nm, cur, d.force ? '직접 덮어쓰기 전' : shrink ? '크게 줄어든 저장 전' : '정기', !!d.force || shrink); }
+  // v11.9 기기 데이터 주인 이름이 다르면 거절
+  if (d.dn != null && str_(d.dn, 12) !== nm) { clog_(nm, '거절(다른 이름 데이터: ' + str_(d.dn, 12) + ')', lg); return out_({ ok: false, err: 'owner' }); }
+  if (cur.r && cur.data) { const shrink = md < cur.md * 0.7 || data.length < cur.data.length * 0.6, other = !!(cur.dv && dv && cur.dv !== dv); cbakAdd_(nm, cur, d.force ? '직접 덮어쓰기 전' : shrink ? '크게 줄어든 저장 전' : other ? '다른 기기 저장 전' : '정기', !!d.force || shrink || other); }
   if (!own) olog_(nm, '주인 없음 → 저장한 기기가 가져감', cur.kh || '', my, d.dv);
-  const r = cur.r && cur.kh === my ? cur.r : acctSetKh_(nm, my), n = acctWrite_(s, r, at, md, data); // v11.6 열쇠가 그대로면 줄을 다시 찾지 않음
+  const r = cur.r && cur.kh === my ? cur.r : acctSetKh_(nm, my), n = acctWrite_(s, r, at, md, data, dv); // v11.6 열쇠가 그대로면 줄을 다시 찾지 않음
   ownerSet_(nm, my);
   clog_(nm, d.force ? '저장(직접)' : '저장', lg);
   return out_({ ok: true, result: 'csave', n, at });
@@ -790,10 +796,10 @@ function cbakAdd_(nm, cur, why, always) {
   return true;
 }
 // 지금 서버 저장본 {r, kh, at, md, data} (없으면 r만)
-function acctCur_(s, nm) { const r = acctRow_(s, nm); if (!r) return { r: 0 }; const v = s.getRange(r, 1, 1, 4 + ACCT_MAX).getValues()[0];
-  return { r, kh: String(v[1] || ''), at: +v[2] || 0, md: +v[3] || 0, data: v.slice(4).map(x => String(x || '')).join('') }; }
-function acctWrite_(s, r, at, md, data) { const parts = []; for (let i = 0; i < data.length; i += ACCT_CHUNK) parts.push(data.slice(i, i + ACCT_CHUNK));
-  const row = [at, md].concat(parts); while (row.length < 2 + ACCT_MAX) row.push('');
+function acctCur_(s, nm) { const r = acctRow_(s, nm); if (!r) return { r: 0 }; const v = s.getRange(r, 1, 1, 5 + ACCT_MAX).getValues()[0]; // v11.9 17번째 칸 = 마지막 저장 기기
+  return { r, kh: String(v[1] || ''), at: +v[2] || 0, md: +v[3] || 0, data: v.slice(4, 4 + ACCT_MAX).map(x => String(x || '')).join(''), dv: String(v[4 + ACCT_MAX] || '') }; }
+function acctWrite_(s, r, at, md, data, dv) { const parts = []; for (let i = 0; i < data.length; i += ACCT_CHUNK) parts.push(data.slice(i, i + ACCT_CHUNK));
+  const row = [at, md].concat(parts); while (row.length < 2 + ACCT_MAX) row.push(''); row.push(dv || '');
   s.getRange(r, 3, 1, row.length).setNumberFormat('@').setValues([row.map(String)]); return parts.length; }
 // 관리자: 백업 목록 + 그 이름의 최근 저장 기록 40줄
 function cbaks_(q) {
