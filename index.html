@@ -9694,6 +9694,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:464,t:'☁ 이름 바꿔 들어갈 때 데이터 덮어쓰기 막기',items:[
+    ['fix','☁ 다른 이름(+비밀번호)으로 들어가면 <b>항상</b> 「어느 데이터를 쓸까요?」를 물어요. 전에 이 기기에서 그 이름을 쓴 적이 있으면 묻지 않고 지금 기기 데이터를 그 이름 서버 데이터에 덮어쓰던 문제를 고쳤어요']]},
   {v:463,t:'👤 이름 저장 오류 원인 수정',items:[
     ['fix','👤 이름 저장·비밀번호 확인이 「랭킹 서버에 연결하지 못했어요」로 계속 실패하던 문제 — 이름 확인 요청이 서버에서 다른 요청(관리자 기기 목록)으로 잘못 처리되고 있었어요. 판 끝 명예의 전당 등록 전 이름 확인도 같은 문제로 실패할 수 있었어요']]},
   {v:461,t:'✨ 마법부여 확인',items:[
@@ -13545,7 +13547,7 @@ const csFlag=n=>{try{return localStorage.getItem('chanseo_csok_'+n)==='1';}catch
 /* v421 클라우드 저장 기준점: 이 기기 데이터가 「어느 이름의 어느 서버 저장본」에서 이어졌는지 {n,at}. 불러오거나 이 기기가 올릴 때만 정해지고,
    코드·파일 가져오기·백업 되돌리기를 하면 지워짐. 자동 저장은 서버 저장본이 이 기준점과 정확히 같을 때만 덮어씀 (다른 기기·다른 이름·빈 기기로 덮어쓰던 사고 방지) */
 const csBaseGet=()=>{try{const b=JSON.parse(localStorage.getItem('chanseo_csbase')||'null');return b&&b.n?b:null;}catch(e){return null;}},csBaseSet=(n,at)=>{try{localStorage.setItem('chanseo_csbase',JSON.stringify({n,at:+at||0}));}catch(e){}},csBaseClr=()=>{try{localStorage.removeItem('chanseo_csbase');}catch(e){}};
-const csInSync=(nm,j)=>{const at=+j.at||0,b=csBaseGet();if(b)return b.n===nm&&+b.at===at;
+const csInSync=(nm,j)=>{const at=+j.at||0,b=csBaseGet();if(b)return b.n===nm&&+b.at===at&&myNick()===nm/* v464 지금 쓰는 이름의 저장본일 때만 */;
   /* 예전 버전에서 넘어온 기기: 이 기기가 마지막으로 올리거나 불러온 시각이 그 이름 서버 저장 시각과 정확히 같을 때만 이어진 것으로 봄 */let last=0;try{last=+localStorage.getItem('chanseo_csat')||0;}catch(e){}return csFlag(nm)&&last>0&&last===at;};
 let CS_ASKED='';
 // 서버에 올림. base = 덮어쓸 서버 저장본 시각(없으면 0). 결과 {ok} · {err:'stale'} · null(연결 실패)
@@ -15676,7 +15678,8 @@ function openNick(){cosPreviewHide();const cur=myNick();
     if(fresh){if(!bakSave('new','새로 시작하기 전 데이터 ('+cur+')',syncExport())){msg('기기 저장 공간이 부족해서 지금 데이터를 백업하지 못했어요. 안전을 위해 새로 시작하지 않았어요.');if(MYKEY!==K0)setMyKey(K0);return;}
       try{for(const k of SYNC_KEYS)if(k!=='chanseo_key')localStorage.removeItem(k);localStorage.setItem('chipdungeon_nick',n);}catch(e){}csBaseClr();nKeySet(n,MYKEY);setTimeout(()=>location.reload(),400);return;}
     const fin=()=>{try{localStorage.setItem('chipdungeon_nick',n);}catch(e){}nKeySet(n,MYKEY);toast(toast2);onlPing();CH_PEND=true;startScreen();if(offer==='up')setTimeout(()=>csUpload(true),300);};
-    if(offer&&offer!=='up')csOffer(n,offer,fin);else fin();};
+    /* v464 이름을 바꿔 들어가면 항상 「어느 데이터를 쓸까요?」를 물음. 예전엔 이 기기가 전에 그 이름 서버 저장본과 맞춰 둔 기록이 남아 있으면 묻지 않고 「이어진 기기」로 보고, 지금 이 기기에 있는 다른 이름 데이터를 그 이름 서버에 자동 저장으로 덮어썼음 */
+    if(offer&&offer!=='up')csOffer(n,offer,fin,n!==cur);else fin();};
   /* v434 비밀번호 바꾸기: 지금 이름의 주인 기기에서만, 지금 비밀번호 확인 + 새 비밀번호 두 번 */$('nkChg').onclick=async()=>{const n=myNick();if(!n||n==='익명'||n==='모험가'){msg('먼저 이름을 정해 주세요.');return;}if(!SHEET||SRV_V<48){msg('랭킹 서버에 연결된 뒤 해 주세요.');return;}
     const own=await nameOwned3(n);if(own!==false){msg(own===null?'서버에 연결하지 못했어요.':`이 기기는 지금 「${n}」의 주인으로 확인되지 않아요. 먼저 이름+비밀번호로 들어온 뒤 바꿀 수 있어요.`);return;}
     if(/^p/.test(MYKEY||'')){const o=await uiPrompt(`「${n}」의 지금 비밀번호를 입력하세요`,'');if(o==null)return;if(pinKey(n,String(o).trim())!==MYKEY){msg('지금 비밀번호가 맞지 않아요. 비밀번호는 바뀌지 않았어요.');return;}}
@@ -16821,7 +16824,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=463,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=464,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
