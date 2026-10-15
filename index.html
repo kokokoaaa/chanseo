@@ -9694,6 +9694,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:463,t:'👤 이름 저장 오류 원인 수정',items:[
+    ['fix','👤 이름 저장·비밀번호 확인이 「랭킹 서버에 연결하지 못했어요」로 계속 실패하던 문제 — 이름 확인 요청이 서버에서 다른 요청(관리자 기기 목록)으로 잘못 처리되고 있었어요. 판 끝 명예의 전당 등록 전 이름 확인도 같은 문제로 실패할 수 있었어요']]},
   {v:461,t:'✨ 마법부여 확인',items:[
     ['new','✨ 마법부여: 고른 줄이 <b>최대치</b>(★ 최대)면 굴리기 전에 「진짜로 다시 돌릴까요?」를 물어요 — 실수로 최고 수치를 날리지 않게']]},
   {v:460,t:'📋 기록 창 정리',items:[
@@ -14602,7 +14604,7 @@ const keyFor=n=>n===myNick()?MYKEY:nKeys()[n]||'';
 async function nameOwned3(nm,key){const r=await nameOwned3a(nm,key);if(r!==null)return r;await new Promise(z=>setTimeout(z,1500));return nameOwned3a(nm,key);}
 async function nameOwned3a(nm,key){const ac=window.AbortController?new AbortController():null,to=ac?setTimeout(()=>ac.abort(),20000):0;
   /* v462 실패 이유를 남김 (화면에 그대로 보여 줌: 짐작하지 않게) */const t0=Date.now();NAME_ERR='';
-  try{const r=await fetch(SHEET_URL+'?own='+encodeURIComponent(nm)+'&k='+encodeURIComponent(key||MYKEY)+'&dv='+(()=>{try{return onlId();}catch(e){return '';}})(),{cache:'no-store',signal:ac?ac.signal:undefined});const tx=await r.text();let j=null;try{j=JSON.parse(tx);}catch(e){NAME_ERR=`서버 응답이 JSON이 아님 (HTTP ${r.status}, ${Math.round((Date.now()-t0)/100)/10}초): ${tx.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').slice(0,120)}`;return null;}
+  try{const r=await fetch(SHEET_URL+'?own='+encodeURIComponent(nm)+'&k='+encodeURIComponent(key||MYKEY)+'&od='+(()=>{try{return onlId();}catch(e){return '';}})()/* v463 예전 이름 dv는 서버에서 관리자 기기 목록(?dv=) 요청으로 먼저 잡혀서 {err:'key'}가 오던 원인 (v434부터) */,{cache:'no-store',signal:ac?ac.signal:undefined});const tx=await r.text();let j=null;try{j=JSON.parse(tx);}catch(e){NAME_ERR=`서버 응답이 JSON이 아님 (HTTP ${r.status}, ${Math.round((Date.now()-t0)/100)/10}초): ${tx.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').slice(0,120)}`;return null;}
     if(j&&'owned' in j)return !!j.owned;NAME_ERR=`서버가 이름 확인 대신 이렇게 답함: ${JSON.stringify(j).slice(0,120)} (${Math.round((Date.now()-t0)/100)/10}초)`;return null;}
   catch(e){NAME_ERR=(e&&e.name==='AbortError'?'20초 안에 서버 응답 없음':'요청 실패: '+(e&&e.message||e))+` (${Math.round((Date.now()-t0)/100)/10}초)`;return null;}finally{clearTimeout(to);}}
 let NAME_ERR='';
@@ -16819,7 +16821,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=462,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=463,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});

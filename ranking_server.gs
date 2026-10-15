@@ -1,4 +1,6 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v11.7
+// 찬서 명예의 전당 서버 (Google Apps Script) v11.8
+//
+// v11.7 → v11.8 바뀐 점 — 이름 확인(?own=…&dv=기기)이 관리자 기기 목록(?dv=)으로 먼저 잡혀 {err:'key'}가 오던 문제 (게임 v434~v462). 게임 v463은 od로 보냄
 //
 // v11.6 → v11.7 바뀐 점 — 이름 확인(?own)·불러오기(?cload): 틀린 열쇠가 10분에 40번 넘게 오면 맞는 비밀번호까지 막아서 「랭킹 서버에 연결하지 못했어요」가 뜨던 문제. 이제 맞는 열쇠는 항상 통과
 //
@@ -348,7 +350,7 @@ function tdone_(kind) {
   try { const c = CacheService.getScriptCache(); let L = []; try { L = JSON.parse(c.get('slowlog') || '[]') || []; } catch (e) { L = []; } L.push({ t: T0_, k: kind, r: TR_.slice(0, 60), ms, s: TL_.join(' · ').slice(0, 300) }); c.put('slowlog', JSON.stringify(L.slice(-40)), 21600); } catch (err) {}
 }
 const GET_R = ['sup', 'chat', 'dv', 'spec', 'unownall', 'unown', 'delrec', 'snap', 'ping', 'gifts', 'ai', 'prof', 'cload', 'cbaks', 'accts', 'cbakd', 'acctd', 'dels', 'dmack', 'dms', 'own', 'donors', 'stat', 'hero'];
-function getRoute_(q) { const k = GET_R.find(x => q[x] != null && q[x] !== ''); return k ? k + (k === 'chat' && q.say != null ? ' say' : '') : 'list'; }
+function getRoute_(q) { const k = q.own ? 'own' : GET_R.find(x => q[x] != null && q[x] !== ''); return k ? k + (k === 'chat' && q.say != null ? ' say' : '') : 'list'; }
 function postRoute_(d) {
   if (!d) return 'bad';
   for (const k of ['ai', 'sup', 'csave', 'crestore', 'dm', 'hire', 'mail', 'donorSet', 'cmEdit', 'rekey', 'fill', 'dwOnly', 'perOnly']) if (d[k]) return k + ' ' + String(d.name || '').slice(0, 12) + (k === 'perOnly' ? ' ' + String(d.diff || '') : '');
@@ -657,7 +659,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 117, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 118, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -1156,7 +1158,7 @@ function doGet0_(e) {
   if (q.stat) return out_(stat_(q));
   if (q.sup) return out_({ msgs: supList_(q.after) });
   if (q.chat) return chat_(q);
-  if (q.dv) return out_(devList_(q));
+  if (q.dv && !q.own) return out_(devList_(q)); // v11.8 이름 확인(?own)에 기기 id를 dv로 붙여 보내던 게임(v434~v462)이 여기로 빠져 {err:'key'}를 받던 문제
   if (q.spec) return out_(spec_(q));
   if (q.unownall) return out_(unownAll_(q));
   if (q.unown) return out_(unown_(q));
@@ -1180,7 +1182,7 @@ function doGet0_(e) {
     //       게임이 「랭킹 서버에 연결하지 못했어요」로 보여 줬음 (이름 저장 한 번에 이 기기 열쇠 후보를 최대 8개까지 확인해서 금방 40번이 참)
     const kh = ownerKh_(nm), owned = !!(nm !== '익명' && kh && kh !== kh_(q.k));
     if (owned && failOver_(nm)) return out_({ owned: true, slow: 1 });
-    if (owned && q.k) { failAdd_(nm); try { const my = kh_(q.k), ck = 'ol_' + Utilities.base64EncodeWebSafe(nm + '|' + my); const c = CacheService.getScriptCache(); if (my && !c.get(ck)) { c.put(ck, '1', 600); olog_(nm, '열쇠 틀림(이름 확인)', kh, my, q.dv); } } catch (err) {} }
+    if (owned && q.k) { failAdd_(nm); try { const my = kh_(q.k), ck = 'ol_' + Utilities.base64EncodeWebSafe(nm + '|' + my); const c = CacheService.getScriptCache(); if (my && !c.get(ck)) { c.put(ck, '1', 600); olog_(nm, '열쇠 틀림(이름 확인)', kh, my, q.od || q.dv); } } catch (err) {} }
     return out_({ owned });
   }
   if (q.donors) return out_({ dn: donors_() });
