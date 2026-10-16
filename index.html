@@ -7132,7 +7132,7 @@ function uwTick(p,dt,v){const c=S.cls,V=v>0&&UWV[c]&&UWV[c][v],T0=V?V[3]:UW_T[c]
   else if(c==='gambler'){if(Math.random()<.3){ex(p.x,p.y,160,4,'#ffd76a');ftext(p.x,p.y-40,'대박!','#ffd76a',20);}else{const e=nearestE(p,380);if(e)ex(e.x,e.y,80,1.5,'#ffd76a');}}}
 // 현자의 지혜: 생존기·궁극기를 쓰면 주변 마법 폭발 + 4초 치명타 확률
 function sageBurst(p){p.xsU=S.t+4;exL('현자의 지혜',null,p.x,p.y,SR(180),pDmg()*lv3('x_sage',6,8,10),'#c8a8ff');S.rings.push({x:p.x,y:p.y,r:10,max:190,life:.45,col:'#e6d6ff'});}
-function useSkill(){const p=S&&S.p;if(!p||!p.alive||S.mode!=='play'||PAUSED||statsOpen||(p.skCd||0)>0)return;sfx('skill');xcEv('skill');const K=SKILLS[S.cls];if(!K)return;
+function useSkill(){const p=S&&S.p;if(!p||!p.alive||S.mode!=='play'||PAUSED||statsOpen||(p.skCd||0)>0)return;if(AUTO.move&&['mage','archer','gunner'].includes(S.cls)&&((S.nw&&nwSafe())||(typeof eyeNoDash==='function'&&eyeNoDash())))return;/* v471 자동 이동: 빛의 원 안·심연의 눈이 뜰 때는 이동형 생존기(점멸·뒤구르기·구르기)를 안 씀 */sfx('skill');xcEv('skill');const K=SKILLS[S.cls];if(!K)return;
   p.skCd=K.cd*(1-.05*mlv('n_skcd'))*gearM.skcd()*Math.max(.5,p.skM||1);if(has('iron_will'))p.iwT=3;if(has('x_sage'))sageBurst(p);if(has('m_crown'))p.skCd*=.5;S.st.sk=(S.st.sk||0)+1;const say=t=>{ftext(p.x,p.y-42,t,'#e8f4ff',18);S.rings.push({x:p.x,y:p.y,r:10,max:110,life:.4,col:'#e8f4ff'});};
   switch(S.cls){
    case 'knight':p.skDrT=3;p.skDr=.8;skFx('knight',{d:3,fol:1});S.shake=Math.max(S.shake||0,.4);for(const e of S.en){if(!e.alive||e.boss||d2(e,p)>SR(170)**2)continue;const a=Math.atan2(e.y-p.y,e.x-p.x);e.x+=Math.cos(a)*90;e.y+=Math.sin(a)*90;e.slowT=Math.max(e.slowT||0,1);}say('철벽 방패!');break;
@@ -7975,7 +7975,7 @@ function xTick(p,dt){S.pdc=pDmg();S.xgOn=['x_dragon','x_star','x_storm','x_veil'
   if(S.xsp&&S.xsp.length){const w=x8('xr_brood');for(const k of S.xsp){k.life-=dt;k.cd-=dt;let tg=null,bd=300*300;for(const e of S.en){if(!e.alive||e.phase)continue;const d=d2(e,k);if(d<bd){bd=d;tg=e;}}
     if(tg){const dx=tg.x-k.x,dy=tg.y-k.y,dd=Math.hypot(dx,dy)||1,rr=(tg.r||12)+6;if(dd>rr){const sp=Math.min(dd-rr,230*dt);k.x+=dx/dd*sp;k.y+=dy/dd*sp;k.f=dx>=0?1:-1;}else if(k.cd<=0){k.cd=.5;xLock(()=>{dmgEs('새끼 거미',tg,pDmg()*lv3('xr_brood',.8,1,1.2)*(w?2:1),'#a8ff6a');if(tg.alive)poisonE(tg,1);});}}
     else{const dx=p.x-k.x,dy=p.y-k.y,dd=Math.hypot(dx,dy)||1;if(dd>40){k.x+=dx/dd*230*dt;k.y+=dy/dd*230*dt;}}}S.xsp=S.xsp.filter(k=>k.life>0);}}
-function dash(){if(AUTO.move&&typeof eyeNoDash==='function'&&eyeNoDash())return;/* v419 심연의 눈: 자동 이동은 눈이 뜨는 동안 대시하지 않음 */
+function dash(){if(AUTO.move&&typeof eyeNoDash==='function'&&eyeNoDash())return;if(AUTO.move&&S&&S.nw&&nwSafe())return;/* v471 악몽의 파동: 자동 이동은 빛의 원 안에 들어가 있으면 대시하지 않음 (원 안은 예고 공격 피해가 없는데, 예고를 피하려는 자동 대시가 원 밖으로 튀어나가 즉사하던 문제) *//* v419 심연의 눈: 자동 이동은 눈이 뜨는 동안 대시하지 않음 */
   const p=S.p;if(!p.alive||p.dashCd>0||p.dashT>0||PAUSED||statsOpen||p.skRootT>0)return;sfx('dash'); // 얼음 결계(못 움직임) 중엔 대시도 안 됨
   let dx=p.lmx,dy=p.lmy;const l=Math.hypot(dx,dy)||1;dx/=l;dy/=l;
   if((S.cls==='knight'&&mky(2))||(S.cls==='rogue'&&mky(2))){p.fxR=Math.max(p.fxRT>0?p.fxR||0:0,.4);p.fxRT=S.cls==='knight'?2:1.5;}
@@ -9700,6 +9700,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:471,t:'☠ 자동 이동 · 악몽의 파동',items:[
+    ['fix','☠ 자동 이동이 「악몽의 파동」 빛의 원 안에 들어갔다가, 예고 공격을 피하려는 자동 대시·이동 생존기(점멸·뒤구르기·구르기)로 원 밖으로 튀어나가 즉사하던 문제: 원 안에서는 대시·이동 생존기를 쓰지 않아요 (원 안은 예고 공격 피해가 없어요). 심연의 눈이 뜰 때도 이동 생존기를 안 써요']]},
   {v:470,t:'🖱 화면 바뀐 직후 잘못 눌림 방지',items:[
     ['fix','🖱 「증강 대신 스탯 카드 받기」 등을 빠르게 두 번 누르면, 바뀐 화면의 같은 자리 버튼(「내 스탯 보기」·스탯 카드)까지 눌려 스탯 창이 갑자기 뜨던 문제: 화면이 바뀐 직후 잠깐(0.3초)은 클릭을 받지 않아요']]},
   {v:469,t:'🔒 증강 봉인 안내',items:[
@@ -16862,7 +16864,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=470,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=471,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
