@@ -9204,9 +9204,11 @@ function xUnify(){const P=ov.querySelector('.panel');ov.onclick=null;if(!P)retur
   ov.onclick=e=>{if(bgHit(e,ov))go();};}
 // 같은 화면을 다시 그릴 때(제목이 같음: 버튼으로 단계·탭·카드 고르기 등)는 스크롤 위치를 그대로 둠 (v277). 다른 화면으로 넘어가면 맨 위
 const ovKey=()=>{const h=ov.classList.contains('on')&&ov.querySelector('.panel h1,.panel h2,.panel h3');return h?h.textContent.trim().slice(0,40):null;};
-function show(html){hofTipHide();try{ftipHide();}catch(e){}const k0=ovKey(),y0=ov.scrollTop;ov.classList.remove('home');{const w=document.getElementById('hofSt');if(w)w.remove();}ov.innerHTML=`<div class="panel">${html}</div>`;ov.classList.add('on');ovPad();xUnify();ov.scrollTop=k0&&k0===ovKey()?y0:0;ov.querySelectorAll('[data-stats]').forEach(b=>b.onclick=()=>toggleStats());if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();}
+function show(html){hofTipHide();try{ftipHide();}catch(e){}const k0=ovKey(),y0=ov.scrollTop;ov.classList.remove('home');{const w=document.getElementById('hofSt');if(w)w.remove();}ov.innerHTML=`<div class="panel">${html}</div>`;ov.classList.add('on');ovPad();xUnify();ov.scrollTop=k0&&k0===ovKey()?y0:0;ov.querySelectorAll('[data-stats]').forEach(b=>b.onclick=()=>toggleStats());if(ovKey()!==k0)OV_T=performance.now();if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();}
 ['keydown','keyup','keypress'].forEach(t=>{const h=e=>{const tg=e.target;if(tg&&tg.tagName==='BUTTON'&&(e.key===' '||e.key==='Enter'||e.code==='Space')){e.preventDefault();e.stopPropagation();}};ov.addEventListener(t,h,true);document.getElementById('st').addEventListener(t,h,true);});
 ov.addEventListener('mousedown',e=>{if(e.target.closest('button'))e.preventDefault();});
+/* v470: 다른 화면으로 바뀐 직후 0.28초는 마우스·터치 클릭을 무시 (예: 「증강 대신 스탯 카드」를 빠르게 두 번 누르면 바뀐 화면의 같은 자리 「내 스탯 보기」가 눌려 스탯 창이 뜨던 문제). 숫자키 선택(코드 클릭)은 그대로 */
+let OV_T=0;ov.addEventListener('click',e=>{if(e.isTrusted&&performance.now()-OV_T<280&&e.target.closest&&e.target.closest('button,.card,[data-stats]')){e.preventDefault();e.stopImmediatePropagation();}},true);
 function hide(){try{ftipHide();}catch(e){}ov.classList.remove('on');ov.innerHTML='';}
 function openNext(){
   joy=null;
@@ -9698,6 +9700,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:470,t:'🖱 화면 바뀐 직후 잘못 눌림 방지',items:[
+    ['fix','🖱 「증강 대신 스탯 카드 받기」 등을 빠르게 두 번 누르면, 바뀐 화면의 같은 자리 버튼(「내 스탯 보기」·스탯 카드)까지 눌려 스탯 창이 갑자기 뜨던 문제: 화면이 바뀐 직후 잠깐(0.3초)은 클릭을 받지 않아요']]},
   {v:469,t:'🔒 증강 봉인 안내',items:[
     ['new','🔒 증강 선택 화면의 「봉인」 버튼 아래에 <b>봉인하면 못 얻게 되는 합체 증강</b>이 나와요. 이름에 마우스를 올리면(휴대폰은 누르면) 그 합체 증강의 효과를 볼 수 있어요']]},
   {v:468,t:'🔓 봉인 해제 화면 유지',items:[
@@ -16858,7 +16862,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=469,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=470,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
