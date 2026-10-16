@@ -9694,6 +9694,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:468,t:'🔓 봉인 해제 화면 유지',items:[
+    ['fix','🔓 직업 봉인을 해제하면 메인 화면으로 돌아가던 문제: 이제 영웅 선택 창에 그대로 남고 해제한 직업이 선택돼요'] ]},
   {v:467,t:'🤝 레이드 동료 협동 개선',items:[
     ['fix','🤝 레이드 기 모으기(봉인 수정·피뢰침·거미줄 기둥·등불·불씨)에서 <b>동료들이 나와 같은 지점으로 몰려가던 문제</b>를 고쳤어요. 이제 내가 맡은 지점을 빼고 남은 지점을 동료들이 겹치지 않게 나눠 맡아요'],
     ['fix','🤝 동료가 기 모으기 목표·협동 장치 위를 지키는 중엔 <b>즉사 공격만 피하고</b> 자리를 지켜요 (체력 40% 아래면 다른 공격도 피함). 예고만 보이면 비켜서 협동이 끊기던 문제를 고쳤어요'],
@@ -11079,7 +11081,7 @@ function openPatch(all){closePatch();const d=document.createElement('div');d.id=
 function closePatch(){const d=document.getElementById('patchPop');if(d)d.remove();}
 function bootPatch(){let seen=0;try{seen=+(localStorage.getItem('chanseo_seenv')||0);}catch(e){}if(seen<BUILD&&PATCH_NOTES.some(p=>p.v>seen))openPatch(false);}
 const $o=id=>document.getElementById(id)||{};
-let SEL_RUSH=false;
+let SEL_RUSH=false,SEL_REOPEN=null;/* v468: 봉인 해제 뒤 메인 화면으로 튕기지 않고 영웅 선택 창을 다시 엶 */
 const goLabel=()=>SEL_RUSH?'⚔ 보스 러시 · '+CLASSES[pickCls].n+'(으)로 시작':(pickDiff==='nightmare'?'☠ 무한의 악몽 · ':DIFF[pickDiff]?DIFF[pickDiff].n+' · ':'')+CLASSES[pickCls].n+'(으)로 시작';
 // v336 배경 구경: 메인 화면 메뉴를 숨기고 배경만 보여 줌. 아무 곳이나 누르거나 아무 키나 누르면 돌아옴
 function bgViewOn(e){if(e)e.stopPropagation();document.body.classList.add('bgview');let h=document.getElementById('bgvHint');if(!h){h=document.createElement('div');h.id='bgvHint';document.body.appendChild(h);}h.textContent='🖼 배경 구경 중 · 아무 곳이나 누르면 돌아가요';h.classList.remove('off');clearTimeout(h._t);h._t=setTimeout(()=>h.classList.add('off'),2600);
@@ -11135,7 +11137,7 @@ function startScreen(){REP_PEND=null;FCLS=null;SEL_RUSH=false;try{metaMig2();}ca
   ov.querySelectorAll('[data-lk]').forEach(t=>t.onclick=ev=>{ev.stopPropagation();const c=t.dataset.lk;META.look=META.look||{};if(META.look[c]==='old')delete META.look[c];else META.look[c]='old';saveMeta();const o=lookOld(c);t.classList.toggle('old',o);t.textContent=o?'옛 모습':'새 모습';});
   ov.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{const k=b.dataset.cls;
     if(!clsOpen(k)){const C=CLASSES[k];$('cdet').innerHTML=/* 봉인 해제 버튼·안내를 맨 위에 (예전엔 설명 아래라 한참 스크롤해야 했음) */(DEV||META.tk>0?`<button class="btn primary" id="ulk" style="margin:0 0 4px;width:100%;font-size:17px;padding:12px">🔓 ${C.n} 직업 봉인 해제하기</button><p style="margin:6px 0 0;font-size:15px;font-weight:700;color:#ffd76a;text-align:center">${DEV?'🛠 개발자 모드 · 해제권을 쓰지 않아요':`🎟 봉인 해제권 <b style="font-size:18px">${META.tk}장</b> 소유`}</p>`:`<p style="color:#ffb0b0;margin:10px 0 0;font-size:15px;font-weight:700;text-align:center">🔒 봉인된 직업 · 지옥·신 난이도를 클리어하거나 무한의 악몽에서 10분 버티면 봉인 해제권을 받아요<br><span style="color:#ffd76a">🎟 봉인 해제권 0장 소유</span></p>`)+clsDetail(k)+unlockInfo(k);
-      if(DEV||META.tk>0)$o('ulk').onclick=()=>{if(!DEV)META.tk--;(META.ucls=META.ucls||[]).push(k);saveMeta();pickCls=k;try{localStorage.setItem('chipdungeon_cls',k);}catch(e){}toast(C.n+' 봉인 해제! '+TAGS[C.fav[0]].n+' 시너지 증강도 이제 나와요');startScreen();};return;}
+      if(DEV||META.tk>0)$o('ulk').onclick=()=>{if(!DEV)META.tk--;(META.ucls=META.ucls||[]).push(k);saveMeta();pickCls=k;try{localStorage.setItem('chipdungeon_cls',k);}catch(e){}toast(C.n+' 봉인 해제! '+TAGS[C.fav[0]].n+' 시너지 증강도 이제 나와요');SEL_REOPEN={k,rush:SEL_RUSH,d:pickDiff};startScreen();};return;}
     pickCls=k;try{localStorage.setItem('chipdungeon_cls',pickCls);}catch(e){}
     ov.querySelectorAll('[data-cls]').forEach(x=>x.classList.toggle('on',x===b));$('cdet').innerHTML=clsDetail(pickCls);$('go').firstChild.textContent=`${goLabel()}${sv?' (저장 삭제)':''}`;
     if($('selPv'))$('selPv').dataset.c=pickCls;if($('qkPv'))$('qkPv').dataset.c=pickCls;if($('qkName'))$('qkName').textContent=CLASSES[pickCls].n;});
@@ -11147,6 +11149,7 @@ function startScreen(){REP_PEND=null;FCLS=null;SEL_RUSH=false;try{metaMig2();}ca
   if($('homeBgm'))$('homeBgm').onclick=()=>bgmCycle();if($('homeSfx')){$('homeSfx').onclick=()=>sfxCycle();refreshSfxBtn();}if($('homeOri'))$('homeOri').onclick=()=>$('oriBtn').click();
   if($('appInst'))$('appInst').onclick=()=>WEB?appInstall():appGate(1);
   $o('meta').onclick=()=>openMeta();if($('mstBtn'))$o('mstBtn').onclick=openMastery;$o('cosBtn').onclick=()=>openMeta(1);if($('hRepCv')){gearLiveStart($('hRepCv'));repPickBind('mr',$('hRepCv'),startScreen);}onlPaint();if($('donBtn'))$o('donBtn').onclick=openDonate;if($('donArt'))drawDonArt($('donArt'));donPlace();if($('supBox'))$o('supBox').onclick=openSupBox;if($('devLog'))$o('devLog').onclick=()=>openDevLog();if($('nickBtn'))$o('nickBtn').onclick=openNick;$o('forgeBtn').onclick=openForge;$o('heroBtn').onclick=openHeroes;if($('raidBtn'))$o('raidBtn').onclick=openRaid;if($('rushBtn'))$o('rushBtn').onclick=()=>{SEL_RUSH=true;if(!clsOpen(pickCls))pickCls=Object.keys(CLASSES).find(clsOpen)||'knight';openSel();};if($('duelBtn'))$o('duelBtn').onclick=openDuel;if($('labBtn'))$o('labBtn').onclick=openLab;$o('sync').onclick=openSync;if($('guideBtn'))$o('guideBtn').onclick=()=>openGuide('a');if($('patchBtn'))$o('patchBtn').onclick=()=>openPatch(true);if($('verLbl')){$o('verLbl').onclick=devTapVer;$('verLbl').style.userSelect='none';}$o('codex').onclick=()=>openCodex();$o('achBtn').onclick=openAch;
+  if(SEL_REOPEN){const R=SEL_REOPEN;SEL_REOPEN=null;SEL_RUSH=R.rush;if(DIFF[R.d]&&diffOpen(R.d))pickDiff=R.d;openSel();const c=ov.querySelector(`[data-cls="${R.k}"]`);if(c)c.click();}
   refreshBoard();
 }
 // 참붕이: 검·방패 내려놓고 밥그릇 드는 기사 (48x40 도트)
@@ -16849,7 +16852,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=467,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=468,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
