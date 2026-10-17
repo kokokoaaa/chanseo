@@ -9700,6 +9700,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:474,t:'📊 기록 능력치 오류',items:[
+    ['fix','📊 명예의 전당 기록을 눌렀을 때, 같은 사람의 여러 기록(다른 직업)이 <b>모두 같은 최종 능력치·증강</b>으로 보이던 문제: 이제 기록마다 그 판 캐릭터의 능력치가 보여요']]},
   {v:473,t:'☁ 여러 기기 저장 안전장치',items:[
     ['fix','☁ 두 기기(예: 집·회사)에서 같은 이름으로 할 때, 한쪽 진행이 서버에 안 올라간 채 쌓였다가 다른 기기에서 로그인하면 묻지 않고 예전 데이터로 들어가던 문제: 이제 <b>게임을 켤 때·창으로 돌아올 때마다 서버를 확인</b>해서, 다른 기기가 그 뒤에 저장했으면 플레이하기 전에 바로 어느 쪽을 쓸지 물어봐요'],
     ['fix','☁ 서버 자동 저장이 멈추면 메인 화면 맨 위에 <b>빨간 알림</b>이 계속 떠요 (누르면 바로 고르는 창). 예전엔 알림이 한 번 뜨고 사라져서 모르고 계속 진행했어요'],
@@ -15939,7 +15941,7 @@ async function hofStatOpen(b){if(!b)return;let w=document.getElementById('hofSt'
   if(!b.h&&!b.bot&&/^raid/.test(String(b.diff||''))&&b.name===myNick()){const mh=(()=>{try{return myHeroes().filter(x=>x.cls===b.cls).sort((x,y)=>(y.score||0)-(x.score||0))[0];}catch(e){return null;}})();if(mh){b={...b,_mh:mh};}}
   if(!b.h&&!b.bot&&!b._mh&&!isDuel){mkG(STX(/^raid/.test(b.diff)?'이 기록에는 능력치 정보가 없어요<br>(v380부터 레이드 기록에도 출전 캐릭터 능력치가 함께 저장돼요. 다시 깨면 채워져요)':'이 기록에는 능력치 정보가 없어요<br>(능력치는 무한의 악몽·보스 러시 기록에 함께 저장돼요)'));paint('');return;}
   paint('');
-  const h=b.bot?botHero(b):b._mh?b._mh:isDuel?(SRV_V>=93?await hofHero({hof:{name:b.name,diff:'duel'},n:b.name}):null):await hofHero({hof:b,n:b.name});if(!document.body.contains(w))return;
+  const h=b.bot?botHero(b):b._mh?b._mh:isDuel?(SRV_V>=93?await hofHero({hof:{name:b.name,diff:'duel'},n:b.name}):null):await hofHero({hof:b,n:b.name,c:String(b.cls||'').split(/[:#@]/)[0]});/* v474 직업도 보냄: 예전엔 이름·난이도만 보내서 서버가 그 이름의 첫 기록 캐릭터를 줬음 → 같은 사람의 여러 기록(다른 직업)이 모두 같은 능력치로 보였음. 캐시 키도 직업이 붙어 예전에 잘못 받은 캐시는 안 씀 */if(!document.body.contains(w))return;
   if(isDuel&&h&&h.gd){String(h.gd).split(':').forEach((x,i)=>{const k=GEAR_KEYS[i];if(k){const it=itDec(k,x);if(it)det[k]=it;}});hasG=Object.keys(det).length;}
   if(!h){mkG(STX(isDuel?'결투 캐릭터 능력치·장비가 아직 없어요<br>(v381부터 저장돼요. 그 모험가가 다음에 결투하면 채워져요)':'능력치를 불러오지 못했어요. 잠시 뒤 다시 눌러 보세요'));paint('');return;}
   // v340: 장비 옆 상자 = 그 판의 최종 능력치 (장비 합산 대신). 아래 증강은 종류별로, 마우스를 올리면 효과
@@ -16893,7 +16895,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=473,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=474,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
