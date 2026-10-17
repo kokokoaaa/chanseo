@@ -3903,11 +3903,18 @@ function fusable(){return FUSIONS.filter(f=>!noFuse(f.a)&&!noFuse(f.b)&&!(S.cls=
 // 합체 짝이 하나도 없는 증강 (카드 위에 「합체 없음」 표시)
 const fzNone=a=>!!a&&a.t!=='f'&&a.t!=='d'&&(noFuse(a.id)||(!fzOf(a.id).length&&!VFUSIONS.some(f=>f.a===a.id||f.b===a.id)));
 // 증강 칸 설명용 합체 안내: 합체 없는 증강이면 그렇다고, 있으면 짝 → 결과 (가진 짝은 ✔)
-function fzInfo(a){if(!a||a.t==='f'||a.t==='d'||a.t==='x'||a.gr)return '';if(fzNone(a))return '<small style="color:#a8b0a0;margin-top:4px">🚫 합체 없는 증강</small>';const L=fzOf(a.id);if(!L.length)return '';const own=new Set(S.augs.map(x=>x.id));
-  return '<small style="color:#ff9a3c;margin-top:4px;line-height:1.5">💥 합체할 수 있는 증강'+L.slice(0,5).map(f=>{const o=f.a===a.id?f.b:f.a,d=augDef(o);const used=S.augs.some(x=>x.parts&&x.parts.includes(o))||own.has(f.id);if(used)return '<br><span style="color:#8a8f88">· '+(d?d.n:o)+' → '+f.n+' (불가: 이미 합체됨)</span>';const T=d&&TIER[d.t],tg=T?' <span style="color:'+T.col+';font-weight:700">['+(d.uc?'고점 돌파':T.n)+']</span>':'';return '<br>'+(own.has(o)?'<span style="color:#7be08f;font-weight:700">✔ '+(d?d.n:o)+'</span>'+tg+' <span style="color:#7be08f">(보유 중)</span>':'· '+(d?d.n:o)+tg)+' → <span style="color:#ffd76a;font-weight:700">'+f.n+'</span>';}).join('')+(L.length>5?'<br>· 외 '+(L.length-5)+'개':'')+'</small>';}
+/* v475 합체 짝이 이 판에서 실제로 나올 수 있는지 (증강 뽑기와 같은 조건). 못 나오면 이유, 나오면 '' */
+function fzWhyNo(o){const d=augDef(o);if(!d)return '없는 증강';if(has(o))return '';if(noFuse(o))return '고점 돌파는 합체 안 됨';if(d.cls&&d.cls!==S.cls)return (CLASSES[d.cls]?CLASSES[d.cls].n:'다른 직업')+' 전용';if(isBanned(o))return '봉인함';
+  if(d.t==='v')return '';if(!tierOpen(d.t))return (TIER[d.t]?TIER[d.t].n:'')+' 등급 아직 잠김';if(rushOn()&&RUSH_BAN.has(o))return '보스 러시에선 안 나옴';if(MELEE_CLS.includes(S.cls)&&MELEE_BAN.has(o))return '근접 직업은 안 나옴';
+  try{if(mBlock(d))return '지금 루트에선 안 나옴';}catch(e){}if(tagLocked(d))return '잠긴 계열';try{if(augW(d)<=0)return CLASSES[S.cls]?CLASSES[S.cls].n+'에선 안 나옴':'안 나옴';}catch(e){}
+  if(!mechOk(d)||(AUG_REQ[o]&&!AUG_REQ[o]()))return '?';return '';}
+function fzInfo(a){if(!a||a.t==='f'||a.t==='d'||a.t==='x'||a.gr)return '';if(fzNone(a))return '<small style="color:#a8b0a0;margin-top:4px">🚫 합체 없는 증강</small>';const L0=fzOf(a.id);if(!L0.length)return '';const own=new Set(S.augs.map(x=>x.id));
+  /* v475 이 직업·이 판에서 나올 수 없는 짝(다른 직업 전용·봉인·등급 잠김 등)은 회색 + 이유. 나올 수 있는 짝을 위로 */
+  const why=f=>{const o=f.a===a.id?f.b:f.a;return fzWhyNo(o);},L=L0.slice().sort((x,y)=>(why(x)&&why(x)!=='?'?1:0)-(why(y)&&why(y)!=='?'?1:0)),ok=L.filter(f=>!why(f)||why(f)==='?').length;
+  return '<small style="color:#ff9a3c;margin-top:4px;line-height:1.5">💥 합체할 수 있는 증강'+(ok<L.length?` <span style="color:#a8b0a0;font-weight:400">(이 판에서 가능 ${ok}/${L.length})</span>`:'')+L.slice(0,6).map(f=>{const o=f.a===a.id?f.b:f.a,d=augDef(o);const used=S.augs.some(x=>x.parts&&x.parts.includes(o))||own.has(f.id);if(used)return '<br><span style="color:#8a8f88">· '+(d?d.n:o)+' → '+f.n+' (불가: 이미 합체됨)</span>';const w=why(f);if(w&&w!=='?')return '<br><span style="color:#7d847c">· '+(d?d.n:o)+' → '+f.n+' <b style="color:#c08a8a">(✖ '+w+')</b></span>';const T=d&&TIER[d.t],tg=T?' <span style="color:'+T.col+';font-weight:700">['+(d.uc?'고점 돌파':T.n)+']</span>':'';return '<br>'+(own.has(o)?'<span style="color:#7be08f;font-weight:700">✔ '+(d?d.n:o)+'</span>'+tg+' <span style="color:#7be08f">(보유 중)</span>':'· '+(d?d.n:o)+tg)+' → <span style="color:#ffd76a;font-weight:700">'+f.n+'</span>'+(w==='?'?' <small style="color:#cfc28a">(조건을 맞추면 나와요)</small>':'');}).join('')+(L.length>6?'<br>· 외 '+(L.length-6)+'개':'')+'</small>';}
 /* v469: 이 증강을 봉인하면 못 얻게 되는 합체 (짝이 이 직업에서 나올 수 있고, 아직 안 만든 것만) */
 const sealFz=a=>{if(!a||!a.id||noFuse(a.id)||a.t==='f'||a.t==='d')return [];const own=new Set(S.augs.map(x=>x.id)),ban=new Set(S.banL||[]);
-  return [...fzOf(a.id),...VFUSIONS.filter(f=>f.a===a.id||f.b===a.id)].filter(f=>{if(own.has(f.id))return false;const o=f.a===a.id?f.b:f.a,d=augDef(o);return d&&!noFuse(o)&&!ban.has(o)&&(!d.cls||d.cls===S.cls)&&!S.augs.some(x=>x.parts&&x.parts.includes(o));});};
+  return [...fzOf(a.id),...VFUSIONS.filter(f=>f.a===a.id||f.b===a.id)].filter(f=>{if(own.has(f.id))return false;const o=f.a===a.id?f.b:f.a,d=augDef(o);return d&&!noFuse(o)&&!ban.has(o)&&(!d.cls||d.cls===S.cls)&&!S.augs.some(x=>x.parts&&x.parts.includes(o))&&(()=>{const w=fzWhyNo(o);return !w||w==='?';})();});};
 const sealFzHtml=a=>{const L=sealFz(a);if(!L.length)return '';return `<div class="sealfz">⚠ 봉인하면 못 얻는 합체: ${L.slice(0,4).map(f=>`<b data-ff="${f.id}">${f.n}</b>`).join(' · ')}${L.length>4?` 외 ${L.length-4}개`:''}</div>`;};
 function partnersOf(id){if(noFuse(id))return [];const L=fzOf(id);if(!L.length)return [];const own=new Set(S.augs.map(a=>a.id));return L.filter(f=>!noFuse(f.a)&&!noFuse(f.b)&&own.has(f.a===id?f.b:f.a));}
 function partnerOf(id){return partnersOf(id)[0]||null;}
@@ -9700,6 +9707,8 @@ function openGuide(t){if(t)guideTab=t;if(!DEV)guideTab='a';show(`<div class="sho
   $('gdBack').onclick=startScreen;ov.querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>openGuide(b.dataset.gd));}
 // 패치 노트: 새 버전을 처음 켰을 때 한 번 창으로 뜸. 시작 화면 버튼으로 다시 볼 수 있음
 const PATCH_NOTES=[
+  {v:475,t:'💥 합체 안내 정리',items:[
+    ['fix','💥 증강 설명의 「합체할 수 있는 증강」 목록에서 <b>이 판에서 나올 수 없는 짝</b>(다른 직업 전용·봉인함·등급 잠김·보스 러시 제외 등)이 나올 수 있는 것처럼 보이던 문제: 이제 회색으로 이유와 함께 보이고, 나올 수 있는 짝이 위에 와요 (예: 「암살 → 암살 표적 ✖ 도적 전용」)']]},
   {v:474,t:'📊 기록 능력치 오류',items:[
     ['fix','📊 명예의 전당 기록을 눌렀을 때, 같은 사람의 여러 기록(다른 직업)이 <b>모두 같은 최종 능력치·증강</b>으로 보이던 문제: 이제 기록마다 그 판 캐릭터의 능력치가 보여요']]},
   {v:473,t:'☁ 여러 기기 저장 안전장치',items:[
@@ -16895,7 +16904,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=474,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=475,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
