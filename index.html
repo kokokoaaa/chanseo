@@ -14796,6 +14796,7 @@ const BOT_SLOT=40*60000;
 // v350 봇 = 하루 플레이 시간이 정해진 가상의 사람. 가벼운 봇은 하루 1시간 안팎, 많이 하는 봇은 2.5~3시간 (날마다 들쭉날쭉).
 // 하루 40분짜리 접속 칸 36개 중 몇 개를 골라 들어옴 (저녁 7시~자정이 가장 많고, 새벽엔 거의 안 들어옴, 주말 낮엔 조금 더)
 // 출시일부터 쌓인 플레이 시간만큼 일반 → 어려움 → 지옥 → 신을 깨고, 그 뒤로 악몽·보스 러시·레이드 기록을 하나씩 쌓아 감
+/* v476: 봇 성장 3배 빠르게 (같은 플레이 시간에 장비·실력·기록이 3배 시간만큼 자람) */const BOT_HX=3;
 const BOT_HR=[1.5,.8,1.2,2.5,3,.7,2,1.8,1.6,2.2,1.4,2.6,0.9,1.8,3.2,1.3,1.1,2.0,1.5,2.8],BOT_SC={},BOT_HC={};
 /* v360 모험가 20명 모두 오늘(10월 13일) 처음 받아서 시작: 각자 시작한 시각(한국 시각 9시~21시 사이)부터 실제로 한 만큼만 쌓임 */
 const BOT_T0=i=>i>=20?Date.UTC(2026,9,13,15)+((i*7)%3)*3600e3:Date.UTC(2026,9,13)+((i*37)%12)*3600e3+((i*17)%60)*60000,botD0=i=>Math.floor(BOT_T0(i)/864e5),botL=i=>.55+(BOT_SK[i]||0)*.2;
@@ -14853,7 +14854,7 @@ const BOT_ALT=[['elem','necro','alch'],['paladin','elem'],['paladin','berserk'],
 function botProf(i,c2){const day=Math.floor(Date.now()/36e5)/* 한 시간마다 다시 (플레이 시간에 따라 자람) */,ck=i+'|'+day+(c2?'|'+c2:'');if(BOT_PC[ck])return BOT_PC[ck];const cls=c2||BOTS[i][1],sk=BOT_SK[i];let sd=botH(i+11,4242+(c2?Object.keys(CLASSES).indexOf(c2)*977:0))|0;
   const rnd=()=>{sd=(sd+0x6D2B79F5)|0;let t=Math.imul(sd^sd>>>15,1|sd);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;},pick=L=>L[Math.floor(rnd()*L.length)];
   /* v360 실제로 한 만큼만: 누적 플레이 시간(실력 보정)·깬 난이도로 장비 개수·등급·강화, 도전과제, 칭호, 날개·오라, 전투력을 정함 */
-  const H=botHours(i),L=botL(i),eH=H*L*(c2?.45:1),cl=botClr(i,H),PG=1-Math.exp(-eH/40),W=[[85,15,0,0],[60,35,5,0],[35,45,18,2],[15,42,33,10],[4,26,45,25]][cl],LVC=[2,4,6,8,10][cl],I={items:[],eqs:{[cls]:{}}};
+  const H=botHours(i),L=botL(i)*BOT_HX,eH=H*L*(c2?.45:1),cl=botClr(i,H),PG=1-Math.exp(-eH/40),W=[[85,15,0,0],[60,35,5,0],[35,45,18,2],[15,42,33,10],[4,26,45,25]][cl],LVC=[2,4,6,8,10][cl],I={items:[],eqs:{[cls]:{}}};
   const fill=Math.min(.95,.1+eH/8);
   for(const k of GEAR_KEYS){if(rnd()>fill)continue;const s=slotT(k);let x=rnd()*100,r=0;for(;r<3;r++){if(x<W[r])break;x-=W[r];}
     const ks=Object.keys(GAFX).sort(()=>rnd()-.5).slice(0,GR[r].af),q=()=>Math.min(1,rnd()*(.7+PG*.6));
@@ -14886,7 +14887,7 @@ function botRuns(i,from,to){const R=[],d0=Math.max(botD0(i),Math.floor(from/864e
     for(const x of botPlanC(i,sl)){if(x.k==='home'||x.k==='forge')continue;const end=t0+x.t+x.d;if(end<from||end>to)continue;const h=botH(Math.floor(end/1000),i*7+3);R.push({...x,end,h,q:(h%1000)/1000,H:botHours(i,end)});}}return R;}
 function botRecs(real,from){const out=[],HB={},now=Date.now(),all=!from;from=from||now-30*864e5;for(const b of real||[]){if(b.bot)continue;const v=+b.score||0,rec=(+b.build||0)>=BUILD-25;const o=HB[b.diff]||(HB[b.diff]={a:0,r:0});o.a=Math.max(o.a,v);if(rec)o.r=Math.max(o.r,v);}BOTS.forEach(([n,cls],i)=>{const sk=BOT_SK[i],p=botProf(i);if(!p)return;let sd=botH(i+31,9090)|0;const r=()=>{sd=(sd+0x6D2B79F5)|0;let t=Math.imul(sd^sd>>>15,1|sd);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;},rs=a=>{sd=botH(Math.floor(a/1000)|0,i*31+7)|0;};/* 같은 판은 언제 봐도 같은 숫자 */
     const det=GEAR_KEYS.map(k=>itEnc(p.det[k]||null)).join(':').replace(/:+$/,''),base={name:n,cls,skin:p.skin,aura:p.aura,gear:p.dr?'!'+p.dr:'',look:'new',gd:det,title:p.title,build:BUILD,bot:1,comment:BOT_P[i].say[Math.floor(r()*BOT_P[i].say.length)]};
-    if(botAge(i)<0)return;const L=botL(i),RN=botRuns(i,from,now);
+    if(botAge(i)<0)return;const L=botL(i)*BOT_HX,RN=botRuns(i,from,now);
     const fz=(H,h0,tau)=>H<=h0?0:1-Math.exp(-(H-h0)/tau);
     /* 판마다 실력(쌓인 시간)·그날 운으로 점수를 매기고 가장 좋은 판 = 기록. 부캐 판은 따로 (판 4개 중 하나꼴로 부캐를 키움) */
     const altOf=x=>{const A=botAlts(i).length?(BOT_ALT[i]||[]).filter((c,j)=>x.H*L>=BOT_ALTH(j)):[];return A.length&&x.h%4===0?A[(x.h>>>4)%A.length]:null;};
@@ -16904,7 +16905,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=475,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=476,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
