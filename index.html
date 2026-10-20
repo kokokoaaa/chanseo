@@ -14915,10 +14915,15 @@ function botHero(b){const i=botIdx(b.name);if(i<0||!b.bot)return null;const sk=B
   const st={'공격력':v(700,1450,1),'공격 속도':v(3.4,10,2,'/초'),'최대 체력':v(850,2600,0),'방어력':v(35,85,0),'치명타 확률':v(18,55,1,'%'),'치명타 피해':v(240,335,0,'%'),'이동 속도':v(190,365,0),'흡혈':v(.8,3.2,1,'%')};
   const o=S&&S.cls;if(S)S.cls=cls;let augs=[];try{const pick=(L,n)=>{L=[...L];const out=[];while(out.length<n&&L.length)out.push(L.splice(Math.floor(r()*L.length),1)[0]);return out;};
     const ek=cls==='mage'?M_ELEM[Math.floor(r()*3)]:null,elOk=a=>!ek||!(a.tags||[]).some(t=>M_ELEM.includes(t)&&t!==ek),mine=AUGS.filter(a=>a.cls===cls&&a.t!=='x'&&!a.uc&&elOk(a)),gen=AUGS.filter(a=>!a.cls&&a.t!=='x'&&!a.src&&elOk(a)&&(a.tags||[]).some(t=>C.fav.includes(t))&&!(a.tags||[]).some(t=>(C.dis||[]).includes(t)));
-    /* v360 증강 개수는 실제 판처럼: 버틴 시간 기준 (실측: 8~10분 판에 8~10개, 그중 합체 3~4) */const mins=Math.max(2,(+b.time||300)/60),N=Math.max(3,Math.min(15,Math.round(1.5+mins*.85))),nF=Math.floor(N/3),nB=N-nF;
-    const P=[...pick(mine,Math.min(nB,1+Math.min(2,Math.floor(sk/2))))];P.push(...pick(gen.filter(a=>!P.includes(a)),nB-P.length-(sk>=3&&mins>=8?1:0)));if(sk>=3&&mins>=8){const V=VIPS.filter(a=>(!a.cls||a.cls===cls)&&elOk(a));P.push(...pick(V,1));}
-    const ids=new Set(P.map(a=>a.id));let F=[...FUSIONS].filter(x=>ids.has(x.a)&&ids.has(x.b)).slice(0,nF);if(F.length<nF){/* 재료가 맞는 합체가 모자라면 재료 둘을 빼고 그 합체로 */for(const x of FUSIONS){if(F.length>=nF)break;if(F.includes(x))continue;const A=AUGS.find(a=>a.id===x.a),B=AUGS.find(a=>a.id===x.b);if(!A||!B||(A.cls&&A.cls!==cls)||(B.cls&&B.cls!==cls)||(x.cls&&x.cls!==cls))continue;if(r()<.08)F.push(x);}}
-    augs=[...P.map(a=>[a.id,1,1]),...F.map(x=>[x.id,1,1])].slice(0,N);}catch(e){}finally{if(S)S.cls=o;}
+    /* v478 실제 판과 같은 규칙: 일반 칸은 최대 MAXA(8)칸 (합체 증강도 한 칸), 합체하면 재료 둘은 사라짐, 왕실은 따로 VIP_MAX칸. 예전엔 재료를 안 빼서 「복수」「죽음의 표식」「복수의 표식」이 같이 있고, 버틴 시간만큼 15개까지 넣었음 */
+    const mins=Math.max(2,(+b.time||300)/60),N=Math.max(3,Math.min(MAXA,Math.round(1.5+mins*.85))),nF=Math.min(Math.floor(N/3)+(mins>=15?1:0),Math.floor(N/2));
+    const okA=a=>a&&!a.uc&&a.t!=='x'&&(!a.cls||a.cls===cls)&&elOk(a);
+    const FZ=FUSIONS.filter(x=>(!x.cls||x.cls===cls)&&okA(AUGS.find(a=>a.id===x.a))&&okA(AUGS.find(a=>a.id===x.b))),pool=[...mine,...gen];
+    /* 직업 전용·좋아하는 계열이 들어간 합체를 먼저 */const fw=x=>(pool.some(a=>a.id===x.a)?1:0)+(pool.some(a=>a.id===x.b)?1:0);const F=[],used=new Set();
+    for(const x of pick(FZ.filter(x=>fw(x)>=1).sort((p,q)=>fw(q)-fw(p)).slice(0,24),24)){if(F.length>=nF)break;if(used.has(x.a)||used.has(x.b))continue;F.push(x);used.add(x.a);used.add(x.b);}
+    const P=[];const want=N-F.length,nMine=Math.min(want,1+Math.min(2,Math.floor(sk/2)));P.push(...pick(mine.filter(a=>!used.has(a.id)),nMine));P.push(...pick(gen.filter(a=>!used.has(a.id)&&!P.includes(a)),want-P.length));
+    const V=sk>=3&&mins>=8?pick(VIPS.filter(a=>(!a.cls||a.cls===cls)&&elOk(a)),Math.min(VIP_MAX,mins>=20?2:1)):[];
+    augs=[...P.map(a=>[a.id,1,1]),...F.map(x=>[x.id,1,1]),...V.map(a=>[a.id,1,1])];}catch(e){}finally{if(S)S.cls=o;}
   const nm=b.diff==='nightmare';return {name:b.name,cls,st,augs,dps:Math.round((nm?4e6:b.diff==='bossrush'?2.5e6:1.2e6)*(1+sk*1.6)*(.8+r()*.4)),aw:nm?2+Math.round(sk*1.5+r()):0,s:{mk:{}}};}
 // 봇 기록은 botRecs에서 정한 점수 범위 그대로 사람 기록 사이에 섞음
 let BOT_REAL=[],BOT_PRC={},BOARD_P=[];
@@ -16916,7 +16921,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=477,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=478,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
