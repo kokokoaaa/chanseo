@@ -1,4 +1,8 @@
-// 찬서 명예의 전당 서버 (Google Apps Script) v11.9
+// 찬서 명예의 전당 서버 (Google Apps Script) v12.0
+//
+// v11.9 → v12.0 바뀐 점 (게임 v477) — 모험가 채팅을 AI로
+// - ?bchat=1&blk=2시간칸&on=[그 시간에 접속한 모험가]&ev=최근 소식 : 2시간마다 한 번 Claude가 그 시간대 모험가들의 혼잣말·서로 주고받는 대화를 한 묶음 지어 둠.
+//   모든 사람이 같은 묶음을 받음 (캐시 + 스크립트 속성 bc_칸번호에 저장, 6시간 지나면 지움). 하루 최대 BC_DAY번. 키(ANTHROPIC_KEY)가 없으면 꺼짐 → 게임은 예전 정해진 대사를 씀
 //
 // v11.8 → v11.9 바뀐 점 (게임 v466) — 클라우드 저장 덮어쓰기 방지
 // - 게임이 보내는 「기기 데이터 주인 이름(dn)」이 저장하려는 이름과 다르면 거절 (다른 이름 데이터로 남의 서버 데이터를 덮던 사고 차단)
@@ -353,7 +357,7 @@ function tdone_(kind) {
   if (ms < 4000) return;
   try { const c = CacheService.getScriptCache(); let L = []; try { L = JSON.parse(c.get('slowlog') || '[]') || []; } catch (e) { L = []; } L.push({ t: T0_, k: kind, r: TR_.slice(0, 60), ms, s: TL_.join(' · ').slice(0, 300) }); c.put('slowlog', JSON.stringify(L.slice(-40)), 21600); } catch (err) {}
 }
-const GET_R = ['sup', 'chat', 'dv', 'spec', 'unownall', 'unown', 'delrec', 'snap', 'ping', 'gifts', 'ai', 'prof', 'cload', 'cbaks', 'accts', 'cbakd', 'acctd', 'dels', 'dmack', 'dms', 'own', 'donors', 'stat', 'hero'];
+const GET_R = ['bchat', 'sup', 'chat', 'dv', 'spec', 'unownall', 'unown', 'delrec', 'snap', 'ping', 'gifts', 'ai', 'prof', 'cload', 'cbaks', 'accts', 'cbakd', 'acctd', 'dels', 'dmack', 'dms', 'own', 'donors', 'stat', 'hero'];
 function getRoute_(q) { const k = q.own ? 'own' : GET_R.find(x => q[x] != null && q[x] !== ''); return k ? k + (k === 'chat' && q.say != null ? ' say' : '') : 'list'; }
 function postRoute_(d) {
   if (!d) return 'bad';
@@ -663,7 +667,7 @@ function ping_(q) {
   // 접속 중인 사람들의 프로필(캐릭터 정보)을 같이 보냄 → 마우스를 올리면 바로 보임 (캐시 한 번에 읽기)
   let pfm = {};
   try { const ks = Object.keys(m).map(k => 'pf_' + dmKey_(m[k].n)).filter(x => x.length > 3); if (ks.length) pfm = c.getAll(ks.slice(0, 100)) || {}; } catch (err) {}
-  return out_({ v: 119, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
+  return out_({ v: 120, ai: aiOn_() ? 1 : 0, ct, w, dm, on: Object.keys(m).map(k => ({ n: m[k].n, a: m[k].a, fx: m[k].fx || '', b: m[k].b || 0, u: k, s: Math.round((now - m[k].t) / 1000), me: k === id ? 1 : 0, pf: pfm['pf_' + dmKey_(m[k].n)] || '' })).sort((a, b) => a.s - b.s) });
 }
 
 // 관리자 쪽지 ('쪽지' 시트: id · to · msg · at · read). 이름은 공백을 빼고 비교
@@ -1104,6 +1108,46 @@ function ai_(q) {
   if (/^\(?\s*패스\s*\)?\.?$/.test(t2)) return { skip: 1 };
   return t2 ? { m: t2, n: B[0], x: xl ? 1 : 0, s: xs ? 1 : 0 } : { err: 'none' };
 }
+// v12.0 모험가 채팅 묶음: 2시간 칸마다 한 번, 그 시간에 접속한 모험가들의 혼잣말 + 서로 주고받는 짧은 대화를 Claude가 지어 둠 (모두 같은 묶음)
+const BC_MS = 7200000, BC_DAY = 16;
+function bchat_(q) {
+  const blk = Math.floor(+q.blk), cur = Math.floor(Date.now() / BC_MS);
+  if (!(blk >= cur - 2 && blk <= cur)) return { err: 'blk' };
+  const c = CacheService.getScriptCache(), ck = 'bc_' + blk, P = PropertiesService.getScriptProperties();
+  const hit = c.get(ck); if (hit) { try { return { blk, L: JSON.parse(hit) }; } catch (err) {} }
+  const pv = P.getProperty(ck); if (pv) { c.put(ck, pv, 21600); try { return { blk, L: JSON.parse(pv) }; } catch (err) {} }
+  const key = P.getProperty('ANTHROPIC_KEY') || ''; if (!key) return { err: 'off' };
+  if (blk !== cur) return { none: 1 }; // 지난 칸은 새로 짓지 않음
+  if (c.get('bcg_' + blk)) return { wait: 1 }; c.put('bcg_' + blk, '1', 240); // 지금 짓는 중 (다른 요청은 기다림)
+  const day = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyyMMdd'), dk = 'bc_n_' + day, n = +(c.get(dk) || 0); if (n >= BC_DAY) return { err: 'day' }; c.put(dk, String(n + 1), 90000);
+  let on = []; try { on = JSON.parse(String(q.on || '[]')); } catch (err) {}
+  const B = AI_BOTS.filter(b => (Array.isArray(on) ? on : []).map(x => String(x)).includes(b[0]));
+  const bots = B.length >= 2 ? B : AI_BOTS.slice(0, 6);
+  const t0 = new Date(blk * BC_MS), fmt = d => Utilities.formatDate(d, 'Asia/Seoul', 'M월 d일 (E) HH:mm'), t1 = new Date(blk * BC_MS + BC_MS);
+  const ev = String(q.ev || '').replace(/\s+/g, ' ').slice(0, 600);
+  const sys = '너는 판타지 모험 게임 「찬서」의 전체 채팅방에서 노는 모험가(게임 플레이어) 여러 명의 채팅을 쓰는 작가야. 모험가들은 실제 사람처럼 보여야 해 — 자기가 AI·봇·캐릭터라는 말은 절대 안 해.\n' +
+    '게임: 뱀서라이크 판타지 액션. 난이도 일반~신, 끝없는 「무한의 악몽」(2분 30초마다 보스), 「보스 러시」, 동료 3명이 거대 보스를 잡는 「레이드」, 저장 캐릭터끼리 「결투」, 증강·합체 증강·시너지, 장비 강화·마법부여(메달), 마스터리, 직업 12개(기사·마법사·궁수·도적·성기사·사령술사·총잡이·정령사·광전사·드루이드·연금술사·도박사).\n' +
+    '이번에 쓸 모험가 (이름 / 사람 / 말투 — 반드시 이 말투 그대로, 서로 말투가 확실히 달라야 함):\n' + bots.map(b => '- ' + b[0] + ' / ' + b[1] + ' / ' + b[2]).join('\n');
+  const user = '시간: ' + fmt(t0) + ' ~ ' + fmt(t1) + ' (한국 시간). 그 시간대·요일에 맞는 얘기를 해 (새벽엔 졸림·야근, 점심엔 밥, 주말엔 쉬는 날 등).\n' + (ev ? '최근 게임 소식(자연스러우면 가끔 언급): ' + ev + '\n' : '') +
+    '이 2시간 동안 채팅방에 올라온 말을 써 줘:\n- 전체 16~24줄. 그중 3~5개는 모험가끼리 주고받는 짧은 대화(2~5줄, 서로 이름을 부르거나 앞사람 말에 대꾸, 1~3분 간격). 나머지는 혼잣말·질문·감탄.\n' +
+    '- 화제를 다양하게: 게임(방금 판 결과, 증강 조합, 강화 실패, 보스 패턴, 레이드 팀 구하기, 직업 고민)과 각자 일상(직업·나이·성격에 맞게)을 섞어. 같은 말·같은 형식 반복 금지. 너무 길게 쓰지 말고 실제 채팅처럼 짧게(대부분 40자 이하).\n' +
+    '- 사람 이름은 위 모험가끼리만 부름. 운영자·개발자·업데이트 담당 얘기는 하지 마.\n' +
+    '출력은 JSON 배열 하나만: [{"m":분(0~119 정수, 시간 순),"n":"이름","t":"말"}] — 다른 글 쓰지 마.';
+  let res;
+  try { res = UrlFetchApp.fetch('https://api.anthropic.com/v1/messages', { method: 'post', contentType: 'application/json', muteHttpExceptions: true, headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+    payload: JSON.stringify({ model: AI_MODEL, max_tokens: 3000, thinking: { type: /haiku/.test(AI_MODEL) ? 'disabled' : 'between_tools' }, system: sys, messages: [{ role: 'user', content: user }] }) }); } catch (err) { c.remove('bcg_' + blk); return { err: 'fetch' }; }
+  if (res.getResponseCode() !== 200) { c.remove('bcg_' + blk); return { err: 'api', code: res.getResponseCode() }; }
+  let j = null; try { j = JSON.parse(res.getContentText()); } catch (err) {}
+  const txt = j ? (j.content || []).filter(x => x.type === 'text').map(x => x.text).join('') : '';
+  let L = []; try { const a = txt.indexOf('['), b2 = txt.lastIndexOf(']'); L = JSON.parse(txt.slice(a, b2 + 1)); } catch (err) { L = []; }
+  const names = bots.map(b => b[0]);
+  L = (Array.isArray(L) ? L : []).map(x => ({ m: Math.max(0, Math.min(119, Math.floor(+x.m || 0))), n: String(x.n || ''), t: String(x.t || '').replace(/\s+/g, ' ').replace(/<[^>]*>/g, '').trim().slice(0, 120) }))
+    .filter(x => names.includes(x.n) && x.t).sort((a, b) => a.m - b.m).slice(0, 30);
+  if (!L.length) { c.remove('bcg_' + blk); return { err: 'none' }; }
+  let js = JSON.stringify(L); while (js.length > 8500 && L.length > 4) { L = L.slice(0, L.length - 1); js = JSON.stringify(L); }
+  c.put(ck, js, 21600); try { P.setProperty(ck, js); P.getKeys().filter(k => /^bc_\d+$/.test(k) && +k.slice(3) < cur - 3).forEach(k => P.deleteProperty(k)); } catch (err) {}
+  return { blk, L };
+}
 function donors_() { try { const L = JSON.parse(PropertiesService.getScriptProperties().getProperty('DONORS') || '[]'); return Array.isArray(L) ? L.map(x => String(x)).filter(Boolean) : []; } catch (err) { return []; } }
 // v9.3 결투 캐릭터 시트: 이름 · 시각 · 캐릭터(hero)
 function duelHeroSheet_() { const ss = book_(); let s = ss.getSheetByName('결투 캐릭터'); if (!s) { s = ss.insertSheet('결투 캐릭터'); s.getRange(1, 1, 1, 3).setValues([['name', 'at', 'hero']]); s.getRange('A:A').setNumberFormat('@'); } return s; }
@@ -1172,6 +1216,7 @@ function doGet0_(e) {
   if (q.snap) return out_(snap_(q));
   if (q.ping) return ping_(q);
   if (q.gifts) return out_(giftTake_(q));
+  if (q.bchat) return out_(bchat_(q));
   if (q.ai) return out_(ai_(q));
   if (q.prof) { let pf = ''; try { pf = CacheService.getScriptCache().get('pf_' + dmKey_(q.prof)) || ''; } catch (err) {} return out_({ pf }); }
   if (q.cload) return cload_(q);
