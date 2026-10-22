@@ -9709,6 +9709,8 @@ const PATCH_NOTES=[
   {v:483,t:'🤖 자동 이동 개선',items:[
     ['change','🤖 자동 이동이 보스·정예의 <b>몸통 돌진</b>을 미리 계산해 대시로 피해요 (예전엔 지금 위치만 보고 움직여서 부딪히는 일이 많았어요)'],
     ['change','🤖 곧 터질 예고 공격(징조 포함)이 있으면 대시를 그때를 위해 아껴 둬요'],
+    ['fix','🤖 예고 공격 안에서 <b>가장 빨리 빠져나가는 쪽</b>으로 걸어요 (직선 예고 안에서 길이 방향으로 걷거나, 주변에 적이 없을 때 예고를 무시하고 돌아다니던 문제). 멈춘 채 대시할 때도 착지 지점이 안전한 쪽으로 튀어요'],
+    ['fix','🤖 악몽의 파동 중: 빛의 원 안에서도 <b>파동이 끝난 뒤 터질 예고</b>가 겹치면 원 안의 빈자리로 옮기고, 원으로 가는 길에 곧 터질 예고는 돌아가요'],
     ['new','🤖 자동 이동이 위급할 때 <b>생존기·궁극기</b>도 알아서 써요 (체력이 낮은데 둘러싸였을 때, 보스전·큰 전투에서 오래 안 쓰고 있을 때)']]},
   {v:475,t:'💥 합체 안내 정리',items:[
     ['fix','💥 증강 설명의 「합체할 수 있는 증강」 목록에서 <b>이 판에서 나올 수 없는 짝</b>(다른 직업 전용·봉인함·등급 잠김·보스 러시 제외 등)이 나올 수 있는 것처럼 보이던 문제: 이제 회색으로 이유와 함께 보이고, 나올 수 있는 짝이 위에 와요 (예: 「암살 → 암살 표적 ✖ 도적 전용」)']]},
@@ -16167,8 +16169,13 @@ function evGoal(){const ev=S.ev,p=S.p;if(!ev||(S.boss&&S.boss.alive))return null
 // 일반 자동 이동의 대가 (안내·패치노트·결과 화면 어디에도 드러내지 않음): 켜 둔 동안 받는 피해 +12%(한 방 상한 뒤에 적용), 켜 둔 시간 비율만큼 최종 점수 −10% (기록의 숨은 값 ap, 명예의 전당 문자열 끝 ~숫자) (개발자 모드는 측정용이라 제외). 직접 움직이면 그 순간은 해당 없음
 const AUTO_DM=1/* v444 자동 이동 받는 피해 +12% 없앰 */,autoPen=()=>AUTO.move&&!DEV&&!!S&&S.mode==='play'&&!S.manualNow;
 // v300: 자동 이동 공통 — 예고 장판 안에 서 있는지 (t초 안에 터지는 것만). 터지기 직전(0.13초)이면 대시 (대시 중엔 패턴 피해 없음, 보스 러시처럼 예고가 짧아 걸어서 못 빠져나가는 큰 원도 피함)
+/* v483 예고 안쪽 깊이: 가장자리까지 거리 (양수=안, 음수=밖) */const teleDepth=(t,x,y)=>{if(t.k==='c')return t.r-Math.hypot(t.x-x,t.y-y);const ux=Math.cos(t.a),uy=Math.sin(t.a),px=x-t.x,py=y-t.y,u=clamp(px*ux+py*uy,0,t.len);return t.w/2-Math.hypot(px-ux*u,py-uy*u);};
 const inTele=(t,p)=>{if(t.k==='c')return Math.hypot(t.x-p.x,t.y-p.y)<t.r+p.r;const ux=Math.cos(t.a),uy=Math.sin(t.a),px2=p.x-t.x,py2=p.y-t.y,u=clamp(px2*ux+py2*uy,0,t.len);return Math.hypot(px2-ux*u,py2-uy*u)<t.w/2+p.r;};
-function autoTrapDash(v){const p=S.p;if(!p||p.dashCd>0||p.dashT>0)return;if(!S.tele.some(t=>t.dmg&&t.t<=.13&&inTele(t,p)))return;const l=Math.hypot(v[0],v[1]);if(l>.01){p.lmx=v[0]/l;p.lmy=v[1]/l;}dash();}
+function autoTrapDash(v){const p=S.p;if(!p||p.dashCd>0||p.dashT>0)return;if(!S.tele.some(t=>t.dmg&&t.t<=.13&&inTele(t,p)))return;
+  /* v483 대시 방향: 착지 지점이 곧 터질 예고 밖인 방향 중 이동 방향에 가까운 쪽 — 분석: 멈춘 채(이동 0) 대시하면 예전 방향으로 튀어 더 깊이 들어감 */
+  const l=Math.hypot(v[0],v[1]),vx=l>.01?v[0]/l:p.lmx||1,vy=l>.01?v[1]/l:p.lmy||0,D=dashDist(),L=S.tele.filter(t=>t.dmg&&t.t<.5);let bx=vx,by=vy,bs=-1e18;
+  for(let i=0;i<16;i++){const a=i*TAU/16,cx=Math.cos(a),cy=Math.sin(a),x=p.x+cx*D,y=p.y+cy*D;if(x<p.r+10||y<p.r+10||x>WW-p.r-10||y>WH-p.r-10||inSolid(x,y,p.r))continue;let dp=0;for(const t of L)dp=Math.max(dp,teleDepth(t,x,y)+p.r+6);const sc=-dp*10+(cx*vx+cy*vy)*30;if(sc>bs){bs=sc;bx=cx;by=cy;}}
+  p.lmx=bx;p.lmy=by;dash();}
 /* v379 일반 자동 이동 초반 보정: 10분(빌드업) 전에는 웬만한 패턴·탄환을 다 피하고, 10분 뒤 3분에 걸쳐 예전(조금씩 맞는) 수준으로. 보스 러시·레이드·결투는 처음부터 예전 수준 */
 /* v394 화면 시계(보스전 시간 제외)와 같은 기준: 예전엔 보스전 시간까지 더해서 화면상 5~7분에 경고가 떴음 *//* v444 자동 이동 제한 해제: 시간과 상관없이 늘 잘 피함 (결투만 예외) */const easyK=()=>{if(!S||duelOn())return 0;return 1;if(rushOn()||raidOn()||labOn())return 0;const t=S.gt||0;return t<NM_EASE_T?1:t<NM_EASE_T+NM_EASE_R?1-(t-NM_EASE_T)/NM_EASE_R:0;};
 // 개발자 자동 '야영' 모드: 가만히 있어야 세지는 증강이 있으면 켤 때 물어봄. 켜면 이벤트가 있을 때만 움직이고, 평소엔 맵(보스전은 결계) 끝에서 정지.
@@ -16191,8 +16198,13 @@ function nwVec0(){const p=S.p;let q=null,bd=1e18;for(const c of S.nw.safe){const
 function nwVec(){const p=S.p,w=S.nw,sp=Math.max(60,typeof moveSpd==='function'?moveSpd():200);
   const clear=(x0,y0,x1,y1)=>{const L=Math.hypot(x1-x0,y1-y0),n=Math.max(1,Math.ceil(L/18));for(let i=1;i<=n;i++){const t=i/n;if(inSolid(x0+(x1-x0)*t,y0+(y1-y0)*t,p.r))return false;}return true;};
   let q=null,bs=1e18;for(const c of w.safe){const d=Math.max(0,Math.hypot(c.x-p.x,c.y-p.y)-c.r*.5),ok=clear(p.x,p.y,c.x,c.y),tm=d/sp,sc=tm+(ok?0:1.5)+(tm>w.t?5:0);if(sc<bs){bs=sc;q=c;}}
-  if(!q)return [0,0];const dx=q.x-p.x,dy=q.y-p.y,l=Math.hypot(dx,dy);if(l<q.r*.4)return [0,0];
-  let a=Math.atan2(dy,dx);if(!clear(p.x,p.y,p.x+Math.cos(a)*60,p.y+Math.sin(a)*60)){for(const da of [.3,-.3,.6,-.6,.9,-.9,1.2,-1.2,1.57,-1.57]){const b=a+da;if(clear(p.x,p.y,p.x+Math.cos(b)*60,p.y+Math.sin(b)*60)){a=b;break;}}}
+  if(!q)return [0,0];
+  /* v483 파동이 끝난 뒤에 터지는 예고(원 안에 있어도 맞음)를 피해 원 안의 빈자리로. 가는 길에 곧 터질 예고도 돌아감 — 분석: 원 한가운데 서 있다가 파동 직후 터진 예고에 맞음 */
+  const late=S.tele.filter(t=>t.dmg&&t.t>w.t-.05&&t.t<w.t+1.8),rk=(x,y,L)=>{let m=0;for(const t of L){const d=teleDepth(t,x,y)+p.r*.5+10;if(d>m)m=d;}return m;};
+  let gx=q.x,gy=q.y;if(late.length&&rk(q.x,q.y,late)>0){let bd=1e18;for(const f of [.3,.55,.78])for(let i=0;i<12;i++){const a=i*TAU/12,x=q.x+Math.cos(a)*q.r*f,y=q.y+Math.sin(a)*q.r*f;if(inSolid(x,y,p.r))continue;const d=Math.hypot(x-p.x,y-p.y)+(rk(x,y,late)>0?1e4+rk(x,y,late)*40:0);if(d<bd){bd=d;gx=x;gy=y;}}}
+  const dx=gx-p.x,dy=gy-p.y,l=Math.hypot(dx,dy);if(l<(gx===q.x&&gy===q.y?q.r*.4:12))return [0,0];
+  const soon=nwSafe()?[]:S.tele.filter(t=>t.dmg&&t.t<Math.min(w.t,.7)),okp=(x,y)=>clear(p.x,p.y,x,y)&&(!soon.length||rk(x,y,soon)<=0||rk(x,y,soon)<rk(p.x,p.y,soon));
+  let a=Math.atan2(dy,dx);if(!okp(p.x+Math.cos(a)*60,p.y+Math.sin(a)*60)){for(const da of [.3,-.3,.6,-.6,.9,-.9,1.2,-1.2,1.57,-1.57]){const b=a+da;if(okp(p.x+Math.cos(b)*60,p.y+Math.sin(b)*60)){a=b;break;}}}
   const vx=Math.cos(a),vy=Math.sin(a);if(p.dashCd<=0&&(l-q.r*.5)/sp>w.t*.75&&l>q.r){p.lmx=vx;p.lmy=vy;dash();}return [vx,vy];}
 /* v483 자동 이동 두 가지로 정리: 일반용(모든 플레이어) = 생존 동작 전부 / 고점용(개발자) = 일반용 + 점수 행동(이벤트·이스터에그·숨은 몬스터·징조 완벽한 회피). 예전 측정용(개발자)은 없앰 */
 function normMoveVec(){S.noEv=1;try{return autoMoveVec0();}finally{S.noEv=0;}}
@@ -16277,7 +16289,7 @@ function autoMoveVec0(){
   /* v483 지금 곧 터질 예고 공격(1.6초 안) 안에 있으면 보스에 붙기·무리 피하기보다 빠져나가기가 먼저 (분석: 근접 직업이 예고 공격에 맞은 경우 100%가 걸어서 피할 수 있었음 — 평균 18~28 거리, 1.3~1.5초) */const thr=S.tele.some(t=>t.dmg&&t.t<1.6&&inTele(t,p)),tk0=thr?.3:1;
   for(const e of near){const d=Math.sqrt(d2(e,p));if(d<160)danger+=1;}
   // 16방향 + 「제자리에 서 있기」(개발자 자동만): 움직이면 예고 공격·탄환에 들어가는 상황이면 멈춰 있는 게 이김
-  for(let i=0;i<=N;i++){const stay=i===N;if(stay&&S.easyAI)continue;
+  for(let i=0;i<=N;i++){const stay=i===N;if(stay&&(S.easyAI||thr))continue;/* v483 곧 터질 예고 안이면 제자리 서기 안 함 */
     const a=stay?(p.amA||0):i*TAU/N,cx=stay?0:Math.cos(a),cy=stay?0:Math.sin(a),tx=p.x+cx*STEP,ty=p.y+cy*STEP;
     let sc=0;
     const edge=Math.min(tx-X0-M,X1-M-tx,ty-Y0-M,Y1-M-ty);
@@ -16298,10 +16310,10 @@ function autoMoveVec0(){
     if(bossOn){const e=S.boss,cl=(auR||mel)&&!low,minW=e.r+p.r+(cl?(mel?34:40):90)/* v419 근접: 보스 몸통과 20 → 34 (돌진에 부딪혀 쓰러지던 문제) */,lo=cl?minW:Math.max(minW,p.range*(low?.7:.5)),hi=mel&&!low?Math.max(minW+15,e.r+pr*.8):auR&&!low?Math.max(minW+20,auR+e.r*.8):p.range*.95,db=Math.hypot(e.x+(e._vx||0)*.3-tx,e.y+(e._vy||0)*.3-ty)/* v483 보스가 0.3초 뒤 있을 자리 기준 */,k=danger>=3?.45:danger>=1?.7:1;
       sc-=k*tk0*(db<lo?(lo-db)*2.4:db>hi?(db-hi)*3:0);if(db<minW)sc-=(minW-db)*9;}
     // 보스 예고 공격·장판 회피
+    /* v483 예고 공격: 「얼마나 깊이 들어가 있나」에 비례한 감점 (원·직선 모두). 예전엔 직선은 안에 있기만 하면 같은 감점이라 나갈 쪽을 못 골랐고, 원도 가운데 쪽만 크게 감점 — 분석: 직선 예고 안에서 더 깊이 들어가거나 나왔다 다시 들어감 */
     for(const t of S.tele){if(!t.dmg&&t.k==='c')continue;
-      const tk=(t.dmg&&t.t<1?3:1)/* v483 1초 안에 터질 예고는 감점 3배 */*S.easyAI?.5+.5*(S.easyK||0):(AI_W.pdf&&AUTO.hi&&t.omen&&p.dashCd<=0&&p.hp>p.maxHp*.5&&(S.st.pd||0)<20&&!S.tele.some(o=>o!==t&&o.dmg&&Math.abs(o.t-t.t)<.4)?.15:1);
-      if(t.k==='c'){const d=Math.hypot(t.x-tx,t.y-ty),m2=Math.hypot(t.x-(p.x+cx*STEP*.5),t.y-(p.y+cy*STEP*.5));if(d<t.r+p.r+10)sc-=(900*(1-d/(t.r+p.r+10))+300)*tk;if(m2<t.r)sc-=200*tk;}
-      else{const ux=Math.cos(t.a),uy=Math.sin(t.a),px2=tx-t.x,py2=ty-t.y,u=clamp(px2*ux+py2*uy,0,t.len),dd=Math.hypot(px2-ux*u,py2-uy*u);if(dd<t.w/2+p.r+16)sc-=900*tk;}}
+      const tk=(t.dmg&&t.t<1?3:1)/* v483 1초 안에 터질 예고는 감점 3배 */*(S.easyAI?.5+.5*(S.easyK||0):(AI_W.pdf&&AUTO.hi&&t.omen&&p.dashCd<=0&&p.hp>p.maxHp*.5&&(S.st.pd||0)<20&&!S.tele.some(o=>o!==t&&o.dmg&&Math.abs(o.t-t.t)<.4)?.15:1));
+      const dep=teleDepth(t,tx,ty)+p.r+12,dm=teleDepth(t,p.x+cx*STEP*.5,p.y+cy*STEP*.5)+p.r;if(dep>0)sc-=(300+dep*12)*tk;if(dm>0)sc-=dm*4*tk;}
     for(const h of S.hz){const d=Math.hypot(h.x-tx,h.y-ty);if(d<h.r+p.r+6)sc-=500;}
     // 돌진 중인 보스(예고선이 사라진 뒤 몸으로 들이받는 중)의 앞길도 피함
     for(const e of S.en){if(!e.alive||!e.boss)continue;const vx=e._vx||0,vy=e._vy||0,sp=Math.hypot(vx,vy);if(sp<400)continue;const ux=vx/sp,uy=vy/sp,px2=tx-e.x,py2=ty-e.y,u=clamp(px2*ux+py2*uy,0,sp*.4),dd=Math.hypot(px2-ux*u,py2-uy*u);if(dd<e.r+p.r+24)sc-=1100;}
@@ -16313,7 +16325,7 @@ function autoMoveVec0(){
     if(stay)sc-=8; // 같은 점수면 움직이는 쪽 (가만히 있다 둘러싸이지 않게)
     if(sc>best){best=sc;ba=a;bStay=stay;}
   }
-  if(!wide.length&&!goal&&!shots.length){const a=S.t*.35;ba=Math.atan2(Math.sin(a)+(CY-p.y)/(A?600:1500),Math.cos(a)+(CX-p.x)/(A?600:1500));}
+  if(!wide.length&&!goal&&!shots.length&&!S.tele.some(t=>t.dmg)&&!S.hz.length/* v483 예고 공격·장판이 있으면 어슬렁거리기로 덮어쓰지 않음 (보스가 뜬 사이 패턴을 안 피하던 버그) */){const a=S.t*.35;ba=Math.atan2(Math.sin(a)+(CY-p.y)/(A?600:1500),Math.cos(a)+(CX-p.x)/(A?600:1500));}
   if(bStay&&(wide.length||shots.length||S.tele.length))return [0,0];
   p.amA=ba;
   const vx=Math.cos(ba),vy=Math.sin(ba);
