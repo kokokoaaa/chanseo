@@ -16221,9 +16221,11 @@ function nwVec(){const p=S.p,w=S.nw,sp=Math.max(60,typeof moveSpd==='function'?m
 function normMoveVec(){S.noEv=1;try{return autoMoveVec0();}finally{S.noEv=0;}}
 /* v484 고점용: 안전할 때만 점수 행동(이벤트·이스터에그·숨은 몬스터·징조 완벽한 회피). 보스전·즉사 패턴·파동·심연의 눈 중이거나, 체력 70% 아래거나, 최근 5초에 최대 체력 15% 넘게 맞았거나(스펙이 딸림), 주변 적이 많으면 일반용과 똑같이 회피만 — 측정: 늘 쫓으면 보너스는 늘지만 판이 짧아져 점수가 오히려 낮았음 */
 function hiSafe(){const p=S.p;if(!p||bossOn()||(typeof doomOn==='function'&&doomOn())||S.nw||S.eye)return false;if(p.hp<p.maxHp*.7||(S.hiTk||0)>.15)return false;let n=0;for(const e of S.en)if(e.alive&&d2(e,p)<200*200&&++n>=12)return false;return true;}
+/* v484 서서 하는 점수 행동(이스터에그 건물 앞 대기·징조 완벽한 회피)은 피격 확률을 직접 올림 → 악몽 12분 전이고 최근 5초에 거의 안 맞았을 때(최대 체력 5% 미만)만. 그 뒤엔 이동해서 줍는 것만 */
+function hiStill(){return (S.gt||0)<720&&(S.hiTk||0)<.05;}
 function autoMoveVec(){if(!hiSafe()){const h=AUTO.hi;AUTO.hi=false;try{return normMoveVec();}finally{AUTO.hi=h;}}
-  const v=campVec(autoMoveVec0()),p=S.p,g=evGoal();
-  if(!g&&AUTO.hi&&!S.easyAI){const pl=aiEggPlan();if(pl){let hot=false;for(const t of S.tele){if(!t.dmg)continue;if(t.k==='c'?d2(t,p)<(t.r+p.r+20)**2:true){hot=true;break;}}
+  S.hiSt=hiStill();const v=campVec(autoMoveVec0()),p=S.p,g=evGoal();
+  if(!g&&AUTO.hi&&!S.easyAI&&S.hiSt){const pl=aiEggPlan();if(pl){let hot=false;for(const t of S.tele){if(!t.dmg)continue;if(t.k==='c'?d2(t,p)<(t.r+p.r+20)**2:true){hot=true;break;}}
     if(!hot){if(pl.act==='dash'&&p.dashCd<=0){p.lmx=pl.v[0];p.lmy=pl.v[1];dash();}if(pl.act==='skill')useSkill();if(pl.act==='ult')useUlt();
       if(pl.stay){const d=Math.hypot(pl.to[0],pl.to[1]);return d?[v[0]*.5+pl.to[0]*.5,v[1]*.5+pl.to[1]*.5]:v;}return pl.v;}}}
   if(!g)return v;
@@ -16326,7 +16328,7 @@ function autoMoveVec0(){
     // 보스 예고 공격·장판 회피
     /* v483 예고 공격: 「얼마나 깊이 들어가 있나」에 비례한 감점 (원·직선 모두). 예전엔 직선은 안에 있기만 하면 같은 감점이라 나갈 쪽을 못 골랐고, 원도 가운데 쪽만 크게 감점 — 분석: 직선 예고 안에서 더 깊이 들어가거나 나왔다 다시 들어감 */
     for(const t of S.tele){if(!t.dmg&&t.k==='c')continue;
-      const tk=(t.dmg&&t.t<1?3:1)/* v483 1초 안에 터질 예고는 감점 3배 */*(S.easyAI?.5+.5*(S.easyK||0):(AI_W.pdf&&AUTO.hi&&t.omen&&p.dashCd<=0&&p.hp>p.maxHp*.5&&(S.st.pd||0)<20&&!S.tele.some(o=>o!==t&&o.dmg&&Math.abs(o.t-t.t)<.4)?.15:1));
+      const tk=(t.dmg&&t.t<1?3:1)/* v483 1초 안에 터질 예고는 감점 3배 */*(S.easyAI?.5+.5*(S.easyK||0):(AI_W.pdf&&AUTO.hi&&S.hiSt&&t.omen&&p.dashCd<=0&&p.hp>p.maxHp*.5&&(S.st.pd||0)<20&&!S.tele.some(o=>o!==t&&o.dmg&&Math.abs(o.t-t.t)<.4)?.15:1));
       const dep=teleDepth(t,tx,ty)+p.r+12,dm=teleDepth(t,p.x+cx*STEP*.5,p.y+cy*STEP*.5)+p.r;if(dep>0)sc-=(300+dep*12)*tk;if(dm>0)sc-=dm*4*tk;}
     for(const h of S.hz){const d=Math.hypot(h.x-tx,h.y-ty);if(d<h.r+p.r+6)sc-=500;}
     // 돌진 중인 보스(예고선이 사라진 뒤 몸으로 들이받는 중)의 앞길도 피함
@@ -16960,7 +16962,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=484,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=485,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
