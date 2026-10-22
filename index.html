@@ -16274,6 +16274,7 @@ function autoMoveVec0(){
   {let bd=600*600;for(const i of S.items){const d=d2(i,p);if(d<bd&&inA(i)){bd=d;goal=i;}}}
   if(!goal){let bd=320*320;for(const q of S.dr){const d=d2(q,p);if(d<bd&&d>magE()*magE()*.4&&inA(q)){bd=d;goal=q;}}}
   let best=-1e9,ba=0,danger=0,bStay=false;
+  /* v483 지금 곧 터질 예고 공격(1.6초 안) 안에 있으면 보스에 붙기·무리 피하기보다 빠져나가기가 먼저 (분석: 근접 직업이 예고 공격에 맞은 경우 100%가 걸어서 피할 수 있었음 — 평균 18~28 거리, 1.3~1.5초) */const thr=S.tele.some(t=>t.dmg&&t.t<1.6&&inTele(t,p)),tk0=thr?.3:1;
   for(const e of near){const d=Math.sqrt(d2(e,p));if(d<160)danger+=1;}
   // 16방향 + 「제자리에 서 있기」(개발자 자동만): 움직이면 예고 공격·탄환에 들어가는 상황이면 멈춰 있는 게 이김
   for(let i=0;i<=N;i++){const stay=i===N;if(stay&&S.easyAI)continue;
@@ -16288,17 +16289,17 @@ function autoMoveVec0(){
     sc+=Math.min(mn,bossOn&&!mel?Math.max(desired,160):desired)*(bossOn?2.9:2.2);
     // 개발자 자동(점수 위주): 도착 지점 주변이 붐비면 감점, 한 걸음 더 간 곳(막다른 길)도 확인
     if(!S.easyAI||(S.easyK||0)>0){const kk=S.easyAI?S.easyK:1;let cn=0,mn2=420;const fx=p.x+cx*STEP*2,fy=p.y+cy*STEP*2;for(const e of near){const d=Math.hypot(e.x-tx,e.y-ty);if(d<140)cn+=e.elite?2:1;const d2b=Math.hypot(e.x-fx,e.y-fy);if(d2b<mn2)mn2=d2b;}
-      sc-=(mk?Math.max(0,cn-mkC):cn)*AI_W.crowd*1.4*kk;sc+=Math.min(mn2,desired)*AI_W.far*kk;}
+      sc-=(mk?Math.max(0,cn-mkC):cn)*AI_W.crowd*1.4*kk*tk0;sc+=Math.min(mn2,desired)*AI_W.far*kk;}
     if(wide.length){let dn=1e9;for(const e of wide){const d=Math.hypot(e.x-tx,e.y-ty);if(d<dn)dn=d;}if(!bossOn){if(dn>reach)sc-=(dn-reach)*(danger>=3||low?1.2:2.6);else sc+=25;}}
     // 탄환은 현재 위치가 아니라 앞으로 0.6초간 날아갈 경로 기준으로 회피
     for(const b of shots){const ex=b.vx*.6,ey=b.vy*.6,L2=ex*ex+ey*ey||1,u=clamp(((tx-b.x)*ex+(ty-b.y)*ey)/L2,0,1),d=Math.hypot(b.x+ex*u-tx,b.y+ey*u-ty),R0=(b.r||5)+p.r+22;if(d<R0)sc-=(R0-d)*(S.easyAI?3+3*(S.easyK||0):6);}
     // 보스전: 보스를 사거리의 50~95% 안에 두면 됨 (사거리가 길수록 움직일 여유가 커짐). 체력이 낮으면 70% 이상 거리 유지
     // 주변에 잡몹이 붙어 있으면 보스 거리보다 잡몹 회피를 우선. 보스 몸통 가까이는 언제나 크게 감점
     if(bossOn){const e=S.boss,cl=(auR||mel)&&!low,minW=e.r+p.r+(cl?(mel?34:40):90)/* v419 근접: 보스 몸통과 20 → 34 (돌진에 부딪혀 쓰러지던 문제) */,lo=cl?minW:Math.max(minW,p.range*(low?.7:.5)),hi=mel&&!low?Math.max(minW+15,e.r+pr*.8):auR&&!low?Math.max(minW+20,auR+e.r*.8):p.range*.95,db=Math.hypot(e.x+(e._vx||0)*.3-tx,e.y+(e._vy||0)*.3-ty)/* v483 보스가 0.3초 뒤 있을 자리 기준 */,k=danger>=3?.45:danger>=1?.7:1;
-      sc-=k*(db<lo?(lo-db)*2.4:db>hi?(db-hi)*3:0);if(db<minW)sc-=(minW-db)*9;}
+      sc-=k*tk0*(db<lo?(lo-db)*2.4:db>hi?(db-hi)*3:0);if(db<minW)sc-=(minW-db)*9;}
     // 보스 예고 공격·장판 회피
     for(const t of S.tele){if(!t.dmg&&t.k==='c')continue;
-      const tk=S.easyAI?.5+.5*(S.easyK||0):(AI_W.pdf&&AUTO.hi&&t.omen&&p.dashCd<=0&&p.hp>p.maxHp*.5&&(S.st.pd||0)<20&&!S.tele.some(o=>o!==t&&o.dmg&&Math.abs(o.t-t.t)<.4)?.15:1);
+      const tk=(t.dmg&&t.t<1?3:1)/* v483 1초 안에 터질 예고는 감점 3배 */*S.easyAI?.5+.5*(S.easyK||0):(AI_W.pdf&&AUTO.hi&&t.omen&&p.dashCd<=0&&p.hp>p.maxHp*.5&&(S.st.pd||0)<20&&!S.tele.some(o=>o!==t&&o.dmg&&Math.abs(o.t-t.t)<.4)?.15:1);
       if(t.k==='c'){const d=Math.hypot(t.x-tx,t.y-ty),m2=Math.hypot(t.x-(p.x+cx*STEP*.5),t.y-(p.y+cy*STEP*.5));if(d<t.r+p.r+10)sc-=(900*(1-d/(t.r+p.r+10))+300)*tk;if(m2<t.r)sc-=200*tk;}
       else{const ux=Math.cos(t.a),uy=Math.sin(t.a),px2=tx-t.x,py2=ty-t.y,u=clamp(px2*ux+py2*uy,0,t.len),dd=Math.hypot(px2-ux*u,py2-uy*u);if(dd<t.w/2+p.r+16)sc-=900*tk;}}
     for(const h of S.hz){const d=Math.hypot(h.x-tx,h.y-ty);if(d<h.r+p.r+6)sc-=500;}
@@ -16318,7 +16319,7 @@ function autoMoveVec0(){
   const vx=Math.cos(ba),vy=Math.sin(ba);
   // v300: 터지기 직전(0.13초 안)인 예고 장판 안에 아직 있으면 대시 (대시 중엔 패턴 피해 없음). 보스 러시처럼 예고가 짧아 걸어서는 못 빠져나가는 큰 원도 피함
   // v300: 보스전에서는 대시를 예고 패턴 회피용으로 아낌 (잡몹이 붙었다고 쓰지 않고, 보스 몸통에 닿기 직전만)
-  if(p.dashCd<=0&&!aiTeleSoon(.9)/* v483 곧 터질 예고 공격이 있으면 대시를 아껴 둠 */&&(bossOn?d2(S.boss,p)<(S.boss.r+p.r+12)**2:mk?S.en.filter(e=>e.alive&&d2(e,p)<90*90).length>=mkC+4:(()=>{/* v483 대시 아끼기: 잡몹 한 마리 닿았다고 쓰지 않음 — 정예가 닿았거나 3마리 이상 붙었거나 크게 둘러싸였을 때만 (분석: 정예 돌진에 맞을 때 대시가 준비된 경우가 12~17%뿐) */const T=S.en.filter(e=>e.alive&&d2(e,p)<(e.r+p.r+26)**2);return T.some(e=>e.elite)||T.length>=3||danger>=5;})())){p.lmx=vx;p.lmy=vy;dash();}
+  if(p.dashCd<=0&&!aiTeleSoon(.9)/* v483 곧 터질 예고 공격이 있으면 대시를 아껴 둠 */&&(bossOn?!((auR||mel)&&!low)/* v483 근접·오라 직업은 보스에 붙어 싸우니 닿았다고 대시를 쓰지 않음 — 예고 공격용으로 남김 (분석: 예고에 맞을 때 대시 준비 9~26%) */&&d2(S.boss,p)<(S.boss.r+p.r+12)**2:mk?S.en.filter(e=>e.alive&&d2(e,p)<90*90).length>=mkC+4:(()=>{/* v483 대시 아끼기: 잡몹 한 마리 닿았다고 쓰지 않음 — 정예가 닿았거나 3마리 이상 붙었거나 크게 둘러싸였을 때만 (분석: 정예 돌진에 맞을 때 대시가 준비된 경우가 12~17%뿐) */const T=S.en.filter(e=>e.alive&&d2(e,p)<(e.r+p.r+26)**2);return T.some(e=>e.elite)||T.length>=3||danger>=5;})())){p.lmx=vx;p.lmy=vy;dash();}
   return [vx,vy];
 }
 function cycleZoom(){ZOOM=(ZOOM+1)%ZOOM_N;try{localStorage.setItem('chanseo_zoom',ZOOM);}catch(e){}resize();refreshAutoBtns();toast(`시야 ${ZOOM+1}단계 (${[1,1.25,1.5,1.75,2][ZOOM]}배 넓게)`);}
