@@ -16278,7 +16278,7 @@ function autoMoveVec0(){
     const a=stay?(p.amA||0):i*TAU/N,cx=stay?0:Math.cos(a),cy=stay?0:Math.sin(a),tx=p.x+cx*STEP,ty=p.y+cy*STEP;
     let sc=0;
     const edge=Math.min(tx-X0-M,X1-M-tx,ty-Y0-M,Y1-M-ty);
-    if(edge<0)sc-=5000-edge*10;else if(edge<250)sc-=(250-edge)*1.2;
+    if(edge<0)sc-=5000-edge*10;else if(edge<400)sc-=(400-edge)*(near.length>=4?2.4:1.2)/* v483 벽에 몰리지 않게 (분석: 정예에게 맞은 순간의 44~65%가 벽 150 안) — 예전 250·1.2 */;
     if(inSolid(tx,ty,p.r+6)||inSolid(p.x+cx*STEP*.5,p.y+cy*STEP*.5,p.r+4)||inSolid(p.x+cx*30,p.y+cy*30,p.r+2))sc-=900;
     let mn=420;
     for(const e of near){const w=e.elite?1.6:e.boss?1.2:1;const d=Math.hypot(e.x-tx,e.y-ty)/w;if(d<mn)mn=d;
@@ -16316,7 +16316,7 @@ function autoMoveVec0(){
   const vx=Math.cos(ba),vy=Math.sin(ba);
   // v300: 터지기 직전(0.13초 안)인 예고 장판 안에 아직 있으면 대시 (대시 중엔 패턴 피해 없음). 보스 러시처럼 예고가 짧아 걸어서는 못 빠져나가는 큰 원도 피함
   // v300: 보스전에서는 대시를 예고 패턴 회피용으로 아낌 (잡몹이 붙었다고 쓰지 않고, 보스 몸통에 닿기 직전만)
-  if(p.dashCd<=0&&!aiTeleSoon(.9)/* v483 곧 터질 예고 공격이 있으면 대시를 아껴 둠 */&&(bossOn?d2(S.boss,p)<(S.boss.r+p.r+12)**2:mk?S.en.filter(e=>e.alive&&d2(e,p)<90*90).length>=mkC+4:(S.en.some(e=>e.alive&&d2(e,p)<(e.r+p.r+26)**2)||danger>=5))){p.lmx=vx;p.lmy=vy;dash();}
+  if(p.dashCd<=0&&!aiTeleSoon(.9)/* v483 곧 터질 예고 공격이 있으면 대시를 아껴 둠 */&&(bossOn?d2(S.boss,p)<(S.boss.r+p.r+12)**2:mk?S.en.filter(e=>e.alive&&d2(e,p)<90*90).length>=mkC+4:(()=>{/* v483 대시 아끼기: 잡몹 한 마리 닿았다고 쓰지 않음 — 정예가 닿았거나 3마리 이상 붙었거나 크게 둘러싸였을 때만 (분석: 정예 돌진에 맞을 때 대시가 준비된 경우가 12~17%뿐) */const T=S.en.filter(e=>e.alive&&d2(e,p)<(e.r+p.r+26)**2);return T.some(e=>e.elite)||T.length>=3||danger>=5;})())){p.lmx=vx;p.lmy=vy;dash();}
   return [vx,vy];
 }
 function cycleZoom(){ZOOM=(ZOOM+1)%ZOOM_N;try{localStorage.setItem('chanseo_zoom',ZOOM);}catch(e){}resize();refreshAutoBtns();toast(`시야 ${ZOOM+1}단계 (${[1,1.25,1.5,1.75,2][ZOOM]}배 넓게)`);}
