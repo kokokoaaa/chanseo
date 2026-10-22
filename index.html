@@ -16253,7 +16253,7 @@ function aiVelTick(dt){if(!(dt>0))return;const p=S.p;if(p._lx!=null){p._vx=(p.x-
 /* v483 몸통 충돌 예측: 보스·정예(근접 직업은 보스만)·빠르게 돌진하는 적이 0.3초 안에 몸에 닿는지 (서로의 속도로 계산). 분석: 자동 이동 피해의 80~90%가 몸통 충돌이었고, 그중 절반 이상은 대시가 준비된 채 맞음 */
 /* v483 처음 닿는 시각: |상대위치 + 상대속도×t| = 닿는 거리 의 작은 근 (예전엔 「가장 가까워지는 시각」으로 계산해서 몸 크기만큼 늦게 잡혀 0.3초 안 돌진을 놓쳤음) */
 const aiTouchT=(rx,ry,vx,vy,Rr)=>{const c=rx*rx+ry*ry-Rr*Rr;if(c<=0)return 0;const vv=vx*vx+vy*vy;if(vv<1)return -1;const bb=rx*vx+ry*vy;if(bb>=0)return -1;const D=bb*bb-vv*c;if(D<0)return -1;return (-bb-Math.sqrt(D))/vv;};
-function aiBodyHit(){const p=S.p,pvx=p._vx||0,pvy=p._vy||0,pm=pureMelee();let m=null,v=null;for(const e of S.en){if(!e.alive||e.phase||e.air>0||e._vx==null)continue;const rvx=e._vx-pvx,rvy=e._vy-pvy,vv=rvx*rvx+rvy*rvy;if(!(e.boss||(e.elite&&!pm)||vv>380*380))continue;if(vv<150*150)continue;const rx=e.x-p.x,ry=e.y-p.y;if(rx*rx+ry*ry>340*340)continue;const tc=aiTouchT(rx,ry,rvx,rvy,e.r+p.r+4);if(tc<0||tc>.3)continue;if(m==null||tc<m){m=tc;v=[rvx,rvy,rx+rvx*tc,ry+rvy*tc];}}return m==null?null:{t:m,v};}
+function aiBodyHit(){const p=S.p,pvx=p._vx||0,pvy=p._vy||0,pm=pureMelee();let m=null,v=null,bo=false;for(const e of S.en){if(!e.alive||e.phase||e.air>0||e._vx==null)continue;const rvx=e._vx-pvx,rvy=e._vy-pvy,vv=rvx*rvx+rvy*rvy;if(!(e.boss||(e.elite&&!pm)||vv>380*380))continue;if(vv<150*150)continue;const rx=e.x-p.x,ry=e.y-p.y;if(rx*rx+ry*ry>340*340)continue;const tc=aiTouchT(rx,ry,rvx,rvy,e.r+p.r+4);if(tc<0||tc>.3)continue;if(m==null||tc<m){m=tc;v=[rvx,rvy,rx+rvx*tc,ry+rvy*tc];bo=!!e.boss;}}return m==null?null:{t:m,v,boss:bo};}
 /* 곧 터질 예고 공격(징조 포함) 안에 있으면 대시를 그쪽에 아껴 둠 */const aiTeleSoon=T=>{const p=S.p;return S.tele.some(t=>aiTeleHurts(t)&&t.t<T&&inTele(t,p));};
 function aiDefend(dt){const p=S.p;if(!p.alive||S.mode!=='play')return;
   /* v483 악몽의 파동 중: 대시는 빛의 원으로 가는 데만 (nwVec이 씀). 몸통·탄환 회피 대시가 대시를 써 버려 원에 못 닿던 문제 (측정: 파동 실패 16판 중 1회 → 7~12회) */if(S.nw&&!nwSafe()){const ulR=(p.ulCd||0)<=0&&ultOk();if(ulR&&p.hp<p.maxHp*.2)useUlt();return;}
@@ -16263,7 +16263,7 @@ function aiDefend(dt){const p=S.p;if(!p.alive||S.mode!=='play')return;
     if(AI_W.pd&&p.dashCd<=0&&p.dashT<=0&&hit<.08){const t=S._hitTl;/* 직선 예고(광선·돌진)는 선의 옆으로, 원은 지금 가는 쪽으로 */if(t&&t.k==='l'){const ux=Math.cos(t.a),uy=Math.sin(t.a),px=p.x-t.x,py=p.y-t.y,u=px*ux+py*uy;aiSideDash([ux,uy,-(px-ux*u)||.01,-(py-uy*u)||.01]);}else dash();return;}
     if(skR&&hit<.2&&(p.dashCd>0||hit<.04)){useSkill();return;}
     if(ulR&&lethal&&hit<.25&&p.dashCd>0&&!skR){useUlt();return;}}
-  {const bh=aiBodyHit();if(!safe&&bh&&hit==null&&AI_W.pd&&p.dashCd<=0&&p.dashT<=0&&bh.t<.15&&!aiTeleSoon(.9)){aiSideDash(bh.v);return;}}
+  {const bh=aiBodyHit();if(!safe&&bh&&hit==null&&AI_W.pd&&p.dashCd<=0&&p.dashT<=0&&bh.t<(bh.boss?.2:.15)&&(bh.boss||!aiTeleSoon(.9))/* v483 보스 몸통은 닿으면 한 방(최대 체력 112%)이라 곧 터질 예고가 있어도 대시 — 분석: 예고 때문에 대시를 아끼다 돌진에 맞아 끝난 판 */){aiSideDash(bh.v);return;}}
   {const sh=aiShotHit(dt);if(!safe&&sh&&hit==null){if(AI_W.pd&&p.dashCd<=0&&p.dashT<=0&&sh.t<.12){aiSideDash(sh.v);return;}if(skR&&sh.t<.06&&p.hp<p.maxHp*.5){useSkill();return;}}}
   if(!safe){let nb=0;for(const e of S.en)if(e.alive&&d2(e,p)<130*130)nb++;
     if(skR&&((p.hp<p.maxHp*.35&&(nb>=2||hit!=null))||(p.hp<p.maxHp*.55&&nb>=6))){useSkill();return;}
@@ -16310,7 +16310,7 @@ function autoMoveVec0(){
     for(const b of shots){const ex=b.vx*.6,ey=b.vy*.6,L2=ex*ex+ey*ey||1,u=clamp(((tx-b.x)*ex+(ty-b.y)*ey)/L2,0,1),d=Math.hypot(b.x+ex*u-tx,b.y+ey*u-ty),R0=(b.r||5)+p.r+22;if(d<R0)sc-=(R0-d)*(S.easyAI?3+3*(S.easyK||0):6);}
     // 보스전: 보스를 사거리의 50~95% 안에 두면 됨 (사거리가 길수록 움직일 여유가 커짐). 체력이 낮으면 70% 이상 거리 유지
     // 주변에 잡몹이 붙어 있으면 보스 거리보다 잡몹 회피를 우선. 보스 몸통 가까이는 언제나 크게 감점
-    if(bossOn){const e=S.boss,cl=(auR||mel)&&!low,minW=e.r+p.r+(cl?(mel?34:40):90)/* v419 근접: 보스 몸통과 20 → 34 (돌진에 부딪혀 쓰러지던 문제) */,lo=cl?minW:Math.max(minW,p.range*(low?.7:.5)),hi=mel&&!low?Math.max(minW+15,e.r+pr*.8):auR&&!low?Math.max(minW+20,auR+e.r*.8):p.range*.95,db=Math.hypot(e.x+(e._vx||0)*.3-tx,e.y+(e._vy||0)*.3-ty)/* v483 보스가 0.3초 뒤 있을 자리 기준 */,k=danger>=3?.45:danger>=1?.7:1;
+    if(bossOn){const e=S.boss,cl=(auR||mel)&&!low,minW=e.r+p.r+(cl?(mel?34:40):90)/* v419 근접: 보스 몸통과 20 → 34 (돌진에 부딪혀 쓰러지던 문제) */,lt=cl&&endless()&&e.dmg*100/(100+Math.max(0,armorEff()))>p.hp+(p.barrier||0)/* v483 보스 몸통 한 방 구간: 근접·오라 직업도 공격이 닿는 거리 안에서 한 발 떨어져 싸움 (돌진에 반응할 틈) — 분석: 근접 직업 판이 보스 몸통 112%·돌진으로 끝남 */,rch=Math.max(20,(auR?Math.min(auR,pr):pr)-p.r),lo=cl?(lt?Math.max(minW,e.r+p.r+rch*.5):minW):Math.max(minW,p.range*(low?.7:.5)),hi=lt?Math.max(lo+20,e.r+p.r+rch*.85):mel&&!low?Math.max(minW+15,e.r+pr*.8):auR&&!low?Math.max(minW+20,auR+e.r*.8):p.range*.95,db=Math.hypot(e.x+(e._vx||0)*.3-tx,e.y+(e._vy||0)*.3-ty)/* v483 보스가 0.3초 뒤 있을 자리 기준 */,k=danger>=3?.45:danger>=1?.7:1;
       sc-=k*tk0*(db<lo?(lo-db)*2.4:db>hi?(db-hi)*3:0);if(db<minW)sc-=(minW-db)*9;}
     // 보스 예고 공격·장판 회피
     /* v483 예고 공격: 「얼마나 깊이 들어가 있나」에 비례한 감점 (원·직선 모두). 예전엔 직선은 안에 있기만 하면 같은 감점이라 나갈 쪽을 못 골랐고, 원도 가운데 쪽만 크게 감점 — 분석: 직선 예고 안에서 더 깊이 들어가거나 나왔다 다시 들어감 */
