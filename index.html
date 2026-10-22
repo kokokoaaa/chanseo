@@ -16228,16 +16228,17 @@ function aiEggPlan(){const p=S.p;if(!AI_W.egg||bossOn()||S.npc||(S.st.eggN||0)>=
 const aiTeleHurts=t=>t.dmg||(t.k==='l'&&t.w>12);
 function aiHitT(){const p=S.p;let m=null;for(const t of S.tele){if(!aiTeleHurts(t)||t.t>.3)continue;let inn;if(t.k==='c')inn=d2(t,p)<(t.r+p.r)**2;else{const ux=Math.cos(t.a),uy=Math.sin(t.a),px=p.x-t.x,py=p.y-t.y,u=clamp(px*ux+py*uy,0,t.len);inn=Math.hypot(px-ux*u,py-uy*u)<t.w/2+p.r;}if(inn&&(m==null||t.t<m)){m=t.t;S._hitTl=t;}}return m;}
 // v350 고점 자동: 예고 장판뿐 아니라 날아오는 탄·돌진하는 보스 몸통도 미리 계산 (가장 가까이 오는 시각·거리). 맞을 것 같으면 탄 진행 방향의 옆으로 대시
-function aiShotHit(dt){const p=S.p;let m=null,v=null;for(const b of S.pr){if(b.mine||!b.vx&&!b.vy)continue;const dx=p.x-b.x,dy=p.y-b.y;if(dx*dx+dy*dy>360*360)continue;const vv=b.vx*b.vx+b.vy*b.vy,tc=(dx*b.vx+dy*b.vy)/vv;if(tc<0||tc>.35)continue;
-    const cx=b.x+b.vx*tc-p.x,cy=b.y+b.vy*tc-p.y;if(cx*cx+cy*cy<(p.r+(b.r||6)+3)**2&&(m==null||tc<m)){m=tc;v=[b.vx,b.vy,cx,cy];}}
-  for(const e of S.en){if(!e.alive||!e.boss)continue;const vx=e._vx||0,vy=e._vy||0,vv=vx*vx+vy*vy;if(vv<300*300)continue;
-    const dx=p.x-e.x,dy=p.y-e.y,tc=(dx*vx+dy*vy)/vv;if(tc<0||tc>.35)continue;const cx=e.x+vx*tc-p.x,cy=e.y+vy*tc-p.y;if(cx*cx+cy*cy<(e.r+p.r+6)**2&&(m==null||tc<m)){m=tc;v=[vx,vy,cx,cy];}}
+function aiShotHit(dt){const p=S.p,pvx=p._vx||0,pvy=p._vy||0;let m=null,v=null;/* v483 처음 닿는 시각으로 (내 움직임도 반영) */
+  for(const b of S.pr){if(b.mine||!b.vx&&!b.vy)continue;const rx=b.x-p.x,ry=b.y-p.y;if(rx*rx+ry*ry>360*360)continue;const vx=b.vx-pvx,vy=b.vy-pvy,tc=aiTouchT(rx,ry,vx,vy,p.r+(b.r||6)+3);if(tc<0||tc>.35)continue;if(m==null||tc<m){m=tc;v=[b.vx,b.vy,rx+vx*tc,ry+vy*tc];}}
+  for(const e of S.en){if(!e.alive||!e.boss)continue;const vx0=e._vx||0,vy0=e._vy||0;if(vx0*vx0+vy0*vy0<300*300)continue;const rx=e.x-p.x,ry=e.y-p.y,vx=vx0-pvx,vy=vy0-pvy,tc=aiTouchT(rx,ry,vx,vy,e.r+p.r+6);if(tc<0||tc>.35)continue;if(m==null||tc<m){m=tc;v=[vx0,vy0,rx+vx*tc,ry+vy*tc];}}
   return m==null?null:{t:m,v};}
 function aiSideDash(v){const p=S.p,[vx,vy,cx,cy]=v,l=Math.hypot(vx,vy)||1;let nx=-vy/l,ny=vx/l;if(nx*cx+ny*cy>0){nx=-nx;ny=-ny;}/* 탄이 지나갈 자리의 반대쪽으로 */const ox=p.lmx,oy=p.lmy;p.lmx=nx;p.lmy=ny;dash();if(p.dashT<=0){p.lmx=ox;p.lmy=oy;}}
 /* v483 자동 이동 공통: 나·보스·정예·근처 적의 속도 (몸통 돌진·추격 예측용) */
 function aiVelTick(dt){if(!(dt>0))return;const p=S.p;if(p._lx!=null){p._vx=(p.x-p._lx)/dt;p._vy=(p.y-p._ly)/dt;}p._lx=p.x;p._ly=p.y;for(const e of S.en){if(!e.alive){e._lx=null;continue;}if(!e.boss&&!e.elite&&d2(e,p)>400*400){e._lx=null;e._vx=null;continue;}if(e._lx!=null){e._vx=(e.x-e._lx)/dt;e._vy=(e.y-e._ly)/dt;}e._lx=e.x;e._ly=e.y;}}
 /* v483 몸통 충돌 예측: 보스·정예(근접 직업은 보스만)·빠르게 돌진하는 적이 0.3초 안에 몸에 닿는지 (서로의 속도로 계산). 분석: 자동 이동 피해의 80~90%가 몸통 충돌이었고, 그중 절반 이상은 대시가 준비된 채 맞음 */
-function aiBodyHit(){const p=S.p,pvx=p._vx||0,pvy=p._vy||0,pm=pureMelee();let m=null,v=null;for(const e of S.en){if(!e.alive||e.phase||e.air>0||e._vx==null)continue;const rvx=e._vx-pvx,rvy=e._vy-pvy,vv=rvx*rvx+rvy*rvy;if(!(e.boss||(e.elite&&!pm)||vv>380*380))continue;if(vv<150*150)continue;const dx=p.x-e.x,dy=p.y-e.y;if(dx*dx+dy*dy>340*340)continue;const tc=(dx*rvx+dy*rvy)/vv;if(tc<0||tc>.3)continue;const cx=e.x+rvx*tc-p.x,cy=e.y+rvy*tc-p.y;if(cx*cx+cy*cy<(e.r+p.r+4)**2&&(m==null||tc<m)){m=tc;v=[rvx,rvy,cx,cy];}}return m==null?null:{t:m,v};}
+/* v483 처음 닿는 시각: |상대위치 + 상대속도×t| = 닿는 거리 의 작은 근 (예전엔 「가장 가까워지는 시각」으로 계산해서 몸 크기만큼 늦게 잡혀 0.3초 안 돌진을 놓쳤음) */
+const aiTouchT=(rx,ry,vx,vy,Rr)=>{const c=rx*rx+ry*ry-Rr*Rr;if(c<=0)return 0;const vv=vx*vx+vy*vy;if(vv<1)return -1;const bb=rx*vx+ry*vy;if(bb>=0)return -1;const D=bb*bb-vv*c;if(D<0)return -1;return (-bb-Math.sqrt(D))/vv;};
+function aiBodyHit(){const p=S.p,pvx=p._vx||0,pvy=p._vy||0,pm=pureMelee();let m=null,v=null;for(const e of S.en){if(!e.alive||e.phase||e.air>0||e._vx==null)continue;const rvx=e._vx-pvx,rvy=e._vy-pvy,vv=rvx*rvx+rvy*rvy;if(!(e.boss||(e.elite&&!pm)||vv>380*380))continue;if(vv<150*150)continue;const rx=e.x-p.x,ry=e.y-p.y;if(rx*rx+ry*ry>340*340)continue;const tc=aiTouchT(rx,ry,rvx,rvy,e.r+p.r+4);if(tc<0||tc>.3)continue;if(m==null||tc<m){m=tc;v=[rvx,rvy,rx+rvx*tc,ry+rvy*tc];}}return m==null?null:{t:m,v};}
 /* 곧 터질 예고 공격(징조 포함) 안에 있으면 대시를 그쪽에 아껴 둠 */const aiTeleSoon=T=>{const p=S.p;return S.tele.some(t=>aiTeleHurts(t)&&t.t<T&&inTele(t,p));};
 function aiDefend(dt){const p=S.p;if(!p.alive||S.mode!=='play')return;
   const safe=(p.inv||0)>.15||p.dashT>0||(p.skInvT||0)>.1||!!S.ult,hit=aiHitT(),lethal=(S.dangerT||0)>0,ulR=(p.ulCd||0)<=0&&ultOk(),skR=(p.skCd||0)<=0;
