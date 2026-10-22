@@ -16241,6 +16241,7 @@ const aiTouchT=(rx,ry,vx,vy,Rr)=>{const c=rx*rx+ry*ry-Rr*Rr;if(c<=0)return 0;con
 function aiBodyHit(){const p=S.p,pvx=p._vx||0,pvy=p._vy||0,pm=pureMelee();let m=null,v=null;for(const e of S.en){if(!e.alive||e.phase||e.air>0||e._vx==null)continue;const rvx=e._vx-pvx,rvy=e._vy-pvy,vv=rvx*rvx+rvy*rvy;if(!(e.boss||(e.elite&&!pm)||vv>380*380))continue;if(vv<150*150)continue;const rx=e.x-p.x,ry=e.y-p.y;if(rx*rx+ry*ry>340*340)continue;const tc=aiTouchT(rx,ry,rvx,rvy,e.r+p.r+4);if(tc<0||tc>.3)continue;if(m==null||tc<m){m=tc;v=[rvx,rvy,rx+rvx*tc,ry+rvy*tc];}}return m==null?null:{t:m,v};}
 /* 곧 터질 예고 공격(징조 포함) 안에 있으면 대시를 그쪽에 아껴 둠 */const aiTeleSoon=T=>{const p=S.p;return S.tele.some(t=>aiTeleHurts(t)&&t.t<T&&inTele(t,p));};
 function aiDefend(dt){const p=S.p;if(!p.alive||S.mode!=='play')return;
+  /* v483 악몽의 파동 중: 대시는 빛의 원으로 가는 데만 (nwVec이 씀). 몸통·탄환 회피 대시가 대시를 써 버려 원에 못 닿던 문제 (측정: 파동 실패 16판 중 1회 → 7~12회) */if(S.nw&&!nwSafe()){const ulR=(p.ulCd||0)<=0&&ultOk();if(ulR&&p.hp<p.maxHp*.2)useUlt();return;}
   const safe=(p.inv||0)>.15||p.dashT>0||(p.skInvT||0)>.1||!!S.ult,hit=aiHitT(),lethal=(S.dangerT||0)>0,ulR=(p.ulCd||0)<=0&&ultOk(),skR=(p.skCd||0)<=0;
   S.ulHeld=ulR?(S.ulHeld||0)+dt:0;
   if(!safe&&hit!=null){
