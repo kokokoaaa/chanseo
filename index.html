@@ -8263,8 +8263,8 @@ function update(dt){
   S.en=S.en.filter(e=>e.alive);
   // 넉백 등으로 몬스터가 맵 밖으로 밀려나가지 않게 (보스는 bossAI에서 따로 처리)
   for(const e of S.en)if(!e.boss){if(e.x<e.r)e.x=e.r;else if(e.x>WW-e.r)e.x=WW-e.r;if(e.y<e.r)e.y=e.r;else if(e.y>WH-e.r)e.y=WH-e.r;}
-  skTick(dt);ultTick(dt);thrTick(dt);try{potTick(dt);}catch(e){}if(AUTO.move&&DEV){if(AUTO.hi)aiDefend(dt);else{aiDodge();autoSkill();if((S.p.ulCd||0)<=0&&(bossOn()||S.en.filter(e=>e.alive).length>25))useUlt();}}
-  /* v372 일반 자동 이동: 패턴 예고는 10번 중 7번꼴로 대시로 피함 (다 피하진 못함), 체력 40% 아래 위험할 때만 생존기. 이벤트·궁극기는 직접 */else if(AUTO.move&&!S.manualNow&&S.p.alive){easyDodge();if(S.p.hp<S.p.maxHp*(.4+.2*easyK()))autoSkill();} // 개발자 자동: 측정용(예전 방식) / 고점용(aiDefend) // 개발자 자동: 생존기·궁극기도 알아서
+  skTick(dt);ultTick(dt);thrTick(dt);try{potTick(dt);}catch(e){}if(AUTO.move)aiVelTick(dt);if(AUTO.move&&DEV){if(AUTO.hi)aiDefend(dt);else{aiDodge();autoSkill();if((S.p.ulCd||0)<=0&&(bossOn()||S.en.filter(e=>e.alive).length>25))useUlt();}}
+  /* v372 일반 자동 이동: 패턴 예고는 10번 중 7번꼴로 대시로 피함 (다 피하진 못함), 체력 40% 아래 위험할 때만 생존기. 이벤트·궁극기는 직접 */else if(AUTO.move&&!S.manualNow&&S.p.alive){easyDodge();easyBody(dt);if(S.p.hp<S.p.maxHp*(.4+.2*easyK()))autoSkill();} // 개발자 자동: 측정용(예전 방식) / 고점용(aiDefend) // 개발자 자동: 생존기·궁극기도 알아서
   nmRingTick(dt);omenTick(dt);nwTick(dt);doomTick(dt);updBoss(dt);hbTick(dt);if(p.rdm)p.rdm*=Math.exp(-dt/3);eggTick(dt);if(S.gold>(S.maxGold||0))S.maxGold=S.gold;if(S.npc){S.npc.t+=dt;if(S.npc.t>4.6)S.npc=null;}
   // 사령술사 해골 궁수대: 해골 3기 중 1기가 1초마다 뼈 화살
   if(has('n_archers')&&S.skel&&p.alive){S.naT=(S.naT??1)-dt;if(S.naT<=0){S.naT=1;S.skel.forEach((k,i)=>{if(i%3!==0||k.life<=0)return;const e=nearestE(k,p.range);if(e)pBullet(k.x,k.y,Math.atan2(e.y-k.y,e.x-k.x),pDmg()*lv3('n_archers',.5,.6,.8)*undM(),{child:true,sub:'해골 궁수대',pierce:1,r:3,life:.9,bone:true,src:'undead'});});}}
@@ -16230,13 +16230,25 @@ function aiShotHit(dt){const p=S.p;let m=null,v=null;for(const b of S.pr){if(b.m
     const dx=p.x-e.x,dy=p.y-e.y,tc=(dx*vx+dy*vy)/vv;if(tc<0||tc>.35)continue;const cx=e.x+vx*tc-p.x,cy=e.y+vy*tc-p.y;if(cx*cx+cy*cy<(e.r+p.r+6)**2&&(m==null||tc<m)){m=tc;v=[vx,vy,cx,cy];}}
   return m==null?null:{t:m,v};}
 function aiSideDash(v){const p=S.p,[vx,vy,cx,cy]=v,l=Math.hypot(vx,vy)||1;let nx=-vy/l,ny=vx/l;if(nx*cx+ny*cy>0){nx=-nx;ny=-ny;}/* 탄이 지나갈 자리의 반대쪽으로 */const ox=p.lmx,oy=p.lmy;p.lmx=nx;p.lmy=ny;dash();if(p.dashT<=0){p.lmx=ox;p.lmy=oy;}}
-function aiDefend(dt){const p=S.p;for(const e of S.en){if(!e.boss)continue;if(e._lx!=null&&dt>0){e._vx=(e.x-e._lx)/dt;e._vy=(e.y-e._ly)/dt;}e._lx=e.x;e._ly=e.y;}/* 보스 속도 (돌진 예측용) */if(!p.alive||S.mode!=='play')return;
+/* v483 자동 이동 공통: 나·보스·정예·근처 적의 속도 (몸통 돌진·추격 예측용) */
+function aiVelTick(dt){if(!(dt>0))return;const p=S.p;if(p._lx!=null){p._vx=(p.x-p._lx)/dt;p._vy=(p.y-p._ly)/dt;}p._lx=p.x;p._ly=p.y;for(const e of S.en){if(!e.alive){e._lx=null;continue;}if(!e.boss&&!e.elite&&d2(e,p)>400*400){e._lx=null;e._vx=null;continue;}if(e._lx!=null){e._vx=(e.x-e._lx)/dt;e._vy=(e.y-e._ly)/dt;}e._lx=e.x;e._ly=e.y;}}
+/* v483 몸통 충돌 예측: 보스·정예(근접 직업은 보스만)·빠르게 돌진하는 적이 0.3초 안에 몸에 닿는지 (서로의 속도로 계산). 분석: 자동 이동 피해의 80~90%가 몸통 충돌이었고, 그중 절반 이상은 대시가 준비된 채 맞음 */
+function aiBodyHit(){const p=S.p,pvx=p._vx||0,pvy=p._vy||0,pm=pureMelee();let m=null,v=null;for(const e of S.en){if(!e.alive||e.phase||e.air>0||e._vx==null)continue;const rvx=e._vx-pvx,rvy=e._vy-pvy,vv=rvx*rvx+rvy*rvy;if(!(e.boss||(e.elite&&!pm)||vv>380*380))continue;if(vv<150*150)continue;const dx=p.x-e.x,dy=p.y-e.y;if(dx*dx+dy*dy>340*340)continue;const tc=(dx*rvx+dy*rvy)/vv;if(tc<0||tc>.3)continue;const cx=e.x+rvx*tc-p.x,cy=e.y+rvy*tc-p.y;if(cx*cx+cy*cy<(e.r+p.r+4)**2&&(m==null||tc<m)){m=tc;v=[rvx,rvy,cx,cy];}}return m==null?null:{t:m,v};}
+/* 곧 터질 예고 공격(징조 포함) 안에 있으면 대시를 그쪽에 아껴 둠 */const aiTeleSoon=T=>{const p=S.p;return S.tele.some(t=>aiTeleHurts(t)&&t.t<T&&inTele(t,p));};
+/* v483 일반 자동 이동: 몸통 충돌 대시 + 궁극기 (예전엔 궁극기는 직접 눌러야 했음) */
+function easyBody(dt){const p=S.p;if(!p.alive||S.mode!=='play')return;let nb=0;for(const e of S.en)if(e.alive&&d2(e,p)<130*130)nb++;
+  const safe=(p.inv||0)>.15||p.dashT>0||(p.skInvT||0)>.1||!!S.ult;
+  if(!safe&&p.dashCd<=0&&!aiTeleSoon(.9)){const bh=aiBodyHit();if(bh&&bh.t<.15){aiSideDash(bh.v);return;}}
+  const ulR=(p.ulCd||0)<=0&&ultOk();S.ulHeld=ulR?(S.ulHeld||0)+dt:0;
+  if(ulR&&!safe&&((p.hp<p.maxHp*.25&&nb>=3)||(p.hp<p.maxHp*.4&&nb>=8)||(S.ulHeld>25&&(bossOn()||S.en.filter(e=>e.alive).length>30))))useUlt();}
+function aiDefend(dt){const p=S.p;if(!p.alive||S.mode!=='play')return;
   const safe=(p.inv||0)>.15||p.dashT>0||(p.skInvT||0)>.1||!!S.ult,hit=aiHitT(),lethal=(S.dangerT||0)>0,ulR=(p.ulCd||0)<=0&&ultOk(),skR=(p.skCd||0)<=0;
   S.ulHeld=ulR?(S.ulHeld||0)+dt:0;
   if(!safe&&hit!=null){
     if(AI_W.pd&&p.dashCd<=0&&p.dashT<=0&&hit<.08){const t=S._hitTl;/* 직선 예고(광선·돌진)는 선의 옆으로, 원은 지금 가는 쪽으로 */if(t&&t.k==='l'){const ux=Math.cos(t.a),uy=Math.sin(t.a),px=p.x-t.x,py=p.y-t.y,u=px*ux+py*uy;aiSideDash([ux,uy,-(px-ux*u)||.01,-(py-uy*u)||.01]);}else dash();return;}
     if(skR&&hit<.2&&(p.dashCd>0||hit<.04)){useSkill();return;}
     if(ulR&&lethal&&hit<.25&&p.dashCd>0&&!skR){useUlt();return;}}
+  {const bh=aiBodyHit();if(!safe&&bh&&hit==null&&AI_W.pd&&p.dashCd<=0&&p.dashT<=0&&bh.t<.15&&!aiTeleSoon(.9)){aiSideDash(bh.v);return;}}
   {const sh=aiShotHit(dt);if(!safe&&sh&&hit==null){if(AI_W.pd&&p.dashCd<=0&&p.dashT<=0&&sh.t<.12){aiSideDash(sh.v);return;}if(skR&&sh.t<.06&&p.hp<p.maxHp*.5){useSkill();return;}}}
   if(!safe){let nb=0;for(const e of S.en)if(e.alive&&d2(e,p)<130*130)nb++;
     if(skR&&((p.hp<p.maxHp*.35&&(nb>=2||hit!=null))||(p.hp<p.maxHp*.55&&nb>=6))){useSkill();return;}
@@ -16284,11 +16296,11 @@ function autoMoveVec0(){
     for(const b of shots){const ex=b.vx*.6,ey=b.vy*.6,L2=ex*ex+ey*ey||1,u=clamp(((tx-b.x)*ex+(ty-b.y)*ey)/L2,0,1),d=Math.hypot(b.x+ex*u-tx,b.y+ey*u-ty),R0=(b.r||5)+p.r+22;if(d<R0)sc-=(R0-d)*(S.easyAI?3+3*(S.easyK||0):6);}
     // 보스전: 보스를 사거리의 50~95% 안에 두면 됨 (사거리가 길수록 움직일 여유가 커짐). 체력이 낮으면 70% 이상 거리 유지
     // 주변에 잡몹이 붙어 있으면 보스 거리보다 잡몹 회피를 우선. 보스 몸통 가까이는 언제나 크게 감점
-    if(bossOn){const e=S.boss,cl=(auR||mel)&&!low,minW=e.r+p.r+(cl?(mel?34:40):90)/* v419 근접: 보스 몸통과 20 → 34 (돌진에 부딪혀 쓰러지던 문제) */,lo=cl?minW:Math.max(minW,p.range*(low?.7:.5)),hi=mel&&!low?Math.max(minW+15,e.r+pr*.8):auR&&!low?Math.max(minW+20,auR+e.r*.8):p.range*.95,db=Math.hypot(e.x-tx,e.y-ty),k=danger>=3?.45:danger>=1?.7:1;
+    if(bossOn){const e=S.boss,cl=(auR||mel)&&!low,minW=e.r+p.r+(cl?(mel?34:40):90)/* v419 근접: 보스 몸통과 20 → 34 (돌진에 부딪혀 쓰러지던 문제) */,lo=cl?minW:Math.max(minW,p.range*(low?.7:.5)),hi=mel&&!low?Math.max(minW+15,e.r+pr*.8):auR&&!low?Math.max(minW+20,auR+e.r*.8):p.range*.95,db=Math.hypot(e.x+(e._vx||0)*.3-tx,e.y+(e._vy||0)*.3-ty)/* v483 보스가 0.3초 뒤 있을 자리 기준 */,k=danger>=3?.45:danger>=1?.7:1;
       sc-=k*(db<lo?(lo-db)*2.4:db>hi?(db-hi)*3:0);if(db<minW)sc-=(minW-db)*(DEV&&AUTO.hi?9:4);}
     // 보스 예고 공격·장판 회피
     for(const t of S.tele){if(!t.dmg&&t.k==='c')continue;
-      const tk=S.easyAI?.5+.5*(S.easyK||0):(AI_W.pdf&&t.omen&&p.dashCd<=0&&p.hp>p.maxHp*.5&&(S.st.pd||0)<20&&!S.tele.some(o=>o!==t&&o.dmg&&Math.abs(o.t-t.t)<.4)?.15:1);
+      const tk=S.easyAI?.5+.5*(S.easyK||0):(AI_W.pdf&&DEV&&AUTO.hi&&t.omen&&p.dashCd<=0&&p.hp>p.maxHp*.5&&(S.st.pd||0)<20&&!S.tele.some(o=>o!==t&&o.dmg&&Math.abs(o.t-t.t)<.4)?.15:1);
       if(t.k==='c'){const d=Math.hypot(t.x-tx,t.y-ty),m2=Math.hypot(t.x-(p.x+cx*STEP*.5),t.y-(p.y+cy*STEP*.5));if(d<t.r+p.r+10)sc-=(900*(1-d/(t.r+p.r+10))+300)*tk;if(m2<t.r)sc-=200*tk;}
       else{const ux=Math.cos(t.a),uy=Math.sin(t.a),px2=tx-t.x,py2=ty-t.y,u=clamp(px2*ux+py2*uy,0,t.len),dd=Math.hypot(px2-ux*u,py2-uy*u);if(dd<t.w/2+p.r+16)sc-=900*tk;}}
     for(const h of S.hz){const d=Math.hypot(h.x-tx,h.y-ty);if(d<h.r+p.r+6)sc-=500;}
@@ -16922,7 +16934,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=482,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=483,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
