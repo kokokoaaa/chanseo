@@ -16219,7 +16219,9 @@ function nwVec(){const p=S.p,w=S.nw,sp=Math.max(60,typeof moveSpd==='function'?m
   const vx=Math.cos(a),vy=Math.sin(a);if(p.dashCd<=0&&(l-q.r*.5)/sp>w.t*.75&&l>q.r){p.lmx=vx;p.lmy=vy;dash();}return [vx,vy];}
 /* v483 자동 이동 두 가지로 정리: 일반용(모든 플레이어) = 생존 동작 전부 / 고점용(개발자) = 일반용 + 점수 행동(이벤트·이스터에그·숨은 몬스터·징조 완벽한 회피). 예전 측정용(개발자)은 없앰 */
 function normMoveVec(){S.noEv=1;try{return autoMoveVec0();}finally{S.noEv=0;}}
-function autoMoveVec(){
+/* v484 고점용: 안전할 때만 점수 행동(이벤트·이스터에그·숨은 몬스터·징조 완벽한 회피). 보스전·즉사 패턴·파동·심연의 눈 중이거나, 체력 70% 아래거나, 최근 5초에 최대 체력 15% 넘게 맞았거나(스펙이 딸림), 주변 적이 많으면 일반용과 똑같이 회피만 — 측정: 늘 쫓으면 보너스는 늘지만 판이 짧아져 점수가 오히려 낮았음 */
+function hiSafe(){const p=S.p;if(!p||bossOn()||(typeof doomOn==='function'&&doomOn())||S.nw||S.eye)return false;if(p.hp<p.maxHp*.7||(S.hiTk||0)>.15)return false;let n=0;for(const e of S.en)if(e.alive&&d2(e,p)<200*200&&++n>=12)return false;return true;}
+function autoMoveVec(){if(!hiSafe()){const h=AUTO.hi;AUTO.hi=false;try{return normMoveVec();}finally{AUTO.hi=h;}}
   const v=campVec(autoMoveVec0()),p=S.p,g=evGoal();
   if(!g&&AUTO.hi&&!S.easyAI){const pl=aiEggPlan();if(pl){let hot=false;for(const t of S.tele){if(!t.dmg)continue;if(t.k==='c'?d2(t,p)<(t.r+p.r+20)**2:true){hot=true;break;}}
     if(!hot){if(pl.act==='dash'&&p.dashCd<=0){p.lmx=pl.v[0];p.lmy=pl.v[1];dash();}if(pl.act==='skill')useSkill();if(pl.act==='ult')useUlt();
@@ -16257,7 +16259,7 @@ function aiShotHit(dt){const p=S.p,pvx=p._vx||0,pvy=p._vy||0;let m=null,v=null;/
   return m==null?null:{t:m,v};}
 function aiSideDash(v){const p=S.p,[vx,vy,cx,cy]=v,l=Math.hypot(vx,vy)||1;let nx=-vy/l,ny=vx/l;if(nx*cx+ny*cy>0){nx=-nx;ny=-ny;}/* 탄이 지나갈 자리의 반대쪽으로 */const ox=p.lmx,oy=p.lmy;p.lmx=nx;p.lmy=ny;dash();if(p.dashT<=0){p.lmx=ox;p.lmy=oy;}}
 /* v483 자동 이동 공통: 나·보스·정예·근처 적의 속도 (몸통 돌진·추격 예측용) */
-function aiVelTick(dt){if(!(dt>0))return;const p=S.p;if(p._lx!=null){p._vx=(p.x-p._lx)/dt;p._vy=(p.y-p._ly)/dt;}p._lx=p.x;p._ly=p.y;for(const e of S.en){if(!e.alive){e._lx=null;continue;}if(!e.boss&&!e.elite&&d2(e,p)>400*400){e._lx=null;e._vx=null;continue;}if(e._lx!=null){e._vx=(e.x-e._lx)/dt;e._vy=(e.y-e._ly)/dt;}e._lx=e.x;e._ly=e.y;}}
+function aiVelTick(dt){if(!(dt>0))return;const p=S.p;/* v484 최근 받은 피해(최대 체력 비율, 5초 감쇠) — 고점용 안전 판단 */{const h=p.hp+(p.barrier||0);if(p._hpv!=null&&h<p._hpv)S.hiTk=(S.hiTk||0)+(p._hpv-h)/Math.max(1,p.maxHp);S.hiTk=(S.hiTk||0)*Math.exp(-dt/5);p._hpv=h;}if(p._lx!=null){p._vx=(p.x-p._lx)/dt;p._vy=(p.y-p._ly)/dt;}p._lx=p.x;p._ly=p.y;for(const e of S.en){if(!e.alive){e._lx=null;continue;}if(!e.boss&&!e.elite&&d2(e,p)>400*400){e._lx=null;e._vx=null;continue;}if(e._lx!=null){e._vx=(e.x-e._lx)/dt;e._vy=(e.y-e._ly)/dt;}e._lx=e.x;e._ly=e.y;}}
 /* v483 몸통 충돌 예측: 보스·정예(근접 직업은 보스만)·빠르게 돌진하는 적이 0.3초 안에 몸에 닿는지 (서로의 속도로 계산). 분석: 자동 이동 피해의 80~90%가 몸통 충돌이었고, 그중 절반 이상은 대시가 준비된 채 맞음 */
 /* v483 처음 닿는 시각: |상대위치 + 상대속도×t| = 닿는 거리 의 작은 근 (예전엔 「가장 가까워지는 시각」으로 계산해서 몸 크기만큼 늦게 잡혀 0.3초 안 돌진을 놓쳤음) */
 const aiTouchT=(rx,ry,vx,vy,Rr)=>{const c=rx*rx+ry*ry-Rr*Rr;if(c<=0)return 0;const vv=vx*vx+vy*vy;if(vv<1)return -1;const bb=rx*vx+ry*vy;if(bb>=0)return -1;const D=bb*bb-vv*c;if(D<0)return -1;return (-bb-Math.sqrt(D))/vv;};
@@ -16958,7 +16960,7 @@ addEventListener('resize',resize);
 // 자동 업데이트: 게임 주소(GitHub Pages)에 더 큰 BUILD가 올라오면 알려주고, 시작 화면에서 바로 새 버전으로 교체.
 // 파일로 연 경우: 새 버전 HTML을 받아서 같은 창에 덮어씀(같은 파일이라 기록 유지). 주소로 연 경우: 새로고침.
 // 시작할 때 + 플레이 중 3분마다 확인. 판 도중에 나오면 판은 그대로 두고 알림만, 시작 화면으로 돌아가면 적용. 패치할 때마다 BUILD를 1씩 올림
-const BUILD=483,UPD_URL='https://kokokoaaa.github.io/chanseo/';
+const BUILD=484,UPD_URL='https://kokokoaaa.github.io/chanseo/';
 const UPD={st:'checking',ver:0,html:null,told:false,fail:0};
 // 파일로 연 경우: 받은 새 버전을 기기 저장소(IndexedDB)에 보관 → 다음에 열 때 인터넷이 느리거나 없어도 바로 새 버전으로 바뀜
 const updDb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('chanseo_upd',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('h');}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});
