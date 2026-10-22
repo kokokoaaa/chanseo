@@ -16103,6 +16103,7 @@ function ptTry(fn){const P0=S.p,A0=S.augs,o0=S.own,q0=S.oq,t0=S.tagc,g0=S.gold,x
   return a&&b?{pw:b.pw/a.pw-1,tg:b.tg/a.tg-1}:null;}
 // 위험한 선택(운에 맡기거나 체력·방어를 깎는 것)은 개발자 자동 선택이 피함
 const RISKY_C=/운명|주사위|러시안|동전|결사|천운/;
+/*AUG_VAL_START*/const AUG_VAL={};/*AUG_VAL_END*/
 function scoreAug(a){
   const W0=typeof AI_W!=='undefined'?AI_W:{};let sc={s:1,g:2.5,p:4,v:W0.tv??6.5}[a.t]||1;/* v483 왕실(고점) 증강을 가장 높게 (예전엔 등급 표에 없어 실버와 같은 1점) */
   if(a.fuseNow)sc+=20;else if(partnerOf(a.id))sc+=5;
@@ -16119,7 +16120,9 @@ function scoreAug(a){
   if(S.p.hp<S.p.maxHp*.4&&!isOff(a))sc+=2;
   // 실제로 잠깐 얻어 보고 전투력·버티는 힘이 얼마나 오르는지 (생존 시간이 늘어나는 쪽 우선). 버티는 힘이 깎이면 크게 감점
   {const lv=a.t==='v'||a.t==='f'||a.t==='d'?1:2,d=ptTry(c=>{S.augs=[...S.augs,{...a,tags:a.tags||[],lv}];tagCount();if(a.f)for(let i=0;i<lv;i++)applyQ(a.f,c,a.q);});
-    if(d){sc+=Math.min(W.pwC??12,d.pw*(W.pwK??30))+Math.min(12,d.tg*30);if(d.tg<-.02)sc-=6+d.tg*-40;}}/* v483 공격력 기본으로 (사람: 「공격력은 기본으로 깔고 간다」) */
+    /* v483 실측 공격 가치표(AUG_VAL): 직업별 고점 빌드 위에 이 증강 하나를 더 넣었을 때 실험실에서 잰 피해 변화 %. 처치 발동·탄 수·연쇄 효과까지 반영됨. 표에 없는 일반 증강은 오차 안(공격 영향 없음) = 0, 합체·고유 등 안 잰 것은 예전 계산 */
+    const AV=typeof AUG_VAL!=='undefined'&&AUG_VAL[S.cls],msr=AV&&['s','g','p','v'].includes(a.t)&&(!a.cls||a.cls===S.cls);
+    if(d){if(msr){const v=AV[a.id]||0;sc+=Math.max(-10,Math.min(30,v*.2));}else sc+=Math.min(W.pwC??12,d.pw*(W.pwK??30));sc+=Math.min(12,d.tg*30);if(d.tg<-.02)sc-=6+d.tg*-40;}}/* v483 공격력 기본으로 (사람: 「공격력은 기본으로 깔고 간다」) */
   if(RISKY_C.test(a.n)||(a.tags||[]).includes('coin')&&S.cls!=='gambler')sc-=6;
   return sc+Math.random()*.8;
 }
