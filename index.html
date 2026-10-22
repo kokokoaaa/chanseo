@@ -16201,9 +16201,12 @@ function nwVec(){const p=S.p,w=S.nw,sp=Math.max(60,typeof moveSpd==='function'?m
   if(!q)return [0,0];
   /* v483 파동이 끝난 뒤에 터지는 예고(원 안에 있어도 맞음)를 피해 원 안의 빈자리로. 가는 길에 곧 터질 예고도 돌아감 — 분석: 원 한가운데 서 있다가 파동 직후 터진 예고에 맞음 */
   const late=S.tele.filter(t=>t.dmg&&t.t>w.t-.05&&t.t<w.t+1.8),rk=(x,y,L)=>{let m=0;for(const t of L){const d=teleDepth(t,x,y)+p.r*.5+10;if(d>m)m=d;}return m;};
-  let gx=q.x,gy=q.y;if(late.length&&rk(q.x,q.y,late)>0){let bd=1e18;for(const f of [.3,.55,.78])for(let i=0;i<12;i++){const a=i*TAU/12,x=q.x+Math.cos(a)*q.r*f,y=q.y+Math.sin(a)*q.r*f;if(inSolid(x,y,p.r))continue;const d=Math.hypot(x-p.x,y-p.y)+(rk(x,y,late)>0?1e4+rk(x,y,late)*40:0);if(d<bd){bd=d;gx=x;gy=y;}}}
+  /* 후보: 원 가운데·지금 자리·원 안 36곳. 비용 = 거리 + 파동 전에 못 닿으면 5000 + 예고 안이면 10000 */
+  let gx=q.x,gy=q.y;const inQ=Math.hypot(p.x-q.x,p.y-q.y)<q.r*.85;
+  if(late.length&&rk(q.x,q.y,late)>0){const C=[[q.x,q.y]];if(inQ)C.push([p.x,p.y]);for(const f of [.3,.55,.78])for(let i=0;i<12;i++){const a=i*TAU/12;C.push([q.x+Math.cos(a)*q.r*f,q.y+Math.sin(a)*q.r*f]);}
+    let bd=1e18;for(const [x,y] of C){if(inSolid(x,y,p.r))continue;const dd=Math.hypot(x-p.x,y-p.y),r0=rk(x,y,late),c=dd+(dd/sp>w.t-.05?5000:0)+(r0>0?1e4+r0*40:0);if(c<bd){bd=c;gx=x;gy=y;}}}
   const dx=gx-p.x,dy=gy-p.y,l=Math.hypot(dx,dy);if(l<(gx===q.x&&gy===q.y?q.r*.4:12))return [0,0];
-  const soon=nwSafe()?[]:S.tele.filter(t=>t.dmg&&t.t<Math.min(w.t,.7)),okp=(x,y)=>clear(p.x,p.y,x,y)&&(!soon.length||rk(x,y,soon)<=0||rk(x,y,soon)<rk(p.x,p.y,soon));
+  const soon=nwSafe()||(l-q.r*.5)/sp>w.t-.8/* 시간 여유가 있을 때만 돌아감 (파동은 즉사, 예고는 피해) */?[]:S.tele.filter(t=>t.dmg&&t.t<Math.min(w.t,.7)),okp=(x,y)=>clear(p.x,p.y,x,y)&&(!soon.length||rk(x,y,soon)<=0||rk(x,y,soon)<rk(p.x,p.y,soon));
   let a=Math.atan2(dy,dx);if(!okp(p.x+Math.cos(a)*60,p.y+Math.sin(a)*60)){for(const da of [.3,-.3,.6,-.6,.9,-.9,1.2,-1.2,1.57,-1.57]){const b=a+da;if(okp(p.x+Math.cos(b)*60,p.y+Math.sin(b)*60)){a=b;break;}}}
   const vx=Math.cos(a),vy=Math.sin(a);if(p.dashCd<=0&&(l-q.r*.5)/sp>w.t*.75&&l>q.r){p.lmx=vx;p.lmy=vy;dash();}return [vx,vy];}
 /* v483 자동 이동 두 가지로 정리: 일반용(모든 플레이어) = 생존 동작 전부 / 고점용(개발자) = 일반용 + 점수 행동(이벤트·이스터에그·숨은 몬스터·징조 완벽한 회피). 예전 측정용(개발자)은 없앰 */
