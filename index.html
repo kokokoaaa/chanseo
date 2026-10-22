@@ -5882,7 +5882,7 @@ function eyeTick(dt){const w=S.eye,p=S.p;w.t-=dt;
   else{w.ph='warn';w.t=w.warn;}}
 // 자동 이동: 토템 → 가장 가까운 토템으로 (공격 거리 안이면 그 자리 근처), 추적자 → 멀어지는 쪽 (결계 가운데로 휘어서), 눈 → 뜬 동안 멈춤
 function doomVec(){const p=S.p;
-  if(S.eye){if(S.eye.ph!=='rest')return [0,0];return null;}
+  if(S.eye){const w=S.eye;if(w.ph==='rest')return null;/* v483 눈이 뜨기 전(경고)에는 눈이 떠 있는 동안 터질 예고 공격 밖으로 미리 옮김 (뜬 동안은 움직이면 즉사라 그 자리에서 맞던 문제) */if(w.ph==='warn'&&w.t>.25&&S.tele.some(t=>t.dmg&&t.t<w.t+(w.gaze||2)+.2&&inTele(t,p)))return null;return [0,0];}
   if(S.tot){const fr=meleeOn()?meleeR():rangeE();let q=null,bd=1e18;for(const e of S.tot.L){if(!e.alive)continue;const d=d2(e,p);if(d<bd){bd=d;q=e;}}if(!q)return null;const dx=q.x-p.x,dy=q.y-p.y,l=Math.hypot(dx,dy);
     if(l<Math.min(fr*.75,260)+q.r)return null;/* 공격 거리 안: 평소 자동 이동(피하기) */if(p.dashCd<=0&&l>240&&S.tot.t<4){p.lmx=dx/l;p.lmy=dy/l;dash();}return [dx/l,dy/l];}
   if(S.hun){/* 공격 거리 안에 적이 5마리 이상이면 평소대로, 아니면 적이 몰린 쪽으로 */const fr=meleeOn()?meleeR():rangeE();let n=0,cx=0,cy=0,c=0;for(const e of S.en){if(!e.alive||e.boss||e.tot)continue;const d=d2(e,p);if(d<(fr+20)**2)n++;if(d<700*700){cx+=e.x;cy+=e.y;c++;}}
