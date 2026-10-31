@@ -1,7 +1,7 @@
 // 찬서 명예의 전당 서버 (Google Apps Script) v12.2
 //
 // v12.1 → v12.2 (게임 v486): AI 모험가 채팅(Anthropic API) 완전히 삭제 — ?ai·?bchat 없앰, 접속 신호의 ai 표시 없앰. 모험가 채팅은 예전처럼 게임 안의 정해진 대사만 씀.
-//   ★ 스크립트 속성의 ANTHROPIC_KEY 도 지워 주세요 (더 이상 쓰지 않음).
+//   ★ 코드를 바꾼 뒤 cleanProps 를 한 번 실행: ANTHROPIC_KEY·지난 부적 표시(aw_…)를 지움. 이후 오래된 aw_ 표시는 매일 부적 확인 때 자동 정리.
 //
 // v12.0 → v12.1 (게임 v480): 채팅 묶음 프롬프트에 「각 줄은 그 시각에 맞는 말만 (오전에 점심 얘기 금지 등)」 추가
 //
@@ -486,6 +486,18 @@ function score_(r0) {
 }
 // v8.2 지난 기간(일간·주간·월간) 기록 줄 지우기: 한 시간에 한 번까지
 // v8.5 🧿 부적 보상: 끝난 기간(어제·지난주·지난달)의 무한의 악몽 순위 1~3위(이름마다 최고 기록 하나)를 「고용 메달」 시트에 부적으로 적어 둠 → 그 사람이 접속하면 받아 감
+// v12.2 지난 부적 표시(aw_…) 정리: 부적은 바로 전 기간(어제·지난주·지난달)만 보므로 오래된 표시는 필요 없음 (스크립트 속성이 50개를 넘으면 설정 화면에서 수정이 안 됨)
+function pruneProps_() {
+  const P = PropertiesService.getScriptProperties(), now = Date.now(), ymd = t => Utilities.formatDate(new Date(t), 'Asia/Seoul', 'yyyyMMdd');
+  const dCut = ymd(now - 7 * 864e5), wCut = ymd(now - 21 * 864e5), mCut = ymd(now - 62 * 864e5).slice(0, 6); let n = 0;
+  P.getKeys().forEach(k => { const m = /^aw_(?:\w+_)?([DWM])(\d+)$/.exec(k); let old = false;
+    if (m) old = m[1] === 'D' ? m[2] < dCut : m[1] === 'W' ? m[2] < wCut : m[2] < mCut;
+    else if (/^bc_\d+$/.test(k) || k === 'ANTHROPIC_KEY') old = true;
+    if (old) { P.deleteProperty(k); n++; } });
+  return n;
+}
+// ★ 한 번 실행: 편집기 위쪽에서 cleanProps 를 골라 ▶ 실행 → ANTHROPIC_KEY 와 오래된 표시를 지움 (로그에 지운 개수)
+function cleanProps() { const n = pruneProps_(); Logger.log('지운 속성 ' + n + '개 · 남은 속성 ' + PropertiesService.getScriptProperties().getKeys().length + '개'); }
 // 한 기간에 한 번만 (스크립트 속성 aw_기간키). 기간 줄을 지우기 전에, 그리고 매일 0시 트리거(awardTick)에서 실행
 function awardPeriods_(s) {
   try {
@@ -495,7 +507,7 @@ function awardPeriods_(s) {
     const MODES = [['nm', '', '무한의 악몽'], ['br', 'BR-', '보스 러시'], ['rd', 'RD-', '레이드']];
     const todo = [];
     keys.forEach(([p, k]) => { if (k === perKey_(p)) return; MODES.forEach(([md, pre, lab]) => { const ak = 'aw_' + (md === 'nm' ? '' : md + '_') + k; if (!P.getProperty(ak)) todo.push({ p, k, md, pre, lab, ak }); }); });
-    if (!todo.length) return;
+    if (!todo.length) { try { pruneProps_(); } catch (e) {} return; }
     const iS = HEAD.indexOf('score'), iT = HEAD.indexOf('time'), iL = HEAD.indexOf('lvl'), iK = HEAD.indexOf('kh');
     // v11.6 무거운 캐릭터(hero) 칸은 읽지 않음: 순위는 기간 줄만(기간기록 시트, 없으면 본 시트의 기간 줄), 계정 묶기는 본 시트의 이름·열쇠 칸만
     const v = perRows_(s), gs = giftSheet_();
